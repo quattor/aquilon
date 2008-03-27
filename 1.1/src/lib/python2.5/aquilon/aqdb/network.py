@@ -7,18 +7,17 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+""" The module governing tables and objects that represent IP networks in
+    Aquilon."""
 
-from sys import path, exit
-#path.append('./utils')
+import sys
 if __name__ == '__main__':
-    path.append('../..')
+    sys.path.append('../..')
 
 from DB import *
 from aquilon.aqdb.utils.dsdb import dump_network
 from location import Location
 from service import service_map
-from aquilon.aqdb.utils.debug import ipshell
 from aquilon.aqdb.utils.schemahelpers import *
 
 from sqlalchemy import *
@@ -29,22 +28,36 @@ location = Table('location', meta, autoload=True)
 building = Table('building', meta, autoload=True)
 
 network_type = mk_type_table('network_type',meta)
-class NetworkType(aqdbType):
-    pass
-mapper(NetworkType,network_type)
 network_type.create(checkfirst=True)
+
+class NetworkType(aqdbType):
+    """ Network Type can be one of four values which have been carried over as
+        legacy from the network table in DSDB:
+        *   management: no networks have it(@ 3/27/08), it's probably useless
+        *   transit: for the phyical interfaces of zebra nodes
+        *   vip:     for the zebra addresses themselves
+        *   unknown: for network rows in DSDB with NULL values for 'type' (GRRR...)
+    """
+    pass
+mapper(NetworkType,network_type, properties={
+        'creation_date' : deferred(network_type.c.creation_date),
+        'comments': deferred(network_type.c.comments)})
+
 
 netmask = Table('netmask', meta,
     Column('mask', Integer, primary_key=True),
     Column('cidr', Integer, unique=True),
-    Column('netmask', String(16), unique=True))
-
+    Column('netmask', String(16), unique=True),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
 netmask.create(checkfirst=True)
 
 class Netmask(aqdbBase):
     """ Network Profile is a dimension table, a concept borrowed from
         data warehousing. Essentially, its just a lookup table of
-        netmask and cidr information.
+        netmask and cidr information, so it has no __init__ method, one should
+        never create one, instead loading it from session.query(Netmask) or the
+        Network it's attached to.
     """
     def mask(self):
         return str(self.mask)
@@ -53,13 +66,15 @@ class Netmask(aqdbBase):
     def cidr(self):
         return str(self.cidr)
 
-mapper(Netmask,netmask)
+mapper(Netmask,netmask,properties={
+        'creation_date' : deferred(netmask.c.creation_date),
+        'comments': deferred(netmask.c.comments)})
 
 def populate_profile():
     if empty(netmask,engine):
         i = netmask.insert()
 
-        f = open('utils/cidr-data','r')
+        f = open('etc/cidr-data','r')
         for line in f.readlines():
             line = line.split(' ')
             i.execute(cidr=int(line[0]), netmask=line[1] , mask=int(line[2]))
@@ -82,7 +97,8 @@ network = Table('network', meta,
     Column('side', String(4), nullable=True),
     Column('campus', String(32), nullable=True),
     Column('bucket', String(32), nullable=True),
-    Column('comments', String(255)))
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
 add_compulsory_columns(network)
 network.create(checkfirst=True)
 
@@ -90,24 +106,31 @@ class Network(aqdbBase):
     @optional_comments
     def __init__(self,location,**kw):
         self.location=location
-        #TODO: normalize all strings to lower
-        self.name  = kw.pop('name', kw['ip'])
+        self.name = kw.pop('name', kw['ip'])
+        self.name  = self.name.strip().lower()
         self.ip = kw.pop('ip')
         self.ip_integer = kw.pop('ip_int')
         self.mask = kw.pop('mask')
         self.byte_mask = kw.pop('byte_mask')
-        self.side = kw.pop('side','a')       #defaults to a
-        self.campus = kw.pop('campus',None)
-        self.bucket = kw.pop('bucket',None) #TODO: implement
+        self.side = kw.pop('side','a')       # defaults to side A, like dsdb
         self.profile_id = self.mask
+
+        cmps = kw.pop('campus',None)
+        if cmps:
+            self.campus=cmps.strip().lower()
+
+        bkt = kw.pop('bucket',None)
+        if bkt:
+            self.bucket = bkt.strip().lower()   #TODO: implement campus + bunker
+        #TODO: snarf comments from DSDB too
 
 mapper(Network,network,properties={
     'type': relation(NetworkType),
     'location':relation(Location),
     'profile' :relation(Netmask),
     'netmask':synonym('profile'),
-    'creation_date' : deferred(service_map.c.creation_date),
-    'comments': deferred(service_map.c.comments)
+    'creation_date' : deferred(network.c.creation_date),
+    'comments': deferred(network.c.comments)
 })
 
 def populate_networks():
