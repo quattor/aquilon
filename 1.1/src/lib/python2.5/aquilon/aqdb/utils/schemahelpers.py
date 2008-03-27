@@ -30,8 +30,6 @@ def optional_comments(func):
 """
 
 def Column(*args, **kw):
-    if args[0] == 'comments':
-        return _Column('comments', String(255), nullable=True)
     if not kw.has_key('nullable'):
         kw['nullable']=False;
     return _Column(*args, **kw)
@@ -79,7 +77,8 @@ def mk_name_id_table(name, meta, *args, **kw):
                        primary_key=True),
                 Column('name', String(32), unique=True, index=True),
                 Column('creation_date', DateTime,
-                       default=datetime.datetime.now),*args,**kw)
+                       default=datetime.datetime.now),
+                Column('comments', String(255), nullable=True),*args,**kw)
 
 
 #COMMENTS FOR TYPE???
@@ -93,16 +92,16 @@ def mk_type_table(name, meta, *args, **kw):
                        primary_key=True),
                 Column('type', String(32), unique=True, index=True),
                 Column('creation_date', DateTime,
-                       default=datetime.datetime.now))
+                       default=datetime.datetime.now),
+                Column('comments', String(255), nullable=True))
 
 def add_compulsory_columns(tab):
-    """
-        Every table should have this column. Call just before meta.create_all().
-        Later we'll use this to add owner and entitlement columns.
-    """
+    """ Every table should have this column. Later we'll use this to add
+        owner and entitlement columns. """
     tab.append_column(
         Column('creation_date', DateTime,
                default=datetime.datetime.now))
+    tab.append_column(Column('comments', String(255), nullable=True))
 
 def empty(table, engine):
     """
