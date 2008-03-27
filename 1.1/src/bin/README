@@ -1,0 +1,34 @@
+This should eventually turn into wrapper scripts that look like the
+current (1.0) aq/aqd...
+
+For now...
+
+To start aqd:
+./twistd aqd
+
+This will create a twistd.log in the current directory and daemonize the
+process.  Run ./twistd with no args or ./twistd aqd --help (different)
+for more options.
+
+To start aqd but keep it in the foreground with logs going to stdout:
+./twistd -no -l - aqd
+
+Ditto, but without expecting to talk to knc:
+./twistd -no -l - aqd --noknc
+
+If running as quattor, try:
+./twistd -no -l - --pidfile=/var/tmp/quattor/aqd.pid aqd
+
+Or as a daemon:
+./twistd --pidfile=/var/tmp/quattor/aqd.pid --logfile=/var/tmp/quattor/aqd.log aqd
+
+Adding --spew gives much twisted debug output.
+
+To run aq:
+./aq.py [commands]
+
+To run aq without knc:
+./aq.py --noknc --aqport=6901 [commands]
+
+Options should be the same / similar to options to aq 1.0.
+
