@@ -7,6 +7,6 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""If you can read this, you should be Documenting"""
 
 #if __name__=='__main__':
