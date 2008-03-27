@@ -16,13 +16,17 @@ To start aqd but keep it in the foreground with logs going to stdout:
 Ditto, but without expecting to talk to knc:
 ./twistd -no -l - aqd --noknc
 
-If running as quattor, try:
-./twistd -no -l - --pidfile=/var/tmp/quattor/aqd.pid aqd
+If running as cdb, try:
+./twistd -no -l - --pidfile=/var/tmp/cdb/aqd.pid aqd
 
 Or as a daemon:
-./twistd --pidfile=/var/tmp/quattor/aqd.pid --logfile=/var/tmp/quattor/aqd.log aqd
+./twistd --pidfile=/var/tmp/cdb/aqd.pid --logfile=/var/tmp/cdb/aqd.log aqd
 
 Adding --spew gives much twisted debug output.
+
+To stop aqd:
+If running with -no (foreground), ctrl-c will bring the server down
+gracefully.  Otherwise, kill -TERM `cat twistd.pid` works as well.
 
 To run aq:
 ./aq.py [commands]

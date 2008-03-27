@@ -11,7 +11,7 @@
 
 from twisted.application import internet
 from twisted.web import server, resource, http
-from twisted.internet import defer
+from twisted.internet import defer, utils
 from twisted.python import log
 
 from aquilon.server.exceptions_ import AuthorizationException
@@ -22,6 +22,17 @@ class ResponsePage(resource.Resource):
         self.dbbroker = dbbroker
         self.azbroker = azbroker
         resource.Resource.__init__(self)
+
+    def render(self, request):
+        """This is just the default implementation from resource.Resource
+        that checks for the appropriate method to delegate to.  This can
+        be expanded out to do any default/incoming processing...
+
+        """
+        m = getattr(self, 'render_' + request.method, None)
+        if not m:
+            raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
+        return m(request)
 
     # All of these wrap* functions should probably be elsewhere, and
     # change depending on what should go back to the client.
@@ -337,6 +348,25 @@ class LocationPage(ResponsePage):
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
+class DummyCommand(ResponsePage):
+    def cb_command_output(self, (out, err, code)):
+        log.msg("echo finished with return code %d" % code)
+        # FIXME: do stuff with err and code
+        return out
+
+    def cb_command_error(self, (out, err, signalNum)):
+        # FIXME: do stuff with err and signalNum
+        return out
+
+    def render_GET(self, request):
+        d = utils.getProcessOutputAndValue("/bin/echo",
+                [ "/bin/env && echo hello && sleep 1 && echo hi; echo bye" ] )
+        d = d.addErrback( self.wrapError, request )
+        d = d.addCallbacks(self.cb_command_output, self.cb_command_error)
+        d = d.addCallback( self.finishRender, request )
+        d = d.addErrback(log.err)
+        return server.NOT_DONE_YET
+
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole.
         It inherits from ResponsePage for requests to /"""
@@ -348,10 +378,13 @@ class RestServer(ResponsePage):
         self.putChild('location', LocationTypePageContainer(self.dbbroker,
                                                             self.azbroker,
                                                             "location"))
+        self.putChild('dummy_command', DummyCommand(self.dbbroker,
+                                                    self.azbroker,
+                                                    "dummy_command"))
 
-    def getChild(self, path, request):
-        return ResponsePage(self.dbbroker, self.azbroker,
-                        path or 'UsageResponse')
+    #def getChild(self, path, request):
+    #    return ResponsePage(self.dbbroker, self.azbroker,
+    #                    path or 'UsageResponse')
 
     def render_GET(self, request):
         """aqcommand: aq status"""

@@ -268,6 +268,8 @@ class transport(Element):
         self.method = attributes['method']
         self.path = attributes['path']
         self.trigger = attributes.has_key('trigger') and attributes['trigger'] or None
+        self.expect = attributes.has_key('expect') and attributes['expect'] or None
+        self.custom = attributes.has_key('custom') and attributes['custom'] or None
 
 # =========================================================================== #
 

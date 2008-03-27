@@ -228,6 +228,7 @@
             Name of the new domain
          </option>
       </optgroup>
+      <transport method="post" path="domain/%(domain)s/bundle" custom="create_bundle"/>
    </command>
    
    <command name="deploy">
@@ -324,6 +325,12 @@
          </option>
       </optgroup>
       <transport method="delete" path="location/%(type)s/%(name)s" />
+   </command>
+
+   <command name="run_dummy_command">
+      Ask the broker for a command to run locally...
+      Also using this to test the broker running commands...
+      <transport method="get" path="dummy_command" expect="command" />
    </command>
 
 
