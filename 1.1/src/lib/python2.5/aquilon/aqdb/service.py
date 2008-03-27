@@ -7,17 +7,16 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+""" The module governing tables and objects that represent what are known as
+    Services (defined below) in Aquilon """
 
 import datetime
 
-from sys import path,exit
-#path.append('./utils')
+import sys
 if __name__ == '__main__':
-    path.append('../..')
+    sys.path.append('../..')
 
 from DB import meta, engine, Session, aqdbBase
-from aquilon.aqdb.utils.debug import ipshell
 from aquilon.aqdb.utils.schemahelpers import *
 
 from location import *
@@ -268,9 +267,8 @@ if __name__ == '__main__':
     else:
         sm=s.query(ServiceMap).first()
 
-    print sm
-    ipshell()
-    exit(0)
+    print 'populated all tables and added %s'%(sm)
+
 
 #todo: services don't have a unique aqdb or quattor configuration source map
 # PATHS SHOULD ALL BE EXTRACTED FOR 2NF AND FLEXIBILITY.
