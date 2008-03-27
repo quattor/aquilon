@@ -7,10 +7,11 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+""" Tables and Objects which represent location entities in Aquilon"""
+from __future__ import with_statement
 
 from sys import path
-#path.append('./utils')
+
 if __name__ == '__main__':
     path.append('../..')
 
@@ -20,7 +21,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 
 from aquilon.aqdb.utils.schemahelpers import *
-#from aquilon.aqdb.utils.Debug import ipshell
+from aquilon.aqdb.utils.exceptions_ import ArgumentError
 
 s = Session()
 
@@ -33,10 +34,10 @@ def mk_loc_table(name, meta, *args, **kw):
 location_type = mk_type_table('location_type',meta)
 class LocationType(aqdbType):
     """To wrap rows in location_type table"""
-    pass #inherits everything from aqdbType parent
+    pass
 mapper(LocationType,location_type)
 
-location_type.create(checkfirst=True) #fill table now to for location_type_id
+location_type.create(checkfirst=True)
 
 if empty(location_type, engine):
     fill_type_table(location_type,['company','hub','continent','country',
@@ -54,7 +55,7 @@ location = Table('location', meta,
           ForeignKey('location_type.id',
                      ondelete='RESTRICT')),
    Column('creation_date', DateTime, default=datetime.datetime.now),
-   Column('comments'),
+   Column('comments', String(255), nullable=True),
    UniqueConstraint('name','location_type_id'))
 
 company = mk_loc_table('company', meta)
@@ -68,7 +69,6 @@ rack = mk_loc_table('rack', meta)
 desk = mk_loc_table('desk', meta)
 chassis = mk_loc_table('chassis', meta)
 
-#don't add creation date here, it's included in the location table
 meta.create_all()
 
 class Location(aqdbBase):
@@ -78,19 +78,29 @@ class Location(aqdbBase):
     @optional_comments
     def __init__(self,name,type_name,**kw):
         self.name = name.strip().lower()
-        #TODO: bail if Location='base_location_type'
         if type_name=='base_location_type':
             msg = """You cannot instance Base Location Type.
             Init the exact type of location needed directly."""
             raise ValueError(msg)
             return
-        try:
-            self.type_id = s.query(LocationType).filter_by(type=type_name).one()
-        except Exception, e:
-            print "Error looking up location type '%s': %s"%(type_name)
+        if isinstance(type_name,str):
+            try:
+                self.type_id = s.query(LocationType).\
+                    filter_by(type=type_name).one()
+            except Exception, e:
+                print "Error looking up location type '%s': %s"%(type_name,e)
+                return
+        else:
+            raise ArgumentError("Location type argument expects a string")
             return
+        #TODO: str type check
         if kw.has_key('fullname'):
-            self.fullname=kw.pop('fullname')
+            fn = kw.pop('fullname')
+            if isinstance(fn,str):
+                self.fullname=fn.strip().lower()
+            else:
+                raise ArgumentError("fullname expects a string")
+                return
         if kw.has_key('parent'):
             self.parent=kw.pop('parent')
 
@@ -197,84 +207,96 @@ mapper(Chassis,chassis,inherits=Location,
 mapper(Desk,desk,inherits=Location,
        polymorphic_identity=get_loc_type_id('desk'))
 
-#def gen_id_cache(obj_name):
-#    cache={}
-#
-#    for c in s.query(obj_name).all():
-#        cache[str(c.name)]=c
-#    return cache
-
 def populate_hubs():
-    w=Company('ms',type='company', fullname='root node')
+    s=Session()
+
+    w=Company('ms', 'company', fullname='root node')
     s.save(w)
     s.commit()
 
-    hk_hub=Hub('hk',type='hub',fullname='hong kong hub',parent=w)
+    hk_hub=Hub('hk','hub', fullname='hong kong hub',parent=w)
     s.save(hk_hub)
 
-    ln_hub=Hub('ln',type='hub',fullname='london hub',parent=w)
+    ln_hub=Hub('ln','hub', fullname='london hub',parent=w)
     s.save(ln_hub)
 
-    tk_hub=Hub('tk',type='hub',fullname='japan hub',parent=w)
+    tk_hub=Hub('tk','hub', fullname='japan hub',parent=w)
     s.save(tk_hub)
 
-    ny_hub=Hub('ny',type='hub',fullname='new york hub',parent=w)
+    ny_hub=Hub('ny','hub', fullname='new york hub',parent=w)
     s.save(ny_hub)
 
-    eu=Continent('eu',parent=ln_hub, type='continent', fullname='Europe')
-    af=Continent('af',parent=ln_hub, type='continent', fullname='Africa')
+    eu=Continent('eu', 'continent', parent=ln_hub, fullname='Europe')
+    af=Continent('af', 'continent', parent=ln_hub, fullname='Africa')
     s.save_or_update(eu)
     s.save_or_update(af)
 
-    na=Continent('na',parent=ny_hub,type='continent', fullname='North America')
-    sa=Continent('sa',parent=ny_hub,type='continent', fullname='South America')
+    na=Continent('na','continent', parent=ny_hub, fullname='North America')
+    sa=Continent('sa','continent', parent=ny_hub, fullname='South America')
     s.save_or_update(na)
     s.save_or_update(sa)
 
-    asia=Continent('as',parent=hk_hub, type='continent', fullname='Asia')
-    au=Continent('au',parent=hk_hub, type='continent', fullname='Autstralia')
+    asia=Continent('as', 'continent', parent=hk_hub, fullname='Asia')
+    au=Continent('au', 'continent', parent=hk_hub, fullname='Autstralia')
     s.save_or_update(au)
     s.save_or_update(asia)
-    s.commit()
-
+    try:
+        s.commit()
+    except Exception,e:
+        s.rollback()
+        print e
+        return
+    s.close()
 
 def populate_country():
     from aquilon.aqdb.utils.dsdb import dump_country
+    s=Session()
+    s.transactional=False
 
     cache=gen_id_cache(Continent)
 
-    for row in dump_country():
-        c=Country(row[0],type='country',fullname=row[1],parent=cache[row[2]])
-        s.save(c)
-        s.commit()
-    s.flush()
+    with s.begin():
+        for row in dump_country():
+            c=Country(row[0],'country',fullname=row[1],parent=cache[row[2]])
+            s.save(c)
+            s.flush()
+
+    s.close()
+    del(s)
+
 
 def populate_city():
     from aquilon.aqdb.utils.dsdb import dump_city
+    s=Session()
+    s.transactional=False
 
     cache=gen_id_cache(Country)
 
-    for row in dump_city():
-        c=City(row[0],type='city',fullname=row[1],parent=cache[row[2]])
-        s.save(c)
-        s.commit()
-    s.flush()
+    with s.begin():
+        for row in dump_city():
+            c=City(row[0],'city',fullname=row[1],parent=cache[row[2]])
+            s.save(c)
+            s.flush()
+    s.close()
+    del(s)
 
 def populate_bldg():
     from aquilon.aqdb.utils.dsdb import dump_bldg
+    s=Session()
+    s.transactional=False
 
     cache=gen_id_cache(City)
 
-    for row in dump_bldg():
-        c=Building(row[0],type='building',fullname=row[1],parent=cache[row[2]])
-        s.save(c)
-        s.commit()
-    s.flush()
-
-
-
+    with s.begin():
+        for row in dump_bldg():
+            c=Building(row[0],'building',fullname=row[1],parent=cache[row[2]])
+            s.save(c)
+            s.flush()
+    s.close()
+    del(s)
 
 if __name__ == '__main__':
+
     if empty(hub,engine):
         print 'populating hubs'
         populate_hubs()
@@ -282,8 +304,8 @@ if __name__ == '__main__':
         print 'hubs already populated'
 
     if empty(country,engine):
-        populate_country()
         print 'populating country'
+        populate_country()
     else:
         print 'country already populated'
 
