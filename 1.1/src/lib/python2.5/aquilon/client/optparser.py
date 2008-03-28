@@ -390,7 +390,7 @@ class OptParser (object):
             self.parser.usage = self.__root.help
             self.parser.error('')
         try:
-            globalOptions = self.__root.check(None, opts)
+            this_is_None, globalOptions = self.__root.check(None, opts)
             transport, commandOptions = self.__root.check(command, opts)
         except ParsingError, e:
             self.parser.usage = e.help
