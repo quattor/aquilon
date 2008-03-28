@@ -85,7 +85,7 @@
    </command>
 
    <command name="add_template">
-      %prog add hardware --hostname name
+      %prog add template --name name --owner owner
       <optgroup name="add_template_opts" mandatory="True" fields="all">
          <option name="name" type="string"> Template name </option>
          <option name="owner" type="string"> Domain name </option>
@@ -118,12 +118,12 @@
    <command name="bind_service">
       %prog add hardware --hostname name
       <optgroup name="bind_service_opts" mandatory="True" fields="all">
-         <option name="host" type="string"> Host name </option>
+         <option name="hostname" type="string"> Host name </option>
          <option name="service" type="string"> Service name </option>
          <option name="instance" type="string"> Instance name </option>
       </optgroup>
       <!-- In 1.0, only one service can be bound to a host at once. -->
-      <transport method="post" path="host/%(host)s/service" />
+      <transport method="post" path="host/%(hostname)s/service" />
    </command>
 
    <command name="del_host">
@@ -152,7 +152,7 @@
       </optgroup>
       <!-- This is a bit of a cop-out, but post seems to be the way to
            go for creating linkages. -->
-      <transport method="post" path="host/%(host)s/assoc" />
+      <transport method="post" path="host/%(hostname)s/command/assoc" />
    </command>
 
    <command name="pxeswitch">
@@ -165,14 +165,14 @@
       </optgroup>
       <!-- Not sure if this is purely informational, or if there are side-
            effects -->
-      <transport method="put" path="host/%(host)s/pxeswitch" />
+      <transport method="put" path="host/%(hostname)s/command/pxeswitch" />
    </command>
 
    <command name="reconfigure">
       <optgroup name="reconfigure options" mandatory="True" fields="all">
          <option name="hostname" type="string"> Host name </option>
       </optgroup>
-      <transport method="post" path="host/%(host)s/reconfigure" />
+      <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
 
    <command name="add_domain">
@@ -204,7 +204,7 @@
       <optgroup name="put options" mandatory="True" fields="all">
          <option name="domain" type="string"> Name of the new domain </option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/bundle" custom="create_bundle"/>
+      <transport method="post" path="domain/%(domain)s/command/bundle" custom="create_bundle"/>
    </command>
    
    <command name="deploy">
@@ -233,7 +233,7 @@
       Usage: %prog cat --hostname name | --domain name --template name
       <optgroup name="cat options" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="template"> Name of the host </option>
-         <optgroup name="cat template options" mandatory="True" fields="all">
+         <optgroup name="cat template options" fields="all">
             <option name="template" type="string" conflicts="hostname"> Name of the template </option>
             <option name="domain" type="string"> Name of the domain </option>
          </optgroup>
