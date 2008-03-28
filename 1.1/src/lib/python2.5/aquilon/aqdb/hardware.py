@@ -9,6 +9,10 @@
 # This module is part of Aquilon
 """The tables/objects/mappings related to hardware in Aquilon. """
 
+if __name__ == '__main__':
+    from sys import path
+    path.append('../..')
+
 #from DB import meta, engine, Session, aqdbBase
 #from aquilon.aqdb.utils.debug import ipshell
 #from aquilon.aqdb.utils.schemahelpers import *
