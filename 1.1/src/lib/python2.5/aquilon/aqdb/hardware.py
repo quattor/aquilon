@@ -7,149 +7,128 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""The tables/objects/mappings related to hardware in Aquilon. """
 
-#import datetime
-
-from sys import path,exit
-#path.append('./utils')
-
-from aquilon.aqdb.DB import meta, engine, Session, aqdbBase
-from aquilon.aqdb.utils.debug import ipshell
-from aquilon.aqdb.utils.schemahelpers import *
+#from DB import meta, engine, Session, aqdbBase
+#from aquilon.aqdb.utils.debug import ipshell
+#from aquilon.aqdb.utils.schemahelpers import *
+from DB import *
+from utils.schemahelpers import *
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
 
-#TODO: add sequences to everything
-
 vendor = mk_name_id_table('vendor',meta)
+vendor.create(checkfirst=True)
+class Vendor(aqdbBase):
+    pass
+mapper(Vendor,vendor,properties={
+    'creation_date':deferred(vendor.c.creation_date)})
 
-class Vendor(object):
-    '''wraps rows of the vendor table
-        CHILD OF: model '''
-    def __init__(self,name,**kw):
-        self.name = name.lower().strip()
-    def __repr__(self):
-        return str(self.name)
-mapper(Vendor,vendor)
+hardware_type = mk_type_table('hardware_type', meta)
+hardware_type.create(checkfirst=True)
 
-################ TYPE ############
-hardware_type = mk_name_id_table('hardware_type', meta)
-class HardwareType(aqdbBase):
-    def __init__(self,name):
-        self.name=name.lower().strip()
-    def __repr__(self):
-        return str(self.name)
-mapper(HardwareType,hardware_type)
-#'blade', 'rackmount', 'workstation'
+class HardwareType(aqdbType):
+    pass
+mapper(HardwareType,hardware_type,properties={
+    'creation_date':deferred(hardware_type.c.creation_date)})
+
+#model format: rackmount, blade, workstation
+model_format=mk_type_table('model_format', meta)
+model_format.create(checkfirst=True)
+
+class ModelFormat(aqdbType):
+    pass
+
+mapper(ModelFormat,model_format, properties={
+    'format':synonym(model_format.c.type),
+    'creation_date':deferred(model_format.c.creation_date)})
 
 model = Table('model',meta,
-    Column('id', Integer, primary_key=True, index=True),
-    Column('name', String(64), unique=True, nullable=False, index=True),
+    Column('id', Integer, primary_key=True),
+    Column('name', String(64), unique=True, index=True),
     Column('vendor_id', Integer,
-           ForeignKey('vendor.id', ondelete='RESTRICT'), nullable=False),
-    #cpu: template pointer
-    #cpu count
-    #ram: template pointer
-    #ram amount integer (in MB?)
+           ForeignKey('vendor.id', ondelete='RESTRICT')),
+    Column('model_format_id', Integer,
+           ForeignKey('model_format.id', ondelete='RESTRICT')),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments',String(255)))
+model.create(checkfirst=True)
 
 class Model(aqdbBase):
-    '''wraps rows in model.
-           PARENT OF: vendor
-    '''
-    @optional_comments
-    def __init__(self,name,vendor,**kw):
+    def __init__(self,name,vndr,form):
         self.name = name.lower().strip()
-        #TODO: more friendly error msg than KeyError:i.e. type check input
-        self.hardware_type = kw.pop('hardware_type')
-        if isinstance(vendor,Vendor):
-            self.vendor = vendor
+
+        if isinstance(vndr,Vendor):
+            self.vendor = vndr
+        elif isinstance(vndr,str):
+            s = Session()
+            try:
+                self.vendor = s.query(Vendor).filter_by(name=vndr).one()
+            except NoSuchRowException:
+                print "Can not find vendor '%s'"%(vndr)
+                return
+            except Exception, e:
+                print 'ERROR: Unhandled Exception',
+                print e
+                return
+            finally:
+                s.close()
         else:
-            v=Vendor(vendor)
-            s.save(v)
-            self.vendor=v
-            s.flush()
-
-
+            raise ArgumentError("Incorrect vendor specification '%s'",vndr)
+            return
+        #TODO: add string check as well, too tired for it now
+        if isinstance(form,ModelFormat):
+            self.model_format = form
+        else:
+            raise ArgumentError("Incorrect format specification '%s'",form)
+            return
     def __repr__(self):
-        return '%s %s'%(self.vendor,self.name)
+        return '%s %s'%(self.vendor.name,self.name)
 
 mapper(Model,model,properties={
-    'vendor': relation(Vendor,backref='model'),
-    'hardware_type': relation(HardwareType,backref='model')
-})
+    'vendor':relation(Vendor),
+    'model_format':relation(ModelFormat),
+    'creation_date':deferred(model.c.creation_date),
+    'comments': deferred(model.c.comments)})
 
-#template name, key, and value
+if __name__ == '__main__':
 
-hardware = Table('hardware',meta,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(255), unique=True, index=True),
-    Column('location_id', Integer,
-           ForeignKey('location.id'), index=True),
-    Column('type_id', Integer,
-           ForeignKey('hardware_type.id',ondelete='RESTRICT')),
-    Column('cfg_path_id',Integer,
-            ForeignKey('cfg_path.id',ondelete='RESTRICT'),
-            unique=True),
-    Column('serialnumber', String(64), unique=True, nullable=True),
-    Column('comments', String(255)))
+    if empty(vendor,engine):
+        s = Session()
+        for i in ['sun','ibm','hp','dell','intel','amd','broadcom', 'generic']:
+            a=Vendor(i)
+            s.save(a)
+        s.commit()
+        s.close()
 
-rackmount = Table('rackmount', meta,
-    Column('id',Integer,ForeignKey('hardware.id'), primary_key=True))
+    if empty(hardware_type,engine):
+        fill_type_table(hardware_type,['model','disk','cpu','nic','ram'])
 
-blade = Table('blade', meta,
-    Column('id', Integer, ForeignKey('hardware.id'), primary_key=True))
+    if empty(model_format,engine):
+        fill_type_table(model_format,['rackmount', 'blade', 'workstation'])
 
-workstation = Table('workstation', meta,
-    Column('id',Integer, ForeignKey('hardware.id'), primary_key=True))
-    #user/owner?
 
-interface_type=mk_name_id_table('interface_type')
-#physical, zebra, service, heartbeat, Router,management, ipmi, vlan, build
+    if empty(model,engine):
+        s=Session()
+        v_cache=gen_id_cache(Vendor)
 
-interface = Table('interface',meta,
-    Column('id', Integer, primary_key=True),
-    Column('interface_type_id', Integer,
-           ForeignKey('interface_type.id'), nullable=False),
-    Column('ip',String(16), default='0.0.0.0', index=True)) #TODO FK to IP table)
+        hwt_cache={}
+        for c in s.query(ModelFormat).all():
+            hwt_cache[str(c)] = c
 
-physical_interface=Table('physical_interface', meta,
-    Column('interface_id', Integer,
-           ForeignKey('interface.id'),primary_key=True),
-    Column('hardware_id', Integer,
-           ForeignKey('hardware.id',ondelete='CASCADE'),
-           nullable=False, index=True),
-    Column('name',String(255), nullable=False), #like e0, hme1, etc.
-    Column('mac', String(32), nullable=False, unique=True, index=True),
-    UniqueConstraint('hardware_id','name'))
+        f = [['ibm','hs20','blade'],
+            ['hp','ls41','blade'],
+            ['sun','ultra-10','workstation'],
+            ['dell','poweredge-6850','rackmount'],
+            ['dell','optiplex-260','workstation']]
 
-"""
-    need disk table. type comes from cfg_path
-"""
-
-#"/hardware" = create("machine/na/np/6/31_c5n12");
-"""
-structure template machine/na/np/6/31_c5n9;
-
-"location" = "np.ny.na";
-"serialnumber" = "99C5549";
-
-# This is a ibm bladecenter hs21
-include hardware/models/ibm_hs21;
-
-"ram" = list(create("hardware/ram/generic", "size", 8192*MB));
-"cpu" = list(create("hardware/cpu/intel_xeon_2660"),
-             create("hardware/cpu/intel_xeon_2660"));
-"harddisks" = nlist("sda", create("hardware/harddisk/scsi", "capacity", 34*GB));
-
-"cards/nic/eth0/hwaddr" = "00:14:5E:D7:9A:E4";
-"cards/nic/eth0/boot" = true;
-"cards/nic/eth1/hwaddr" = "00:14:5E:D7:9A:E6";
-"""
-#""" path to template is assumed as /hardware/vendor/model """
-#hardware_cfg_path = Table('hardware_cfg_path',meta,
-#    Column('id', Integer, ForeignKey('cfg_path.id'), primary_key=True),
-#    Column('model_id', Integer,
-#        ForeignKey('model.id', ondelete='RESTRICT'), nullable=False))
+        for i in f:
+            m=Model(i[1],v_cache[i[0]],hwt_cache[i[2]])
+            s.save_or_update(m)
+        try:
+            s.commit()
+        except Exception,e:
+            print e
+        finally:
+            s.close()
