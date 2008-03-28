@@ -11,6 +11,9 @@
 
 from optparse import OptionParser
 from xml.parsers import expat
+import re
+import pdb
+
 
 def joinDict (d1, d2):
     temp = d1
@@ -62,9 +65,9 @@ class Element(object):
 
 class commandline(Element):
     def __init__ (self, name, attributes):
+        Element.__init__(self, name, attributes)
         self.__commandlist = {}
         self.__allcommands = None
-        self.help = ''
 
 # --------------------------------------------------------------------------- #
 
@@ -79,20 +82,26 @@ class commandline(Element):
     def check (self, command, options):
         result = {}
 
-        if command is None:
+        if (command is None):
             if (self.__allcommands):
                 ##print "check generic options"
                 (res, found) = self.__allcommands.check(command, options)
                 result = joinDict(result,res)
-            return result
+            return None, result
 
         if (self.__commandlist.has_key(command)):
             ##print "commandline checking command:", command
             commandElement = self.__commandlist[command]
             (res, found) = commandElement.check(command, options)
             result = joinDict (result,res)
+        elif (command == 'help' or command == ''):
+            # print general help, and help for each command
+            help = ''
+            for c in self.__commandlist:
+                help = help + c.help
+            raise ParsingError ('', self.help + help)
         else:
-            raise ParsingError('Unknown command',self.help);
+            raise ParsingError('Command '+command+' is not known!',self.help)
 
         transport = None
         for t in commandElement.transports:
@@ -114,6 +123,7 @@ class commandline(Element):
 
 class command(Element):
     def __init__ (self, name, attributes):
+        Element.__init__(self, name, attributes)
         self.name = attributes['name']
         self.optgroups = []
         self.help = ''
@@ -133,7 +143,11 @@ class command(Element):
     def check (self, command, options):
         result = {}
         for optgroup in self.optgroups:
-            (res, found) = optgroup.check(command, options)
+            try:
+                (res, found) = optgroup.check(command, options)
+            except ParsingError, e:
+                e.help = self.help + e.help
+                raise e
             result = joinDict (result, res)
         return result, True
 
@@ -141,14 +155,23 @@ class command(Element):
 
 class optgroup(Element):
     def __init__ (self, name, attributes):
+        Element.__init__(self, name, attributes)
         self.name = attributes['name']
         self.help = ''
         self.options = []
 
         if (attributes.has_key('mandatory')):
-            self.mandatory = attributes['mandatory']
+            try:
+                self.mandatory = eval (attributes['mandatory'])
+            except StandardError, e:
+                self.mandatory = False
         else:
-            self.mandatory = 'np'
+            self.mandatory = False
+        
+        if (attributes.has_key('fields')):
+            self.fields = attributes['fields']
+        else:
+            self.fields = 'none'
 
         if (attributes.has_key('conflicts')):
             self.conflicts = attributes['conflicts'].split(' ')
@@ -169,31 +192,44 @@ class optgroup(Element):
         foundall = True
 
         for option in self.options:
-            (res, f) = option.check(command, options)
+            try:
+                (res, f) = option.check(command, options)
+            except ParsingError, e:
+                e.help = self.help + e.help
+                raise e
             found[option.name] = f
             if (f):
                 result = joinDict(result, res)
             foundany = foundany or f
             foundall = foundall and f
+
+        # check if the options are specified as requested
+        if (self.mandatory):
+            if (self.fields == 'all' and not foundall):
+                raise ParsingError(self.help, 'Not all mandatory options specified!')
+            if (self.fields == 'any' and not foundany):
+                raise ParsingError(self.help, 'Please provide any of the required options!')
+            if (not foundany):
+                raise ParsingError(self.help, 'Mandatory options not provided')
+        else:
+            if (self.fields == 'all' and foundany and not foundall):
+                raise ParsingError(self.help, 'Not all mandatory options specified!')
+
+        # check for conflicts
         for option in self.options:
-            # Only need to check for conflicts if the option was specified...
             if not found[option.name]:
                 continue
             for conflict in option.conflicts:
                 if (found.has_key(conflict) and found[conflict] == True):
                     raise ParsingError('','Option or option group '+option.name+' conflicts with '+conflict)
-
-        if (not foundall and self.mandatory == 'all'):
-            if (foundany):
-                raise ParsingError(self.help, 'Not all mandatory options specified')
-            else:
-                return {}, False
+        # return result
         return result, foundany
 
 # =========================================================================== #
 
 class option(Element):
     def __init__ (self, name, attributes):
+        Element.__init__(self, name, attributes)
         self.name = attributes['name']
         if (attributes.has_key('type')):
             self.type = attributes['type']
@@ -275,10 +311,11 @@ class transport(Element):
 
 class OptParser (object):
     def __init__ (self, xmlFileName):
+        self.mb = 0 
         self.__nodeStack = []
         self.__root = None
-        self.parser = OptionParser ();
-        self.ParseXml(xmlFileName);
+        self.parser = OptionParser ()
+        self.ParseXml(xmlFileName)
 
 # --------------------------------------------------------------------------- #
 
@@ -319,8 +356,20 @@ class OptParser (object):
 
     def CharacterData(self, data):
         'Expat character data event handler'
-        if data.strip( ):
-            data = data.encode( )
+        if data.strip():
+            data = data.encode()
+        if (re.match('^\s+$',data)):
+            self.mb += 1
+            if (self.mb > 2):
+                return
+        else:
+            self.mb = 0
+
+        if (self.__nodeStack):
+            parent = self.__nodeStack[-1]
+            parent.help = parent.help + data
+        else:
+            self.__root.help = self.root.help + data
 
 # --------------------------------------------------------------------------- #
 
@@ -338,9 +387,14 @@ class OptParser (object):
         if (args):
             command = '_'.join(args)
         else:
-            raise ParsingError (self.__root.help, 'No command is given')
-        globalOptions = self.__root.check(None, opts)
-        transport, commandOptions = self.__root.check(command, opts)
+            self.parser.usage = self.__root.help
+            self.parser.error('')
+        try:
+            globalOptions = self.__root.check(None, opts)
+            transport, commandOptions = self.__root.check(command, opts)
+        except ParsingError, e:
+            self.parser.usage = e.help
+            self.parser.error(e.error)
         return command, transport, commandOptions, globalOptions
 
 # =========================================================================== #
@@ -350,9 +404,11 @@ if __name__ == '__main__':
     BINDIR = os.path.dirname( os.path.realpath(sys.argv[0]) )
     p = OptParser( os.path.join( BINDIR, '..', '..', '..', '..', 'etc', 'input.xml' ) )
     try:
-        (command, commandOptions, globalOptions) = p.getOptions()
+ #       pdb.set_trace()
+        (command, transport, commandOptions, globalOptions) = p.getOptions()
     except ParsingError, e:
         print "ERROR", e.error
+ #       print "HELP\n", e.help
     else:
         print "Command:", command
         print "Command Options:", commandOptions
