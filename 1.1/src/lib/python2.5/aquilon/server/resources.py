@@ -7,19 +7,35 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''These classes handle responses to the client.  They all subclass 
-ResponsePage (which is a subclass of resource.Resource) and are
-web-accessible resources.
+'''The main class here is ResponsePage, which contains all the methods
+for implementing the various aq commands.
 
-Each render_ method corresponds to a command (or possibly specific
-options for a command) that can be run by the client.  The docstring
-for each is the command (or subset) that is being run.
+To implement a command, define a transport for it in input.xml and
+then add a command_<name>[_trigger] method to the ResponsePage class.
+Any variables in the URL itself will be available as 
+request.path_variable["varname"] where "varname" is the name of the
+option.
+
+The pages are built up at server start time based on the definitions in
+the server's input.xml.  The RestServer class (which itself inherits
+from ResponsePage for serving requests) contains this magic.  This
+class builds out all the ResponsePage children as part of its __init__.
+
+For any given ResponsePage, all methods (including all the command_
+methods) are available, but only the expected methods for that relative
+URL will be assigned to render_GET, render_POST, etc.  The rest will be
+dormant.
 
 Coming soon: the ResponsePage should provide some massaging for
 incoming data, or at least handle requests for different output
 formats consistently.  It can/should also provide some helpers for
 those output formats.
 '''
+
+import re
+import sys
+import os
+import xml.etree.ElementTree as ET
 
 from twisted.application import internet
 from twisted.web import server, resource, http, error
@@ -29,15 +45,33 @@ from twisted.python import log
 from aquilon.server.exceptions_ import AuthorizationException
 
 class ResponsePage(resource.Resource):
-    def __init__(self, dbbroker, azbroker, path, **kwargs):
+    def __init__(self, dbbroker, azbroker, path, path_variable=None):
         self.path = path
         self.dbbroker = dbbroker
         self.azbroker = azbroker
+        self.path_variable = path_variable
+        self.dynamic_child = None
         resource.Resource.__init__(self)
-        if kwargs.has_key('domain'):
-            self.domain = kwargs['domain']
-        if kwargs.has_key('host'):
-            self.host = kwargs['host']
+
+    def getChild(self, path, request):
+        """Typically in twisted.web, a dynamic child would be created...
+        dynamically.  However, to make the command_* mappings possible,
+        they were all created at start time.
+
+        This is an issue because the path cannot be handed to the
+        constructor for it to deal with variable path names.  Instead,
+        the request object is abused - the variable path names are
+        crammed into it before handing back the child that is being
+        requested.
+
+        """
+
+        if not self.dynamic_child:
+            return resource.Resource.getChild(self, path, request)
+        if not getattr(request, "path_variables", None):
+            request.path_variables = {}
+        request.path_variables[self.dynamic_child.path_variable] = path
+        return self.dynamic_child
 
     def render(self, request):
         """This is just the default implementation from resource.Resource
@@ -152,9 +186,7 @@ class ResponsePage(resource.Resource):
         request.finish()
         return failure
 
-
-class HostPageContainer(ResponsePage):
-    def render_GET(self, request):
+    def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
         #print 'render_GET called'
         try:
@@ -174,17 +206,12 @@ class HostPageContainer(ResponsePage):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq show_host --all has not been implemented yet"
     
-    def getChild(self, path, request):
-        "Return the correct HostPage for this path"
-        return HostPage(self.dbbroker, self.azbroker, path)
-
-
-class HostPage(ResponsePage):
-    def render_GET(self, request):
+    def command_show_host_hostname(self, request):
         """aqcommand: aq show host --hostname=<host>"""
         #print 'render_GET called'
         #name = request.args['name'][0]
-        name = self.path
+        #name = self.path
+        name = request.path_variables["hostname"]
 
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "show",
@@ -203,11 +230,12 @@ class HostPage(ResponsePage):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq show_host --hostname has not been implemented yet"
 
-    def render_PUT(self, request):
+    def command_add_host(self, request):
         """aqcommand: aq add host --hostname=<host>"""
         #name = request.args['name'][0]
         #request.content.seek(0)
-        name = self.path
+        #name = self.path
+        name = request.path_variables["hostname"]
 
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "add",
@@ -227,9 +255,10 @@ class HostPage(ResponsePage):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add_host has not been implemented yet"
 
-    def render_DELETE(self, request):
+    def command_del_host(self, request):
         """aqcommand: aq del host --hostname=<host>"""
-        name = self.path
+        #name = self.path
+        name = request.path_variables["hostname"]
 
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "del",
@@ -247,164 +276,92 @@ class HostPage(ResponsePage):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq del_host has not been implemented yet"
 
-    def getChild(self, path, request):
-        "Return the correct ResponsePage for this path"
-        if path == 'command':
-            return HostCommandPageContainer(self.dbbroker, self.azbroker, path, host=self.path)
-        return error.NoResource("No resource defined for %s" % path)
-
-
-class HostCommandPageContainer(ResponsePage):
-    def getChild(self, path, request):
-        "Return the correct HostCommand*Page for this path"
-        if path == 'pxeswitch':
-            return HostCommandPxeswitchPage(self.dbbroker, self.azbroker, path, host=self.path)
-        elif path =='assoc':
-            return HostCommandAssocPage(self.dbbroker, self.azbroker, path, host=self.path)
-        elif path =='reconfigure':
-            return HostCommandReconfigurePage(self.dbbroker, self.azbroker, path, host=self.path)
-        elif path =='cat':
-            return HostCommandCatPage(self.dbbroker, self.azbroker, path, host=self.path)
-        return error.NoResource("No resource defined for %s" % path)
-
-
-class HostCommandPxeswitchPage(ResponsePage):
-    def render_PUT(self, request):
+    def command_pxeswitch(self, request):
         """aqcommand: aq pxeswitch --hostname=<host>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq pxeswitch has not been implemented yet"
 
-
-class HostCommandAssocPage(ResponsePage):
-    def render_POST(self, request):
+    def command_assoc(self, request):
         """aqcommand: aq assoc --hostname=<host>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq assoc has not been implemented yet"
 
-
-class HostCommandReconfigurePage(ResponsePage):
-    def render_POST(self, request):
+    def command_reconfigure(self, request):
         """aqcommand: aq reconfigure --hostname=<host>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq reconfigure has not been implemented yet"
 
-
-class HostCommandCatPage(ResponsePage):
-    def render_POST(self, request):
+    def command_cat_hostname(self, request):
         """aqcommand: aq cat --hostname=<host>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq cat --hostname has not been implemented yet"
 
+    def command_cat_template(self, request):
+        """aqcommand: aq cat --template=<template> --domain=<domain>"""
 
-class DomainPageContainer(ResponsePage):
-    def getChild(self, path, request):
-        "Return the correct DomainPage for this path"
-        return DomainPage(self.dbbroker, self.azbroker, path)
+        request.setResponseCode( http.NOT_IMPLEMENTED )
+        return "aq cat --template has not been implemented yet"
 
-
-class DomainPage(ResponsePage):
-    def render_PUT(self, request):
+    def command_add_domain(self, request):
         """aqcommand: aq add domain --domain=<domain>"""
-        name = self.path
+        #name = self.path
+        domain = request.path_variables["domain"]
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add_domain has not been implemented yet"
 
-    def render_DELETE(self, request):
+    def command_del_domain(self, request):
         """aqcommand: aq del domain --domain=<domain>"""
-        name = self.path
+        #name = self.path
+        domain = request.path_variables["domain"]
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq del_domain has not been implemented yet"
 
-    def getChild(self, path, request):
-        "Return the correct ResponsePage for this path"
-        if path == 'template':
-            return DomainTemplatePageContainer(self.dbbroker, self.azbroker, path, domain=self.path)
-        #elif path =='model':
-        #    return DomainModelPageContainer(self.dbbroker, self.azbroker, path, domain=self.path)
-        elif path =='command':
-            return DomainCommandPageContainer(self.dbbroker, self.azbroker, path, domain=self.path)
-        return error.NoResource("No resource defined for %s" % path)
-
-
-class DomainTemplatePageContainer(ResponsePage):
-    def getChild(self, path, request):
-        "Return the correct DomainTemplatePage for this path"
-        return DomainTemplatePage(self.dbbroker, self.azbroker, path, domain=self.domain)
-
-
-class DomainTemplatePage(ResponsePage):
-    def render_PUT(self, request):
-        """aqcommand: aq add template --name=<name> --owner=<owner>"""
-        name = self.path
+    def command_add_template(self, request):
+        """aqcommand: aq add template --name=<name> --domain=<domain>"""
+        #name = self.path
+        domain = request.path_variables["domain"]
+        template = request.path_variables["name"]
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add_template has not been implemented yet"
 
-
-class DomainCommandPageContainer(ResponsePage):
-    def getChild(self, path, request):
-        "Return the correct DomainCommand*Page for this path"
-        if path == 'get':
-            return DomainCommandGetPage(self.dbbroker, self.azbroker, path, domain=self.domain)
-        elif path == 'bundle':
-            return DomainCommandBundlePage(self.dbbroker, self.azbroker, path, domain=self.domain)
-        elif path == 'deploy':
-            return DomainCommandDeployPage(self.dbbroker, self.azbroker, path, domain=self.domain)
-        elif path == 'manage':
-            return DomainCommandManagePage(self.dbbroker, self.azbroker, path, domain=self.domain)
-        elif path == 'sync':
-            return DomainCommandSyncPage(self.dbbroker, self.azbroker, path, domain=self.domain)
-        return error.NoResource("No resource defined for %s" % path)
-
-
-class DomainCommandGetPage(ResponsePage):
-    def render_POST(self, request):
+    def command_get(self, request):
         """aqcommand: aq get --domain=<domain>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq get has not been implemented yet"
 
-
-class DomainCommandBundlePage(ResponsePage):
-    def render_POST(self, request):
+    def command_put(self, request):
         """aqcommand: aq put --domain=<domain>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq put has not been implemented yet"
 
-
-class DomainCommandDeployPage(ResponsePage):
-    def render_POST(self, request):
+    def command_deploy(self, request):
         """aqcommand: aq deploy --domain=<domain> --to=<domain>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq deploy has not been implemented yet"
 
-
-class DomainCommandManagePage(ResponsePage):
-    def render_POST(self, request):
+    def command_manage(self, request):
         """aqcommand: aq manage --hostname=<name> --domain=<domain>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq manage has not been implemented yet"
 
-
-class DomainCommandSyncPage(ResponsePage):
-    def render_POST(self, request):
+    def command_sync(self, request):
         """aqcommand: aq sync --domain=<domain>"""
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq sync has not been implemented yet"
 
-
-class LocationTypePageContainer(ResponsePage):
-    def render_GET(self, request):
+    def command_show_location(self, request):
         """aqcommand: aq show location"""
         #print 'render_GET called'
         try:
@@ -422,15 +379,10 @@ class LocationTypePageContainer(ResponsePage):
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
-    def getChild(self, path, request):
-        "Return the correct LocationPage for this path"
-        # FIXME: Need to pass in the type...
-        return LocationPageContainer(self.dbbroker, self.azbroker, path)
-
-class LocationPageContainer(ResponsePage):
-    def render_GET(self, request):
+    def command_show_location_type(self, request):
         """aqcommand: aq show location --type"""
-        type = self.path
+        #type = self.path
+        type = request.path_variables["type"]
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "show",
                                 "/location/%s" % type)
@@ -446,19 +398,13 @@ class LocationPageContainer(ResponsePage):
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
-    def getChild(self, path, request):
-        "Return the correct LocationPage for this path"
-        return LocationPage(self.dbbroker, self.azbroker, path)
-
-class LocationPage(ResponsePage):
-    def render_POST(self, request):
-        "accept a POST request to add a new location"
-
-    def render_GET(self, request):
-        """aqcommand: aq show location --locationname=<location>"""
+    def command_show_location_name(self, request):
+        """aqcommand: aq show location --name=<location>"""
         #print 'render_GET called'
         #name = request.args['name'][0]
-        name = self.path
+        #name = self.path
+        type = request.path_variables["type"]
+        name = request.path_variables["name"]
 
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "show",
@@ -475,11 +421,13 @@ class LocationPage(ResponsePage):
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
-    def render_PUT(self, request):
+    def command_add_location(self, request):
         """aqcommand: aq add location --locationname=<location>"""
         #name = request.args['name'][0]
         #request.content.seek(0)
-        name = self.path
+        #name = self.path
+        type = request.path_variables["type"]
+        name = request.path_variables["name"]
 
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "add",
@@ -497,9 +445,11 @@ class LocationPage(ResponsePage):
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
-    def render_DELETE(self, request):
+    def command_del_location(self, request):
         """aqcommand: aq del location --locationname=<location>"""
-        name = self.path
+        #name = self.path
+        type = request.path_variables["type"]
+        name = request.path_variables["name"]
 
         try:
             self.azbroker.check(None, request.channel.getPrinciple(), "del",
@@ -515,51 +465,25 @@ class LocationPage(ResponsePage):
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
-class DummyCommand(ResponsePage):
-    def cb_command_output(self, (out, err, code)):
-        log.msg("echo finished with return code %d" % code)
-        # FIXME: do stuff with err and code
-        return out
+    def command_run_dummy_command(self, request):
+        def _cb_command_output((out, err, code)):
+            log.msg("echo finished with return code %d" % code)
+            # FIXME: do stuff with err and code
+            return out
 
-    def cb_command_error(self, (out, err, signalNum)):
-        # FIXME: do stuff with err and signalNum
-        return out
+        def _cb_command_error((out, err, signalNum)):
+            # FIXME: do stuff with err and signalNum
+            return out
 
-    def render_GET(self, request):
         d = utils.getProcessOutputAndValue("/bin/echo",
                 [ "/bin/env && echo hello && sleep 1 && echo hi; echo bye" ] )
         d = d.addErrback( self.wrapError, request )
-        d = d.addCallbacks(self.cb_command_output, self.cb_command_error)
+        d = d.addCallbacks(_cb_command_output, _cb_command_error)
         d = d.addCallback( self.finishRender, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
-class RestServer(ResponsePage):
-    """The root resource is used to define the site as a whole.
-        It inherits from ResponsePage for requests to /"""
-    def __init__(self, dbbroker, azbroker):
-        ResponsePage.__init__(self, dbbroker, azbroker, '/')
-        self.putChild('host', HostPageContainer(self.dbbroker,
-                                                self.azbroker,
-                                                "host"))
-        self.putChild('location', LocationTypePageContainer(self.dbbroker,
-                                                            self.azbroker,
-                                                            "location"))
-        self.putChild('domain', DomainPageContainer(self.dbbroker,
-                                                            self.azbroker,
-                                                            "domain"))
-        self.putChild('dummy_command', DummyCommand(self.dbbroker,
-                                                    self.azbroker,
-                                                    "dummy_command"))
-
-    def getChild(self, path, request):
-        if path == '':
-            return self
-    #    return ResponsePage(self.dbbroker, self.azbroker,
-    #                    path or 'UsageResponse')
-        return error.NoResource("No resource defined for %s" % path)
-
-    def render_GET(self, request):
+    def command_status(self, request):
         """aqcommand: aq status"""
 
         try:
@@ -570,4 +494,135 @@ class RestServer(ResponsePage):
             return ""
 
         return "<html><head><title>Status</title></head><body>OK</body></html>"
+
+    # FIXME: Probably going to change...
+    def command_add_hardware(self, request):
+        """aqcommand: aq add hardware --location=<location>"""
+
+        request.setResponseCode( http.NOT_IMPLEMENTED )
+        return "aq add hardware has not been implemented yet"
+
+    # FIXME: Probably going to change...
+    def command_add_model(self, request):
+        """aqcommand: aq add model --os=<os> --model=<model> --domain=<domain>"""
+
+        request.setResponseCode( http.NOT_IMPLEMENTED )
+        return "aq add model has not been implemented yet"
+
+    # FIXME: Probably going to change...
+    def command_add_service(self, request):
+        """aqcommand: aq add service --service=<service> --domain=<domain>"""
+
+        request.setResponseCode( http.NOT_IMPLEMENTED )
+        return "aq add service has not been implemented yet"
+
+    # FIXME: Probably going to change...
+    def command_add_service_instance(self, request):
+        """aqcommand: aq add service --service=<service> --domain=<domain> --instance=<instance>"""
+
+        request.setResponseCode( http.NOT_IMPLEMENTED )
+        return "aq add service --instance has not been implemented yet"
+
+    # FIXME: Probably going to change...
+    def command_bind_service(self, request):
+        """aqcommand: aq bind service --service=<service> --hostname=<hostname>"""
+
+        request.setResponseCode( http.NOT_IMPLEMENTED )
+        return "aq bind service has not been implemented yet"
+
+
+class RestServer(ResponsePage):
+    """The root resource is used to define the site as a whole."""
+    def __init__(self, dbbroker, azbroker):
+        ResponsePage.__init__(self, dbbroker, azbroker, '')
+
+        # Regular Expression for matching variables in a path definition.
+        varmatch = re.compile(r'^%\((.*)\)s$')
+
+        BINDIR = os.path.dirname( os.path.realpath(sys.argv[0]) )
+        tree = ET.parse( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
+
+        for command in tree.getiterator("command"):
+            for transport in command.getiterator("transport"):
+                if not command.attrib.has_key("name") \
+                        or not transport.attrib.has_key("method") \
+                        or not transport.attrib.has_key("path"):
+                    continue
+                name = command.attrib["name"]
+                method = transport.attrib["method"]
+                path = transport.attrib["path"]
+                trigger = transport.attrib.get("trigger")
+                container = self
+                relative = ""
+                # Traverse down the resource tree, container will
+                # end up pointing to the correct spot.
+                # Create branches and leaves as necessary, continueing to
+                # traverse downward.
+                for component in path.split("/"):
+                    relative = relative + "/" + component
+                    #log.msg("Working with component '" + component + "' of '" + relative + "'.")
+                    m = varmatch.match(component)
+                    # Is this piece of the path dynamic?
+                    if not m:
+                        #log.msg("Component '" + component + "' is static.")
+                        child = container.getStaticEntity(component)
+                        if child is None:
+                            #log.msg("Creating new static component '" + component + "'.")
+                            child = ResponsePage(self.dbbroker, self.azbroker,
+                                                    relative)
+                            container.putChild(component, child)
+                        container = child
+                    else:
+                        #log.msg("Component '" + component + "' is dynamic.")
+                        path_variable = m.group(1)
+                        if container.dynamic_child is not None:
+                            #log.msg("Dynamic component '" + component + "' already exists.")
+                            current_variable = container.dynamic_child.\
+                                    path_variable
+                            if current_variable != path_variable:
+                                log.err("Could not use variable '"
+                                        + path_variable + "', already have "
+                                        + "dynamic variable '" 
+                                        + current_variable + "'.")
+                                # XXX: Raise an error if they don't match
+                                container = container.dynamic_child
+                            else:
+                                #log.msg("Dynamic component '" + component + "' had correct variable.")
+                                container = container.dynamic_child
+                        else:
+                            #log.msg("Creating new dynamic component '" + component + "'.")
+                            child = ResponsePage(self.dbbroker, self.azbroker,
+                                                    relative,
+                                                    path_variable=path_variable)
+                            container.dynamic_child = child
+                            container = child
+
+                fullcommand = name
+                if trigger:
+                    fullcommand = fullcommand + "_" + trigger
+                # If the command has not been implemented yet, the server
+                # will bail out on startup with something like:
+                # AttributeError: ResponsePage instance has no attribute
+                #  'command_xxx'
+                # Go create it, or fix the command/transport definition.
+                mycommand = getattr(container, "command_" + fullcommand)
+                rendermethod = "render_" + method.upper()
+                if getattr(container, rendermethod, None):
+                    # FIXME: Raise an Error, something has already been added
+                    log.err("Already have a %s here at %s..." %
+                            (rendermethod, container.path))
+                #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
+                setattr(container, rendermethod, mycommand)
+
+        def _logChildren(level, container):
+            for (key, child) in container.listStaticEntities():
+                log.msg("Resource at level %d for %s [key:%s]"
+                        % (level, child.path, key))
+                _printChildren(level+1, child)
+            if container.dynamic_child:
+                log.msg("Resource at level %d for %s [dynamic]"
+                        % (level, container.dynamic_child.path))
+                _printChildren(level+1, container.dynamic_child)
+
+        #_logChildren(0, self)
 
