@@ -10,15 +10,13 @@
 """ Tables and Objects which represent location entities in Aquilon"""
 from __future__ import with_statement
 
-from sys import path
+import sys
+sys.path.append('../..')
 
-if __name__ == '__main__':
-    path.append('../..')
+from db import *
 
-from DB import *
-
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.aqdb.utils.schemahelpers import *
 from aquilon.aqdb.utils.exceptions_ import ArgumentError
@@ -26,7 +24,7 @@ from aquilon.aqdb.utils.exceptions_ import ArgumentError
 s = Session()
 
 def mk_loc_table(name, meta, *args, **kw):
-    return Table(name, meta,\
+    return Table(name, meta,
                 Column('id',Integer, Sequence('%s_id_seq',name),
                        ForeignKey('location.id'), primary_key=True),
             *args,**kw)
@@ -104,12 +102,20 @@ class Location(aqdbBase):
         if kw.has_key('parent'):
             self.parent=kw.pop('parent')
 
-    #TODO: method for all parents
+    def parents(self):
+        pl=[]
+        p_node=self.parent
+        while p_node.parent is not None:
+            pl.append(p_node)
+            p_node=p_node.parent
+        pl.append(p_node)
+        pl.reverse()
+        return pl
 
     def get_typed_children(self,type):
         """ return all child location objects of a given location type"""
         return s.query(Location).with_polymorphic('*').\
-            filter(Location.type.type==type).all()
+            filter(Location.type==type).all()
 
     def append(self,node,**kw):
         if isinstance(node, Location):
@@ -158,6 +164,9 @@ class Rack(Location):
     pass
 
 class Chassis(Location):
+    #__slots__=['_sa_session_id','name','parent','_state','_entity_name',
+    #           'parent_id','location_type_id','fullname','id','_instance_key']
+
     pass
 
 class Desk(Location):
@@ -295,28 +304,64 @@ def populate_bldg():
     s.close()
     del(s)
 
+
+def np_racks():
+    s=Session()
+
+    b=s.query(Building).filter_by(name='np').one()
+    with open('etc/np-racks','r') as f:
+        for line in f.readlines():
+            name=line
+            r=Rack(name,'rack',parent=b,fullname='rack %s'%(name))
+            s.save(r)
+            s.commit()
+
+def np_chassis():
+    s=Session()
+    b=s.query(Building).filter_by(name='np').one()
+    with open('etc/np-chassis','r') as f:
+        for line in f.readlines():
+            n=line.strip()
+            (rack,c,num) = line.partition('c')
+            c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
+                Rack).filter_by(name=rack).one())
+            s.save(c)
+            s.commit()
+
+
 if __name__ == '__main__':
 
     if empty(hub,engine):
         print 'populating hubs'
         populate_hubs()
-    else:
-        print 'hubs already populated'
 
     if empty(country,engine):
         print 'populating country'
         populate_country()
-    else:
-        print 'country already populated'
 
     if empty(city,engine):
         print 'populating city'
         populate_city()
-    else:
-        print 'city already populated'
-
     if empty(building,engine):
         print 'populating buildings'
         populate_bldg()
-    else:
-        print 'building already populated'
+    if empty(rack,engine):
+        np_racks()
+    if empty(chassis,engine):
+        np_chassis()
+
+"""
+def populate_rack_chassis():
+    s=Session()
+    s.transactional=False
+    with s.begin():
+        b=s.query(Building).filter_by(name='np').one()
+        r=Rack('np3','rack',comments='Comm room: 6th floor lab',parent=b)
+        s.save(r)
+        s.flush()
+        c=Chassis('c1','chassis',parent=r)
+        s.save(c)
+        s.flush()
+    s.close()
+    print 'created %s and %s'%(r,c)
+"""

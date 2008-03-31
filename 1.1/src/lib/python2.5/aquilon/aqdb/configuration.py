@@ -15,11 +15,13 @@ import sys
 if __name__ == '__main__':
     sys.path.append('../..')
 
-from DB import *
+from db import *
 
 from aquilon.aqdb.utils.schemahelpers import *
+from aquilon import const
 from utils.exceptions_ import NoSuchRowException
 from utils import altpath
+const.cfg_base=altpath.path('/var/quattor/template-king/')
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
@@ -119,9 +121,14 @@ mapper(Domain,domain,properties={
 #######POPULATION FUNCTIONS########
 def populate_tld():
     if empty(cfg_tld, engine):
-        fill_type_table(cfg_tld, ['archetype', 'hardware', 'os', 'service',
-                                  'feature','pan', 'components', 'location',
-                                  'monitoring', 'personality'])
+        import os
+        tlds=[]
+        for i in os.listdir(str(const.cfg_base)):
+            if os.path.isdir(os.path.abspath(
+                os.path.join(str(const.cfg_base),i ))) :
+                    tlds.append(i)
+
+        fill_type_table(cfg_tld, tlds)
 
 def populate_cst():
     if empty(cfg_source_type,engine):
@@ -129,19 +136,16 @@ def populate_cst():
 
 def create_paths():
     if empty(cfg_path,engine):
-        #s=Session()
-        #ipshell()
-
-        a=CfgPath('archetype/aquilon')
-        b=CfgPath('service/afs/q.ny.ms.com/client/config')
-        c=CfgPath('personality/grid')
-        d=CfgPath('os/linux/4.0.1-x86_64/')
-        e=CfgPath('hardware/ibm/hs20/')
-
-        for i in [a,b,c,d,e]:
-            Session.save(i)
+        import os
+        for root, dirs, files in os.walk(str(const.cfg_base)):
+            if len(files) > 0:
+                for i in files:
+                    p = altpath.path(os.path.join(root,i))
+                    print p[4:]
+                    f=CfgPath(str(p[4:]))
+                    Session.save(f)
         Session.commit()
-        print 'created sample configuration paths'
+        print 'created configuration paths'
 
 def create_domains():
     if empty(domain,engine):
@@ -166,9 +170,9 @@ if __name__ == '__main__':
     b=s.query(CfgSourceType).first()
     c=s.query(CfgPath).first()
 
-    print a
-    print b
-    print c
+    assert(a)
+    assert(b)
+    assert(c)
 
 #TODO: this key/value attribute of aqdb config source
 #TODO: figure out quattor config source

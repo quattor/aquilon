@@ -14,8 +14,7 @@ import sys
 if __name__ == '__main__':
     sys.path.append('../..')
 
-from DB import *
-from aquilon.aqdb.utils.dsdb import dump_network
+from db import *
 from location import Location
 from service import service_map
 from aquilon.aqdb.utils.schemahelpers import *
@@ -178,4 +177,5 @@ if __name__ == '__main__':
     populate_profile()
 
     if empty(network,engine):
+        from aquilon.aqdb.utils.dsdb import dump_network
         populate_networks()

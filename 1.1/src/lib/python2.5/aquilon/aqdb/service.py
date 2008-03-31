@@ -9,21 +9,19 @@
 # This module is part of Aquilon
 """ The module governing tables and objects that represent what are known as
     Services (defined below) in Aquilon """
+from __future__ import with_statement
 
-import datetime
+import sys, datetime
+sys.path.append('../..')
 
-import sys
-if __name__ == '__main__':
-    sys.path.append('../..')
-
-from DB import meta, engine, Session, aqdbBase
+from db import meta, engine, Session, aqdbBase
 from aquilon.aqdb.utils.schemahelpers import *
 
 from location import *
 location=Table('location', meta, autoload=True)
 
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy.orm import mapper, relation, deferred
 
 service = Table('service',meta,
     Column('id', Integer, primary_key=True, index=True),
@@ -35,18 +33,18 @@ service.create(checkfirst=True)
 
 class Service(aqdbBase):
     """ SERVICE: a central definition of service is composed of
-    a simple name of a service consumable by OTHER hosts. Applications
-    that run on a system like ssh are features, not services.
+        a simple name of a service consumable by OTHER hosts. Applications
+        that run on a system like ssh are features, not services.
 
-    The config source id/unique column says that there is one and only one
-    config source for a service. DNS can not be configured by aqdb AND quattor
-    Addtionally, remember that this points to a precise instance of
-    aqdb OR quattor as a mechansim.
+        The config source id/unique column says that there is one and only one
+        config source for a service. DNS can not be configured by aqdb AND quattor
+        Addtionally, remember that this points to a precise instance of
+        aqdb OR quattor as a mechansim.
 
-    We're not currently subtyping or 'grading' services with 'prod/qa/dev' etc.
-    It would have to be accomplished with the name, i.e. production-dns, and
-    the burden of naming can be greatly reduced by service lists (which make
-    their presence known shortly), though this may be revamped later.
+        We're not currently subtyping or 'grading' services with 'prod/qa/dev' etc.
+        It would have to be accomplished with the name, i.e. production-dns, and
+        the burden of naming can be greatly reduced by service lists (which make
+        their presence known shortly), though this may be revamped later.
 """
     @optional_comments
     def __init__(self,name):
@@ -106,9 +104,8 @@ class System(aqdbBase):
 mapper(System, system, polymorphic_on=system.c.type_id, \
        polymorphic_identity=s.execute(
     "select id from system_type where type='base_system_type'").fetchone()[0],
-    properties={
-    'creation_date' : deferred(system.c.creation_date),
-    'comments': deferred(system.c.comments)})
+    properties={'creation_date' : deferred(system.c.creation_date),
+                'comments': deferred(system.c.comments)})
 
 afs_cell = Table('afs_cell',meta,
     Column('system_id', Integer, ForeignKey('system.id',
@@ -129,12 +126,10 @@ class AfsCell(System):
             print e
             return
 
-mapper(AfsCell,afs_cell, inherits=System, polymorphic_identity=s.execute(
-                "select id from system_type where type='afs_cell'").\
-                fetchone()[0],
-       properties={
-        'system':relation(System,backref='afs_cell')
-})
+mapper(AfsCell,afs_cell,
+        inherits=System, polymorphic_identity=s.execute(
+           "select id from system_type where type='afs_cell'").fetchone()[0],
+       properties={'system':relation(System,backref='afs_cell')})
 
 service_instance = Table('service_instance',meta,
     Column('id', Integer, primary_key=True, index=True),
@@ -150,10 +145,10 @@ service_instance.create(checkfirst=True)
 
 class ServiceInstance(aqdbBase):
     """ Formerly known as 'provider' service instance captures the data around
-    assignment of a system for a particular purpose (aka usage.)
-    If machines have a 'personality' dictated by the application they run
-    (and they can run and provide more than one, though at the moment, that
-    too will be captured by its personality)
+        assignment of a system for a particular purpose (aka usage.)
+        If machines have a 'personality' dictated by the application they run
+        (and they can run and provide more than one, though at the moment, that
+        too will be captured by its personality)
     """
     @optional_comments
     def __init__(self,svc,a_sys,*args,**kw):
@@ -179,7 +174,9 @@ class ServiceInstance(aqdbBase):
 
 mapper(ServiceInstance,service_instance, properties={
     'service': relation(Service),
-    'system' : relation(System)
+    'system' : relation(System),
+    'creation_date' : deferred(service_instance.c.creation_date),
+    'comments': deferred(service_instance.c.comments)
 })
 
 service_map=Table('service_map',meta,
@@ -202,8 +199,9 @@ service_map.create(checkfirst=True)
 
 class ServiceMap(aqdbBase):
     """ Service Map: mapping a service_instance to a location.
-    The rows in this table assert that an instance is a valid useable default
-    that clients can choose as their provider during service autoconfiguration
+        The rows in this table assert that an instance is a valid useable
+        default that clients can choose as their provider during service
+        autoconfiguration.
     """
     def __init__(self, si, loc, *args,**kw):
         if isinstance(si,ServiceInstance):
@@ -228,7 +226,53 @@ mapper(ServiceMap,service_map,properties={
 })
 
 
-if __name__ == '__main__':
+"""
+    The next two tables are are used to represent the service requirements of
+    the various host build archetypes. It groups required services into
+    groupings that can be reused at build time.
+"""
+service_list = Table('service_list', meta,
+    Column('id', Integer, Sequence('service_list_id_seq'), primary_key=True),
+    Column('name', String(32), unique=True, index=True),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+service_list.create(checkfirst=True)
+
+class ServiceList(aqdbBase):
+    """ A bucket to put required services into as a list of required
+        service dependencies for hosts.
+    """
+    pass
+mapper(ServiceList,service_list,properties={
+    'creation_date' : deferred(service_list.c.creation_date),
+    'comments': deferred(service_list.c.comments)})
+
+service_list_item = Table('service_list_item', meta,
+    Column('id', Integer, primary_key=True),
+    Column('service_id',Integer,
+           ForeignKey('service.id'), unique=True),
+    Column('service_list_id',Integer,
+           ForeignKey('service_list.id'), index=True),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+service_list_item.create(checkfirst=True)
+
+class ServiceListItem(aqdbBase):
+    """ The individual items in a list of required service dependencies """
+    def __init__(self,svc_list,svc):
+        self.service_list = svc_list
+        self.service = svc
+    def __repr__(self):
+        return '(service list item) %s'%(self.service.name)
+
+mapper(ServiceListItem,service_list_item,properties={
+    'service_list': relation(ServiceList, backref='items'),
+    'service': relation(Service),
+    'creation_date' : deferred(service_list_item.c.creation_date),
+    'comments': deferred(service_list_item.c.comments)
+})
+
+def populate_all_service_tables():
     if empty(afs_cell,engine):
         a=AfsCell('q.ny','afs_cell')
         s.save(a)
@@ -267,16 +311,31 @@ if __name__ == '__main__':
     else:
         sm=s.query(ServiceMap).first()
 
+    if empty(service_list,engine):
+        sl=ServiceList('aquilon')
+        s.save(sl)
+        s.commit()
+
+        svc=s.query(Service).filter_by(name='syslog').one()
+
+        sli=ServiceListItem(sl,svc)
+        s.save(sli)
+        s.commit()
+
     print 'populated all tables and added %s'%(sm)
 
+if __name__ == '__main__':
+    #import sys
+    #sys.path.append('../..')
 
-#todo: services don't have a unique aqdb or quattor configuration source map
-# PATHS SHOULD ALL BE EXTRACTED FOR 2NF AND FLEXIBILITY.
-# 'TYPING' provides enhanced search + constraint ability
-#quattor config source: has cfg path + domain + quattor server
+    populate_all_service_tables()
+
+#aqdb config source?
+#quattor config source?
 #service config path could just be:
 #   service/<service name>/<instance name>/[ client || server ]
 
+#TODO: do we need this or is it a subset of the build table?
 """
     Consumer captures service selections at the time they are made by building
     a host. This information will be used to generate utilization information
@@ -284,7 +343,6 @@ if __name__ == '__main__':
     rebuilding hosts
 """
 
-"""
 consumer = Table('consumer', meta,
     Column('system_id', Integer,
            ForeignKey('system.id',
@@ -294,15 +352,3 @@ consumer = Table('consumer', meta,
            ForeignKey('service_instance.id',
                       ondelete='RESTRICT'),
            nullable=False))
-
-
-service_list = mk_name_id_table('service_list',meta)
-
-service_list_item = Table('service_list_item', meta,
-    Column('id', Integer, primary_key=True),
-    Column('service_id',Integer,
-           ForeignKey('service.id'), unique=True),
-    Column('service_list_id',Integer,
-           ForeignKey('service_list.id'), index=True),
-    Column('comments', String(255), nullable=True))
-"""
