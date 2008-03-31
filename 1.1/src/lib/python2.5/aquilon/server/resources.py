@@ -361,7 +361,7 @@ class ResponsePage(resource.Resource):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq sync has not been implemented yet"
 
-    def command_show_location(self, request):
+    def command_show_location_types(self, request):
         """aqcommand: aq show location"""
         #print 'render_GET called'
         try:

@@ -259,15 +259,20 @@
 
    <command name="show_location">
       %prog show location [--type type [--name name]]
-      Shows all location types, all locations of a given type,
+      Shows all locations of a given type
       or information about a specific location type and name.
       <optgroup name="show_location_opts" mandatory="True" fields="any">
          <option name="name" type="string">Host name</option>
          <option name="type" type="string">Location type</option>
       </optgroup>
-      <transport method="get" path="location" />
       <transport trigger="type" method="get" path="location/%(type)s" />
       <transport trigger="name" method="get" path="location/%(type)s/%(name)s" />
+   </command>
+
+   <command name="show_location_types">
+      %prog show location types
+      Shows all location types.
+      <transport method="get" path="location" />
    </command>
 
    <command name="del_location">
