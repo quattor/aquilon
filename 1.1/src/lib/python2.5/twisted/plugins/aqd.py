@@ -25,7 +25,7 @@ from twisted.application.service import IServiceMaker, MultiService
 from twisted.runner.procmon import ProcessMonitor
 from twisted.internet import reactor
 
-from aquilon.server.resources import RestServer
+from aquilon.server.resources import RestServer, BrokerInfo
 from aquilon.server.kncwrappers import KNCSite
 from aquilon.server.anonwrappers import AnonSite
 from aquilon.server import dbaccess
@@ -70,7 +70,7 @@ class AQDMaker(object):
         #        dburi = dbaccess.sqlite()
         from aquilon.aqdb.DB import dsn as dburi
 
-        dbbroker = dbaccess.DatabaseBroker( dburi )
+        dbbroker = dbaccess.DatabaseBroker(dburi)
 
         # We seem to be OK without something like this...
         #def initDatabase(dbbroker):
@@ -81,8 +81,14 @@ class AQDMaker(object):
 
         azbroker = AuthorizationBroker()
 
-        restServer = RestServer( dbbroker, azbroker )
-        openSite = AnonSite( restServer )
+        # FIXME: This object should probably be handed a config file,
+        # and then go off and create the dbbroker and azbroker...
+        # (Or the RestServer could be handed the config, and then
+        # create this object.)
+        broker = BrokerInfo(dbbroker, azbroker)
+
+        restServer = RestServer(broker)
+        openSite = AnonSite(restServer)
 
         if options["usesock"]:
             return strports.service("unix:/var/tmp/wesleyhe/aqdsock:mode=600", openSite )

@@ -45,13 +45,19 @@ from twisted.python import log
 from aquilon.server.exceptions_ import AuthorizationException
 
 class ResponsePage(resource.Resource):
-    def __init__(self, dbbroker, azbroker, path, path_variable=None):
+    def __init__(self, broker, path, path_variable=None):
         self.path = path
-        self.dbbroker = dbbroker
-        self.azbroker = azbroker
+        self.broker = broker
         self.path_variable = path_variable
         self.dynamic_child = None
         resource.Resource.__init__(self)
+
+    def add_path_variable(self, request, path_variable, val):
+        """Helper method to add request.path_variables[path_variable]=val"""
+        if not getattr(request, "path_variables", None):
+            request.path_variables = {}
+        request.path_variables[path_variable] = val
+        return val
 
     def getChild(self, path, request):
         """Typically in twisted.web, a dynamic child would be created...
@@ -68,9 +74,8 @@ class ResponsePage(resource.Resource):
 
         if not self.dynamic_child:
             return resource.Resource.getChild(self, path, request)
-        if not getattr(request, "path_variables", None):
-            request.path_variables = {}
-        request.path_variables[self.dynamic_child.path_variable] = path
+
+        self.add_path_variable(request, self.dynamic_child.path_variable, path)
         return self.dynamic_child
 
     def render(self, request):
@@ -171,12 +176,7 @@ class ResponsePage(resource.Resource):
         request.finish()
         return
 
-    # TODO: Something should go into both the logs and back to the client...
-    def wrapError(self, failure, request):
-        # FIXME: This should be overridden, looking for and trapping specific
-        # exceptions.  Maybe this is left as a final check.
-        print failure.getErrorMessage()
-        failure.printDetailedTraceback()
+    def finishError(self, request):
         request.setResponseCode( http.INTERNAL_SERVER_ERROR )
         # FIXME: Ditto from finishOK
         #retval = "FAILED"
@@ -184,19 +184,28 @@ class ResponsePage(resource.Resource):
         #request.write(retval)
         request.setHeader('content-length', 0)
         request.finish()
+        return
+
+    # TODO: Something should go into both the logs and back to the client...
+    def wrapError(self, failure, request):
+        # FIXME: This should be overridden, looking for and trapping specific
+        # exceptions.  Maybe this is left as a final check.
+        print failure.getErrorMessage()
+        failure.printDetailedTraceback()
+        self.finishError(request)
         return failure
 
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
         #print 'render_GET called'
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "show",
-                                "/host")
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "show", "/host")
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.dbbroker.showHostAll(session=True)
+        #d = self.broker.dbbroker.showHostAll(session=True)
         #d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapHostInTable )
         #d = d.addCallback( self.wrapTableInBody )
@@ -214,13 +223,13 @@ class ResponsePage(resource.Resource):
         name = request.path_variables["hostname"]
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "show",
-                                "/host/%s" % name)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "show", "/host/%s" % name)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.dbbroker.showHost(name, session=True)
+        #d = self.broker.dbbroker.showHost(name, session=True)
         #d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapHostInTable )
         #d = d.addCallback( self.wrapTableInBody )
@@ -238,13 +247,13 @@ class ResponsePage(resource.Resource):
         name = request.path_variables["hostname"]
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "add",
-                                "/host/%s" % name)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "add", "/host/%s" % name)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.dbbroker.addHost(name, session=True)
+        #d = self.broker.dbbroker.addHost(name, session=True)
         ## FIXME: Trap specific exceptions (host exists, etc.)
         #d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapHostInTable )
@@ -261,13 +270,13 @@ class ResponsePage(resource.Resource):
         name = request.path_variables["hostname"]
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "del",
-                                "/host/%s" % name)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "del", "/host/%s" % name)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.dbbroker.delHost(name, session=True)
+        #d = self.broker.dbbroker.delHost(name, session=True)
         ## FIXME: Trap specific exceptions (host exists, etc.)
         #d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.finishOK, request )
@@ -332,10 +341,27 @@ class ResponsePage(resource.Resource):
         return "aq add_template has not been implemented yet"
 
     def command_get(self, request):
-        """aqcommand: aq get --domain=<domain>"""
+        """aqcommand: aq get"""
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq get has not been implemented yet"
+        # FIXME: Lookup the default domain.
+        domain = "production"
+
+        self.add_path_variable(request, "domain", domain)
+
+        return self.command_get_domain(request)
+
+    def command_get_domain(self, request):
+        """aqcommand: aq get --domain=<domain>"""
+        domain = request.path_variables["domain"]
+
+        # FIXME: Lookup whether this server handles this domain
+        # redirect as necessary.
+
+        # FIXME: The server needs to have its name around somewhere...
+        localhost = "quattorsrv"
+
+        # FIXME: Return absolute paths to git?
+        return "git clone 'http://%s/templates/%s/.git/%s' && cd '%s' && ( git checkout -b '%s' || true )" % (localhost, domain, domain, domain, domain)
 
     def command_put(self, request):
         """aqcommand: aq put --domain=<domain>"""
@@ -358,20 +384,86 @@ class ResponsePage(resource.Resource):
     def command_sync(self, request):
         """aqcommand: aq sync --domain=<domain>"""
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq sync has not been implemented yet"
+        # FIXME: Lookup the default domain.
+        domain = "production"
+
+        self.add_path_variable(request, "domain", domain)
+
+        return self.command_sync_domain(request)
+
+    def command_sync_domain(self, request):
+        """aqcommand: aq sync --domain=<domain>"""
+        domain = request.path_variables["domain"]
+
+        # FIXME: Sanitize domain before it is used in commands.
+
+        # FIXME: Lookup whether this server handles this domain
+        # and redirect as necessary.
+        # Presumably, that lookup will catch domains that do not
+        # actually exist.
+
+        # FIXME: Check whether the directory exists.
+
+        def _cb_command_error((out, err, signalNum), request):
+            log.err("Command exited with signal number %d" % signalNum)
+            log.err("Command stdout: %s" % out)
+            log.err("Command stderr: %s" % err)
+            self.finishError(request)
+            return
+
+        def _cb_git_update_server_info_output((out, err, code), request):
+            log.msg("git update server info finished with return code %d"
+                    % code)
+            log.msg("git update server info stdout: %s", out)
+            log.msg("git update server info stderr: %s", err)
+            if code != 0:
+                self.finishError(request)
+                return
+            # Everything went as expected - tell the client to do a pull
+            self.finishRender("git pull")
+
+        def _cb_git_pull_output((out, err, code), request):
+            log.msg("git pull finished with return code %d" % code)
+            log.msg("git pull stdout: %s", out)
+            log.msg("git pull stderr: %s", err)
+            if code != 0:
+                self.finishError(request)
+                return
+            # The 1.0 code notes that this should probably be done as a
+            # hook in git... just need to make sure it runs.
+            # This code could be simplified if it was just tacked on
+            # to the pull as an &&.
+            d = utils.getProcessOutputAndValue("/bin/sh",
+                    ["-c", "cd '%s/%s' && %s update server info"
+                        % (self.broker.templatesdir, domain, self.broker.git)])
+            d = d.addCallbacks(_cb_git_update_server_info_output,
+                    _cb_command_error,
+                    callbackArgs=[request], errbackArgs=[request])
+            d = d.addCallback(self.finishRender, request)
+            d = d.addErrback(self.wrapError, request)
+            return
+
+        d = utils.getProcessOutputAndValue("/bin/sh",
+                ["-c", "cd '%s/%s' && %s pull"
+                    % (self.broker.templatesdir, domain, self.broker.git)])
+        d = d.addCallbacks(_cb_git_pull_output, _cb_command_error,
+                callbackArgs=[request], errbackArgs=[request])
+        d = d.addErrback(self.wrapError, request)
+        d = d.addErrback(log.err)
+        return server.NOT_DONE_YET
+
 
     def command_show_location_types(self, request):
         """aqcommand: aq show location"""
         #print 'render_GET called'
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "show",
-                                "/location")
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "show", "/location")
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.dbbroker.showLocationType(session=True)
+        d = self.broker.dbbroker.showLocationType(session=True)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.wrapAqdbTypeInTable )
         d = d.addCallback( self.wrapTableInBody )
@@ -384,13 +476,14 @@ class ResponsePage(resource.Resource):
         #type = self.path
         type = request.path_variables["type"]
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "show",
-                                "/location/%s" % type)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "show", "/location/%s" % type)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.dbbroker.showLocation(session=True, type=type)
+        d = self.broker.dbbroker.showLocation(session=True, type=type,
+                transact_subs={"type":LocationType})
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.wrapLocationInTable )
         d = d.addCallback( self.wrapTableInBody )
@@ -407,13 +500,15 @@ class ResponsePage(resource.Resource):
         name = request.path_variables["name"]
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "show",
-                                "/location/%s" % name)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "show", "/location/%s" % name)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.dbbroker.showLocation(name, session=True)
+        d = self.broker.dbbroker.showLocation(type=type, name=name,
+                transact_subs={"type":"LocationType"},
+                session=True)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.wrapLocationInTable )
         d = d.addCallback( self.wrapTableInBody )
@@ -430,13 +525,13 @@ class ResponsePage(resource.Resource):
         name = request.path_variables["name"]
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "add",
-                                "/location/%s" % name)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "add", "/location/%s" % name)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.dbbroker.addLocation(name, session=True)
+        d = self.broker.dbbroker.addLocation(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.wrapLocationInTable )
@@ -452,13 +547,13 @@ class ResponsePage(resource.Resource):
         name = request.path_variables["name"]
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "del",
-                                "/location/%s" % name)
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "del", "/location/%s" % name)
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.dbbroker.delLocation(name, session=True)
+        d = self.broker.dbbroker.delLocation(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.finishOK, request )
@@ -487,8 +582,8 @@ class ResponsePage(resource.Resource):
         """aqcommand: aq status"""
 
         try:
-            self.azbroker.check(None, request.channel.getPrinciple(), "show",
-                                "/")
+            self.broker.azbroker.check(None, request.channel.getPrinciple(),
+                    "show", "/")
         except AuthorizationException:
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
@@ -531,10 +626,32 @@ class ResponsePage(resource.Resource):
         return "aq bind service has not been implemented yet"
 
 
+class BrokerInfo(object):
+    """For now, simple container object.  This will probably be 
+    initialized with a conf file at some point in the future, which could
+    set up the dbbroker, azbroker, etc.
+    
+    """
+
+    def __init__(self, dbbroker, azbroker):
+        self.dbbroker = dbbroker
+        self.azbroker = azbroker
+        self.osuser = os.environ.get('USER')
+        self.basedir = "/var/tmp/%s/quattor" % self.osuser
+        self.profilesdir = "%s/web/htdocs/profiles" % self.basedir
+        self.depsdir = "%s/deps" % self.basedir
+        self.hostsdir = "%s/hosts" % self.basedir
+        self.templatesdir = "%s/templates" % self.basedir
+        self.default_domain = ".ms.com"
+        self.git = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin/git"
+        self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
+        self.cdpport = 7777
+
+
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
-    def __init__(self, dbbroker, azbroker):
-        ResponsePage.__init__(self, dbbroker, azbroker, '')
+    def __init__(self, broker):
+        ResponsePage.__init__(self, broker, '')
 
         # Regular Expression for matching variables in a path definition.
         varmatch = re.compile(r'^%\((.*)\)s$')
@@ -568,8 +685,7 @@ class RestServer(ResponsePage):
                         child = container.getStaticEntity(component)
                         if child is None:
                             #log.msg("Creating new static component '" + component + "'.")
-                            child = ResponsePage(self.dbbroker, self.azbroker,
-                                                    relative)
+                            child = ResponsePage(self.broker, relative)
                             container.putChild(component, child)
                         container = child
                     else:
@@ -591,8 +707,7 @@ class RestServer(ResponsePage):
                                 container = container.dynamic_child
                         else:
                             #log.msg("Creating new dynamic component '" + component + "'.")
-                            child = ResponsePage(self.dbbroker, self.azbroker,
-                                                    relative,
+                            child = ResponsePage(self.broker, relative,
                                                     path_variable=path_variable)
                             container.dynamic_child = child
                             container = child

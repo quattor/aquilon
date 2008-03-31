@@ -186,10 +186,11 @@
 
    <command name="get">
       %prog get --domain NAME
-      <optgroup name="get options" mandatory="True" fields="all">
+      <optgroup name="get options" mandatory="False" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/get" expect="command"/>
+      <transport method="post" path="command/get" expect="command"/>
+      <transport trigger="domain" method="post" path="domain/%(domain)s/command/get" expect="command"/>
    </command>
 
    <command name="put">
@@ -238,10 +239,11 @@
 
    <command name="sync">
       %prog sync --domain DOMAIN_NAME
-      <optgroup name="sync options" mandatory="True" fields="all">
+      <optgroup name="sync options" mandatory="False" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/sync" expect="command"/>
+      <transport method="post" path="command/sync" expect="command"/>
+      <transport trigger="domain" method="post" path="domain/%(domain)s/command/sync" expect="command"/>
    </command>
 
    <command name="add_location">

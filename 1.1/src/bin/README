@@ -36,3 +36,13 @@ To run aq without knc:
 
 Options should be the same / similar to options to aq 1.0.
 
+An initial/test database can be built by following this procedure:
+# move or remove any old DBs at /var/tmp/$USER/aquilon/aquilon.db
+# This directory/file will be created automatically if needed.
+mkdir -p /var/tmp/$USER/quattor
+# This may not be sufficient - try Scott's q-tmpl-king.tbz file.
+rsync -avP quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
+cd ~/dev/aquilon/aqd/1.1/src     # your shadow
+cd lib/python2.5/aquilon/aqdb
+./location.py && ./network.py && ./service.py && ./configuration.py && ./hardware.py && ./interfaces.py
+

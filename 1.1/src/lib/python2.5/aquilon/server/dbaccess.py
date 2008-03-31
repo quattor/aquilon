@@ -81,7 +81,26 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def showLocation(self, **kwargs):
+        if kwargs.has_key("type"):
+            kwargs["type"] = self.session.query(LocationType).filter_by(
+                    type=kwargs["type"]).one()
         return self.session.query(Location).filter_by(**kwargs).all()
+
+    # This is a more generic solution... would be called with
+    # transact_subs={"type":"LocationType"} as an argument alongside
+    # type=whatever and/or name=whatever.
+    #@transact
+    #def showLocation(self, **kwargs):
+    #    querycls = Location
+    #    if kwargs.has_key("transact_subs"):
+    #        subs = kwargs.pop("transact_subs")
+    #        for (arg, cls) in subs.items():
+    #            cls = globals().get(cls)
+    #            if not issubclass(cls, aqdbBase):
+    #                continue
+    #            filter = {arg:kwargs[arg]}
+    #            kwargs[arg] = self.session.query(cls).filter_by(**filter).one()
+    #    return self.session.query(querycls).filter_by(**kwargs).all()
 
     @transact
     def showLocationType(self, **kwargs):
