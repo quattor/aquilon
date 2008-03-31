@@ -309,24 +309,24 @@ def np_racks():
     s=Session()
 
     b=s.query(Building).filter_by(name='np').one()
-    with open('etc/np-racks','r') as f:
+    with open('etc/np-data/np-racks','r') as f:
         for line in f.readlines():
             name=line
             r=Rack(name,'rack',parent=b,fullname='rack %s'%(name))
             s.save(r)
-            s.commit()
+        s.flush()
 
 def np_chassis():
     s=Session()
     b=s.query(Building).filter_by(name='np').one()
-    with open('etc/np-chassis','r') as f:
+    with open('etc/np-data/np-chassis','r') as f:
         for line in f.readlines():
             n=line.strip()
             (rack,c,num) = line.partition('c')
             c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
                 Rack).filter_by(name=rack).one())
             s.save(c)
-            s.commit()
+            s.flush()
 
 
 if __name__ == '__main__':
