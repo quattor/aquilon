@@ -268,10 +268,8 @@ def populate_country():
         for row in dump_country():
             c=Country(row[0],'country',fullname=row[1],parent=cache[row[2]])
             s.save(c)
-            s.flush()
-
+    s.flush()
     s.close()
-    del(s)
 
 
 def populate_city():
@@ -285,7 +283,7 @@ def populate_city():
         for row in dump_city():
             c=City(row[0],'city',fullname=row[1],parent=cache[row[2]])
             s.save(c)
-            s.flush()
+    s.flush()
     s.close()
     del(s)
 
@@ -300,12 +298,13 @@ def populate_bldg():
         for row in dump_bldg():
             c=Building(row[0],'building',fullname=row[1],parent=cache[row[2]])
             s.save(c)
-            s.flush()
+    s.flush()
     s.close()
     del(s)
 
 
 def np_racks():
+    print 'populating all racks in building NP'
     s=Session()
 
     b=s.query(Building).filter_by(name='np').one()
@@ -317,6 +316,7 @@ def np_racks():
         s.flush()
 
 def np_chassis():
+    print 'populating all chassis in building NP'
     s=Session()
     b=s.query(Building).filter_by(name='np').one()
     with open('etc/np-data/np-chassis','r') as f:
@@ -326,7 +326,7 @@ def np_chassis():
             c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
                 Rack).filter_by(name=rack).one())
             s.save(c)
-            s.flush()
+        s.flush()
 
 
 if __name__ == '__main__':
