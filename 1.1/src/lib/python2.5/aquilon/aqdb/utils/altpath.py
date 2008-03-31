@@ -11,511 +11,899 @@
 
 In use by the configuration module which does a fair bit of path manipulation.
 I've found it more convenient to use than pythons standard os.path and path
-objects, and as it's on the table for inclusion in 2.6 it seems reasonable
-to use it.
+for some things
 
-Based on the path module by Jason Orendorff
-(http://www.jorendorff.com/articles/python/path)
+Example:
 
-Written by Noam Raphael to show the idea of using a tuple instead of
-a string, and to reduce the number of methods.
+from path import path
+d = path('/home/guido/bin')
+for f in d.files('*.py'):
+    f.chmod(0755)
 
-Currently only implements posix and nt paths - more can be added.
+This module requires Python 2.2 or later.
 
-"""
 
-import os
-import stat
-import itertools
-import fnmatch
-import re
-import string
+URL:     http://www.jorendorff.com/articles/python/path """
 
-class StatWrapper(object):
-    """ A wrapper around stat_result objects which gives additional properties.
 
-    This object is a wrapper around a stat_result object. It allows access
-    to all the original object's attributes, and adds a few convinient
-    properties, by using the stat module.
+# TODO
+#   - Tree-walking functions don't avoid symlink loops.  Matt Harrison
+#     sent me a patch for this.
+#   - Bug in write_text().  It doesn't support Universal newline mode.
+#   - Better error message in listdir() when self isn't a
+#     directory. (On Windows, the error message really sucks.)
+#   - Make sure everything has a good docstring.
+#   - Add methods for regex find and replace.
+#   - guess_content_type() method?
+#   - Perhaps support arguments to touch().
 
-    This object should have been a subclass posix.stat_result - it simply
-    isn't possible currently. This functionality may also be integrated into
-    the original type.
+from __future__ import generators
+
+import sys, warnings, os, fnmatch, glob, shutil, codecs, md5
+
+__version__ = '2.2'
+__all__ = ['path']
+
+# Platform-specific support for path.owner
+if os.name == 'nt':
+    try:
+        import win32security
+    except ImportError:
+        win32security = None
+else:
+    try:
+        import pwd
+    except ImportError:
+        pwd = None
+
+# Pre-2.3 support.  Are unicode filenames supported?
+_base = str
+_getcwd = os.getcwd
+try:
+    if os.path.supports_unicode_filenames:
+        _base = unicode
+        _getcwd = os.getcwdu
+except AttributeError:
+    pass
+
+# Pre-2.3 workaround for booleans
+try:
+    True, False
+except NameError:
+    True, False = 1, 0
+
+# Pre-2.3 workaround for basestring.
+try:
+    basestring
+except NameError:
+    basestring = (str, unicode)
+
+# Universal newline support
+_textmode = 'r'
+if hasattr(file, 'newlines'):
+    _textmode = 'U'
+
+
+class TreeWalkWarning(Warning):
+    pass
+
+class path(_base):
+    """ Represents a filesystem path.
+
+    For documentation on individual methods, consult their
+    counterparts in os.path.
     """
 
-    __slots__ = ['_stat']
-
-    def __init__(self, stat):
-        self._stat = stat
-
-    def __getattribute__(self, attr, *default):
-        try:
-            return object.__getattribute__(self, attr, *default)
-        except AttributeError:
-            return getattr(self._stat, attr, *default)
-
-    # Mode properties
-
-    @property
-    def isdir(self):
-        return stat.S_ISDIR(self.st_mode)
-    @property
-    def isfile(self):
-        return stat.S_ISREG(self.st_mode)
-    @property
-    def islink(self):
-        return stat.S_ISLNK(self.st_mode)
-
-    # Easier names properties
-
-    @property
-    def size(self):
-        return self.st_size
-    @property
-    def mtime(self):
-        return self.st_mtime
-    @property
-    def atime(self):
-        return self.st_atime
-    @property
-    def ctime(self):
-        return self.st_ctime
-
-
-class BasePath(tuple):
-    """ The base, abstract, path type.
-
-    The OS-specific path types inherit from it.
-    """
-
-    # ----------------------------------------------------------------
-    # We start with methods which don't use system calls - they just
-    # manipulate paths.
-
-    class _BaseRoot(object):
-        """ Represents a start location for a path.
-
-        A Root is an object which may be the first element of a path tuple,
-        and represents from where to start the path.
-
-        On posix, there's only one: ROOT (singleton).
-        On nt, there are a few:
-          CURROOT - the root of the current drive (singleton)
-          Drive(letter) - the root of a specific drive
-          UnrootedDrive(letter) - the current working directory on a specific
-                                  drive
-          UNCRoot(host, mountpoint) - a UNC mount point
-
-        The class for each OS has its own root classes, which should inherit
-        from _OSBaseRoot.
-
-        str(root) should return the string name of the root. The string should
-        identify the root: two root elements with the same string should have
-        the same meaning. To allow meaningful sorting of path objects, root
-        objects can be compared to strings and other root objects. They are
-        smaller than all strings, and are compared with other root objects
-        according to their string name.
-
-        Every Root object should contain the "isabs" attribute, which is True
-        if changes in the current working directory won't change the meaning
-        of the root and False otherwise. (CURROOT and UnrootedDrive aren't
-        absolute)
-        If isabs is True, it should also implement the abspath() method, which
-        should return an absolute path object, equivalent to the root when the
-        call was made.
-        """
-        isabs = None
-
-        def abspath(self):
-            if self.abspath:
-                raise NotImplementedError, 'This root is already absolute'
-            else:
-                raise NotImplementedError, 'abspath is abstract'
-
-        def __str__(self):
-            raise NotImplementedError, '__str__ is abstract'
-
-        def __cmp__(self, other):
-            if isinstance(other, str):
-                return -1
-            elif isinstance(other, BasePath._BaseRoot):
-                return cmp(str(self), str(other))
-            else:
-                raise TypeError, 'Comparison not defined'
-
-        def __hash__(self):
-            # This allows path objects to be hashable
-            return hash(str(self))
-
-    # _OSBaseRoot should be the base of the OS-specific root classes, which
-    # should inherit from _BaseRoot
-    _OSBaseRoot = None
-
-    # These string constants should be filled by subclasses - they are real
-    # directory names
-    curdir = None
-    pardir = None
-
-    # These string constants are used by default implementations of methods,
-    # but are not part of the interface - the whole idea is for the interface
-    # to hide those details.
-    _sep = None
-    _altsep = None
-
-    @staticmethod
-    def _parse_str(pathstr):
-        # Concrete path classes should implement _parse_str to get a path
-        # string and return an iterable over path elements.
-        raise NotImplementedError, '_parse_str is abstract'
-
-    @staticmethod
-    def normcasestr(string):
-        """ Normalize the case of one path element.
-
-        This default implementation returns string unchanged. On
-        case-insensitive platforms, it returns the normalized string.
-        """
-        return string
-
-    # We make this method a property, to show that it doesn't use any
-    # system calls.
-    # Case-sensitive subclasses can redefine it to return self.
-    @property
-    def normcase(self):
-        """ Return an equivalent path with case-normalized elements. """
-        if self.isrel:
-            return self.__class__(self.normcasestr(element)
-                                  for element in self)
-        else:
-            def gen():
-                it = iter(self)
-                yield it.next()
-                for element in it:
-                    yield self.normcasestr(element)
-            return self.__class__(gen())
-
-    @classmethod
-    def _normalize_elements(cls, elements):
-        # This method gets an iterable over path elements.
-        # It should return an iterator over normalized path elements -
-        # that is, curdir elements should be ignored.
-
-        for i, element in enumerate(elements):
-            if isinstance(element, str):
-                if element != cls.curdir:
-                    if (not element or
-                        cls._sep in element or
-                        (cls._altsep and cls._altsep in element)):
-                        # Those elements will cause path(str(x)) != x
-                        raise ValueError, "Element %r is invalid" % element
-                    yield element
-            elif i == 0 and isinstance(element, cls._OSBaseRoot):
-                yield element
-            else:
-                raise TypeError, "Element %r is of a wrong type" % element
-
-    def __new__(cls, arg=None):
-        """ Create a new path object.
-
-        If arg isn't given, an empty path, which represents the current
-        working directory, is returned.
-        If arg is a string, it is parsed into a logical path.
-        If arg is an iterable over path elements, a new path is created from
-        them.
-        """
-        if arg is None:
-            return tuple.__new__(cls)
-        elif type(arg) is cls:
-            return arg
-        elif isinstance(arg, str):
-            return tuple.__new__(cls, cls._parse_str(arg))
-        else:
-            return tuple.__new__(cls, cls._normalize_elements(arg))
-
-    def __init__(self, arg=None):
-        # Since paths are immutable, we can cache the string representation
-        self._cached_str = None
-
-    def _build_str(self):
-        # Return a string representation of self.
-        #
-        # This is a default implementation, which may be overriden by
-        # subclasses (form example, MacPath)
-        if not self:
-            return self.curdir
-        elif isinstance(self[0], self._OSBaseRoot):
-            return str(self[0]) + self._sep.join(self[1:])
-        else:
-            return self._sep.join(self)
-
-    def __str__(self):
-        """ Return a string representation of self. """
-        if self._cached_str is None:
-            self._cached_str = self._build_str()
-        return self._cached_str
+    # --- Special Python methods.
 
     def __repr__(self):
-        # We want path, not the real class name.
-        return 'path(%r)' % str(self)
+        return 'path(%s)' % _base.__repr__(self)
 
-    @property
-    def isabs(self):
-        """ Return whether this path represent an absolute path.
-
-        An absolute path is a path whose meaning doesn't change when the
-        the current working directory changes.
-
-        (Note that this is not the same as "not self.isrelative")
-        """
-        return len(self) > 0 and \
-               isinstance(self[0], self._OSBaseRoot) and \
-               self[0].isabs
-
-    @property
-    def isrel(self):
-        """ Return whether this path represents a relative path.
-
-        A relative path is a path without a root element, so it can be
-        concatenated to other paths.
-
-        (Note that this is not the same as "not self.isabs")
-        """
-        return len(self) == 0 or \
-               not isinstance(self[0], self._OSBaseRoot)
-
-    # Wrap a few tuple methods to return path objects
-
-    def __add__(self, other):
-        other = self.__class__(other)
-        if not other.isrel:
-            raise ValueError, "Right operand should be a relative path"
-        return self.__class__(itertools.chain(self, other))
+    # Adding a path and a string yields a path.
+    def __add__(self, more):
+        try:
+            resultStr = _base.__add__(self, more)
+        except TypeError:  #Python bug
+            resultStr = NotImplemented
+        if resultStr is NotImplemented:
+            return resultStr
+        return self.__class__(resultStr)
 
     def __radd__(self, other):
-        if not self.isrel:
-            raise ValueError, "Right operand should be a relative path"
-        other = self.__class__(other)
-        return self.__class__(itertools.chain(other, self))
-
-    def __getslice__(self, *args):
-        return self.__class__(tuple.__getslice__(self, *args))
-
-    def __mul__(self, *args):
-        if not self.isrel:
-            raise ValueError, "Only relative paths can be multiplied"
-        return self.__class__(tuple.__mul__(self, *args))
-
-    def __rmul__(self, *args):
-        if not self.isrel:
-            raise ValueError, "Only relative paths can be multiplied"
-        return self.__class__(tuple.__rmul__(self, *args))
-
-    def __eq__(self, other):
-        return tuple.__eq__(self, self.__class__(other))
-    def __ge__(self, other):
-        return tuple.__ge__(self, self.__class__(other))
-    def __gt__(self, other):
-        return tuple.__gt__(self, self.__class__(other))
-    def __le__(self, other):
-        return tuple.__le__(self, self.__class__(other))
-    def __lt__(self, other):
-        return tuple.__lt__(self, self.__class__(other))
-    def __ne__(self, other):
-        return tuple.__ne__(self, self.__class__(other))
-
-
-    # ----------------------------------------------------------------
-    # Now come the methods which use system calls.
-
-    # --- Path transformation which use system calls
-
-    @classmethod
-    def cwd(cls):
-        return cls(os.getcwd())
-
-    def chdir(self):
-        return os.chdir(str(self))
-
-    def abspath(self):
-        if not self:
-            return self.cwd()
-        if isinstance(self[0], self._OSBaseRoot):
-            if self[0].isabs:
-                return self
-            else:
-                return self[0].abspath() + self[1:]
+        if isinstance(other, basestring):
+            return self.__class__(other.__add__(self))
         else:
-            return self.cwd() + self
+            return NotImplemented
 
-    def realpath(self):
-        return self.__class__(os.path.realpath(str(self)))
+    # The / operator joins paths.
+    def __div__(self, rel):
+        """ fp.__div__(rel) == fp / rel == fp.joinpath(rel)
 
-    def relpathto(self, dst):
+        Join two path components, adding a separator character if
+        needed.
+        """
+        return self.__class__(os.path.join(self, rel))
+
+    # Make the / operator work even when true division is enabled.
+    __truediv__ = __div__
+
+    def getcwd(cls):
+        """ Return the current working directory as a path object. """
+        return cls(_getcwd())
+    getcwd = classmethod(getcwd)
+
+
+    # --- Operations on path strings.
+
+    isabs = os.path.isabs
+    def abspath(self):       return self.__class__(os.path.abspath(self))
+    def normcase(self):      return self.__class__(os.path.normcase(self))
+    def normpath(self):      return self.__class__(os.path.normpath(self))
+    def realpath(self):      return self.__class__(os.path.realpath(self))
+    def expanduser(self):    return self.__class__(os.path.expanduser(self))
+    def expandvars(self):    return self.__class__(os.path.expandvars(self))
+    def dirname(self):       return self.__class__(os.path.dirname(self))
+    basename = os.path.basename
+
+    def expand(self):
+        """ Clean up a filename by calling expandvars(),
+        expanduser(), and normpath() on it.
+
+        This is commonly everything needed to clean up a filename
+        read from a configuration file, for example.
+        """
+        return self.expandvars().expanduser().normpath()
+
+    def _get_namebase(self):
+        base, ext = os.path.splitext(self.name)
+        return base
+
+    def _get_ext(self):
+        f, ext = os.path.splitext(_base(self))
+        return ext
+
+    def _get_drive(self):
+        drive, r = os.path.splitdrive(self)
+        return self.__class__(drive)
+
+    parent = property(
+        dirname, None, None,
+        """ This path's parent directory, as a new path object.
+
+        For example, path('/usr/local/lib/libpython.so').parent == path('/usr/local/lib')
+        """)
+
+    name = property(
+        basename, None, None,
+        """ The name of this file or directory without the full path.
+
+        For example, path('/usr/local/lib/libpython.so').name == 'libpython.so'
+        """)
+
+    namebase = property(
+        _get_namebase, None, None,
+        """ The same as path.name, but with one file extension stripped off.
+
+        For example, path('/home/guido/python.tar.gz').name     == 'python.tar.gz',
+        but          path('/home/guido/python.tar.gz').namebase == 'python.tar'
+        """)
+
+    ext = property(
+        _get_ext, None, None,
+        """ The file extension, for example '.py'. """)
+
+    drive = property(
+        _get_drive, None, None,
+        """ The drive specifier, for example 'C:'.
+        This is always empty on systems that don't use drive specifiers.
+        """)
+
+    def splitpath(self):
+        """ p.splitpath() -> Return (p.parent, p.name). """
+        parent, child = os.path.split(self)
+        return self.__class__(parent), child
+
+    def splitdrive(self):
+        """ p.splitdrive() -> Return (p.drive, <the rest of p>).
+
+        Split the drive specifier from this path.  If there is
+        no drive specifier, p.drive is empty, so the return value
+        is simply (path(''), p).  This is always the case on Unix.
+        """
+        drive, rel = os.path.splitdrive(self)
+        return self.__class__(drive), rel
+
+    def splitext(self):
+        """ p.splitext() -> Return (p.stripext(), p.ext).
+
+        Split the filename extension from this path and return
+        the two parts.  Either part may be empty.
+
+        The extension is everything from '.' to the end of the
+        last path segment.  This has the property that if
+        (a, b) == p.splitext(), then a + b == p.
+        """
+        filename, ext = os.path.splitext(self)
+        return self.__class__(filename), ext
+
+    def stripext(self):
+        """ p.stripext() -> Remove one file extension from the path.
+
+        For example, path('/home/guido/python.tar.gz').stripext()
+        returns path('/home/guido/python.tar').
+        """
+        return self.splitext()[0]
+
+    if hasattr(os.path, 'splitunc'):
+        def splitunc(self):
+            unc, rest = os.path.splitunc(self)
+            return self.__class__(unc), rest
+
+        def _get_uncshare(self):
+            unc, r = os.path.splitunc(self)
+            return self.__class__(unc)
+
+        uncshare = property(
+            _get_uncshare, None, None,
+            """ The UNC mount point for this path.
+            This is empty for paths on local drives. """)
+
+    def joinpath(self, *args):
+        """ Join two or more path components, adding a separator
+        character (os.sep) if needed.  Returns a new path
+        object.
+        """
+        return self.__class__(os.path.join(self, *args))
+
+    def splitall(self):
+        r""" Return a list of the path components in this path.
+
+        The first item in the list will be a path.  Its value will be
+        either os.curdir, os.pardir, empty, or the root directory of
+        this path (for example, '/' or 'C:\\').  The other items in
+        the list will be strings.
+
+        path.path.joinpath(*result) will yield the original path.
+        """
+        parts = []
+        loc = self
+        while loc != os.curdir and loc != os.pardir:
+            prev = loc
+            loc, child = prev.splitpath()
+            if loc == prev:
+                break
+            parts.append(child)
+        parts.append(loc)
+        parts.reverse()
+        return parts
+
+    def relpath(self):
+        """ Return this path as a relative path,
+        based from the current working directory.
+        """
+        cwd = self.__class__(os.getcwd())
+        return cwd.relpathto(self)
+
+    def relpathto(self, dest):
         """ Return a relative path from self to dest.
 
-        This method examines self.realpath() and dest.realpath(). If
-        they have the same root element, a path in the form
-        path([path.pardir, path.pardir, ..., dir1, dir2, ...])
-        is returned. If they have different root elements,
-        dest.realpath() is returned.
+        If there is no relative path from self to dest, for example if
+        they reside on different drives in Windows, then this returns
+        dest.abspath().
         """
-        src = self.realpath()
-        dst = self.__class__(dst).realpath()
+        origin = self.abspath()
+        dest = self.__class__(dest).abspath()
 
-        if src[0] == dst[0]:
-            # They have the same root
+        orig_list = origin.normcase().splitall()
+        # Don't normcase dest!  We want to preserve the case.
+        dest_list = dest.splitall()
 
-            # find the length of the equal prefix
-            i = 1
-            while i < len(src) and i < len(dst) and \
-                  self.normcasestr(src[i]) == self.normcasestr(dst[i]):
-                i += 1
+        if orig_list[0] != os.path.normcase(dest_list[0]):
+            # Can't get here from there.
+            return dest
 
-            return [self.pardir] * (len(src) - i) + dst[i:]
+        # Find the location where the two paths start to differ.
+        i = 0
+        for start_seg, dest_seg in zip(orig_list, dest_list):
+            if start_seg != os.path.normcase(dest_seg):
+                break
+            i += 1
 
+        # Now i is the point where the two paths diverge.
+        # Need a certain number of "os.pardir"s to work up
+        # from the origin to the point of divergence.
+        segments = [os.pardir] * (len(orig_list) - i)
+        # Need to add the diverging part of dest_list.
+        segments += dest_list[i:]
+        if len(segments) == 0:
+            # If they happen to be identical, use os.curdir.
+            relpath = os.curdir
         else:
-            # They don't have the same root
-            return dst
+            relpath = os.path.join(*segments)
+        return self.__class__(relpath)
+
+    # --- Listing, searching, walking, and matching
+
+    def listdir(self, pattern=None):
+        """ D.listdir() -> List of items in this directory.
+
+        Use D.files() or D.dirs() instead if you want a listing
+        of just files or just subdirectories.
+
+        The elements of the list are path objects.
+
+        With the optional 'pattern' argument, this only lists
+        items whose names match the given pattern.
+        """
+        names = os.listdir(self)
+        if pattern is not None:
+            names = fnmatch.filter(names, pattern)
+        return [self / child for child in names]
+
+    def dirs(self, pattern=None):
+        """ D.dirs() -> List of this directory's subdirectories.
+
+        The elements of the list are path objects.
+        This does not walk recursively into subdirectories
+        (but see path.walkdirs).
+
+        With the optional 'pattern' argument, this only lists
+        directories whose names match the given pattern.  For
+        example, d.dirs('build-*').
+        """
+        return [p for p in self.listdir(pattern) if p.isdir()]
+
+    def files(self, pattern=None):
+        """ D.files() -> List of the files in this directory.
+
+        The elements of the list are path objects.
+        This does not walk into subdirectories (see path.walkfiles).
+
+        With the optional 'pattern' argument, this only lists files
+        whose names match the given pattern.  For example,
+        d.files('*.pyc').
+        """
+        
+        return [p for p in self.listdir(pattern) if p.isfile()]
+
+    def walk(self, pattern=None, errors='strict'):
+        """ D.walk() -> iterator over files and subdirs, recursively.
+
+        The iterator yields path objects naming each child item of
+        this directory and its descendants.  This requires that
+        D.isdir().
+
+        This performs a depth-first traversal of the directory tree.
+        Each directory is returned just before all its children.
+
+        The errors= keyword argument controls behavior when an
+        error occurs.  The default is 'strict', which causes an
+        exception.  The other allowed values are 'warn', which
+        reports the error via warnings.warn(), and 'ignore'.
+        """
+        if errors not in ('strict', 'warn', 'ignore'):
+            raise ValueError("invalid errors parameter")
+
+        try:
+            childList = self.listdir()
+        except Exception:
+            if errors == 'ignore':
+                return
+            elif errors == 'warn':
+                warnings.warn(
+                    "Unable to list directory '%s': %s"
+                    % (self, sys.exc_info()[1]),
+                    TreeWalkWarning)
+                return
+            else:
+                raise
+
+        for child in childList:
+            if pattern is None or child.fnmatch(pattern):
+                yield child
+            try:
+                isdir = child.isdir()
+            except Exception:
+                if errors == 'ignore':
+                    isdir = False
+                elif errors == 'warn':
+                    warnings.warn(
+                        "Unable to access '%s': %s"
+                        % (child, sys.exc_info()[1]),
+                        TreeWalkWarning)
+                    isdir = False
+                else:
+                    raise
+
+            if isdir:
+                for item in child.walk(pattern, errors):
+                    yield item
+
+    def walkdirs(self, pattern=None, errors='strict'):
+        """ D.walkdirs() -> iterator over subdirs, recursively.
+
+        With the optional 'pattern' argument, this yields only
+        directories whose names match the given pattern.  For
+        example, mydir.walkdirs('*test') yields only directories
+        with names ending in 'test'.
+
+        The errors= keyword argument controls behavior when an
+        error occurs.  The default is 'strict', which causes an
+        exception.  The other allowed values are 'warn', which
+        reports the error via warnings.warn(), and 'ignore'.
+        """
+        if errors not in ('strict', 'warn', 'ignore'):
+            raise ValueError("invalid errors parameter")
+
+        try:
+            dirs = self.dirs()
+        except Exception:
+            if errors == 'ignore':
+                return
+            elif errors == 'warn':
+                warnings.warn(
+                    "Unable to list directory '%s': %s"
+                    % (self, sys.exc_info()[1]),
+                    TreeWalkWarning)
+                return
+            else:
+                raise
+
+        for child in dirs:
+            if pattern is None or child.fnmatch(pattern):
+                yield child
+            for subsubdir in child.walkdirs(pattern, errors):
+                yield subsubdir
+
+    def walkfiles(self, pattern=None, errors='strict'):
+        """ D.walkfiles() -> iterator over files in D, recursively.
+
+        The optional argument, pattern, limits the results to files
+        with names that match the pattern.  For example,
+        mydir.walkfiles('*.tmp') yields only files with the .tmp
+        extension.
+        """
+        if errors not in ('strict', 'warn', 'ignore'):
+            raise ValueError("invalid errors parameter")
+
+        try:
+            childList = self.listdir()
+        except Exception:
+            if errors == 'ignore':
+                return
+            elif errors == 'warn':
+                warnings.warn(
+                    "Unable to list directory '%s': %s"
+                    % (self, sys.exc_info()[1]),
+                    TreeWalkWarning)
+                return
+            else:
+                raise
+
+        for child in childList:
+            try:
+                isfile = child.isfile()
+                isdir = not isfile and child.isdir()
+            except:
+                if errors == 'ignore':
+                    continue
+                elif errors == 'warn':
+                    warnings.warn(
+                        "Unable to access '%s': %s"
+                        % (self, sys.exc_info()[1]),
+                        TreeWalkWarning)
+                    continue
+                else:
+                    raise
+
+            if isfile:
+                if pattern is None or child.fnmatch(pattern):
+                    yield child
+            elif isdir:
+                for f in child.walkfiles(pattern, errors):
+                    yield f
+
+    def fnmatch(self, pattern):
+        """ Return True if self.name matches the given pattern.
+
+        pattern - A filename pattern with wildcards,
+            for example '*.py'.
+        """
+        return fnmatch.fnmatch(self.name, pattern)
+
+    def glob(self, pattern):
+        """ Return a list of path objects that match the pattern.
+
+        pattern - a path relative to this directory, with wildcards.
+
+        For example, path('/users').glob('*/bin/*') returns a list
+        of all the files users have in their bin directories.
+        """
+        cls = self.__class__
+        return [cls(s) for s in glob.glob(_base(self / pattern))]
 
 
+    # --- Reading or writing an entire file at once.
+
+    def open(self, mode='r'):
+        """ Open this file.  Return a file object. """
+        return file(self, mode)
+
+    def bytes(self):
+        """ Open this file, read all bytes, return them as a string. """
+        f = self.open('rb')
+        try:
+            return f.read()
+        finally:
+            f.close()
+
+    def write_bytes(self, bytes, append=False):
+        """ Open this file and write the given bytes to it.
+
+        Default behavior is to overwrite any existing file.
+        Call p.write_bytes(bytes, append=True) to append instead.
+        """
+        if append:
+            mode = 'ab'
+        else:
+            mode = 'wb'
+        f = self.open(mode)
+        try:
+            f.write(bytes)
+        finally:
+            f.close()
+
+    def text(self, encoding=None, errors='strict'):
+        r""" Open this file, read it in, return the content as a string.
+
+        This uses 'U' mode in Python 2.3 and later, so '\r\n' and '\r'
+        are automatically translated to '\n'.
+
+        Optional arguments:
+
+        encoding - The Unicode encoding (or character set) of
+            the file.  If present, the content of the file is
+            decoded and returned as a unicode object; otherwise
+            it is returned as an 8-bit str.
+        errors - How to handle Unicode errors; see help(str.decode)
+            for the options.  Default is 'strict'.
+        """
+        if encoding is None:
+            # 8-bit
+            f = self.open(_textmode)
+            try:
+                return f.read()
+            finally:
+                f.close()
+        else:
+            # Unicode
+            f = codecs.open(self, 'r', encoding, errors)
+            # (Note - Can't use 'U' mode here, since codecs.open
+            # doesn't support 'U' mode, even in Python 2.3.)
+            try:
+                t = f.read()
+            finally:
+                f.close()
+            return (t.replace(u'\r\n', u'\n')
+                     .replace(u'\r\x85', u'\n')
+                     .replace(u'\r', u'\n')
+                     .replace(u'\x85', u'\n')
+                     .replace(u'\u2028', u'\n'))
+
+    def write_text(self, text, encoding=None, errors='strict', linesep=os.linesep, append=False):
+        r""" Write the given text to this file.
+
+        The default behavior is to overwrite any existing file;
+        to append instead, use the 'append=True' keyword argument.
+
+        There are two differences between path.write_text() and
+        path.write_bytes(): newline handling and Unicode handling.
+        See below.
+
+        Parameters:
+
+          - text - str/unicode - The text to be written.
+
+          - encoding - str - The Unicode encoding that will be used.
+            This is ignored if 'text' isn't a Unicode string.
+
+          - errors - str - How to handle Unicode encoding errors.
+            Default is 'strict'.  See help(unicode.encode) for the
+            options.  This is ignored if 'text' isn't a Unicode
+            string.
+
+          - linesep - keyword argument - str/unicode - The sequence of
+            characters to be used to mark end-of-line.  The default is
+            os.linesep.  You can also specify None; this means to
+            leave all newlines as they are in 'text'.
+
+          - append - keyword argument - bool - Specifies what to do if
+            the file already exists (True: append to the end of it;
+            False: overwrite it.)  The default is False.
 
 
-    # --- Expand
+        --- Newline handling.
 
-    def expanduser(self):
-        return path(os.path.expanduser(str(self)))
+        write_text() converts all standard end-of-line sequences
+        ('\n', '\r', and '\r\n') to your platform's default end-of-line
+        sequence (see os.linesep; on Windows, for example, the
+        end-of-line marker is '\r\n').
 
-    def expandvars(self):
-        return path(os.path.expandvars(str(self)))
+        If you don't like your platform's default, you can override it
+        using the 'linesep=' keyword argument.  If you specifically want
+        write_text() to preserve the newlines as-is, use 'linesep=None'.
+
+        This applies to Unicode text the same as to 8-bit text, except
+        there are three additional standard Unicode end-of-line sequences:
+        u'\x85', u'\r\x85', and u'\u2028'.
+
+        (This is slightly different from when you open a file for
+        writing with fopen(filename, "w") in C or file(filename, 'w')
+        in Python.)
 
 
-    # --- Info about the path
+        --- Unicode
+
+        If 'text' isn't Unicode, then apart from newline handling, the
+        bytes are written verbatim to the file.  The 'encoding' and
+        'errors' arguments are not used and must be omitted.
+
+        If 'text' is Unicode, it is first converted to bytes using the
+        specified 'encoding' (or the default encoding if 'encoding'
+        isn't specified).  The 'errors' argument applies only to this
+        conversion.
+
+        """
+        if isinstance(text, unicode):
+            if linesep is not None:
+                # Convert all standard end-of-line sequences to
+                # ordinary newline characters.
+                text = (text.replace(u'\r\n', u'\n')
+                            .replace(u'\r\x85', u'\n')
+                            .replace(u'\r', u'\n')
+                            .replace(u'\x85', u'\n')
+                            .replace(u'\u2028', u'\n'))
+                text = text.replace(u'\n', linesep)
+            if encoding is None:
+                encoding = sys.getdefaultencoding()
+            bytes = text.encode(encoding, errors)
+        else:
+            # It is an error to specify an encoding if 'text' is
+            # an 8-bit string.
+            assert encoding is None
+
+            if linesep is not None:
+                text = (text.replace('\r\n', '\n')
+                            .replace('\r', '\n'))
+                bytes = text.replace('\n', linesep)
+
+        self.write_bytes(bytes, append)
+
+    def lines(self, encoding=None, errors='strict', retain=True):
+        r""" Open this file, read all lines, return them in a list.
+
+        Optional arguments:
+            encoding - The Unicode encoding (or character set) of
+                the file.  The default is None, meaning the content
+                of the file is read as 8-bit characters and returned
+                as a list of (non-Unicode) str objects.
+            errors - How to handle Unicode errors; see help(str.decode)
+                for the options.  Default is 'strict'
+            retain - If true, retain newline characters; but all newline
+                character combinations ('\r', '\n', '\r\n') are
+                translated to '\n'.  If false, newline characters are
+                stripped off.  Default is True.
+
+        This uses 'U' mode in Python 2.3 and later.
+        """
+        if encoding is None and retain:
+            f = self.open(_textmode)
+            try:
+                return f.readlines()
+            finally:
+                f.close()
+        else:
+            return self.text(encoding, errors).splitlines(retain)
+
+    def write_lines(self, lines, encoding=None, errors='strict',
+                    linesep=os.linesep, append=False):
+        r""" Write the given lines of text to this file.
+
+        By default this overwrites any existing file at this path.
+
+        This puts a platform-specific newline sequence on every line.
+        See 'linesep' below.
+
+        lines - A list of strings.
+
+        encoding - A Unicode encoding to use.  This applies only if
+            'lines' contains any Unicode strings.
+
+        errors - How to handle errors in Unicode encoding.  This
+            also applies only to Unicode strings.
+
+        linesep - The desired line-ending.  This line-ending is
+            applied to every line.  If a line already has any
+            standard line ending ('\r', '\n', '\r\n', u'\x85',
+            u'\r\x85', u'\u2028'), that will be stripped off and
+            this will be used instead.  The default is os.linesep,
+            which is platform-dependent ('\r\n' on Windows, '\n' on
+            Unix, etc.)  Specify None to write the lines as-is,
+            like file.writelines().
+
+        Use the keyword argument append=True to append lines to the
+        file.  The default is to overwrite the file.  Warning:
+        When you use this with Unicode data, if the encoding of the
+        existing data in the file is different from the encoding
+        you specify with the encoding= parameter, the result is
+        mixed-encoding data, which can really confuse someone trying
+        to read the file later.
+        """
+        if append:
+            mode = 'ab'
+        else:
+            mode = 'wb'
+        f = self.open(mode)
+        try:
+            for line in lines:
+                isUnicode = isinstance(line, unicode)
+                if linesep is not None:
+                    # Strip off any existing line-end and add the
+                    # specified linesep string.
+                    if isUnicode:
+                        if line[-2:] in (u'\r\n', u'\x0d\x85'):
+                            line = line[:-2]
+                        elif line[-1:] in (u'\r', u'\n',
+                                           u'\x85', u'\u2028'):
+                            line = line[:-1]
+                    else:
+                        if line[-2:] == '\r\n':
+                            line = line[:-2]
+                        elif line[-1:] in ('\r', '\n'):
+                            line = line[:-1]
+                    line += linesep
+                if isUnicode:
+                    if encoding is None:
+                        encoding = sys.getdefaultencoding()
+                    line = line.encode(encoding, errors)
+                f.write(line)
+        finally:
+            f.close()
+
+    def read_md5(self):
+        """ Calculate the md5 hash for this file.
+
+        This reads through the entire file.
+        """
+        f = self.open('rb')
+        try:
+            m = md5.new()
+            while True:
+                d = f.read(8192)
+                if not d:
+                    break
+                m.update(d)
+        finally:
+            f.close()
+        return m.digest()
+
+    # --- Methods for querying the filesystem.
+
+    exists = os.path.exists
+    isdir = os.path.isdir
+    isfile = os.path.isfile
+    islink = os.path.islink
+    ismount = os.path.ismount
+
+    if hasattr(os.path, 'samefile'):
+        samefile = os.path.samefile
+
+    getatime = os.path.getatime
+    atime = property(
+        getatime, None, None,
+        """ Last access time of the file. """)
+
+    getmtime = os.path.getmtime
+    mtime = property(
+        getmtime, None, None,
+        """ Last-modified time of the file. """)
+
+    if hasattr(os.path, 'getctime'):
+        getctime = os.path.getctime
+        ctime = property(
+            getctime, None, None,
+            """ Creation time of the file. """)
+
+    getsize = os.path.getsize
+    size = property(
+        getsize, None, None,
+        """ Size of the file, in bytes. """)
+
+    if hasattr(os, 'access'):
+        def access(self, mode):
+            """ Return true if current user has access to this path.
+
+            mode - One of the constants os.F_OK, os.R_OK, os.W_OK, os.X_OK
+            """
+            return os.access(self, mode)
 
     def stat(self):
-        return StatWrapper(os.stat(str(self)))
-
-    def exists(self):
-        try:
-            self.stat()
-        except OSError:
-            return False
-        else:
-            return True
-
-    def isdir(self):
-        try:
-            return self.stat().isdir
-        except OSError:
-            return False
-
-    def isfile(self):
-        try:
-            return self.stat().isfile
-        except OSError:
-            return False
+        """ Perform a stat() system call on this path. """
+        return os.stat(self)
 
     def lstat(self):
-        return StatWrapper(os.lstat(str(self)))
+        """ Like path.stat(), but do not follow symbolic links. """
+        return os.lstat(self)
 
-    def lexists(self):
-        try:
-            self.lstat()
-        except OSError:
-            return False
-        else:
-            return True
+    def get_owner(self):
+        r""" Return the name of the owner of this file or directory.
 
-    def lisdir(self):
-        try:
-            return self.stat().lisdir
-        except OSError:
-            return False
+        This follows symbolic links.
 
-    def lisfile(self):
-        try:
-            return self.stat().lisfile
-        except OSError:
-            return False
-
-    def islink(self):
-        try:
-            return self.lstat().islink
-        except OSError:
-            return False
-
-    def ismount(self):
-        return os.path.ismount(str(self))
-
-    def access(self, mode):
-        """ Return true if current user has access to this path.
-
-        mode - One of the constants os.F_OK, os.R_OK, os.W_OK, os.X_OK
+        On Windows, this returns a name of the form ur'DOMAIN\User Name'.
+        On Windows, a group can own a file or directory.
         """
-        return os.access(str(self), mode)
+        if os.name == 'nt':
+            if win32security is None:
+                raise Exception("path.owner requires win32all to be installed")
+            desc = win32security.GetFileSecurity(
+                self, win32security.OWNER_SECURITY_INFORMATION)
+            sid = desc.GetSecurityDescriptorOwner()
+            account, domain, typecode = win32security.LookupAccountSid(None, sid)
+            return domain + u'\\' + account
+        else:
+            if pwd is None:
+                raise NotImplementedError("path.owner is not implemented on this platform.")
+            st = self.stat()
+            return pwd.getpwuid(st.st_uid).pw_name
 
-    # Additional methods in subclasses:
-    # statvfs (PosixPath)
-    # pathconf (PosixPath, XXX MacPath)
-    # samefile (PosixPath, XXX MacPath)
+    owner = property(
+        get_owner, None, None,
+        """ Name of the owner of this file or directory. """)
+
+    if hasattr(os, 'statvfs'):
+        def statvfs(self):
+            """ Perform a statvfs() system call on this path. """
+            return os.statvfs(self)
+
+    if hasattr(os, 'pathconf'):
+        def pathconf(self, name):
+            return os.pathconf(self, name)
 
 
     # --- Modifying operations on files and directories
 
     def utime(self, times):
         """ Set the access and modified times of this file. """
-        os.utime(str(self), times)
+        os.utime(self, times)
 
     def chmod(self, mode):
-        os.chmod(str(self), mode)
+        os.chmod(self, mode)
+
+    if hasattr(os, 'chown'):
+        def chown(self, uid, gid):
+            os.chown(self, uid, gid)
 
     def rename(self, new):
-        os.rename(str(self), str(new))
+        os.rename(self, new)
 
-    # Additional methods in subclasses:
-    # chown (PosixPath, XXX MacPath)
-    # lchown (PosixPath, XXX MacPath)
+    def renames(self, new):
+        os.renames(self, new)
 
 
     # --- Create/delete operations on directories
 
     def mkdir(self, mode=0777):
-        os.mkdir(str(self), mode)
+        os.mkdir(self, mode)
 
     def makedirs(self, mode=0777):
-        os.makedirs(str(self), mode)
+        os.makedirs(self, mode)
 
     def rmdir(self):
-        os.rmdir(str(self))
+        os.rmdir(self)
 
-    def removedirs(self, base=None):
-        """ Remove empty directories recursively.
-
-        If the directory is empty, remove it. If the parent directory becomes
-        empty, remove it too. Continue until a directory can't be removed,
-        because it's not empty or for other reasons.
-        If base is given, it should be a prefix of self. base won't be removed
-        even if it becomes empty.
-        Note: only directories explicitly listed in the path will be removed.
-        This means that if self is a relative path, predecesors of the
-        current working directory won't be removed.
-        """
-        if not self.stat().isdir:
-            raise OSError, 'removedirs only works on directories.'
-        base = self.__class__(base)
-        if base:
-            if not self[:len(base)] == base:
-                raise ValueError, 'base should be a prefix of self.'
-            stopat = len(base)
-        else:
-            stopat = 0
-        for i in xrange(len(self), stopat, -1):
-            try:
-                self[:i].rmdir()
-            except OSError:
-                break
-
-    def rmtree(self, *args):
-        return shutil.rmtree(str(self), *args)
+    def removedirs(self):
+        os.removedirs(self)
 
 
     # --- Modifying operations on files
@@ -524,639 +912,69 @@ class BasePath(tuple):
         """ Set the access/modified times of this file to the current time.
         Create the file if it does not exist.
         """
-        fd = os.open(str(self), os.O_WRONLY | os.O_CREAT, 0666)
+        fd = os.open(self, os.O_WRONLY | os.O_CREAT, 0666)
         os.close(fd)
-        os.utime(str(self), None)
+        os.utime(self, None)
 
     def remove(self):
-        os.remove(str(self))
+        os.remove(self)
 
-    def copy(self, dst, copystat=False):
-        """ Copy file from self to dst.
-
-        If copystat is False, copy data and mode bits ("cp self dst").
-        If copystat is True, copy data and all stat info ("cp -p self dst").
-
-        The destination may be a directory. If so, a file with the same base
-        name as self will be created in that directory.
-        """
-        dst = self.__class__(dst)
-        if dst.stat().isdir:
-            dst += self[-1]
-        shutil.copyfile(str(self), str(dst))
-        if copystat:
-            shutil.copystat(str(self), str(dst))
-        else:
-            shutil.copymode(str(self), str(dst))
-
-    def move(self, dst):
-        dst = self.__class__(dst)
-        return shutil.move(str(self), str(dst))
+    def unlink(self):
+        os.unlink(self)
 
 
     # --- Links
 
-    # In subclasses:
-    # link (PosixPath, XXX MacPath)
-    # writelink (PosixPath) - what about MacPath?
-    # readlink (PosixPath, XXX MacPath)
-    # readlinkpath (PosixPath, XXXMacPath)
+    if hasattr(os, 'link'):
+        def link(self, newpath):
+            """ Create a hard link at 'newpath', pointing to this file. """
+            os.link(self, newpath)
 
+    if hasattr(os, 'symlink'):
+        def symlink(self, newlink):
+            """ Create a symbolic link at 'newlink', pointing here. """
+            os.symlink(self, newlink)
 
-    # --- Extra
+    if hasattr(os, 'readlink'):
+        def readlink(self):
+            """ Return the path to which this symbolic link points.
 
-    # In subclasses:
-    # mkfifo (PosixPath, XXX MacPath)
-    # mknod (PosixPath, XXX MacPath)
-    # chroot (PosixPath, XXX MacPath)
-    #
-    # startfile (NTPath)
+            The result may be an absolute or a relative path.
+            """
+            return self.__class__(os.readlink(self))
 
+        def readlinkabs(self):
+            """ Return the path to which this symbolic link points.
 
-    # --- Globbing
-
-    # If the OS supports it, _id should be a function that gets a stat object
-    # and returns a unique id of a file.
-    # It the OS doesn't support it, it should be None.
-    _id = None
-
-    @staticmethod
-    def _match_element(comp_element, element):
-        # Does a filename match a compiled pattern element?
-        # The filename should be normcased.
-        if comp_element is None:
-            return True
-        elif isinstance(comp_element, str):
-            return comp_element == element
-        else:
-            return comp_element.match(element)
-
-    def _glob(cls, pth, comp_pattern, topdown, onlydirs, onlyfiles,
-              positions, on_path, stat):
-        """ The recursive function used by glob.
-
-        This version treats symbolic links as files. Broken symlinks won't be
-        listed.
-
-        pth is a dir in which we search.
-
-        comp_pattern is the compiled pattern. It's a sequence which should
-        consist of three kinds of elements:
-        * None - matches any number of subdirectories, including 0.
-        * a string - a normalized name, when exactly one name can be matched.
-        * a regexp - for testing if normalized names match.
-
-        positions is a sequence of positions on comp_pattern that children of
-        path may match. On the first call, if will be [0].
-
-        on_path is a set of inode identifiers on path, or None if circles
-        shouldn't be checked.
-
-        stat is the appropriate stat function - cls.stat or cls.lstat.
-        """
-
-        if len(positions) == 1 and isinstance(comp_pattern[positions[0]], str):
-            # We don't have to listdir if exactly one file name can match.
-            # Since we always stat the files, it's ok if the file doesn't exist.
-            listdir = [comp_pattern[positions[0]]]
-        else:
-            listdir = os.listdir(str(pth))
-            listdir.sort()
-
-        for subfile in listdir:
-            newpth = pth + subfile
-            # We don't strictly need to stat a file if we don't follow symlinks
-            # AND positions == [len(comp_pattern)-1] AND
-            # not isinstance(comp_pattern[-1], str), but do me a favour...
-            try:
-                st = stat(newpth)
-            except OSError:
-                continue
-            newpositions = []
-            subfilenorm = cls.normcasestr(subfile)
-
-            if topdown:
-                # If not topdown, it happens after we handle subdirs
-                if positions[-1] == len(comp_pattern) - 1:
-                    if cls._match_element(comp_pattern[-1], subfilenorm):
-                        if not ((onlydirs and not st.isdir) or
-                                (onlyfiles and not st.isfile)):
-                            yield newpth
-
-            for pos in reversed(positions):
-                if st.isdir:
-                    comp_element = comp_pattern[pos]
-                    if pos + 1 < len(comp_pattern):
-                        if cls._match_element(comp_element, subfilenorm):
-                            newpositions.append(pos + 1)
-                            if comp_pattern[pos + 1] is None:
-                                # We should stop at '..'
-                                break
-                    if comp_element is None:
-                        newpositions.append(pos)
-                        # We don't have to break - there are not supposed
-                        # to be any positions before '..'.
-
-            if newpositions:
-                newpositions.reverse()
-
-                if on_path is not None:
-                    newpath_id = cls._id(st)
-                    if newpath_id in on_path:
-                        raise OSError, "Circular path encountered"
-                    on_path.add(newpath_id)
-
-                for x in cls._glob(newpth,
-                                   comp_pattern, topdown, onlydirs, onlyfiles,
-                                   newpositions, on_path, stat):
-                    yield x
-
-                if on_path is not None:
-                    on_path.remove(newpath_id)
-
-            if not topdown:
-                # If topdown, it happens after we handle subdirs
-                if positions[-1] == len(comp_pattern) - 1:
-                    if cls._match_element(comp_pattern[-1], subfilenorm):
-                        if not ((onlydirs and not st.isdir) or
-                                (onlyfiles and not st.isfile)):
-                            yield newpth
-
-    _magic_check = re.compile('[*?[]')
-
-    @classmethod
-    def _has_magic(cls, s):
-        return cls._magic_check.search(s) is not None
-
-    _cache = {}
-
-    @classmethod
-    def _compile_pattern(cls, pattern):
-        # Get a pattern, return the list of compiled pattern elements
-        # and the list of initial positions.
-        pattern = cls(pattern)
-        if not pattern.isrel:
-            raise ValueError, "pattern should be a relative path."
-
-        comp_pattern = []
-        last_was_none = False
-        for element in pattern:
-            element = cls.normcasestr(element)
-            if element == '**':
-                if not last_was_none:
-                    comp_pattern.append(None)
+            The result is always an absolute path.
+            """
+            p = self.readlink()
+            if p.isabs():
+                return p
             else:
-                last_was_none = False
-                if not cls._has_magic(element):
-                    comp_pattern.append(element)
-                else:
-                    try:
-                        r = cls._cache[element]
-                    except KeyError:
-                        r = re.compile(fnmatch.translate(element))
-                        cls._cache[element] = r
-                    comp_pattern.append(r)
+                return (self.parent / p).abspath()
 
-        if comp_pattern[0] is None and len(comp_pattern) > 1:
-            positions = [0, 1]
-        else:
-            positions = [0]
 
-        return comp_pattern, positions
+    # --- High-level functions from shutil
 
-    def match(self, pattern):
-        """ Return whether self matches the given pattern.
+    copyfile = shutil.copyfile
+    copymode = shutil.copymode
+    copystat = shutil.copystat
+    copy = shutil.copy
+    copy2 = shutil.copy2
+    copytree = shutil.copytree
+    if hasattr(shutil, 'move'):
+        move = shutil.move
+    rmtree = shutil.rmtree
 
-        pattern has the same meaning as in the glob method.
-        self should be relative.
 
-        This method doesn't use any system calls.
-        """
-        if not self.isrel:
-            raise ValueError, "self must be a relative path"
-        comp_pattern, positions = self._compile_pattern(pattern)
+    # --- Special stuff from os
 
-        for element in self.normcase:
-            newpositions = []
-            for pos in reversed(positions):
-                if pos == len(comp_pattern):
-                    # We matched the pattern but the path isn't finished -
-                    # too bad
-                    continue
-                comp_element = comp_pattern[pos]
-                if self._match_element(comp_element, element):
-                    newpositions.append(pos + 1)
-                if comp_element is None:
-                    newpositions.append(pos)
-                    # No need to continue after a '**'
-                    break
-            newpositions.reverse()
-            positions = newpositions
-            if not positions:
-                # No point in carrying on
-                break
+    if hasattr(os, 'chroot'):
+        def chroot(self):
+            os.chroot(self)
 
-        return (len(comp_pattern) in positions)
+    if hasattr(os, 'startfile'):
+        def startfile(self):
+            os.startfile(self)
 
-    def glob(self, pattern='*', topdown=True, onlydirs=False, onlyfiles=False):
-        """ Return an iterator over all files in self matching pattern.
-
-        pattern should be a relative path, which may include wildcards.
-        In addition to the regular shell wildcards, you can use '**', which
-        matches any number of directories, including 0.
-
-        If topdown is True (the default), a directory is yielded before its
-        descendents. If it's False, a directory is yielded after its
-        descendents.
-
-        If onlydirs is True, only directories will be yielded. If onlyfiles
-        is True, only regular files will be yielded.
-
-        This method treats symbolic links as regular files. Broken symlinks
-        won't be yielded.
-        """
-
-        if onlydirs and onlyfiles:
-            raise ValueError, \
-                  "Only one of onlydirs and onlyfiles can be specified."
-
-        comp_pattern, positions = self._compile_pattern(pattern)
-
-        if self._id is not None and None in comp_pattern:
-            on_path = set([self._id(self.stat())])
-        else:
-            on_path = None
-
-        for x in self._glob(self, comp_pattern, topdown, onlydirs, onlyfiles,
-                            positions, on_path, self.__class__.stat):
-            yield x
-
-    def lglob(self, pattern='*', topdown=True, onlydirs=False, onlyfiles=False):
-        """ Return an iterator over all files in self matching pattern.
-
-        pattern should be a relative path, which may include wildcards.
-        In addition to the regular shell wildcards, you can use '**', which
-        matches any number of directories, including 0.
-
-        If topdown is True (the default), a directory is yielded before its
-        descendents. If it's False, a directory is yielded after its
-        descendents.
-
-        If onlydirs is True, only directories will be yielded. If onlyfiles
-        is True, only regular files will be yielded.
-
-        This method treats symbolic links as special files - they won't be
-        followed, and they will be yielded even if they're broken.
-        """
-
-        if onlydirs and onlyfiles:
-            raise ValueError, \
-                  "Only one of onlydirs and onlyfiles can be specified."
-
-        comp_pattern, positions = self._compile_pattern(pattern)
-
-        for x in self._glob(self, comp_pattern, topdown, onlydirs, onlyfiles,
-                            positions, None, self.__class__.lstat):
-            yield x
-
-
-class PosixPath(BasePath):
-    """ Represents POSIX paths. """
-
-    class _PosixRoot(BasePath._BaseRoot):
-        """ Represents the filesystem root (/).
-
-        There's only one root on posix systems, so this is a singleton.
-        """
-        instance = None
-        def __new__(cls):
-            if cls.instance is None:
-                instance = object.__new__(cls)
-                cls.instance = instance
-            return cls.instance
-
-        def __str__(self):
-            return '/'
-
-        def __repr__(self):
-            return 'path.ROOT'
-
-        isabs = True
-
-    _OSBaseRoot = _PosixRoot
-
-    ROOT = _PosixRoot()
-
-    # Public constants
-    curdir = '.'
-    pardir = '..'
-
-    # Private constants
-    _sep = '/'
-    _altsep = None
-
-    @classmethod
-    def _parse_str(cls, pathstr):
-        # get a path string and return an iterable over path elements.
-        if pathstr.startswith('/'):
-            if pathstr.startswith('//') and not pathstr.startswith('///'):
-                # Two initial slashes have application-specific meaning
-                # in POSIX, and it's not supported currently.
-                raise NotImplementedError, \
-                      "Paths with two leading slashes aren't supported."
-            yield cls.ROOT
-        for element in pathstr.split('/'):
-            if element == '' or element == cls.curdir:
-                continue
-            # '..' aren't specially treated, since popping the last
-            # element isn't correct if the last element was a symbolic
-            # link.
-            yield element
-
-
-    # POSIX-specific methods
-
-
-    # --- Info about the path
-
-    def statvfs(self):
-        """ Perform a statvfs() system call on this path. """
-        return os.statvfs(str(self))
-
-    def pathconf(self, name):
-        return os.pathconf(str(self), name)
-
-    def samefile(self, other):
-        other = self.__class__(other)
-        s1 = self.stat()
-        s2 = other.stat()
-        return s1.st_ino == s2.st_ino and \
-               s1.st_dev == s2.st_dev
-
-
-    # --- Modifying operations on files and directories
-
-    def chown(self, uid=None, gid=None):
-        if uid is None:
-            uid = -1
-        if gid is None:
-            gid = -1
-        return os.chown(str(self), uid, gid)
-
-    def lchown(self, uid=None, gid=None):
-        if uid is None:
-            uid = -1
-        if gid is None:
-            gid = -1
-        return os.lchown(str(self), uid, gid)
-
-
-    # --- Links
-
-    def link(self, newpath):
-        """ Create a hard link at 'newpath', pointing to this file. """
-        os.link(str(self), str(newpath))
-
-    def writelink(self, src):
-        """ Create a symbolic link at self, pointing to src.
-
-        src may be any string. Note that if it's a relative path, it
-        will be interpreted relative to self, not relative to the current
-        working directory.
-        """
-        os.symlink(str(src), str(self))
-
-    def readlink(self):
-        """ Return the path to which this symbolic link points.
-
-        The result is a string, which may be an absolute path, a
-        relative path (which should be interpreted relative to self[:-1]),
-        or any arbitrary string.
-        """
-        return os.readlink(str(self))
-
-    def readlinkpath(self):
-        """ Return the path to which this symbolic link points. """
-        linkpath = self.__class__(self.readlink())
-        if linkpath.isrel:
-            return self + linkpath
-        else:
-            return linkpath
-
-
-    # --- Extra
-
-    def mkfifo(self, *args):
-        return os.mkfifo(str(self), *args)
-
-    def mknod(self, *args):
-        return os.mknod(str(self), *args)
-
-    def chroot(self):
-        return os.chroot(str(self))
-
-
-    # --- Globbing
-
-    @staticmethod
-    def _id(stat):
-        return (stat.st_ino, stat.st_dev)
-
-
-class NTPath(BasePath):
-    """ Represents paths on Windows operating systems. """
-
-    class _NTBaseRoot(BasePath._BaseRoot):
-        """ The base class of all Windows root classes. """
-        pass
-
-    _OSBaseRoot = _NTBaseRoot
-
-    class _CurRootType(_NTBaseRoot):
-        """ Represents the root of the current working drive.
-
-        This class is a singleton. It represents the root of the current
-        working drive - paths starting with '\'.
-        """
-        instance = None
-        def __new__(cls):
-            if cls.instance is None:
-                instance = object.__new__(cls)
-                cls.instance = instance
-            return cls.instance
-
-        def __str__(self):
-            return '\\'
-
-        def __repr__(self):
-            return 'path.CURROOT'
-
-        isabs = False
-
-        def abspath(self):
-            from nt import _getfullpathname
-            return NTPath(_getfullpathname(str(self)))
-
-    CURROOT = _CurRootType()
-
-    class Drive(_NTBaseRoot):
-        """ Represents the root of a specific drive. """
-        def __init__(self, letter):
-            # Drive letter is normalized - we don't lose any information
-            if len(letter) != 1 or letter not in string.letters:
-                raise ValueError, 'Should get one letter'
-            self._letter = letter.lower()
-
-        @property
-        def letter(self):
-            # We use a property because we want the object to be immutable.
-            return self._letter
-
-        def __str__(self):
-            return '%s:\\' % self.letter
-
-        def __repr__(self):
-            return 'path.Drive(%r)' % self.letter
-
-        isabs = True
-
-    class UnrootedDrive(_NTBaseRoot):
-        """ Represents the current working directory on a specific drive. """
-        def __init__(self, letter):
-            # Drive letter is normalized - we don't lose any information
-            if len(letter) != 1 or letter not in string.letters:
-                raise ValueError, 'Should get one letter'
-            self._letter = letter.lower()
-
-        @property
-        def letter(self):
-            # We use a property because we want the object to be immutable.
-            return self._letter
-
-        def __str__(self):
-            return '%s:' % self.letter
-
-        def __repr__(self):
-            return 'path.UnrootedDrive(%r)' % self.letter
-
-        isabs = False
-
-        def abspath(self):
-            from nt import _getfullpathname
-            return NTPath(_getfullpathname(str(self)))
-
-    class UNCRoot(_NTBaseRoot):
-        """ Represents a UNC mount point. """
-        def __init__(self, host, mountpoint):
-            # Host and mountpoint are normalized - we don't lose any information
-            self._host = host.lower()
-            self._mountpoint = mountpoint.lower()
-
-        @property
-        def host(self):
-            # We use a property because we want the object to be immutable.
-            return self._host
-
-        @property
-        def mountpoint(self):
-            # We use a property because we want the object to be immutable.
-            return self._mountpoint
-
-        def __str__(self):
-            return '\\\\%s\\%s\\' % (self.host, self.mountpoint)
-
-        def __repr__(self):
-            return 'path.UNCRoot(%r, %r)' % (self.host, self.mountpoint)
-
-        isabs = True
-
-
-    # Public constants
-    curdir = '.'
-    pardir = '..'
-
-    # Private constants
-    _sep = '\\'
-    _altsep = '/'
-
-    @staticmethod
-    def normcasestr(string):
-        """ Normalize the case of one path element.
-
-        On Windows, this returns string.lower()
-        """
-        return string.lower()
-
-    @classmethod
-    def _parse_str(cls, pathstr):
-        # get a path string and return an iterable over path elements.
-
-        # First, replace all backslashes with slashes.
-        # I know that it should have been the other way round, but I can't
-        # stand all those escapes.
-
-        pathstr = pathstr.replace('\\', '/')
-
-        # Handle the root element
-
-        if pathstr.startswith('/'):
-            if pathstr.startswith('//'):
-                # UNC Path
-                if pathstr.startswith('///'):
-                    raise ValueError, \
-                          "Paths can't start with more than two slashes"
-                index = pathstr.find('/', 2)
-                if index == -1:
-                    raise ValueError, \
-                          "UNC host name should end with a slash"
-                index2 = index+1
-                while pathstr[index2:index2+1] == '/':
-                    index2 += 1
-                if index2 == len(pathstr):
-                    raise ValueError, \
-                          "UNC mount point is empty"
-                index3 = pathstr.find('/', index2)
-                if index3 == -1:
-                    index3 = len(pathstr)
-                yield cls.UNCRoot(pathstr[2:index], pathstr[index2:index3])
-                pathstr = pathstr[index3:]
-            else:
-                # CURROOT
-                yield cls.CURROOT
-        else:
-            if pathstr[1:2] == ':':
-                if pathstr[2:3] == '/':
-                    # Rooted drive
-                    yield cls.Drive(pathstr[0])
-                    pathstr = pathstr[3:]
-                else:
-                    # Unrooted drive
-                    yield cls.UnrootedDrive(pathstr[0])
-                    pathstr = pathstr[2:]
-
-        # Handle all other elements
-
-        for element in pathstr.split('/'):
-            if element == '' or element == cls.curdir:
-                continue
-            # We don't treat pardir specially, since in the presence of
-            # links there's nothing to do about them.
-            # Windows doesn't have links, but why not keep path handling
-            # similiar?
-            yield element
-
-
-    # NT-specific methods
-
-    # --- Extra
-
-    def startfile(self):
-        return os.startfile(str(self))
-
-if os.name == 'posix':
-    path = PosixPath
-elif os.name == 'nt':
-    path = NTPath
-else:
-    raise NotImplementedError, \
-          "The path object is currently not implemented for OS %r" % os.name
