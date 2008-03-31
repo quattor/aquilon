@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <commandline>
    %prog command [subcommand] options
-   Commands:
-   status
-   show host [--hostname NAME | --all]
-   add hardware --hostname NAME
-   add host --hostname NAME
-   add hardware --location NAME
-   add template --name NAME --domain WHO
-   add model --os OS --model VER --domain WHO
-   add service --service NAME [--instance NAME]
-   bind service --host NAME --service NAME --instance NAME
-   assoc --hostname NAME [--os OS --model VER] [--hardware NAME] [--template NAME]
-   pxeswitch --hostname NAME [--boot|--install]
-   reconfigure --hostname NAME
-
-   Working with configuration domains:
-   add domain --domain NAME
-   del domain --domain NAME
-   deploy --domain NAME [--to DOMAIN]
-   manage --hostname NAME --domain NAME
-   cat --domain NAME --template NAME
-   get --domain NAME
-   put --domain NAME
    <command name="*">
       <optgroup name="all commands">
          <option name="verbose" short="v" type="boolean" conflicts="silent">
@@ -51,7 +29,6 @@
 
    <command name="status">
       %prog status
-
       Shows the current server status.
       <transport method="get" path="" />
    </command>
@@ -60,8 +37,8 @@
       %prog show host --name hostname|--all
       Shows the configuration for a given host, or for all hosts.
       <optgroup name="show_host_Input" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="all"> Host name </option>
-         <option name="all" type="boolean" conflicts="hostname"> Select all hosts </option>
+         <option name="hostname" type="string" conflicts="all">Host name</option>
+         <option name="all" type="boolean" conflicts="hostname">Select all hosts</option>
       </optgroup>
       <transport trigger="all" method="get" path="host" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
@@ -69,8 +46,9 @@
 
    <command name="add_hardware">
       %prog add hardware --hostname name
+      Add new hardware to the database.
       <optgroup name="add_hardware_opts" mandatory="True" fields="any">
-         <option name="location" type="string" conflicts="hostname"> Hardware location </option>
+         <option name="location" type="string" conflicts="hostname">Hardware location</option>
       </optgroup>
       <!-- FIXME: Due for overhaul with Scott's work.  Might also
                   be tricky as Nick's implementation has slashes -->
@@ -78,75 +56,87 @@
    </command>
 
    <command name="add_host">
+      %prog add host --name NAME
+      Add a new host to the database.
       <optgroup name="add_host_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Host name </option>
+         <option name="hostname" type="string">Host name</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
    </command>
 
    <command name="add_template">
-      %prog add template --name name --domain domain
+      %prog add template --name NAME --domain DOMAIN
+      Add a new template for the specified domain.
       <optgroup name="add_template_opts" mandatory="True" fields="all">
-         <option name="name" type="string"> Template name </option>
-         <option name="domain" type="string"> Domain name </option>
+         <option name="name" type="string">Template name</option>
+         <option name="domain" type="string">Domain name</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s/template/%(name)s" />
    </command>
 
    <command name="add_model">
-      %prog add model --os=os --model=model --domain=domain
+      %prog add model --os OS --model MODEL --domain DOMAIN
+      Add a new model
       <optgroup name="add_model_opts" mandatory="True" fields="all">
-         <option name="os" type="string"> </option>
-         <option name="model" type="string"> </option>
-         <option name="domain" type="string"> </option>
+         <option name="os" type="string">OS type</option>
+         <option name="model" type="string">OS model</option>
+         <option name="domain" type="string">Domain name</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s/model/%(os)s/%(model)s" />
    </command>
 
    <command name="add_service">
-      %prog add hardware --hostname name
+      %prog add service --service SERVICE_NAME [--instance INSTANCE_NAME]
+      Add new service
       <optgroup name="add_service_mopts" mandatory="True" fields="all">
-         <option name="service" type="string" mandatory="True"> Host name </option>
+         <option name="service" type="string" mandatory="True">Host name</option>
       </optgroup>
       <optgroup name="add_service_opts" mandatory="False">
-         <option name="instance" type="string"> Host name </option>
+         <option name="instance" type="string">Instance name</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s/service/%(service)s" />
       <transport trigger="instance" method="put" path="domain/%(domain)s/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="bind_service">
-      %prog add hardware --hostname name
+      %prog bind service --host NAME --service SERVICE_NAME 
+      --instance INSTANCE_NAME
+      Bind a service on a host.
       <optgroup name="bind_service_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Host name </option>
-         <option name="service" type="string"> Service name </option>
-         <option name="instance" type="string"> Instance name </option>
+         <option name="hostname" type="string">Host name</option>
+         <option name="service" type="string">Service name</option>
+         <option name="instance" type="string">Instance name</option>
       </optgroup>
       <!-- In 1.0, only one service can be bound to a host at once. -->
       <transport method="post" path="host/%(hostname)s/service" />
    </command>
 
    <command name="del_host">
+      %prog del host --name HOSTNAME
+      Delete a host.
       <optgroup name="del_host_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Host name </option>
+         <option name="hostname" type="string">Host name</option>
       </optgroup>
       <transport method="delete" path="host/%(hostname)s" />
    </command>
 
    <command name="assoc">
-      %prog assoc --hostname NAME [--os OS --model VER] [--hardware NAME] [--template NAME]
+      %prog assoc --hostname NAME 
+      [--os OS --model VER] [--hardware NAME] [--template NAME]
+      Associate a host with an OS, a hardware or a template.
+      You have to specify any, but not more than one of the optional argument groups.
       <optgroup name="assoc_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Host name </option>
+         <option name="hostname" type="string">Host name</option>
          <optgroup name="additionalopts" mandatory="True" fields="any">
             <optgroup name="os" mandatory="False" fields="all" conflicts="hardware template">
-               <option name="os" type="string"> Host name </option>
-               <option name="model" type="string"> Host name </option>
+               <option name="os" type="string">OS type</option>
+               <option name="model" type="string">OS model</option>
             </optgroup>
             <optgroup name="hardware" mandatory="False" fields="all" conflicts="os template">
-               <option name="hardware" type="string"> Host name </option>
+               <option name="hardware" type="string">Hardware name</option>
             </optgroup>
             <optgroup name="template" mandatory="False" fields="all" conflicts="os hardware">
-               <option name="template" type="string"> Host name </option>
+               <option name="template" type="string">Template name</option>
             </optgroup>
          </optgroup>
       </optgroup>
@@ -156,12 +146,14 @@
    </command>
 
    <command name="pxeswitch">
+      %prog pxeswitch --host HOSTNAME (--install | --boot)
+      pxe
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Host name </option>
+         <option name="host" type="string">Host name</option>
       </optgroup>
       <optgroup name="bootinstall" mandatory="True" fields="any">
-         <option name="install" type="boolean" conflicts="boot"> </option>
-         <option name="boot" type="boolean" conflicts="install"> </option>
+         <option name="install" type="boolean" conflicts="boot">Do an install</option>
+         <option name="boot" type="boolean" conflicts="install">Do a reboot</option>
       </optgroup>
       <!-- Not sure if this is purely informational, or if there are side-
            effects -->
@@ -169,48 +161,49 @@
    </command>
 
    <command name="reconfigure">
+      %prog reconfigure --host HOSTNAME
       <optgroup name="reconfigure options" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Host name </option>
+         <option name="host" type="string">Host name</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
 
    <command name="add_domain">
-      Usage: %prog add domain --domain domain_name
+      %prog add domain --domain NAME
       <optgroup name="add domain options" mandatory="True" fields="all">
-         <option name="domain" type="string"> Name of the new domain </option>
+         <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
 
    <command name="del_domain">
-      Usage: %prog del domain --domain domain_name
+      %prog del domain --domain NAME
       <optgroup name="add domain options" mandatory="True" fields="all">
-         <option name="domain" type="string"> Name of the new domain </option>
+         <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
       <transport method="delete" path="domain/%(domain)s" />
    </command>
 
    <command name="get">
-      Usage: %prog get --domain domain_name
+      %prog get --domain NAME
       <optgroup name="get options" mandatory="True" fields="all">
-         <option name="domain" type="string"> Name of the new domain </option>
+         <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
       <transport method="post" path="domain/%(domain)s/command/get" expect="command"/>
    </command>
 
    <command name="put">
-      Usage: %prog put --domain domain_name
+      %prog put --domain NAME
       <optgroup name="put options" mandatory="True" fields="all">
-         <option name="domain" type="string"> Name of the new domain </option>
+         <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
       <transport method="post" path="domain/%(domain)s/command/bundle" custom="create_bundle"/>
    </command>
-   
+
    <command name="deploy">
-      Usage: %prog deploy --domain domain_name [--to domain_name]
+      %prog deploy --domain DOMAIN_NAME [--to DOMAIN_NAME]
       <optgroup name="deploy options" mandatory="True" fields="all">
-         <option name="domain" type="string"> Name of the domain </option>
+         <option name="domain" type="string">Name of the domain</option>
       </optgroup>
       <optgroup name="deploy to" mandatory="False" fields="all">
          <option name="to" type="string">
@@ -221,21 +214,22 @@
    </command>
 
    <command name="manage">
-      Usage: %prog manage --hostname name --domain name
+      %prog manage --hostname HOST_NAME --domain DOMAIN_NAME
       <optgroup name="manage options" mandatory="True" fields="all">
-         <option name="hostname" type="string"> Name of the host </option>
-         <option name="domain" type="string"> Name of the domain </option>
+         <option name="hostname" type="string">Name of the host</option>
+         <option name="domain" type="string">Name of the domain</option>
       </optgroup>
       <transport method="post" path="domain/%(domain)s/command/manage" />
    </command>
 
    <command name="cat">
-      Usage: %prog cat --hostname name | --domain name --template name
+      %prog cat ( --hostname HOSTNAME | 
+      (--domain DOMAIN_NAME  --template TEMPLATE_NAME ))
       <optgroup name="cat options" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="template"> Name of the host </option>
+         <option name="hostname" type="string" conflicts="template">Name of the host</option>
          <optgroup name="cat template options" fields="all">
-            <option name="template" type="string" conflicts="hostname"> Name of the template </option>
-            <option name="domain" type="string"> Name of the domain </option>
+            <option name="template" type="string" conflicts="hostname">Name of the template</option>
+            <option name="domain" type="string">Name of the domain</option>
          </optgroup>
       </optgroup>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/cat" />
@@ -243,40 +237,22 @@
    </command>
 
    <command name="sync">
-      Usage: %prog sync --domain domain_name
+      %prog sync --domain DOMAIN_NAME
       <optgroup name="sync options" mandatory="True" fields="all">
-         <option name="domain" type="string"> Name of the domain </option>
+         <option name="domain" type="string">Name of the domain</option>
       </optgroup>
       <transport method="post" path="domain/%(domain)s/command/sync" expect="command"/>
    </command>
 
    <command name="add_location">
-      Usage: %prog add location [options]
-         --name [mandatory] Short name of new location
-   	     --fullname [optional] Full/descriptive name of new location
-	     --type [mandatory] Location type
-	     --parentname [mandatory] Short name of parent
-	     --parenttype [mandatory] Location type of parent
-	     --comments [mandatory] Comments about the location
+      %prog add location [options]
       <optgroup name="add_location_opts" mandatory="True" fields="all">
-         <option name="name" type="string">
-            Short name of new location 
-         </option>
-         <option name="fullname" type="string">
-            Full/descriptive name of new location
-         </option>
-         <option name="type" type="string">
-            Location type
-         </option>
-         <option name="parentname" type="string">
-            Short name of parent
-         </option>
-         <option name="parenttype" type="string">
-            Location type of parent
-         </option>
-         <option name="comments" type="string">
-            Comments about the location
-         </option>
+         <option name="name" type="string">Short name of new location</option>
+         <option name="fullname" type="string">Full/descriptive name of new location</option>
+         <option name="type" type="string">Location type</option>
+         <option name="parentname" type="string">Short name of parent</option>
+         <option name="parenttype" type="string">Location type of parent</option>
+         <option name="comments" type="string">Comments about the location</option>
       </optgroup>
       <transport method="put" path="location/%(type)s/%(name)s" />
    </command>
@@ -285,13 +261,9 @@
       %prog show location [--type type [--name name]]
       Shows all location types, all locations of a given type,
       or information about a specific location type and name.
-      <optgroup name="show_location_opts">
-         <option name="name" type="string">
-            Host name
-         </option>
-         <option name="type" type="string">
-            Location type
-         </option>
+      <optgroup name="show_location_opts" mandatory="True" fields="any">
+         <option name="name" type="string">Host name</option>
+         <option name="type" type="string">Location type</option>
       </optgroup>
       <transport method="get" path="location" />
       <transport trigger="type" method="get" path="location/%(type)s" />
@@ -299,13 +271,10 @@
    </command>
 
    <command name="del_location">
-      <optgroup name="del_location_opts" mandatory="all">
-         <option name="name" type="string">
-            Short name of new location
-         </option>
-         <option name="type" type="string">
-            Location type
-         </option>
+      %prog del location --name NAME --type TYPE
+      <optgroup name="del_location_opts" mandatory="True" fields="all">
+         <option name="name" type="string">Short name of new location</option>
+         <option name="type" type="string">Location type</option>
       </optgroup>
       <transport method="delete" path="location/%(type)s/%(name)s" />
    </command>
@@ -315,7 +284,5 @@
       Also using this to test the broker running commands...
       <transport method="get" path="dummy_command" expect="command" />
    </command>
-
-
 </commandline>
 

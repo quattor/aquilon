@@ -25,7 +25,7 @@ def joinDict (d1, d2):
 # =========================================================================== #
 
 class ParsingError(StandardError):
-    def __init__ (self, helpMessage, errorMessage):
+    def __init__ (self, errorMessage, helpMessage = ''):
         self.help = helpMessage
         self.error = errorMessage
 
@@ -60,6 +60,14 @@ class Element(object):
             (res, found) = child.check(command, options)
             result = joinDict(result, res)
         return result, True
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp (self):
+        res = self.help
+        for child in self.children:
+            res = res + child.recursiveHelp()
+        return res
 
 # =========================================================================== #
 
@@ -96,12 +104,9 @@ class commandline(Element):
             result = joinDict (result,res)
         elif (command == 'help' or command == ''):
             # print general help, and help for each command
-            help = ''
-            for c in self.__commandlist:
-                help = help + c.help
-            raise ParsingError ('', self.help + help)
+            raise ParsingError ('',self.recursiveHelp())
         else:
-            raise ParsingError('Command '+command+' is not known!',self.help)
+            raise ParsingError('Command '+command+' is not known!',self.irecursiveHelp())
 
         transport = None
         for t in commandElement.transports:
@@ -113,6 +118,14 @@ class commandline(Element):
                 continue
 
         return transport, result
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp (self):
+        res = self.help + "\nValid commands are:\n"
+        for k in self.__commandlist.keys():
+            res = res + self.__commandlist[k].recursiveHelp()
+        return res
 
 # --------------------------------------------------------------------------- #
 
@@ -146,10 +159,21 @@ class command(Element):
             try:
                 (res, found) = optgroup.check(command, options)
             except ParsingError, e:
-                e.help = self.help + e.help
+                e.help = self.recursiveHelp()
                 raise e
             result = joinDict (result, res)
         return result, True
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp (self):
+        res = "\n"
+        lines = self.help.split("\n")
+        for line in lines:
+            res = res + "    " + line + "\n"
+        for og in self.optgroups:
+            res = res + og.recursiveHelp()
+        return res
 
 # =========================================================================== #
 
@@ -167,7 +191,7 @@ class optgroup(Element):
                 self.mandatory = False
         else:
             self.mandatory = False
-        
+
         if (attributes.has_key('fields')):
             self.fields = attributes['fields']
         else:
@@ -192,11 +216,7 @@ class optgroup(Element):
         foundall = True
 
         for option in self.options:
-            try:
-                (res, f) = option.check(command, options)
-            except ParsingError, e:
-                e.help = self.help + e.help
-                raise e
+            (res, f) = option.check(command, options)
             found[option.name] = f
             if (f):
                 result = joinDict(result, res)
@@ -206,14 +226,14 @@ class optgroup(Element):
         # check if the options are specified as requested
         if (self.mandatory):
             if (self.fields == 'all' and not foundall):
-                raise ParsingError(self.help, 'Not all mandatory options specified!')
+                raise ParsingError('Not all mandatory options specified!')
             if (self.fields == 'any' and not foundany):
-                raise ParsingError(self.help, 'Please provide any of the required options!')
+                raise ParsingError('Please provide any of the required options!')
             if (not foundany):
-                raise ParsingError(self.help, 'Mandatory options not provided')
+                raise ParsingError('Mandatory options not provided')
         else:
             if (self.fields == 'all' and foundany and not foundall):
-                raise ParsingError(self.help, 'Not all mandatory options specified!')
+                raise ParsingError('Not all mandatory options specified!')
 
         # check for conflicts
         for option in self.options:
@@ -221,9 +241,17 @@ class optgroup(Element):
                 continue
             for conflict in option.conflicts:
                 if (found.has_key(conflict) and found[conflict] == True):
-                    raise ParsingError('','Option or option group '+option.name+' conflicts with '+conflict)
+                    raise ParsingError('Option or option group '+option.name+' conflicts with '+conflict)
         # return result
         return result, foundany
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp (self):
+        res = self.help
+        for o in self.options:
+            res = res + o.recursiveHelp()
+        return res
 
 # =========================================================================== #
 
@@ -266,7 +294,7 @@ class option(Element):
 
         if (self.mandatory):
             if (not hasattr(options, self.name)):
-                raise ParsingError (self.help, 'Option '+self.name+' is missing');
+                raise ParsingError ('Option '+self.name+' is missing');
         if (hasattr(options, self.name)):
             val = getattr(options, self.name)
             if (not val is None):
@@ -292,9 +320,14 @@ class option(Element):
         elif (self.type == 'multiple'):
             str = str +', action="append"'
         else:
-            raise ParsingError('','Invalid option type: '+self.type);
+            raise ParsingError('Invalid option type: '+self.type);
         str = str+')'
         eval (str)
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp (self):
+        return "        --%-10s %s" %(self.name, self.help)
 
 # =========================================================================== #
 
@@ -311,7 +344,6 @@ class transport(Element):
 
 class OptParser (object):
     def __init__ (self, xmlFileName):
-        self.mb = 0 
         self.__nodeStack = []
         self.__root = None
         self.parser = OptionParser ()
@@ -356,20 +388,19 @@ class OptParser (object):
 
     def CharacterData(self, data):
         'Expat character data event handler'
+        asciidata = "" 
         if data.strip():
-            data = data.encode()
-        if (re.match('^\s+$',data)):
-            self.mb += 1
-            if (self.mb > 2):
-                return
-        else:
-            self.mb = 0
-
+            asciidata = data.encode()
+        if (len(asciidata) == 0):
+            return
+        asciidata = re.sub('^\s*','', asciidata)
+        asciidata = re.sub('[\s\r]*$','', asciidata)
+        asciidata = re.sub('^\s+$','', asciidata)
         if (self.__nodeStack):
             parent = self.__nodeStack[-1]
-            parent.help = parent.help + data
+            parent.help = parent.help + asciidata + "\n"
         else:
-            self.__root.help = self.root.help + data
+            self.__root.help = self.root.help + asciidata + "\n"
 
 # --------------------------------------------------------------------------- #
 
@@ -387,8 +418,8 @@ class OptParser (object):
         if (args):
             command = '_'.join(args)
         else:
-            self.parser.usage = self.__root.help
-            self.parser.error('')
+            self.parser.usage = self.__root.recursiveHelp ()
+            self.parser.error('Please specify a command')
         try:
             this_is_None, globalOptions = self.__root.check(None, opts)
             transport, commandOptions = self.__root.check(command, opts)
