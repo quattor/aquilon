@@ -21,7 +21,11 @@ from aquilon.aqdb.utils.schemahelpers import *
 from aquilon import const
 from utils.exceptions_ import NoSuchRowException
 from utils import altpath
-const.cfg_base=altpath.path('/var/quattor/template-king/')
+
+import os
+osuser = os.environ.get('USER')
+qdir = os.path.join( '/var/tmp', osuser, 'quattor/template-king' )
+const.cfg_base=altpath.path(qdir)
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
@@ -141,7 +145,7 @@ def create_paths():
             if len(files) > 0:
                 for i in files:
                     p = altpath.path(os.path.join(root,i))
-                    print p[4:]
+                    #print p[4:]
                     f=CfgPath(str(p[4:]))
                     Session.save(f)
         Session.commit()
@@ -158,7 +162,24 @@ def create_domains():
         s.commit()
         print 'created production and qa domains'
 
+def get_quattor_src():
+    """ ugly ugly way to initialize a quattor repo for import"""
+    
+    import os
+    import exceptions
+    if os.path.exists(str(const.cfg_base)):
+        return
+
+    remote_dir = 'quattorsrv:/var/tmp/quattor/template-king/*'
+    try:
+        os.makedirs(str(const.cfg_base))
+    except exceptions.OSError, e:
+        pass 
+    print 'run "scp -r %s %s in a seperate window."'%(remote_dir,str(const.cfg_base))
+    raw_input("When you've completed this, press any key")
+
 if __name__ == '__main__':
+    get_quattor_src()
     populate_tld()
     populate_cst()
     create_paths()
