@@ -33,9 +33,11 @@ p=m.location.parents()
 w=p[0]
 
 print 'm.interfaces: \n%s\n'%(m.interfaces)
-
 print 'm.interfaces[0]: \n%s\n'%(m.interfaces[0])
-
 print 'm.interfaces[0].__dict__: \n%s\n'%(m.interfaces[0].__dict__)
+print 'm.interfaces[0].nic: \n%s\n'%(m.interfaces[0].nic)     
+print 'm.interfaces[0].nic.driver: \n%s\n'%(m.interfaces[0].nic.driver)
+print 'm.interfaces[0].nic.__dict__: \n%s\n'%(m.interfaces[0].nic.__dict__)
+
 
 ipshell()
