@@ -22,6 +22,7 @@ from aquilon.aqdb.utils.schemahelpers import *
 from location import Location,Chassis
 from configuration import CfgPath
 from hardware import Machine
+import configuration #for the const.* set there.
 
 location=Table('location', meta, autoload=True)
 chassis=Table('chassis', meta, autoload=True)
@@ -31,14 +32,39 @@ machine=Table('machine', meta, autoload=True)
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
-const.nic_directory='/var/quattor/template-king/hardware/nic/'
+const.nic_directory=str(configuration.const.cfg_base)+'/hardware/nic/'
 const.nic_prefix ='hardware/nic/'
 const.nics = os.listdir(const.nic_directory)
 
 interface_type=mk_type_table('interface_type',meta)
 interface_type.create(checkfirst=True)
 
-#interface_type=Table('interface_type',meta,autoload=True)
+def parse_template(file):
+    """ Reads in a quattor hardware template and returns a dictionary
+        of all the key/value pairs within it.
+    """
+    if not file.startswith(const.nic_directory):
+        fqp = const.nic_directory + file
+    else:
+        fqp=file
+        import os
+        (pth,file) = os.path.split(file)
+
+    f = open(fqp,'ro')
+    hash={}
+    hash['cfg_path']=file
+
+    for line in f.readlines():
+        if line.isspace() or line.startswith('#'):
+            continue
+        if line.startswith('structure template '):
+            continue
+
+        line = line.strip().strip(';').rstrip('\n')
+        line = line.replace('"','')
+        (a,b,c) = line.partition('=')
+        hash[a.strip()] = c.strip()
+    return hash
 
 class InterfaceType(aqdbType):
     """ AQDB will support different types of interfaces besides just the usual
@@ -51,8 +77,8 @@ mapper(InterfaceType, interface_type, properties={
     'creation_date':deferred(interface_type.c.creation_date),
     'comments': deferred(interface_type.c.comments)})
 if empty(interface_type,engine):
-    fill_type_table(interface_type,['physical','zebra','service','802.1q'])
-
+    fill_type_table(interface_type,['physical','zebra','service','802.1q',
+            'base_interface_type'])
 
 interface = Table('interface',meta,
     Column('id', Integer, primary_key=True),
@@ -171,7 +197,7 @@ class PhysicalInterface(Interface):
         self.name = name.strip().lower()
         self.mac  = mac.strip().lower()
         self.nic  = nic
-        self.machine= m
+        self.machine= machine
         #TODO: tighten this up with type/value checks
 
 mapper(PhysicalInterface, physical_interface,
@@ -193,17 +219,14 @@ def populate_physical():
     if empty(physical_interface,engine):
         m=Session.query(Machine).first()
         nick=Session.query(Nic).filter_by(driver='tg3').one()
-        pi=PhysicalInterface('e0',nick,'00:ae:0f:11:bb:cc',m)
-        ipshell()
+        try:
+            pi=PhysicalInterface('e0',nick,'00:ae:0f:11:bb:cc',m)
+        except Exception,e:
+            print e
+
         Session.save(pi)
         Session.commit()
 
 if __name__ == '__main__':
-    from aquilon.aqdb.utils.debug import ipshell
-
     populate_nics()
     populate_physical()
-    #TODO: there's no inheritance of interface type through pmorphic
-
-    m=Session.query(Machine).first()
-    ipshell()

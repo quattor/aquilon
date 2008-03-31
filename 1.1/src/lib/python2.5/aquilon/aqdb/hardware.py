@@ -18,7 +18,6 @@ import datetime
 
 from db import *
 from aquilon.aqdb.utils.schemahelpers import *
-from aquilon import const
 
 from location import Location,Chassis
 from configuration import CfgPath
@@ -29,37 +28,6 @@ cfg_path=Table('cfg_path',meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
-
-const.tables=['vendor','hardware_type','machine_type','model','machine']
-#machine, machine_type, hardware_type, model, vendor
-
-def parse_template(file):
-    """ Reads in a quattor hardware template and returns a dictionary
-        of all the key/value pairs within it.
-    """
-    if not file.startswith(const.nic_directory):
-        fqp = const.nic_directory + file
-    else:
-        fqp=file
-        import os
-        (pth,file) = os.path.split(file)
-
-    f = open(fqp,'ro')
-    hash={}
-    hash['cfg_path']=file
-
-    for line in f.readlines():
-        if line.isspace() or line.startswith('#'):
-            continue
-        if line.startswith('structure template '):
-            continue
-
-        line = line.strip().strip(';').rstrip('\n')
-        line = line.replace('"','')
-        (a,b,c) = line.partition('=')
-        hash[a.strip()] = c.strip()
-    return hash
-
 
 vendor = mk_name_id_table('vendor',meta)
 vendor.create(checkfirst=True)
@@ -270,7 +238,7 @@ def populate_fake_machine():
 
         c=Session.query(Chassis).first()
         mod=Session.query(Model).filter_by(name='hs20').one()
-        m=Machine(c,mod)
+        m=Machine(c,mod,name='np3c1n9-TESTHOST')
 
         Session.save(m)
         Session.commit()
