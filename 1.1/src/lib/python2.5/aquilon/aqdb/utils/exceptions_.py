@@ -28,7 +28,7 @@ class ArgumentError(AquilonError):
 class AlreadyExistsException(AquilonError):
     '''Raised when an attempt to create a row/object which already exists
         and would violate a unique constraint somewhere'''
-    from aquilon.aqdb.DB import engine
+    from aquilon.aqdb.db import engine
     if engine.dialect.__class__.__name__ == 'SQLiteDialect':
         from sqlite3 import IntegrityError
 
