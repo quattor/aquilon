@@ -45,12 +45,21 @@ from twisted.python import log
 from aquilon.server.exceptions_ import AuthorizationException
 
 class ResponsePage(resource.Resource):
+
     def __init__(self, broker, path, path_variable=None):
         self.path = path
         self.broker = broker
         self.path_variable = path_variable
         self.dynamic_child = None
         resource.Resource.__init__(self)
+        # FIXME: How does the client request a different format?
+        self.formats = []
+        for attr in dir(self):
+            if not callable(attr):
+                continue
+            if not attr.startswith("format_"):
+                continue
+            self.formats.append(attr[7:])
 
     def add_path_variable(self, request, path_variable, val):
         """Helper method to add request.path_variables[path_variable]=val"""
@@ -88,6 +97,14 @@ class ResponsePage(resource.Resource):
         if not m:
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
         return m(request)
+
+    def format(self, result, request):
+        style = getattr(request, "output_format", "raw")
+        formatter = getattr(self, "format_" + style, self.format_raw)
+        return formatter(result, request)
+
+    def format_raw(self, result, request):
+        return str(result)
 
     # All of these wrap* functions should probably be elsewhere, and
     # change depending on what should go back to the client.
@@ -464,10 +481,11 @@ class ResponsePage(resource.Resource):
             return ""
 
         d = self.broker.dbbroker.showLocationType(session=True)
-        d = d.addErrback( self.wrapError, request )
-        d = d.addCallback( self.wrapAqdbTypeInTable )
-        d = d.addCallback( self.wrapTableInBody )
-        d = d.addCallback( self.finishRender, request )
+        d = d.addErrback(self.wrapError, request)
+        #d = d.addCallback(self.wrapAqdbTypeInTable)
+        #d = d.addCallback(self.wrapTableInBody)
+        d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
@@ -483,10 +501,11 @@ class ResponsePage(resource.Resource):
             return ""
 
         d = self.broker.dbbroker.showLocation(session=True, type=type)
-        d = d.addErrback( self.wrapError, request )
-        d = d.addCallback( self.wrapLocationInTable )
-        d = d.addCallback( self.wrapTableInBody )
-        d = d.addCallback( self.finishRender, request )
+        d = d.addErrback(self.wrapError, request)
+        #d = d.addCallback( self.wrapLocationInTable )
+        #d = d.addCallback( self.wrapTableInBody )
+        d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
@@ -508,8 +527,9 @@ class ResponsePage(resource.Resource):
         d = self.broker.dbbroker.showLocation(type=type, name=name,
                 session=True)
         d = d.addErrback( self.wrapError, request )
-        d = d.addCallback( self.wrapLocationInTable )
-        d = d.addCallback( self.wrapTableInBody )
+        #d = d.addCallback( self.wrapLocationInTable )
+        #d = d.addCallback( self.wrapTableInBody )
+        d = d.addCallback(self.format, request)
         d = d.addCallback( self.finishRender, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
@@ -532,8 +552,9 @@ class ResponsePage(resource.Resource):
         d = self.broker.dbbroker.addLocation(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
-        d = d.addCallback( self.wrapLocationInTable )
-        d = d.addCallback( self.wrapTableInBody )
+        #d = d.addCallback( self.wrapLocationInTable )
+        #d = d.addCallback( self.wrapTableInBody )
+        d = d.addCallback(self.format, request)
         d = d.addCallback( self.finishRender, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
@@ -586,7 +607,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        return "<html><head><title>Status</title></head><body>OK</body></html>"
+        return self.format("OK", request)
 
     # FIXME: Probably going to change...
     def command_add_hardware(self, request):

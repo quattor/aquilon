@@ -99,7 +99,7 @@ def gotPage(pageData, uri, expect):
         d = d.addCallbacks(cb_command_response, cb_command_error)
         d.addCallback(lambda _: reactor.stop())
     else:
-        print "Got representation of %s:" % uri
+        print "[OK] %s" % uri
         print pageData
         reactor.stop()
 
