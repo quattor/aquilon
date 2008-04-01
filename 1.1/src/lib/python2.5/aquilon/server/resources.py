@@ -61,13 +61,6 @@ class ResponsePage(resource.Resource):
                 continue
             self.formats.append(attr[7:])
 
-    def add_path_variable(self, request, path_variable, val):
-        """Helper method to add request.path_variables[path_variable]=val"""
-        if not getattr(request, "path_variables", None):
-            request.path_variables = {}
-        request.path_variables[path_variable] = val
-        return val
-
     def getChild(self, path, request):
         """Typically in twisted.web, a dynamic child would be created...
         dynamically.  However, to make the command_* mappings possible,
@@ -84,7 +77,7 @@ class ResponsePage(resource.Resource):
         if not self.dynamic_child:
             return resource.Resource.getChild(self, path, request)
 
-        self.add_path_variable(request, self.dynamic_child.path_variable, path)
+        request.args[self.dynamic_child.path_variable] = [path]
         return self.dynamic_child
 
     def render(self, request):
@@ -234,10 +227,7 @@ class ResponsePage(resource.Resource):
     
     def command_show_host_hostname(self, request):
         """aqcommand: aq show host --hostname=<host>"""
-        #print 'render_GET called'
-        #name = request.args['name'][0]
-        #name = self.path
-        name = request.path_variables["hostname"]
+        name = request.args['hostname'][0]
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
@@ -258,10 +248,8 @@ class ResponsePage(resource.Resource):
 
     def command_add_host(self, request):
         """aqcommand: aq add host --hostname=<host>"""
-        #name = request.args['name'][0]
+        name = request.args['hostname'][0]
         #request.content.seek(0)
-        #name = self.path
-        name = request.path_variables["hostname"]
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
@@ -283,8 +271,7 @@ class ResponsePage(resource.Resource):
 
     def command_del_host(self, request):
         """aqcommand: aq del host --hostname=<host>"""
-        #name = self.path
-        name = request.path_variables["hostname"]
+        name = request.args['hostname'][0]
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
@@ -334,25 +321,22 @@ class ResponsePage(resource.Resource):
 
     def command_add_domain(self, request):
         """aqcommand: aq add domain --domain=<domain>"""
-        #name = self.path
-        domain = request.path_variables["domain"]
+        domain = request.args['domain'][0]
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add_domain has not been implemented yet"
 
     def command_del_domain(self, request):
         """aqcommand: aq del domain --domain=<domain>"""
-        #name = self.path
-        domain = request.path_variables["domain"]
+        domain = request.args['domain'][0]
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq del_domain has not been implemented yet"
 
     def command_add_template(self, request):
         """aqcommand: aq add template --name=<name> --domain=<domain>"""
-        #name = self.path
-        domain = request.path_variables["domain"]
-        template = request.path_variables["name"]
+        domain = request.args['domain'][0]
+        template = request.args['name'][0]
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add_template has not been implemented yet"
@@ -363,13 +347,13 @@ class ResponsePage(resource.Resource):
         # FIXME: Lookup the default domain.
         domain = "production"
 
-        self.add_path_variable(request, "domain", domain)
+        request.args["domain"] = [domain]
 
         return self.command_get_domain(request)
 
     def command_get_domain(self, request):
         """aqcommand: aq get --domain=<domain>"""
-        domain = request.path_variables["domain"]
+        domain = request.args['domain'][0]
 
         # FIXME: Lookup whether this server handles this domain
         # redirect as necessary.
@@ -404,13 +388,13 @@ class ResponsePage(resource.Resource):
         # FIXME: Lookup the default domain.
         domain = "production"
 
-        self.add_path_variable(request, "domain", domain)
+        request.args["domain"] = [domain]
 
         return self.command_sync_domain(request)
 
     def command_sync_domain(self, request):
         """aqcommand: aq sync --domain=<domain>"""
-        domain = request.path_variables["domain"]
+        domain = request.args['domain'][0]
 
         # FIXME: Sanitize domain before it is used in commands.
 
@@ -491,8 +475,7 @@ class ResponsePage(resource.Resource):
     
     def command_show_location_type(self, request):
         """aqcommand: aq show location --type"""
-        #type = self.path
-        type = request.path_variables["type"]
+        type = request.args['type'][0]
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
                     "show", "/location/%s" % type)
@@ -511,11 +494,8 @@ class ResponsePage(resource.Resource):
     
     def command_show_location_name(self, request):
         """aqcommand: aq show location --name=<location>"""
-        #print 'render_GET called'
-        #name = request.args['name'][0]
-        #name = self.path
-        type = request.path_variables["type"]
-        name = request.path_variables["name"]
+        type = request.args['type'][0]
+        name = request.args['name'][0]
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
@@ -536,11 +516,8 @@ class ResponsePage(resource.Resource):
 
     def command_add_location(self, request):
         """aqcommand: aq add location --locationname=<location>"""
-        #name = request.args['name'][0]
-        #request.content.seek(0)
-        #name = self.path
-        type = request.path_variables["type"]
-        name = request.path_variables["name"]
+        type = request.args['type'][0]
+        name = request.args['name'][0]
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
@@ -561,9 +538,8 @@ class ResponsePage(resource.Resource):
 
     def command_del_location(self, request):
         """aqcommand: aq del location --locationname=<location>"""
-        #name = self.path
-        type = request.path_variables["type"]
-        name = request.path_variables["name"]
+        type = request.args['type'][0]
+        name = request.args['name'][0]
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
