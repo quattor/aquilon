@@ -81,12 +81,10 @@ class DatabaseBroker(AccessBroker):
         if kwargs.has_key("type"):
             # Not this easy...
             #kwargs["LocationType.type"] = kwargs.pop("type")
-            query = query.filter(\
-                and_(\
-                    LocationType.type==kwargs.pop("type"),\
-                    Location.location_type_id==LocationType.id\
-                )\
-            )
+            query = query.join('type').filter_by(type=kwargs.pop("type"))
+            query = query.reset_joinpoint()
+        if kwargs:
+            query = query.filter_by(**kwargs)
         return query.all()
 
     # This is a more generic solution... would be called with
