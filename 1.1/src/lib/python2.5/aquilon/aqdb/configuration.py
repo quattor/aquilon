@@ -21,6 +21,7 @@ from aquilon.aqdb.utils.schemahelpers import *
 from aquilon import const
 from utils.exceptions_ import NoSuchRowException
 from utils import altpath
+from aquilon.aqdb.utils.debug import ipshell
 
 import os
 osuser = os.environ.get('USER')
@@ -88,7 +89,7 @@ class CfgPath(aqdbBase):
         if isinstance(pth,str):
             pth = altpath.path(pth.lstrip('/').lower())
             try:
-                tld=Session.query(CfgTLD).filter_by(type=pth[0]).one()
+                tld=Session.query(CfgTLD).filter_by(type=pth.split('/')[0]).one()
             except NoSuchRowException:
                 print "Can't find top level element '%s'"
             else:
@@ -140,14 +141,18 @@ def populate_cst():
 
 def create_paths():
     if empty(cfg_path,engine):
-        import os
-        for root, dirs, files in os.walk(str(const.cfg_base)):
-            if len(files) > 0:
-                for i in files:
-                    p = altpath.path(os.path.join(root,i))
-                    #print p[4:]
-                    f=CfgPath(str(p[4:]))
-                    Session.save(f)
+        #import os
+        #for root, dirs, files in os.walk(str(const.cfg_base)):
+        #    if len(files) > 0:
+        #        for i in files:
+        #            p = altpath.path(os.path.join(root,i))
+        #            ipshell()
+        #            print p[4:]
+        d=altpath.path(str(const.cfg_base))
+        for file in d.walk('*.tpl'):
+            (a,b,c)=file.partition('template-king/')
+            f=CfgPath(c)
+            Session.save(f)
         Session.commit()
         print 'created configuration paths'
 
