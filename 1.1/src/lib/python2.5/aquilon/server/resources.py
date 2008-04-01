@@ -36,13 +36,15 @@ import re
 import sys
 import os
 import xml.etree.ElementTree as ET
+from base64 import b64decode
+from tempfile import mkstemp
 
 from twisted.application import internet
 from twisted.web import server, resource, http, error
 from twisted.internet import defer, utils
 from twisted.python import log
 
-from aquilon.server.exceptions_ import AuthorizationException
+from aquilon.server.exceptions_ import AuthorizationException, GitCommandException
 
 class ResponsePage(resource.Resource):
 
@@ -205,6 +207,23 @@ class ResponsePage(resource.Resource):
         self.finishError(request)
         return failure
 
+    def cb_git_command_finished(self, (out, err, code), request):
+        """Raise an error for a non-zero return code."""
+        log.msg("git command finished with return code %d" % code)
+        log.msg("git command stdout: %s" % out)
+        log.msg("git command stderr: %s" % err)
+        if code != 0:
+            raise GitCommandException("Git command failed with code: %d" % code)
+        return out
+
+    def cb_git_command_error(self, (out, err, signalNum), request):
+        """Raise an error for a non-zero return code."""
+        log.msg("git command exitted with signal %d" % signalNum)
+        log.msg("git command stdout: %s" % out)
+        log.msg("git command stderr: %s" % err)
+        raise GitCommandException("Git command exitted with signal: %d"
+                % signalNum)
+
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
         #print 'render_GET called'
@@ -364,8 +383,29 @@ class ResponsePage(resource.Resource):
         # FIXME: Return absolute paths to git?
         return "git clone 'http://%s/templates/%s/.git/%s' && cd '%s' && ( git checkout -b '%s' || true )" % (localhost, domain, domain, domain, domain)
 
+    def decode_and_write(self, encoded):
+        decoded = b64decode(encoded)
+        (handle, filename) = mkstemp()
+        # Write decoded to the filename
+        return filename
+
     def command_put(self, request):
         """aqcommand: aq put --domain=<domain>"""
+        bundle = request.args["bundle"][0]
+
+        # FIXME: Lookup whether this server handles this domain
+        # redirect as necessary.
+
+        domaindir = self.broker.templatesdir + "/" + domain
+        # FIXME: Check that it exists.
+
+        #d = deferToThread(self.decode_and_write, bundle)
+        #d = d.addCallback(lambda filename: utils.getProcessOutputAndValue(
+        #    "/bin/sh", ["-c", "cd '%s/%s' && 
+        #    d = utils.getProcessOutputAndValue("/bin/sh",
+        #            ["-c", "cd '%s' && %s update server info"
+
+        # FIXME: Code in progress here...
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq put has not been implemented yet"
@@ -404,51 +444,24 @@ class ResponsePage(resource.Resource):
         # actually exist.
 
         # FIXME: Check whether the directory exists.
-
-        def _cb_command_error((out, err, signalNum), request):
-            log.err("Command exited with signal number %d" % signalNum)
-            log.err("Command stdout: %s" % out)
-            log.err("Command stderr: %s" % err)
-            self.finishError(request)
-            return
-
-        def _cb_git_update_server_info_output((out, err, code), request):
-            log.msg("git update server info finished with return code %d"
-                    % code)
-            log.msg("git update server info stdout: %s", out)
-            log.msg("git update server info stderr: %s", err)
-            if code != 0:
-                self.finishError(request)
-                return
-            # Everything went as expected - tell the client to do a pull
-            self.finishRender("git pull")
-
-        def _cb_git_pull_output((out, err, code), request):
-            log.msg("git pull finished with return code %d" % code)
-            log.msg("git pull stdout: %s", out)
-            log.msg("git pull stderr: %s", err)
-            if code != 0:
-                self.finishError(request)
-                return
-            # The 1.0 code notes that this should probably be done as a
-            # hook in git... just need to make sure it runs.
-            # This code could be simplified if it was just tacked on
-            # to the pull as an &&.
-            d = utils.getProcessOutputAndValue("/bin/sh",
-                    ["-c", "cd '%s/%s' && %s update server info"
-                        % (self.broker.templatesdir, domain, self.broker.git)])
-            d = d.addCallbacks(_cb_git_update_server_info_output,
-                    _cb_command_error,
-                    callbackArgs=[request], errbackArgs=[request])
-            d = d.addCallback(self.finishRender, request)
-            d = d.addErrback(self.wrapError, request)
-            return
+        domaindir = self.broker.templatesdir + '/' + domain
 
         d = utils.getProcessOutputAndValue("/bin/sh",
-                ["-c", "cd '%s/%s' && %s pull"
-                    % (self.broker.templatesdir, domain, self.broker.git)])
-        d = d.addCallbacks(_cb_git_pull_output, _cb_command_error,
+                ["-c", "cd '%s' && %s pull" % (domaindir, self.broker.git)])
+        d = d.addCallbacks(self.cb_git_command_finished,
+                self.cb_git_command_error,
                 callbackArgs=[request], errbackArgs=[request])
+        # The 1.0 code notes that this should probably be done as a
+        # hook in git... just need to make sure it runs.
+        d = d.addCallback(lambda _: utils.getProcessOutputAndValue("/bin/sh",
+                ["-c", "cd '%s' && %s update server info"
+                    % (domaindir, self.broker.git)]))
+        d = d.addCallbacks(self.cb_git_command_finished,
+                self.cb_git_command_error,
+                callbackArgs=[request], errbackArgs=[request])
+        # All went well... send client command.
+        d = d.addCallback(lambda _: "git pull")
+        d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapError, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
@@ -565,11 +578,28 @@ class ResponsePage(resource.Resource):
             # FIXME: do stuff with err and signalNum
             return out
 
+        # Here's what is happening...
+        # Set up a Deferred to run a process and get the output.
         d = utils.getProcessOutputAndValue("/bin/echo",
                 [ "/bin/env && echo hello && sleep 1 && echo hi; echo bye" ] )
-        d = d.addErrback( self.wrapError, request )
+        # Set up callbacks to just return the stdout output
         d = d.addCallbacks(_cb_command_output, _cb_command_error)
+        # Ignore the data being brought in (demo purposes, although
+        # similar would happen in a real command chain... generally
+        # we're not parsing output, just looking for a successful
+        # command with the return code).
+        # Create a new Deferred within the callback!  Twisted will
+        # then run the results through this (existing) callback chain!
+        d = d.addCallback(lambda _: utils.getProcessOutputAndValue(
+                "/bin/echo",
+                ["/bin/env && echo hello there && sleep 1 && echo bye"]))
+        # Same callbacks as before - just return stdout
+        d = d.addCallbacks(_cb_command_output, _cb_command_error)
+        # Pass the output of *only* the second command (the first
+        # one was thrown away) back to the client with finishRender.
         d = d.addCallback( self.finishRender, request )
+        # Catch any uncaught expceptions and finish the request.
+        d = d.addErrback( self.wrapError, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 

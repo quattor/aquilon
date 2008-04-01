@@ -46,3 +46,8 @@ class AuthorizationException(AquilonError):
     action on a resource.
 
     '''
+
+class GitCommandException(AquilonError):
+    '''Raised when a git command fails.
+
+    '''
