@@ -161,7 +161,7 @@ def populate_networks():
         c=Network(b,**kw)
         s.save_or_update(c)
         count += 1
-        if count % 500 == 0:
+        if count % 1000 == 0:
             s.commit()
             s.flush()
 

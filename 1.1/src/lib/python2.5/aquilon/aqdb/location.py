@@ -125,22 +125,17 @@ class Location(aqdbBase):
     def children(self):
         return list(self.sublocations)
 
+    def sysloc(self):
+        v=['building','rack','chassis','desk']
+        if str(self.type) in v:
+            l=self.parents()
+            return str('.'.join([l[2].name, l[4].name, l[5].name]))
+        
     def __repr__(self):
         return self.__class__.__name__ + " " + self.name
 
     def __str__(self):
         return self.name
-
-    def _getstring(self, level, expand = False):
-        s = ('  ' * level) + "%s (%s,%s, %d)" % (
-            self.name, self.id,self.parent.id,id(self)) + '\n'
-        if expand:
-            s += ''.join([n._getstring(level+1, True)
-                          for n in self.children()])
-        return s
-
-    def print_nodes(self):
-        return self._getstring(0, True)
 
 class Company(Location):
     pass
@@ -164,9 +159,6 @@ class Rack(Location):
     pass
 
 class Chassis(Location):
-    #__slots__=['_sa_session_id','name','parent','_state','_entity_name',
-    #           'parent_id','location_type_id','fullname','id','_instance_key']
-
     pass
 
 class Desk(Location):

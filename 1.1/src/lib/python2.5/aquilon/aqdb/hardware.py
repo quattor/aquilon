@@ -20,11 +20,12 @@ from db import *
 from aquilon.aqdb.utils.schemahelpers import *
 
 from location import Location,Chassis
-from configuration import CfgPath
+from configuration import CfgPath, Domain
 
 location=Table('location',meta,autoload=True)
 chassis=Table('chassis',meta,autoload=True)
 cfg_path=Table('cfg_path',meta, autoload=True)
+domain=Table('domain', meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
@@ -173,11 +174,79 @@ class Machine(aqdbBase):
 mapper(Machine,machine, properties={
     'location': relation(Location),
     'model':    relation(Model),
-    #type is m.model.machine_type. would be nice to have it directly
     'creation_date' : deferred(machine.c.creation_date),
     'comments': deferred(machine.c.comments)
 })
 
+status=Table('status', meta,
+    Column('id', Integer, primary_key=True, index=True),
+    Column('name', String(16), unique=True, index=True, nullable=False),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255)))
+status.create(checkfirst=True)
+
+class Status(object):
+    """ Status represents phases of deployment. can be one of prod, dev, qa, or
+        build. Child of host table, so it comes first. """
+    def __init__(self,name):
+        msg = """
+Status is a static table and cannot be instanced, only queried. """
+        raise ArgumentError(msg.lstrip())
+        return
+    def __repr__(self):
+        return str(self.name)
+
+mapper(Status, status)
+if empty(status,engine):
+    i=status.insert()
+    for name in ['prod','dev','qa','build']:
+        i.execute(name=name)
+
+
+host=Table('host', meta,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(32), unique=True, index=True),
+    Column('machine_id', Integer,
+           ForeignKey('machine.id',ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('domain_id', Integer,
+           ForeignKey('domain.id', ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('status_id', Integer,
+           ForeignKey('status.id', ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+host.create(checkfirst=True)
+#TODO: an aliases table and dns domain table
+
+class Host(aqdbBase):
+    """ HOORAY HOST!!! """
+    def __init__(self,mchin,**kw):
+        s = Session()
+        if isinstance(mchin,Machine):
+            self.machine=mchin
+        self.name=kw.pop('name',mchin.name)
+        self.domain=kw.pop('domain',
+                           s.query(Domain).filter_by(name='qa').one())
+        self.status=kw.pop('status',
+                           s.query(Status).filter_by(name='build').one())
+        s.close()
+    def sysloc(self):
+        l=self.machine.location.parents()
+        sl='.'.join([l[2].name, l[4].name, l[5].name])
+        return sl
+    def __repr__(self):
+        return 'Host %s'%(self.name)
+
+mapper(Host,host, properties={
+    'machine':relation(Machine),
+    'domain':relation(Domain),
+    'status':relation(Status),
+    'creation_date' : deferred(host.c.creation_date),
+    'comments': deferred(host.c.comments)
+})
+#try to make the ip addresses easily accessable in the mapper
+
+
+####POPULATION ROUTINES####
 def populate_vendor():
     if empty(vendor,engine):
         s = Session()
@@ -221,6 +290,8 @@ def populate_model():
             ['hp','dl580','machine','rackmount'],
             ['sun','ultra-10','machine','workstation'],
             ['dell','poweredge-6850','machine','rackmount'],
+            ['dell','poweredge-2650','machine','rackmount'],
+            ['dell','poweredge-2850','machine','rackmount'],
             ['dell','optiplex-260','machine','workstation']]
 
         for i in f:
@@ -235,29 +306,46 @@ def populate_model():
 
 def populate_fake_machine():
     if empty(machine,engine):
-
         c=Session.query(Chassis).first()
         mod=Session.query(Model).filter_by(name='hs20').one()
-        m=Machine(c,mod,name='np3c1n9-TESTHOST')
+        m=Machine(c,mod,name='np12c1n9-TESTHOST')
 
         Session.save(m)
         Session.commit()
 
 def populate_np_nodes():
-    s=Session
-    mod=Session.query(Model).filter_by(name='hs20').one()
-    with open('etc/np-nodes','r') as f:
-        for line in f.readlines():
-            (c,q,num)=line.strip().lstrip('n').partition('n')
-            c='n'+c
-            try:
-                r=s.query(Chassis).filter_by(name=c).one()
-            except Exception,e:
-                print 'no such chassis %s'%c
-                continue
-            m=Machine(r,mod,name=line.strip())
-            s.save(m)
-    s.commit()
+    cnt=machine.count().execute()
+    if cnt.fetchall()[0][0] < 2:
+        s=Session
+        mod=Session.query(Model).filter_by(name='hs20').one()
+        with open('etc/np-data/np-nodes','r') as f:
+            for line in f.readlines():
+                (c,q,num)=line.strip().lstrip('n').partition('n')
+                c='n'+c
+                try:
+                    r=s.query(Chassis).filter_by(name=c).one()
+                except Exception,e:
+                    print 'no such chassis %s'%c
+                    continue
+                m=Machine(r,mod,name=line.strip())
+                s.save(m)
+        s.commit()
+        s.close()
+
+def populate_hosts():
+    if empty(host,engine):
+        s=Session()
+        mlist=s.query(Machine).all()
+        m=mlist[23]
+        h=Host(m,name='npipm1')
+        s.save(h)
+        h.name='npipm1'
+        s.commit()
+        m=mlist[43]
+        h=Host(m,name='npipm2')
+        s.save(h)
+        s.commit()
+        s.close()
 
 if __name__ == '__main__':
     from aquilon.aqdb.utils.debug import ipshell
@@ -268,11 +356,8 @@ if __name__ == '__main__':
     populate_model()
     populate_fake_machine()
     populate_np_nodes()
+    populate_hosts()
 
-    #ipshell()
-
-
-
+    ipshell()
 
 #do we need hardware type when we have nic, cpu, disk and model tables?
-#machine is an association map of all these items
