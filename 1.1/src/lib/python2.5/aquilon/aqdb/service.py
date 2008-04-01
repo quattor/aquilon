@@ -20,6 +20,14 @@ from aquilon.aqdb.utils.schemahelpers import *
 from location import *
 location=Table('location', meta, autoload=True)
 
+from hardware import Machine, Status
+machine=Table('machine', meta, autoload=True)
+status = Table('status', meta, autoload=True)
+
+from configuration import Domain
+domain = Table('domain', meta, autoload=True)
+
+
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
@@ -98,33 +106,72 @@ class System(aqdbBase):
         else:
             raise ArgumentError("Incorrect name argument %s",cn)
             return
-    def type(self):
-        return str(self.type)
+    #def type(self):
+    #    return str(self.type)
 
 mapper(System, system, polymorphic_on=system.c.type_id, \
        polymorphic_identity=s.execute(
     "select id from system_type where type='base_system_type'").fetchone()[0],
-    properties={'creation_date' : deferred(system.c.creation_date),
-                'comments': deferred(system.c.comments)})
+    properties={
+        'type':relation(SystemType),
+        'creation_date' : deferred(system.c.creation_date),
+        'comments': deferred(system.c.comments)})
+
+
+host=Table('host', meta,
+    Column('id', Integer, ForeignKey('system.id',
+                                     ondelete='RESTRICT',
+                                     onupdate='CASCADE'), primary_key=True),
+    Column('machine_id', Integer,
+           ForeignKey('machine.id',ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('domain_id', Integer,
+           ForeignKey('domain.id', ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('status_id', Integer,
+           ForeignKey('status.id', ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+host.create(checkfirst=True)
+
+class Host(System):
+    """  """
+    def __init__(self,machine,**kw):
+        s = Session()
+        if isinstance(machine,Machine):
+            self.machine=machine
+        self.name=kw.pop('name',machine.name)
+        self.domain=kw.pop('domain',
+                           s.query(Domain).filter_by(name='qa').one())
+        self.status=kw.pop('status',
+                           s.query(Status).filter_by(name='build').one())
+        s.close()
+    def sysloc(self):
+        return self.machine.location.sysloc()
+    def __repr__(self):
+        return 'Host %s'%(self.name)
+
+mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
+           "select id from system_type where type='host'").fetchone()[0],
+    properties={
+        'system'        :relation(System,backref='host'),
+        'machine'       :relation(Machine),
+        'domain'        :relation(Domain),
+        'status'        :relation(Status),
+        'creation_date' : deferred(host.c.creation_date),
+        'comments'      : deferred(host.c.comments)
+})
 
 afs_cell = Table('afs_cell',meta,
     Column('system_id', Integer, ForeignKey('system.id',
-                      ondelete='RESTRICT'), primary_key=True))
+                                            ondelete='RESTRICT',
+                                            onupdate='CASCADE'),
+           primary_key=True))
 afs_cell.create(checkfirst=True)
 
 class AfsCell(System):
     """ AfsCell class is an example of a way we'll override system to
         model other types of service providers besides just host
     """
-    def __init__(self,name,type,*args,**kw):
-        self.name = name
-        try:
-            self.type = s.execute(
-                "select id from system_type where type='afs_cell'").\
-                fetchone()[0]
-        except Exception,e:
-            print e
-            return
+    pass
 
 mapper(AfsCell,afs_cell,
         inherits=System, polymorphic_identity=s.execute(
@@ -272,11 +319,14 @@ mapper(ServiceListItem,service_list_item,properties={
     'comments': deferred(service_list_item.c.comments)
 })
 
+
+####POPULATION ROUTINES####
 def populate_all_service_tables():
     if empty(afs_cell,engine):
         a=AfsCell('q.ny','afs_cell')
         s.save(a)
         s.commit()
+        print 'created q.ny'
     else:
         a=s.query(AfsCell).first()
 
@@ -286,7 +336,7 @@ def populate_all_service_tables():
             srv = Service(i)
             s.save(srv)
             s.commit()
-            del(srv)
+        print 'populated services'
 
     svc=s.query(Service).filter_by(name='afs').one()
 
@@ -298,6 +348,7 @@ def populate_all_service_tables():
         except Exception,e:
             s.rollback()
             print e
+        print 'populated a test service instance (%s)'%(si)
     else:
         si=s.query(ServiceInstance).first()
 
@@ -308,6 +359,7 @@ def populate_all_service_tables():
         sm=ServiceMap(si,loc)
         s.save(sm)
         s.commit()
+        print 'populated service map with a sample'
     else:
         sm=s.query(ServiceMap).first()
 
@@ -321,34 +373,45 @@ def populate_all_service_tables():
         sli=ServiceListItem(sl,svc)
         s.save(sli)
         s.commit()
+        print 'populated service list'
 
-    print 'populated all tables and added %s'%(sm)
+def populate_hosts():
+    if empty(host,engine):
+        s=Session()
+        mlist=s.query(Machine).all()
+        m=mlist[23]
+        h=Host(m,name='npipm1')
+        s.save(h)
+        h.name='npipm1'
+        s.commit()
+        m=mlist[43]
+        h=Host(m,name='npipm2')
+        s.save(h)
+        s.commit()
+        s.close()
+
+def make_podmasters():
+    cnt=service_instance.count().execute()
+    if cnt.fetchall()[0][0] < 2:
+        hlist=s.query(Host).all()
+        npipm1=hlist[0]
+        npipm2=hlist[1]
+
+        svcs=s.query(Service).all()
+        syslog=s.query(Service).filter_by(name='syslog').one()
+
+        si=ServiceInstance(syslog,npipm1)
+        s.save(si)
+
+        si2=ServiceInstance(syslog,npipm2)
+        s.save(si2)
+        s.commit()
+        print 'added %s service instances'%(syslog)
 
 if __name__ == '__main__':
-    #import sys
-    #sys.path.append('../..')
+    from aquilon.aqdb.utils.debug import ipshell
 
     populate_all_service_tables()
-
-#aqdb config source?
-#quattor config source?
-#service config path could just be:
-#   service/<service name>/<instance name>/[ client || server ]
-
-#TODO: do we need this or is it a subset of the build table?
-"""
-    Consumer captures service selections at the time they are made by building
-    a host. This information will be used to generate utilization information
-    of service instances, as well as a replay log for service selection when
-    rebuilding hosts
-"""
-
-consumer = Table('consumer', meta,
-    Column('system_id', Integer,
-           ForeignKey('system.id',
-                      ondelete='CASCADE'),
-           primary_key=True),
-    Column('service_instance_id', Integer,
-           ForeignKey('service_instance.id',
-                      ondelete='RESTRICT'),
-           nullable=False))
+    populate_hosts()
+    make_podmasters()
+    #ipshell()

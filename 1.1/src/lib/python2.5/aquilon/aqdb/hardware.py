@@ -202,50 +202,6 @@ if empty(status,engine):
     for name in ['prod','dev','qa','build']:
         i.execute(name=name)
 
-
-host=Table('host', meta,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(32), unique=True, index=True),
-    Column('machine_id', Integer,
-           ForeignKey('machine.id',ondelete='RESTRICT', onupdate='CASCADE')),
-    Column('domain_id', Integer,
-           ForeignKey('domain.id', ondelete='RESTRICT', onupdate='CASCADE')),
-    Column('status_id', Integer,
-           ForeignKey('status.id', ondelete='RESTRICT', onupdate='CASCADE')),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
-host.create(checkfirst=True)
-#TODO: an aliases table and dns domain table
-
-class Host(aqdbBase):
-    """ HOORAY HOST!!! """
-    def __init__(self,mchin,**kw):
-        s = Session()
-        if isinstance(mchin,Machine):
-            self.machine=mchin
-        self.name=kw.pop('name',mchin.name)
-        self.domain=kw.pop('domain',
-                           s.query(Domain).filter_by(name='qa').one())
-        self.status=kw.pop('status',
-                           s.query(Status).filter_by(name='build').one())
-        s.close()
-    def sysloc(self):
-        l=self.machine.location.parents()
-        sl='.'.join([l[2].name, l[4].name, l[5].name])
-        return sl
-    def __repr__(self):
-        return 'Host %s'%(self.name)
-
-mapper(Host,host, properties={
-    'machine':relation(Machine),
-    'domain':relation(Domain),
-    'status':relation(Status),
-    'creation_date' : deferred(host.c.creation_date),
-    'comments': deferred(host.c.comments)
-})
-#try to make the ip addresses easily accessable in the mapper
-
-
 ####POPULATION ROUTINES####
 def populate_vendor():
     if empty(vendor,engine):
@@ -332,20 +288,7 @@ def populate_np_nodes():
         s.commit()
         s.close()
 
-def populate_hosts():
-    if empty(host,engine):
-        s=Session()
-        mlist=s.query(Machine).all()
-        m=mlist[23]
-        h=Host(m,name='npipm1')
-        s.save(h)
-        h.name='npipm1'
-        s.commit()
-        m=mlist[43]
-        h=Host(m,name='npipm2')
-        s.save(h)
-        s.commit()
-        s.close()
+
 
 if __name__ == '__main__':
     from aquilon.aqdb.utils.debug import ipshell
@@ -356,8 +299,7 @@ if __name__ == '__main__':
     populate_model()
     populate_fake_machine()
     populate_np_nodes()
-    populate_hosts()
 
-    ipshell()
+#    ipshell()
 
 #do we need hardware type when we have nic, cpu, disk and model tables?
