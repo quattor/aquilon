@@ -81,9 +81,13 @@ class DatabaseBroker(AccessBroker):
         if kwargs.has_key("type"):
             # Not this easy...
             #kwargs["LocationType.type"] = kwargs.pop("type")
-            query = query.filter(Location.type.has(
-                LocationType.type==kwargs.pop("type")))
-        return query.filter_by(**kwargs).all()
+            query = query.filter(\
+                and_(\
+                    LocationType.type==kwargs.pop("type"),\
+                    Location.location_type_id==LocationType.id\
+                )\
+            )
+        return query.all()
 
     # This is a more generic solution... would be called with
     # transact_subs={"type":"LocationType"} as an argument alongside
