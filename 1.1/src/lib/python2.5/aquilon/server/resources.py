@@ -482,8 +482,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.dbbroker.showLocation(session=True, type=type,
-                transact_subs={"type":LocationType})
+        d = self.broker.dbbroker.showLocation(session=True, type=type)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.wrapLocationInTable )
         d = d.addCallback( self.wrapTableInBody )
@@ -507,7 +506,6 @@ class ResponsePage(resource.Resource):
             return ""
 
         d = self.broker.dbbroker.showLocation(type=type, name=name,
-                transact_subs={"type":"LocationType"},
                 session=True)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.wrapLocationInTable )

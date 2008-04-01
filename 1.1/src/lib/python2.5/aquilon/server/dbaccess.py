@@ -12,14 +12,10 @@
 import os
 import exceptions
 
-#from sqlalchemy import *
-from sqlalchemy import Column, Integer, Sequence, String
-from sqlalchemy.orm import mapper, relation, clear_mappers
 from sasync.database import AccessBroker, transact
 from twisted.internet import defer
 from twisted.python import log
 
-#from aquilon.aqdb.DB import meta, engine, Session
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 
@@ -81,14 +77,18 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def showLocation(self, **kwargs):
+        query = self.session.query(Location)
         if kwargs.has_key("type"):
-            kwargs["type"] = self.session.query(LocationType).filter_by(
-                    type=kwargs["type"]).one()
-        return self.session.query(Location).filter_by(**kwargs).all()
+            # Not this easy...
+            #kwargs["LocationType.type"] = kwargs.pop("type")
+            query = query.filter(Location.type.has(
+                LocationType.type==kwargs.pop("type")))
+        return query.filter_by(**kwargs).all()
 
     # This is a more generic solution... would be called with
     # transact_subs={"type":"LocationType"} as an argument alongside
     # type=whatever and/or name=whatever.
+    # It would then be much more general than just Location.
     #@transact
     #def showLocation(self, **kwargs):
     #    querycls = Location
@@ -107,13 +107,3 @@ class DatabaseBroker(AccessBroker):
         return self.session.query(LocationType).filter_by(**kwargs).all()
 
 
-# FIXME: This may no longer be needed... moved to aqdb.DB.
-def sqlite():
-    """Set up a default sqlite URI for use when none given."""
-    osuser = os.environ.get('USER')
-    dbdir = os.path.join( '/var/tmp', osuser, 'aquilondb' )
-    try:
-        os.makedirs( dbdir )
-    except exceptions.OSError:
-        pass
-    return "sqlite:///" + os.path.join( dbdir, 'aquilon.db' )
