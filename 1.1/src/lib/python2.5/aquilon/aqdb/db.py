@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''To be imported by classes and modules requiring aqdb access'''
+"""To be imported by classes and modules requiring aqdb access"""
 
 import msversion
 msversion.addpkg('sqlalchemy','0.4.4','dist')
@@ -30,16 +30,24 @@ def make_sqlite_dsn():
     return "sqlite:///" + os.path.join( dbdir, 'aquilon.db' )
 
 sqlite_dsn = make_sqlite_dsn()
-oracle_dsn='oracle://aqd:hello@aquilon'
+oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
 
 """
     CONFIGURES THE DSN FOR THE ENTIRE PROJECT
 """
 dsn = sqlite_dsn
 
+if dsn.startswith('oracle'):
+    msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dev')
+    
+
 engine = create_engine(dsn)
 engine.connect()
 meta  = MetaData(engine)
+
+#if dsn.startswith('oracle'):
+#    meta.bind.echo = True
+
 
 Session = scoped_session(sessionmaker(bind=engine,
                                       autoflush=True,
