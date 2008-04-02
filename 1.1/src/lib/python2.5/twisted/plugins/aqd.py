@@ -54,7 +54,7 @@ class Options(usage.Options):
     optParameters = [
                 ["kncport", "p", 6900, "The port number for knc to listen on."],
                 ["openport", "p", 6901, "The port number to listen on for anonymous connections."],
-                # For now, dburi must match dsn in aqdb.DB.  (Backwards...)
+                # For now, dburi must match dsn in aqdb.db.  (Backwards...)
                 # ["dburi", "d", "sqlite", "DB URI to use."]
             ]
 
@@ -68,7 +68,7 @@ class AQDMaker(object):
         #dburi = options["dburi"]
         #if options["dburi"] == 'sqlite':
         #        dburi = dbaccess.sqlite()
-        from aquilon.aqdb.DB import dsn as dburi
+        from aquilon.aqdb.db import dsn as dburi
 
         dbbroker = dbaccess.DatabaseBroker(dburi)
 
