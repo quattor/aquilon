@@ -97,6 +97,14 @@ class commandline(Element):
                 result = joinDict(result,res)
             return None, result
 
+        if (command.find('help') != -1):
+            helpfor = command[5:]
+            if (self.__commandlist.has_key(helpfor)):
+                print self.__commandlist[helpfor].recursiveHelp()
+                exit(1)
+            else:
+                raise ParsingError ('The requested help page does not exist')
+
         if (self.__commandlist.has_key(command)):
             ##print "commandline checking command:", command
             commandElement = self.__commandlist[command]
@@ -346,7 +354,8 @@ class OptParser (object):
     def __init__ (self, xmlFileName):
         self.__nodeStack = []
         self.__root = None
-        self.parser = OptionParser ()
+        self.parser = OptionParser (conflict_handler='resolve')
+        self.parser.add_option('--help', '-h', action='store_true', default=False)
         self.ParseXml(xmlFileName)
 
 # --------------------------------------------------------------------------- #
@@ -415,11 +424,15 @@ class OptParser (object):
 
     def getOptions (self):
         (opts, args) = self.parser.parse_args()
-        if (args):
-            command = '_'.join(args)
-        else:
+        if (opts.help):
+            print self.__root.recursiveHelp ()
+            exit(1)
+        elif (not args):
             self.parser.usage = self.__root.recursiveHelp ()
             self.parser.error('Please specify a command')
+        else:
+            command = '_'.join(args)
+
         try:
             this_is_None, globalOptions = self.__root.check(None, opts)
             transport, commandOptions = self.__root.check(command, opts)
