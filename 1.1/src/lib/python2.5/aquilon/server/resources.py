@@ -392,6 +392,7 @@ class ResponsePage(resource.Resource):
     def command_put(self, request):
         """aqcommand: aq put --domain=<domain>"""
         bundle = request.args["bundle"][0]
+        domain = request.args['domain'][0]
 
         # FIXME: Lookup whether this server handles this domain
         # redirect as necessary.
@@ -496,6 +497,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
+        # FIXME: Treat an empty list as a 404.
         d = self.broker.dbbroker.showLocation(session=True, type=type)
         d = d.addErrback(self.wrapError, request)
         #d = d.addCallback( self.wrapLocationInTable )
@@ -517,6 +519,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
+        # FIXME: Treat an empty list as a 404.
         d = self.broker.dbbroker.showLocation(type=type, name=name,
                 session=True)
         d = d.addErrback( self.wrapError, request )
