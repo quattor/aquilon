@@ -89,19 +89,21 @@ def cb_command_response(code):
 def cb_command_error(signalNum):
     print >>sys.stderr, "Error running command, received signal %d" % signalNum
 
-def gotPage(pageData, uri, expect):
+def gotPage(pageData, uri, expect, globalOptions):
     if expect == 'command':
+        if globalOptions.get("noexec"):
+            print pageData
+            return
         d = defer.Deferred()
         p = CommandPassThrough(d)
         # FIXME: Does the command transport need to be any more complicated?
         reactor.spawnProcess(p, "/bin/sh", ("/bin/sh", "-c", pageData),
                                 os.environ, '.')
         d = d.addCallbacks(cb_command_response, cb_command_error)
-        d.addCallback(lambda _: reactor.stop())
+        return d
     else:
         print "[OK] %s" % uri
         print pageData
-        reactor.stop()
 
 
 class CustomAction(object):
@@ -162,7 +164,6 @@ def handleFailure(failure):
         print "Communications subprocess terminated:", failure.getErrorMessage()
     else:
         print "Error:", failure.getErrorMessage()
-    reactor.stop()
 
 if __name__ == "__main__":
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
@@ -194,9 +195,9 @@ if __name__ == "__main__":
     # be given on the command line.
     uri = str( 'http://%s:%s/' % (host, port) + transport.path % commandOptions )
 
-    if globalOptions.has_key('usesock') and globalOptions['usesock']:
+    if globalOptions.get('usesock'):
         from aquilon.client.socketwrappers import getPage
-    elif globalOptions.has_key('noknc') and globalOptions['noknc']:
+    elif globalOptions.get('noknc'):
         from aquilon.client.ncwrappers import getPage
     else:
         from aquilon.client.kncwrappers import getPage
@@ -230,8 +231,9 @@ if __name__ == "__main__":
         print >>sys.stderr, "Unhandled transport method ", transport.method
         sys.exit(1)
 
-    d = d.addCallback(gotPage, uri, transport.expect)
+    d = d.addCallback(gotPage, uri, transport.expect, globalOptions)
     d = d.addErrback(handleFailure)
+    d = d.addCallback(lambda _: reactor.stop())
 
     #import pdb
     #pdb.set_trace()
