@@ -24,9 +24,9 @@ from hardware import Machine, Status
 machine=Table('machine', meta, autoload=True)
 status = Table('status', meta, autoload=True)
 
-from configuration import Domain
+from configuration import Domain, ServiceList
 domain = Table('domain', meta, autoload=True)
-
+service_list = Table('service_list', meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
@@ -146,6 +146,8 @@ class Host(System):
         s.close()
     def sysloc(self):
         return self.machine.location.sysloc()
+    #def location(self):
+    #    return self.machine.location
     def __repr__(self):
         return 'Host %s'%(self.name)
 
@@ -154,6 +156,7 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
     properties={
         'system'        :relation(System,backref='host'),
         'machine'       :relation(Machine),
+        'location'      :relation(Machine,remote_side=machine.c.location_id),
         'domain'        :relation(Domain),
         'status'        :relation(Status),
         'creation_date' : deferred(host.c.creation_date),
@@ -274,26 +277,11 @@ mapper(ServiceMap,service_map,properties={
 
 
 """
-    The next two tables are are used to represent the service requirements of
-    the various host build archetypes. It groups required services into
-    groupings that can be reused at build time.
+    Service list item is an individual member of a service list, defined
+    in configuration. They represent requirements for baseline archetype
+    builds. Think of things like 'dns', 'syslog', etc. that you'd need just
+    to get a host up and running...that's what these represent.
 """
-service_list = Table('service_list', meta,
-    Column('id', Integer, Sequence('service_list_id_seq'), primary_key=True),
-    Column('name', String(32), unique=True, index=True),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
-service_list.create(checkfirst=True)
-
-class ServiceList(aqdbBase):
-    """ A bucket to put required services into as a list of required
-        service dependencies for hosts.
-    """
-    pass
-mapper(ServiceList,service_list,properties={
-    'creation_date' : deferred(service_list.c.creation_date),
-    'comments': deferred(service_list.c.comments)})
-
 service_list_item = Table('service_list_item', meta,
     Column('id', Integer, primary_key=True),
     Column('service_id',Integer,

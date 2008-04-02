@@ -10,14 +10,20 @@
 """Classes and Tables relating to network interfaces"""
 from __future__ import with_statement
 
+import msversion
+msversion.addpkg('sqlalchemy','0.4.4','dist')
+
 import sys
 sys.path.append('../..')
 
 import os
+import datetime
 
+from aquilon.aqdb.utils.schemahelpers import Column, mk_type_table, empty, fill_type_table
 from db import *
 from aquilon import const
-from aquilon.aqdb.utils.schemahelpers import *
+
+from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint
 
 from location import Location,Chassis
 from configuration import CfgPath
@@ -181,9 +187,9 @@ physical_interface=Table('physical_interface', meta,
     Column('machine_id', Integer,
            ForeignKey('machine.id',ondelete='CASCADE'),
            nullable=False, index=True),
-    Column('name',String(255)), #like e0, hme1, etc.
+    Column('name',String(32), nullable=False), #like e0, hme1, etc.
     Column('nic_id', Integer,
-           ForeignKey('nic.id', ondelete='RESTRICT')),
+           ForeignKey('nic.id', ondelete='RESTRICT'), nullable=False),
     Column('mac', String(32), nullable=False, unique=True, index=True),
     Column('boot', Boolean, default=False),
     #creation/comments supplied by Super (Interface)

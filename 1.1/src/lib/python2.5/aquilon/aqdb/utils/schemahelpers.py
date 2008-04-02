@@ -12,8 +12,11 @@
     and associated baseline data
 """
 
-from sqlalchemy import *
+from sqlalchemy import Table, Integer, Sequence, String
+from sqlalchemy import UniqueConstraint , ForeignKey, DateTime
 from sqlalchemy import Column as _Column
+from sqlalchemy.sql import insert
+
 import datetime
 
 def optional_comments(func):

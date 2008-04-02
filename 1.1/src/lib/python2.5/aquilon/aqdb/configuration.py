@@ -12,15 +12,14 @@
 import datetime
 
 import sys
-if __name__ == '__main__':
-    sys.path.append('../..')
+sys.path.append('../..')
 
 from db import *
 
-from aquilon.aqdb.utils.schemahelpers import *
 from aquilon import const
-from utils.exceptions_ import NoSuchRowException
-from utils import altpath
+from aquilon.aqdb.utils import altpath
+from aquilon.aqdb.utils.schemahelpers import *
+from aquilon.aqdb.utils.exceptions_ import NoSuchRowException
 from aquilon.aqdb.utils.debug import ipshell
 
 import os
@@ -28,11 +27,10 @@ osuser = os.environ.get('USER')
 qdir = os.path.join( '/var/tmp', osuser, 'quattor/template-king' )
 const.cfg_base=altpath.path(qdir)
 
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy.orm import mapper, relation, deferred
 
 cfg_tld = mk_type_table('cfg_tld',meta)
-
 cfg_tld.create(checkfirst=True)
 
 class CfgTLD(aqdbType):
@@ -71,11 +69,12 @@ mapper(CfgSourceType, cfg_source_type, properties={
 
 cfg_path = Table('cfg_path',meta,
     Column('id', Integer, Sequence('cfg_path_id_seq'),primary_key=True),
-    Column('cfg_tld_id', Integer, ForeignKey('cfg_tld.id')),
-    Column('relative_path', String(64), index=True),
+    Column('cfg_tld_id', Integer, ForeignKey('cfg_tld.id'), nullable=False),
+    Column('relative_path', String(64), index=True, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('last_used', DateTime, default=datetime.datetime.now),
     Column('comments',String(255)))
-
+#TODO: unique tld/relative_path
 cfg_path.create(checkfirst=True)
 
 class CfgPath(aqdbBase):
@@ -110,7 +109,6 @@ mapper(CfgPath,cfg_path,properties={
     'comments':deferred(cfg_path.c.comments)})
 
 domain = mk_name_id_table('domain', meta,)
-#TODO: Column('host_id'), Integer, ForeignKey('host.id'), nullable=False)
 domain.create(checkfirst=True)
 
 class Domain(aqdbBase):
@@ -121,7 +119,72 @@ mapper(Domain,domain,properties={
     'creation_date':deferred(domain.c.creation_date),
     'comments':deferred(domain.c.comments)})
 
-#Quattor Source: path + domain? Or, are paths to configurations fixed?
+"""
+    The service list table is used to represent the service requirements of
+    host 'build archetypes'. It groups required services into groupings that
+    can be referenced and reused at build time. The list object is here
+    because archteype requires is as a parent. Service list 'item' requires
+    Service as a parent, and is included there instead.
+"""
+service_list = Table('service_list', meta,
+    Column('id', Integer, Sequence('service_list_id_seq'), primary_key=True),
+    Column('name', String(32), unique=True, index=True),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+service_list.create(checkfirst=True)
+
+
+class ServiceList(aqdbBase):
+    """ A bucket to put required services into as a list of required
+        service dependencies for hosts.
+    """
+    pass
+mapper(ServiceList,service_list,properties={
+    'creation_date' : deferred(service_list.c.creation_date),
+    'comments': deferred(service_list.c.comments)})
+
+archetype = Table('archetype', meta,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(32), unique=True, nullable=True, index=True),
+    Column('service_list_id', Integer,
+           ForeignKey('service_list.id',
+                      ondelete='RESTRICT',
+                      onupdate='CASCADE'),
+           nullable=False),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+archetype.create(checkfirst=True)
+
+class Archetype(aqdbBase):
+    """Describes high level template requirements for building hosts """
+    def __init__(self,name,**kw):
+        if isinstance(name,str):
+            self.name=name.strip().lower()
+        #just look for /archetype/name/base.tpl and final for now
+            s=Session()
+            try:
+                self.first = s.query(CfgPath).filter_by(
+                    relative_path='%s/base.tpl'%(self.name)).one()
+            except NoSuchRowException:
+                print "Can't find archetype/%s/base.tpl"%(self.name)
+                return
+            try:
+                self.last=s.query(CfgPath).filter_by(
+                    relative_path='%s/final.tpl'%(self.name)).one()
+            except NoSuchRowException:
+                print "Can't find archetype/%s/final.tpl"%(self.name)
+                return
+            try:
+                self.service_list=s.query(
+                    ServiceList).filter_by(name=self.name).one()
+            except NoSuchRowException:
+                print "Can't find a service list for %s"%(self.name)
+                return
+mapper(Archetype,archetype, properties={
+    'service_list':relation(ServiceList, backref='archetype'),
+    'creation_date' : deferred(archetype.c.creation_date),
+    'comments': deferred(archetype.c.comments)
+})
 
 #######POPULATION FUNCTIONS########
 def populate_tld():
@@ -167,21 +230,29 @@ def create_domains():
         s.commit()
         print 'created production and qa domains'
 
+def create_aquilon_archetype():
+    if empty(archetype, engine):
+        a=Archetype('aquilon')
+        s.save(a)
+        s.commit()
+
 def get_quattor_src():
     """ ugly ugly way to initialize a quattor repo for import"""
-    
+
     import os
     import exceptions
     if os.path.exists(str(const.cfg_base)):
         return
 
-    remote_dir = 'quattorsrv:/var/tmp/quattor/template-king/*'
+    remote_dir = 'blackcomb:/var/tmp/daqscott/quattor/*'
     try:
         os.makedirs(str(const.cfg_base))
     except exceptions.OSError, e:
-        pass 
+        pass
     print 'run "scp -r %s %s in a seperate window."'%(remote_dir,str(const.cfg_base))
     raw_input("When you've completed this, press any key")
+
+
 
 if __name__ == '__main__':
     get_quattor_src()
@@ -189,16 +260,21 @@ if __name__ == '__main__':
     populate_cst()
     create_paths()
     create_domains()
+    create_aquilon_archetype()
 
     s=Session()
 
     a=s.query(CfgTLD).first()
     b=s.query(CfgSourceType).first()
     c=s.query(CfgPath).first()
+    d=s.query(Domain).first()
+    e=s.query(Archetype).first()
 
     assert(a)
     assert(b)
     assert(c)
+    assert(d)
+    assert(e)
 
 #TODO: this key/value attribute of aqdb config source
 #TODO: figure out quattor config source

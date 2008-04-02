@@ -91,7 +91,7 @@ class Location(aqdbBase):
         else:
             raise ArgumentError("Location type argument expects a string")
             return
-        #TODO: str type check
+
         if kw.has_key('fullname'):
             fn = kw.pop('fullname')
             if isinstance(fn,str):
@@ -102,9 +102,13 @@ class Location(aqdbBase):
         if kw.has_key('parent'):
             self.parent=kw.pop('parent')
 
+        #TODO: raise a Warning.
+        #TODO: maintenance: a periodic sweep of this table for null parents
+
     def parents(self):
         pl=[]
         p_node=self.parent
+        self._parent_dict[str(self.parent.type)]=self.parent
         while p_node.parent is not None:
             pl.append(p_node)
             p_node=p_node.parent
@@ -113,9 +117,9 @@ class Location(aqdbBase):
         return pl
 
     def get_typed_children(self,type):
-        """ return all child location objects of a given location type"""
+        """ return all child location objects of a given location type """
         return s.query(Location).with_polymorphic('*').\
-            filter(Location.type==type).all()
+            join('type').filter(LocationType.type==type).all()
 
     def append(self,node,**kw):
         if isinstance(node, Location):
@@ -130,7 +134,7 @@ class Location(aqdbBase):
         if str(self.type) in v:
             l=self.parents()
             return str('.'.join([l[2].name, l[4].name, l[5].name]))
-        
+
     def __repr__(self):
         return self.__class__.__name__ + " " + self.name
 
@@ -166,7 +170,9 @@ class Desk(Location):
 
 
 
-### POLYMORPHIC INHERITANCE/ADJACENCY LIST
+""" This is an example of both polymorphic inheritance AND
+    an adjacency list """
+
 mapper(Location, location, polymorphic_on=location.c.location_type_id, \
         polymorphic_identity='base_location_type',properties={
             'parent':relation(
