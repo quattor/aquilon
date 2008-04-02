@@ -35,12 +35,13 @@ those output formats.
 import re
 import sys
 import os
+import socket
 import xml.etree.ElementTree as ET
 from base64 import b64decode
 from tempfile import mkstemp
 
 from twisted.application import internet
-from twisted.web import server, resource, http, error
+from twisted.web import server, resource, http, error, static
 from twisted.internet import defer, utils
 from twisted.python import log
 
@@ -377,11 +378,8 @@ class ResponsePage(resource.Resource):
         # FIXME: Lookup whether this server handles this domain
         # redirect as necessary.
 
-        # FIXME: The server needs to have its name around somewhere...
-        localhost = "quattorsrv"
-
         # FIXME: Return absolute paths to git?
-        return "git clone 'http://%s/templates/%s/.git/%s' && cd '%s' && ( git checkout -b '%s' || true )" % (localhost, domain, domain, domain, domain)
+        return """env PATH="%(path)s:$PATH" git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.broker.git_path, "url":self.broker.git_templates_url, "domain":domain}
 
     def decode_and_write(self, encoded):
         decoded = b64decode(encoded)
@@ -671,9 +669,12 @@ class BrokerInfo(object):
         self.hostsdir = "%s/hosts" % self.basedir
         self.templatesdir = "%s/templates" % self.basedir
         self.default_domain = ".ms.com"
-        self.git = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin/git"
+        self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
+        self.git = "%s/git" % self.git_path
         self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
         self.cdpport = 7777
+        self.localhost = socket.gethostname()
+        self.git_templates_url = "http://%s:6901/templates" % self.localhost
 
 
 class RestServer(ResponsePage):
@@ -682,6 +683,8 @@ class RestServer(ResponsePage):
         ResponsePage.__init__(self, broker, '')
 
         # Regular Expression for matching variables in a path definition.
+        # Currently only supports stuffing a single variable in a path
+        # component.
         varmatch = re.compile(r'^%\((.*)\)s$')
 
         BINDIR = os.path.dirname( os.path.realpath(sys.argv[0]) )
@@ -757,15 +760,21 @@ class RestServer(ResponsePage):
                 #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
                 setattr(container, rendermethod, mycommand)
 
+        # Serve up a static templates directory for git...
+        log.msg("Checking on %s" % self.broker.templatesdir)
+        if os.path.exists(self.broker.templatesdir):
+            log.msg("Adding child for templates")
+            self.putChild("templates", static.File(self.broker.templatesdir))
+
         def _logChildren(level, container):
             for (key, child) in container.listStaticEntities():
                 log.msg("Resource at level %d for %s [key:%s]"
                         % (level, child.path, key))
-                _printChildren(level+1, child)
-            if container.dynamic_child:
+                _logChildren(level+1, child)
+            if getattr(container, "dynamic_child", None):
                 log.msg("Resource at level %d for %s [dynamic]"
                         % (level, container.dynamic_child.path))
-                _printChildren(level+1, container.dynamic_child)
+                _logChildren(level+1, container.dynamic_child)
 
         #_logChildren(0, self)
 
