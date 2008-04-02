@@ -103,7 +103,13 @@ class commandline(Element):
                 print self.__commandlist[helpfor].recursiveHelp()
                 exit(1)
             else:
-                raise ParsingError ('The requested help page does not exist')
+                print "The requested command is not known to this server"
+                print "Available commands are:"
+                k = self.__commandlist.keys()
+                k.sort()
+                for c in k:
+                    print "\t", self.__commandlist[c].name
+                exit(1)
 
         if (self.__commandlist.has_key(command)):
             ##print "commandline checking command:", command
