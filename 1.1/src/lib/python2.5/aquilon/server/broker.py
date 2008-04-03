@@ -8,16 +8,17 @@
 #
 # This module is part of Aquilon
 
-import sys
 import os
-import os.path
-import shutil
 import socket
-from  aquilon.server.dbaccess import DatabaseBroker
+
+from twisted.internet import defer
+
+from aquilon.server.processes import ProcessBroker
+from aquilon.exceptions_ import AquilonError
 
 #=============================================================================#
 
-class BrokerError (StandardError):
+class BrokerError(StandardError):
     def __init__ (self):
         self.errorList = []
 
@@ -29,10 +30,16 @@ class BrokerError (StandardError):
 
 #=============================================================================#
 
+def raise_exception(msg):
+    raise AquilonError(msg)
+
+#=============================================================================#
+
 class Broker(object):
     def __init__(self, dbbroker, azbroker):
         self.dbbroker = dbbroker
         self.azbroker = azbroker
+        self.pbroker = ProcessBroker()
         self.osuser = os.environ.get('USER')
         self.basedir = "/var/tmp/%s/quattor" % self.osuser
         self.profilesdir = "%s/web/htdocs/profiles" % self.basedir
@@ -74,3 +81,20 @@ class Broker(object):
     
     def make_aquilon (self, **kwargs):
         return ""
+
+# --------------------------------------------------------------------------- #
+    
+    def sync (self, **kwargs):
+        domain = kwargs.pop("domain")
+        domaindir = os.path.join(self.templatesdir, domain)
+        if not os.path.exists(domaindir):
+            return defer.maybeDeferred(raise_exception,
+                "domain directory '%s' does not exist" % domaindir)
+        return self.pbroker.sync(git_path=self.git_path, domaindir=domaindir,
+                **kwargs)
+
+# --------------------------------------------------------------------------- #
+    
+    def get (self, domain, **kwargs):
+        # FIXME: Return absolute paths to git?
+        return """env PATH="%(path)s:$PATH" git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":domain}

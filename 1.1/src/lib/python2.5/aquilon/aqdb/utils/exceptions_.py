@@ -13,11 +13,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 '''Exceptions to be used by Aquilon Database Module'''
 
-'''The base exception class is AquilonError.'''
-
-class AquilonError(Exception):
-    '''Generic error class.'''
-
+from aquilon.exceptions_ import AquilonError
 
 class ArgumentError(AquilonError):
     '''Raised for all those conditions where invalid arguments are

@@ -43,7 +43,6 @@ ToDo:
 import re
 import sys
 import os
-import socket
 import xml.etree.ElementTree as ET
 from base64 import b64decode
 from tempfile import mkstemp
@@ -53,7 +52,7 @@ from twisted.web import server, resource, http, error, static
 from twisted.internet import defer, utils
 from twisted.python import log
 
-from aquilon.server.exceptions_ import AuthorizationException, GitCommandException
+from aquilon.server.exceptions_ import AuthorizationException
 
 class ResponsePage(resource.Resource):
 
@@ -251,29 +250,13 @@ class ResponsePage(resource.Resource):
 
     # TODO: Something should go into both the logs and back to the client...
     def wrapError(self, failure, request):
-        # FIXME: This should be overridden, looking for and trapping specific
-        # exceptions.  Maybe this is left as a final check.
-        print failure.getErrorMessage()
-        failure.printDetailedTraceback()
+        """This is generally the final stop for errors - anything will be
+        caught, logged, and a 500 error passed back to the client."""
+        log.err(failure.getBriefTraceback())
+        log.err(failure.getErrorMessage())
+        #failure.printDetailedTraceback()
         self.finishError(request)
-        return failure
-
-    def cb_git_command_finished(self, (out, err, code), request):
-        """Raise an error for a non-zero return code."""
-        log.msg("git command finished with return code %d" % code)
-        log.msg("git command stdout: %s" % out)
-        log.msg("git command stderr: %s" % err)
-        if code != 0:
-            raise GitCommandException("Git command failed with code: %d" % code)
-        return out
-
-    def cb_git_command_error(self, (out, err, signalNum), request):
-        """Raise an error for a non-zero return code."""
-        log.msg("git command exitted with signal %d" % signalNum)
-        log.msg("git command stdout: %s" % out)
-        log.msg("git command stderr: %s" % err)
-        raise GitCommandException("Git command exitted with signal: %d"
-                % signalNum)
+        return None
 
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
@@ -425,8 +408,7 @@ class ResponsePage(resource.Resource):
         # FIXME: Lookup whether this server handles this domain
         # redirect as necessary.
 
-        # FIXME: Return absolute paths to git?
-        return """env PATH="%(path)s:$PATH" git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.broker.git_path, "url":self.broker.git_templates_url, "domain":domain}
+        return self.broker.get(domain)
 
     def decode_and_write(self, encoded):
         decoded = b64decode(encoded)
@@ -469,8 +451,9 @@ class ResponsePage(resource.Resource):
         return "aq manage has not been implemented yet"
 
     def command_sync(self, request):
-        """aqcommand: aq sync --domain=<domain>"""
+        """aqcommand: aq sync"""
 
+        # FIXME: This should be the user's current domain, as set by aq config.
         request.args["domain"] = [self.broker.domain_name]
 
         return self.command_sync_domain(request)
@@ -480,35 +463,22 @@ class ResponsePage(resource.Resource):
         domain = request.args['domain'][0]
 
         # FIXME: Sanitize domain before it is used in commands.
+        # FIXME: Verify that the domain exists, 404 if not.
 
         # FIXME: Lookup whether this server handles this domain
         # and redirect as necessary.
         # Presumably, that lookup will catch domains that do not
         # actually exist.
 
-        # FIXME: Check whether the directory exists.
-        domaindir = self.broker.templatesdir + '/' + domain
-
-        d = utils.getProcessOutputAndValue("/bin/sh",
-                ["-c", "cd '%s' && %s-pull" % (domaindir, self.broker.git)])
-        d = d.addCallbacks(self.cb_git_command_finished,
-                self.cb_git_command_error,
-                callbackArgs=[request], errbackArgs=[request])
-        # The 1.0 code notes that this should probably be done as a
-        # hook in git... just need to make sure it runs.
-        d = d.addCallback(lambda _: utils.getProcessOutputAndValue("/bin/sh",
-                ["-c", "cd '%s' && %s-update-server-info"
-                    % (domaindir, self.broker.git)]))
-        d = d.addCallbacks(self.cb_git_command_finished,
-                self.cb_git_command_error,
-                callbackArgs=[request], errbackArgs=[request])
-        # All went well... send client command.
-        d = d.addCallback(lambda _: "git pull")
+        d = self.broker.sync(domain=domain, user=request.channel.getPrinciple())
+        # All went well (errors will be caught by wrapError...),
+        # so send client command.
+        d = d.addCallback(lambda _: """env PATH="%s:$PATH" git pull""" 
+                % self.broker.git_path)
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapError, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
-
 
     def command_show_location_types(self, request):
         """aqcommand: aq show location"""
@@ -521,11 +491,11 @@ class ResponsePage(resource.Resource):
             return ""
 
         d = self.broker.show_location_type(session=True)
-        d = d.addErrback(self.wrapError, request)
         #d = d.addCallback(self.wrapAqdbTypeInTable)
         #d = d.addCallback(self.wrapTableInBody)
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapError, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
@@ -541,11 +511,11 @@ class ResponsePage(resource.Resource):
 
         # FIXME: Treat an empty list as a 404.
         d = self.broker.show_location(session=True, type=type)
-        d = d.addErrback(self.wrapError, request)
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapError, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
@@ -564,11 +534,11 @@ class ResponsePage(resource.Resource):
         # FIXME: Treat an empty list as a 404.
         d = self.broker.show_location(type=type, name=name,
                 session=True)
-        d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
         d = d.addCallback( self.finishRender, request )
+        d = d.addErrback( self.wrapError, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
@@ -586,11 +556,11 @@ class ResponsePage(resource.Resource):
 
         d = self.broker.add_location(name, type=type, name=name)
         # FIXME: Trap specific exceptions (location exists, etc.)
-        d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
         d = d.addCallback( self.finishRender, request )
+        d = d.addErrback( self.wrapError, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
@@ -608,8 +578,8 @@ class ResponsePage(resource.Resource):
 
         d = self.broker.del_location(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
-        d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.finishOK, request )
+        d = d.addErrback( self.wrapError, request )
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
