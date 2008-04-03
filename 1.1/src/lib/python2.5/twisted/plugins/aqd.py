@@ -25,11 +25,12 @@ from twisted.application.service import IServiceMaker, MultiService
 from twisted.runner.procmon import ProcessMonitor
 from twisted.internet import reactor
 
-from aquilon.server.resources import RestServer, BrokerInfo
+from aquilon.server.resources import RestServer
 from aquilon.server.kncwrappers import KNCSite
 from aquilon.server.anonwrappers import AnonSite
 from aquilon.server import dbaccess
 from aquilon.server.authorization import AuthorizationBroker
+from aquilon.server.broker import Broker, BrokerError
 
 #from aquilon.aqdb.utils.Debug import ipshell
 
@@ -85,7 +86,7 @@ class AQDMaker(object):
         # and then go off and create the dbbroker and azbroker...
         # (Or the RestServer could be handed the config, and then
         # create this object.)
-        broker = BrokerInfo(dbbroker, azbroker)
+        broker = Broker(dbbroker, azbroker)
 
         restServer = RestServer(broker)
         openSite = AnonSite(restServer)

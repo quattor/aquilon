@@ -520,7 +520,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.dbbroker.showLocationType(session=True)
+        d = self.broker.showLocationType(session=True)
         d = d.addErrback(self.wrapError, request)
         #d = d.addCallback(self.wrapAqdbTypeInTable)
         #d = d.addCallback(self.wrapTableInBody)
@@ -540,7 +540,7 @@ class ResponsePage(resource.Resource):
             return ""
 
         # FIXME: Treat an empty list as a 404.
-        d = self.broker.dbbroker.showLocation(session=True, type=type)
+        d = self.broker.showLocation(session=True, type=type)
         d = d.addErrback(self.wrapError, request)
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
@@ -562,7 +562,7 @@ class ResponsePage(resource.Resource):
             return ""
 
         # FIXME: Treat an empty list as a 404.
-        d = self.broker.dbbroker.showLocation(type=type, name=name,
+        d = self.broker.showLocation(type=type, name=name,
                 session=True)
         d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapLocationInTable )
@@ -584,7 +584,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.dbbroker.addLocation(name, session=True)
+        d = self.broker.addLocation(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapLocationInTable )
@@ -606,7 +606,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.dbbroker.delLocation(name, session=True)
+        d = self.broker.delLocation(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.finishOK, request )
@@ -694,32 +694,6 @@ class ResponsePage(resource.Resource):
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq bind service has not been implemented yet"
-
-
-class BrokerInfo(object):
-    """For now, simple container object.  This will probably be 
-    initialized with a conf file at some point in the future, which could
-    set up the dbbroker, azbroker, etc.
-    
-    """
-
-    def __init__(self, dbbroker, azbroker):
-        self.dbbroker = dbbroker
-        self.azbroker = azbroker
-        self.osuser = os.environ.get('USER')
-        self.basedir = "/var/tmp/%s/quattor" % self.osuser
-        self.profilesdir = "%s/web/htdocs/profiles" % self.basedir
-        self.depsdir = "%s/deps" % self.basedir
-        self.hostsdir = "%s/hosts" % self.basedir
-        self.templatesdir = "%s/templates" % self.basedir
-        self.default_domain = ".ms.com"
-        self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
-        self.git = "%s/git" % self.git_path
-        self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
-        self.cdpport = 7777
-        self.localhost = socket.gethostname()
-        self.git_templates_url = "http://%s:6901/templates" % self.localhost
-        self.domain_name = "production"
 
 
 class RestServer(ResponsePage):
