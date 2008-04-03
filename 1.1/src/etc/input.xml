@@ -92,7 +92,7 @@
    </command>
 
    <command name="add_service">
-      %prog add service --service SERVICE_NAME [--instance INSTANCE_NAME]
+      %prog add service --service SERVICE_NAME   -instance INSTANCE_NAME]
       Add new service
       <optgroup name="add_service_mopts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">Host name</option>
@@ -128,7 +128,7 @@
 
    <command name="assoc">
       %prog assoc --hostname NAME 
-      [--os OS --model VER] [--hardware NAME] [--template NAME]
+        -os OS --model VER] [--hardware NAME] [--template NAME]
       Associate a host with an OS, a hardware or a template.
       You have to specify any, but not more than one of the optional argument groups.
       <optgroup name="assoc_opts" mandatory="True" fields="all">
@@ -208,7 +208,7 @@
    </command>
 
    <command name="deploy">
-      %prog deploy --domain DOMAIN_NAME [--to DOMAIN_NAME]
+      %prog deploy --domain DOMAIN_NAME   -to DOMAIN_NAME]
       <optgroup name="deploy options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
@@ -266,7 +266,7 @@
    </command>
 
    <command name="show_location">
-      %prog show location [--type type [--name name]]
+      %prog show location   -type type [--name name]]
       Shows all locations of a given type
       or information about a specific location type and name.
       <optgroup name="show_location_opts" mandatory="True" fields="any">
@@ -290,6 +290,65 @@
          <option name="type" type="string">Location type</option>
       </optgroup>
       <transport method="delete" path="location/%(type)s/%(name)s" />
+   </command>
+
+   <command name="make_aquilon">
+      %prog make aquilon
+      Create an aquilon host.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="hostname" type="string">Host name to make</option>
+      </optgroup>
+      <optgroup name="optional_options">
+         <option name="personality" type="string">Personality of the host</option>
+      </optgroup>
+   </command>
+
+   <command name="make_aurora">
+      %prog make aurora --model MODEL --type TYPE --host HOST1,HOST2... --pod PODNAME --version VERSION
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         Mandatory options:
+         <option name="model" type="string">a known model or the full path to a build</option>
+         <option name="type" type="string">machine type. Depends upon model</option>
+         <option name="host" type="string">list of hosts to make</option>
+         <option name="pod" type="string">pod name, required if making aurora</option>
+         <option name="version" type="string">aurora-version, required if making non-aurora model</option>
+      </optgroup>
+      <optgroup name="optional_options">
+         Optional options:
+         <option name="force" type="boolean">skip check for build other server</option>
+         <optgroup name="os_group" fields="all">
+            <option name="os" type="string">OS, values are (sunos.sparc|linux|sunos.i386)</option>
+            <option name="osrel" type="string">OS release to build</option>
+         </optgroup>
+         <option name="bootosrel" type="string">OS release of the boottree (deprecated)</option>
+         <option name="cellname" type="string">overrides default of /ms/dist/osconf/pod/$pod/root/etc/vice/etc/ThisCell</option>
+         <option name="side" type="string">any single character (a-z)</option>
+         <option name="podmake" type="boolean">forces call of pod_make</option>
+         <option name="nodist" type="boolean">do not perform final dist</option>
+         <option name="boothost" type="string">if different from primary hostnames</option>
+         <optgroup name="bootserver" fields="all">
+            <option name="bootserver" type="string">overrides default for building</option>
+            <option name="bootpath" type="string">needs to be set if bootserver is set</option>
+         </optgroup>
+         <option name="subpod" type="string">A subpod (a different set of config files)</option>
+         <option name="mkinterfaces" type="boolean">Create /etc/hostname.* files</option>
+         <option name="fca" type="string">Add fibre-disk information into bootparams</option>
+         <option name="sysloc" type="string">Specify sysloc by hand</option>
+         <option name="pxeswitchfile" type="string">file to point pxe symlink to</option>
+         <option name="zebra" type="boolean">create /etc/default/routing and turn on the zebra stuff</option>
+         <option name="swapfactor" type="string"></option>
+         <option name="thiscell" type="string">override ThisCell of the bunker</option>
+         <option name="corepart" type="string">requires case-by-case approval from UnixEng</option>
+         <option name="hwclass" type="string">Specify hardware class (default for sunos is sun4u)</option>
+         <option name="profile" type="string">Specify an aegisng profile</option>
+         <option name="profilever" type="string">Specify and aegisng profilever</option>
+         <option name="amd" type="string">Use 'bootserver:bootpath' based on a user specified AMD key</option>
+         <option name="remprogs" type="boolean">Use 'bootserver:bootpath' that are defined in remprogs NIS map</option>
+         <option name="strategy" type="string">Use alternate net-strategy (i.e. dhcp)</option>
+         <option name="vchost" type="string">Specify the Virtual Centre host for ESX servers</option>
+         <option name="vcport" type="string">Specify the Virtual Centre port name/number for ESX servers</option>
+         <option name="intscheme" type="string">Specify a interface scheme for ESX servers</option>
+      </optgroup>
    </command>
 
    <command name="run_dummy_command">

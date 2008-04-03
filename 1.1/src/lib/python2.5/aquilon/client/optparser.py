@@ -341,7 +341,32 @@ class option(Element):
 # --------------------------------------------------------------------------- #
 
     def recursiveHelp (self):
-        return "        --%-10s %s" %(self.name, self.help)
+        LLEN = 80
+        val = self.type=='string' and " VALUE" or ""
+        help = len(self.help)>1 and self.help or "\n"
+        res = "    --%-20s %s" %(self.name+val, help)
+        if (len(res) < LLEN):
+            return res
+        pos = res.rfind(" ", 0, LLEN)
+        if (pos > 0):
+            tres = res[0:res.rfind(" ", 0, LLEN)]
+            res = res[res.rfind(" ", 0, LLEN):]
+        else:
+            tres = res[0:LLEN]
+            res = res[LLEN:]
+        while (len(res) >= LLEN - 26):
+            pos = res.rfind(" ", 0, LLEN-26)
+            if (pos > 0):
+                tres = tres + "\n" + " "*26 + res[0:pos]
+                res = res[pos:]
+            else:
+                tres = tres + "\n" + " "*26 + res[0:LLEN-26]
+                res = res[LLEN-26:]
+        if (len(res) > 1):
+            tres = tres + "\n" + " "*26 + res
+        else:
+            tres = tres + "\n"
+        return tres
 
 # =========================================================================== #
 
