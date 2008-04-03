@@ -72,7 +72,7 @@ build_element.create(checkfirst=True)
 class BuildElement(aqdbBase):
     pass
 mapper(BuildElement,build_element, properties={
-    'build'         : relation(Build),
+    'build'         : relation(BuildElement),
     'cfg_path'      : relation(CfgPath),
     'creation_date' : deferred(build_element.c.creation_date),
     'comments'      : deferred(build_element.c.comments)
@@ -83,83 +83,7 @@ mapper(BuildElement,build_element, properties={
 #somewhere in this or chost, a change should trigger an
 #update_time column on some table to update
 
-s=Session()
-
-def n_of(n,string):
-    while n > 0:
-        yield ''.join([string,str(n)])
-        n-=1
-
-
-def two_in_each():
-    nodelist=[]
-    try:
-        model  = s.query(Model).filter_by(name='hs21').one()
-        syslog = s.query(Service).filter_by(name='syslog').one()
-        prod   = s.query(Domain).filter_by(name='production').one()
-        stat   = s.query(Status).filter_by(name='prod').one()
-    except Exception, e:
-        print e
-        s.close()
-        return
-
-    cmnt   = 'FAKE'
-
-    for b in s.query(Building).all():
-        if b.name == 'np':
-            continue
-        else:
-            racks = (Rack(r,'rack',fullname='rack %s'%r,
-                          parent=b,comments=cmnt)
-                for r in n_of(2,str(b.name)))
-
-        for rack in racks:
-            s.save(rack)
-            chs = (Chassis(c,'chassis', fullname='chassis %s'%c,
-                           parent=rack,comments=cmnt)
-                for c in n_of(2,''.join([rack.name,'c'])))
-
-        for ch in chs:
-            s.save(ch)
-            nodes = (Machine(ch,model,name=nodename,comments=cmnt)
-                     for nodename in n_of(12,''.join([ch.name,'n'])))
-
-        for node in nodes:
-            try:
-                s.save(node)
-                nodelist.append(node)
-            except Exception, e:
-                print e
-                s.rollback()
-                return
-
-
-    try:
-        s.commit()
-    except Exception, e:
-        s.rollback()
-        print e
-        return
-
-
-    print 'created %s nodes'%(len(nodelist))
-    try:
-        for node in nodelist:
-            h=Host(node,name=node.name,status=stat, domain=prod,comments=cmnt)
-            s.save(h)
-            s.commit()
-    except Exception, e:
-        print e
-        s.close()
-        return
-    print 'created %s hosts'%(len(nodelist))
 
 if __name__ == '__main__':
     from aquilon.aqdb.utils.debug import ipshell
-    from location import *
-    from network import *
-    from service import *
-    from configuration import *
-    from hardware import *
-    from interfaces import *
-    two_in_each()
+    ipshell()

@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""The tables/objects/mappings related to configuration in aquilon """
+""" The tables/objects/mappings related to configuration in aquilon """
 
 import datetime
 
@@ -17,7 +17,6 @@ sys.path.append('../..')
 from db import *
 
 from aquilon import const
-from aquilon.aqdb.utils import altpath
 from aquilon.aqdb.utils.schemahelpers import *
 from aquilon.aqdb.utils.exceptions_ import NoSuchRowException
 from aquilon.aqdb.utils.debug import ipshell
@@ -25,10 +24,29 @@ from aquilon.aqdb.utils.debug import ipshell
 import os
 osuser = os.environ.get('USER')
 qdir = os.path.join( '/var/tmp', osuser, 'quattor/template-king' )
-const.cfg_base=altpath.path(qdir)
+#const.cfg_base=altpath.path(qdir)
+const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor/template-king')
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
+
+def splitall(path):
+    """
+        Split a path into all of its parts.
+    """
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path:
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
 
 cfg_tld = mk_type_table('cfg_tld',meta)
 cfg_tld.create(checkfirst=True)
@@ -86,13 +104,13 @@ class CfgPath(aqdbBase):
     """
     def __init__(self,pth):
         if isinstance(pth,str):
-            pth = altpath.path(pth.lstrip('/').lower())
+            pth = pth.lstrip('/').lower()
             try:
-                tld=Session.query(CfgTLD).filter_by(type=pth.split('/')[0]).one()
+                tld=Session.query(CfgTLD).filter_by(type=splitall(pth)[0]).one()
             except NoSuchRowException:
                 print "Can't find top level element '%s'"
             else:
-                self.relative_path = str(pth[1:])
+                self.relative_path = '/'.join(splitall(pth)[1:])
                 self.tld=tld
         else:
             raise TypeError('path must be a string')
@@ -160,7 +178,7 @@ class Archetype(aqdbBase):
     def __init__(self,name,**kw):
         if isinstance(name,str):
             self.name=name.strip().lower()
-        #just look for /archetype/name/base.tpl and final for now
+        #just look for archetype/name/base.tpl and final for now
             s=Session()
             try:
                 self.first = s.query(CfgPath).filter_by(
@@ -191,9 +209,9 @@ def populate_tld():
     if empty(cfg_tld, engine):
         import os
         tlds=[]
-        for i in os.listdir(str(const.cfg_base)):
+        for i in os.listdir(const.cfg_base):
             if os.path.isdir(os.path.abspath(
-                os.path.join(str(const.cfg_base),i ))) :
+                os.path.join(const.cfg_base,i ))) :
                     tlds.append(i)
 
         fill_type_table(cfg_tld, tlds)
@@ -204,18 +222,18 @@ def populate_cst():
 
 def create_paths():
     if empty(cfg_path,engine):
-        #import os
-        #for root, dirs, files in os.walk(str(const.cfg_base)):
-        #    if len(files) > 0:
-        #        for i in files:
-        #            p = altpath.path(os.path.join(root,i))
-        #            ipshell()
-        #            print p[4:]
-        d=altpath.path(str(const.cfg_base))
+        from aquilon.aqdb.utils import altpath
+        d=altpath.path(const.cfg_base)
         for file in d.walk('*.tpl'):
             (a,b,c)=file.partition('template-king/')
-            f=CfgPath(c)
-            Session.save(f)
+            try:
+                #print c
+                f=CfgPath(c)
+                Session.save(f)
+            except Exception,e:
+                print e
+                Session.rollback()
+                continue
         Session.commit()
         print 'created configuration paths'
 
@@ -233,23 +251,23 @@ def create_domains():
 def create_aquilon_archetype():
     if empty(archetype, engine):
         a=Archetype('aquilon')
-        s.save(a)
-        s.commit()
+        Session.save(a)
+        Session.commit()
 
 def get_quattor_src():
     """ ugly ugly way to initialize a quattor repo for import"""
 
     import os
     import exceptions
-    if os.path.exists(str(const.cfg_base)):
+    if os.path.exists(const.cfg_base):
         return
 
     remote_dir = 'blackcomb:/var/tmp/daqscott/quattor/*'
     try:
-        os.makedirs(str(const.cfg_base))
+        os.makedirs(const.cfg_base)
     except exceptions.OSError, e:
         pass
-    print 'run "scp -r %s %s in a seperate window."'%(remote_dir,str(const.cfg_base))
+    print 'run "scp -r %s %s in a seperate window."'%(remote_dir,const.cfg_base)
     raw_input("When you've completed this, press any key")
 
 
