@@ -7,7 +7,8 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""All database access should funnel through this module to ensure that it
+is properly backgrounded within twisted, and not blocking execution."""
 
 import os
 import exceptions

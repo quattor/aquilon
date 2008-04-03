@@ -7,14 +7,14 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''The main class here is ResponsePage, which contains all the methods
+"""The main class here is ResponsePage, which contains all the methods
 for implementing the various aq commands.
 
 To implement a command, define a transport for it in input.xml and
 then add a command_<name>[_trigger] method to the ResponsePage class.
 Any variables in the URL itself will be available as 
-request.path_variable["varname"] where "varname" is the name of the
-option.
+request.args["varname"][0] where "varname" is the name of the
+option.  (Any normal query/post variables will also be in this dict.)
 
 The pages are built up at server start time based on the definitions in
 the server's input.xml.  The RestServer class (which itself inherits
@@ -26,11 +26,19 @@ methods) are available, but only the expected methods for that relative
 URL will be assigned to render_GET, render_POST, etc.  The rest will be
 dormant.
 
-Coming soon: the ResponsePage should provide some massaging for
-incoming data, or at least handle requests for different output
-formats consistently.  It can/should also provide some helpers for
-those output formats.
-'''
+As the request comes in (and passes through the various 
+getChildWithDefault() calls) it will be checked for extensions that
+match the available format functions.  A request for location.html,
+for example, will retrieve 'location' and format it with format_html().
+
+ToDo:
+    - Possibly massage the incoming data - simplify lists back to 
+        single variables, handle put content, etc.
+    - Add some sort of interface that can be implemented for
+        objects to give hints on how they should be rendered.
+    - Add other output formats (csv, xml, etc.).
+
+"""
 
 import re
 import sys
@@ -55,14 +63,30 @@ class ResponsePage(resource.Resource):
         self.path_variable = path_variable
         self.dynamic_child = None
         resource.Resource.__init__(self)
-        # FIXME: How does the client request a different format?
         self.formats = []
         for attr in dir(self):
-            if not callable(attr):
-                continue
             if not attr.startswith("format_"):
                 continue
+            if not callable(getattr(self,attr)):
+                continue
             self.formats.append(attr[7:])
+
+    def getChildWithDefault(self, path, request):
+        """Overriding this method to parse formatting requests out
+        of the incoming resource request."""
+
+        # A good optimization here would be to have the resource store
+        # a compiled regular expression to use instead of this loop.
+        for style in self.formats:
+            #log.msg("Checking style: %s" % style)
+            extension = "." + style
+            if path.endswith(extension):
+                #log.msg("Retrieving formatted child for dynamic page: %s" % path)
+                request.output_format = style
+                # Chop off the extension when searching for children
+                path = path[:-len(extension)]
+                break
+        return resource.Resource.getChildWithDefault(self, path, request)
 
     def getChild(self, path, request):
         """Typically in twisted.web, a dynamic child would be created...
@@ -72,14 +96,20 @@ class ResponsePage(resource.Resource):
         This is an issue because the path cannot be handed to the
         constructor for it to deal with variable path names.  Instead,
         the request object is abused - the variable path names are
-        crammed into it before handing back the child that is being
+        crammed into the data structure used for query and post
+        arguments before handing back the child that is being
         requested.
 
+        This method also checks to see if a format has been requested,
+        and tucks that info away in the request object as well.  This
+        is done for the static objects simply by replicating them at
+        creation time - one for each style.
         """
 
         if not self.dynamic_child:
             return resource.Resource.getChild(self, path, request)
 
+        #log.msg("Retrieving child for dynamic page: %s" % path)
         request.args[self.dynamic_child.path_variable] = [path]
         return self.dynamic_child
 
@@ -88,6 +118,10 @@ class ResponsePage(resource.Resource):
         that checks for the appropriate method to delegate to.  This can
         be expanded out to do any default/incoming processing...
 
+        One possibility would be for it to simplify request.args to 
+        have another value, maybe request.simple_args that decomposed
+        single-element lists back to single variables.
+
         """
         m = getattr(self, 'render_' + request.method, None)
         if not m:
@@ -95,12 +129,28 @@ class ResponsePage(resource.Resource):
         return m(request)
 
     def format(self, result, request):
-        style = getattr(request, "output_format", "raw")
+        style = getattr(self, "output_format", None)
+        if style is None:
+            style = getattr(request, "output_format", "raw")
         formatter = getattr(self, "format_" + style, self.format_raw)
         return formatter(result, request)
 
     def format_raw(self, result, request):
         return str(result)
+
+    # FIXME: This should eventually be some sort of dynamic system...
+    # maybe try to ask result how it should be rendered, or check the
+    # request for hints.  For now, just wrap in a basic document.
+    def format_html(self, result, request):
+        retval = """
+        <html>
+        <head><title>%s</title></head>
+        <body>
+        %s
+        </body>
+        </html>
+        """ % (self.path % request.args, str(result))
+        return str(retval)
 
     # All of these wrap* functions should probably be elsewhere, and
     # change depending on what should go back to the client.
@@ -364,10 +414,7 @@ class ResponsePage(resource.Resource):
     def command_get(self, request):
         """aqcommand: aq get"""
 
-        # FIXME: Lookup the default domain.
-        domain = "production"
-
-        request.args["domain"] = [domain]
+        request.args["domain"] = [self.broker.domain_name]
 
         return self.command_get_domain(request)
 
@@ -424,10 +471,7 @@ class ResponsePage(resource.Resource):
     def command_sync(self, request):
         """aqcommand: aq sync --domain=<domain>"""
 
-        # FIXME: Lookup the default domain.
-        domain = "production"
-
-        request.args["domain"] = [domain]
+        request.args["domain"] = [self.broker.domain_name]
 
         return self.command_sync_domain(request)
 
@@ -446,14 +490,14 @@ class ResponsePage(resource.Resource):
         domaindir = self.broker.templatesdir + '/' + domain
 
         d = utils.getProcessOutputAndValue("/bin/sh",
-                ["-c", "cd '%s' && %s pull" % (domaindir, self.broker.git)])
+                ["-c", "cd '%s' && %s-pull" % (domaindir, self.broker.git)])
         d = d.addCallbacks(self.cb_git_command_finished,
                 self.cb_git_command_error,
                 callbackArgs=[request], errbackArgs=[request])
         # The 1.0 code notes that this should probably be done as a
         # hook in git... just need to make sure it runs.
         d = d.addCallback(lambda _: utils.getProcessOutputAndValue("/bin/sh",
-                ["-c", "cd '%s' && %s update server info"
+                ["-c", "cd '%s' && %s-update-server-info"
                     % (domaindir, self.broker.git)]))
         d = d.addCallbacks(self.cb_git_command_finished,
                 self.cb_git_command_error,
@@ -675,6 +719,7 @@ class BrokerInfo(object):
         self.cdpport = 7777
         self.localhost = socket.gethostname()
         self.git_templates_url = "http://%s:6901/templates" % self.localhost
+        self.domain_name = "production"
 
 
 class RestServer(ResponsePage):
@@ -761,10 +806,12 @@ class RestServer(ResponsePage):
                 setattr(container, rendermethod, mycommand)
 
         # Serve up a static templates directory for git...
-        log.msg("Checking on %s" % self.broker.templatesdir)
+        #log.msg("Checking on %s" % self.broker.templatesdir)
         if os.path.exists(self.broker.templatesdir):
-            log.msg("Adding child for templates")
             self.putChild("templates", static.File(self.broker.templatesdir))
+        else:
+            log.err("ERROR: templates directory '%s' not found, will not serve"
+                    % self.broker.templatesdir)
 
         def _logChildren(level, container):
             for (key, child) in container.listStaticEntities():

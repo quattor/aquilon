@@ -12,6 +12,9 @@
          <option name="debug" short="d" type="boolean" conflicts="">
             Generate debug statements sent to stderr.
          </option>
+         <option name="format" short="f" type="string" conflicts="">
+            Specify output format as raw (default) or html.
+         </option>
          <option name="noknc" type="boolean" conflicts="usesock">
             Connect to port without using knc.
          </option>

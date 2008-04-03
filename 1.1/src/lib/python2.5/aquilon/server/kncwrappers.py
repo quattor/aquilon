@@ -41,10 +41,10 @@ class KNCHTTPChannel(http.HTTPChannel):
             # with the one from the parent (http.HTTPChannel).
             if line == 'END':
                 self.__needKNCInfo = 0
-                log.msg("Finished receiving knc info.")
+                #log.msg("Finished receiving knc info.")
                 return
             (key, value) = line.split(':', 1)
-            log.msg("Got knc info key='%s' value='%s'" % (key, value))
+            #log.msg("Got knc info key='%s' value='%s'" % (key, value))
             self.kncinfo[key] = value
 
             # Removing, as 1.3 is being tested...
@@ -59,7 +59,7 @@ class KNCHTTPChannel(http.HTTPChannel):
         http.HTTPChannel.lineReceived(self, line)
 
     def getPrinciple(self):
-        return self.kncinfo.has_key("CREDS") and self.kncinfo["CREDS"] or None
+        return self.kncinfo.get("CREDS")
 
     # FIXME: Generally, twisted methods would return an IPv4Address here.
     def getClientIP(self):
@@ -69,8 +69,7 @@ class KNCHTTPChannel(http.HTTPChannel):
         give it this info, but that does not seem to be straightforward.
 
         """
-        return self.kncinfo.has_key("REMOTE_IP") \
-                and self.kncinfo["REMOTE_IP"] or None
+        return self.kncinfo.get("REMOTE_IP")
             
 
 class KNCSite(server.Site):
@@ -81,7 +80,7 @@ class KNCSite(server.Site):
     # getUser() is commented out... could have just fiddled with that).
     # Also made "IP address" return the value given from knc, instead
     # of "None" (since, as far as the framework is concerned, the
-    # connection came in over a unix domain socket and not tcp/ip.
+    # connection came in over a unix domain socket and not tcp/ip).
     def log(self, request):
         if hasattr(self, "logFile"):
             line = '%s - %s %s "%s" %d %s "%s" "%s"\n' % (

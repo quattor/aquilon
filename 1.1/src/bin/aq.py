@@ -195,6 +195,17 @@ if __name__ == "__main__":
     # be given on the command line.
     uri = str( 'http://%s:%s/' % (host, port) + transport.path % commandOptions )
 
+    # Add the formatting option into the string.  This is only tricky if
+    # a query operator has been specified, otherwise it would just be
+    # tacking on (for example) .html to the uri.
+    if globalOptions.has_key('format'):
+        query_index = uri.find('?')
+        extension = '.' + globalOptions["format"]
+        if query_index > -1:
+            uri = uri[:query_index] + extension + uri[query_index:]
+        else:
+            uri = uri + '.' + globalOptions["format"]
+
     if globalOptions.get('usesock'):
         from aquilon.client.socketwrappers import getPage
     elif globalOptions.get('noknc'):
