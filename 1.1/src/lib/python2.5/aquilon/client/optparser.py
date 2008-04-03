@@ -120,7 +120,7 @@ class commandline(Element):
             # print general help, and help for each command
             raise ParsingError ('',self.recursiveHelp())
         else:
-            raise ParsingError('Command '+command+' is not known!',self.irecursiveHelp())
+            raise ParsingError('Command '+command+' is not known!',self.recursiveHelp())
 
         transport = None
         for t in commandElement.transports:

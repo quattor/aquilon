@@ -50,27 +50,27 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def showLocation (self, **kwargs):
+    def show_location (self, **kwargs):
         # just a facade method
         return self.dbbroker.showLocation(**kwargs)
 
 # --------------------------------------------------------------------------- #
 
-    def showLocationType (self, **kwargs):
+    def show_location_type (self, **kwargs):
         # just a facade method
         return self.dbbroker.showLocationType(**kwargs)
 
 # --------------------------------------------------------------------------- #
 
-    def addLocation (self, **kwargs):
+    def add_location (self, **kwargs):
         return self.dbbroker.addLocation (**kwargs)
 
 # --------------------------------------------------------------------------- #
 
-    def delLocation (self, **kwargs):
+    def del_location (self, **kwargs):
         return self.dbbroker.delLocation(**kwargs)
 
 # --------------------------------------------------------------------------- #
     
-    def makeAquilon (self, **kwargs):
+    def make_aquilon (self, **kwargs):
         return ""

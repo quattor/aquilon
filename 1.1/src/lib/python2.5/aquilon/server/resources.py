@@ -520,7 +520,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.showLocationType(session=True)
+        d = self.broker.show_location_type(session=True)
         d = d.addErrback(self.wrapError, request)
         #d = d.addCallback(self.wrapAqdbTypeInTable)
         #d = d.addCallback(self.wrapTableInBody)
@@ -540,7 +540,7 @@ class ResponsePage(resource.Resource):
             return ""
 
         # FIXME: Treat an empty list as a 404.
-        d = self.broker.showLocation(session=True, type=type)
+        d = self.broker.show_location(session=True, type=type)
         d = d.addErrback(self.wrapError, request)
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
@@ -562,7 +562,7 @@ class ResponsePage(resource.Resource):
             return ""
 
         # FIXME: Treat an empty list as a 404.
-        d = self.broker.showLocation(type=type, name=name,
+        d = self.broker.show_location(type=type, name=name,
                 session=True)
         d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapLocationInTable )
@@ -584,7 +584,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.addLocation(name, session=True)
+        d = self.broker.add_location(name, type=type, name=name)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapLocationInTable )
@@ -606,7 +606,7 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.delLocation(name, session=True)
+        d = self.broker.del_location(name, session=True)
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addErrback( self.wrapError, request )
         d = d.addCallback( self.finishOK, request )
@@ -694,6 +694,30 @@ class ResponsePage(resource.Resource):
 
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq bind service has not been implemented yet"
+
+    def command_make_aquilon(self, request):
+        """aqcommand: aq make aquilon --hostname=<name> [--personality=<personality>]"""
+
+        request.setResponseCode (http.NOT_IMPLEMENTED)
+        return "aq make aquilon has not been implemented yet"
+        #hostname = request.args['hostname'][0]
+        #personality = request.args['personality'][0] and request.args['personality'][0] or None
+        #try:
+        #    self.broker.azbroker.check(None, request.channel.getPrinciple(),
+        #            "make", "/host/%s" % type)
+        #except AuthorizationException:
+        #    request.setResponseCode( http.UNAUTHORIZED )
+        #    return ""
+
+        ## FIXME: Treat an empty list as a 404.
+        #d = self.broker.make_aquilon(session=True, hostname=hostname, personality=personality)
+        #d = d.addErrback(self.wrapError, request)
+        ##d = d.addCallback( self.wrapLocationInTable )
+        ##d = d.addCallback( self.wrapTableInBody )
+        #d = d.addCallback(self.format, request)
+        #d = d.addCallback(self.finishRender, request)
+        #d = d.addErrback(log.err)
+        #return server.NOT_DONE_YET
 
 
 class RestServer(ResponsePage):
