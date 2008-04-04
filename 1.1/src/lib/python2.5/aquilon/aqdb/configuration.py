@@ -149,6 +149,7 @@ class Domain(aqdbBase):
             Represents individual config repositories
     """
 mapper(Domain,domain,properties={
+    'dns_domain': relation(DnsDomain),
     'creation_date':deferred(domain.c.creation_date),
     'comments':deferred(domain.c.comments)})
 

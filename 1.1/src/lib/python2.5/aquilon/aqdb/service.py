@@ -155,6 +155,10 @@ class Host(System):
         return self.machine.location.sysloc()
     sysloc = property(_sysloc)
 
+    def _fqdn(self):
+        return '.'.join([str(self.name),str(self.domain.dns_domain)])
+    fqdn = property(_fqdn)
+
     def __repr__(self):
         return 'Host %s'%(self.name)
 

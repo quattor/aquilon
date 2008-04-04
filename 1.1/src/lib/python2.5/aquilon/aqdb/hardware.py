@@ -298,7 +298,7 @@ def populate_np_nodes():
 
 
 if __name__ == '__main__':
-    from aquilon.aqdb.utils.debug import ipshell
+    #from aquilon.aqdb.utils.debug import ipshell
 
     populate_vendor()
     populate_hardware_type()
