@@ -16,7 +16,6 @@ if __name__ == '__main__':
 
 from db import *
 from location import Location
-from service import service_map
 from aquilon.aqdb.utils.schemahelpers import *
 
 from sqlalchemy import *
@@ -130,6 +129,65 @@ mapper(Network,network,properties={
     'netmask':synonym('profile'),
     'creation_date' : deferred(network.c.creation_date),
     'comments': deferred(network.c.comments)
+})
+
+dns_domain = Table('dns_domain', meta,
+    Column('id', Integer, Sequence('dns_domain_id_seq'),primary_key=True),
+    Column('name',String(32), unique=True, nullable=False, index=True),
+    Column('parent_id', Integer,
+           ForeignKey('dns_domain.id',
+                   ondelete='RESTRICT',
+                   onupdate='CASCADE'), nullable=True),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+dns_domain.create(checkfirst=True)
+
+if empty(dns_domain,engine):
+    i=insert(dns_domain)
+    i.execute(name='ms.com', comments='root node')
+    i.execute(name='one-nyp',parent_id=1, comments='1 NYP test domain')
+    print 'created ms.com dns domain root'
+
+class DnsDomain(aqdbBase):
+    """ To store dns domains in an adjacency list """
+
+    @optional_comments
+    def __init__(self,name,parent,**kw):
+        self.name = name.strip().lower()
+
+        if isinstance(parent,DnsDomain):
+            self.parent=parent
+            parent.append(self)
+        else:
+            msg="parent argument must be type 'DnsDomain'"
+            raise TypeError(msg)
+            #TODO: accept string
+
+    def parent_fqd(self):
+        pl=[]
+        p_node=self.parent
+        while p_node.parent is not None:
+            pl.append(p_node.name)
+            p_node=p_node.parent.name
+        pl.append(p_node.name)
+        pl.reverse()
+        return '.'.join(pl)
+
+    def append(self,node,**kw):
+        if isinstance(node, DnsDomain):
+            node.parent = self
+            self.sublocations[node] = node
+
+    def __repr__(self):
+        return '.'.join([self.name,self.parent_fqd()])
+
+
+mapper(DnsDomain, dns_domain, properties={
+            'parent':relation(DnsDomain,
+                              remote_side=[dns_domain.c.id],
+                              backref='subdomains'),
+            'creation_date' : deferred(location.c.creation_date),
+            'comments': deferred(location.c.comments)
 })
 
 def populate_networks():
