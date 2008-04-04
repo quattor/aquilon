@@ -262,9 +262,17 @@ mapper(Desk,desk,inherits=Location,
 def populate_hubs():
     s=Session()
 
-    w=Company('ms', 'company', fullname='root node')
-    s.save(w)
-    s.commit()
+#    w=Company('ms', 'company', fullname='root node')
+    if empty(location):
+        i=location.insert()
+        i.execute(name='ms',location_type_id=1,
+            fullname='root node',comments='root of location tree')
+        i=company.insert()
+        i.execute(id=1)
+        print 'created root node'
+    
+    w=s.query(Location).first()
+    assert(w)
 
     hk_hub=Hub('hk','hub', fullname='hong kong hub',parent=w)
     s.save(hk_hub)

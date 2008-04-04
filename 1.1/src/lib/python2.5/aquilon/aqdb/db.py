@@ -17,6 +17,7 @@ from sqlalchemy import MetaData, create_engine,  UniqueConstraint
 from sqlalchemy import Table, Integer, DateTime, Sequence, String
 from sqlalchemy import Column as _Column
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.sql import insert
 
 def make_sqlite_dsn():
     import os

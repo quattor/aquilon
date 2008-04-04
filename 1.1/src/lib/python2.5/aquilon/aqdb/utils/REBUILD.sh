@@ -18,5 +18,7 @@ time ./hardware.py
 echo
 time ./interfaces.py
 echo 
+time ./build.py
+echo
 time ./auth.py
 echo
