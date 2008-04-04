@@ -72,7 +72,7 @@ build_element.create(checkfirst=True)
 class BuildElement(aqdbBase):
     pass
 mapper(BuildElement,build_element, properties={
-    'build'         : relation(BuildElement),
+    'build'         : relation(Build),
     'cfg_path'      : relation(CfgPath),
     'creation_date' : deferred(build_element.c.creation_date),
     'comments'      : deferred(build_element.c.comments)
