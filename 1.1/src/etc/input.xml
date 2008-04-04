@@ -297,6 +297,8 @@
       Create an aquilon host.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
+         <option name="os" type="string">OS to assign to host</option>
+         <option name="archeotype" type="string">Architecture type of the host</option>
       </optgroup>
       <optgroup name="optional_options">
          <option name="personality" type="string">Personality of the host</option>
