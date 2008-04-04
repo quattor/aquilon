@@ -29,7 +29,7 @@ domain = Table('domain', meta, autoload=True)
 service_list = Table('service_list', meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
-from sqlalchemy.orm import mapper, relation, deferred
+from sqlalchemy.orm import mapper, relation, deferred, synonym
 from sqlalchemy.sql import and_
 
 service = Table('service',meta,
@@ -147,21 +147,25 @@ class Host(System):
         self.status=kw.pop('status',
                            s.query(Status).filter_by(name='build').one())
         s.close()
-    def sysloc(self):
+
+    def _get_location(self):
+        return self.machine.location
+    location = property(_get_location)
+
+    def _sysloc(self):
         return self.machine.location.sysloc()
-    #def location(self):
-    #    return self.machine.location
+    sysloc = property(_sysloc)
+
     def __repr__(self):
         return 'Host %s'%(self.name)
 
 mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='host'").fetchone()[0],
     properties={
-        'system'        :relation(System,backref='host'),
-        'machine'       :relation(Machine),
-        'location'      :relation(Machine,remote_side=machine.c.location_id),
-        'domain'        :relation(Domain),
-        'status'        :relation(Status),
+        'system'        : relation(System,backref='host'),
+        'machine'       : relation(Machine),
+        'domain'        : relation(Domain),
+        'status'        : relation(Status),
         'creation_date' : deferred(host.c.creation_date),
         'comments'      : deferred(host.c.comments)
 })

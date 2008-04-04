@@ -69,6 +69,24 @@ chassis = mk_loc_table('chassis', meta)
 
 meta.create_all()
 
+def parents(loc):
+    pl=[]
+    p_node=loc.parent
+    while p_node.parent is not None:
+        pl.append(p_node)
+        p_node=p_node.parent
+    pl.append(p_node)
+    pl.reverse()
+    return pl
+
+def p_dict(loc):
+    d={}
+    p_node=loc.parent
+    while p_node.parent is not None:
+        d[str(p_node.type)]=str(p_node.name)
+        p_node=p_node.parent
+    return d
+
 class Location(aqdbBase):
     """ Location is the base class for all location subtypes to
         inherit from. It wraps the rows of the location table """
@@ -101,20 +119,48 @@ class Location(aqdbBase):
                 return
         if kw.has_key('parent'):
             self.parent=kw.pop('parent')
+        else:
+            msg('no parent location supplied')
+            raise ArgumentError(msg)
+            return
+        #TODO: if there is no parent raise a Warning.
+        #TODO: maintenance: a periodic sweep of this table for null parents?
 
-        #TODO: raise a Warning.
-        #TODO: maintenance: a periodic sweep of this table for null parents
+    #def _parents(self):
+    #    return parents(self)
+    #parents = property(_parents)
 
-    def parents(self):
-        pl=[]
-        p_node=self.parent
-        self._parent_dict[str(self.parent.type)]=self.parent
-        while p_node.parent is not None:
-            pl.append(p_node)
-            p_node=p_node.parent
-        pl.append(p_node)
-        pl.reverse()
-        return pl
+    def _p_dict(self):
+        return p_dict(self)
+    p_dict = property(_p_dict)
+
+    def _hub(self):
+        return self.p_dict['hub']
+    hub = property(_hub)
+
+    def _continent(self):
+        return self.p_dict['continent']
+    continent=property(_continent)
+
+    def _country(self):
+        return self.p_dict['country']
+    country = property(_country)
+
+    def _city(self):
+        return self.p_dict['city']
+    city = property(_city)
+
+    def _building(self):
+        return self.p_dict['building']
+    building = property(_building)
+
+    def _rack(self):
+        return self.p_dict['rack']
+    rack = property(_rack)
+
+    def _chassis(self):
+        return self.p_dict['chassis']
+    chassis = property(_chassis)
 
     def get_typed_children(self,type):
         """ return all child location objects of a given location type """
@@ -343,10 +389,10 @@ if __name__ == '__main__':
     if empty(building,engine):
         print 'populating buildings'
         populate_bldg()
-    if empty(rack,engine):
-        np_racks()
-    if empty(chassis,engine):
-        np_chassis()
+#    if empty(rack,engine):
+#        np_racks()
+#    if empty(chassis,engine):
+#        np_chassis()
 
 """
 def populate_rack_chassis():
