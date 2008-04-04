@@ -14,8 +14,9 @@ import sys
 sys.path.append('../..')
 
 from db import *
-#from aquilon.aqdb.utils.schemahelpers import *
-from sqlalchemy import Table, Column, Integer, Sequence, String, ForeignKey, DateTime
+
+from sqlalchemy import Table, Column, Integer, Sequence, String
+from sqlalchemy import ForeignKey, DateTime
 from sqlalchemy.orm import mapper, relation, deferred
 
 user_principle = Table('user_principle', meta,
@@ -35,13 +36,12 @@ mapper(UserPrinciple,user_principle, properties={
     'comments': deferred(user_principle.c.comments)
 })
 
-
 if __name__ == '__main__':
     if empty(user_principle):
         i=user_principle.insert()
         for nm in ['njw','daqscott','wesleyhe','guyrol']:
             i.execute(name=nm)
+    print 'inserted some example user principles'
 
     a=Session.query(UserPrinciple).first()
     assert(a)
-    print 'created some example user principles'

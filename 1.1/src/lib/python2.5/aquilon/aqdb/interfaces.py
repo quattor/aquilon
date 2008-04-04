@@ -17,7 +17,6 @@ import os
 import datetime
 
 from db import *
-from aquilon.aqdb.utils.schemahelpers import *
 from aquilon import const
 
 from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint

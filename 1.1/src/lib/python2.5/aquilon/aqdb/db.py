@@ -11,11 +11,12 @@
 
 import msversion
 msversion.addpkg('sqlalchemy','0.4.4','dist')
+import datetime
 
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, create_engine,  UniqueConstraint
+from sqlalchemy import Table, Integer, DateTime, Sequence, String
+from sqlalchemy import Column as _Column
 from sqlalchemy.orm import sessionmaker, scoped_session
-
-from aquilon.aqdb.utils.schemahelpers import optional_comments
 
 def make_sqlite_dsn():
     import os
@@ -39,7 +40,7 @@ dsn = sqlite_dsn
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dev')
-    
+
 
 engine = create_engine(dsn)
 engine.connect()
@@ -122,14 +123,23 @@ Session = scoped_session(sessionmaker(bind=engine,
         loaded, or were marked as "expired".
 """
 
+def optional_comments(func):
+    """ reduce repeated code to handle 'comments' column """
+    def comments_decorator(*__args, **__kw):
+        ATTR = 'comments'
+        if (__kw.has_key(ATTR)):
+            setattr(__args[0], ATTR, __kw.pop(ATTR))
+        return func(*__args, **__kw)
+    return comments_decorator
 
-""" The AQDB module base class.
-    All ORM classes will extend aqdbBase. While this is currently empty,
-    it would be silly not to have this class such that we can make use
-    of it later when and if needed. Not sure it will exist here permanently
-    but since all schema modules need to import DB, it's here for now
-"""
+
+
 class aqdbBase(object):
+    """ AQDB base class: All ORM classes will extend aqdbBase. While the code
+    is a bit trite, it would be silly not to have this class such that we can
+    make use of it later when and if needed. All schema modules need to import
+    db, so this is the best place for it
+    """
     @optional_comments
     def __init__(self,name,*args,**kw):
         self.name = name
@@ -153,6 +163,18 @@ class aqdbType(aqdbBase):
     def __repr__(self):
         return str(self.type)
 
+"""
+    Utilities to decrease repeated code in generating schema
+    and associated baseline data
+"""
+
+def Column(*args, **kw):
+    """ some curry: default column from SA to default as null=False
+        unless it's comments, which we hardcode to standardize
+    """
+    if not kw.has_key('nullable'):
+        kw['nullable']=False;
+    return _Column(*args, **kw)
 
 """ Example of a 'mock' engine to output sql as print statments
 
@@ -187,10 +209,9 @@ def gen_id_cache(obj_name):
         "already attached to the session" which loaded them (because it was a
         different session). """
 
-def empty(table):
+def empty(table, *args, **kw):
     """
-        Returns True if no rows in table, helps in interative schema 
-population
+        Returns True if no rows in table, helps in interative schema population
     """
     count = engine.execute(table.count()).fetchone()[0]
     if count < 1:
@@ -198,3 +219,43 @@ population
     else:
         return False
 
+def fill_type_table(table,items):
+    """
+        Shorthand for filling up simple 'type' tables
+    """
+    if not isinstance(table,Table):
+        raise TypeError("table argument must be type Table")
+        return
+    if not isinstance(items,list):
+        raise TypeError("items argument must be type list")
+        return
+    i = insert(table)
+    for t in items:
+        result = i.execute(type=t)
+
+
+def mk_name_id_table(name, meta, *args, **kw):
+    """
+        Many tables simply contain name and id columns, use this
+        to reduce code volume and standardize DDL
+    """
+    return Table(name, meta, \
+                Column('id', Integer, Sequence('%s_id_seq',name),
+                       primary_key=True),
+                Column('name', String(32), unique=True, index=True),
+                Column('creation_date', DateTime,
+                       default=datetime.datetime.now),
+                Column('comments', String(255), nullable=True),*args,**kw)
+
+def mk_type_table(name, meta, *args, **kw):
+    """
+        Variant on name_id. Can and should reduce them to a single function
+        (later)
+    """
+    return Table(name, meta, \
+                Column('id', Integer, Sequence('%s_id_seq',name),
+                       primary_key=True),
+                Column('type', String(32), unique=True, index=True),
+                Column('creation_date', DateTime,
+                       default=datetime.datetime.now),
+                Column('comments', String(255), nullable=True))

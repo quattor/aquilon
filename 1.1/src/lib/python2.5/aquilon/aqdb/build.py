@@ -17,7 +17,6 @@ sys.path.append('../..')
 from db import *
 from service import Host
 from configuration import CfgPath
-from aquilon.aqdb.utils.schemahelpers import *
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
@@ -87,5 +86,6 @@ mapper(BuildElement,build_element, properties={
 
 
 if __name__ == '__main__':
-    from aquilon.aqdb.utils.debug import ipshell
-    ipshell()
+    #from aquilon.aqdb.utils.debug import ipshell
+    #ipshell()
+    assert(build_element)

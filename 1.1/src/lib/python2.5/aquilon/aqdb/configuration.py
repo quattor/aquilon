@@ -17,9 +17,8 @@ sys.path.append('../..')
 from db import *
 
 from aquilon import const
-from aquilon.aqdb.utils.schemahelpers import *
+
 from aquilon.aqdb.utils.exceptions_ import NoSuchRowException
-from aquilon.aqdb.utils.debug import ipshell
 
 from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred

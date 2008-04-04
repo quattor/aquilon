@@ -18,7 +18,6 @@ from db import *
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
-from aquilon.aqdb.utils.schemahelpers import *
 from aquilon.aqdb.utils.exceptions_ import ArgumentError
 
 s = Session()

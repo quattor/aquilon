@@ -16,7 +16,6 @@ if __name__ == '__main__':
 
 from db import *
 from location import Location
-from aquilon.aqdb.utils.schemahelpers import *
 
 from sqlalchemy import *
 from sqlalchemy.orm import *
@@ -97,7 +96,6 @@ network = Table('network', meta,
     Column('bucket', String(32), nullable=True),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
-add_compulsory_columns(network)
 network.create(checkfirst=True)
 
 class Network(aqdbBase):

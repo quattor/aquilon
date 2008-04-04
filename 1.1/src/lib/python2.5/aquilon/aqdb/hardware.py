@@ -17,7 +17,6 @@ import os
 import datetime
 
 from db import *
-from aquilon.aqdb.utils.schemahelpers import *
 
 from location import Location,Chassis
 from configuration import CfgPath, Domain
@@ -309,4 +308,3 @@ if __name__ == '__main__':
     #populate_np_nodes()
 
     #ipshell()
-

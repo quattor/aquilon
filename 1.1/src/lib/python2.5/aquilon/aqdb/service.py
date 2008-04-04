@@ -14,8 +14,7 @@ from __future__ import with_statement
 import sys, datetime
 sys.path.append('../..')
 
-from db import meta, engine, Session, aqdbBase
-from aquilon.aqdb.utils.schemahelpers import *
+from db import *
 
 from location import *
 location=Table('location', meta, autoload=True)
@@ -28,7 +27,7 @@ from configuration import Domain, ServiceList
 domain = Table('domain', meta, autoload=True)
 service_list = Table('service_list', meta, autoload=True)
 
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy import Integer, Sequence, String, ForeignKey, Table, DateTime
 from sqlalchemy.orm import mapper, relation, deferred, synonym
 from sqlalchemy.sql import and_
 
