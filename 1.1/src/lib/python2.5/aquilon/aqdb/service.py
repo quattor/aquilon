@@ -375,43 +375,5 @@ def populate_all_service_tables():
         s.commit()
         print 'populated service list'
 
-def populate_hosts():
-    if empty(host,engine):
-        s=Session()
-        mlist=s.query(Machine).all()
-        m=mlist[23]
-        h=Host(m,name='npipm1')
-        s.save(h)
-        h.name='npipm1'
-        s.commit()
-        m=mlist[43]
-        h=Host(m,name='npipm2')
-        s.save(h)
-        s.commit()
-        s.close()
-
-def make_podmasters():
-    cnt=service_instance.count().execute()
-    if cnt.fetchall()[0][0] < 2:
-        hlist=s.query(Host).all()
-        npipm1=hlist[0]
-        npipm2=hlist[1]
-
-        svcs=s.query(Service).all()
-        syslog=s.query(Service).filter_by(name='syslog').one()
-
-        si=ServiceInstance(syslog,npipm1)
-        s.save(si)
-
-        si2=ServiceInstance(syslog,npipm2)
-        s.save(si2)
-        s.commit()
-        print 'added %s service instances'%(syslog)
-
 if __name__ == '__main__':
-    from aquilon.aqdb.utils.debug import ipshell
-
     populate_all_service_tables()
-    #populate_hosts()
-    #make_podmasters()
-    #ipshell()

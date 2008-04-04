@@ -12,12 +12,20 @@ well with ipython.  If we are in the server, wrap the call so that
 it does not get brought in.'''
 
 import sys
+import os
+user = os.environ.get('USER')
+
+def dummy_ipshell():
+    print >>sys.stderr, "In the server, not actually calling ipshell()!"
 
 if sys.modules.has_key('twisted.scripts.twistd'):
-    def dummy_ipshell():
-        print >>sys.stderr, "In the server, not actually calling ipshell()!"
+    ipshell = dummy_ipshell()
+    
+elif user == 'quattor':
+    """ ipython likes to create rc files for you, but prod ids have read only
+        home dirs, and spewage ensues """
+    ipshell = dummy_ipshell()
 
-    ipshell = dummy_ipshell
 else:
     import msversion
     msversion.addpkg('ipython','0.7.2','dist')

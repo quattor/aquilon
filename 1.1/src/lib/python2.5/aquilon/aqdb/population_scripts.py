@@ -27,14 +27,17 @@ from configuration import *
 from hardware import *
 from interfaces import *
 
+s=Session()
+
+nick=Session.query(Nic).filter_by(driver='tg3').one()
+
 cmnt = 'FAKE'
 
-s=Session()
-model  = s.query(Model).filter_by(name='hs21').one()
-syslog = s.query(Service).filter_by(name='syslog').one()
-prod   = s.query(Domain).filter_by(name='production').one()
-stat   = s.query(Status).filter_by(name='prod').one()
-nick=Session.query(Nic).filter_by(driver='tg3').one()
+def create_aquilon_archetype():
+    if empty(archetype, engine):
+        a=Archetype('aquilon')
+        Session.save(a)
+        Session.commit()
 
 def n_of(n,string):
     """ generate n strings with sequential integer appended
@@ -51,7 +54,7 @@ def n_of_rand_hex(n):
 
 def make_interfaces():
     """ generate e0 and e1 with random hex fields for FAKE commented
-        machine that has none. Theres a chance it might repeat but
+        machine that has none. There's a chance it might repeat but
         I'm not too worried about it, and wrapped in try/except anyway """
 
     for m in s.query(Machine).filter_by(comments=cmnt).all():
@@ -61,6 +64,8 @@ def make_interfaces():
                     pi=PhysicalInterface(
                         'e'+str(n),nick,random_mac(),m,
                     comments=cmnt)
+                    if n == 0:
+                        pi.boot=True
                     s.save(pi)
                 except Exception, e:
                     print e
@@ -75,6 +80,13 @@ def make_interfaces():
 
 def two_in_each():
     nodelist=[]
+
+    cmnt = 'FAKE'
+    model  = s.query(Model).filter_by(name='hs21').one()
+    syslog = s.query(Service).filter_by(name='syslog').one()
+    prod   = s.query(Domain).filter_by(name='production').one()
+    stat   = s.query(Status).filter_by(name='prod').one()
+    nick=Session.query(Nic).filter_by(driver='tg3').one()
 
     for b in s.query(Building).all():
         racks = (Rack(r,'rack',fullname='rack %s'%r,
@@ -134,7 +146,6 @@ def two_in_each():
     delete from location where comments like '%FAKE%';
 
 """
-
 def random_mac():
     mac=[]
     for i in range(4):
@@ -169,7 +180,75 @@ def configure_host(host):
 
         print si_list
 
+##older routines not used so much now:
+def populate_fake_machine():
+    if empty(machine,engine):
+        c=Session.query(Chassis).first()
+        mod=Session.query(Model).filter_by(name='hs20').one()
+        m=Machine(c,mod,name='np12c1n9-TESTHOST')
+
+        Session.save(m)
+        Session.commit()
+
+def populate_np_nodes():
+    cnt=machine.count().execute()
+    if cnt.fetchall()[0][0] < 2:
+        s=Session
+        mod=Session.query(Model).filter_by(name='hs20').one()
+        with open('etc/np-data/np-nodes','r') as f:
+            for line in f.readlines():
+                (c,q,num)=line.strip().lstrip('n').partition('n')
+                c='n'+c
+                try:
+                    r=s.query(Chassis).filter_by(name=c).one()
+                except Exception,e:
+                    print 'no such chassis %s'%c
+                    continue
+                m=Machine(r,mod,name=line.strip())
+                s.save(m)
+        s.commit()
+        s.close()
+
+def populate_hosts():
+    if empty(host,engine):
+        s=Session()
+        mlist=s.query(Machine).all()
+        m=mlist[23]
+        h=Host(m,name='npipm1')
+        s.save(h)
+        h.name='npipm1'
+        s.commit()
+        m=mlist[43]
+        h=Host(m,name='npipm2')
+        s.save(h)
+        s.commit()
+        s.close()
+
+def make_podmasters():
+    cnt=service_instance.count().execute()
+    if cnt.fetchall()[0][0] < 2:
+        hlist=s.query(Host).all()
+        npipm1=hlist[0]
+        npipm2=hlist[1]
+
+        svcs=s.query(Service).all()
+        syslog=s.query(Service).filter_by(name='syslog').one()
+
+        si=ServiceInstance(syslog,npipm1)
+        s.save(si)
+
+        si2=ServiceInstance(syslog,npipm2)
+        s.save(si2)
+        s.commit()
+        print 'added %s service instances'%(syslog)
+
+
+#############
 
 if __name__ == '__main__':
     two_in_each()
     make_interfaces()
+    #ipshell()
+
+
+

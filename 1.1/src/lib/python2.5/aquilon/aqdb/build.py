@@ -18,7 +18,7 @@ from db import *
 from service import Host
 from configuration import CfgPath
 
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy import Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
 host     = Table('host', meta, autoload=True)
@@ -86,6 +86,4 @@ mapper(BuildElement,build_element, properties={
 
 
 if __name__ == '__main__':
-    #from aquilon.aqdb.utils.debug import ipshell
-    #ipshell()
     assert(build_element)

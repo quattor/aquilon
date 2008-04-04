@@ -267,44 +267,8 @@ def populate_model():
         finally:
             s.close()
 
-def populate_fake_machine():
-    if empty(machine,engine):
-        c=Session.query(Chassis).first()
-        mod=Session.query(Model).filter_by(name='hs20').one()
-        m=Machine(c,mod,name='np12c1n9-TESTHOST')
-
-        Session.save(m)
-        Session.commit()
-
-def populate_np_nodes():
-    cnt=machine.count().execute()
-    if cnt.fetchall()[0][0] < 2:
-        s=Session
-        mod=Session.query(Model).filter_by(name='hs20').one()
-        with open('etc/np-data/np-nodes','r') as f:
-            for line in f.readlines():
-                (c,q,num)=line.strip().lstrip('n').partition('n')
-                c='n'+c
-                try:
-                    r=s.query(Chassis).filter_by(name=c).one()
-                except Exception,e:
-                    print 'no such chassis %s'%c
-                    continue
-                m=Machine(r,mod,name=line.strip())
-                s.save(m)
-        s.commit()
-        s.close()
-
-
-
 if __name__ == '__main__':
-    #from aquilon.aqdb.utils.debug import ipshell
-
     populate_vendor()
     populate_hardware_type()
     populate_machine_type()
     populate_model()
-    #populate_fake_machine()
-    #populate_np_nodes()
-
-    #ipshell()
