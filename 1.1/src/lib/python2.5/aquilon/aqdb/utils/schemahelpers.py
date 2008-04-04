@@ -11,6 +11,9 @@
     Utilities to decrease repeated code in generating schema
     and associated baseline data
 """
+import warnings
+warnings.warn("schemahelpers will be deprecated in the next day",
+                              category=DeprecationWarning)
 
 from sqlalchemy import Table, Integer, Sequence, String
 from sqlalchemy import UniqueConstraint , ForeignKey, DateTime
