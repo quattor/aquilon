@@ -301,6 +301,7 @@
       <optgroup name="optional_options">
          <option name="personality" type="string">Personality of the host</option>
       </optgroup>
+      <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
 
    <command name="make_aurora">

@@ -79,8 +79,8 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
     
-    def make_aquilon (self, **kwargs):
-        return ""
+    def make_host (self, **kwargs):
+        return self.dbbroker.make_host(session=True, **kwargs)
 
 # --------------------------------------------------------------------------- #
     

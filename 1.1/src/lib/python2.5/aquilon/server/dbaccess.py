@@ -19,6 +19,7 @@ from twisted.python import log
 
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
+from aquilon.aqdb.configuration import *
 
 
 class DatabaseBroker(AccessBroker):
@@ -108,5 +109,10 @@ class DatabaseBroker(AccessBroker):
     @transact
     def showLocationType(self, **kwargs):
         return self.session.query(LocationType).filter_by(**kwargs).all()
+
+    @transact
+    def make_host(self, **kwargs):
+        return self.session.query(Archetype).filter_by(
+                name=kwargs.get("archetype")).all()
 
 

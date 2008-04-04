@@ -667,11 +667,11 @@ class ResponsePage(resource.Resource):
 
     def command_make_aquilon(self, request):
         """aqcommand: aq make aquilon --hostname=<name> [--personality=<personality>]"""
+        hostname = request.args['hostname'][0]
+        personality = request.args.has_key('personality') and request.args['personality'][0] or None
+        archetype = "aquilon"
+        os = "linux"
 
-        request.setResponseCode (http.NOT_IMPLEMENTED)
-        return "aq make aquilon has not been implemented yet"
-        #hostname = request.args['hostname'][0]
-        #personality = request.args['personality'][0] and request.args['personality'][0] or None
         #try:
         #    self.broker.azbroker.check(None, request.channel.getPrinciple(),
         #            "make", "/host/%s" % type)
@@ -680,14 +680,16 @@ class ResponsePage(resource.Resource):
         #    return ""
 
         ## FIXME: Treat an empty list as a 404.
-        #d = self.broker.make_aquilon(session=True, hostname=hostname, personality=personality)
-        #d = d.addErrback(self.wrapError, request)
+        d = self.broker.make_host(hostname=hostname, personality=personality,
+                archetype=archetype, os=os)
         ##d = d.addCallback( self.wrapLocationInTable )
         ##d = d.addCallback( self.wrapTableInBody )
         #d = d.addCallback(self.format, request)
         #d = d.addCallback(self.finishRender, request)
-        #d = d.addErrback(log.err)
-        #return server.NOT_DONE_YET
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapError, request)
+        d = d.addErrback(log.err)
+        return server.NOT_DONE_YET
 
 
 class RestServer(ResponsePage):
