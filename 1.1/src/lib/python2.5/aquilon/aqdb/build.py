@@ -37,6 +37,7 @@ build.create(checkfirst=True)
 class Build(aqdbBase):
     """ Identifies the build process of a given Host.
         Parent of 'build_element' """
+    @optional_comments
     def __init__(self,host):
         if isinstance(host,Host):
             self.host=host
@@ -82,6 +83,7 @@ mapper(BuildElement,build_element, properties={
 #primary key should be host_id/order
 #somewhere in this or chost, a change should trigger an
 #update_time column on some table to update
+
 
 
 if __name__ == '__main__':

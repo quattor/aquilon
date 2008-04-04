@@ -21,14 +21,19 @@ from aquilon.aqdb.utils.schemahelpers import *
 from aquilon.aqdb.utils.exceptions_ import NoSuchRowException
 from aquilon.aqdb.utils.debug import ipshell
 
+from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
+from sqlalchemy.orm import mapper, relation, deferred
+
+from network import DnsDomain
+dns_domain=Table('dns_domain', meta, autoload=True)
+
+
 import os
 osuser = os.environ.get('USER')
 qdir = os.path.join( '/var/tmp', osuser, 'quattor/template-king' )
-#const.cfg_base=altpath.path(qdir)
 const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor/template-king')
 
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
-from sqlalchemy.orm import mapper, relation, deferred
+
 
 def splitall(path):
     """
@@ -62,6 +67,7 @@ class CfgTLD(aqdbType):
             final     (only one for now)
             personality is really just app (or service if its consumable too)
     """
+    pass
 mapper(CfgTLD, cfg_tld, properties={
     'creation_date' : deferred(cfg_tld.c.creation_date)})
 
@@ -91,7 +97,7 @@ cfg_path = Table('cfg_path',meta,
     Column('relative_path', String(64), index=True, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('last_used', DateTime, default=datetime.datetime.now),
-    Column('comments',String(255)))
+    Column('comments',String(255),nullable=True))
 #TODO: unique tld/relative_path
 cfg_path.create(checkfirst=True)
 
@@ -102,6 +108,7 @@ class CfgPath(aqdbBase):
 
         The individual config paths are created against this base class.
     """
+    @optional_comments
     def __init__(self,pth):
         if isinstance(pth,str):
             pth = pth.lstrip('/').lower()
@@ -126,7 +133,16 @@ mapper(CfgPath,cfg_path,properties={
     'creation_date':deferred(cfg_path.c.creation_date),
     'comments':deferred(cfg_path.c.comments)})
 
-domain = mk_name_id_table('domain', meta,)
+domain = Table('domain', meta,
+    Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
+    Column('name', String(32), unique=True, index=True),
+    #TODO: a better place for dns-domain. We'll need to flesh out DNS support
+    #within aqdb in the coming weeks after the handoff, but for now,
+    #it's an innocuous place since hosts can only be in one domain
+    Column('dns_domain_id', Integer,
+           ForeignKey('dns_domain.id'), nullable=False, default=2),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
 domain.create(checkfirst=True)
 
 class Domain(aqdbBase):
@@ -175,6 +191,7 @@ archetype.create(checkfirst=True)
 
 class Archetype(aqdbBase):
     """Describes high level template requirements for building hosts """
+    @optional_comments
     def __init__(self,name,**kw):
         if isinstance(name,str):
             self.name=name.strip().lower()
@@ -293,6 +310,7 @@ if __name__ == '__main__':
     assert(c)
     assert(d)
     assert(e)
+
 
 #TODO: this key/value attribute of aqdb config source
 #TODO: figure out quattor config source

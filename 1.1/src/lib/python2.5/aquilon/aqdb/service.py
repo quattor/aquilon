@@ -30,6 +30,7 @@ service_list = Table('service_list', meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
+from sqlalchemy.sql import and_
 
 service = Table('service',meta,
     Column('id', Integer, primary_key=True, index=True),
@@ -100,6 +101,7 @@ class System(aqdbBase):
         It is perhaps the most important table so far, and replaces the notion of
         'host' as we've used it in our discussions and designs thus far.
     """
+    @optional_comments
     def __init__(self,cn,*args,**kw):
         if isinstance(cn,str):
             self.name = cn
@@ -134,6 +136,7 @@ host.create(checkfirst=True)
 
 class Host(System):
     """  """
+    @optional_comments
     def __init__(self,machine,**kw):
         s = Session()
         if isinstance(machine,Machine):
@@ -253,6 +256,7 @@ class ServiceMap(aqdbBase):
         default that clients can choose as their provider during service
         autoconfiguration.
     """
+    @optional_comments
     def __init__(self, si, loc, *args,**kw):
         if isinstance(si,ServiceInstance):
             self.service_instance = si
@@ -294,6 +298,7 @@ service_list_item.create(checkfirst=True)
 
 class ServiceListItem(aqdbBase):
     """ The individual items in a list of required service dependencies """
+    @optional_comments
     def __init__(self,svc_list,svc):
         self.service_list = svc_list
         self.service = svc
@@ -400,6 +405,6 @@ if __name__ == '__main__':
     from aquilon.aqdb.utils.debug import ipshell
 
     populate_all_service_tables()
-    populate_hosts()
-    make_podmasters()
+    #populate_hosts()
+    #make_podmasters()
     #ipshell()

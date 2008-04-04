@@ -10,17 +10,14 @@
 """Classes and Tables relating to network interfaces"""
 from __future__ import with_statement
 
-import msversion
-msversion.addpkg('sqlalchemy','0.4.4','dist')
-
 import sys
 sys.path.append('../..')
 
 import os
 import datetime
 
-from aquilon.aqdb.utils.schemahelpers import Column, mk_type_table, empty, fill_type_table
 from db import *
+from aquilon.aqdb.utils.schemahelpers import *
 from aquilon import const
 
 from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint
@@ -28,7 +25,7 @@ from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint
 from location import Location,Chassis
 from configuration import CfgPath
 from hardware import Machine
-import configuration #for the const.* set there.
+import configuration #for cfg_base
 
 location=Table('location', meta, autoload=True)
 chassis=Table('chassis', meta, autoload=True)
@@ -38,8 +35,8 @@ machine=Table('machine', meta, autoload=True)
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
-const.nic_directory=str(configuration.const.cfg_base)+'/hardware/nic/'
 const.nic_prefix ='hardware/nic/'
+const.nic_directory=os.path.join(configuration.const.cfg_base,const.nic_prefix)
 const.nics = os.listdir(const.nic_directory)
 
 interface_type=mk_type_table('interface_type',meta)
@@ -126,6 +123,7 @@ nic.create(checkfirst=True)
 """
 class Nic(aqdbBase):
     """ This table/class models the quattor/hardware/nic/* for host creation """
+    @optional_comments
     def __init__(self,*args,**kw):
         msg = 'The Nic class is query only and cannot be instanced'
         raise ArgumentError(msg)
@@ -235,4 +233,4 @@ def populate_physical():
 
 if __name__ == '__main__':
     populate_nics()
-    populate_physical()
+    #populate_physical()

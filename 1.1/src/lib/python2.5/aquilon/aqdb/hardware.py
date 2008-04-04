@@ -77,6 +77,9 @@ model = Table('model',meta,
 model.create(checkfirst=True)
 
 class Model(aqdbBase):
+    """ Model is a combination of vendor and product name used to
+        catalogue various different kinds of hardware """
+    @optional_comments
     def __init__(self,name,vndr,h_typ,m_typ=None):
         self.name = name.lower().strip()
 
@@ -145,26 +148,30 @@ class Machine(aqdbBase):
     """ Represents any kind of computer that we need to model. This spans
         workstations, rackmount or chassis servers.
     """
+    @optional_comments
     def __init__(self,loc,model,**kw):
         self.location = loc
+        self.model = model
+        #TODO: validate that this model type can go in this location type
+        #TODO: make name and node#/chassis loc mutually exclusive
+
         if kw.has_key('name'):
             self.name=kw.pop('name')
-        #if loc is a chassis, then get the node #
-        #if loc is a rack, get node #
-        #desk: dunno, could take a building i guess as a hack for now
-        #might also be nice to take building, then validate ask for more
-        #info based on what machine_type it is
-        self.model = model
-        #TODO: ALOT!!!
-        #automatic node name assignment (building, rack, chassis)
-        #create rack and chassis by building name and #, Chassis w/ chassis #
-        #what are the nodenames of rackmount boxes? (how to autocalculate?)
-        #sysloc on everything
-        #attributes on all location nodes for each parent loc component
-        #check whether this model type can go in this location
-        #IMPORTANT:
-        #chassis needs to have slots. And machines can have node #s? (simplify
-        #   the methods for naming machines, etc.)
+        #if loc = chassis then get a node #
+        elif loc.type=='chassis':
+            if kw.has_key('node'):
+                if isinstance(kw['node'],int):
+                    self.name= ''.join([loc.name, 'n', str(kw.pop('node'))])
+                else:
+                    msg="""
+Argument to 'node' must be integer, got '%s', type '%s'"""%(kw['node'],
+                                                               type(kw['node']))
+                    raise TypeError(msg.lstrip())
+
+        #if loc = rack/its a rackmount, nodename is faked (how is TBD),
+        #  create a new unique chassis for it with 1 slot.
+        #if loc = desk: TBD, building for now
+
     def __repr__(self):
         return 'Machine: %s is a %s located in %s'%(
             self.name,self.model,self.location)
@@ -188,6 +195,7 @@ status.create(checkfirst=True)
 class Status(object):
     """ Status represents phases of deployment. can be one of prod, dev, qa, or
         build. Child of host table, so it comes first. """
+    @optional_comments
     def __init__(self,name):
         msg = """
 Status is a static table and cannot be instanced, only queried. """
@@ -297,9 +305,8 @@ if __name__ == '__main__':
     populate_hardware_type()
     populate_machine_type()
     populate_model()
-    populate_fake_machine()
-    populate_np_nodes()
+    #populate_fake_machine()
+    #populate_np_nodes()
 
-#    ipshell()
+    #ipshell()
 
-#do we need hardware type when we have nic, cpu, disk and model tables?
