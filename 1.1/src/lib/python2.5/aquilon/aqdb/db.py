@@ -186,3 +186,15 @@ def gen_id_cache(obj_name):
         cause errors from being in the persistent state, and marked as
         "already attached to the session" which loaded them (because it was a
         different session). """
+
+def empty(table):
+    """
+        Returns True if no rows in table, helps in interative schema 
+population
+    """
+    count = engine.execute(table.count()).fetchone()[0]
+    if count < 1:
+        return True
+    else:
+        return False
+
