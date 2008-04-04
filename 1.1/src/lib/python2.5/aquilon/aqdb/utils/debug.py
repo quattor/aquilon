@@ -15,16 +15,16 @@ import sys
 import os
 user = os.environ.get('USER')
 
-def dummy_ipshell():
-    print >>sys.stderr, "In the server, not actually calling ipshell()!"
+def dummy_ipshell(msg):
+    print >>sys.stderr, msg
 
 if sys.modules.has_key('twisted.scripts.twistd'):
-    ipshell = dummy_ipshell()
+    ipshell = dummy_ipshell("In the server, not actually calling ipshell()!")
     
 elif user == 'quattor':
     """ ipython likes to create rc files for you, but prod ids have read only
         home dirs, and spewage ensues """
-    ipshell = dummy_ipshell()
+    ipshell = dummy_ipshell("quattor prodid can't use ipython...")
 
 else:
     import msversion

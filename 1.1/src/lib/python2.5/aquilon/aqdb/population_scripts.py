@@ -33,12 +33,6 @@ nick=Session.query(Nic).filter_by(driver='tg3').one()
 
 cmnt = 'FAKE'
 
-def create_aquilon_archetype():
-    if empty(archetype, engine):
-        a=Archetype('aquilon')
-        Session.save(a)
-        Session.commit()
-
 def n_of(n,string):
     """ generate n strings with sequential integer appended
         useful for generating lots of rack/node names, etc """
@@ -81,7 +75,8 @@ def make_interfaces():
 def two_in_each():
     nodelist=[]
 
-    cmnt = 'FAKE'
+    print "go get some coffee, we'll be here a while"
+
     model  = s.query(Model).filter_by(name='hs21').one()
     syslog = s.query(Service).filter_by(name='syslog').one()
     prod   = s.query(Domain).filter_by(name='production').one()
@@ -144,8 +139,8 @@ def two_in_each():
     delete from rack where id in (select id from location where comments like '%FAKE%');
     delete from chassis where id in (select id from location where comments like '%FAKE%');
     delete from location where comments like '%FAKE%';
-
 """
+
 def random_mac():
     mac=[]
     for i in range(4):
@@ -170,7 +165,6 @@ def make_host(name, machine,**kw):
 
     assert(h)
     configure_host(h)
-    #s.delete(h)
 
 def configure_host(host):
     a=s.query(Archetype).filter_by(name='aquilon').one()
@@ -179,16 +173,6 @@ def configure_host(host):
         si_list=s.query(ServiceInstance).filter_by(service=svc.service).all()
 
         print si_list
-
-##older routines not used so much now:
-def populate_fake_machine():
-    if empty(machine,engine):
-        c=Session.query(Chassis).first()
-        mod=Session.query(Model).filter_by(name='hs20').one()
-        m=Machine(c,mod,name='np12c1n9-TESTHOST')
-
-        Session.save(m)
-        Session.commit()
 
 def populate_np_nodes():
     cnt=machine.count().execute()
@@ -209,46 +193,69 @@ def populate_np_nodes():
         s.commit()
         s.close()
 
-def populate_hosts():
-    if empty(host,engine):
-        s=Session()
-        mlist=s.query(Machine).all()
-        m=mlist[23]
-        h=Host(m,name='npipm1')
-        s.save(h)
-        h.name='npipm1'
+def make_syslog_si(hostname):
+    h=s.query(Host).filter_by(name=hostname).one()
+
+    syslog=s.query(Service).filter_by(name='syslog').one()
+
+    si=ServiceInstance(syslog,h)
+    s.save(si)
+    try:
         s.commit()
-        m=mlist[43]
-        h=Host(m,name='npipm2')
-        s.save(h)
+    except Exception,e:
+        s.rollback
+        print e
+        return False
+    print 'added %s service instances'%(syslog)
+    return True
+
+def npipm1():
+    np=s.query(Building).filter_by(name='np').one()
+    mod=s.query(Model).filter_by(name='ls20').one()
+    nick=Session.query(Nic).filter_by(driver='tg3').one()
+
+    c=s.query(Chassis).filter_by(name='np302c1').first()
+    if not c:
+        c=Chassis('np302c1','chassis',parent=np,
+                comment='a test for npipm1', fullname='chassis np302c1')
+        s.save(c)
         s.commit()
-        s.close()
+        print 'created chassis np302c1'
 
-def make_podmasters():
-    cnt=service_instance.count().execute()
-    if cnt.fetchall()[0][0] < 2:
-        hlist=s.query(Host).all()
-        npipm1=hlist[0]
-        npipm2=hlist[1]
-
-        svcs=s.query(Service).all()
-        syslog=s.query(Service).filter_by(name='syslog').one()
-
-        si=ServiceInstance(syslog,npipm1)
-        s.save(si)
-
-        si2=ServiceInstance(syslog,npipm2)
-        s.save(si2)
+    m=Machine(c,mod,node=1,comments='test npipm1 machine')
+    pi=PhysicalInterface('e0',nick,'00:14:5e:86:d8:84',
+                            m,comments='test npipm1-e0')
+    pi2=PhysicalInterface('e1',nick,'00:14:5e:86:d8:85',
+                            m,comments='test npipm1-e1')
+    pi.ip='10.163.112.198'
+    pi2.ip='10.163.112.229'
+    s.save(m)
+    s.save(pi)
+    s.save(pi2)
+    try:
         s.commit()
-        print 'added %s service instances'%(syslog)
+    except Exception, e:
+        print e
+        s.rollback()
 
+    h=Host(m,name='npipm1',comments='test npipm1')
+    s.save(h)
+
+    try:
+        s.commit()
+    except Exception,e:
+        print e
+        s.rollback()
+    s.flush()
+    make_syslog_si('npipm1')
 
 #############
 
 if __name__ == '__main__':
-    two_in_each()
-    make_interfaces()
-    #ipshell()
+    #two_in_each()
+    #make_interfaces()
+    #npipm1()
+    ipshell()
 
 
 
