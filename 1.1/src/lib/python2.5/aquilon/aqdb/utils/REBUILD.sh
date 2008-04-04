@@ -1,7 +1,10 @@
 #!/bin/bash
 
-mv /var/tmp/`whoami`/aquilondb/aquilon.db  /var/tmp/`whoami`/aquilondb/saved.db
-echo 'move existing db to 'saved.db'
+DBFILE=/var/tmp/`whoami`/aquilondb/aquilon.db
+if [ -r "$DBFILE" ] ; then
+	mv "$DBFILE" "$DBFILE.saved"
+	echo "moved existing db to '$DBFILE.saved'"
+fi
 
 time ./location.py
 echo
