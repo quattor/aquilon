@@ -18,7 +18,7 @@ from db import *
 from service import Host
 from configuration import CfgPath
 
-from sqlalchemy import Integer, Sequence, String, ForeignKey
+from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
 host     = Table('host', meta, autoload=True)
@@ -26,9 +26,9 @@ cfg_path = Table('cfg_path', meta, autoload=True)
 
 
 build = Table('build', meta,
-    Column('id', Integer, primary_key=True),
+    Column('id', Integer, Sequence('build_id_seq'), primary_key=True),
     Column('host_id', Integer,
-           ForeignKey('host.id'), unique=True, nullable=False, index=True),
+           ForeignKey('host.id'), unique=True, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 build.create(checkfirst=True)
@@ -52,17 +52,13 @@ mapper(Build,build,properties={
 })
 
 build_element = Table('build_element', meta,
-    Column('id',Integer, primary_key=True),
+    Column('id',Integer, Sequence('build_element_id_seq'), primary_key=True),
     Column('build_id', Integer,
-           ForeignKey('build.id',
-                      ondelete='CASCADE',
-                      onupdate='CASCADE'),
+           ForeignKey('build.id'),
            nullable=False,
            index=True),
     Column('cfg_path_id', Integer,
-           ForeignKey('cfg_path.id',
-                      ondelete='RESTRICT',
-                      onupdate='CASCADE'),
+           ForeignKey('cfg_path.id'),
            nullable=False),
     Column('order', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
@@ -86,4 +82,6 @@ mapper(BuildElement,build_element, properties={
 
 
 if __name__ == '__main__':
+    #from aquilon.aqdb.utils.debug import ipshell
+    #ipshell()
     assert(build_element)

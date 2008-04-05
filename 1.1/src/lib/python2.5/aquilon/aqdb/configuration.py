@@ -91,7 +91,7 @@ mapper(CfgSourceType, cfg_source_type, properties={
 
 
 cfg_path = Table('cfg_path',meta,
-    Column('id', Integer, Sequence('cfg_path_id_seq'),primary_key=True),
+    Column('id', Integer, Sequence('cfg_path_id_seq'), primary_key=True),
     Column('cfg_tld_id', Integer, ForeignKey('cfg_tld.id'), nullable=False),
     Column('relative_path', String(64), index=True, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
@@ -149,9 +149,9 @@ class Domain(aqdbBase):
             Represents individual config repositories
     """
 mapper(Domain,domain,properties={
-    'dns_domain': relation(DnsDomain),
-    'creation_date':deferred(domain.c.creation_date),
-    'comments':deferred(domain.c.comments)})
+    'dns_domain':       relation(DnsDomain),
+    'creation_date':    deferred(domain.c.creation_date),
+    'comments':         deferred(domain.c.comments)})
 
 """
     The service list table is used to represent the service requirements of
@@ -178,12 +178,10 @@ mapper(ServiceList,service_list,properties={
     'comments': deferred(service_list.c.comments)})
 
 archetype = Table('archetype', meta,
-    Column('id', Integer, primary_key=True),
+    Column('id', Integer, Sequence('archetype_id_seq'), primary_key=True),
     Column('name', String(32), unique=True, nullable=True, index=True),
     Column('service_list_id', Integer,
-           ForeignKey('service_list.id',
-                      ondelete='RESTRICT',
-                      onupdate='CASCADE'),
+           ForeignKey('service_list.id'),
            nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
@@ -266,11 +264,18 @@ def create_domains():
         print 'created production and qa domains'
 
 def create_aquilon_archetype():
+    if empty(service_list):
+        sl=ServiceList('aquilon')
+        Session.save(sl)
+        Session.commit()
+        print 'created aquilon service list'
+
     if empty(archetype, engine):
         a=Archetype('aquilon')
         Session.save(a)
         Session.commit()
-
+        print 'created aquilon archetype'
+        
 def get_quattor_src():
     """ ugly ugly way to initialize a quattor repo for import"""
 

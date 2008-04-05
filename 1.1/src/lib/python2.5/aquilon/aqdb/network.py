@@ -78,15 +78,13 @@ def populate_profile():
         f.close()
 
 network = Table('network', meta,
-    Column('id', Integer, primary_key=True, index=True),
+    Column('id', Integer, Sequence('network_id_seq'), primary_key=True),
     Column('location_id', Integer,
         ForeignKey('location.id'), index=True),
     Column('network_type_id', Integer,
            ForeignKey('network_type.id')),
     Column('mask', Integer,
-           ForeignKey('netmask.mask',
-                      ondelete='RESTRICT',
-                      onupdate='RESTRICT')),
+           ForeignKey('netmask.mask')),
     Column('name', String(255)),
     Column('ip', String(15), index=True),
     Column('ip_integer', Integer),
@@ -133,9 +131,7 @@ dns_domain = Table('dns_domain', meta,
     Column('id', Integer, Sequence('dns_domain_id_seq'),primary_key=True),
     Column('name',String(32), unique=True, nullable=False, index=True),
     Column('parent_id', Integer,
-           ForeignKey('dns_domain.id',
-                   ondelete='RESTRICT',
-                   onupdate='CASCADE'), nullable=True),
+           ForeignKey('dns_domain.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 dns_domain.create(checkfirst=True)

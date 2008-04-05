@@ -27,12 +27,12 @@ from configuration import Domain, ServiceList
 domain = Table('domain', meta, autoload=True)
 service_list = Table('service_list', meta, autoload=True)
 
-from sqlalchemy import Integer, Sequence, String, ForeignKey, Table, DateTime
+from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
 from sqlalchemy.orm import mapper, relation, deferred, synonym
 from sqlalchemy.sql import and_
 
 service = Table('service',meta,
-    Column('id', Integer, primary_key=True, index=True),
+    Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
     Column('name',String(64), unique=True, index=True),
     Column('cfg_path',String(32), unique=True),
     Column('creation_date', DateTime, default=datetime.datetime.now),
@@ -75,10 +75,10 @@ if empty(system_type,engine):
                                  'host', 'afs_cell', 'sybase_instance'])
 
 system = Table('system',meta,
-    Column('id', Integer, primary_key=True),
+    Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
     Column('name', String(64), unique=True, index=True),
     Column('type_id', Integer,
-           ForeignKey('system_type.id',ondelete='RESTRICT'),
+           ForeignKey('system_type.id'),
            nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255)))
@@ -120,15 +120,10 @@ mapper(System, system, polymorphic_on=system.c.type_id, \
 
 
 host=Table('host', meta,
-    Column('id', Integer, ForeignKey('system.id',
-                                     ondelete='RESTRICT',
-                                     onupdate='CASCADE'), primary_key=True),
-    Column('machine_id', Integer,
-           ForeignKey('machine.id',ondelete='RESTRICT', onupdate='CASCADE')),
-    Column('domain_id', Integer,
-           ForeignKey('domain.id', ondelete='RESTRICT', onupdate='CASCADE')),
-    Column('status_id', Integer,
-           ForeignKey('status.id', ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('id', Integer, ForeignKey('system.id'), primary_key=True),
+    Column('machine_id', Integer, ForeignKey('machine.id')),
+    Column('domain_id', Integer, ForeignKey('domain.id')),
+    Column('status_id', Integer, ForeignKey('status.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 host.create(checkfirst=True)
@@ -174,10 +169,7 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
 })
 
 afs_cell = Table('afs_cell',meta,
-    Column('system_id', Integer, ForeignKey('system.id',
-                                            ondelete='RESTRICT',
-                                            onupdate='CASCADE'),
-           primary_key=True))
+    Column('system_id', Integer, ForeignKey('system.id'), primary_key=True))
 afs_cell.create(checkfirst=True)
 
 class AfsCell(System):
@@ -192,11 +184,9 @@ mapper(AfsCell,afs_cell,
        properties={'system':relation(System,backref='afs_cell')})
 
 service_instance = Table('service_instance',meta,
-    Column('id', Integer, primary_key=True, index=True),
-    Column('service_id',Integer,
-           ForeignKey('service.id', ondelete='RESTRICT')),
-    Column('system_id', Integer,
-           ForeignKey('system.id', ondelete='RESTRICT', onupdate='CASCADE')),
+    Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
+    Column('service_id',Integer, ForeignKey('service.id')),
+    Column('system_id', Integer, ForeignKey('system.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255)),
     UniqueConstraint('service_id','system_id'))
@@ -240,16 +230,12 @@ mapper(ServiceInstance,service_instance, properties={
 })
 
 service_map=Table('service_map',meta,
-    Column('id', Integer, primary_key=True),
+    Column('id', Integer, Sequence('service_map_id_seq'), primary_key=True),
     Column('service_instance_id', Integer,
-           ForeignKey('service_instance.id',
-                      ondelete='RESTRICT',
-                      onupdate='CASCADE'),
+           ForeignKey('service_instance.id'),
            nullable=False),
     Column('location_id', Integer,
-           ForeignKey('location.id',
-                      ondelete='CASCADE',
-                      onupdate='CASCADE'),
+           ForeignKey('location.id', ondelete='CASCADE'),
            nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments',String(255),nullable=True),
@@ -294,13 +280,15 @@ mapper(ServiceMap,service_map,properties={
     to get a host up and running...that's what these represent.
 """
 service_list_item = Table('service_list_item', meta,
-    Column('id', Integer, primary_key=True),
+    Column('id', Integer,
+           Sequence('service_list_item_id_seq'), primary_key=True),
     Column('service_id',Integer,
            ForeignKey('service.id'), unique=True),
     Column('service_list_id',Integer,
-           ForeignKey('service_list.id'), index=True),
+           ForeignKey('service_list.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
+Index('idx_srv_list_item_list_id', service_list_item.c.service_list_id)
 service_list_item.create(checkfirst=True)
 
 class ServiceListItem(aqdbBase):
@@ -323,10 +311,11 @@ mapper(ServiceListItem,service_list_item,properties={
 ####POPULATION ROUTINES####
 def populate_all_service_tables():
     if empty(afs_cell,engine):
-        a=AfsCell('q.ny','afs_cell')
-        s.save(a)
+        for c in ['a.ny','b.ny','c.ny','q.ny','q.ln']:
+            a=AfsCell(c+'.ms.com','afs_cell')
+            s.save(a)
         s.commit()
-        print 'created q.ny'
+        print 'created afs cells'
     else:
         a=s.query(AfsCell).first()
 
@@ -376,4 +365,9 @@ def populate_all_service_tables():
         print 'populated service list'
 
 if __name__ == '__main__':
+    from aquilon.aqdb.utils.debug import ipshell
+
     populate_all_service_tables()
+    #populate_hosts()
+    #make_podmasters()
+    #ipshell()

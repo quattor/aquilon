@@ -15,8 +15,7 @@ sys.path.append('../..')
 
 from db import *
 
-from sqlalchemy import Table, Column, Integer, Sequence, String
-from sqlalchemy import ForeignKey, DateTime
+from sqlalchemy import Table, Column, Integer, Sequence, String, DateTime
 from sqlalchemy.orm import mapper, relation, deferred
 
 user_principle = Table('user_principle', meta,

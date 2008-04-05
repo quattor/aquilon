@@ -15,7 +15,7 @@ sys.path.append('../..')
 
 from db import *
 
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.aqdb.utils.exceptions_ import ArgumentError
@@ -24,7 +24,7 @@ s = Session()
 
 def mk_loc_table(name, meta, *args, **kw):
     return Table(name, meta,
-                Column('id',Integer, Sequence('%s_id_seq',name),
+                Column('id',Integer, Sequence('%s_id_seq'%name),
                        ForeignKey('location.id'), primary_key=True),
             *args,**kw)
 
@@ -41,16 +41,12 @@ if empty(location_type, engine):
                                    'city','building','rack','chassis','desk'])
 
 location = Table('location', meta,
-   Column('id', Integer, primary_key=True),
-   Column('parent_id', Integer,
-        ForeignKey('location.id',
-                   ondelete='RESTRICT',
-                   onupdate='CASCADE'), nullable=True),
+   Column('id', Integer, Sequence('location_id_seq'), primary_key=True),
+   Column('parent_id', Integer, ForeignKey('location.id')),
    Column('name', String(16)),
-   Column('fullname',String(32),nullable=True),
+   Column('fullname',String(64),nullable=True),
    Column('location_type_id', Integer,
-          ForeignKey('location_type.id',
-                     ondelete='RESTRICT')),
+          ForeignKey('location_type.id')),
    Column('creation_date', DateTime, default=datetime.datetime.now),
    Column('comments', String(255), nullable=True),
    UniqueConstraint('name','location_type_id'))
@@ -262,7 +258,10 @@ mapper(Desk,desk,inherits=Location,
 def populate_hubs():
     s=Session()
 
-#    w=Company('ms', 'company', fullname='root node')
+    #w=Company('ms', 'company', fullname='root node')
+    #s.save(w)
+    #s.commit()
+
     if empty(location):
         i=location.insert()
         i.execute(name='ms',location_type_id=1,
@@ -270,9 +269,10 @@ def populate_hubs():
         i=company.insert()
         i.execute(id=1)
         print 'created root node'
-    
+
     w=s.query(Location).first()
     assert(w)
+
 
     hk_hub=Hub('hk','hub', fullname='hong kong hub',parent=w)
     s.save(hk_hub)

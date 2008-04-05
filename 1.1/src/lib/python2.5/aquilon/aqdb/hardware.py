@@ -26,7 +26,7 @@ chassis=Table('chassis',meta,autoload=True)
 cfg_path=Table('cfg_path',meta, autoload=True)
 domain=Table('domain', meta, autoload=True)
 
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import mapper, relation, deferred
 
 vendor = mk_name_id_table('vendor',meta)
@@ -62,7 +62,7 @@ mapper(MachineType,machine_type, properties={
     'comments':deferred(machine_type.c.comments)})
 
 model = Table('model',meta,
-    Column('id', Integer, primary_key=True),
+    Column('id', Integer, Sequence('model_id_seq'), primary_key=True),
     Column('name', String(64), unique=True, index=True),
     Column('vendor_id', Integer,
            ForeignKey('vendor.id', ondelete='RESTRICT')),
@@ -130,15 +130,9 @@ mapper(Model,model,properties={
 machine = Table('machine', meta,
     Column('id', Integer, Sequence('machine_id_seq'), primary_key=True),
     Column('name', String(32), unique=True, index=True), #nodename
-    Column('location_id', Integer, ForeignKey('location.id',
-                                              ondelete='RESTRICT',
-                                              onupdate='CASCADE')),
-    Column('model_id', Integer, ForeignKey('model.id',
-                                           ondelete='RESTRICT',
-                                           onupdate='CASCADE')),
-    Column('machine_type_id', Integer, ForeignKey('machine_type.id',
-                                                  ondelete='RESTRICT',
-                                                  onupdate='CASCADE')),
+    Column('location_id', Integer, ForeignKey('location.id')),
+    Column('model_id', Integer, ForeignKey('model.id')),
+    Column('machine_type_id', Integer, ForeignKey('machine_type.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 machine.create(checkfirst=True)
@@ -157,7 +151,7 @@ class Machine(aqdbBase):
         if kw.has_key('name'):
             self.name=kw.pop('name')
         #if loc = chassis then get a node #
-        elif loc.type=='chassis':
+        elif str(loc.type)=='chassis':
             if kw.has_key('node'):
                 if isinstance(kw['node'],int):
                     self.name= ''.join([loc.name, 'n', str(kw.pop('node'))])
@@ -185,7 +179,7 @@ mapper(Machine,machine, properties={
 })
 
 status=Table('status', meta,
-    Column('id', Integer, primary_key=True, index=True),
+    Column('id', Integer, Sequence('status_id_seq'),primary_key=True),
     Column('name', String(16), unique=True, index=True, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255)))
