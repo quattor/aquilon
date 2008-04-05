@@ -16,6 +16,7 @@ import datetime
 from sqlalchemy import MetaData, create_engine,  UniqueConstraint
 from sqlalchemy import Table, Integer, DateTime, Sequence, String
 from sqlalchemy import Column as _Column
+from sqlalchemy import ForeignKey as _fk
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import insert
 
@@ -37,18 +38,30 @@ oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
 """
     CONFIGURES THE DSN FOR THE ENTIRE PROJECT
 """
-dsn = sqlite_dsn
+#dsn = sqlite_dsn
+dsn = oracle_dsn
 
 if dsn.startswith('oracle'):
-    msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dev')
-
-
+    msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
+    import cx_Oracle
+    import os
+    import sys
+    
+    o_home = os.environ.get('ORACLE_HOME')
+    if not o_home:
+        print 'Oracle Home is not set, check the environment'
+        sys.exit(1)
+    o_sid = os.environ.get('ORACLE_SID')
+    if not o_sid:
+        print 'Oracle SID not found in environment, setting to test instance'
+        os.environment['ORACLE_SID']='LNTO_AQUILON_NY'
+    
 engine = create_engine(dsn)
 engine.connect()
 meta  = MetaData(engine)
 
 #if dsn.startswith('oracle'):
-#    meta.bind.echo = True
+    #        meta.bind.echo = True
 
 
 Session = scoped_session(sessionmaker(bind=engine,
@@ -177,6 +190,18 @@ def Column(*args, **kw):
         kw['nullable']=False;
     return _Column(*args, **kw)
 
+def ForeignKey(*args, **kw):
+    """ more curry: Oracle has 'on delete RESTRICT' by default
+        This removes it in case you need to """
+
+    if kw.has_key('ondelete'):
+        if kw['ondelete'] == 'RESTRICT':
+            kw.pop('ondelete')
+    if kw.has_key('onupdate'):
+        kw.pop('onupdate')
+    return _fk(*args, **kw)
+
+
 """ Example of a 'mock' engine to output sql as print statments
 
     buf = StringIO.StringIO()
@@ -241,7 +266,7 @@ def mk_name_id_table(name, meta, *args, **kw):
         to reduce code volume and standardize DDL
     """
     return Table(name, meta, \
-                Column('id', Integer, Sequence('%s_id_seq',name),
+                Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
                 Column('name', String(32), unique=True, index=True),
                 Column('creation_date', DateTime,
@@ -254,7 +279,7 @@ def mk_type_table(name, meta, *args, **kw):
         (later)
     """
     return Table(name, meta, \
-                Column('id', Integer, Sequence('%s_id_seq',name),
+                Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
                 Column('type', String(32), unique=True, index=True),
                 Column('creation_date', DateTime,
