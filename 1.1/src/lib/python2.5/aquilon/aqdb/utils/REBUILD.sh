@@ -16,7 +16,7 @@ time ./configuration.py
 echo
 time ./hardware.py
 echo
-time ./interfaces.py
+time ./interface.py
 echo 
 time ./build.py
 echo
