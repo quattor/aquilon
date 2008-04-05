@@ -19,7 +19,7 @@ import datetime
 from db import *
 from aquilon import const
 
-from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint, Index
 
 from location import Location,Chassis
 from configuration import CfgPath
@@ -183,13 +183,14 @@ physical_interface=Table('physical_interface', meta,
            ForeignKey('interface.id'), primary_key=True),
     Column('machine_id', Integer,
            ForeignKey('machine.id',ondelete='CASCADE'),
-           nullable=False, index=True),
+           nullable=False),
     Column('name',String(32), nullable=False), #like e0, hme1, etc.
     Column('nic_id', Integer, ForeignKey('nic.id'), nullable=False),
     Column('mac', String(32), nullable=False, unique=True, index=True),
     Column('boot', Boolean, default=False),
     #creation/comments supplied by Super (Interface)
     UniqueConstraint('machine_id','name'))
+Index('idx_phys_int_machine_id', physical_interface.c.machine_id)
 physical_interface.create(checkfirst=True)
 
 class PhysicalInterface(Interface):
