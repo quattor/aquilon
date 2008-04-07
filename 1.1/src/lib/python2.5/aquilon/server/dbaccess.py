@@ -17,6 +17,7 @@ from sasync.database import AccessBroker, transact
 from twisted.internet import defer
 from twisted.python import log
 
+from aquilon.exceptions_ import RollbackException
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 from aquilon.aqdb.configuration import *
@@ -111,8 +112,62 @@ class DatabaseBroker(AccessBroker):
         return self.session.query(LocationType).filter_by(**kwargs).all()
 
     @transact
-    def make_host(self, **kwargs):
-        return self.session.query(Archetype).filter_by(
-                name=kwargs.get("archetype")).all()
+    def make_aquilon(self, **kwargs):
+        """This creates a template file and saves a copy in the DB.
+        
+        It does *not* do pan compile... that happens outside this method.
+        """
 
+        fqdn = "aquilon00.one-nyp.ms.com"
+        #archetype = self.session.query(Archetype).filter(
+        #        Archetype.name=="aquilon").one()
+        #base_template = "%s/base" % archetype.name
+        #final_template = "%s/final" % archetype.name
+        base_template = "archetype/aquilon/base"
+        final_template = "archetype/aquilon/final"
+        os_template = "os/linux/4.0.1-x86_64/config"
+        personality_template = "usage/grid/config"
+        hardware = "machine/na/np/6/31_c1n3"
+        interfaces = [ {"ip":"172.31.29.82", "netmask":"255.255.255.128",
+                "broadcast":"172.31.29.127", "gateway":"172.31.29.1",
+                "bootproto":"dhcp", "name":"eth0"} ]
+        services = [ "service/afs/q.ny.ms.com/client/config" ]
+
+        templates = []
+        templates.append(base_template)
+        templates.append(os_template)
+        for service in services:
+            templates.append(service)
+        templates.append(personality_template)
+        templates.append(final_template)
+
+        template_lines = []
+        template_lines.append("object template %(fqdn)s;\n")
+        template_lines.append("""include { "pan/units" };\n""")
+        template_lines.append(""""/hardware" = create("%s");\n""" % hardware)
+        for interface in interfaces:
+            template_lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""")
+        for template in templates:
+            template_lines.append("""include { "%s" };""" % template)
+        template_string = "\n".join(template_lines)
+
+        # FIXME: Save this to the build table...
+        buildid = 0
+        return fqdn, buildid, template_string
+
+    @transact
+    def cancel_make(self, failure):
+        """Gets called if the make_aquilon build fails."""
+        failure.trap(RollbackException)
+        # FIXME: re-raising the original error might rollback the
+        # transaction - may need a different way to do this.
+        # One hack would be to just return the error, and have an
+        # addBoth() that checked to see if it was passed an exception,
+        # and then raise it.
+        raise failure.value.cause
+
+    @transact
+    def confirm_make(self, buildid):
+        """Gets called if the make_aquilon build succeeds."""
+        # FIXME: Should finalize the build table...
 

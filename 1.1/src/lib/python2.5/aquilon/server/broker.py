@@ -79,8 +79,24 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
     
-    def make_host (self, **kwargs):
-        return self.dbbroker.make_host(session=True, **kwargs)
+    def make_aquilon(self, **kwargs):
+        """This should do all the database work, then try to compile the
+        file, and then finish or cancel the database transaction.
+
+        Ultimately, the database work will actually pass back some sort
+        of job/transaction id that the client could receive immediately,
+        while the server continues to do the work.
+
+        For now, this is just one long execution thread that the client
+        will need to wait on.
+
+        """
+        
+        d = self.dbbroker.make_aquilon(session=True, **kwargs)
+        d = d.addCallback(self.pbroker.make_aquilon, basedir=self.basedir)
+        d = d.addCallback(self.dbbroker.confirm_make, session=True)
+        d = d.addErrback(self.dbbroker.cancel_make, session=True)
+        return d
 
 # --------------------------------------------------------------------------- #
     

@@ -33,4 +33,16 @@ class ProcessException(AquilonError):
             msg = msg + " with signal '%d'" % signalNum
         StandardError.__init__(self, msg)
 
+
+class RollbackException(AquilonError):
+    """If this is being thrown, should attempt to rollback any high-level
+    activities being executed."""
+    # This isn't fully baked yet... might not be necessary.
+    def __init__(self, jobid=None, cause=None, *args, **kwargs):
+        self.jobid = jobid
+        self.cause = cause
+        if not args and cause:
+            args = [ str(cause) ]
+        AquilonError.__init__(self, *args, **kwargs)
+
 #if __name__=='__main__':

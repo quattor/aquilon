@@ -669,7 +669,6 @@ class ResponsePage(resource.Resource):
         """aqcommand: aq make aquilon --hostname=<name> [--personality=<personality>]"""
         hostname = request.args['hostname'][0]
         personality = request.args.has_key('personality') and request.args['personality'][0] or None
-        archetype = "aquilon"
         os = "linux"
 
         #try:
@@ -680,13 +679,13 @@ class ResponsePage(resource.Resource):
         #    return ""
 
         ## FIXME: Treat an empty list as a 404.
-        d = self.broker.make_host(hostname=hostname, personality=personality,
-                archetype=archetype, os=os)
+        d = self.broker.make_aquilon(hostname=hostname,
+                personality=personality, os=os)
         ##d = d.addCallback( self.wrapLocationInTable )
         ##d = d.addCallback( self.wrapTableInBody )
-        #d = d.addCallback(self.format, request)
-        #d = d.addCallback(self.finishRender, request)
-        d = d.addCallback(self.finishOK, request)
+        d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
+        #d = d.addCallback(self.finishOK, request)
         d = d.addErrback(self.wrapError, request)
         d = d.addErrback(log.err)
         return server.NOT_DONE_YET

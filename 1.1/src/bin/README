@@ -44,5 +44,5 @@ mkdir -p /var/tmp/$USER/quattor
 rsync -avP quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
 cd ~/dev/aquilon/aqd/1.1/src     # your shadow
 cd lib/python2.5/aquilon/aqdb
-./location.py && ./network.py && ./service.py && ./configuration.py && ./hardware.py && ./interfaces.py
+./utils/REBUILD.sh
 
