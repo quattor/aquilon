@@ -175,11 +175,11 @@ if __name__ == "__main__":
         print '%s: Try --help for usage details.' % (sys.argv[0])
         sys.exit(1)
 
-    if globalOptions.has_key('debug') and globalOptions['debug']:
+    if globalOptions.get('debug'):
         log.startLogging(sys.stderr)
 
-    host = globalOptions.has_key('aqhost') and globalOptions['aqhost'] or socket.gethostname()
-    port = globalOptions.has_key('aqport') and globalOptions['aqport'] or "6900"
+    host = globalOptions.get('aqhost') or socket.gethostname()
+    port = globalOptions.get('aqport') or "6900"
 
     if transport is None:
         print >>sys.stderr, "Unimplemented command ", command
@@ -193,12 +193,13 @@ if __name__ == "__main__":
     # file used for options definitions.  This is a standard python
     # string formatting, with references to the options that might
     # be given on the command line.
-    uri = str( 'http://%s:%s/' % (host, port) + transport.path % commandOptions )
+    uri = str('http://%s:%s/' % (host, port) + transport.path % commandOptions)
 
     # Add the formatting option into the string.  This is only tricky if
     # a query operator has been specified, otherwise it would just be
     # tacking on (for example) .html to the uri.
-    if globalOptions.has_key('format'):
+    # Do not apply any formatting for commands (transport.expect == 'command').
+    if globalOptions.has_key('format') and not transport.expect:
         query_index = uri.find('?')
         extension = '.' + globalOptions["format"]
         if query_index > -1:
