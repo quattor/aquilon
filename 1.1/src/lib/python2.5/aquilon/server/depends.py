@@ -14,6 +14,6 @@ import msversion
 msversion.addpkg('zope.interface', '3.3.0')
 msversion.addpkg('twisted', '2.5.0')
 msversion.addpkg('sqlalchemy', '0.4.4', 'dist')
-msversion.addpkg('asynqueue', '0.3', 'dev')
-msversion.addpkg('sasync', '0.6', 'dev')
+msversion.addpkg('asynqueue', '0.3', 'dist')
+msversion.addpkg('sasync', '0.6', 'dist')
 msversion.addpkg('ipython', '0.7.2', 'dist')

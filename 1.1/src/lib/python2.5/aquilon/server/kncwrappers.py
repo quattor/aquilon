@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""Wrappers for using knc with the stock twisted server implementations."""
 
 from twisted.web import server, http
 from twisted.python import log
@@ -36,9 +36,6 @@ class KNCHTTPChannel(http.HTTPChannel):
                 for l in lines:
                     self.lineReceived(l)
                 return
-            # If I was a real python-ite this is where
-            # this instance's lineReceived would be replaced
-            # with the one from the parent (http.HTTPChannel).
             if line == 'END':
                 self.__needKNCInfo = 0
                 #log.msg("Finished receiving knc info.")
@@ -46,15 +43,6 @@ class KNCHTTPChannel(http.HTTPChannel):
             (key, value) = line.split(':', 1)
             #log.msg("Got knc info key='%s' value='%s'" % (key, value))
             self.kncinfo[key] = value
-
-            # Removing, as 1.3 is being tested...
-            # Compatibility with initial knc 1.2, can probably
-            # be removed if on 1.3 or later...
-            #if key == 'AUTH':
-            #    del self.kncinfo[key]
-            #    log.msg("Translating AUTH key to CREDS for backwards compatibilty")
-            #    self.kncinfo["CREDS"] = value
-
             return
         http.HTTPChannel.lineReceived(self, line)
 

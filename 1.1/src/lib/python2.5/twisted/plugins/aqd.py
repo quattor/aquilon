@@ -92,20 +92,20 @@ class AQDMaker(object):
         openSite = AnonSite(restServer)
 
         if options["usesock"]:
-            return strports.service("unix:/var/tmp/wesleyhe/aqdsock:mode=600", openSite )
+            return strports.service("unix:%s/aqdsock:mode=600"
+                    % broker.basedir, openSite)
 
         if options["noknc"]:
             return strports.service(str(options["openport"]), openSite )
 
-        # FIXME: Should socket name be configurable and/or dynamic?
-        sockname = "/var/tmp/quattor/kncsock"
+        sockname = broker.basedir + "/kncsock"
         mon = ProcessMonitor()
         # FIXME: Should probably run krb5_keytab here as well.
         # and/or verify that the keytab file exists.
         mon.addProcess("knc", ["/usr/bin/env",
-            "KRB5_KTNAME=FILE:/var/spool/keytabs/quattor",
-            "/ms/dev/kerberos/knc/1.3/install/exec/bin/knc",
-            #"/ms/dist/kerberos/PROJ/knc/1.2/bin/knc",
+            "KRB5_KTNAME=FILE:/var/spool/keytabs/%s" % broker.osuser,
+            #"/ms/dev/kerberos/knc/1.3/install/exec/bin/knc",
+            "/ms/dist/kerberos/PROJ/knc/1.3/bin/knc",
             "-lS", sockname, str(options["kncport"]) ])
         mon.startService()
         reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
