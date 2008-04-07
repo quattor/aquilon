@@ -273,16 +273,16 @@ def populate_hubs():
     assert(w)
 
 
-    hk_hub=Hub('hk','hub', fullname='hong kong hub',parent=w)
+    hk_hub=Hub('hk','hub', fullname='non-japan-asia',parent=w)
     s.save(hk_hub)
 
-    ln_hub=Hub('ln','hub', fullname='london hub',parent=w)
+    ln_hub=Hub('ln','hub', fullname='europe',parent=w)
     s.save(ln_hub)
 
-    tk_hub=Hub('tk','hub', fullname='japan hub',parent=w)
+    tk_hub=Hub('tk','hub', fullname='japan-asia',parent=w)
     s.save(tk_hub)
 
-    ny_hub=Hub('ny','hub', fullname='new york hub',parent=w)
+    ny_hub=Hub('ny','hub', fullname='americas',parent=w)
     s.save(ny_hub)
 
     eu=Continent('eu', 'continent', parent=ln_hub, fullname='Europe')
