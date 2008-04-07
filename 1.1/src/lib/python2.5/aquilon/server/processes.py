@@ -10,12 +10,14 @@
 """Handling of external processes for the broker happens here."""
 
 import os
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
+from base64 import b64decode
 
 from twisted.internet import utils, threads, defer
 from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, RollbackException
+
 
 def _cb_cleanup_dir(arg, dir):
     """This callback is meant as a finally block to clean up the directory."""
@@ -35,6 +37,15 @@ def _cb_cleanup_dir(arg, dir):
     except exceptions.OSError, e:
         log.err(str(e))
     return arg
+
+def _cb_cleanup_file(arg, file):
+    """This callback is meant as a finally block to clean up a file."""
+    try:
+        os.unlink(file)
+    except exceptions.OSError, e:
+        log.err(str(e))
+    return arg
+
 
 class ProcessBroker(object):
 
@@ -57,8 +68,9 @@ class ProcessBroker(object):
         raise ProcessException(command=command, out=out, err=err,
                 signalNum=signalNum)
 
-    def run_shell_command(self, command):
-        d = utils.getProcessOutputAndValue("/bin/sh", ["-c", command])
+    def run_shell_command(self, command, env={}, path="."):
+        d = utils.getProcessOutputAndValue("/bin/sh", ["-c", command],
+                env, path)
         return d.addCallbacks(self.cb_shell_command_finished,
                 self.cb_shell_command_error,
                 callbackArgs=[command], errbackArgs=[command])
@@ -67,13 +79,14 @@ class ProcessBroker(object):
         """Implements the heavy lifting of the aq sync command.
         
         Will raise ProcessException if one of the commands fails."""
-        d = self.run_shell_command(("cd '%(domaindir)s'" +
-                """ && env PATH="%(git_path)s:$PATH" git pull""") % kwargs)
+        d = self.run_shell_command(
+                """env PATH="%(git_path)s:$PATH" git pull""" % kwargs,
+                path=domaindir)
         # The 1.0 code notes that this should probably be done as a
         # hook in git... just need to make sure it runs.
-        d = d.addCallback(lambda _: self.run_shell_command(("cd '%(domaindir)s'"
-            + """ && env PATH="%(git_path)s:$PATH" git update server info""")
-            % kwargs))
+        d = d.addCallback(lambda _: self.run_shell_command(
+            """env PATH="%(git_path)s:$PATH" git-update-server-info"""
+            % kwargs, path=domaindir))
         return d
 
     def wrap_failure_with_rollback(self, failure, **kwargs):
@@ -83,16 +96,14 @@ class ProcessBroker(object):
         error = failure.trap(ProcessException)
         raise RollbackException(cause=error, **kwargs)
 
-    def write_file(self, filename, content):
+    def write_file(self, content, filename):
         # FIXME: Wrap errors in a ProcessException?
         def _write_file():
             f = open(filename, 'w')
             f.write(content)
             f.close()
 
-        # FIXME: Threading seems to create headaches for error handling...
         return threads.deferToThread(_write_file)
-        #return defer.maybeDeferred(_write_file)
 
     def make_aquilon(self, (fqdn, buildid, template_string),
             basedir):
@@ -103,7 +114,7 @@ class ProcessBroker(object):
         tempdir = mkdtemp()
         filename = os.path.join(tempdir, fqdn) + '.tpl'
         log.msg("writing the template to %s" % filename)
-        d = self.write_file(filename, template_string)
+        d = self.write_file(template_string, filename)
         # FIXME: Pass these in from the broker...
         compiler = "/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc"
         # FIXME: Should be using the appropriate domain basedir.
@@ -119,5 +130,65 @@ class ProcessBroker(object):
         d = d.addBoth(_cb_cleanup_dir, tempdir)
         d = d.addErrback(self.wrap_failure_with_rollback, jobid=buildid)
         return d
+
+    def add_domain(self, result, domain, git_path, templatesdir, kingdir,
+            **kwargs):
+        """Domain has been added to the database (results in result).
+
+        Now create the git repository.
+
+        """
+        domaindir = os.path.join(templatesdir, domain)
+        # FIXME: If this command fails, the user should be notified.
+        # FIXME: If this command fails, should the domain entry be
+        # removed from the database?
+        d = self.run_shell_command(
+                """env PATH="%s:$PATH" git clone "%s" "%s" """
+                % (git_path, kingdir, domaindir))
+        # The 1.0 code notes that this should probably be done as a
+        # hook in git... just need to make sure it runs.
+        d = d.addCallback(lambda _: self.run_shell_command(
+            """env PATH="%s:$PATH" git-update-server-info"""
+            % git_path, path=domaindir))
+        # FIXME: 1.0 contains an initdomain() that would run here.
+        # Most of it looks to now be irrelevant (part of the previous
+        # ant build system)... none of it is included here (yet).
+        return d
+
+    def del_domain(self, result, domain, templatesdir, **kwargs):
+        """Domain has been removed from the database (results in result).
+
+        Now remove the directories.
+
+        """
+        domaindir = os.path.join(templatesdir, domain)
+        d = threads.deferToThread(_cb_cleanup_dir, True, domaindir)
+        # FIXME: The server also removes /var/quattor/build/cfg/domains/<domain>
+        return d
+
+    #def decode_and_write(self, filename, encoded):
+        #decoded = b64decode(encoded)
+        #return self.write_file(filename, decoded)
+
+    def put(self, domain, bundle, basedir, templatesdir, git_path, **kwargs):
+        # FIXME: Check that it exists.
+        domaindir = templatesdir + "/" + domain
+        # FIXME: How long can mkstemp() block?
+        # FIXME: Maybe create the temp file under basedir somewhere.
+        (handle, filename) = mkstemp()
+        d = threads.deferToThread(b64decode, bundle)
+        d = d.addCallback(self.write_file, filename)
+        d = d.addCallback(lambda _: self.run_shell_command(
+            """env PATH="%s:$PATH" git bundle verify "%s" """
+            % (git_path, filename), path=domaindir))
+        d = d.addCallback(lambda _: self.run_shell_command(
+            """env PATH="%s:$PATH" git pull "%s" HEAD"""
+            % (git_path, filename), path=domaindir))
+        d = d.addCallback(lambda _: self.run_shell_command(
+            """env PATH="%s:$PATH" git-update-server-info"""
+            % git_path, path=domaindir))
+        d = d.addBoth(_cb_cleanup_file, filename)
+        return d
+
 
 #if __name__=='__main__':

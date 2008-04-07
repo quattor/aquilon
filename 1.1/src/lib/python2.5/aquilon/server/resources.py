@@ -44,8 +44,6 @@ import re
 import sys
 import os
 import xml.etree.ElementTree as ET
-from base64 import b64decode
-from tempfile import mkstemp
 
 from twisted.application import internet
 from twisted.web import server, resource, http, error, static
@@ -376,15 +374,27 @@ class ResponsePage(resource.Resource):
         """aqcommand: aq add domain --domain=<domain>"""
         domain = request.args['domain'][0]
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq add_domain has not been implemented yet"
+        # FIXME: Add authorization.
+
+        d = self.broker.add_domain(domain=domain,
+                user=request.channel.getPrinciple())
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapError, request)
+        d = d.addErrback(log.err)
+        return server.NOT_DONE_YET
 
     def command_del_domain(self, request):
         """aqcommand: aq del domain --domain=<domain>"""
         domain = request.args['domain'][0]
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq del_domain has not been implemented yet"
+        # FIXME: Add authorization.
+
+        d = self.broker.del_domain(domain=domain,
+                user=request.channel.getPrinciple())
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapError, request)
+        d = d.addErrback(log.err)
+        return server.NOT_DONE_YET
 
     def command_add_template(self, request):
         """aqcommand: aq add template --name=<name> --domain=<domain>"""
@@ -410,12 +420,6 @@ class ResponsePage(resource.Resource):
 
         return self.broker.get(domain)
 
-    def decode_and_write(self, encoded):
-        decoded = b64decode(encoded)
-        (handle, filename) = mkstemp()
-        # Write decoded to the filename
-        return filename
-
     def command_put(self, request):
         """aqcommand: aq put --domain=<domain>"""
         bundle = request.args["bundle"][0]
@@ -424,19 +428,14 @@ class ResponsePage(resource.Resource):
         # FIXME: Lookup whether this server handles this domain
         # redirect as necessary.
 
-        domaindir = self.broker.templatesdir + "/" + domain
-        # FIXME: Check that it exists.
-
-        #d = deferToThread(self.decode_and_write, bundle)
-        #d = d.addCallback(lambda filename: utils.getProcessOutputAndValue(
-        #    "/bin/sh", ["-c", "cd '%s/%s' && 
-        #    d = utils.getProcessOutputAndValue("/bin/sh",
-        #            ["-c", "cd '%s' && %s update server info"
-
-        # FIXME: Code in progress here...
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq put has not been implemented yet"
+        d = self.broker.put(bundle=bundle, domain=domain,
+                user=request.channel.getPrinciple())
+        #d = d.addCallback(self.format, request)
+        #d = d.addCallback(self.finishRender, request)
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapError, request)
+        d = d.addErrback(log.err)
+        return server.NOT_DONE_YET
 
     def command_deploy(self, request):
         """aqcommand: aq deploy --domain=<domain> --to=<domain>"""

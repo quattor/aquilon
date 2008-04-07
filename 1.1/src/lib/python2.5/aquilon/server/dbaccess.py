@@ -171,3 +171,13 @@ class DatabaseBroker(AccessBroker):
         """Gets called if the make_aquilon build succeeds."""
         # FIXME: Should finalize the build table...
 
+    @transact
+    def add_domain(self, domain, user, **kwargs):
+        """Add the domain to the database, initialize as necessary."""
+        return True
+
+    @transact
+    def del_domain(self, domain, user, **kwargs):
+        """Remove the domain from the database."""
+        return True
+

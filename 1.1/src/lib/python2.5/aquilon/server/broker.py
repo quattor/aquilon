@@ -46,6 +46,7 @@ class Broker(object):
         self.depsdir = "%s/deps" % self.basedir
         self.hostsdir = "%s/hosts" % self.basedir
         self.templatesdir = "%s/templates" % self.basedir
+        self.kingdir = "%s/template-king" % self.basedir
         self.default_domain = ".ms.com"
         self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
         self.git = "%s/git" % self.git_path
@@ -113,4 +114,31 @@ class Broker(object):
     
     def get (self, domain, **kwargs):
         # FIXME: Return absolute paths to git?
+        # 1.0 just hard-codes the path modificatin into the client.
         return """env PATH="%(path)s:$PATH" git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":domain}
+
+# --------------------------------------------------------------------------- #
+
+    def add_domain (self, **kwargs):
+        d = self.dbbroker.add_domain(**kwargs)
+        d = d.addCallback(self.pbroker.add_domain, git_path=self.git_path,
+                templatesdir=self.templatesdir, kingdir=self.kingdir,
+                **kwargs)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def del_domain (self, **kwargs):
+        d = self.dbbroker.del_domain(**kwargs)
+        d = d.addCallback(self.pbroker.del_domain,
+                templatesdir=self.templatesdir, **kwargs)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def put (self, **kwargs):
+        # FIXME: Does the database need to be updated with this info?
+        d = self.pbroker.put(templatesdir=self.templatesdir,
+                git_path=self.git_path, basedir=self.basedir, **kwargs)
+        return d
+

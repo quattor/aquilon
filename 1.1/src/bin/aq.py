@@ -132,11 +132,12 @@ class CustomAction(object):
 
         p = Popen(("git", "status"), stdout=PIPE, stderr=2)
         (out, err) = p.communicate()
-        if p.returncode:
-            sys.stdout.write(out)
-            print >>sys.stderr, "Error running git status, returncode %d" \
-                    % p.returncode
-            sys.exit(1)
+        # Looks like git status returns with "1" if there is nothing to commit.
+        #if p.returncode:
+        #    sys.stdout.write(out)
+        #    print >>sys.stderr, "Error running git status, returncode %d" \
+        #            % p.returncode
+        #    sys.exit(1)
         if not search("nothing to commit", out):
             print >>sys.stderr, "Not ready to commit: %s" % out
             sys.exit(1)
