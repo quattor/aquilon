@@ -71,7 +71,7 @@ def populate_profile():
     if empty(netmask,engine):
         i = netmask.insert()
 
-        f = open('etc/cidr-data','r')
+        f = open('../../../../etc/data/cidr-data','r')
         for line in f.readlines():
             line = line.split(' ')
             i.execute(cidr=int(line[0]), netmask=line[1] , mask=int(line[2]))

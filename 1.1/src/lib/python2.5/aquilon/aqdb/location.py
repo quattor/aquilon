@@ -171,10 +171,9 @@ class Location(aqdbBase):
         return list(self.sublocations)
 
     def sysloc(self):
-        v=['building','rack','chassis','desk']
-        if str(self.type) in v:
-            l=self.parents()
-            return str('.'.join([l[2].name, l[4].name, l[5].name]))
+        if str(self.type) in ['building','rack','chassis','desk']:
+            l=self.p_dict
+            return str('.'.join([l['building'], l['city'], l['continent']]))
 
     def __repr__(self):
         return self.__class__.__name__ + " " + self.name
@@ -351,34 +350,6 @@ def populate_bldg():
             s.save(c)
     s.flush()
     s.close()
-    del(s)
-
-
-def np_racks():
-    print 'populating all racks in building NP'
-    s=Session()
-
-    b=s.query(Building).filter_by(name='np').one()
-    with open('etc/np-data/np-racks','r') as f:
-        for line in f.readlines():
-            name=line
-            r=Rack(name,'rack',parent=b,fullname='rack %s'%(name))
-            s.save(r)
-        s.flush()
-
-def np_chassis():
-    print 'populating all chassis in building NP'
-    s=Session()
-    b=s.query(Building).filter_by(name='np').one()
-    with open('etc/np-data/np-chassis','r') as f:
-        for line in f.readlines():
-            n=line.strip()
-            (rack,c,num) = line.partition('c')
-            c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
-                Rack).filter_by(name=rack).one())
-            s.save(c)
-        s.flush()
-
 
 if __name__ == '__main__':
 
@@ -396,23 +367,3 @@ if __name__ == '__main__':
     if empty(building,engine):
         print 'populating buildings'
         populate_bldg()
-#    if empty(rack,engine):
-#        np_racks()
-#    if empty(chassis,engine):
-#        np_chassis()
-
-"""
-def populate_rack_chassis():
-    s=Session()
-    s.transactional=False
-    with s.begin():
-        b=s.query(Building).filter_by(name='np').one()
-        r=Rack('np3','rack',comments='Comm room: 6th floor lab',parent=b)
-        s.save(r)
-        s.flush()
-        c=Chassis('c1','chassis',parent=r)
-        s.save(c)
-        s.flush()
-    s.close()
-    print 'created %s and %s'%(r,c)
-"""

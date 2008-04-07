@@ -25,7 +25,7 @@ from network import *
 from service import *
 from configuration import *
 from hardware import *
-from interfaces import *
+from interface import *
 
 s=Session()
 
@@ -179,7 +179,7 @@ def populate_np_nodes():
     if cnt.fetchall()[0][0] < 2:
         s=Session
         mod=Session.query(Model).filter_by(name='hs20').one()
-        with open('etc/np-data/np-nodes','r') as f:
+        with open('../../../../etc/data/np-nodes','r') as f:
             for line in f.readlines():
                 (c,q,num)=line.strip().lstrip('n').partition('n')
                 c='n'+c
@@ -214,9 +214,17 @@ def npipm1():
     mod=s.query(Model).filter_by(name='ls20').one()
     nick=Session.query(Nic).filter_by(driver='tg3').one()
 
+    rk = s.query(Rack).filter_by(name='np302').first()
+    if not tk:
+        rk=Rack('np302','rack',parent=np,
+                comment='test rack from npipm1', fullname = 'rack np302')
+        s.save(rk)
+        s.commit()
+        print 'created rack np302'
     c=s.query(Chassis).filter_by(name='np302c1').first()
+
     if not c:
-        c=Chassis('np302c1','chassis',parent=np,
+        c=Chassis('np302c1','chassis',parent=rk,
                 comment='a test for npipm1', fullname='chassis np302c1')
         s.save(c)
         s.commit()
@@ -248,6 +256,31 @@ def npipm1():
         s.rollback()
     s.flush()
     make_syslog_si('npipm1')
+
+def np_racks():
+    print 'populating all racks in building NP'
+    s=Session()
+
+    b=s.query(Building).filter_by(name='np').one()
+    with open('../../../../etc/data/np-racks','r') as f:
+        for line in f.readlines():
+            name=line
+            r=Rack(name,'rack',parent=b,fullname='rack %s'%(name))
+            s.save(r) 
+        s.flush()
+
+def np_chassis():
+    print 'populating all chassis in building NP'
+    s=Session()
+    b=s.query(Building).filter_by(name='np').one()
+    with open('../../../../etc/data/np-chassis','r') as f:
+        for line in f.readlines():
+            n=line.strip()
+            (rack,c,num) = line.partition('c')
+            c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
+                Rack).filter_by(name=rack).one())
+            s.save(c)
+        s.flush()
 
 #############
 

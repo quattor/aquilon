@@ -20,6 +20,7 @@ from db import *
 from aquilon import const
 
 from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint, Index
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from location import Location,Chassis
 from configuration import CfgPath
@@ -214,8 +215,9 @@ mapper(PhysicalInterface, physical_interface,
             fetchone()[0], properties={
     'machine':      relation(Machine,backref='interfaces'),
     'nic':          relation(Nic),
-    'interface':    relation(Interface,backref='physical')
-})
+    'interface':    relation(Interface,backref='physical')})
+        
+    #collection_clas=attribute_mapped_collection('name'))})
 
 def populate_nics():
     if empty(nic,engine):

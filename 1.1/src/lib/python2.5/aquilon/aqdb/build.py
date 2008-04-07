@@ -62,24 +62,20 @@ build_element = Table('build_element', meta,
            nullable=False),
     Column('order', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('id','cfg_path_id','order'))
+#TODO: trigger on insert to update the last_used in cfg_path
 build_element.create(checkfirst=True)
 
 class BuildElement(aqdbBase):
     pass
+
 mapper(BuildElement,build_element, properties={
     'build'         : relation(Build),
     'cfg_path'      : relation(CfgPath),
     'creation_date' : deferred(build_element.c.creation_date),
     'comments'      : deferred(build_element.c.comments)
 })
-#unique on host,cfg_path
-#unique on build_id/order
-#primary key should be host_id/order
-#somewhere in this or chost, a change should trigger an
-#update_time column on some table to update
-
-
 
 if __name__ == '__main__':
     #from aquilon.aqdb.utils.debug import ipshell
