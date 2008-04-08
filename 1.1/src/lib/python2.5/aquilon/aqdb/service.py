@@ -26,8 +26,8 @@ from hardware import Machine, Status
 machine=Table('machine', meta, autoload=True)
 status = Table('status', meta, autoload=True)
 
-from auth import UserPrinciple
-user_principle = Table('user_principle', meta, autoload=True)
+from auth import UserPrincipal
+user_principal = Table('user_principal', meta, autoload=True)
 from configuration import ServiceList
 service_list = Table('service_list', meta, autoload=True)
 
@@ -155,9 +155,9 @@ domain = Table('domain', meta,
     Column('dns_domain_id', Integer,
            ForeignKey('dns_domain.id'), nullable=False, default=2),
     Column('owner_id', Integer,
-           ForeignKey('user_principle.id'),nullable=False,
+           ForeignKey('user_principal.id'),nullable=False,
            default=s.execute(
-    "select id from user_principle where name='quattor'").fetchone()[0]),
+    "select id from user_principal where name='quattor'").fetchone()[0]),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 domain.create(checkfirst=True)
@@ -179,13 +179,13 @@ class Domain(aqdbBase):
         self.compiler=kw.pop('compiler',
                              '/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc')
 
-        self.owner=s.query(UserPrinciple).\
+        self.owner=s.query(UserPrincipal).\
             filter_by(name=(kw.pop('owner','quattor'))).one()
 
 mapper(Domain,domain,properties={
     'server':           relation(QuattorServer,backref='domain'),
     'dns_domain':       relation(DnsDomain),
-    'owner':            relation(UserPrinciple,remote_side=user_principle.c.id),
+    'owner':            relation(UserPrincipal,remote_side=user_principal.c.id),
     'creation_date':    deferred(domain.c.creation_date),
     'comments':         deferred(domain.c.comments)})
 
@@ -210,7 +210,7 @@ class Host(System):
                            s.query(Domain).filter_by(name='qa').one())
         self.status=kw.pop('status',
                            s.query(Status).filter_by(name='build').one())
-        s.close()
+        #s.close()
 
     def _get_location(self):
         return self.machine.location
