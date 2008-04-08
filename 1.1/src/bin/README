@@ -16,7 +16,11 @@ To start aqd but keep it in the foreground with logs going to stdout:
 Ditto, but without expecting to talk to knc:
 ./twistd -no -l - aqd --noknc
 
-If running as cdb, try:
+If running as cdb, make sure you have a keytab set up:
+/ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
+
+And then, assuming you are in a directory owned by your normal user id,
+so cdb won't be able to write to ./aqd.pid:
 ./twistd -no -l - --pidfile=/var/tmp/cdb/aqd.pid aqd
 
 Or as a daemon:
