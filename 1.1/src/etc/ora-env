@@ -3,6 +3,6 @@ unset LD_LIBRARY_PATH
 unset TNS_ADMIN
 unset ORACLE_SID
 
-module load orcl/10.2.0.1.0_32
+module load orcl/10.2.0.1.0
 export ORACLE_SID=LNTO_AQUILON_NY
 
