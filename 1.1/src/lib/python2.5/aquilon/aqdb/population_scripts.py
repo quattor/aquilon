@@ -102,31 +102,44 @@ def two_in_each():
         nodecount=0
         for node in nodes:
             try:
-                s.save(node)
+                s.save_or_update(node)
                 nodelist.append(node)
             except Exception, e:
                 print e
                 s.rollback()
-                return
+                sys.exit(1) 
 
     try:
         s.commit()
     except Exception, e:
         s.rollback()
         print e
-        return
+        sys.exit(1)
 
 
     print 'created %s nodes'%(len(nodelist))
     try:
         for node in nodelist:
             h=Host(node,name=node.name,status=stat, domain=prod,comments=cmnt)
-            s.save(h)
+            s.save_or_update(h)
             s.commit()
     except Exception, e:
         print e
         s.close()
-        return
+        sys.exit(1) 
+    print 'created %s hosts'%(len(nodelist))
+
+def just_hosts():
+    nodelist=s.query(Machine).all()
+    try:
+        for node in nodelist:
+            h=Host(node,name=node.name,comments=cmnt)
+            s.save_or_update(h) 
+            s.commit()    
+    except Exception, e:
+        print e
+        s.close()   
+        sys.exit(1)
     print 'created %s hosts'%(len(nodelist))
 
 """ To clear fake stuff:
@@ -209,13 +222,16 @@ def make_syslog_si(hostname):
     print 'added %s service instances'%(syslog)
     return True
 
+def clone_dsdb_host(hostname):
+    print 'cloning %s'%(hostname)
+
 def npipm1():
     np=s.query(Building).filter_by(name='np').one()
     mod=s.query(Model).filter_by(name='ls20').one()
     nick=Session.query(Nic).filter_by(driver='tg3').one()
 
     rk = s.query(Rack).filter_by(name='np302').first()
-    if not tk:
+    if not rk:
         rk=Rack('np302','rack',parent=np,
                 comment='test rack from npipm1', fullname = 'rack np302')
         s.save(rk)
@@ -229,15 +245,20 @@ def npipm1():
         s.save(c)
         s.commit()
         print 'created chassis np302c1'
+    
+    try:
+        m=s.query(Machine).filter_by(name='npipm1').one()
+    except Exception, e:
+        print 'creating a machine npipm1'
+        m=Machine(c,mod,node=1,comments='test npipm1 machine')
+        s.save(m)
 
-    m=Machine(c,mod,node=1,comments='test npipm1 machine')
     pi=PhysicalInterface('e0',nick,'00:14:5e:86:d8:84',
                             m,comments='test npipm1-e0')
     pi2=PhysicalInterface('e1',nick,'00:14:5e:86:d8:85',
                             m,comments='test npipm1-e1')
     pi.ip='10.163.112.198'
     pi2.ip='10.163.112.229'
-    s.save(m)
     s.save(pi)
     s.save(pi2)
     try:
@@ -247,7 +268,7 @@ def npipm1():
         s.rollback()
 
     h=Host(m,name='npipm1',comments='test npipm1')
-    s.save(h)
+    s.save_or_update(h)
 
     try:
         s.commit()
@@ -280,15 +301,17 @@ def np_chassis():
             c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
                 Rack).filter_by(name=rack).one())
             s.save(c)
-        s.flush()
+        s.commit()
+        
 
 #############
 
 if __name__ == '__main__':
-    #two_in_each()
-    #make_interfaces()
-    #npipm1()
-    ipshell()
+    two_in_each()
+    #just_hosts()
+    make_interfaces()
+    npipm1()
+    #ipshell()
 
 
 

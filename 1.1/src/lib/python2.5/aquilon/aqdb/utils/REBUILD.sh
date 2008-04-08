@@ -6,6 +6,9 @@ if [ -r "$DBFILE" ] ; then
 	echo "moved existing db to '$DBFILE.saved'"
 fi
 
+echo starting at 
+/bin/date
+
 time ./location.py
 echo
 time ./network.py
@@ -21,4 +24,7 @@ echo
 time ./service.py
 echo
 time ./build.py
-echo
+#echo
+#time ./population_scripts.py
+echo completed at
+/bin/date
