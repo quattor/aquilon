@@ -23,14 +23,10 @@ from aquilon.aqdb.utils.exceptions_ import NoSuchRowException
 from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
-from network import DnsDomain
-dns_domain=Table('dns_domain', meta, autoload=True)
-
-
 import os
 osuser = os.environ.get('USER')
-qdir = os.path.join( '/var/tmp', osuser, 'quattor/template-king' )
-const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor/template-king')
+qdir = os.path.join( '/var/tmp', osuser, 'quattor/' )
+const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor/')
 
 
 
@@ -132,26 +128,7 @@ mapper(CfgPath,cfg_path,properties={
     'creation_date':deferred(cfg_path.c.creation_date),
     'comments':deferred(cfg_path.c.comments)})
 
-domain = Table('domain', meta,
-    Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
-    Column('name', String(32), unique=True, index=True),
-    #TODO: a better place for dns-domain. We'll need to flesh out DNS support
-    #within aqdb in the coming weeks after the handoff, but for now,
-    #it's an innocuous place since hosts can only be in one domain
-    Column('dns_domain_id', Integer,
-           ForeignKey('dns_domain.id'), nullable=False, default=2),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
-domain.create(checkfirst=True)
 
-class Domain(aqdbBase):
-    """ Domain is to be used as the top most level for path traversal of the SCM
-            Represents individual config repositories
-    """
-mapper(Domain,domain,properties={
-    'dns_domain':       relation(DnsDomain),
-    'creation_date':    deferred(domain.c.creation_date),
-    'comments':         deferred(domain.c.comments)})
 
 """
     The service list table is used to represent the service requirements of
@@ -196,14 +173,15 @@ class Archetype(aqdbBase):
         #just look for archetype/name/base.tpl and final for now
             s=Session()
             try:
-                self.first = s.query(CfgPath).filter_by(
-                    relative_path='%s/base.tpl'%(self.name)).one()
+                self.first = s.query(CfgPath).filter(
+                        CfgPath.relative_path.like('%archetype/base.tpl')).one()
+                #TODO: and this with 'aquilon'
             except NoSuchRowException:
                 print "Can't find archetype/%s/base.tpl"%(self.name)
                 return
             try:
-                self.last=s.query(CfgPath).filter_by(
-                    relative_path='%s/final.tpl'%(self.name)).one()
+                self.last=s.query(CfgPath).filter( #TODO: fix with AND
+                        CfgPath.relative_path.like('%archetype/final.tpl')).one()
             except NoSuchRowException:
                 print "Can't find archetype/%s/final.tpl"%(self.name)
                 return
@@ -240,7 +218,7 @@ def create_paths():
         from aquilon.aqdb.utils import altpath
         d=altpath.path(const.cfg_base)
         for file in d.walk('*.tpl'):
-            (a,b,c)=file.partition('template-king/')
+            (a,b,c)=file.partition('quattor/')
             try:
                 #print c
                 f=CfgPath(c)
@@ -251,17 +229,6 @@ def create_paths():
                 continue
         Session.commit()
         print 'created configuration paths'
-
-def create_domains():
-    if empty(domain,engine):
-        s=Session()
-
-        p = Domain('production',comments='The master production area')
-        q = Domain('qa',comments='Do your testing here')
-        s.save(p)
-        s.save(q)
-        s.commit()
-        print 'created production and qa domains'
 
 def create_aquilon_archetype():
     if empty(service_list):
@@ -299,7 +266,6 @@ if __name__ == '__main__':
     populate_tld()
     populate_cst()
     create_paths()
-    create_domains()
     create_aquilon_archetype()
 
     s=Session()
@@ -307,13 +273,11 @@ if __name__ == '__main__':
     a=s.query(CfgTLD).first()
     b=s.query(CfgSourceType).first()
     c=s.query(CfgPath).first()
-    d=s.query(Domain).first()
     e=s.query(Archetype).first()
 
     assert(a)
     assert(b)
     assert(c)
-    assert(d)
     assert(e)
 
 

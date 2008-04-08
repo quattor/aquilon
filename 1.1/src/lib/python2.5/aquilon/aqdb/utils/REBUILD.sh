@@ -10,7 +10,7 @@ time ./location.py
 echo
 time ./network.py
 echo
-time ./service.py
+time ./auth.py
 echo
 time ./configuration.py
 echo
@@ -18,7 +18,7 @@ time ./hardware.py
 echo
 time ./interface.py
 echo 
-time ./build.py
+time ./service.py
 echo
-time ./auth.py
+time ./build.py
 echo

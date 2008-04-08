@@ -19,16 +19,20 @@ from db import *
 from location import *
 location=Table('location', meta, autoload=True)
 
+from network import DnsDomain
+dns_domain=Table('dns_domain', meta, autoload=True)
+
 from hardware import Machine, Status
 machine=Table('machine', meta, autoload=True)
 status = Table('status', meta, autoload=True)
 
-from configuration import Domain, ServiceList
-domain = Table('domain', meta, autoload=True)
+from auth import UserPrinciple
+user_principle = Table('user_principle', meta, autoload=True)
+from configuration import ServiceList
 service_list = Table('service_list', meta, autoload=True)
 
 from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
-from sqlalchemy.orm import mapper, relation, deferred, synonym
+from sqlalchemy.orm import mapper, relation, deferred, synonym, backref
 from sqlalchemy.sql import and_
 
 service = Table('service',meta,
@@ -72,7 +76,9 @@ class SystemType(aqdbType):
 mapper(SystemType,system_type)
 if empty(system_type,engine):
     fill_type_table(system_type,['base_system_type',
-                                 'host', 'afs_cell', 'sybase_instance'])
+                                 'host', 'afs_cell',
+                                 'quattor_server',
+                                 'sybase_instance'])
 
 system = Table('system',meta,
     Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
@@ -118,6 +124,70 @@ mapper(System, system, polymorphic_on=system.c.type_id, \
         'creation_date' : deferred(system.c.creation_date),
         'comments': deferred(system.c.comments)})
 
+quattor_server = Table('quattor_server',meta,
+    Column('id', Integer, ForeignKey('system.id'), primary_key=True),)
+quattor_server.create(checkfirst=True)
+
+class QuattorServer(System):
+    """ Quattor Servers are a speicalized system to provide configuration
+        services for the others on the network. This also helps to
+        remove cyclical dependencies of hosts, and domains (hosts must be
+        in exaclty one domain, and a domain must have a host as it's server)
+    """
+    pass
+
+mapper(QuattorServer,quattor_server,
+        inherits=System, polymorphic_identity=s.execute(
+          "select id from system_type where type='quattor_server'").fetchone()[0],
+       properties={ 'system': relation(System,backref='quattor_server')})
+
+""" TODO: a better place for dns-domain. We'll need to flesh out DNS
+        support within aqdb in the coming weeks after the handoff, but for now,
+        it's an innocuous place since hosts can only be in one domain
+    """
+domain = Table('domain', meta,
+    Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
+    Column('name', String(32), unique=True, index=True),
+    Column('server_id', Integer,
+           ForeignKey('quattor_server.id'), nullable=False),
+    Column('compiler', String(255), nullable=False,
+           default='/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'),
+    Column('dns_domain_id', Integer,
+           ForeignKey('dns_domain.id'), nullable=False, default=2),
+    Column('owner_id', Integer,
+           ForeignKey('user_principle.id'),nullable=False,
+           default=s.execute(
+    "select id from user_principle where name='quattor'").fetchone()[0]),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True))
+domain.create(checkfirst=True)
+
+class Domain(aqdbBase):
+    """ Domain is to be used as the top most level for path traversal of the SCM
+            Represents individual config repositories
+    """
+    def __init__(self, name, server , **kw):
+        self.name=name.strip().lower()
+        if isinstance(server,QuattorServer):
+            self.server = server
+        else:
+            raise ArgumentError('second argument must be a Quattor Server')
+
+        self.dns_domain=s.query(DnsDomain).\
+            filter_by(name=(kw.pop('dns-domain', 'one-nyp'))).one()
+
+        self.compiler=kw.pop('compiler',
+                             '/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc')
+
+        self.owner=s.query(UserPrinciple).\
+            filter_by(name=(kw.pop('owner','quattor'))).one()
+
+mapper(Domain,domain,properties={
+    'server':           relation(QuattorServer,backref='domain'),
+    'dns_domain':       relation(DnsDomain),
+    'owner':            relation(UserPrinciple,remote_side=user_principle.c.id),
+    'creation_date':    deferred(domain.c.creation_date),
+    'comments':         deferred(domain.c.comments)})
 
 host=Table('host', meta,
     Column('id', Integer, ForeignKey('system.id'), primary_key=True),
@@ -160,9 +230,11 @@ class Host(System):
 mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='host'").fetchone()[0],
     properties={
-        'system'        : relation(System,backref='host'),
-        'machine'       : relation(Machine),
-        'domain'        : relation(Domain),
+        'system'        : relation(System),
+        'machine'       : relation(Machine,backref='host'),
+        'domain'        : relation(Domain,
+                                   primaryjoin=host.c.domain_id==domain.c.id,
+                                   backref=backref('hosts')),
         'status'        : relation(Status),
         'creation_date' : deferred(host.c.creation_date),
         'comments'      : deferred(host.c.comments)
@@ -307,8 +379,26 @@ mapper(ServiceListItem,service_list_item,properties={
     'comments': deferred(service_list_item.c.comments)
 })
 
-
 ####POPULATION ROUTINES####
+
+def create_domains():
+    s=Session()
+    if empty(quattor_server):
+        qs=QuattorServer('quattorsrv')
+        s.save(qs)
+        s.commit()
+    else:
+        qs=s.query(QuattorServer).filter_by(name='quattorsrv').one()
+
+    if empty(domain,engine):
+        p = Domain('production',qs, owner='njw', comments='The master production area')
+        q = Domain('qa',qs, owner='quattor', comments='Do your testing here')
+        s.save_or_update(p)
+        s.save_or_update(q)
+
+        s.commit()
+        print 'created production and qa domains'
+
 def populate_all_service_tables():
     if empty(afs_cell,engine):
         for c in ['a.ny','b.ny','c.ny','q.ny','q.ln']:
@@ -365,9 +455,10 @@ def populate_all_service_tables():
         print 'populated service list'
 
 if __name__ == '__main__':
-    from aquilon.aqdb.utils.debug import ipshell
+    #from aquilon.aqdb.utils.debug import ipshell
+
+    create_domains()
+    d=s.query(Domain).first()
+    assert(d)
 
     populate_all_service_tables()
-    #populate_hosts()
-    #make_podmasters()
-    #ipshell()

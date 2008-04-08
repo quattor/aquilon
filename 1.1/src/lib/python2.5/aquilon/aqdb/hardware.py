@@ -19,12 +19,11 @@ import datetime
 from db import *
 
 from location import Location,Chassis
-from configuration import CfgPath, Domain
+from configuration import CfgPath
 
 location=Table('location',meta,autoload=True)
 chassis=Table('chassis',meta,autoload=True)
 cfg_path=Table('cfg_path',meta, autoload=True)
-domain=Table('domain', meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import mapper, relation, deferred

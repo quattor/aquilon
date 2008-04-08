@@ -38,7 +38,7 @@ mapper(UserPrinciple,user_principle, properties={
 if __name__ == '__main__':
     if empty(user_principle):
         i=user_principle.insert()
-        for nm in ['njw','daqscott','wesleyhe','guyrol']:
+        for nm in ['njw', 'daqscott', 'wesleyhe', 'guyrol', 'quattor']:
             i.execute(name=nm)
     print 'inserted some example user principles'
 
