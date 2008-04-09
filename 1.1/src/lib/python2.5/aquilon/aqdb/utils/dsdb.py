@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python -W ignore
+#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # $Header$
 # $Change$
@@ -12,6 +12,8 @@
 import msversion
 msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
+
+import os
 
 get_country = """
     select country_symbol, country_name, continent
@@ -47,12 +49,60 @@ get_network = """
     AND B.state >=0
     AND C.state >=0
 """
+esp_host = """
+SELECT
+        A.host_name,                                          /* network_host */
+        B.cpu, B.virt_cpu, B.cputype, B.memory, B.hostid,          /* machine */
+        C.name, C.version, C.kernel_id,                                 /* os */
+        D.maker, D.model, D.arch, D.karch,                           /* model */
+        E.total_disks, E.service, E.side, E.sys_loc, E.afscell,       /* minfo*/
+        E.lan, E.swap, E.motd, E.boot_time,                      /* new stuff */
+        G.iface_name, G.ip_addr, G.ether_addr              /* interface info */
+        
+
+                FROM   network_host A, machine B, os C, model D,
+                       machine_info E, network_iface G
+
+                WHERE  A.name_type = 0
+                       AND A.machine_id = B.machine_id
+                       AND B.primary_host_id = A.host_id
+                       AND B.os_id *= C.id
+                       AND B.model_id *= D.id
+                       AND B.machine_id = E.machine_id
+                       AND B.machine_id *= G.machine_id
+
+
+                       AND A.state >= 0
+                       AND B.state >= 0
+                       AND C.state >= 0
+                       AND D.state >= 0
+                       AND E.state >= 0
+                       AND G.state >= 0
+
+                       and A.host_name = 'np3c1n4'
+
+"""
+
 
 class aqsyb:
     '''Wraps connections and calls to sybase'''
-    def __init__(self,data_src):
-        self.syb = Sybase.connect('NYP_DSDB11','dsdb_guest','dsdb_guest', \
-                                  'dsdb',datetime='auto',auto_commit = '0')
+    def __init__(self,dsn,database):
+        if os.environ['USER'] == 'daqscott':
+            print 'using kerberos authentication'
+            principal = None
+            for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():
+                svr, principal = line.split()
+                if svr == dsn:
+                    break
+
+            self.syb = Sybase.connect(dsn,'','',database,delay_connect=1)
+            self.syb.set_property(Sybase.CS_SEC_NETWORKAUTH, Sybase.CS_TRUE)
+            self.syb.set_property(Sybase.CS_SEC_SERVERPRINCIPAL, principal)
+            self.syb.connect()
+        else:
+            #kuu to a user, then do the above
+            self.syb = Sybase.connect(dsn,'dsdb_guest','dsdb_guest', \
+                                  database,datetime='auto',auto_commit = '0')
 
     def run_query(self,sql):
         '''Runs query sql. Note use runSybaseProc to call a stored procedure.
@@ -83,7 +133,7 @@ class aqsyb:
 
 
 def test():
-    syb = aqsyb('RO_PROD')
+    syb = aqsyb('NYP_DSDB11','dsdb')
     sql    = '''select boot_path from network_host A, bootparam B where
             A.host_name = \'blackcomb\'
             AND A.machine_id = B.machine_id
