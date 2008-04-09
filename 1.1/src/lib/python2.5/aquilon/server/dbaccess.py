@@ -11,6 +11,7 @@
 is properly backgrounded within twisted, and not blocking execution."""
 
 import os
+import re
 import exceptions
 
 from sasync.database import AccessBroker, transact
@@ -21,6 +22,7 @@ from aquilon.exceptions_ import RollbackException
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 from aquilon.aqdb.configuration import *
+from aquilon.aqdb.auth import *
 
 
 class DatabaseBroker(AccessBroker):
@@ -171,13 +173,54 @@ class DatabaseBroker(AccessBroker):
         """Gets called if the make_aquilon build succeeds."""
         # FIXME: Should finalize the build table...
 
+    # This should probably move over to UserPrinciple
+    principal_re = re.compile(r'^(.*)@([^@]+)$')
+    def split_principal(self, user):
+        m = self.principal_re.match(user)
+        if m:
+            return (m.group(1), m.group(2))
+        return (user, None)
+
     @transact
     def add_domain(self, domain, user, **kwargs):
         """Add the domain to the database, initialize as necessary."""
-        return True
+        (user, realm) = self.split_principal(user)
+        # FIXME: UserPrincipal should include the realm...
+        dbuser = self.session.query(UserPrincipal).filter_by(name=user).first()
+        if not dbuser:
+            dbuser = UserPrincipal(user)
+            self.session.save_or_update(dbuser)
+        # NOTE: Defaulting the name of the quattor server to quattorsrv.
+        quattorsrv = self.session.query(QuattorServer).filter_by(
+                name='quattorsrv').one()
+        # NOTE: Does DNS domain matter here?
+        dnsdomain = self.session.query(DnsDomain).filter_by(
+                name='one-nyp').one()
+        # For now, succeed without error if the domain already exists.
+        dbdomain = self.session.query(Domain).filter_by(name=domain).first()
+        if not dbdomain:
+            dbdomain = Domain(domain, quattorsrv, dnsdomain, dbuser)
+            self.session.save_or_update(dbdomain)
+        # We just need to confirm that the new domain can be added... do
+        # not need anything from the DB to be passed to pbroker.
+        return dbdomain.name
 
     @transact
     def del_domain(self, domain, user, **kwargs):
         """Remove the domain from the database."""
-        return True
+        # Do we need to delete any dependencies before deleting the domain?
+        (user, realm) = self.split_principal(user)
+        # NOTE: Defaulting the name of the quattor server to quattorsrv.
+        quattorsrv = self.session.query(QuattorServer).filter_by(
+                name='quattorsrv').one()
+        # For now, succeed without error if the domain does not exist.
+        dbdomain = self.session.query(Domain).filter_by(name=domain).first()
+        if quattorsrv != dbdomain.server:
+            log.err("FIXME: Should be redirecting this operation.")
+        # FIXME: Entitlements will need to happen at this point.
+        if dbdomain:
+            self.session.delete(dbdomain)
+        # We just need to confirm that domain was removed from the db...
+        # do not need anything from the DB to be passed to pbroker.
+        return domain
 

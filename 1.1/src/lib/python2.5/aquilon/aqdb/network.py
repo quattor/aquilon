@@ -195,6 +195,7 @@ def populate_networks():
         except KeyError:
             print "Can't find building '%s'\n%s"%(row[6],row)
             #TODO: log error somewhere: AND, pull the new building in from dsdb
+            continue
 
         kw['name']       = row[0].lower().strip()
         kw['ip']         = row[1]

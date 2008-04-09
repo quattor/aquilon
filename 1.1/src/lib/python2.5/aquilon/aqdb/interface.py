@@ -156,14 +156,15 @@ class NicTemplate(object):
             msg = 'NicTemplate requires a file or driver argument'
             raise AttributeError(msg)
 
-    def to_db(self):
-        cfp = CfgPath('/'.join([const.nic_prefix,self.file]))
-        Session.save(cfp)
+    def to_db(self, session):
+        tld = session.query(CfgTLD).filter_by(type=const.nic_prefix).one()
+        cfp = CfgPath(tld, '/'.join([const.nic_prefix,self.file]))
+        session.save(cfp)
         try:
-            Session.commit()
+            session.commit()
         except Exception,e:
             print e
-            Session.rollback()
+            session.rollback()
             return
         self.info['cfg_path_id']=cfp.id
         del self.info['cfg_path']

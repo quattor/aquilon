@@ -166,21 +166,27 @@ class Domain(aqdbBase):
     """ Domain is to be used as the top most level for path traversal of the SCM
             Represents individual config repositories
     """
-    def __init__(self, name, server , **kw):
+    def __init__(self, name, server, dns_domain, owner, **kw):
         self.name=name.strip().lower()
         if isinstance(server,QuattorServer):
             self.server = server
         else:
             raise ArgumentError('second argument must be a Quattor Server')
 
-        self.dns_domain=s.query(DnsDomain).\
-            filter_by(name=(kw.pop('dns-domain', 'one-nyp'))).one()
+        if isinstance(dns_domain, DnsDomain):
+            self.dns_domain = dns_domain
+        else:
+            raise ArgumentError('third argument must be a DNS Domain')
 
-        self.compiler=kw.pop('compiler',
-                             '/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc')
-
-        self.owner=s.query(UserPrincipal).\
-            filter_by(name=(kw.pop('owner','quattor'))).one()
+        if isinstance(owner, UserPrincipal):
+            self.owner = owner
+        else:
+            raise ArgumentError('fourth argument must be a Kerberos Principal')
+            
+        if kw.has_key('compiler'):
+            self.compiler = kw.pop('compiler')
+        else:
+            self.compiler = '/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'
 
 mapper(Domain,domain,properties={
     'server':           relation(QuattorServer,backref='domain'),
@@ -390,9 +396,14 @@ def create_domains():
     else:
         qs=s.query(QuattorServer).filter_by(name='quattorsrv').one()
 
+    onenyp = s.query(DnsDomain).filter_by(name='one-nyp').one()
+    njw = s.query(UserPrincipal).filter_by(name='njw').one()
+    quattor = s.query(UserPrincipal).filter_by(name='quattor').one()
+        
     if empty(domain,engine):
-        p = Domain('production',qs, owner='njw', comments='The master production area')
-        q = Domain('qa',qs, owner='quattor', comments='Do your testing here')
+        p = Domain('production', qs, onenyp, njw,
+                comments='The master production area')
+        q = Domain('qa', qs, onenyp, quattor, comments='Do your testing here')
         s.save_or_update(p)
         s.save_or_update(q)
 

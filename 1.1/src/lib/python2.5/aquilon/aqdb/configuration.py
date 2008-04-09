@@ -104,16 +104,15 @@ class CfgPath(aqdbBase):
         The individual config paths are created against this base class.
     """
     @optional_comments
-    def __init__(self,pth):
+    def __init__(self, tld, pth):
+        if isinstance(tld, CfgTLD):
+            self.tld = tld
+        else:
+            raise ArgumentException("First argument must be a CfgTLD")
+
         if isinstance(pth,str):
             pth = pth.lstrip('/').lower()
-            try:
-                tld=Session.query(CfgTLD).filter_by(type=splitall(pth)[0]).one()
-            except NoSuchRowException:
-                print "Can't find top level element '%s'"
-            else:
-                self.relative_path = '/'.join(splitall(pth)[1:])
-                self.tld=tld
+            self.relative_path = '/'.join(splitall(pth)[1:])
         else:
             raise TypeError('path must be a string')
             return
@@ -172,16 +171,18 @@ class Archetype(aqdbBase):
             self.name=name.strip().lower()
         #just look for archetype/name/base.tpl and final for now
             s=Session()
+            # FIXME: Do not use an internal session...
             try:
                 self.first = s.query(CfgPath).filter(
-                        CfgPath.relative_path.like('%archetype/base.tpl')).one()
+                        CfgPath.relative_path.like(name + '/base.tpl')).one()
+                        #CfgPath.relative_path.like('%archetype/base.tpl')).one()
                 #TODO: and this with 'aquilon'
             except NoSuchRowException:
                 print "Can't find archetype/%s/base.tpl"%(self.name)
                 return
             try:
                 self.last=s.query(CfgPath).filter( #TODO: fix with AND
-                        CfgPath.relative_path.like('%archetype/final.tpl')).one()
+                        CfgPath.relative_path.like(name + '/final.tpl')).one()
             except NoSuchRowException:
                 print "Can't find archetype/%s/final.tpl"%(self.name)
                 return
@@ -214,6 +215,7 @@ def populate_cst():
         fill_type_table(cfg_source_type,['quattor','aqdb'])
 
 def create_paths():
+    s = Session()
     if empty(cfg_path,engine):
         from aquilon.aqdb.utils import altpath
         d=altpath.path(const.cfg_base)
@@ -221,26 +223,28 @@ def create_paths():
             (a,b,c)=file.partition('quattor/')
             try:
                 #print c
-                f=CfgPath(c)
-                Session.save(f)
+                tld=s.query(CfgTLD).filter_by(type=splitall(c)[0]).first()
+                f=CfgPath(tld, c)
+                s.save(f)
             except Exception,e:
                 print e
-                Session.rollback()
+                s.rollback()
                 continue
-        Session.commit()
+        s.commit()
         print 'created configuration paths'
 
 def create_aquilon_archetype():
+    s = Session()
     if empty(service_list):
         sl=ServiceList('aquilon')
-        Session.save(sl)
-        Session.commit()
+        s.save(sl)
+        s.commit()
         print 'created aquilon service list'
 
     if empty(archetype, engine):
         a=Archetype('aquilon')
-        Session.save(a)
-        Session.commit()
+        s.save(a)
+        s.commit()
         print 'created aquilon archetype'
         
 def get_quattor_src():

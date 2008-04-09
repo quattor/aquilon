@@ -120,7 +120,10 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
 
     def add_domain (self, **kwargs):
-        d = self.dbbroker.add_domain(**kwargs)
+        # FIXME: Quick hack... remove this when auth is added...
+        if not kwargs.get("user"):
+            kwargs["user"] = self.osuser
+        d = self.dbbroker.add_domain(session=True, **kwargs)
         d = d.addCallback(self.pbroker.add_domain, git_path=self.git_path,
                 templatesdir=self.templatesdir, kingdir=self.kingdir,
                 **kwargs)
@@ -129,7 +132,10 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
 
     def del_domain (self, **kwargs):
-        d = self.dbbroker.del_domain(**kwargs)
+        # FIXME: Quick hack... remove this when auth is added...
+        if not kwargs.get("user"):
+            kwargs["user"] = self.osuser
+        d = self.dbbroker.del_domain(session=True, **kwargs)
         d = d.addCallback(self.pbroker.del_domain,
                 templatesdir=self.templatesdir, **kwargs)
         return d

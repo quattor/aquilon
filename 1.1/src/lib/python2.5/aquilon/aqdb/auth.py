@@ -42,5 +42,6 @@ if __name__ == '__main__':
             i.execute(name=nm)
     print 'inserted some example user principals'
 
-    a=Session.query(UserPrincipal).first()
+    s = Session()
+    a = s.query(UserPrincipal).first()
     assert(a)
