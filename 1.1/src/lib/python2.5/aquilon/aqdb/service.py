@@ -28,8 +28,9 @@ status = Table('status', meta, autoload=True)
 
 from auth import UserPrincipal
 user_principal = Table('user_principal', meta, autoload=True)
-from configuration import ServiceList
-service_list = Table('service_list', meta, autoload=True)
+
+from configuration import Archetype
+archetype = Table('archetype', meta, autoload=True)
 
 from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
 from sqlalchemy.orm import mapper, relation, deferred, synonym, backref
@@ -207,16 +208,20 @@ host.create(checkfirst=True)
 class Host(System):
     """  """
     @optional_comments
-    def __init__(self,machine,**kw):
-        s = Session()
-        if isinstance(machine,Machine):
-            self.machine=machine
-        self.name=kw.pop('name',machine.name)
-        self.domain=kw.pop('domain',
-                           s.query(Domain).filter_by(name='qa').one())
-        self.status=kw.pop('status',
-                           s.query(Status).filter_by(name='build').one())
-        #s.close()
+    def __init__(self,mach,dom,stat,**kw):
+        if isinstance(mach,Machine):
+            self.machine=mach
+        self.name=kw.pop('name',mach.name)
+
+        if isinstance(dom,Domain):
+            self.domain = dom
+        else:
+            raise ArgumentError('second argument must be a valid domain')
+
+        if isinstance(stat, Status):
+            self.status = stat
+        else:
+            raise ArgumentError('third argument must be a valid status')
 
     def _get_location(self):
         return self.machine.location
@@ -282,20 +287,12 @@ class ServiceInstance(aqdbBase):
     def __init__(self,svc,a_sys,*args,**kw):
         if isinstance(svc,Service):
             self.service = svc
-        elif isinstance(svc,str):
-            try:
-                self.service = s.query(Service).filter_by(name=svc).one()
-            except Exception, e:
-                print "Error looking up service '%s', %s"%(svc,e)
-                return
+        else:
+            raise ArgumentError('First argument must be a valid Service')
         if isinstance(a_sys,System):
             self.system = a_sys
-        elif isinstance(a_sys,str):
-            try:
-                self.system = s.query(System).filter_by(name=a_sys).one()
-            except Exception, e:
-                print "Error looking up system '%s', %s"%(a_sys,e)
-                return
+        else:
+            raise ArgumentError('Second Argument must be a valid System')
     def __repr__(self):
         return '%s %s %s'%(self.__class__.__name__ ,
                            str(self.service.name),str(self.system.name))
@@ -362,24 +359,33 @@ service_list_item = Table('service_list_item', meta,
            Sequence('service_list_item_id_seq'), primary_key=True),
     Column('service_id',Integer,
            ForeignKey('service.id'), unique=True),
-    Column('service_list_id',Integer,
-           ForeignKey('service_list.id')),
+    Column('archetype_id',Integer,
+           ForeignKey('archetype.id'), index=True),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
-Index('idx_srv_list_item_list_id', service_list_item.c.service_list_id)
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('archetype_id','service_id'))
+#was here for oracle size limit on idx
+#Index('idx_srv_list_arch_id', service_list_item.c.archetype_id)
 service_list_item.create(checkfirst=True)
 
 class ServiceListItem(aqdbBase):
     """ The individual items in a list of required service dependencies """
     @optional_comments
-    def __init__(self,svc_list,svc):
-        self.service_list = svc_list
-        self.service = svc
-    def __repr__(self):
-        return '(service list item) %s'%(self.service.name)
+    def __init__(self,archetype,svc):
+        if isinstance(archetype,Archetype):
+            self.archetype = archetype
+        else:
+            raise ArgumentError('First argument must be an Archetype')
+        if isinstance(svc,Service):
+            self.service = svc
+        else:
+            raise ArgumentError('Second argument must be a Service')
+        
+    #def __repr__(self):
+    #    return '(service list item) %s'%(self.service.name)
 
 mapper(ServiceListItem,service_list_item,properties={
-    'service_list': relation(ServiceList, backref='items'),
+    'archetype': relation(Archetype,backref='service_list'),
     'service': relation(Service),
     'creation_date' : deferred(service_list_item.c.creation_date),
     'comments': deferred(service_list_item.c.comments)
@@ -409,6 +415,7 @@ def create_domains():
 
         s.commit()
         print 'created production and qa domains'
+        s.close()
 
 def populate_all_service_tables():
     if empty(afs_cell,engine):
@@ -453,18 +460,15 @@ def populate_all_service_tables():
     else:
         sm=s.query(ServiceMap).first()
 
-    if empty(service_list,engine):
-        sl=ServiceList('aquilon')
-        s.save(sl)
-        s.commit()
-
         svc=s.query(Service).filter_by(name='syslog').one()
+        arch=s.query(Archetype).filter_by(name='aquilon').one()
 
-        sli=ServiceListItem(sl,svc)
+        sli=ServiceListItem(arch,svc)
         s.save(sli)
         s.commit()
         print 'populated service list'
-
+    s.close()
+    
 if __name__ == '__main__':
     #from aquilon.aqdb.utils.debug import ipshell
 

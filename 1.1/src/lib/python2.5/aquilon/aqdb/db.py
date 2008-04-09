@@ -38,8 +38,8 @@ oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
 """
     CONFIGURES THE DSN FOR THE ENTIRE PROJECT
 """
-#dsn = sqlite_dsn
-dsn = oracle_dsn
+dsn = sqlite_dsn
+#dsn = oracle_dsn
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
@@ -160,8 +160,8 @@ class aqdbBase(object):
     def __repr__(self):
         if hasattr(self,'name'):
             return self.__class__.__name__ + " " + str(self.name)
-        #elif hasattr(self,'canonical_name'):
-        #    return self.__class__.__name__ + " " + str(self.canonical_name.name)
+        elif hasattr(self,'service'):
+            return self.__class__.__name__ + " " + str(self.service.name)
         elif hasattr(self,'system'):
             return self.__class__.__name__ + " " + str(self.system.name)
         else:

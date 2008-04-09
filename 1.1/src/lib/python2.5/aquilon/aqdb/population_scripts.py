@@ -29,9 +29,19 @@ from interface import *
 
 s=Session()
 
-nick=Session.query(Nic).filter_by(driver='tg3').one()
-
 cmnt = 'FAKE'
+model  = s.query(Model).filter_by(name='hs21').one()
+assert(model)
+
+syslog = s.query(Service).filter_by(name='syslog').one()
+assert(syslog)
+
+prod   = s.query(Domain).filter_by(name='production').one()
+assert(prod)
+
+stat   = s.query(Status).filter_by(name='prod').one()
+assert(stat)
+
 
 def n_of(n,string):
     """ generate n strings with sequential integer appended
@@ -56,7 +66,7 @@ def make_interfaces():
             for n in range(2):
                 try:
                     pi=PhysicalInterface(
-                        'e'+str(n),nick,random_mac(),m,
+                        'e'+str(n),random_mac(),m,
                     comments=cmnt)
                     if n == 0:
                         pi.boot=True
@@ -77,11 +87,7 @@ def two_in_each():
 
     print "go get some coffee, we'll be here a while"
 
-    model  = s.query(Model).filter_by(name='hs21').one()
-    syslog = s.query(Service).filter_by(name='syslog').one()
-    prod   = s.query(Domain).filter_by(name='production').one()
-    stat   = s.query(Status).filter_by(name='prod').one()
-    nick=Session.query(Nic).filter_by(driver='tg3').one()
+
 
     for b in s.query(Building).all():
         racks = (Rack(r,'rack',fullname='rack %s'%r,
@@ -116,30 +122,44 @@ def two_in_each():
         print e
         sys.exit(1)
 
-
     print 'created %s nodes'%(len(nodelist))
+
     try:
         for node in nodelist:
-            h=Host(node,name=node.name,status=stat, domain=prod,comments=cmnt)
-            s.save_or_update(h)
-            s.commit()
+            h=Host(node,prod,stat,name=node.name,comments=cmnt)
+            s.save(h)
     except Exception, e:
         print e
         s.close()
-        sys.exit(1) 
+        sys.exit(1)
+
+    try:
+        s.commit()
+    except Exception, e:
+        print e
+        s.close()
+        sys.exit(1)
+
     print 'created %s hosts'%(len(nodelist))
 
 def just_hosts():
     nodelist=s.query(Machine).all()
     try:
         for node in nodelist:
-            h=Host(node,name=node.name,comments=cmnt)
-            s.save_or_update(h) 
-            s.commit()    
+            h=Host(node,prod,stat,name=node.name,comments=cmnt)
+            s.save(h)
     except Exception, e:
         print e
         s.close()   
         sys.exit(1)
+ 
+    try:
+        s.commit()
+    except Exception, e:
+        print e
+        s.close()
+        sys.exit(1)
+    
     print 'created %s hosts'%(len(nodelist))
 
 """ To clear fake stuff:
@@ -149,6 +169,7 @@ def just_hosts():
     delete from interface where comments like '%FAKE%';
     delete from host where comments like '%FAKE';
     delete from machine where comments like '%FAKE%';
+    delete from system where comments like '%FAKE';
     delete from rack where id in (select id from location where comments like '%FAKE%');
     delete from chassis where id in (select id from location where comments like '%FAKE%');
     delete from location where comments like '%FAKE%';
@@ -224,11 +245,12 @@ def make_syslog_si(hostname):
 
 def clone_dsdb_host(hostname):
     print 'cloning %s'%(hostname)
+    #need building, rack and chassis
+    #need model/type, afs cell, pod
 
 def npipm1():
     np=s.query(Building).filter_by(name='np').one()
     mod=s.query(Model).filter_by(name='ls20').one()
-    nick=Session.query(Nic).filter_by(driver='tg3').one()
 
     rk = s.query(Rack).filter_by(name='np302').first()
     if not rk:
@@ -253,9 +275,9 @@ def npipm1():
         m=Machine(c,mod,node=1,comments='test npipm1 machine')
         s.save(m)
 
-    pi=PhysicalInterface('e0',nick,'00:14:5e:86:d8:84',
+    pi=PhysicalInterface('e0','00:14:5e:86:d8:84',
                             m,comments='test npipm1-e0')
-    pi2=PhysicalInterface('e1',nick,'00:14:5e:86:d8:85',
+    pi2=PhysicalInterface('e1','00:14:5e:86:d8:85',
                             m,comments='test npipm1-e1')
     pi.ip='10.163.112.198'
     pi2.ip='10.163.112.229'
@@ -267,7 +289,7 @@ def npipm1():
         print e
         s.rollback()
 
-    h=Host(m,name='npipm1',comments='test npipm1')
+    h=Host(m,prod,stat,name='npipm1',comments='test npipm1')
     s.save_or_update(h)
 
     try:

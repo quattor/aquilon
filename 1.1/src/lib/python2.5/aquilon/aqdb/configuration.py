@@ -18,7 +18,7 @@ from db import *
 
 from aquilon import const
 
-from aquilon.aqdb.utils.exceptions_ import NoSuchRowException
+from aquilon.aqdb.utils.exceptions_ import *
 
 from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
@@ -108,7 +108,7 @@ class CfgPath(aqdbBase):
         if isinstance(tld, CfgTLD):
             self.tld = tld
         else:
-            raise ArgumentException("First argument must be a CfgTLD")
+            raise ArgumentError("First argument must be a CfgTLD")
 
         if isinstance(pth,str):
             pth = pth.lstrip('/').lower()
@@ -128,37 +128,9 @@ mapper(CfgPath,cfg_path,properties={
     'comments':deferred(cfg_path.c.comments)})
 
 
-
-"""
-    The service list table is used to represent the service requirements of
-    host 'build archetypes'. It groups required services into groupings that
-    can be referenced and reused at build time. The list object is here
-    because archteype requires is as a parent. Service list 'item' requires
-    Service as a parent, and is included there instead.
-"""
-service_list = Table('service_list', meta,
-    Column('id', Integer, Sequence('service_list_id_seq'), primary_key=True),
-    Column('name', String(32), unique=True, index=True),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
-service_list.create(checkfirst=True)
-
-
-class ServiceList(aqdbBase):
-    """ A bucket to put required services into as a list of required
-        service dependencies for hosts.
-    """
-    pass
-mapper(ServiceList,service_list,properties={
-    'creation_date' : deferred(service_list.c.creation_date),
-    'comments': deferred(service_list.c.comments)})
-
 archetype = Table('archetype', meta,
     Column('id', Integer, Sequence('archetype_id_seq'), primary_key=True),
     Column('name', String(32), unique=True, nullable=True, index=True),
-    Column('service_list_id', Integer,
-           ForeignKey('service_list.id'),
-           nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 archetype.create(checkfirst=True)
@@ -169,31 +141,8 @@ class Archetype(aqdbBase):
     def __init__(self,name,**kw):
         if isinstance(name,str):
             self.name=name.strip().lower()
-        #just look for archetype/name/base.tpl and final for now
-            s=Session()
-            # FIXME: Do not use an internal session...
-            try:
-                self.first = s.query(CfgPath).filter(
-                        CfgPath.relative_path.like(name + '/base.tpl')).one()
-                        #CfgPath.relative_path.like('%archetype/base.tpl')).one()
-                #TODO: and this with 'aquilon'
-            except NoSuchRowException:
-                print "Can't find archetype/%s/base.tpl"%(self.name)
-                return
-            try:
-                self.last=s.query(CfgPath).filter( #TODO: fix with AND
-                        CfgPath.relative_path.like(name + '/final.tpl')).one()
-            except NoSuchRowException:
-                print "Can't find archetype/%s/final.tpl"%(self.name)
-                return
-            try:
-                self.service_list=s.query(
-                    ServiceList).filter_by(name=self.name).one()
-            except NoSuchRowException:
-                print "Can't find a service list for %s"%(self.name)
-                return
+
 mapper(Archetype,archetype, properties={
-    'service_list':relation(ServiceList, backref='archetype'),
     'creation_date' : deferred(archetype.c.creation_date),
     'comments': deferred(archetype.c.comments)
 })
@@ -217,13 +166,12 @@ def populate_cst():
 def create_paths():
     s = Session()
     if empty(cfg_path,engine):
-        from aquilon.aqdb.utils import altpath
-        d=altpath.path(const.cfg_base)
-        for file in d.walk('*.tpl'):
-            (a,b,c)=file.partition('quattor/')
+        for root,dirs,files in os.walk(const.cfg_base):
+            for d in dirs:
+                c=os.path.join(root,d)
+                (a,b,c)=c.partition('quattor/')
             try:
-                #print c
-                tld=s.query(CfgTLD).filter_by(type=splitall(c)[0]).first()
+                tld=s.query(CfgTLD).filter_by(type=splitall(c)[0]).one()
                 f=CfgPath(tld, c)
                 s.save(f)
             except Exception,e:
@@ -235,17 +183,12 @@ def create_paths():
 
 def create_aquilon_archetype():
     s = Session()
-    if empty(service_list):
-        sl=ServiceList('aquilon')
-        s.save(sl)
-        s.commit()
-        print 'created aquilon service list'
-
-    if empty(archetype, engine):
+    if empty(archetype):
         a=Archetype('aquilon')
         s.save(a)
         s.commit()
         print 'created aquilon archetype'
+    s.close()
         
 def get_quattor_src():
     """ ugly ugly way to initialize a quattor repo for import"""
@@ -277,25 +220,9 @@ if __name__ == '__main__':
     a=s.query(CfgTLD).first()
     b=s.query(CfgSourceType).first()
     c=s.query(CfgPath).first()
-    e=s.query(Archetype).first()
+    d=s.query(Archetype).first()
 
     assert(a)
     assert(b)
     assert(c)
-    assert(e)
-
-
-#TODO: this key/value attribute of aqdb config source
-#TODO: figure out quattor config source
-#TODO: svc_cfg_source: tell services are configured by quattor or aqdb?
-"""
-def create_qcs():
-    if empty(quattor_cfg_source,engine):
-        s=Session()
-
-        prod=s.query(Domain).filter_by(name='production').one()
-        for i in s.query(CfgPath).all():
-            qcs = QuattorCfgSource(prod,i)
-            s.save(qcs)
-            s.commit()
-"""
+    assert(d)
