@@ -49,19 +49,18 @@ get_network = """
     AND B.state >=0
     AND C.state >=0
 """
-esp_host = """
+host_info  = """
 SELECT
         A.host_name,                                          /* network_host */
         B.cpu, B.virt_cpu, B.cputype, B.memory, B.hostid,          /* machine */
         C.name, C.version, C.kernel_id,                                 /* os */
-        D.maker, D.model, D.arch, D.karch,                           /* model */
-        E.total_disks, E.service, E.side, E.sys_loc, E.afscell,       /* minfo*/
-        E.lan, E.swap, E.motd, E.boot_time,                      /* new stuff */
-        G.iface_name, G.ip_addr, G.ether_addr              /* interface info */
+        D.maker, D.model, D.arch, D.karch,                          /* model */
+        E.sys_loc, E.afscell --,                               /* minfo*/
+        --G.iface_name, G.ip_addr, G.ether_addr            /* interface info */
         
 
-                FROM   network_host A, machine B, os C, model D,
-                       machine_info E, network_iface G
+                FROM   network_host A, machine B, os C, model D, machine_info E
+                --, network_iface G
 
                 WHERE  A.name_type = 0
                        AND A.machine_id = B.machine_id
@@ -69,7 +68,7 @@ SELECT
                        AND B.os_id *= C.id
                        AND B.model_id *= D.id
                        AND B.machine_id = E.machine_id
-                       AND B.machine_id *= G.machine_id
+                       --AND B.machine_id *= G.machine_id
 
 
                        AND A.state >= 0
@@ -77,7 +76,7 @@ SELECT
                        AND C.state >= 0
                        AND D.state >= 0
                        AND E.state >= 0
-                       AND G.state >= 0
+                       --AND G.state >= 0
 
                        and A.host_name = 'np3c1n4'
 
@@ -88,19 +87,20 @@ class aqsyb:
     '''Wraps connections and calls to sybase'''
     def __init__(self,dsn,database):
         if os.environ['USER'] == 'daqscott':
-            print 'using kerberos authentication'
+            #print 'using kerberos authentication'
             principal = None
             for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():
                 svr, principal = line.split()
                 if svr == dsn:
                     break
 
-            self.syb = Sybase.connect(dsn,'','',database,delay_connect=1)
+            self.syb = Sybase.connect(dsn,'','',database,
+                                      delay_connect=1, datetime='auto')
             self.syb.set_property(Sybase.CS_SEC_NETWORKAUTH, Sybase.CS_TRUE)
             self.syb.set_property(Sybase.CS_SEC_SERVERPRINCIPAL, principal)
             self.syb.connect()
         else:
-            #kuu to a user, then do the above
+            #TODO: kuu to a user, then do the above
             self.syb = Sybase.connect(dsn,'dsdb_guest','dsdb_guest', \
                                   database,datetime='auto',auto_commit = '0')
 
@@ -162,9 +162,9 @@ def dump_network():
 
 def esp():
     db = aqsyb('NYP_DSDB11','dsdb')
-    return db.run_query(esp_host).fetchall()
+    return db.run_query(host_info).fetchall()
 
 if __name__ == '__main__':
-    test()
-    #country()
-    esp()[0]
+    #test()
+    a=esp()
+    print a[0]
