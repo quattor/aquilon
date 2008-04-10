@@ -102,13 +102,14 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
     
     def sync (self, **kwargs):
-        domain = kwargs.pop("domain")
-        domaindir = os.path.join(self.templatesdir, domain)
-        if not os.path.exists(domaindir):
-            return defer.maybeDeferred(raise_exception,
-                "domain directory '%s' does not exist" % domaindir)
-        return self.pbroker.sync(git_path=self.git_path, domaindir=domaindir,
+        d = self.dbbroker.verify_domain(session=True,
+                domain=kwargs.pop("domain"))
+        d = d.addCallback(self.pbroker.sync,
+                git_path=self.git_path, templatesdir=self.templatesdir,
                 **kwargs)
+        d = d.addCallback(lambda _:
+                """env PATH="%s:$PATH" NO_PROXY=* git pull""" % self.git_path)
+        return d
 
 # --------------------------------------------------------------------------- #
     
@@ -120,9 +121,6 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
 
     def add_domain (self, **kwargs):
-        # FIXME: Quick hack... remove this when auth is added...
-        if not kwargs.get("user"):
-            kwargs["user"] = self.osuser
         d = self.dbbroker.add_domain(session=True, **kwargs)
         d = d.addCallback(self.pbroker.add_domain, git_path=self.git_path,
                 templatesdir=self.templatesdir, kingdir=self.kingdir,
@@ -132,9 +130,6 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
 
     def del_domain (self, **kwargs):
-        # FIXME: Quick hack... remove this when auth is added...
-        if not kwargs.get("user"):
-            kwargs["user"] = self.osuser
         d = self.dbbroker.del_domain(session=True, **kwargs)
         d = d.addCallback(self.pbroker.del_domain,
                 templatesdir=self.templatesdir, **kwargs)

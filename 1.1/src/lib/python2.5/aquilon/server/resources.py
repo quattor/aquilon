@@ -500,19 +500,12 @@ class ResponsePage(resource.Resource):
         """aqcommand: aq sync --domain=<domain>"""
         domain = request.args['domain'][0]
 
-        # FIXME: Sanitize domain before it is used in commands.
-        # FIXME: Verify that the domain exists, 404 if not.
-
         # FIXME: Lookup whether this server handles this domain
         # and redirect as necessary.
         # Presumably, that lookup will catch domains that do not
         # actually exist.
 
         d = self.broker.sync(domain=domain, user=request.channel.getPrinciple())
-        # All went well (errors will be caught by wrapError...),
-        # so send client command.
-        d = d.addCallback(lambda _: """env PATH="%s:$PATH" git pull""" 
-                % self.broker.git_path)
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)

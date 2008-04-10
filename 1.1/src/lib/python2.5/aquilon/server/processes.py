@@ -25,16 +25,16 @@ def _cb_cleanup_dir(arg, dir):
         for name in files:
             try:
                 os.remove(os.path.join(root, name))
-            except exceptions.OSError, e:
+            except OSError, e:
                 log.err(str(e))
         for name in dirs:
             try:
                 os.rmdir(os.path.join(root, name))
-            except exceptions.OSError, e:
+            except OSError, e:
                 log.err(str(e))
     try:
         os.rmdir(dir)
-    except exceptions.OSError, e:
+    except OSError, e:
         log.err(str(e))
     return arg
 
@@ -42,7 +42,7 @@ def _cb_cleanup_file(arg, file):
     """This callback is meant as a finally block to clean up a file."""
     try:
         os.unlink(file)
-    except exceptions.OSError, e:
+    except OSError, e:
         log.err(str(e))
     return arg
 
@@ -82,18 +82,20 @@ class ProcessBroker(object):
                 self.cb_shell_command_error,
                 callbackArgs=[command], errbackArgs=[command])
 
-    def sync(self, **kwargs):
+    def sync(self, domain, git_path, templatesdir, **kwargs):
         """Implements the heavy lifting of the aq sync command.
         
         Will raise ProcessException if one of the commands fails."""
+
+        domaindir = templatesdir + "/" + domain
         d = self.run_shell_command(
-                """env PATH="%(git_path)s:$PATH" git pull""" % kwargs,
+                """env PATH="%s:$PATH" git pull""" % git_path,
                 path=domaindir)
         # The 1.0 code notes that this should probably be done as a
         # hook in git... just need to make sure it runs.
         d = d.addCallback(lambda _: self.run_shell_command(
-            """env PATH="%(git_path)s:$PATH" git-update-server-info"""
-            % kwargs, path=domaindir))
+            """env PATH="%s:$PATH" git-update-server-info"""
+            % git_path, path=domaindir))
         return d
 
     def wrap_failure_with_rollback(self, failure, **kwargs):

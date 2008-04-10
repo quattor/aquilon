@@ -21,7 +21,7 @@ from twisted.python import log
 
 from aquilon import const
 from aquilon.exceptions_ import RollbackException
-from aquilon.server.exceptions_ import NotFoundException
+from aquilon.server.exceptions_ import NotFoundException, AuthorizationException
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 from aquilon.aqdb.configuration import *
@@ -231,6 +231,8 @@ class DatabaseBroker(AccessBroker):
     # This should probably move over to UserPrincipal
     principal_re = re.compile(r'^(.*)@([^@]+)$')
     def split_principal(self, user):
+        if not user:
+            return (user, None)
         m = self.principal_re.match(user)
         if m:
             return (m.group(1), m.group(2))
@@ -243,6 +245,9 @@ class DatabaseBroker(AccessBroker):
         # FIXME: UserPrincipal should include the realm...
         dbuser = self.session.query(UserPrincipal).filter_by(name=user).first()
         if not dbuser:
+            if not user:
+                raise AuthorizationException("Cannot create a domain without"
+                        + " an authenticated connection.")
             dbuser = UserPrincipal(user)
             self.session.save_or_update(dbuser)
         # NOTE: Defaulting the name of the quattor server to quattorsrv.
@@ -253,6 +258,8 @@ class DatabaseBroker(AccessBroker):
                 name='one-nyp').one()
         # For now, succeed without error if the domain already exists.
         dbdomain = self.session.query(Domain).filter_by(name=domain).first()
+        # FIXME: Check that the domain name is composed only of characters
+        # that are valid for a directory name.
         if not dbdomain:
             dbdomain = Domain(domain, quattorsrv, dnsdomain, dbuser)
             self.session.save_or_update(dbdomain)
@@ -269,7 +276,10 @@ class DatabaseBroker(AccessBroker):
         quattorsrv = self.session.query(QuattorServer).filter_by(
                 name='quattorsrv').one()
         # For now, succeed without error if the domain does not exist.
-        dbdomain = self.session.query(Domain).filter_by(name=domain).first()
+        try:
+            dbdomain = self.session.query(Domain).filter_by(name=domain).one()
+        except InvalidRequestError:
+            return domain
         if quattorsrv != dbdomain.server:
             log.err("FIXME: Should be redirecting this operation.")
         # FIXME: Entitlements will need to happen at this point.
