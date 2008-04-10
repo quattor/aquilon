@@ -22,6 +22,9 @@ class ArgumentError(AquilonError):
     
     """
 
+class NoSuchRowException(AquilonError):
+    '''thrown when a call to session.query.***.one() returns no rows'''
+    from sqlalchemy.exceptions import InvalidRequestError
 
 class ProcessException(AquilonError):
     def __init__(self, command=None, out=None, err=None,
