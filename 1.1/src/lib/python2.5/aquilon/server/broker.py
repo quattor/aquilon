@@ -58,25 +58,25 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def show_location (self, **kwargs):
+    def show_location(self, **kwargs):
         # just a facade method
-        return self.dbbroker.showLocation(**kwargs)
+        return self.dbbroker.show_location(session=True, **kwargs)
 
 # --------------------------------------------------------------------------- #
 
-    def show_location_type (self, **kwargs):
+    def show_location_type(self, **kwargs):
         # just a facade method
-        return self.dbbroker.showLocationType(**kwargs)
+        return self.dbbroker.show_location_type(session=True, **kwargs)
 
 # --------------------------------------------------------------------------- #
 
-    def add_location (self, **kwargs):
-        return self.dbbroker.addLocation (**kwargs)
+    def add_location(self, **kwargs):
+        return self.dbbroker.add_location(session=True, **kwargs)
 
 # --------------------------------------------------------------------------- #
 
-    def del_location (self, **kwargs):
-        return self.dbbroker.delLocation(**kwargs)
+    def del_location(self, **kwargs):
+        return self.dbbroker.del_location(session=True, **kwargs)
 
 # --------------------------------------------------------------------------- #
     
@@ -115,7 +115,7 @@ class Broker(object):
     def get (self, domain, **kwargs):
         # FIXME: Return absolute paths to git?
         # 1.0 just hard-codes the path modificatin into the client.
-        return """env PATH="%(path)s:$PATH" git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":domain}
+        return """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":domain}
 
 # --------------------------------------------------------------------------- #
 

@@ -11,9 +11,15 @@
 
 from aquilon.exceptions_ import AquilonError
 
+
 class AuthorizationException(AquilonError):
     '''Raised when a principle is not authorized to perform a given
     action on a resource.
 
     '''
+
+
+class NotFoundException(AquilonError):
+    """Raised when a requested resource cannot be found."""
+
 

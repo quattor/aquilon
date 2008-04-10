@@ -15,6 +15,7 @@ import sys, datetime
 sys.path.append('../..')
 
 from db import *
+from aquilon.exceptions_ import ArgumentError
 
 from location import *
 location=Table('location', meta, autoload=True)
@@ -112,7 +113,7 @@ class System(aqdbBase):
         if isinstance(cn,str):
             self.name = cn
         else:
-            raise ArgumentError("Incorrect name argument %s",cn)
+            raise ArgumentError("Incorrect name argument %s" % cn)
             return
     #def type(self):
     #    return str(self.type)

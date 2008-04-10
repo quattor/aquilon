@@ -15,15 +15,21 @@ import re
 import exceptions
 
 from sasync.database import AccessBroker, transact
+from sqlalchemy.exceptions import InvalidRequestError
 from twisted.internet import defer
 from twisted.python import log
 
+from aquilon import const
 from aquilon.exceptions_ import RollbackException
+from aquilon.server.exceptions_ import NotFoundException
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 from aquilon.aqdb.configuration import *
 from aquilon.aqdb.auth import *
 
+# FIXME: This probably belongs in location.py
+const.location_types = ("company", "hub", "continent", "country", "city",
+        "building", "rack", "chassis", "desk")
 
 class DatabaseBroker(AccessBroker):
     """All database access eventually funnels through this class, to
@@ -68,49 +74,98 @@ class DatabaseBroker(AccessBroker):
     #    return self.session.query(Host).filter_by(name=name).all()
 
     @transact
-    def addLocation(self, **kwargs):
-        #return self.host.insert().execute(name=name)
-        newLocation = Location(**kwargs)
-        self.session.save(newLocation)
+    def add_location(self, name, type, parentname, parenttype,
+            fullname, comments, user, **kwargs):
+        newLocation = self.session.query(Location).filter_by(name=name
+                ).join('type').filter_by(type=type).first()
+        if newLocation:
+            # FIXME: Technically this is coming in with an http PUT,
+            # which should try to adjust state and succeed if everything
+            # is alright.
+            raise ArgumentError("Location name=%s type=%s already exists."
+                    % (name, type))
+        try:
+            parent = self.session.query(Location).filter_by(name=parentname
+                    ).join('type').filter_by(type=parenttype).one()
+        except InvalidRequestError:
+            raise ArgumentError(
+                    "Parent Location type='%s' name='%s' not found."
+                    % (parenttype, parentname))
+        # Incoming looks like 'city', need the City class.
+        location_type = globals()[type.capitalize()]
+        if not issubclass(location_type, Location):
+            raise ArgumentError("%s is not a known location type" % type)
+        try:
+            dblt = self.session.query(LocationType).filter_by(type=type).one()
+        except InvalidRequestError:
+            raise ArgumentError("Invalid type '%s'" % type)
+
+        # Figure out if it is valid to add this type of child to the parent...
+        found_parent = False
+        found_new = False
+        for t in const.location_types:
+            if t == parenttype:
+                # Great, found the parent type in the list before requested type
+                found_parent = True
+                continue
+            if t != type:
+                # This item is neither parent nor new, keep going...
+                continue
+            # Moment of truth.
+            if found_parent:
+                # We saw the parent earlier - life is good.
+                found_new = True
+                break
+            raise ArgumentError("type %s cannot be a parent of %s",
+                    (parenttype, type))
+        if not found_new:
+            raise ArgumentError("unknown type %s", type)
+
+        optional_args = {}
+        if fullname:
+            optional_args["fullname"] = fullname
+        if comments:
+            optional_args["comments"] = comments
+
+        newLocation = location_type(name=name, type_name=dblt,
+                parent=parent, owner=user, **optional_args)
         return [newLocation]
 
     @transact
-    def delLocation(self, **kwargs):
-        oldLocation = self.session.query(Location).filter_by(**kwargs).one()
+    def del_location(self, name, type, user, **kwargs):
+        try:
+            oldLocation = self.session.query(Location).filter_by(name=name
+                    ).join('type').filter_by(type=type).one()
+        except InvalidRequestError:
+            raise NotFoundException(
+                    "Location type='%s' name='%s' not found."
+                    % (type, name))
         self.session.delete(oldLocation)
         return
 
     @transact
-    def showLocation(self, **kwargs):
+    def show_location(self, type=None, name=None, **kwargs):
+        log.msg("Attempting to generate a query...")
         query = self.session.query(Location)
-        if kwargs.has_key("type"):
+        if type:
             # Not this easy...
-            #kwargs["LocationType.type"] = kwargs.pop("type")
-            query = query.join('type').filter_by(type=kwargs.pop("type"))
+            #kwargs["LocationType.type"] = type
+            log.msg("Attempting to add a type...")
+            query = query.join('type').filter_by(type=type)
             query = query.reset_joinpoint()
-        if kwargs:
-            query = query.filter_by(**kwargs)
+        if name:
+            try:
+                log.msg("Attempting query for one...")
+                return [query.filter_by(name=name).one()]
+            except InvalidRequestError:
+                raise NotFoundException(
+                        "Location type='%s' name='%s' not found."
+                        % (type, name))
+        log.msg("Attempting to query for all...")
         return query.all()
 
-    # This is a more generic solution... would be called with
-    # transact_subs={"type":"LocationType"} as an argument alongside
-    # type=whatever and/or name=whatever.
-    # It would then be much more general than just Location.
-    #@transact
-    #def showLocation(self, **kwargs):
-    #    querycls = Location
-    #    if kwargs.has_key("transact_subs"):
-    #        subs = kwargs.pop("transact_subs")
-    #        for (arg, cls) in subs.items():
-    #            cls = globals().get(cls)
-    #            if not issubclass(cls, aqdbBase):
-    #                continue
-    #            filter = {arg:kwargs[arg]}
-    #            kwargs[arg] = self.session.query(cls).filter_by(**filter).one()
-    #    return self.session.query(querycls).filter_by(**kwargs).all()
-
     @transact
-    def showLocationType(self, **kwargs):
+    def show_location_type(self, **kwargs):
         return self.session.query(LocationType).filter_by(**kwargs).all()
 
     @transact
@@ -173,7 +228,7 @@ class DatabaseBroker(AccessBroker):
         """Gets called if the make_aquilon build succeeds."""
         # FIXME: Should finalize the build table...
 
-    # This should probably move over to UserPrinciple
+    # This should probably move over to UserPrincipal
     principal_re = re.compile(r'^(.*)@([^@]+)$')
     def split_principal(self, user):
         m = self.principal_re.match(user)

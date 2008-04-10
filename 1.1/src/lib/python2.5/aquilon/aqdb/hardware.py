@@ -28,6 +28,8 @@ cfg_path=Table('cfg_path',meta, autoload=True)
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import mapper, relation, deferred
 
+from aquilon.exceptions_ import ArgumentError
+
 vendor = mk_name_id_table('vendor',meta)
 vendor.create(checkfirst=True)
 class Vendor(aqdbBase):
@@ -97,19 +99,20 @@ class Model(aqdbBase):
             finally:
                 s.close()
         else:
-            raise ArgumentError("Incorrect vendor specification '%s'",vndr)
+            raise ArgumentError("Incorrect vendor specification '%s'" % vndr)
             return
         #TODO: handle string arguments?
         if isinstance(h_typ,HardwareType):
             self.hardware_type = h_typ
         else:
-            raise ArgumentError("Incorrect hardware type specified '%s'",h_typ)
+            raise ArgumentError("Incorrect hardware type specified '%s'" %
+                    h_typ)
             return
         if m_typ:
             if isinstance(m_typ,MachineType):
                 self.machine_type = m_typ
             else:
-                raise ArgumentError("Incorrect machine type specified '%s'",
+                raise ArgumentError("Incorrect machine type specified '%s'" %
                                     m_typ)
                 return
     def __repr__(self):

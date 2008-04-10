@@ -15,12 +15,6 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 from aquilon.exceptions_ import AquilonError
 
-class ArgumentError(AquilonError):
-    '''Raised for all those conditions where invalid arguments are
-    sent to constructed objects.  This error generally corresponds to
-    construction time state errors.
-    '''
-
 class AlreadyExistsException(AquilonError):
     '''Raised when an attempt to create a row/object which already exists
         and would violate a unique constraint somewhere'''

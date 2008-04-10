@@ -26,6 +26,7 @@ import aquilon.client.depends
 
 from twisted.python import log
 from twisted.internet import reactor, error, utils, protocol, defer
+from twisted.web import http, error as web_error
 
 from aquilon.client.optparser import OptParser, ParsingError
 
@@ -158,11 +159,18 @@ class CustomAction(object):
 
 # FIXME: This behavior might be incorrect... might want to exit(1) in some
 # situations.
-def handleFailure(failure):
+def handleFailure(failure, uri):
     """Final stop handling for all errors - this will return success
     and let the reactor stop cleanly."""
     if failure.check(error.ProcessTerminated):
         print "Communications subprocess terminated:", failure.getErrorMessage()
+    elif failure.check(web_error.Error):
+        # FIXME: The 500 responses are nicely formatted html that do not
+        # look right... maybe try to run them through a local formatter?
+        # Or could just try to configure the server to send something raw...
+        print "[%s] %s" % (failure.value.status, uri)
+        print "%s: %s" % (http.RESPONSES.get(int(failure.value.status)),
+                failure.value.response)
     else:
         print "Error:", failure.getErrorMessage()
 
@@ -245,7 +253,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     d = d.addCallback(gotPage, uri, transport.expect, globalOptions)
-    d = d.addErrback(handleFailure)
+    d = d.addErrback(handleFailure, uri)
     d = d.addCallback(lambda _: reactor.stop())
 
     #import pdb

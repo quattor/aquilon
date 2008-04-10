@@ -21,6 +21,8 @@ from configuration import CfgPath
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
+from aquilon.exceptions_ import ArgumentError
+
 host     = Table('host', meta, autoload=True)
 cfg_path = Table('cfg_path', meta, autoload=True)
 
@@ -42,7 +44,7 @@ class Build(aqdbBase):
             self.host=host
         else:
             msg = 'Build object requires a Host object for its constructor'
-            raise ArgumentError()
+            raise ArgumentError(msg)
     def __repr__(self):
         return 'Build Information for %s'%(self.host.name)
 

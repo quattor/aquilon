@@ -7,12 +7,20 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Exceptions to be used by Aquilon Database Module"""
+"""Exceptions to be used by Aquilon"""
 
 """The base exception class is AquilonError."""
 
 class AquilonError(StandardError):
     '''Generic error class.'''
+
+
+class ArgumentError(AquilonError):
+    """Raised for all those conditions where invalid arguments are
+    sent to constructed objects.  This error generally corresponds to
+    construction time state errors.
+    
+    """
 
 
 class ProcessException(AquilonError):
@@ -44,5 +52,6 @@ class RollbackException(AquilonError):
         if not args and cause:
             args = [ str(cause) ]
         AquilonError.__init__(self, *args, **kwargs)
+
 
 #if __name__=='__main__':

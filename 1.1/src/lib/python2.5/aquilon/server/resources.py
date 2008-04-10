@@ -50,7 +50,8 @@ from twisted.web import server, resource, http, error, static
 from twisted.internet import defer, utils
 from twisted.python import log
 
-from aquilon.server.exceptions_ import AuthorizationException
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.exceptions_ import AuthorizationException, NotFoundException
 
 class ResponsePage(resource.Resource):
 
@@ -120,6 +121,13 @@ class ResponsePage(resource.Resource):
         single-element lists back to single variables.
 
         """
+        if request.method == 'PUT':
+            # For now, assume all put requests use a simple urllib encoding.
+            request.content.seek(0)
+            # Since these are both lists, there is a theoretical case where
+            # one might want to merge the lists, instead of overwriting with
+            # the new.  Not sure if that matters right now.
+            request.args.update( http.parse_qs(request.content.read()) )
         m = getattr(self, 'render_' + request.method, None)
         if not m:
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
@@ -139,6 +147,13 @@ class ResponsePage(resource.Resource):
     # maybe try to ask result how it should be rendered, or check the
     # request for hints.  For now, just wrap in a basic document.
     def format_html(self, result, request):
+        if request.code and request.code >= 300:
+            title = "%d %s" % (request.code, request.code_message)
+        else:
+            simpleargs = {}
+            for (key, value) in request.args.items():
+                simpleargs[key] = value and value[0] or value
+            title = self.path % simpleargs
         retval = """
         <html>
         <head><title>%s</title></head>
@@ -146,7 +161,7 @@ class ResponsePage(resource.Resource):
         %s
         </body>
         </html>
-        """ % (self.path % request.args, str(result))
+        """ % (title, str(result))
         return str(retval)
 
     # All of these wrap* functions should probably be elsewhere, and
@@ -246,6 +261,19 @@ class ResponsePage(resource.Resource):
         request.finish()
         return
 
+    def wrapNonInternalError(self, failure, request):
+        """This takes care of 'expected' problems, like NotFoundException."""
+        r = failure.trap(NotFoundException, AuthorizationException,
+                ArgumentError)
+        if r == NotFoundException:
+            request.setResponseCode(http.NOT_FOUND)
+        elif r == AuthorizationException:
+            request.setResponseCode( http.UNAUTHORIZED )
+        elif r == ArgumentError:
+            request.setResponseCode( http.BAD_REQUEST )
+        formatted = self.format(failure.value, request)
+        return self.finishRender(formatted, request)
+
     # TODO: Something should go into both the logs and back to the client...
     def wrapError(self, failure, request):
         """This is generally the final stop for errors - anything will be
@@ -266,12 +294,12 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.broker.dbbroker.showHostAll(session=True)
-        #d = d.addErrback( self.wrapError, request )
+        #d = self.broker.dbbroker.showHostAll()
         #d = d.addCallback( self.wrapHostInTable )
         #d = d.addCallback( self.wrapTableInBody )
         #d = d.addCallback( self.finishRender, request )
-        #d = d.addErrback(log.err)
+        #d = d.addErrback(self.wrapNonInternalError, request)
+        #d = d.addErrback(self.wrapError, request)
         #return server.NOT_DONE_YET
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq show_host --all has not been implemented yet"
@@ -287,12 +315,12 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.broker.dbbroker.showHost(name, session=True)
-        #d = d.addErrback( self.wrapError, request )
+        #d = self.broker.dbbroker.showHost(name)
         #d = d.addCallback( self.wrapHostInTable )
         #d = d.addCallback( self.wrapTableInBody )
         #d = d.addCallback( self.finishRender, request )
-        #d = d.addErrback(log.err)
+        #d = d.addErrback(self.wrapNonInternalError, request)
+        #d = d.addErrback(self.wrapError, request)
         #return server.NOT_DONE_YET
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq show_host --hostname has not been implemented yet"
@@ -309,13 +337,13 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.broker.dbbroker.addHost(name, session=True)
+        #d = self.broker.dbbroker.addHost(name)
         ## FIXME: Trap specific exceptions (host exists, etc.)
-        #d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.wrapHostInTable )
         #d = d.addCallback( self.wrapTableInBody )
         #d = d.addCallback( self.finishRender, request )
-        #d = d.addErrback(log.err)
+        #d = d.addErrback(self.wrapNonInternalError, request)
+        #d = d.addErrback(self.wrapError, request)
         #return server.NOT_DONE_YET
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add_host has not been implemented yet"
@@ -331,11 +359,11 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        #d = self.broker.dbbroker.delHost(name, session=True)
+        #d = self.broker.dbbroker.delHost(name)
         ## FIXME: Trap specific exceptions (host exists, etc.)
-        #d = d.addErrback( self.wrapError, request )
         #d = d.addCallback( self.finishOK, request )
-        #d = d.addErrback(log.err)
+        #d = d.addErrback(self.wrapNonInternalError, request)
+        #d = d.addErrback(self.wrapError, request)
         #return server.NOT_DONE_YET
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq del_host has not been implemented yet"
@@ -379,8 +407,8 @@ class ResponsePage(resource.Resource):
         d = self.broker.add_domain(domain=domain,
                 user=request.channel.getPrinciple())
         d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
     def command_del_domain(self, request):
@@ -392,8 +420,8 @@ class ResponsePage(resource.Resource):
         d = self.broker.del_domain(domain=domain,
                 user=request.channel.getPrinciple())
         d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
     def command_add_template(self, request):
@@ -433,8 +461,8 @@ class ResponsePage(resource.Resource):
         #d = d.addCallback(self.format, request)
         #d = d.addCallback(self.finishRender, request)
         d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
     def command_deploy(self, request):
@@ -475,8 +503,8 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(lambda _: """env PATH="%s:$PATH" git pull""" 
                 % self.broker.git_path)
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
     def command_show_location_types(self, request):
@@ -489,13 +517,13 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.show_location_type(session=True)
+        d = self.broker.show_location_type()
         #d = d.addCallback(self.wrapAqdbTypeInTable)
         #d = d.addCallback(self.wrapTableInBody)
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
     def command_show_location_type(self, request):
@@ -509,13 +537,13 @@ class ResponsePage(resource.Resource):
             return ""
 
         # FIXME: Treat an empty list as a 404.
-        d = self.broker.show_location(session=True, type=type)
+        d = self.broker.show_location(type=type)
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
     
     def command_show_location_name(self, request):
@@ -531,20 +559,25 @@ class ResponsePage(resource.Resource):
             return ""
 
         # FIXME: Treat an empty list as a 404.
-        d = self.broker.show_location(type=type, name=name,
-                session=True)
+        d = self.broker.show_location(type=type, name=name)
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
-        d = d.addCallback( self.finishRender, request )
-        d = d.addErrback( self.wrapError, request )
-        d = d.addErrback(log.err)
+        d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
     def command_add_location(self, request):
         """aqcommand: aq add location --locationname=<location>"""
         type = request.args['type'][0]
         name = request.args['name'][0]
+        parenttype = request.args['parenttype'][0]
+        parentname = request.args['parentname'][0]
+        fullname = request.args.has_key('fullname') and \
+                request.args["fullname"][0] or None
+        comments = request.args.has_key('comments') and \
+                request.args["comments"][0] or None
 
         try:
             self.broker.azbroker.check(None, request.channel.getPrinciple(),
@@ -553,14 +586,17 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.add_location(name, type=type, name=name)
+        d = self.broker.add_location(name=name, type=type,
+                parentname=parentname, parenttype=parenttype,
+                fullname=fullname, comments=comments,
+                user=request.channel.getPrinciple())
         # FIXME: Trap specific exceptions (location exists, etc.)
         #d = d.addCallback( self.wrapLocationInTable )
         #d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
         d = d.addCallback( self.finishRender, request )
-        d = d.addErrback( self.wrapError, request )
-        d = d.addErrback(log.err)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
     def command_del_location(self, request):
@@ -575,12 +611,31 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        d = self.broker.del_location(name, session=True)
+        d = self.broker.del_location(name=name, type=type,
+                user=request.channel.getPrinciple())
         # FIXME: Trap specific exceptions (location exists, etc.)
         d = d.addCallback( self.finishOK, request )
-        d = d.addErrback( self.wrapError, request )
-        d = d.addErrback(log.err)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
+
+    def command_add_city(self, request):
+        if not request.args.has_key('parenttype'):
+            request.args["parenttype"] = ["country"]
+        request.args["type"] = ["city"]
+        return self.command_add_location(request)
+
+    def command_show_city(self, request):
+        request.args["type"] = ["city"]
+        return self.command_show_location_type(request)
+
+    def command_show_city_name(self, request):
+        request.args["type"] = ["city"]
+        return self.command_show_location_name(request)
+
+    def command_del_city(self, request):
+        request.args["type"] = ["city"]
+        return self.command_del_location(request)
 
     def command_run_dummy_command(self, request):
         def _cb_command_output((out, err, code)):
@@ -594,8 +649,8 @@ class ResponsePage(resource.Resource):
 
         # Here's what is happening...
         # Set up a Deferred to run a process and get the output.
-        d = utils.getProcessOutputAndValue("/bin/echo",
-                [ "/bin/env && echo hello && sleep 1 && echo hi; echo bye" ] )
+        d = utils.getProcessOutputAndValue("/bin/sleep",
+                [ "60" ] )
         # Set up callbacks to just return the stdout output
         d = d.addCallbacks(_cb_command_output, _cb_command_error)
         # Ignore the data being brought in (demo purposes, although
@@ -613,8 +668,8 @@ class ResponsePage(resource.Resource):
         # one was thrown away) back to the client with finishRender.
         d = d.addCallback( self.finishRender, request )
         # Catch any uncaught expceptions and finish the request.
-        d = d.addErrback( self.wrapError, request )
-        d = d.addErrback(log.err)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
     def command_status(self, request):
@@ -685,8 +740,8 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
         #d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addErrback(log.err)
         return server.NOT_DONE_YET
 
 

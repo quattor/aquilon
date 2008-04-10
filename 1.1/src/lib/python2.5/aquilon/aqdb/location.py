@@ -18,7 +18,7 @@ from db import *
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import mapper, relation, deferred
 
-from aquilon.aqdb.utils.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError
 
 s = Session()
 
@@ -94,7 +94,11 @@ class Location(aqdbBase):
             Init the exact type of location needed directly."""
             raise ValueError(msg)
             return
-        if isinstance(type_name,str):
+        # FIXME: Should not reference a session within the contructor.
+        # For now, leaving it for backware compatibility...
+        if isinstance(type_name, LocationType):
+            self.type = type_name
+        elif isinstance(type_name,str):
             try:
                 self.type_id = s.query(LocationType).\
                     filter_by(type=type_name).one()
@@ -224,6 +228,7 @@ mapper(Location, location, polymorphic_on=location.c.location_type_id, \
 
 #you may just want to get the object, and throw that in as a property
 def get_loc_type_id(type):
+    # FIXME: Direct reference to session...
     return s.execute(
         "select id from location_type where type='%s'"%(type)).fetchone()[0]
 
@@ -331,6 +336,7 @@ def populate_city():
 
     with s.begin():
         for row in dump_city():
+            #print "City: ", row[0]
             c=City(row[0],'city',fullname=row[1],parent=cache[row[2]])
             s.save(c)
     s.flush()

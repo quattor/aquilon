@@ -24,6 +24,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from location import Location,Chassis
 from hardware import Machine
+from aquilon.exceptions_ import ArgumentError
 
 
 location=Table('location', meta, autoload=True)
