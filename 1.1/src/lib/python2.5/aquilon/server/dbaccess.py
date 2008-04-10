@@ -279,3 +279,18 @@ class DatabaseBroker(AccessBroker):
         # do not need anything from the DB to be passed to pbroker.
         return domain
 
+    @transact
+    def verify_domain(self, domain):
+        """This checks both that the domain exists *and* that this is
+        the correct server to handle requests for the domain."""
+        # NOTE: Defaulting the name of the quattor server to quattorsrv.
+        quattorsrv = self.session.query(QuattorServer).filter_by(
+                name='quattorsrv').one()
+        try:
+            dbdomain = self.session.query(Domain).filter_by(name=domain).one()
+        except InvalidRequestError:
+            raise NotFoundException("Domain '%s' not found." % domain)
+        if quattorsrv != dbdomain.server:
+            log.err("FIXME: Should be redirecting this operation.")
+        return dbdomain.name
+

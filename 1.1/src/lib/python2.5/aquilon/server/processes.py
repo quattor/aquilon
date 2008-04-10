@@ -53,8 +53,10 @@ class ProcessBroker(object):
     # instead of returning out.
     def cb_shell_command_finished(self, (out, err, code), command):
         log.msg("command `%s` finished with return code %d" % (command, code))
-        log.msg("command `%s` stdout: %s" % (command, out))
-        log.msg("command `%s` stderr: %s" % (command, err))
+        if out:
+            log.msg("command `%s` stdout: %s" % (command, out))
+        if err:
+            log.msg("command `%s` stderr: %s" % (command, err))
         if code != 0:
             raise ProcessException(command=command, out=out, err=err, code=code)
         return out
@@ -63,12 +65,17 @@ class ProcessBroker(object):
     # instead of returning out.
     def cb_shell_command_error(self, (out, err, signalNum), command):
         log.msg("command `%s` exited with signal %d" % (command, signalNum))
-        log.msg("command `%s` stdout: %s" % (command, out))
-        log.msg("command `%s` stderr: %s" % (command, err))
+        if out:
+            log.msg("command `%s` stdout: %s" % (command, out))
+        if err:
+            log.msg("command `%s` stderr: %s" % (command, err))
         raise ProcessException(command=command, out=out, err=err,
                 signalNum=signalNum)
 
     def run_shell_command(self, command, env={}, path="."):
+        # Forcibly string-ifying the command in the long run might not be such
+        # a great idea, but this makes dealing with unicode simpler...
+        command = str(command)
         d = utils.getProcessOutputAndValue("/bin/sh", ["-c", command],
                 env, path)
         return d.addCallbacks(self.cb_shell_command_finished,
@@ -188,6 +195,15 @@ class ProcessBroker(object):
             """env PATH="%s:$PATH" git-update-server-info"""
             % git_path, path=domaindir))
         d = d.addBoth(_cb_cleanup_file, filename)
+        return d
+
+    def deploy(self, fromdomain, todomain, basedir, templatesdir, kingdir,
+            git_path, **kwargs):
+        # FIXME: Check that it exists.
+        fromdomaindir = templatesdir + "/" + fromdomain
+        d = self.run_shell_command(
+                """env PATH="%s:$PATH" git pull "%s" """
+                % (git_path, fromdomaindir), path=kingdir)
         return d
 
 

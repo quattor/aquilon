@@ -467,9 +467,20 @@ class ResponsePage(resource.Resource):
 
     def command_deploy(self, request):
         """aqcommand: aq deploy --domain=<domain> --to=<domain>"""
+        fromdomain = request.args["domain"][0]
+        todomain = request.args.get("to", [None])[0]
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq deploy has not been implemented yet"
+        # FIXME: Lookup whether this server handles this domain
+        # redirect as necessary.
+
+        d = self.broker.deploy(fromdomain=fromdomain, todomain=todomain,
+                user=request.channel.getPrinciple())
+        #d = d.addCallback(self.format, request)
+        #d = d.addCallback(self.finishRender, request)
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
+        return server.NOT_DONE_YET
 
     def command_manage(self, request):
         """aqcommand: aq manage --hostname=<name> --domain=<domain>"""

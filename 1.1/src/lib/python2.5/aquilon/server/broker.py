@@ -148,3 +148,15 @@ class Broker(object):
                 git_path=self.git_path, basedir=self.basedir, **kwargs)
         return d
 
+# --------------------------------------------------------------------------- #
+
+    def deploy (self, **kwargs):
+        # FIXME: Does the database need to be updated with this info?
+        # For now, just verify that the domain exists.
+        d = self.dbbroker.verify_domain(session=True,
+                domain=kwargs.pop("fromdomain"))
+        d = d.addCallback(self.pbroker.deploy, basedir=self.basedir,
+                templatesdir=self.templatesdir, kingdir=self.kingdir,
+                git_path=self.git_path, **kwargs)
+        return d
+
