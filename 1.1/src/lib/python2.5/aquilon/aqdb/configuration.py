@@ -87,7 +87,8 @@ cfg_path = Table('cfg_path',meta,
     Column('relative_path', String(255), index=True, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('last_used', DateTime, default=datetime.datetime.now),
-    Column('comments',String(255),nullable=True))
+    Column('comments',String(255),nullable=True),
+    UniqueConstraint('cfg_tld_id','relative_path'))
 #TODO: unique tld/relative_path
 cfg_path.create(checkfirst=True)
 
@@ -160,19 +161,23 @@ def populate_cst():
 
 def create_paths():
     s = Session()
+    created=[]
     if empty(cfg_path,engine):
         for root,dirs,files in os.walk(const.cfg_base):
             for d in dirs:
                 c=os.path.join(root,d)
-                (a,b,c)=c.partition('quattor/')
-            try:
-                tld=s.query(CfgTLD).filter_by(type=splitall(c)[0]).one()
-                f=CfgPath(tld, c)
-                s.save(f)
-            except Exception,e:
-                print e
-                s.rollback()
-                continue
+                if not d in created:
+                    (a,b,c)=c.partition('quattor/')
+                    tld=s.query(CfgTLD).filter_by(type=splitall(c)[0]).one()
+                if c.find('/') >= 0:
+                    try:
+                        f=CfgPath(tld, c)
+                        s.save(f)
+                        created.append(c)
+                    except Exception,e:
+                        print e
+                        s.rollback()
+                        continue
         s.commit()
         print 'created configuration paths'
 
