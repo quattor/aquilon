@@ -361,12 +361,11 @@ service_list_item = Table('service_list_item', meta,
     Column('service_id',Integer,
            ForeignKey('service.id'), unique=True),
     Column('archetype_id',Integer,
-           ForeignKey('archetype.id'), index=True),
+           ForeignKey('archetype.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('archetype_id','service_id'))
-#was here for oracle size limit on idx
-#Index('idx_srv_list_arch_id', service_list_item.c.archetype_id)
+Index('idx_srvlst_arch_id', service_list_item.c.archetype_id)
 service_list_item.create(checkfirst=True)
 
 class ServiceListItem(aqdbBase):
@@ -381,9 +380,6 @@ class ServiceListItem(aqdbBase):
             self.service = svc
         else:
             raise ArgumentError('Second argument must be a Service')
-        
-    #def __repr__(self):
-    #    return '(service list item) %s'%(self.service.name)
 
 mapper(ServiceListItem,service_list_item,properties={
     'archetype': relation(Archetype,backref='service_list'),

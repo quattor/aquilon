@@ -145,21 +145,26 @@ def test():
     print pod
 
 def dump_country():
-    db = aqsyb('RO_PROD')
+    db = aqsyb('NYP_DSDB11','dsdb')
     return db.run_query(get_country).fetchall()
 
 def dump_city():
-    db = aqsyb('RO_PROD')
+    db = aqsyb('NYP_DSDB11','dsdb')
     return db.run_query(get_city).fetchall()
 
 def dump_bldg():
-    db = aqsyb('RO_PROD')
+    db = aqsyb('NYP_DSDB11','dsdb')
     return db.run_query(get_bldg).fetchall()
 
 def dump_network():
-    db = aqsyb('RO_PROD')
+    db = aqsyb('NYP_DSDB11','dsdb')
     return db.run_query(get_network).fetchall()
+
+def esp():
+    db = aqsyb('NYP_DSDB11','dsdb')
+    return db.run_query(esp_host).fetchall()
 
 if __name__ == '__main__':
     test()
     #country()
+    esp()[0]

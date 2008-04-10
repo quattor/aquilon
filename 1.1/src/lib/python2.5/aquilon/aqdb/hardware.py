@@ -28,7 +28,7 @@ cfg_path=Table('cfg_path',meta, autoload=True)
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import mapper, relation, deferred
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError,NoSuchRowException
 
 vendor = mk_name_id_table('vendor',meta)
 vendor.create(checkfirst=True)

@@ -9,27 +9,28 @@
 # This module is part of Aquilon
 
 import warnings
-warnings.filterwarnings('ignore', category=FutureWarning)
+#warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.warn('This module is being deprecated',DeprecationWarning)
 
 '''Exceptions to be used by Aquilon Database Module'''
 
 from aquilon.exceptions_ import AquilonError
 
-class AlreadyExistsException(AquilonError):
-    '''Raised when an attempt to create a row/object which already exists
-        and would violate a unique constraint somewhere'''
-    from aquilon.aqdb.db import engine
-    if engine.dialect.__class__.__name__ == 'SQLiteDialect':
-        from sqlite3 import IntegrityError
+#class AlreadyExistsException(AquilonError):
+#    '''Raised when an attempt to create a row/object which already exists
+#        and would violate a unique constraint somewhere'''
+#    from aquilon.aqdb.db import engine
+#    if engine.dialect.__class__.__name__ == 'SQLiteDialect':
+#        from sqlite3 import IntegrityError
 
 class NoSuchRowException(AquilonError):
     '''thrown when a call to session.query.***.one() returns no rows'''
     from sqlalchemy.exceptions import InvalidRequestError
 
-class MissingRequiredParameter(AquilonError):
-    '''thrown when a method call is missing something required'''
-    def __init__(self,req,kw):
-        self.msg = "Missing required parameter: '%s', received '%s'"%(req,str(kw))
-    def __str__(self):
-        return self.msg
-#if __name__=='__main__':
+#class MissingRequiredParameter(AquilonError):
+#    '''thrown when a method call is missing something required'''
+#    def __init__(self,req,kw):
+#        self.msg = "Missing required parameter: '%s', received '%s'"%(req,str(kw))
+#    def __str__(self):
+#        return self.msg
+##if __name__=='__main__':
