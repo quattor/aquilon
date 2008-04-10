@@ -141,6 +141,10 @@ class ResponsePage(resource.Resource):
         return formatter(result, request)
 
     def format_raw(self, result, request):
+        # Any sort of custom printing here might be better suited for
+        # a different formatting function.
+        if isinstance(result, list):
+            return "\n".join([str(item) for item in result])
         return str(result)
 
     # FIXME: This should eventually be some sort of dynamic system...
@@ -154,6 +158,11 @@ class ResponsePage(resource.Resource):
             for (key, value) in request.args.items():
                 simpleargs[key] = value and value[0] or value
             title = self.path % simpleargs
+        if isinstance(result, list):
+            msg = "<ul>\n<li>" + "</li>\n<li>".join(
+                    [str(item) for item in result]) + "</li>\n</ul>\n"
+        else:
+            msg = str(result)
         retval = """
         <html>
         <head><title>%s</title></head>
@@ -161,7 +170,7 @@ class ResponsePage(resource.Resource):
         %s
         </body>
         </html>
-        """ % (title, str(result))
+        """ % (title, msg)
         return str(retval)
 
     # All of these wrap* functions should probably be elsewhere, and
@@ -686,7 +695,12 @@ class ResponsePage(resource.Resource):
             request.setResponseCode( http.UNAUTHORIZED )
             return ""
 
-        return self.format("OK", request)
+        d = self.broker.status(user=request.channel.getPrinciple())
+        d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
+        return server.NOT_DONE_YET
 
     # FIXME: Probably going to change...
     def command_add_hardware(self, request):

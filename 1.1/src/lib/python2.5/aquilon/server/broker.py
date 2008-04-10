@@ -155,3 +155,13 @@ class Broker(object):
                 git_path=self.git_path, **kwargs)
         return d
 
+# --------------------------------------------------------------------------- #
+
+    def status(self, **kwargs):
+        stat = []
+        # FIXME: Hard coded version number.
+        stat.append("Aquilon Broker v1.1")
+        d = self.dbbroker.status(session=True, stat=stat, **kwargs)
+        d = d.addCallback(lambda _: stat)
+        return d
+

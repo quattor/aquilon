@@ -304,3 +304,16 @@ class DatabaseBroker(AccessBroker):
             log.err("FIXME: Should be redirecting this operation.")
         return dbdomain.name
 
+    @transact
+    def status(self, stat, user, **kwargs):
+        """Return status information from the database."""
+        stat.extend(self.session.query(Domain).all())
+        (user, realm) = self.split_principal(user)
+        # FIXME: UserPrincipal should include the realm...
+        dbuser = self.session.query(UserPrincipal).filter_by(name=user).first()
+        if user and not dbuser:
+            dbuser = UserPrincipal(user)
+            self.session.save_or_update(dbuser)
+        if dbuser:
+            stat.append(dbuser)
+
