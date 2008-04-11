@@ -355,12 +355,6 @@ class ResponsePage(resource.Resource):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq del_host has not been implemented yet"
 
-    def command_pxeswitch(self, request):
-        """aqcommand: aq pxeswitch --hostname=<host>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq pxeswitch has not been implemented yet"
-
     def command_assoc(self, request):
         """aqcommand: aq assoc --hostname=<host>"""
 
@@ -753,9 +747,9 @@ class ResponsePage(resource.Resource):
 
     def command_pxeswitch (self, request):
         if (request.args.has_key('boot')):
-            d = self.broker.pxeswitch(request.args['host'][0], boot = True)
+            d = self.broker.pxeswitch(request.args['hostname'][0], boot = True)
         elif (request.args.has_key('install')):
-            d = self.broker.pxeswitch(request.args['host'][0], install = True)
+            d = self.broker.pxeswitch(request.args['hostname'][0], install = True)
         else:
             self.wrapError('Invalid parameter sequence!', request)
             return server.ERROR

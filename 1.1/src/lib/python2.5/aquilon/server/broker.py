@@ -169,6 +169,8 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
 
     def add_model (self, name, vendor, hardware, machine):
+        # NOTE: This does not try to verify that the model exists on the
+        # filesystem anywhere.
         return self.dbbroker.add_model(name, vendor, hardware, machine, session=True)
 
 # --------------------------------------------------------------------------- #

@@ -54,11 +54,11 @@
       %prog add hardware --hostname name
       Add new hardware to the database.
       <optgroup name="add_hardware_opts" mandatory="True" fields="any">
-         <option name="location" type="string" conflicts="hostname">Hardware location</option>
+         <option name="hardware" type="string" conflicts="hostname">Hardware</option>
       </optgroup>
       <!-- FIXME: Due for overhaul with Scott's work.  Might also
                   be tricky as Nick's implementation has slashes -->
-      <transport method="get" path="hardware/%(location)s" />
+      <transport method="get" path="hardware/%(hardware)s" />
    </command>
 
    <command name="add_host">
@@ -153,10 +153,10 @@
    </command>
 
    <command name="pxeswitch">
-      %prog pxeswitch --host HOSTNAME (--install | --boot)
+      %prog pxeswitch --hostname HOSTNAME (--install | --boot)
       pxe
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
-         <option name="host" type="string">Host name</option>
+         <option name="hostname" type="string">Host name</option>
       </optgroup>
       <optgroup name="bootinstall" mandatory="True" fields="any">
          <option name="install" type="boolean" conflicts="boot">Do an install</option>
@@ -164,7 +164,7 @@
       </optgroup>
       <!-- Not sure if this is purely informational, or if there are side-
            effects -->
-      <transport method="put" path="host/%(host)s/command/pxeswitch" />
+      <transport method="put" path="host/%(hostname)s/command/pxeswitch" />
    </command>
 
    <command name="reconfigure">
