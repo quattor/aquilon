@@ -13,11 +13,12 @@ from __future__ import with_statement
 
 import sys
 sys.path.append('../..')
-
 import random
 
-from aquilon.aqdb.utils.debug import ipshell
+from shell import ipshell
 from db import meta, engine, Session
+
+from sqlalchemy.sql import and_
 
 from location import *
 from network import *
@@ -141,7 +142,7 @@ def two_in_each():
         sys.exit(1)
 
     print 'created %s hosts'%(len(nodelist))
-    print 'creationg interfaces:'
+    print 'creating interfaces for all those hosts'
     make_interfaces()
     print 'done'
 
@@ -170,16 +171,8 @@ def just_hosts():
     print 'created %s hosts'%(len(nodelist))
 
 """ To clear fake stuff:
-    delete from physical_interface where interface_id in \
-        (select id from interface where comments like '%FAKE%');
-
-    delete from interface where comments like '%FAKE%';
-    delete from host where comments like '%FAKE';
-    delete from machine where comments like '%FAKE%';
-    delete from system where comments like '%FAKE';
-    delete from rack where id in (select id from location where comments like '%FAKE%');
-    delete from chassis where id in (select id from location where comments like '%FAKE%');
-    delete from location where comments like '%FAKE%';
+    echo '.read utils/clear-fake.sql' | sqlite3 \
+        /var/tmp/`whoami`/aquilondb/aquilon.db
 """
 def random_mac():
     mac=[]
@@ -206,13 +199,39 @@ def make_host(name, machine,**kw):
     assert(h)
     configure_host(h)
 
-def configure_host(host):
-    a=s.query(Archetype).filter_by(name='aquilon').one()
-    for svc in a.service_list.items:
-        print 'finding an instance of %s for %s'%(svc.service,host)
-        si_list=s.query(ServiceInstance).filter_by(service=svc.service).all()
+def get_server_for(svc_name,hname):
+    #a=s.query(Archetype).filter_by(name='aquilon').one()
+    try:
+        svc=s.query(Service).filter_by(name=svc_name).one()
+        assert(svc)
+    except NoSuchRowException:
+        print "Can't find service named '%s' "%(svc_name)
+        return
+    try:
+        host=s.query(Host).filter_by(name=hname).one()
+        assert(host)
+    except NoSuchRowException:
+        print "Can't find service named '%s' "%(svc_name)
+        return
 
-        print si_list
+
+    """for afs search first in the building, then in the hub """
+    for loc in [host.location.building,host.location.hub]:
+        print 'searching for %s in %s %s...'%(svc,loc.type,loc)
+        si=s.query(ServiceMap).filter_by(
+                location=loc).join(
+                'service_instance').filter(
+                ServiceInstance.service==svc).all()
+        if len(si) > 1:
+                print 'found %s service maps'%(len(si))
+                print si
+        elif len(si) == 1:
+            print 'found it: %s'%si[0]
+            return si[0]
+        else:
+            print 'no afs in %s %s\n\n'%(loc.type,loc)
+
+    return
 
 def all_cells():
     cnt=afs_cell.count().execute().fetchall()[0][0]
@@ -280,24 +299,7 @@ def all_cells():
     print s.query(AfsCell).all()
     return True
 
-def populate_np_nodes():
-    cnt=machine.count().execute()
-    if cnt.fetchall()[0][0] < 2:
-        s=Session
-        mod=Session.query(Model).filter_by(name='hs20').one()
-        with open('../../../../etc/data/np-nodes','r') as f:
-            for line in f.readlines():
-                (c,q,num)=line.strip().lstrip('n').partition('n')
-                c='n'+c
-                try:
-                    r=s.query(Chassis).filter_by(name=c).one()
-                except Exception,e:
-                    print 'no such chassis %s'%c
-                    continue
-                m=Machine(r,mod,name=line.strip())
-                s.save(m)
-        s.commit()
-        s.close()
+
 
 def make_syslog_si(hostname):
     assert(syslog)
@@ -377,6 +379,20 @@ def npipm1():
     s.flush()
     make_syslog_si('npipm1')
 
+
+
+#############
+
+if __name__ == '__main__':
+    two_in_each()
+    just_hosts()
+
+    npipm1()
+    all_cells()
+    get_server_for('afs','aj1c1n6')
+    #ipshell()
+
+"""
 def np_racks():
     print 'populating all racks in building NP'
     s=Session()
@@ -402,13 +418,34 @@ def np_chassis():
             s.save(c)
         s.commit()
 
+def populate_np_nodes():
+    cnt=machine.count().execute()
+    if cnt.fetchall()[0][0] < 2:
+        s=Session
+        mod=Session.query(Model).filter_by(name='hs20').one()
+        with open('../../../../etc/data/np-nodes','r') as f:
+            for line in f.readlines():
+                (c,q,num)=line.strip().lstrip('n').partition('n')
+                c='n'+c
+                try:
+                    r=s.query(Chassis).filter_by(name=c).one()
+                except Exception,e:
+                    print 'no such chassis %s'%c
+                    continue
+                m=Machine(r,mod,name=line.strip())
+                s.save(m)
+        s.commit()
+        s.close()
+"""
+"""
+    delete from physical_interface where interface_id in \
+        (select id from interface where comments like '%FAKE%');
 
-#############
-
-if __name__ == '__main__':
-    two_in_each()
-    just_hosts()
-
-    npipm1()
-    all_cells()
-    #ipshell()
+    delete from interface where comments like '%FAKE%';
+    delete from host where comments like '%FAKE';
+    delete from machine where comments like '%FAKE%';
+    delete from system where comments like '%FAKE';
+    delete from rack where id in (select id from location where comments like '%FAKE%');
+    delete from chassis where id in (select id from location where comments like '%FAKE%');
+    delete from location where comments like '%FAKE%';
+    """

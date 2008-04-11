@@ -331,6 +331,9 @@ class ServiceMap(aqdbBase):
         else:
             raise AttributeError('You must supply a valid location')
             return
+    def _service(self):
+        return self.service_instance.service
+    service = property(_service)
     def __repr__(self):
         return 'Service Mapping: %s at %s %s'%(self.service_instance,
                                      self.location.type,self.location.name)
@@ -338,6 +341,7 @@ class ServiceMap(aqdbBase):
 mapper(ServiceMap,service_map,properties={
     'location':relation(Location),
     'service_instance':relation(ServiceInstance,backref='service_map'),
+    'service':synonym('_service'),
     'creation_date' : deferred(service_map.c.creation_date),
     'comments': deferred(service_map.c.comments)
 })

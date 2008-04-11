@@ -78,7 +78,7 @@ def p_dict(loc):
     d={}
     p_node=loc.parent
     while p_node.parent is not None:
-        d[str(p_node.type)]=str(p_node.name)
+        d[str(p_node.type)]=p_node
         p_node=p_node.parent
     return d
 
@@ -125,9 +125,9 @@ class Location(aqdbBase):
         #TODO: if there is no parent raise a Warning.
         #TODO: maintenance: a periodic sweep of this table for null parents?
 
-    #def _parents(self):
-    #    return parents(self)
-    #parents = property(_parents)
+    def _parents(self):
+        return parents(self)
+    parents = property(_parents)
 
     def _p_dict(self):
         return p_dict(self)
@@ -261,10 +261,6 @@ mapper(Desk,desk,inherits=Location,
 
 def populate_hubs():
     s=Session()
-
-    #w=Company('ms', 'company', fullname='root node')
-    #s.save(w)
-    #s.commit()
 
     if empty(location):
         i=location.insert()
