@@ -238,37 +238,14 @@ class ResponsePage(resource.Resource):
         return str(retval)
 
     def finishRender(self, result, request):
-        #print "about to write ", result
         request.setHeader('content-length', str(len(result)))
         request.write(result)
         request.finish()
-        #print "All done"
         return
 
     def finishOK(self, result, request):
         """Ignore any results - usually empty for this - and finish"""
-        # FIXME: Hack to get around client not understanding
-        # zero-length response... Use explicit 0 when knc 1.3 exists.
-        # Tried setting it explicitly...
-        request.setHeader('content-length', 0)
-        # Tried sending a "no content" response...
-        #request.setResponseCode( http.NO_CONTENT )
-        # For now, just send OK.
-        #retval = "OK"
-        #request.setHeader('content-length', len(retval))
-        #request.write(retval)
-        request.finish()
-        return
-
-    def finishError(self, request):
-        request.setResponseCode( http.INTERNAL_SERVER_ERROR )
-        # FIXME: Ditto from finishOK
-        #retval = "FAILED"
-        #request.setHeader('content-length', len(retval))
-        #request.write(retval)
-        request.setHeader('content-length', 0)
-        request.finish()
-        return
+        return self.finishRender("", request)
 
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
@@ -288,10 +265,11 @@ class ResponsePage(resource.Resource):
         """This is generally the final stop for errors - anything will be
         caught, logged, and a 500 error passed back to the client."""
         log.err(failure.getBriefTraceback())
+        msg = failure.getErrorMessage()
         log.err(failure.getErrorMessage())
         #failure.printDetailedTraceback()
-        self.finishError(request)
-        return None
+        request.setResponseCode(http.INTERNAL_SERVER_ERROR)
+        return self.finishRender(msg, request)
 
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
@@ -767,7 +745,6 @@ class ResponsePage(resource.Resource):
 
         d = self.broker.add_model(name, vendor, hardware, machine)
         
-        d = d.addCallback(self.finishOK, request)
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
@@ -784,8 +761,9 @@ class ResponsePage(resource.Resource):
             return server.ERROR
                 
         d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addCallback(self.finishOK, request)
         return server.NOT_DONE_YET
 
 class RestServer(ResponsePage):
