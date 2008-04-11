@@ -12,6 +12,7 @@ import os
 import socket
 
 from twisted.internet import defer
+from twisted.internet import reactor
 
 from aquilon.server.processes import ProcessBroker
 from aquilon.exceptions_ import AquilonError
@@ -79,7 +80,7 @@ class Broker(object):
         return self.dbbroker.del_location(session=True, **kwargs)
 
 # --------------------------------------------------------------------------- #
-    
+
     def make_aquilon(self, **kwargs):
         """This should do all the database work, then try to compile the
         file, and then finish or cancel the database transaction.
@@ -92,7 +93,7 @@ class Broker(object):
         will need to wait on.
 
         """
-        
+
         d = self.dbbroker.make_aquilon(session=True, **kwargs)
         d = d.addCallback(self.pbroker.make_aquilon, basedir=self.basedir)
         d = d.addCallback(self.dbbroker.confirm_make, session=True)
@@ -100,7 +101,7 @@ class Broker(object):
         return d
 
 # --------------------------------------------------------------------------- #
-    
+
     def sync (self, **kwargs):
         d = self.dbbroker.verify_domain(session=True,
                 domain=kwargs.pop("domain"))
@@ -112,7 +113,7 @@ class Broker(object):
         return d
 
 # --------------------------------------------------------------------------- #
-    
+
     def get (self, domain, **kwargs):
         # FIXME: Return absolute paths to git?
         # 1.0 just hard-codes the path modificatin into the client.
@@ -165,3 +166,7 @@ class Broker(object):
         d = d.addCallback(lambda _: stat)
         return d
 
+# --------------------------------------------------------------------------- #
+
+    def add_model (self, name, vendor, hardware, machine):
+        return self.dbbroker.add_model(name, vendor, hardware, machine, session=True)

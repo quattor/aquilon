@@ -710,13 +710,6 @@ class ResponsePage(resource.Resource):
         return "aq add hardware has not been implemented yet"
 
     # FIXME: Probably going to change...
-    def command_add_model(self, request):
-        """aqcommand: aq add model --os=<os> --model=<model> --domain=<domain>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq add model has not been implemented yet"
-
-    # FIXME: Probably going to change...
     def command_add_service(self, request):
         """aqcommand: aq add service --service=<service> --domain=<domain>"""
 
@@ -762,7 +755,25 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
+    def command_add_model (self, request):
+        try:
+            name = request.args['name'][0]
+            vendor = request.args['vendor'][0]
+            hardware = request.args['hardware'][0]
+            machine = request.args['machine'][0]
+        except Error, e:
+            self.wrapError('arnvalid parameter sequence',request);
+            return server.ERROR
 
+        d = self.broker.add_model(name, vendor, hardware, machine)
+        
+        d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
+        return server.NOT_DONE_YET
+                
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
     def __init__(self, broker):

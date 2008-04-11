@@ -81,14 +81,15 @@
    </command>
 
    <command name="add_model">
-      %prog add model --os OS --model MODEL --domain DOMAIN
+      %prog add model --name NAME --vendor VENDOR_NAME --hardware HARDWARE_TYPE --machine MACHINE_TYPE
       Add a new model
       <optgroup name="add_model_opts" mandatory="True" fields="all">
-         <option name="os" type="string">OS type</option>
-         <option name="model" type="string">OS model</option>
-         <option name="domain" type="string">Domain name</option>
+         <option name="name" type="string">Name of the new model</option>
+         <option name="vendor" type="string">Vendor name</option>
+         <option name="hardware" type="string">Hardware type name</option>
+         <option name="machine" type="string">Machine type name</option>
       </optgroup>
-      <transport method="put" path="domain/%(domain)s/model/%(os)s/%(model)s" />
+      <transport method="put" path="hardware/%(hardware)s/%(machine)s/%(vendor)s/%(name)s" />
    </command>
 
    <command name="add_service">

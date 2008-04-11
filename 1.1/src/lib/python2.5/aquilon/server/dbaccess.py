@@ -26,6 +26,7 @@ from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 from aquilon.aqdb.configuration import *
 from aquilon.aqdb.auth import *
+from aquilon.aqdb.hardware import *
 
 # FIXME: This probably belongs in location.py
 const.location_types = ("company", "hub", "continent", "country", "city",
@@ -37,14 +38,12 @@ class DatabaseBroker(AccessBroker):
 
     As a general rule, the methods here should reflect the actions
     being invoked by the client.
-       
     """
 
     def startup(self):
         """This method normally creates Deferred objects for setting up
         the tables.  However, in our setup, all this work has already
         been done by importing aquilon.aqdb modules.
-        
         """
         pass
 
@@ -122,8 +121,7 @@ class DatabaseBroker(AccessBroker):
             raise ArgumentError("unknown type %s", type)
 
         optional_args = {}
-        if fullname:
-            optional_args["fullname"] = fullname
+        optional_args["fullname"] = fullname
         if comments:
             optional_args["comments"] = comments
 
@@ -171,7 +169,7 @@ class DatabaseBroker(AccessBroker):
     @transact
     def make_aquilon(self, **kwargs):
         """This creates a template file and saves a copy in the DB.
-        
+
         It does *not* do pan compile... that happens outside this method.
         """
 
@@ -317,3 +315,27 @@ class DatabaseBroker(AccessBroker):
         if dbuser:
             stat.append(dbuser)
 
+    @transact
+    def add_model (self, name, vendor, hardware, machine, **kwargs):
+        v,h,m = None
+        try:
+            v = self.session.query(Vendor).filter_by(name = vendor).one()
+        except StandardError, e:
+            raise ValueError("Vendor '"+vendor+"' not found!")
+
+        try:
+            h = self.session.query(HardwareType).filter_by(type = hardware).one()
+        except StandardError, e:
+            raise ValueError("Hardware type '"+hardware+"' not found!")
+
+        try:
+            m = self.session.query(MachineType).filter_by(type = machine).one()
+        except StandardError, e:
+            raise ValueError("Machine type '"+machine+"' not found!")
+
+#        try:
+#            model = Model(name, v, h, m)
+#            self.session.save(Model)
+#        except StandardError, e:
+#            raise ValueError("Vendor '"+vendor+"' not found!")
+        return "New model successfully created"
