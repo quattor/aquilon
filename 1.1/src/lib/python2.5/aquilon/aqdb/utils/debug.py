@@ -21,10 +21,10 @@ def dummy_ipshell(msg):
 if sys.modules.has_key('twisted.scripts.twistd'):
     ipshell = dummy_ipshell("In the server, not actually calling ipshell()!")
     
-elif user == 'quattor':
+elif user == 'cdb':
     """ ipython likes to create rc files for you, but prod ids have read only
         home dirs, and spewage ensues """
-    ipshell = dummy_ipshell("quattor prodid can't use ipython...")
+    ipshell = dummy_ipshell("cdb prodid can't use ipython...")
 
 else:
     import msversion
