@@ -164,7 +164,7 @@
       </optgroup>
       <!-- Not sure if this is purely informational, or if there are side-
            effects -->
-      <transport method="put" path="host/%(hostname)s/command/pxeswitch" />
+      <transport method="put" path="host/%(host)s/command/pxeswitch" />
    </command>
 
    <command name="reconfigure">

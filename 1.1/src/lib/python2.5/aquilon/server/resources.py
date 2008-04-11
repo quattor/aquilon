@@ -47,7 +47,7 @@ import xml.etree.ElementTree as ET
 
 from twisted.application import internet
 from twisted.web import server, resource, http, error, static
-from twisted.internet import defer, utils
+from twisted.internet import defer, utils, threads
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
@@ -762,18 +762,33 @@ class ResponsePage(resource.Resource):
             hardware = request.args['hardware'][0]
             machine = request.args['machine'][0]
         except Error, e:
-            self.wrapError('arnvalid parameter sequence',request);
+            self.wrapError('Invalid parameter sequence',request);
             return server.ERROR
 
         d = self.broker.add_model(name, vendor, hardware, machine)
         
+        d = d.addCallback(self.finishOK, request)
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
-        d = d.addCallback(self.finishOK, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
+
+    def command_pxeswitch (self, request):
+        if (request.args.has_key('boot')):
+            d = self.broker.pxeswitch(request.args['host'][0], boot = True)
+        elif (request.args.has_key('install')):
+            d = self.broker.pxeswitch(request.args['host'][0], install = True)
+        else:
+            self.wrapError('Invalid parameter sequence!', request)
+            return server.ERROR
                 
+        d = d.addCallback(self.format, request)
+        d = d.addErrback(self.wrapError, request)
+        d = d.addCallback(self.finishRender, request)
+        d = d.addCallback(self.finishOK, request)
+        return server.NOT_DONE_YET
+
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
     def __init__(self, broker):

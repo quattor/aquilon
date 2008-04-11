@@ -207,6 +207,16 @@ class ProcessBroker(object):
                 """env PATH="%s:$PATH" git pull "%s" """
                 % (git_path, fromdomaindir), path=kingdir)
         return d
-
+    
+    def pxeswitch (self, host, **kwargs):
+        command = '/ms/dist/elfms/PROJ/aii/1.3.10-1/sbin/aii-installf'
+        args = []
+        if (kwargs.has_key('boot')):
+            args.append('--boot')
+        else:
+            args.append('--install')
+        args.append(host)
+        args.append('2>&1')
+        return utils.getProcessOutputAndValue(command, args)
 
 #if __name__=='__main__':

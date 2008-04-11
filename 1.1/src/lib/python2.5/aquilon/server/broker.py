@@ -170,3 +170,9 @@ class Broker(object):
 
     def add_model (self, name, vendor, hardware, machine):
         return self.dbbroker.add_model(name, vendor, hardware, machine, session=True)
+
+# --------------------------------------------------------------------------- #
+
+    def pxeswitch (self, host, **kwargs):
+        return self.pbroker.pxeswitch(host, **kwargs)
+
