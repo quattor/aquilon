@@ -785,7 +785,6 @@ class ResponsePage(resource.Resource):
                 
         d = d.addCallback(self.format, request)
         d = d.addErrback(self.wrapError, request)
-        d = d.addCallback(self.finishRender, request)
         d = d.addCallback(self.finishOK, request)
         return server.NOT_DONE_YET
 

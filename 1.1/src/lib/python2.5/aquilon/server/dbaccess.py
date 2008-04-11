@@ -317,7 +317,7 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def add_model (self, name, vendor, hardware, machine, **kwargs):
-        v,h,m = None
+        v,h,m = None, None, None
         try:
             v = self.session.query(Vendor).filter_by(name = vendor).one()
         except StandardError, e:
