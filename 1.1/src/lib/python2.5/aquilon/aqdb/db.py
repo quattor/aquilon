@@ -46,7 +46,7 @@ if dsn.startswith('oracle'):
     import cx_Oracle
     import os
     import sys
-    
+
     o_home = os.environ.get('ORACLE_HOME')
     if not o_home:
         print 'Oracle Home is not set, check the environment'
@@ -55,7 +55,7 @@ if dsn.startswith('oracle'):
     if not o_sid:
         print 'Oracle SID not found in environment, setting to test instance'
         os.environment['ORACLE_SID']='LNTO_AQUILON_NY'
-    
+
 engine = create_engine(dsn)
 engine.connect()
 meta  = MetaData(engine)
@@ -155,8 +155,15 @@ class aqdbBase(object):
     db, so this is the best place for it
     """
     @optional_comments
-    def __init__(self,name,*args,**kw):
-        self.name = name
+    def __init__(self,cn,*args,**kw):
+        if cn.isspace() or len(cn) < 1 :
+            msg='Names must contain some non-whitespace characters'
+            raise ArgumentError(msg)
+        if isinstance(cn,str):
+            self.name = cn.strip().lower()
+        else:
+            raise ArgumentError("Incorrect name argument %s" % cn)
+            return
     def __repr__(self):
         if hasattr(self,'name'):
             return self.__class__.__name__ + " " + str(self.name)
@@ -171,7 +178,14 @@ class aqdbType(aqdbBase):
     """To wrap rows in 'type' tables"""
     @optional_comments
     def __init__(self,type,*args,**kw):
-        self.type=type
+        if type.isspace() or len(type) < 1:
+            msg='Names must contain some non-whitespace characters'
+            raise ArgumentError(msg)
+        if isinstance(type,str):
+            self.type = type.strip().lower()
+        else:
+            raise ArgumentError("Incorrect name argument %s" %(type))
+            return
     def name(self):
         return str(self.type)
     def __repr__(self):

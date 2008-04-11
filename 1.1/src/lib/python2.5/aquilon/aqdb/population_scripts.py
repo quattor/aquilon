@@ -19,7 +19,6 @@ import random
 from aquilon.aqdb.utils.debug import ipshell
 from db import meta, engine, Session
 
-
 from location import *
 from network import *
 from service import *
@@ -85,9 +84,10 @@ def make_interfaces():
 def two_in_each():
     nodelist=[]
 
-    print "go get some coffee, we'll be here a while"
-
-
+    cnt=machine.count().execute()
+    if cnt.fetchall()[0][0] > 2000:
+        print 'machine count > 2000, skipping creation'
+        return
 
     for b in s.query(Building).all():
         racks = (Rack(r,'rack',fullname='rack %s'%r,
@@ -113,7 +113,7 @@ def two_in_each():
             except Exception, e:
                 print e
                 s.rollback()
-                sys.exit(1) 
+                sys.exit(1)
 
     try:
         s.commit()
@@ -141,8 +141,15 @@ def two_in_each():
         sys.exit(1)
 
     print 'created %s hosts'%(len(nodelist))
+    print 'creationg interfaces:'
+    make_interfaces()
+    print 'done'
 
 def just_hosts():
+    cnt=host.count().execute()
+    if cnt.fetchall()[0][0] > 2000:
+        print 'machine count > 2000, skipping creation'
+        return
     nodelist=s.query(Machine).all()
     try:
         for node in nodelist:
@@ -150,16 +157,16 @@ def just_hosts():
             s.save(h)
     except Exception, e:
         print e
-        s.close()   
+        s.close()
         sys.exit(1)
- 
+
     try:
         s.commit()
     except Exception, e:
         print e
         s.close()
         sys.exit(1)
-    
+
     print 'created %s hosts'%(len(nodelist))
 
 """ To clear fake stuff:
@@ -174,7 +181,6 @@ def just_hosts():
     delete from chassis where id in (select id from location where comments like '%FAKE%');
     delete from location where comments like '%FAKE%';
 """
-
 def random_mac():
     mac=[]
     for i in range(4):
@@ -208,6 +214,72 @@ def configure_host(host):
 
         print si_list
 
+def all_cells():
+    cnt=afs_cell.count().execute().fetchall()[0][0]
+    if cnt > 8:
+        print 'afs cell count is %s, skipping'%(str(cnt))
+        return
+
+    afs=s.query(Service).filter_by(name='afs').one()
+    assert(afs)
+
+    hubs={}
+    for h in s.query(Hub).all():
+        hubs[str(h.name)]=h
+
+    buildings={}
+    for b in s.query(Building).all():
+        buildings[str(b.name)]=b
+
+    count = 0
+    with open('../../../../etc/data/afs_cells') as f:
+        for line in f.readlines():
+            if line.isspace():
+                continue
+            line = line.strip()
+
+            a=s.query(AfsCell).filter_by(name=line).first()
+            if a:
+                print "'%s' already created"%(a)
+            else:
+                try:
+                    a=AfsCell(line,'afs_cell', comments='afs cell %s'%(line))
+                    s.save(a)
+                except Exception,e:
+                    s.rollback()
+                    print e
+                    continue
+
+            si=ServiceInstance(afs,a)
+            s.save(si)
+
+            loc_name = line.partition('.')[2].partition('.')[0]
+            if loc_name in hubs:
+                print 'Creating hub level service map at %s for %s'%(
+                    loc_name,line)
+                sm=ServiceMap(si,hubs[loc_name])
+                s.save(sm)
+            elif loc_name in buildings:
+                print 'Creating building level svc map %s for %s '%(
+                    loc_name,line)
+                sm=ServiceMap(si,buildings[loc_name])
+                s.save(sm)
+                count +=1
+            else:
+                print "FOUND NOTHING FOR '%s'"%(loc_name)
+
+    print 'initialized %s cells with svc instances+maps'%(count)
+
+    try:
+        s.commit()
+    except Exception, e:
+        s.close()
+        print e
+        return False
+    print 'persisted %s afs cells to database'%(count)
+    print s.query(AfsCell).all()
+    return True
+
 def populate_np_nodes():
     cnt=machine.count().execute()
     if cnt.fetchall()[0][0] < 2:
@@ -228,9 +300,9 @@ def populate_np_nodes():
         s.close()
 
 def make_syslog_si(hostname):
-    h=s.query(Host).filter_by(name=hostname).one()
+    assert(syslog)
 
-    syslog=s.query(Service).filter_by(name='syslog').one()
+    h=s.query(Host).filter_by(name=hostname).one()
 
     si=ServiceInstance(syslog,h)
     s.save(si)
@@ -249,6 +321,11 @@ def clone_dsdb_host(hostname):
     #need model/type, afs cell, pod
 
 def npipm1():
+    t = s.query(Host).filter_by(name='npipm1').first()
+    if isinstance(t,Host):
+        print 'npipm already created.'
+        return
+
     np=s.query(Building).filter_by(name='np').one()
     mod=s.query(Model).filter_by(name='ls20').one()
 
@@ -267,7 +344,7 @@ def npipm1():
         s.save(c)
         s.commit()
         print 'created chassis np302c1'
-    
+
     try:
         m=s.query(Machine).filter_by(name='npipm1').one()
     except Exception, e:
@@ -309,7 +386,7 @@ def np_racks():
         for line in f.readlines():
             name=line
             r=Rack(name,'rack',parent=b,fullname='rack %s'%(name))
-            s.save(r) 
+            s.save(r)
         s.flush()
 
 def np_chassis():
@@ -324,16 +401,14 @@ def np_chassis():
                 Rack).filter_by(name=rack).one())
             s.save(c)
         s.commit()
-        
+
 
 #############
 
 if __name__ == '__main__':
     two_in_each()
-    #just_hosts()
-    make_interfaces()
+    just_hosts()
+
     npipm1()
+    all_cells()
     #ipshell()
-
-
-

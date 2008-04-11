@@ -80,6 +80,4 @@ mapper(BuildElement,build_element, properties={
 })
 
 if __name__ == '__main__':
-    #from aquilon.aqdb.utils.debug import ipshell
-    #ipshell()
     assert(build_element)

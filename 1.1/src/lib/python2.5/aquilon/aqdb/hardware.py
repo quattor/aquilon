@@ -65,12 +65,9 @@ mapper(MachineType,machine_type, properties={
 model = Table('model',meta,
     Column('id', Integer, Sequence('model_id_seq'), primary_key=True),
     Column('name', String(64), unique=True, index=True),
-    Column('vendor_id', Integer,
-           ForeignKey('vendor.id', ondelete='RESTRICT')),
-    Column('hardware_type_id', Integer,
-           ForeignKey('hardware_type.id', ondelete='RESTRICT')),
-    Column('machine_type_id', Integer,
-           ForeignKey('machine_type.id', ondelete='RESTRICT'),nullable=True),
+    Column('vendor_id', Integer, ForeignKey('vendor.id')),
+    Column('hardware_type_id', Integer, ForeignKey('hardware_type.id')),
+    Column('machine_type_id', Integer, ForeignKey('machine_type.id'), nullable=True),
     #TODO: rethink the nullable thing(subtype hardware type with machine_type)
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments',String(255)))
@@ -248,10 +245,11 @@ def populate_model():
             ['hp','dl145','machine','rackmount'],
             ['hp','dl580','machine','rackmount'],
             ['sun','ultra-10','machine','workstation'],
-            ['dell','poweredge-6850','machine','rackmount'],
-            ['dell','poweredge-2650','machine','rackmount'],
-            ['dell','poweredge-2850','machine','rackmount'],
-            ['dell','optiplex-260','machine','workstation']]
+            ['dell','poweredge_6850','machine','rackmount'],
+            ['dell','poweredge_6650', 'machine', 'rackmount'],
+            ['dell','poweredge_2650','machine','rackmount'],
+            ['dell','poweredge_2850','machine','rackmount'],
+            ['dell','optiplex_260','machine','workstation']]
 
         for i in f:
             m=Model(i[1],v_cache[i[0]],hwt_cache[i[2]],m_cache[i[3]])

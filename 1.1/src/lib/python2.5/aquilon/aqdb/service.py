@@ -108,15 +108,7 @@ class System(aqdbBase):
         It is perhaps the most important table so far, and replaces the notion of
         'host' as we've used it in our discussions and designs thus far.
     """
-    @optional_comments
-    def __init__(self,cn,*args,**kw):
-        if isinstance(cn,str):
-            self.name = cn
-        else:
-            raise ArgumentError("Incorrect name argument %s" % cn)
-            return
-    #def type(self):
-    #    return str(self.type)
+    pass
 
 mapper(System, system, polymorphic_on=system.c.type_id, \
        polymorphic_identity=s.execute(
@@ -184,7 +176,7 @@ class Domain(aqdbBase):
             self.owner = owner
         else:
             raise ArgumentError('fourth argument must be a Kerberos Principal')
-            
+
         if kw.has_key('compiler'):
             self.compiler = kw.pop('compiler')
         else:
@@ -253,7 +245,9 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
 })
 
 afs_cell = Table('afs_cell',meta,
-    Column('system_id', Integer, ForeignKey('system.id'), primary_key=True))
+    Column('system_id', Integer, ForeignKey('system.id',
+                                            ondelete='CASCADE'),
+           primary_key=True))
 afs_cell.create(checkfirst=True)
 
 class AfsCell(System):
@@ -296,7 +290,7 @@ class ServiceInstance(aqdbBase):
             raise ArgumentError('Second Argument must be a valid System')
     def __repr__(self):
         return '%s %s %s'%(self.__class__.__name__ ,
-                           str(self.service.name),str(self.system.name))
+                           self.service,self.system)
 
 mapper(ServiceInstance,service_instance, properties={
     'service': relation(Service),
@@ -339,7 +333,7 @@ class ServiceMap(aqdbBase):
             return
     def __repr__(self):
         return 'Service Mapping: %s at %s %s'%(self.service_instance,
-                                     self.location.type,self.location)
+                                     self.location.type,self.location.name)
 
 mapper(ServiceMap,service_map,properties={
     'location':relation(Location),
@@ -402,7 +396,7 @@ def create_domains():
     onenyp = s.query(DnsDomain).filter_by(name='one-nyp').one()
     njw = s.query(UserPrincipal).filter_by(name='njw').one()
     quattor = s.query(UserPrincipal).filter_by(name='quattor').one()
-        
+
     if empty(domain,engine):
         p = Domain('production', qs, onenyp, njw,
                 comments='The master production area')
@@ -415,15 +409,6 @@ def create_domains():
         s.close()
 
 def populate_all_service_tables():
-    if empty(afs_cell,engine):
-        for c in ['a.ny','b.ny','c.ny','q.ny','q.ln']:
-            a=AfsCell(c+'.ms.com','afs_cell')
-            s.save(a)
-        s.commit()
-        print 'created afs cells'
-    else:
-        a=s.query(AfsCell).first()
-
     if empty(service,engine):
         svcs = 'dns','dhcp','quattor','syslog','afs'
         for i in svcs:
@@ -433,6 +418,37 @@ def populate_all_service_tables():
         print 'populated services'
 
     svc=s.query(Service).filter_by(name='afs').one()
+#    svc=s.query(Service).filter_by(name='syslog').one()
+
+    arch=s.query(Archetype).filter_by(name='aquilon').one()
+    assert(arch)
+
+    sli=ServiceListItem(arch,svc)
+    s.save(sli)
+    s.commit()
+    assert(sli)
+
+    print 'populated service list'
+    s.close()
+
+if __name__ == '__main__':
+
+    create_domains()
+    d=s.query(Domain).first()
+    assert(d)
+
+    populate_all_service_tables()
+
+
+"""
+    if empty(afs_cell,engine):
+        for c in ['a.ny','b.ny','c.ny','q.ny','q.ln']:
+            a=AfsCell(c+'.ms.com','afs_cell')
+            s.save(a)
+        s.commit()
+        print 'created afs cells'
+    else:
+        a=s.query(AfsCell).first()
 
     if empty(service_instance,engine):
         si = ServiceInstance(svc,a)
@@ -457,20 +473,4 @@ def populate_all_service_tables():
     else:
         sm=s.query(ServiceMap).first()
 
-        svc=s.query(Service).filter_by(name='syslog').one()
-        arch=s.query(Archetype).filter_by(name='aquilon').one()
-
-        sli=ServiceListItem(arch,svc)
-        s.save(sli)
-        s.commit()
-        print 'populated service list'
-    s.close()
-    
-if __name__ == '__main__':
-    #from aquilon.aqdb.utils.debug import ipshell
-
-    create_domains()
-    d=s.query(Domain).first()
-    assert(d)
-
-    populate_all_service_tables()
+"""
