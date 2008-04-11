@@ -16,7 +16,8 @@ from base64 import b64decode
 from twisted.internet import utils, threads, defer
 from twisted.python import log
 
-from aquilon.exceptions_ import ProcessException, RollbackException
+from aquilon.exceptions_ import ProcessException, RollbackException, \
+        PanException
 
 
 def _cb_cleanup_dir(arg, dir):
@@ -103,7 +104,7 @@ class ProcessBroker(object):
         # should trigger a rollback.  Maybe any exception should trigger
         # a rollback...
         error = failure.trap(ProcessException)
-        raise RollbackException(cause=error, **kwargs)
+        raise RollbackException(cause=failure.value, **kwargs)
 
     def write_file(self, content, filename):
         # FIXME: Wrap errors in a ProcessException?
@@ -114,7 +115,17 @@ class ProcessBroker(object):
 
         return threads.deferToThread(_write_file)
 
-    def make_aquilon(self, (fqdn, buildid, template_string),
+    def eb_pan_compile(self, failure, infile, outfile):
+        failure.trap(ProcessException)
+        input = ""
+        if os.path.exists(infile):
+            input = file(infile).read()
+        output = failure.value.out
+        if os.path.exists(outfile):
+            output = file(outfile).read()
+        raise PanException(failure.value, input, output)
+
+    def make_aquilon(self, (fqdn, domain, buildid, template_string),
             basedir):
         """This expects to be called with the results of the dbaccess
         method of the same name."""
@@ -122,20 +133,30 @@ class ProcessBroker(object):
         # in a specific subdirectory...
         tempdir = mkdtemp()
         filename = os.path.join(tempdir, fqdn) + '.tpl'
-        log.msg("writing the template to %s" % filename)
         d = self.write_file(template_string, filename)
+        if os.path.exists(os.path.join(basedir, "recent_raw")):
+            d = d.addCallback(lambda _: self.write_file(template_string,
+                    os.path.join(basedir, "recent_raw", "%s.tpl" % fqdn)))
         # FIXME: Pass these in from the broker...
         compiler = "/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc"
-        # FIXME: Should be using the appropriate domain basedir.
-        includes = [ basedir, "/ms/dev/elfms/ms-templates/1.0/src/distro" ]
+        domaindir = os.path.join(basedir, "templates", domain)
+        # FIXME: Not sure if we need this, or if it's correct
+        aquilondir = os.path.join(domaindir, "aquilon")
+        includes = [ aquilondir, domaindir,
+                "/ms/dev/elfms/ms-templates/1.0/src/distro" ]
         include_line = ""
         for i in includes:
             include_line = include_line + ' -I "' + i + '" '
-        d = d.addCallback(lambda _: self.run_shell_command(compiler +
+        outfile = os.path.join(tempdir, fqdn + '.xml')
+        fix_path = """env PATH="/ms/dist/msjava/PROJ/sunjdk/1.6.0_04/bin:$PATH" """
+        d = d.addCallback(lambda _: self.run_shell_command(fix_path +
+                compiler +
                 include_line + ' -y ' + filename
-                + ' >' + os.path.join(tempdir, fqdn) + '.xml'))
+                + ' >' + outfile))
+        d = d.addErrback(self.eb_pan_compile, filename, outfile)
         # FIXME: Do we want to save off the built xml file anywhere
-        # before the temp directory gets cleaned up?
+        # before the temp directory gets cleaned up?  (On failure,
+        # it will be in the exception.)
         d = d.addBoth(_cb_cleanup_dir, tempdir)
         d = d.addErrback(self.wrap_failure_with_rollback, jobid=buildid)
         return d

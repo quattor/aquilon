@@ -27,6 +27,7 @@ class NoSuchRowException(AquilonError):
     from sqlalchemy.exceptions import InvalidRequestError
 
 class ProcessException(AquilonError):
+    """Raised when a process being executed fails."""
     def __init__(self, command=None, out=None, err=None,
             code=None, signalNum=None):
         self.command = command
@@ -55,6 +56,32 @@ class RollbackException(AquilonError):
         if not args and cause:
             args = [ str(cause) ]
         AquilonError.__init__(self, *args, **kwargs)
+
+
+class AuthorizationException(AquilonError):
+    """Raised when a principle is not authorized to perform a given
+    action on a resource.
+
+    """
+
+
+class NotFoundException(AquilonError):
+    """Raised when a requested resource cannot be found."""
+
+
+class PanException(AquilonError):
+    """Raised when a pan compile fails."""
+    def __init__(self, pe, input, output):
+        self.processException = pe
+        self.output = output
+        msg = str(pe) + "\n"
+        if input:
+            msg = msg + "\ninput:\n" + input + "\n"
+        if output:
+            msg = msg + "\nstdout:\n" + output + "\n"
+        if pe.err:
+            msg = msg + "\nstderr:\n" + pe.err + "\n"
+        AquilonError.__init__(self, msg)
 
 
 #if __name__=='__main__':

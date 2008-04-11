@@ -50,8 +50,8 @@ from twisted.web import server, resource, http, error, static
 from twisted.internet import defer, utils, threads
 from twisted.python import log
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.server.exceptions_ import AuthorizationException, NotFoundException
+from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
+        NotFoundException
 
 class ResponsePage(resource.Resource):
 
@@ -703,26 +703,19 @@ class ResponsePage(resource.Resource):
         return "aq bind service has not been implemented yet"
 
     def command_make_aquilon(self, request):
-        """aqcommand: aq make aquilon --hostname=<name> [--personality=<personality>]"""
+        """aqcommand: aq make aquilon --hostname=<name> --os=<os>
+            [--personality=<personality>]"""
         hostname = request.args['hostname'][0]
-        personality = request.args.has_key('personality') and request.args['personality'][0] or None
-        os = "linux"
+        os = request.args['os'][0]
+        personality = request.args.get('personality', [None])[0]
 
-        #try:
-        #    self.broker.azbroker.check(None, request.channel.getPrinciple(),
-        #            "make", "/host/%s" % type)
-        #except AuthorizationException:
-        #    request.setResponseCode( http.UNAUTHORIZED )
-        #    return ""
+        d = defer.maybeDeferred(self.broker.make_aquilon,
+                hostname=hostname, personality=personality, os=os,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
 
-        ## FIXME: Treat an empty list as a 404.
-        d = self.broker.make_aquilon(hostname=hostname,
-                personality=personality, os=os)
-        ##d = d.addCallback( self.wrapLocationInTable )
-        ##d = d.addCallback( self.wrapTableInBody )
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
-        #d = d.addCallback(self.finishOK, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET

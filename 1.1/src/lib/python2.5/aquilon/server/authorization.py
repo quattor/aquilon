@@ -9,7 +9,7 @@
 # This module is part of Aquilon
 '''If you can read this, you should be Documenting'''
 
-from aquilon.server.exceptions_ import AuthorizationException
+from aquilon.exceptions_ import AuthorizationException
 from twisted.python import log
 
 # FIXME: How does this get instantiated?  Should it be a singleton?

@@ -94,7 +94,9 @@ class Broker(object):
 
         """
 
-        d = self.dbbroker.make_aquilon(session=True, **kwargs)
+        d = defer.maybeDeferred(self.azbroker.check, None, kwargs["user"],
+                "make", kwargs["request_path"])
+        d = d.addCallback(self.dbbroker.make_aquilon, session=True, **kwargs)
         d = d.addCallback(self.pbroker.make_aquilon, basedir=self.basedir)
         d = d.addCallback(self.dbbroker.confirm_make, session=True)
         d = d.addErrback(self.dbbroker.cancel_make, session=True)
@@ -108,6 +110,8 @@ class Broker(object):
         d = d.addCallback(self.pbroker.sync,
                 git_path=self.git_path, templatesdir=self.templatesdir,
                 **kwargs)
+        # If no errors are raised from the commands, send a command back
+        # to the client to execute.
         d = d.addCallback(lambda _:
                 """env PATH="%s:$PATH" NO_PROXY=* git pull""" % self.git_path)
         return d

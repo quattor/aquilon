@@ -18,10 +18,11 @@ from sasync.database import AccessBroker, transact
 from sqlalchemy.exceptions import InvalidRequestError
 from twisted.internet import defer
 from twisted.python import log
+from twisted.python.failure import Failure
 
 from aquilon import const
-from aquilon.exceptions_ import RollbackException
-from aquilon.server.exceptions_ import NotFoundException, AuthorizationException
+from aquilon.exceptions_ import RollbackException, NotFoundException, \
+        AuthorizationException
 from aquilon.aqdb.location import *
 from aquilon.aqdb.service import *
 from aquilon.aqdb.configuration import *
@@ -167,19 +168,29 @@ class DatabaseBroker(AccessBroker):
         return self.session.query(LocationType).filter_by(**kwargs).all()
 
     @transact
-    def make_aquilon(self, **kwargs):
+    def make_aquilon(self, authorized, hostname, os, **kwargs):
         """This creates a template file and saves a copy in the DB.
 
         It does *not* do pan compile... that happens outside this method.
         """
 
-        fqdn = "aquilon00.one-nyp.ms.com"
-        #archetype = self.session.query(Archetype).filter(
-        #        Archetype.name=="aquilon").one()
-        #base_template = "%s/base" % archetype.name
-        #final_template = "%s/final" % archetype.name
-        base_template = "archetype/aquilon/base"
-        final_template = "archetype/aquilon/final"
+        # The authorized variable is a dummy variable, as this is currently
+        # a callback of the authorization check.  That check would have
+        # raised an error if not authorized (so far).
+
+        # FIXME: Uniqueness constraint needs to be addressed.
+        #hostname = "ab1c1n12"
+        try:
+            dbhost = self.session.query(Host).filter_by(name=hostname).one()
+        except InvalidRequestError:
+            raise NotFoundException("Host '%s' not found." % hostname)
+
+        # We may not do anything with this... just verifying that it's there.
+        archetype = self.session.query(Archetype).filter(
+                Archetype.name=="aquilon").one()
+
+        base_template = "archetype/base"
+        final_template = "archetype/final"
         os_template = "os/linux/4.0.1-x86_64/config"
         personality_template = "usage/grid/config"
         hardware = "machine/na/np/6/31_c1n3"
@@ -197,7 +208,7 @@ class DatabaseBroker(AccessBroker):
         templates.append(final_template)
 
         template_lines = []
-        template_lines.append("object template %(fqdn)s;\n")
+        template_lines.append("object template %s;\n" % dbhost.fqdn)
         template_lines.append("""include { "pan/units" };\n""")
         template_lines.append(""""/hardware" = create("%s");\n""" % hardware)
         for interface in interfaces:
@@ -207,19 +218,17 @@ class DatabaseBroker(AccessBroker):
         template_string = "\n".join(template_lines)
 
         # FIXME: Save this to the build table...
-        buildid = 0
-        return fqdn, buildid, template_string
+        buildid = -1
+        return dbhost.fqdn, dbhost.domain.name, buildid, template_string
 
     @transact
     def cancel_make(self, failure):
-        """Gets called if the make_aquilon build fails."""
-        failure.trap(RollbackException)
-        # FIXME: re-raising the original error might rollback the
-        # transaction - may need a different way to do this.
-        # One hack would be to just return the error, and have an
-        # addBoth() that checked to see if it was passed an exception,
-        # and then raise it.
-        raise failure.value.cause
+        """Gets called as an Errback if the make_aquilon build fails."""
+        error = failure.check(RollbackException)
+        if not error:
+            return failure
+        # FIXME: Do the actual work of cancelling the make.
+        return Failure(failure.value.cause)
 
     @transact
     def confirm_make(self, buildid):
