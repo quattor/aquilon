@@ -6,6 +6,8 @@ if [ -r "$DBFILE" ] ; then
 	echo "moved existing db to '$DBFILE.saved'"
 fi
 
+IPY='/ms/dist/python/PROJ/ipython/0.7.2/bin/ipython '
+
 echo starting at 
 /bin/date
 

@@ -14,6 +14,7 @@ from __future__ import with_statement
 import sys
 sys.path.append('../..')
 import random
+import re
 
 from shell import ipshell
 from db import Session
@@ -102,8 +103,8 @@ def two_in_each():
                 for c in n_of(2,''.join([rack.name,'c'])))
         ###fix me: this only creates nodes in C1 and never in C2
         for ch in chs:
-            print ch,ch.name
             s.save(ch)
+            #the problem with no c2 nodes is in the next bit
             nodes = (Machine(ch,model,name=nodename,comments=cmnt)
                      for nodename in n_of(12,''.join([ch.name,'n'])))
 
@@ -303,21 +304,24 @@ def pick_afs_servers():
     except Exception, e:
         print "Can't find service named '%s' "%(svc_name)
 
-    full_chassis_list=s.query(Location).filter(
-        location.c.name.like('%c1%')).all() ##hack until we fix 2_in_each
+    #full_chassis_list=s.query(Location).filter(
+    #    location.c.name.like('%c1n%')).all() ##hack until we fix 2_in_each
+    full_chassis_list=s.query(Chassis).all()
 
     for c in full_chassis_list:
         nodename = 'n'.join([c.name,str(random.randint(1,12))])
-        try:
-            m=s.query(Machine).filter_by(name=nodename).one()
-        except Exception, e:
-            print Exception, e, 'for query Machine(%s)'%(m)
+        print nodename 
+        m=re.match("[a-z]{2}\d{1,2}c1n\d+",nodename)
+        if not m:
+            print 'skipping %s'%nodename
             continue
         try:
-            h=s.query(Host).filter_by(machine=m).one()
+            h=s.query(Host).filter_by(name=nodename).one()
         except Exception, e:
-            print Exception, e, 'for query Host(%s)'%(m)
-
+            print Exception, e, 'for query Host(%s)'%(nodename)
+            s.rollback()
+            continue
+        
         srv_map=get_server_for(svc,nodename)
         if srv_map:
             #print "picked %s for %s"%(srv_map,nodename)
@@ -338,8 +342,6 @@ def all_cells():
         return
 
     s=Session()
-    s.autoflush=False
-    s.transacational=True
 
     afs=s.query(Service).filter_by(name='afs').one()
     assert(afs)
@@ -379,6 +381,8 @@ def all_cells():
                     except exceptions.OSError, e:
                         print e
                         print 'fix this later...'
+                #TODO: lookup/create the config path here. use it in bi creation. 
+            
                 try:
                     a=AfsCell(line, comments='afs cell %s'%(line))
                     s.save(a)
@@ -386,7 +390,6 @@ def all_cells():
                     s.rollback()
                     print e
                     continue
-            #TODO: IMPORTANT: cfg_path should be service/afs/CELLNAME
             si=ServiceInstance(afs,a,comments='afs')
             s.save(si)
             s.commit()
@@ -450,7 +453,7 @@ def clone_dsdb_host(hostname):
 
 if __name__ == '__main__':
     two_in_each()
-    just_hosts()
+    #just_hosts()
 
     #npipm1()
     all_cells()
