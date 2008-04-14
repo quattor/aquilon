@@ -32,18 +32,9 @@ from db import *
 from aquilon.exceptions_ import ArgumentError
 
 from location import *
-location=Table('location', meta, autoload=True)
-
-from network import DnsDomain
-dns_domain=Table('dns_domain', meta, autoload=True)
-
-from hardware import Machine, Status
-machine=Table('machine', meta, autoload=True)
-status = Table('status', meta, autoload=True)
-
+from network import DnsDomain,dns_domain
+from hardware import Machine, machine, Status, status
 from auth import UserPrincipal,user_principal
-#TODO: make all tables happen this way if this works...
-#user_principal = Table('user_principal', meta, autoload=True)
 
 import configuration
 from configuration import *
@@ -499,14 +490,14 @@ class ServiceMap(aqdbBase):
     service = property(_service)
     def __repr__(self):
         return '(Service Mapping) %s at %s (%s)'%(
-            self.instance.service, self.location.name, self.location.type)
+            self.service_instance.service, self.location.name, self.location.type)
 
 mapper(ServiceMap,service_map,properties={
-    'location':relation(Location,viewonly=True),
-    'instance':relation(ServiceInstance,backref='service_map'),
-    'service':synonym('_service'),
-    'creation_date' : deferred(service_map.c.creation_date),
-    'comments': deferred(service_map.c.comments)
+    'location'         : relation(Location),
+    'service_instance' : relation(ServiceInstance,backref='service_map'),
+    'service'          : synonym('_service'),
+    'creation_date'    : deferred(service_map.c.creation_date),
+    'comments'         : deferred(service_map.c.comments)
 })
 
 

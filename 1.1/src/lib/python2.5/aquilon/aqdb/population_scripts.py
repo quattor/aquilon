@@ -102,8 +102,8 @@ def two_in_each():
                 for c in n_of(2,''.join([rack.name,'c'])))
         ###fix me: this only creates nodes in C1 and never in C2
         for ch in chs:
+            print ch,ch.name
             s.save(ch)
-            print 'creating nodes for %s'%(ch)
             nodes = (Machine(ch,model,name=nodename,comments=cmnt)
                      for nodename in n_of(12,''.join([ch.name,'n'])))
 
@@ -150,7 +150,7 @@ def two_in_each():
 def just_hosts():
     cnt=host.count().execute()
     if cnt.fetchall()[0][0] > 2000:
-        print 'machine count > 2000, skipping creation'
+        print 'host count > 2000, skipping creation'
         return
     nodelist=s.query(Machine).all()
     try:
@@ -279,7 +279,7 @@ def get_server_for(svc,hname):
     for loc in [host.location.building,host.location.hub]:
         si=s.query(ServiceMap).filter_by(
                 location=loc).join(
-                'instance').filter(
+                'service_instance').filter(
                 ServiceInstance.service==svc).all()
         if len(si) > 1:
                 return pick_best_server(si)
@@ -321,14 +321,14 @@ def pick_afs_servers():
         srv_map=get_server_for(svc,nodename)
         if srv_map:
             #print "picked %s for %s"%(srv_map,nodename)
-            bi=BuildItem(h,srv_map.instance.cfg_path,3)
+            #TODO: should be client path, not instance path
+            bi=BuildItem(h,srv_map.service_instance.cfg_path,3)
             try:
                 s.save(bi)
             except Exception, e:
                 print Exception, e
                 s.close()
                 return False
-            #print bi
     s.commit()
 
 def all_cells():
@@ -336,6 +336,10 @@ def all_cells():
     if cnt > 8:
         print 'afs cell count is %s, skipping'%(str(cnt))
         return
+
+    s=Session()
+    s.autoflush=False
+    s.transacational=True
 
     afs=s.query(Service).filter_by(name='afs').one()
     assert(afs)
@@ -382,11 +386,10 @@ def all_cells():
                     s.rollback()
                     print e
                     continue
-            #TODO: IMPORTANT: is the cfg_path for the service instance
-            #    just the prefix (i.e. service/afs/CELLNAME/)
-            #    or is it service/afs/CELLNAME/client ???
+            #TODO: IMPORTANT: cfg_path should be service/afs/CELLNAME
             si=ServiceInstance(afs,a,comments='afs')
             s.save(si)
+            s.commit()
 
             loc_name = line.partition('.')[2].partition('.')[0]
             if loc_name in hubs:
@@ -399,6 +402,7 @@ def all_cells():
                     loc_name,line)
                 sm=ServiceMap(si,buildings[loc_name],comments='afs')
                 s.save(sm)
+                s.commit()
                 count +=1
             else:
                 print "FOUND NOTHING FOR '%s'"%(loc_name)
@@ -407,6 +411,7 @@ def all_cells():
 
     try:
         s.commit()
+        s.flush()
     except Exception, e:
         s.close()
         print e
@@ -447,7 +452,7 @@ if __name__ == '__main__':
     two_in_each()
     just_hosts()
 
-    npipm1()
+    #npipm1()
     all_cells()
     pick_afs_servers()
     #ipshell()
