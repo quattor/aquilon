@@ -36,9 +36,10 @@ mapper(LocationType,location_type)
 
 location_type.create(checkfirst=True)
 
-if empty(location_type, engine):
+if empty(location_type):
     fill_type_table(location_type,['company','hub','continent','country',
-                                   'city','building','rack','chassis','desk'])
+                                   'city','building','rack','chassis','desk',
+                                   'base_location_type'])
 
 location = Table('location', meta,
    Column('id', Integer, Sequence('location_id_seq'), primary_key=True),
@@ -166,7 +167,7 @@ class Location(aqdbBase):
         return s.query(Location).with_polymorphic('*').\
             join('type').filter(LocationType.type==type).all()
 
-    def append(self,node,**kw):
+    def append(self,node):
         if isinstance(node, Location):
             node.parent = self
             self.sublocations[node] = node
@@ -179,11 +180,11 @@ class Location(aqdbBase):
             l=self.p_dict
             return str('.'.join([l['building'], l['city'], l['continent']]))
 
-    def __repr__(self):
-        return self.__class__.__name__ + " " + self.name
+    #def __repr__(self):
+    #    return self.__class__.__name__ + " " + self.name
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 class Company(Location):
     pass
@@ -218,7 +219,9 @@ class Desk(Location):
     an adjacency list """
 
 mapper(Location, location, polymorphic_on=location.c.location_type_id, \
-        polymorphic_identity='base_location_type',properties={
+        polymorphic_identity=s.execute(
+           "select id from location_type where type='base_location_type'").\
+        fetchone()[0], properties={
             'parent':relation(
                 Location,remote_side=[location.c.id],backref='sublocations'),
             'type':relation(LocationType),
@@ -226,38 +229,41 @@ mapper(Location, location, polymorphic_on=location.c.location_type_id, \
             'comments': deferred(location.c.comments)
 })
 
-#you may just want to get the object, and throw that in as a property
-def get_loc_type_id(type):
-    # FIXME: Direct reference to session...
-    return s.execute(
-        "select id from location_type where type='%s'"%(type)).fetchone()[0]
-
 mapper(Company,company,inherits=Location,
-       polymorphic_identity=get_loc_type_id('company'))
+       polymorphic_identity=engine.execute(
+           "select id from location_type where type='company'").fetchone()[0])
 
 mapper(Hub, hub, inherits=Location,
-       polymorphic_identity=get_loc_type_id('hub'))
+       polymorphic_identity=engine.execute(
+        "select id from location_type where type='hub'").fetchone()[0])
 
 mapper(Continent, continent, inherits=Location,
-       polymorphic_identity=get_loc_type_id('continent'))
+       polymorphic_identity=engine.execute(
+           "select id from location_type where type='continent'").fetchone()[0])
 
 mapper(Country, country,inherits=Location,
-       polymorphic_identity=get_loc_type_id('country'))
+       polymorphic_identity=engine.execute(
+           "select id from location_type where type='country'").fetchone()[0])
 
 mapper(City, city, inherits=Location,
-       polymorphic_identity=get_loc_type_id('city'))
+       polymorphic_identity=engine.execute(
+        "select id from location_type where type='city'").fetchone()[0])
 
 mapper(Building, building, inherits=Location,
-       polymorphic_identity=get_loc_type_id('building'))
+       polymorphic_identity=engine.execute(
+        "select id from location_type where type='building'").fetchone()[0])
 
 mapper(Rack,rack, inherits=Location,
-       polymorphic_identity=get_loc_type_id('rack'))
+       polymorphic_identity=engine.execute(
+        "select id from location_type where type='rack'").fetchone()[0])
 
 mapper(Chassis,chassis,inherits=Location,
-       polymorphic_identity=get_loc_type_id('chassis'))
+       polymorphic_identity=engine.execute(
+        "select id from location_type where type='chassis'").fetchone()[0])
 
 mapper(Desk,desk,inherits=Location,
-       polymorphic_identity=get_loc_type_id('desk'))
+       polymorphic_identity=engine.execute(
+        "select id from location_type where type='desk'").fetchone()[0])
 
 def populate_hubs():
     s=Session()
@@ -332,7 +338,6 @@ def populate_city():
 
     with s.begin():
         for row in dump_city():
-            #print "City: ", row[0]
             c=City(row[0],'city',fullname=row[1],parent=cache[row[2]])
             s.save(c)
     s.flush()
@@ -355,17 +360,17 @@ def populate_bldg():
 
 if __name__ == '__main__':
 
-    if empty(hub,engine):
+    if empty(hub):
         print 'populating hubs'
         populate_hubs()
 
-    if empty(country,engine):
+    if empty(country):
         print 'populating country'
         populate_country()
 
-    if empty(city,engine):
+    if empty(city):
         print 'populating city'
         populate_city()
-    if empty(building,engine):
+    if empty(building):
         print 'populating buildings'
         populate_bldg()

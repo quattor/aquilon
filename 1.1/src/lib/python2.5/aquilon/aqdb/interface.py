@@ -48,7 +48,7 @@ class InterfaceType(aqdbType):
 mapper(InterfaceType, interface_type, properties={
     'creation_date':deferred(interface_type.c.creation_date),
     'comments': deferred(interface_type.c.comments)})
-if empty(interface_type,engine):
+if empty(interface_type):
     fill_type_table(interface_type,['physical','zebra','service','802.1q',
             'base_interface_type'])
 

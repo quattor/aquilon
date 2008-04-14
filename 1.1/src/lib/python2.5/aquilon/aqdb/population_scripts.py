@@ -16,7 +16,7 @@ sys.path.append('../..')
 import random
 
 from shell import ipshell
-from db import meta, engine, Session
+from db import Session
 
 from sqlalchemy.sql import and_
 
@@ -100,9 +100,10 @@ def two_in_each():
             chs = (Chassis(c,'chassis', fullname='chassis %s'%c,
                            parent=rack,comments=cmnt)
                 for c in n_of(2,''.join([rack.name,'c'])))
-
+        ###fix me: this only creates nodes in C1 and never in C2
         for ch in chs:
             s.save(ch)
+            print 'creating nodes for %s'%(ch)
             nodes = (Machine(ch,model,name=nodename,comments=cmnt)
                      for nodename in n_of(12,''.join([ch.name,'n'])))
 
@@ -199,129 +200,6 @@ def make_host(name, machine,**kw):
     assert(h)
     configure_host(h)
 
-def get_server_for(svc_name,hname):
-    #a=s.query(Archetype).filter_by(name='aquilon').one()
-    try:
-        svc=s.query(Service).filter_by(name=svc_name).one()
-        assert(svc)
-    except NoSuchRowException:
-        print "Can't find service named '%s' "%(svc_name)
-        return
-    try:
-        host=s.query(Host).filter_by(name=hname).one()
-        assert(host)
-    except NoSuchRowException:
-        print "Can't find service named '%s' "%(svc_name)
-        return
-
-
-    """for afs search first in the building, then in the hub """
-    for loc in [host.location.building,host.location.hub]:
-        print 'searching for %s in %s %s...'%(svc,loc.type,loc)
-        si=s.query(ServiceMap).filter_by(
-                location=loc).join(
-                'service_instance').filter(
-                ServiceInstance.service==svc).all()
-        if len(si) > 1:
-                print 'found %s service maps'%(len(si))
-                print si
-        elif len(si) == 1:
-            print 'found it: %s'%si[0]
-            return si[0]
-        else:
-            print 'no afs in %s %s\n\n'%(loc.type,loc)
-
-    return
-
-def all_cells():
-    cnt=afs_cell.count().execute().fetchall()[0][0]
-    if cnt > 8:
-        print 'afs cell count is %s, skipping'%(str(cnt))
-        return
-
-    afs=s.query(Service).filter_by(name='afs').one()
-    assert(afs)
-
-    hubs={}
-    for h in s.query(Hub).all():
-        hubs[str(h.name)]=h
-
-    buildings={}
-    for b in s.query(Building).all():
-        buildings[str(b.name)]=b
-
-    count = 0
-    with open('../../../../etc/data/afs_cells') as f:
-        for line in f.readlines():
-            if line.isspace():
-                continue
-            line = line.strip()
-
-            a=s.query(AfsCell).filter_by(name=line).first()
-            if a:
-                print "'%s' already created"%(a)
-            else:
-                try:
-                    a=AfsCell(line,'afs_cell', comments='afs cell %s'%(line))
-                    s.save(a)
-                except Exception,e:
-                    s.rollback()
-                    print e
-                    continue
-
-            si=ServiceInstance(afs,a)
-            s.save(si)
-
-            loc_name = line.partition('.')[2].partition('.')[0]
-            if loc_name in hubs:
-                print 'Creating hub level service map at %s for %s'%(
-                    loc_name,line)
-                sm=ServiceMap(si,hubs[loc_name])
-                s.save(sm)
-            elif loc_name in buildings:
-                print 'Creating building level svc map %s for %s '%(
-                    loc_name,line)
-                sm=ServiceMap(si,buildings[loc_name])
-                s.save(sm)
-                count +=1
-            else:
-                print "FOUND NOTHING FOR '%s'"%(loc_name)
-
-    print 'initialized %s cells with svc instances+maps'%(count)
-
-    try:
-        s.commit()
-    except Exception, e:
-        s.close()
-        print e
-        return False
-    print 'persisted %s afs cells to database'%(count)
-    print s.query(AfsCell).all()
-    return True
-
-
-
-def make_syslog_si(hostname):
-    assert(syslog)
-
-    h=s.query(Host).filter_by(name=hostname).one()
-
-    si=ServiceInstance(syslog,h)
-    s.save(si)
-    try:
-        s.commit()
-    except Exception,e:
-        s.rollback
-        print e
-        return False
-    print 'added %s service instances'%(syslog)
-    return True
-
-def clone_dsdb_host(hostname):
-    print 'cloning %s'%(hostname)
-    #need building, rack and chassis
-    #need model/type, afs cell, pod
-
 def npipm1():
     t = s.query(Host).filter_by(name='npipm1').first()
     if isinstance(t,Host):
@@ -379,9 +257,191 @@ def npipm1():
     s.flush()
     make_syslog_si('npipm1')
 
+def get_server_for(svc,hname):
+    #passing it in for now, this isn't efficient in a loop
+    #try:
+    #    svc=s.query(Service).filter_by(name=svc_name).one()
+    #    assert(svc)
+    #except Exception, e:
+    #    print "Can't find service named '%s' "%(svc_name)
+    #    return
+    try:
+        host=s.query(Host).filter_by(name=hname).one()
+        assert(host)
+    except Exception, e:
+        print "Can't find host named '%s' "%(hname)
+        return
 
 
-#############
+    """ for afs search first in the building, then in the hub
+        A later extension is to add chassis, rack first """
+
+    for loc in [host.location.building,host.location.hub]:
+        si=s.query(ServiceMap).filter_by(
+                location=loc).join(
+                'instance').filter(
+                ServiceInstance.service==svc).all()
+        if len(si) > 1:
+                return pick_best_server(si)
+        elif len(si) == 1:
+            return si[0]
+
+    print 'Unable to find an appropriate service mapping'
+    return False
+    #TODO: create an exception and raise it, log it
+
+def pick_best_server(si_list):
+    """ a starter function who only chooses at random for now """
+    index=random.randint(0,len(si_list) - 1)
+    return si_list[index]
+
+def pick_afs_servers():
+    s=Session()
+
+    try:
+        svc=s.query(Service).filter_by(name='afs').one()
+    except Exception, e:
+        print "Can't find service named '%s' "%(svc_name)
+
+    full_chassis_list=s.query(Location).filter(
+        location.c.name.like('%c1%')).all() ##hack until we fix 2_in_each
+
+    for c in full_chassis_list:
+        nodename = 'n'.join([c.name,str(random.randint(1,12))])
+        try:
+            m=s.query(Machine).filter_by(name=nodename).one()
+        except Exception, e:
+            print Exception, e, 'for query Machine(%s)'%(m)
+            continue
+        try:
+            h=s.query(Host).filter_by(machine=m).one()
+        except Exception, e:
+            print Exception, e, 'for query Host(%s)'%(m)
+
+        srv_map=get_server_for(svc,nodename)
+        if srv_map:
+            #print "picked %s for %s"%(srv_map,nodename)
+            bi=BuildItem(h,srv_map.instance.cfg_path,3)
+            try:
+                s.save(bi)
+            except Exception, e:
+                print Exception, e
+                s.close()
+                return False
+            #print bi
+    s.commit()
+
+def all_cells():
+    cnt=afs_cell.count().execute().fetchall()[0][0]
+    if cnt > 8:
+        print 'afs cell count is %s, skipping'%(str(cnt))
+        return
+
+    afs=s.query(Service).filter_by(name='afs').one()
+    assert(afs)
+
+    hubs={}
+    for h in s.query(Hub).all():
+        hubs[str(h.name)]=h
+
+    buildings={}
+    for b in s.query(Building).all():
+        buildings[str(b.name)]=b
+
+    count = 0
+    with open('../../../../etc/data/afs_cells') as f:
+        for line in f.readlines():
+            if line.isspace():
+                continue
+            line = line.strip()
+
+            a=s.query(AfsCell).filter_by(name=line).first()
+            if a:
+                print "'%s' already created"%(a)
+            else:
+                """ The routine to create the config directory here is a
+                    convenience, or a hack depending on how you see it, or
+                    may be just plain uneeeded. We'll see how the broker will
+                    handle the complex work flow required for this task
+                    """
+                path=os.path.join('service/afs/',line)
+                    #mkdir cfg_base/path/client
+                client_path=os.path.join(str(configuration.const.cfg_base),
+                                         path,
+                                         'client')
+                if not os.path.isdir(client_path):
+                    try:
+                        os.makedirs(client_path)
+                    except exceptions.OSError, e:
+                        print e
+                        print 'fix this later...'
+                try:
+                    a=AfsCell(line, comments='afs cell %s'%(line))
+                    s.save(a)
+                except Exception,e:
+                    s.rollback()
+                    print e
+                    continue
+            #TODO: IMPORTANT: is the cfg_path for the service instance
+            #    just the prefix (i.e. service/afs/CELLNAME/)
+            #    or is it service/afs/CELLNAME/client ???
+            si=ServiceInstance(afs,a,comments='afs')
+            s.save(si)
+
+            loc_name = line.partition('.')[2].partition('.')[0]
+            if loc_name in hubs:
+                print 'Creating hub level service map at %s for %s'%(
+                    loc_name,line)
+                sm=ServiceMap(si,hubs[loc_name], comments='afs')
+                s.save(sm)
+            elif loc_name in buildings:
+                print 'Creating building level svc map %s for %s '%(
+                    loc_name,line)
+                sm=ServiceMap(si,buildings[loc_name],comments='afs')
+                s.save(sm)
+                count +=1
+            else:
+                print "FOUND NOTHING FOR '%s'"%(loc_name)
+
+    print 'initialized %s cells with svc instances+maps'%(count)
+
+    try:
+        s.commit()
+    except Exception, e:
+        s.close()
+        print e
+        return False
+    print 'persisted %s afs cells to database'%(count)
+    print s.query(AfsCell).all()
+    return True
+
+
+
+def make_syslog_si(hostname):
+    assert(syslog)
+
+    h=s.query(Host).filter_by(name=hostname).one()
+
+    si=ServiceInstance(syslog,h)
+    s.save(si)
+    try:
+        s.commit()
+    except Exception,e:
+        s.rollback
+        print e
+        return False
+    assert(si)
+    print 'added %s service instances'%(syslog)
+    return True
+
+def clone_dsdb_host(hostname):
+    print 'cloning %s'%(hostname)
+    #need building, rack and chassis
+    #need model/type, afs cell, pod
+
+
+
+
 
 if __name__ == '__main__':
     two_in_each()
@@ -389,54 +449,12 @@ if __name__ == '__main__':
 
     npipm1()
     all_cells()
-    get_server_for('afs','aj1c1n6')
+    pick_afs_servers()
     #ipshell()
 
-"""
-def np_racks():
-    print 'populating all racks in building NP'
-    s=Session()
 
-    b=s.query(Building).filter_by(name='np').one()
-    with open('../../../../etc/data/np-racks','r') as f:
-        for line in f.readlines():
-            name=line
-            r=Rack(name,'rack',parent=b,fullname='rack %s'%(name))
-            s.save(r)
-        s.flush()
-
-def np_chassis():
-    print 'populating all chassis in building NP'
-    s=Session()
-    b=s.query(Building).filter_by(name='np').one()
-    with open('../../../../etc/data/np-chassis','r') as f:
-        for line in f.readlines():
-            n=line.strip()
-            (rack,c,num) = line.partition('c')
-            c=Chassis(n,'chassis',fullname='chassis %s'%(n),parent=s.query(
-                Rack).filter_by(name=rack).one())
-            s.save(c)
-        s.commit()
-
-def populate_np_nodes():
-    cnt=machine.count().execute()
-    if cnt.fetchall()[0][0] < 2:
-        s=Session
-        mod=Session.query(Model).filter_by(name='hs20').one()
-        with open('../../../../etc/data/np-nodes','r') as f:
-            for line in f.readlines():
-                (c,q,num)=line.strip().lstrip('n').partition('n')
-                c='n'+c
-                try:
-                    r=s.query(Chassis).filter_by(name=c).one()
-                except Exception,e:
-                    print 'no such chassis %s'%c
-                    continue
-                m=Machine(r,mod,name=line.strip())
-                s.save(m)
-        s.commit()
-        s.close()
-"""
+###### Look into doing stuff like below:
+    #for sql in _testsql: e.execute(sql) #doctest: +ELLIPSIS
 """
     delete from physical_interface where interface_id in \
         (select id from interface where comments like '%FAKE%');
@@ -449,3 +467,4 @@ def populate_np_nodes():
     delete from chassis where id in (select id from location where comments like '%FAKE%');
     delete from location where comments like '%FAKE%';
     """
+#a=s.query(Archetype).filter_by(name='aquilon').one()

@@ -23,8 +23,6 @@ time ./interface.py
 echo 
 time ./service.py
 echo
-time ./build.py
-#echo
-#time ./population_scripts.py
+time ./population_scripts.py
 echo completed at
 /bin/date

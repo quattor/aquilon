@@ -8,11 +8,25 @@
 #
 # This module is part of Aquilon
 """ The module governing tables and objects that represent what are known as
-    Services (defined below) in Aquilon """
+    Services (defined below) in Aquilon.
+
+    Many important tables and concepts are tied together in this module,
+    which makes it a bit larger than most. Additionally there are many layers
+    at work for things, especially for Host, Service Instance, and Map. The
+    reason for this is that breaking each component down into seperate tables
+    yields higher numbers of tables, but with FAR less nullable columns, which
+    simultaneously increases the density of information per row (and speedy
+    table scans where they're required) but increases the 'thruthiness'[1] of
+    every row. (Daqscott 4/13/08)
+    [1] http://en.wikipedia.org/wiki/Truthiness """
 from __future__ import with_statement
 
 import sys, datetime
 sys.path.append('../..')
+
+import os
+import re
+import exceptions
 
 from db import *
 from aquilon.exceptions_ import ArgumentError
@@ -27,22 +41,28 @@ from hardware import Machine, Status
 machine=Table('machine', meta, autoload=True)
 status = Table('status', meta, autoload=True)
 
-from auth import UserPrincipal
-user_principal = Table('user_principal', meta, autoload=True)
+from auth import UserPrincipal,user_principal
+#TODO: make all tables happen this way if this works...
+#user_principal = Table('user_principal', meta, autoload=True)
 
-from configuration import Archetype
-archetype = Table('archetype', meta, autoload=True)
+import configuration
+from configuration import *
+##import * for all the table definitions...
 
 from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
+from sqlalchemy import select, insert
 from sqlalchemy.orm import mapper, relation, deferred, synonym, backref
+from sqlalchemy.orm.collections import attribute_mapped_collection
+#from sqlalchemy.ext import associationproxy
+from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_
 
 service = Table('service',meta,
     Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
     Column('name',String(64), unique=True, index=True),
-    Column('cfg_path',String(32), unique=True),
+    Column('cfg_path_id', Integer, ForeignKey('cfg_path.id'), unique=True),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255)))
+    Column('comments', String(255), nullable=True))
 service.create(checkfirst=True)
 
 class Service(aqdbBase):
@@ -62,12 +82,38 @@ class Service(aqdbBase):
 """
     @optional_comments
     def __init__(self,name):
-        self.name=name
-        self.cfg_path = 'service/%s'%(self.name)
+        self.name=name.strip().lower()
+
+        service_id=engine.execute(
+            select([cfg_tld.c.id],cfg_tld.c.type=='service')).fetchone()[0]
+        if not service_id:
+            raise ArgumentError('Service TLD is undefined')
+
+        result=engine.execute(
+            """SELECT id FROM cfg_path WHERE
+                cfg_tld_id=%s
+                AND relative_path = '%s' """%(service_id,self.name)).fetchone()
+        if result:
+            self.cfg_path_id = result[0]
+        else:
+            print "No cfg path for service %s, creating..."%(self.name)
+            i=cfg_path.insert()
+            result=i.execute(relative_path=self.name,
+                              cfg_tld_id=service_id,
+                              comments='autocreated')
+            self.cfg_path_id=result.last_inserted_ids()[0]
+    """ We're being nice here. Don't know if we should be, but wanted to show
+        another way around the problem we had with using session in the init
+        functions. The line WAS:
+            raise ArgumentError('no cfg path for %s'%(self.name))
+
+        The path on filesystem is not created here like I did for the
+        afs cells in all_cells() in population_scripts (did em manaully) """
 
 mapper(Service,service,properties={
+    'cfg_path'      : relation(CfgPath,backref='service'),
     'creation_date' : deferred(service.c.creation_date),
-    'comments': deferred(service.c.comments)})
+    'comments'      : deferred(service.c.comments)})
 
 system_type=mk_type_table('system_type', meta)
 system_type.create(checkfirst=True)
@@ -76,7 +122,7 @@ class SystemType(aqdbType):
     """ System Type is a discrimintor for polymorphic System object/table """
     pass
 mapper(SystemType,system_type)
-if empty(system_type,engine):
+if empty(system_type):
     fill_type_table(system_type,['base_system_type',
                                  'host', 'afs_cell',
                                  'quattor_server',
@@ -89,7 +135,7 @@ system = Table('system',meta,
            ForeignKey('system_type.id'),
            nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255)))
+    Column('comments', String(255), nullable=True))
 system.create(checkfirst=True)
 
 class System(aqdbBase):
@@ -199,12 +245,14 @@ host=Table('host', meta,
 host.create(checkfirst=True)
 
 class Host(System):
-    """  """
+    """ Here's our most common kind of System, the Host. Putting a physical
+        machine into a chassis and powering it up leaves it in a state with a
+        few more attributes not filled in: what Domain configures this host?
+        What is the build/mcm 'status'? If Ownership is captured, this is the
+        place for it.
+    """
     @optional_comments
     def __init__(self,mach,dom,stat,**kw):
-        if isinstance(mach,Machine):
-            self.machine=mach
-        self.name=kw.pop('name',mach.name)
 
         if isinstance(dom,Domain):
             self.domain = dom
@@ -216,9 +264,21 @@ class Host(System):
         else:
             raise ArgumentError('third argument must be a valid status')
 
+        if isinstance(mach,Machine):
+            self.machine=mach
+        if kw.has_key('name'):
+            name = kw.pop('name')
+            if isinstance(name,str):
+                self.name=name.strip().lower()
+            else:
+                raise ArgumentError("Host name must be type 'str'")
+        else:
+            self.name=kw.pop('name',mach.name)
+
+
     def _get_location(self):
         return self.machine.location
-    location = property(_get_location)
+    location = property(_get_location) #TODO: make these synonms?
 
     def _sysloc(self):
         return self.machine.location.sysloc()
@@ -230,7 +290,54 @@ class Host(System):
 
     def __repr__(self):
         return 'Host %s'%(self.name)
+#Host mapper deferred for ordering list to build_item...
 
+build_item = Table('build_item', meta,
+    Column('id', Integer, Sequence('build_item_id_seq'), primary_key=True),
+    Column('host_id', Integer,
+           ForeignKey('host.id'), unique=True, nullable=False),
+    Column('cfg_path_id', Integer,
+           ForeignKey('cfg_path.id'),
+           nullable=False),
+    Column('order', Integer, nullable=False),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('id','host_id','cfg_path_id','order'))
+build_item.create(checkfirst=True)
+
+class BuildItem(aqdbBase):
+    """ Identifies the build process of a given Host.
+        Parent of 'build_element' """
+    @optional_comments
+    def __init__(self,host,cp,order):
+        if isinstance(host,Host):
+            self.host=host
+        else:
+            msg = 'Build object requires a Host for its constructor'
+            raise ArgumentError(msg)
+
+        if isinstance(cp,CfgPath):
+            self.cfg_path=cp
+        else:
+            msg = 'Build Item requires a Config Path as its second arg'
+            raise ArgumentError(msg)
+        if isinstance(order,int):
+            self.order=order
+        else:
+            msg='Build Item only accepts integer as its third argument'
+            raise(msg)
+
+    def __repr__(self):
+        return '%s: %s'%(self.host.name,self.cfg_path)
+
+mapper(BuildItem,build_item,properties={
+    'host'          : relation(Host),
+    'cfg_path'      : relation(CfgPath),
+    'creation_date' : deferred(build_item.c.creation_date),
+    'comments'      : deferred(build_item.c.comments)})
+
+#Uses Ordering List, an advanced data mapping pattern for this kind of thing
+#more at http://www.sqlalchemy.org/docs/04/plugins.html#plugins_orderinglist
 mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='host'").fetchone()[0],
     properties={
@@ -239,7 +346,11 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
         'domain'        : relation(Domain,
                                    primaryjoin=host.c.domain_id==domain.c.id,
                                    backref=backref('hosts')),
+        #TODO: Archetype (for base/final)
         'status'        : relation(Status),
+        'templates'     : relation(BuildItem,
+                                   collection_class=ordering_list('order'),
+                                   order_by=[build_item.c.order]),
         'creation_date' : deferred(host.c.creation_date),
         'comments'      : deferred(host.c.comments)
 })
@@ -254,29 +365,54 @@ class AfsCell(System):
     """ AfsCell class is an example of a way we'll override system to
         model other types of service providers besides just host
     """
-    pass
+    @optional_comments
+    def __init__(self,name,*args,**kw):
+        if isinstance(name,str):
+            name=name.strip().lower()
+            ##Achtung: This regex hardcodes *.**.ms.com ##
+            m=re.match("^([a-z]{1})\.([a-z]{2})\.(ms\.com)$",name)
+            if len(m.groups()) != 3:
+                msg="""
+                    Names of afs cell's must match the pattern 'X.YZ.ms.com'
+                    where X,Y,Z are all single alphabetic characters, and YZ
+                    must match the name of a valid HUB or BUILDING. """
+                    ###FIX ME: BROKER HAS TO ENFORCE THIS (NO SESSION CALLS ARE
+                    ###        ALLOWED IN __init__() METHODS.)
+                    ### Long term, a check constraint would be better to keep
+                    ### bad data out of the DB, but also afs cell creation will
+                    ### be highly restricted.
+                raise ArgumentError(msg.strip())
+                return
+        else:
+            msg="name of Afs Cell must be a string, received '%s', %s"%(
+                name,type(name))
+            raise ArgumentError(msg)
+
+        super(AfsCell, self).__init__(name,**kw)
+        ###TODO: Would it be ok to make a service instance here? a cell without
+        ###   one really wouldn't make a whole lot of sense...
 
 mapper(AfsCell,afs_cell,
         inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='afs_cell'").fetchone()[0],
-       properties={'system':relation(System,backref='afs_cell')})
+       properties={
+        'system' : relation(System,backref='afs_cell')})
 
 service_instance = Table('service_instance',meta,
     Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
     Column('service_id',Integer, ForeignKey('service.id')),
     Column('system_id', Integer, ForeignKey('system.id')),
+    Column('cfg_path_id', Integer, ForeignKey('cfg_path.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255)),
+    Column('comments', String(255), nullable=True),
     UniqueConstraint('service_id','system_id'))
 
 service_instance.create(checkfirst=True)
 
 class ServiceInstance(aqdbBase):
-    """ Formerly known as 'provider' service instance captures the data around
-        assignment of a system for a particular purpose (aka usage.)
+    """ Service instance captures the data around assignment of a system for a
+        particular purpose (aka usage)
         If machines have a 'personality' dictated by the application they run
-        (and they can run and provide more than one, though at the moment, that
-        too will be captured by its personality)
     """
     @optional_comments
     def __init__(self,svc,a_sys,*args,**kw):
@@ -288,15 +424,42 @@ class ServiceInstance(aqdbBase):
             self.system = a_sys
         else:
             raise ArgumentError('Second Argument must be a valid System')
+
+        path='%s/%s'%(self.service.name,self.system.name)
+
+        service_id=engine.execute(
+                select([cfg_tld.c.id],cfg_tld.c.type=='service')).fetchone()[0]
+        if not service_id:
+            raise ArgumentError('Service TLD is undefined')
+
+        result=engine.execute(
+                """ SELECT id FROM cfg_path WHERE
+                    cfg_tld_id=%s
+                    AND relative_path = '%s' """%(service_id,path)).fetchone()
+        if result:
+            self.cfg_path_id=result[0]
+        else:
+            i=cfg_path.insert()
+            result=i.execute(relative_path=path,
+                              cfg_tld_id=service_id,
+                              comments='autocreated')
+            if result:
+                self.cfg_path_id=result.last_inserted_ids()[0]
+            else:
+                raise ArgumentError('unable to create cfg path')
+            #TODO: a better exception and a much better message
+
+
     def __repr__(self):
-        return '%s %s %s'%(self.__class__.__name__ ,
-                           self.service,self.system)
+        return '(%s) %s %s'%(self.__class__.__name__ ,
+                           self.service.name ,self.system.name)
 
 mapper(ServiceInstance,service_instance, properties={
-    'service': relation(Service),
-    'system' : relation(System),
+    'service'       : relation(Service),
+    'system'        : relation(System, uselist=False, backref='svc_inst'),
+    'cfg_path'      : relation(CfgPath, uselist=False, backref='svc_inst'),
     'creation_date' : deferred(service_instance.c.creation_date),
-    'comments': deferred(service_instance.c.comments)
+    'comments'      : deferred(service_instance.c.comments)
 })
 
 service_map=Table('service_map',meta,
@@ -308,7 +471,7 @@ service_map=Table('service_map',meta,
            ForeignKey('location.id', ondelete='CASCADE'),
            nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments',String(255),nullable=True),
+    Column('comments',String(255), nullable=True),
     UniqueConstraint('service_instance_id','location_id'))
 
 service_map.create(checkfirst=True)
@@ -335,12 +498,12 @@ class ServiceMap(aqdbBase):
         return self.service_instance.service
     service = property(_service)
     def __repr__(self):
-        return 'Service Mapping: %s at %s %s'%(self.service_instance,
-                                     self.location.type,self.location.name)
+        return '(Service Mapping) %s at %s (%s)'%(
+            self.instance.service, self.location.name, self.location.type)
 
 mapper(ServiceMap,service_map,properties={
-    'location':relation(Location),
-    'service_instance':relation(ServiceInstance,backref='service_map'),
+    'location':relation(Location,viewonly=True),
+    'instance':relation(ServiceInstance,backref='service_map'),
     'service':synonym('_service'),
     'creation_date' : deferred(service_map.c.creation_date),
     'comments': deferred(service_map.c.comments)
@@ -380,11 +543,12 @@ class ServiceListItem(aqdbBase):
             raise ArgumentError('Second argument must be a Service')
 
 mapper(ServiceListItem,service_list_item,properties={
-    'archetype': relation(Archetype,backref='service_list'),
-    'service': relation(Service),
+    'archetype'     : relation(Archetype,backref='service_list'),
+    'service'       : relation(Service),
     'creation_date' : deferred(service_list_item.c.creation_date),
-    'comments': deferred(service_list_item.c.comments)
+    'comments'      : deferred(service_list_item.c.comments)
 })
+
 
 ####POPULATION ROUTINES####
 
@@ -401,7 +565,7 @@ def create_domains():
     njw = s.query(UserPrincipal).filter_by(name='njw').one()
     quattor = s.query(UserPrincipal).filter_by(name='quattor').one()
 
-    if empty(domain,engine):
+    if empty(domain):
         p = Domain('production', qs, onenyp, njw,
                 comments='The master production area')
         q = Domain('qa', qs, onenyp, quattor, comments='Do your testing here')
@@ -412,27 +576,28 @@ def create_domains():
         print 'created production and qa domains'
         s.close()
 
-def populate_all_service_tables():
-    if empty(service,engine):
-        svcs = 'dns','dhcp','quattor','syslog','afs'
+def populate_service():
+    if empty(service):
+        svcs = ['dns', 'dhcp', 'syslog', 'afs']
         for i in svcs:
             srv = Service(i)
             s.save(srv)
-            s.commit()
+        s.commit()
         print 'populated services'
+        s.close()
 
-    svc=s.query(Service).filter_by(name='afs').one()
-#    svc=s.query(Service).filter_by(name='syslog').one()
+def populate_service_list():
+    svc = s.query(Service).filter_by(name='afs').one()
+    assert(svc)
 
-    arch=s.query(Archetype).filter_by(name='aquilon').one()
+    arch = s.query(Archetype).filter_by(name='aquilon').one()
     assert(arch)
-
-    sli=ServiceListItem(arch,svc)
-    s.save(sli)
-    s.commit()
-    assert(sli)
-
-    print 'populated service list'
+    if empty(service_list_item):
+        sli=ServiceListItem(arch,svc)
+        s.save(sli)
+        s.commit()
+        assert(sli)
+        print 'populated service list'
     s.close()
 
 if __name__ == '__main__':
@@ -441,40 +606,7 @@ if __name__ == '__main__':
     d=s.query(Domain).first()
     assert(d)
 
-    populate_all_service_tables()
-
-
-"""
-    if empty(afs_cell,engine):
-        for c in ['a.ny','b.ny','c.ny','q.ny','q.ln']:
-            a=AfsCell(c+'.ms.com','afs_cell')
-            s.save(a)
-        s.commit()
-        print 'created afs cells'
-    else:
-        a=s.query(AfsCell).first()
-
-    if empty(service_instance,engine):
-        si = ServiceInstance(svc,a)
-        s.save(si)
-        try:
-            s.commit()
-        except Exception,e:
-            s.rollback()
-            print e
-        print 'populated a test service instance (%s)'%(si)
-    else:
-        si=s.query(ServiceInstance).first()
-
-    if empty(service_map,engine):
-        hub_type=s.query(LocationType).filter_by(type='hub').one()
-        loc=s.query(Location).filter(and_(
-            location.c.name=='ln',location.c.location_type_id==hub_type.id)).one()
-        sm=ServiceMap(si,loc)
-        s.save(sm)
-        s.commit()
-        print 'populated service map with a sample'
-    else:
-        sm=s.query(ServiceMap).first()
-
-"""
+    populate_service()
+    #assert for afs service within the next function call...
+    populate_service_list()
+    #TODO: assert, and MAKE NOSE testFunctions out of all these

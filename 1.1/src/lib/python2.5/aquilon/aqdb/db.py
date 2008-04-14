@@ -68,74 +68,7 @@ Session = scoped_session(sessionmaker(bind=engine,
                                       autoflush=True,
                                       transactional=True))
 
-""" Some very important things about the selection of attributes in the
-    sessionmaker call above:
 
-    *   When using a transactional session, either a rollback() or a close() call
-        is *required* when an error is raised by flush() or commit(). The
-        flush() error condition will issue a ROLLBACK to the database
-        automatically, but the state of the Session itself remains in an
-        "undefined" state until the user decides whether to rollback or close.
-
-    *   A commit() call unconditionally issues a flush(). Particularly when
-        using transactional=True in conjunction with autoflush=True, explicit
-        flush() calls are usually not needed.
-
-    *   Session also supports Python 2.5's with statement so that we can:
-
-        Session = sessionmaker(transactional=False)
-        sess = Session()
-        with sess.begin():
-            item1 = sess.query(Item).get(1)
-            item2 = sess.query(Item).get(2)
-            item1.foo = 'bar'
-            item2.bar = 'foo'
-
-    Methods that can be called against objects pulled from session.query():
-
-    *   expunge() removes an object from the Session, sending persistent
-        instances-> detached state, and pending instances-> transient state.
-
-    *   clear() expunges everything from the Session, but doesn't reset any
-        transactional state or connection resources. What you usually want
-        instead of clear is close()
-
-    *   close() method issues a clear(), and releases any transactional or
-        connection resources. When connections are returned to the connection
-        pool, whatever transactional state exists is rolled back.
-
-    *   reload()/expire(): to assist with the Session's "sticky" behavior,
-        instances which are present, individual objects can have all of their
-        attributes immediately reloaded from the database, or marked as
-        "expired".
-        This will cause a reload to occur upon the next access of any mapped
-        attributes. This includes all relationships, so lazy-loaders will be
-        re-initialized, eager relationships will be repopulated. Any changes
-        marked on the object are discarded.
-
-    Quickie review of Object States in the Session:
-
-    *Transient: an instance that's not in a session, and is not
-        saved to the database; i.e. it has no database identity. The only
-        relationship such an object has to the ORM is that its class has a
-        mapper() associated with it.
-
-    *Pending: when you save() a transient instance, it becomes pending. It still
-        wasn't actually flushed to the database yet, but it will be when the
-        next flush occurs.
-
-    *Persistent: An instance which is present in the session and has a record
-        in the database. You get persistent instances by either flushing so
-        that the pending instances become persistent, or by querying the
-        database for existing instances (or moving persistent instances from
-        other sessions into your local session).
-
-    *Detached: an instance which has a record in the database, but is not in any
-        session. Theres nothing wrong with this, and you can use objects
-        normally when they're detached, except they will not be able to issue
-        any SQL in order to load collections or attributes which are not yet
-        loaded, or were marked as "expired".
-"""
 
 def optional_comments(func):
     """ reduce repeated code to handle 'comments' column """
@@ -242,19 +175,11 @@ def gen_id_cache(obj_name):
         sess.close()
     return cache
 
-    """ Before we started using the thread local session, we needed to send
-        the instance from the persistent state to the detached state with
-        expire, so that when they are reused in another context they won't
-        cause errors from being in the persistent state, and marked as
-        "already attached to the session" which loaded them (because it was a
-        different session). """
-
-def empty(table, *args, **kw):
+def empty(table):
     """
         Returns True if no rows in table, helps in interative schema population
     """
-    count = engine.execute(table.count()).fetchone()[0]
-    if count < 1:
+    if  engine.execute(table.count()).fetchone()[0] < 1:
         return True
     else:
         return False
@@ -271,31 +196,31 @@ def fill_type_table(table,items):
         return
     i = insert(table)
     for t in items:
-        result = i.execute(type=t)
+        i.execute(type=t)
 
 
-def mk_name_id_table(name, meta, *args, **kw):
+def mk_name_id_table(name, my_meta, *args, **kw):
     """
         Many tables simply contain name and id columns, use this
         to reduce code volume and standardize DDL
     """
-    return Table(name, meta, \
+    return Table(name, my_meta, \
                 Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
                 Column('name', String(32), unique=True, index=True),
                 Column('creation_date', DateTime,
                        default=datetime.datetime.now),
-                Column('comments', String(255), nullable=True),*args,**kw)
+                Column('comments', String(255), nullable=True), *args, **kw)
 
-def mk_type_table(name, meta, *args, **kw):
+def mk_type_table(name, my_meta, *args, **kw):
     """
         Variant on name_id. Can and should reduce them to a single function
         (later)
     """
-    return Table(name, meta, \
+    return Table(name, my_meta, \
                 Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
                 Column('type', String(32), unique=True, index=True),
                 Column('creation_date', DateTime,
                        default=datetime.datetime.now),
-                Column('comments', String(255), nullable=True))
+                Column('comments', String(255), nullable=True), *args, **kw)

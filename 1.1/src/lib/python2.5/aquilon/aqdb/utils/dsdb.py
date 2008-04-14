@@ -127,7 +127,7 @@ class aqsyb:
             return rs
         except Sybase.DatabaseError, inst:
             print inst
-            #we're not raising this all the way up yet b/c it means you have
+            #we're not raising this b/c it means you have
             #to import Sybase everywhere...
             #raise Sybase.DatabaseError(inst)
 

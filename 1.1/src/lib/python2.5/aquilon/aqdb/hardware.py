@@ -197,14 +197,14 @@ Status is a static table and cannot be instanced, only queried. """
         return str(self.name)
 
 mapper(Status, status)
-if empty(status,engine):
+if empty(status):
     i=status.insert()
     for name in ['prod','dev','qa','build']:
         i.execute(name=name)
 
 ####POPULATION ROUTINES####
 def populate_vendor():
-    if empty(vendor,engine):
+    if empty(vendor):
         s = Session()
         for i in ['sun','ibm','hp','dell','intel','amd','broadcom', 'generic']:
             a=Vendor(i)
@@ -213,17 +213,17 @@ def populate_vendor():
         s.close()
 
 def populate_hardware_type():
-    if empty(hardware_type,engine):
+    if empty(hardware_type):
         fill_type_table(hardware_type,['machine','disk','cpu','nic','ram'])
 
 def populate_machine_type():
-    if empty(machine_type,engine):
+    if empty(machine_type):
         fill_type_table(machine_type,['rackmount', 'blade', 'workstation'])
 
 def populate_model():
-    if empty(model,engine):
-        s=Session()
-        v_cache=gen_id_cache(Vendor)
+    if empty(model):
+        s = Session()
+        v_cache = gen_id_cache(Vendor)
 
         hwt_cache={}
         for c in s.query(HardwareType).all():
@@ -233,8 +233,8 @@ def populate_model():
         for t in s.query(MachineType).all():
             m_cache[str(t)] = t
 
-        f = [['ibm','hs20','machine','blade'],
-            ['ibm','ls20','machine','blade'],
+        f = [['ibm', 'hs20', 'machine', 'blade'],
+            ['ibm', 'ls20', 'machine','blade'],
             ['ibm','hs21','machine','blade'],
             ['ibm','hs40','machine','blade'],
             ['hp','bl35p','machine','blade'],

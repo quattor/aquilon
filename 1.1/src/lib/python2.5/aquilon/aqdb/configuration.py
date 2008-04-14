@@ -59,27 +59,8 @@ class CfgTLD(aqdbType):
     """
     pass
 mapper(CfgTLD, cfg_tld, properties={
-    'creation_date' : deferred(cfg_tld.c.creation_date)})
-
-
-""" Config Source Type are labels for the 'type' attribute in the
-    config_source table, supplied to satisfy 2NF. Currently we support
-    2 types of configuration, aqdb, and quattor. Later, we'll be supporting
-    a new type, 'Cola'
-"""
-cfg_source_type = mk_type_table('cfg_source_type',meta)
-meta.create_all()
-
-
-class CfgSourceType(aqdbType):
-    """ Config Source Type are labels for the 'type' attribute in the
-        config_source table, supplied to satisfy 2NF. Currently we support
-        2 types of configuration, aqdb, and quattor. Later, we'll be supporting
-        a new type, 'Cola'
-    """
-mapper(CfgSourceType, cfg_source_type, properties={
-    'creation_date' : deferred(cfg_source_type.c.creation_date)})
-
+    'creation_date' : deferred(cfg_tld.c.creation_date),
+    'comments'      : deferred(cfg_tld.c.comments)})
 
 cfg_path = Table('cfg_path',meta,
     Column('id', Integer, Sequence('cfg_path_id_seq'), primary_key=True),
@@ -119,7 +100,6 @@ class CfgPath(aqdbBase):
 
 mapper(CfgPath,cfg_path,properties={
     'tld': relation(CfgTLD,remote_side=cfg_tld.c.id,lazy=False),
-    'category':relation(CfgTLD,remote_side=cfg_tld.c.type),
     'creation_date':deferred(cfg_path.c.creation_date),
     'comments':deferred(cfg_path.c.comments)})
 
@@ -145,7 +125,7 @@ mapper(Archetype,archetype, properties={
 
 #######POPULATION FUNCTIONS########
 def populate_tld():
-    if empty(cfg_tld, engine):
+    if empty(cfg_tld):
         import os
         tlds=[]
         for i in os.listdir(const.cfg_base):
@@ -155,14 +135,10 @@ def populate_tld():
 
         fill_type_table(cfg_tld, tlds)
 
-def populate_cst():
-    if empty(cfg_source_type,engine):
-        fill_type_table(cfg_source_type,['quattor','aqdb'])
-
 def create_paths():
     s = Session()
     created=[]
-    if empty(cfg_path,engine):
+    if empty(cfg_path):
         for root,dirs,files in os.walk(const.cfg_base):
             for d in dirs:
                 c=os.path.join(root,d)
@@ -184,12 +160,13 @@ def create_paths():
 def create_aquilon_archetype():
     s = Session()
     if empty(archetype):
+        print 'CREATING AQUILON'
         a=Archetype('aquilon')
         s.save(a)
         s.commit()
         print 'created aquilon archetype'
     s.close()
-        
+
 def get_quattor_src():
     """ ugly ugly way to initialize a quattor repo for import"""
 
@@ -211,18 +188,42 @@ def get_quattor_src():
 if __name__ == '__main__':
     get_quattor_src()
     populate_tld()
-    populate_cst()
     create_paths()
     create_aquilon_archetype()
 
     s=Session()
 
     a=s.query(CfgTLD).first()
-    b=s.query(CfgSourceType).first()
-    c=s.query(CfgPath).first()
-    d=s.query(Archetype).first()
+    b=s.query(CfgPath).first()
+    c=s.query(Archetype).first()
 
     assert(a)
     assert(b)
     assert(c)
-    assert(d)
+
+""" Config Source Type are labels for the 'type' attribute in the
+    config_source table, supplied to satisfy 2NF. Currently we support
+    2 types of configuration, aqdb, and quattor. Later, we'll be supporting
+    a new type, 'Cola'
+"""
+"""
+###We're not using it yet, and it hangs out like a sore thumb in the schema.
+
+cfg_source_type = mk_type_table('cfg_source_type',meta)
+meta.create_all()
+
+
+class CfgSourceType(aqdbType):
+    "" Config Source Type are labels for the 'type' attribute in the
+        config_source table, supplied to satisfy 2NF. Currently we support
+        2 types of configuration, aqdb, and quattor. Later, we'll be supporting
+        a new type, 'Cola'
+    ""
+mapper(CfgSourceType, cfg_source_type, properties={
+    'creation_date' : deferred(cfg_source_type.c.creation_date)})
+
+
+def populate_cst():
+    if empty(cfg_source_type):
+        fill_type_table(cfg_source_type,['quattor','aqdb'])
+"""

@@ -34,19 +34,19 @@ else:
     from IPython.Shell import IPShellEmbed
     ipshell = IPShellEmbed()
 
-sys.path.append('../..')
 
-from db import meta, engine, Session
 
-from location import *
-from network import *
-from service import *
-from configuration import *
-from hardware import *
-from interface import *
-from build import *
-from auth import *
+if __name__ == '__main__':
+    sys.path.append('../..')
 
-s=Session()
+    from db import meta, Session
 
-ipshell()
+    from location import *
+    from network import *
+    from service import *
+    from configuration import *
+    from hardware import *
+    from interface import *
+    from auth import *
+    s=Session()
+    ipshell()

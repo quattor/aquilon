@@ -68,7 +68,7 @@ mapper(Netmask,netmask,properties={
         'comments': deferred(netmask.c.comments)})
 
 def populate_profile():
-    if empty(netmask,engine):
+    if empty(netmask):
         i = netmask.insert()
 
         f = open('../../../../etc/data/cidr-data','r')
@@ -136,7 +136,7 @@ dns_domain = Table('dns_domain', meta,
     Column('comments', String(255), nullable=True))
 dns_domain.create(checkfirst=True)
 
-if empty(dns_domain,engine):
+if empty(dns_domain):
     i=insert(dns_domain)
     i.execute(name='ms.com', comments='root node')
     i.execute(name='one-nyp',parent_id=1, comments='1 NYP test domain')
@@ -167,7 +167,7 @@ class DnsDomain(aqdbBase):
         pl.reverse()
         return '.'.join(pl)
 
-    def append(self,node,**kw):
+    def append(self,node):
         if isinstance(node, DnsDomain):
             node.parent = self
             self.sublocations[node] = node
@@ -223,12 +223,12 @@ def populate_networks():
     s.flush()
 
 if __name__ == '__main__':
-    if empty(network_type,engine):
+    if empty(network_type):
         fill_type_table(network_type,
                         ['transit', 'vip', 'management', 'unknown'])
 
     populate_profile()
 
-    if empty(network,engine):
+    if empty(network):
         from aquilon.aqdb.utils.dsdb import dump_network
         populate_networks()
