@@ -265,15 +265,12 @@ class DatabaseBroker(AccessBroker):
         # NOTE: Defaulting the name of the quattor server to quattorsrv.
         quattorsrv = self.session.query(QuattorServer).filter_by(
                 name='quattorsrv').one()
-        # NOTE: Does DNS domain matter here?
-        dnsdomain = self.session.query(DnsDomain).filter_by(
-                name='one-nyp').one()
         # For now, succeed without error if the domain already exists.
         dbdomain = self.session.query(Domain).filter_by(name=domain).first()
         # FIXME: Check that the domain name is composed only of characters
         # that are valid for a directory name.
         if not dbdomain:
-            dbdomain = Domain(domain, quattorsrv, dnsdomain, dbuser)
+            dbdomain = Domain(domain, quattorsrv, dbuser)
             self.session.save_or_update(dbdomain)
         # We just need to confirm that the new domain can be added... do
         # not need anything from the DB to be passed to pbroker.
