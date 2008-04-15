@@ -69,8 +69,8 @@ class Service(aqdbBase):
         We're not currently subtyping or 'grading' services with 'prod/qa/dev' etc.
         It would have to be accomplished with the name, i.e. production-dns, and
         the burden of naming can be greatly reduced by service lists (which make
-        their presence known shortly), though this may be revamped later.
-"""
+        their presence known shortly), though this may be revamped later. """
+
     @optional_comments
     def __init__(self,name):
         self.name=name.strip().lower()
@@ -123,8 +123,11 @@ system = Table('system',meta,
     Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
     Column('name', String(64), unique=True, index=True),
     Column('type_id', Integer,
-           ForeignKey('system_type.id'),
-           nullable=False),
+           ForeignKey('system_type.id'), nullable=False),
+    #TODO: don't hard code the ID in dns_domain as default
+    #This will probably break on Oracle
+    Column('dns_domain_id', Integer,
+           ForeignKey('dns_domain.id'), nullable=False, default=1),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 system.create(checkfirst=True)
@@ -145,15 +148,44 @@ class System(aqdbBase):
         It is perhaps the most important table so far, and replaces the notion of
         'host' as we've used it in our discussions and designs thus far.
     """
-    pass
+    def __init__(self,name,**kw):
+        if isinstance (name,str):
+            self.name = name.strip().lower()
+        else:
+            raise ArgumentError('name must be string type')
+
+        if kw.has_key('type'):
+            if isinstance (typ,SystemType):
+                self.type=typ
+            else:
+                raise ArgumentError('type argument must be SystemType')
+        #polymorphic inheritance should cover this anyway, and I might
+        #remove it provided I can validate it's always automated.
+
+        if kw.has_key('dns_domain'):
+            if isinstance(dns_domain, str):
+                dns_dom_id=engine.execute(
+                "select id from dns_domain where name = '%s'"%(kw['dns_domain'])
+                ).fetchone()[0]
+                if dns_domain_id:
+                    self.dns_domain_id=dns_dom_id
+                else:
+                    raise ArgumentError("can't find dns domain '%s'"%(kw['dns_domain']))
+        else:
+            raise ArgumentError('you must provide a DNS Domain')
+
+    def _fqdn(self):
+        return '.'.join([str(self.name),str(self.dns_domain)])
+    fqdn = property(_fqdn)
 
 mapper(System, system, polymorphic_on=system.c.type_id, \
        polymorphic_identity=s.execute(
     "select id from system_type where type='base_system_type'").fetchone()[0],
     properties={
-        'type':relation(SystemType),
+        'type'          : relation(SystemType),
+        'dns_domain'    : relation(DnsDomain),
         'creation_date' : deferred(system.c.creation_date),
-        'comments': deferred(system.c.comments)})
+        'comments'      : deferred(system.c.comments)})
 
 quattor_server = Table('quattor_server',meta,
     Column('id', Integer, ForeignKey('system.id'), primary_key=True),)
@@ -165,12 +197,17 @@ class QuattorServer(System):
         remove cyclical dependencies of hosts, and domains (hosts must be
         in exaclty one domain, and a domain must have a host as it's server)
     """
-    pass
+    def __init__(self,name,**kw):
+        #default dns domain for quattor servers to ms.com
+        if not kw.has_key('dns_domain'):
+            kw['dns_domain'] = 'ms.com'
+        super(QuattorServer, self).__init__(name,**kw)
+
 
 mapper(QuattorServer,quattor_server,
         inherits=System, polymorphic_identity=s.execute(
           "select id from system_type where type='quattor_server'").fetchone()[0],
-       properties={ 'system': relation(System,backref='quattor_server')})
+       properties={'system': relation(System,backref='quattor_server')})
 
 """ TODO: a better place for dns-domain. We'll need to flesh out DNS
         support within aqdb in the coming weeks after the handoff, but for now,
@@ -183,8 +220,6 @@ domain = Table('domain', meta,
            ForeignKey('quattor_server.id'), nullable=False),
     Column('compiler', String(255), nullable=False,
            default='/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'),
-    Column('dns_domain_id', Integer,
-           ForeignKey('dns_domain.id'), nullable=False, default=2),
     Column('owner_id', Integer,
            ForeignKey('user_principal.id'),nullable=False,
            default=s.execute(
@@ -197,22 +232,16 @@ class Domain(aqdbBase):
     """ Domain is to be used as the top most level for path traversal of the SCM
             Represents individual config repositories
     """
-    def __init__(self, name, server, dns_domain, owner, **kw):
+    def __init__(self, name, server, owner, **kw):
         self.name=name.strip().lower()
         if isinstance(server,QuattorServer):
             self.server = server
         else:
             raise ArgumentError('second argument must be a Quattor Server')
-
-        if isinstance(dns_domain, DnsDomain):
-            self.dns_domain = dns_domain
-        else:
-            raise ArgumentError('third argument must be a DNS Domain')
-
         if isinstance(owner, UserPrincipal):
             self.owner = owner
         else:
-            raise ArgumentError('fourth argument must be a Kerberos Principal')
+            raise ArgumentError('third argument must be a Kerberos Principal')
 
         if kw.has_key('compiler'):
             self.compiler = kw.pop('compiler')
@@ -221,7 +250,6 @@ class Domain(aqdbBase):
 
 mapper(Domain,domain,properties={
     'server':           relation(QuattorServer,backref='domain'),
-    'dns_domain':       relation(DnsDomain),
     'owner':            relation(UserPrincipal,remote_side=user_principal.c.id),
     'creation_date':    deferred(domain.c.creation_date),
     'comments':         deferred(domain.c.comments)})
@@ -275,9 +303,9 @@ class Host(System):
         return self.machine.location.sysloc()
     sysloc = property(_sysloc)
 
-    def _fqdn(self):
-        return '.'.join([str(self.name),str(self.domain.dns_domain)])
-    fqdn = property(_fqdn)
+    #def _fqdn(self):
+    #    return '.'.join([str(self.name),str(self.dns_domain)])
+    #fqdn = property(_fqdn)
 
     def __repr__(self):
         return 'Host %s'%(self.name)
@@ -357,15 +385,17 @@ class AfsCell(System):
         model other types of service providers besides just host
     """
     @optional_comments
-    def __init__(self,name,*args,**kw):
+    def __init__(self,name,**kw):
         if isinstance(name,str):
             name=name.strip().lower()
-            ##Achtung: This regex hardcodes *.**.ms.com ##
-            m=re.match("^([a-z]{1})\.([a-z]{2})\.(ms\.com)$",name)
-            if len(m.groups()) != 3:
+            #FIX ME: this was a rush job to get it working before I leave for
+            #someone please implement this with a better message
+            #m=re.match("^([a-z]{1})\.([a-z]{2})$",name)
+            #m.groups should equal 2.
+            if name.count('.') != 1:
                 msg="""
-                    Names of afs cell's must match the pattern 'X.YZ.ms.com'
-                    where X,Y,Z are all single alphabetic characters, and YZ
+                    Names of afs cell's must match the pattern 'X.YZ'
+                    where X.YZ are all single alphabetic characters, and YZ
                     must match the name of a valid HUB or BUILDING. """
                     ###FIX ME: BROKER HAS TO ENFORCE THIS (NO SESSION CALLS ARE
                     ###        ALLOWED IN __init__() METHODS.)
@@ -378,6 +408,9 @@ class AfsCell(System):
             msg="name of Afs Cell must be a string, received '%s', %s"%(
                 name,type(name))
             raise ArgumentError(msg)
+
+        if not kw.has_key('dns_domain'):
+            kw['dns_domain'] = 'ms.com'
 
         super(AfsCell, self).__init__(name,**kw)
         ###TODO: Would it be ok to make a service instance here? a cell without
@@ -552,14 +585,13 @@ def create_domains():
     else:
         qs=s.query(QuattorServer).filter_by(name='quattorsrv').one()
 
-    onenyp = s.query(DnsDomain).filter_by(name='one-nyp').one()
     njw = s.query(UserPrincipal).filter_by(name='njw').one()
     quattor = s.query(UserPrincipal).filter_by(name='quattor').one()
 
     if empty(domain):
-        p = Domain('production', qs, onenyp, njw,
+        p = Domain('production', qs, njw,
                 comments='The master production area')
-        q = Domain('qa', qs, onenyp, quattor, comments='Do your testing here')
+        q = Domain('qa', qs, quattor, comments='Do your testing here')
         s.save_or_update(p)
         s.save_or_update(q)
 

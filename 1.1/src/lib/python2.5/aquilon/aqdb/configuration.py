@@ -22,7 +22,7 @@ from sqlalchemy.orm import mapper, relation, deferred
 
 import os
 osuser = os.environ.get('USER')
-qdir = os.path.join( '/var/tmp', osuser, 'quattor/' )
+qdir = os.path.join( '/var/tmp', osuser, 'quattor/')
 const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor/')
 
 def splitall(path):
