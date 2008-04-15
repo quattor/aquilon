@@ -172,13 +172,18 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def add_model (self, name, vendor, hardware, machine):
+    def add_model (self, name, vendor, hardware):
         # NOTE: This does not try to verify that the model exists on the
         # filesystem anywhere.
-        return self.dbbroker.add_model(name, vendor, hardware, machine, session=True)
+        return self.dbbroker.add_model(name, vendor, hardware, session=True)
 
 # --------------------------------------------------------------------------- #
 
     def pxeswitch (self, host, **kwargs):
         return self.pbroker.pxeswitch(host, **kwargs)
+
+# --------------------------------------------------------------------------- #
+
+    def add_machine (self, name, location, model):
+        return self.dbbroker.add_machine(name, location, model, session=True)
 

@@ -325,26 +325,38 @@ class DatabaseBroker(AccessBroker):
             stat.append(dbuser)
 
     @transact
-    def add_model (self, name, vendor, hardware, machine, **kwargs):
-        v,h,m = None, None, None
+    def add_model (self, name, vendor, hardware, **kwargs):
         try:
-            v = self.session.query(Vendor).filter_by(name = vendor).one()
-        except StandardError, e:
-            raise ValueError("Vendor '"+vendor+"' not found!")
+            v = self.session.query(Vendor).filter_by(name = vendor).first()
+        except:
+            raise ArgumentError("Vendor '"+vendor+"' not found!")
 
         try:
-            h = self.session.query(HardwareType).filter_by(type = hardware).one()
-        except StandardError, e:
-            raise ValueError("Hardware type '"+hardware+"' not found!")
+            h = self.session.query(HardwareType).filter_by(type = hardware).first()
+        except:
+            raise ArgumentError("Hardware type '"+hardware+"' not found!")
 
         try:
-            m = self.session.query(MachineType).filter_by(type = machine).one()
-        except StandardError, e:
-            raise ValueError("Machine type '"+machine+"' not found!")
-
-#        try:
-#            model = Model(name, v, h, m)
-#            self.session.save(Model)
-#        except StandardError, e:
-#            raise ValueError("Vendor '"+vendor+"' not found!")
+            model = Model(name, v, h)
+            self.session.save(model)
+        except InvalidRequestError, e:
+            raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
         return "New model successfully created"
+
+    @transact
+    def add_machine (self, name, location, model, **kwargs):
+        try:
+            loc = self.session.query(Location).filter_by(name = location).first()
+        except:
+            raise ArgumentError("Location name '"+location+"' not found!")
+        try:
+            mod = self.session.query(Model).filter_by(name = model).first()
+        except:
+            raise ArgumentError("Model name '"+model+"' not found!");
+
+        try:
+            m = Machine (name, loc, mod)
+            self.session.save(m)
+        except InvalidRequestError, e:
+            raise ValueError("Requested machine could not be created!\n"+e.__str__())
+        return "New machine succesfully created"

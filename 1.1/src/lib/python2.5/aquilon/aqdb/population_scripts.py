@@ -23,10 +23,10 @@ from sqlalchemy.sql import and_
 
 from location import *
 from network import *
-from service import *
-from configuration import *
 from hardware import *
+from configuration import *
 from interface import *
+from service import *
 
 s=Session()
 

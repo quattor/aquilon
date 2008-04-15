@@ -87,9 +87,8 @@
          <option name="name" type="string">Name of the new model</option>
          <option name="vendor" type="string">Vendor name</option>
          <option name="hardware" type="string">Hardware type name</option>
-         <option name="machine" type="string">Machine type name</option>
       </optgroup>
-      <transport method="put" path="hardware/%(hardware)s/%(machine)s/%(vendor)s/%(name)s" />
+      <transport method="put" path="hardware/%(hardware)s/%(vendor)s/%(name)s" />
    </command>
 
    <command name="add_service">
@@ -388,6 +387,16 @@
          <option name="name" type="string">city name</option>
       </optgroup>
       <transport method="delete" path="location/city/%(name)s" />
+   </command>
+
+   <command name="add_machine">
+      %prog  add machine --name MACHINE_NAME --location LOCATION --type TYPE --model MODEL
+      <optgroup name="del_city_opts" mandatory="True" fields="all">
+         <option name="name" type="string">machine name</option>
+         <option name="location" type="string">location of the new machine</option>
+         <option name="model" type="string">machine model</option>
+      </optgroup>
+      <transport method="put" path="/machine/%(name)s/%(location)s/%(model)s" />
    </command>
 
    <command name="run_dummy_command">

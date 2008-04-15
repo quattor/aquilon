@@ -12,7 +12,7 @@ for implementing the various aq commands.
 
 To implement a command, define a transport for it in input.xml and
 then add a command_<name>[_trigger] method to the ResponsePage class.
-Any variables in the URL itself will be available as 
+Any variables in the URL itself will be available as
 request.args["varname"][0] where "varname" is the name of the
 option.  (Any normal query/post variables will also be in this dict.)
 
@@ -26,13 +26,13 @@ methods) are available, but only the expected methods for that relative
 URL will be assigned to render_GET, render_POST, etc.  The rest will be
 dormant.
 
-As the request comes in (and passes through the various 
+As the request comes in (and passes through the various
 getChildWithDefault() calls) it will be checked for extensions that
 match the available format functions.  A request for location.html,
 for example, will retrieve 'location' and format it with format_html().
 
 ToDo:
-    - Possibly massage the incoming data - simplify lists back to 
+    - Possibly massage the incoming data - simplify lists back to
         single variables, handle put content, etc.
     - Add some sort of interface that can be implemented for
         objects to give hints on how they should be rendered.
@@ -116,7 +116,7 @@ class ResponsePage(resource.Resource):
         that checks for the appropriate method to delegate to.  This can
         be expanded out to do any default/incoming processing...
 
-        One possibility would be for it to simplify request.args to 
+        One possibility would be for it to simplify request.args to
         have another value, maybe request.simple_args that decomposed
         single-element lists back to single variables.
 
@@ -290,7 +290,7 @@ class ResponsePage(resource.Resource):
         #return server.NOT_DONE_YET
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq show_host --all has not been implemented yet"
-    
+
     def command_show_host_hostname(self, request):
         """aqcommand: aq show host --hostname=<host>"""
         name = request.args['hostname'][0]
@@ -510,7 +510,7 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
-    
+
     def command_show_location_type(self, request):
         """aqcommand: aq show location --type"""
         type = request.args['type'][0]
@@ -530,7 +530,7 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
-    
+
     def command_show_location_name(self, request):
         """aqcommand: aq show location --name=<location>"""
         type = request.args['type'][0]
@@ -725,13 +725,12 @@ class ResponsePage(resource.Resource):
             name = request.args['name'][0]
             vendor = request.args['vendor'][0]
             hardware = request.args['hardware'][0]
-            machine = request.args['machine'][0]
         except Error, e:
             self.wrapError('Invalid parameter sequence',request);
             return server.ERROR
 
-        d = self.broker.add_model(name, vendor, hardware, machine)
-        
+        d = self.broker.add_model(name, vendor, hardware)
+
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
@@ -746,12 +745,24 @@ class ResponsePage(resource.Resource):
         else:
             self.wrapError('Invalid parameter sequence!', request)
             return server.ERROR
-                
+
         d = d.addCallback(self.format, request)
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
+
+    def command_add_machine (self, request):
+        try:
+            name = request.args['name'][0]
+            location = request.args['location'][0]
+            model = request.args['model'][0]
+        except:
+            raise ArgumentError('Argument error')
+        d=self.broker.add_machine(name, location, model)
+        return server.NOT_DONE_YET
+
+#==============================================================================
 
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
@@ -805,7 +816,7 @@ class RestServer(ResponsePage):
                             if current_variable != path_variable:
                                 log.err("Could not use variable '"
                                         + path_variable + "', already have "
-                                        + "dynamic variable '" 
+                                        + "dynamic variable '"
                                         + current_variable + "'.")
                                 # XXX: Raise an error if they don't match
                                 container = container.dynamic_child

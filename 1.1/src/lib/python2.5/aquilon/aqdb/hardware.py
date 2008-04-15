@@ -51,23 +51,11 @@ mapper(HardwareType,hardware_type,properties={
     'creation_date':deferred(hardware_type.c.creation_date),
     'comments':deferred(hardware_type.c.comments)})
 
-#machine type: rackmount, blade, workstation
-machine_type=mk_type_table('machine_type', meta)
-machine_type.create(checkfirst=True)
-
-class MachineType(aqdbType):
-    pass
-
-mapper(MachineType,machine_type, properties={
-    'creation_date':deferred(machine_type.c.creation_date),
-    'comments':deferred(machine_type.c.comments)})
-
 model = Table('model',meta,
     Column('id', Integer, Sequence('model_id_seq'), primary_key=True),
     Column('name', String(64), unique=True, index=True),
     Column('vendor_id', Integer, ForeignKey('vendor.id')),
     Column('hardware_type_id', Integer, ForeignKey('hardware_type.id')),
-    Column('machine_type_id', Integer, ForeignKey('machine_type.id'), nullable=True),
     #TODO: rethink the nullable thing(subtype hardware type with machine_type)
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments',String(255)))
@@ -77,7 +65,7 @@ class Model(aqdbBase):
     """ Model is a combination of vendor and product name used to
         catalogue various different kinds of hardware """
     @optional_comments
-    def __init__(self,name,vndr,h_typ,m_typ=None):
+    def __init__(self,name,vndr,h_typ):
         self.name = name.lower().strip()
 
         if isinstance(vndr,Vendor):
@@ -105,20 +93,13 @@ class Model(aqdbBase):
             raise ArgumentError("Incorrect hardware type specified '%s'" %
                     h_typ)
             return
-        if m_typ:
-            if isinstance(m_typ,MachineType):
-                self.machine_type = m_typ
-            else:
-                raise ArgumentError("Incorrect machine type specified '%s'" %
-                                    m_typ)
-                return
+
     def __repr__(self):
         return '%s %s'%(self.vendor.name,self.name)
 
 mapper(Model,model,properties={
     'vendor':relation(Vendor),
     'hardware_type':relation(HardwareType),
-    'machine_type':relation(MachineType),
     'creation_date':deferred(model.c.creation_date),
     'comments': deferred(model.c.comments)})
 
@@ -131,7 +112,6 @@ machine = Table('machine', meta,
     Column('name', String(32), unique=True, index=True), #nodename
     Column('location_id', Integer, ForeignKey('location.id')),
     Column('model_id', Integer, ForeignKey('model.id')),
-    Column('machine_type_id', Integer, ForeignKey('machine_type.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 machine.create(checkfirst=True)
@@ -168,7 +148,7 @@ Argument to 'node' must be integer, got '%s', type '%s'"""%(kw['node'],
         return 'Machine: %s is a %s located in %s'%(
             self.name,self.model,self.location)
     def type(self):
-        return str(self.model.machine_type)
+        return str(self.model.hardware_type)
 
 mapper(Machine,machine, properties={
     'location': relation(Location),
@@ -205,6 +185,7 @@ if empty(status):
 ####POPULATION ROUTINES####
 def populate_vendor():
     if empty(vendor):
+        print "Populating vendor"
         s = Session()
         for i in ['sun','ibm','hp','dell','intel','amd','broadcom', 'generic']:
             a=Vendor(i)
@@ -214,14 +195,12 @@ def populate_vendor():
 
 def populate_hardware_type():
     if empty(hardware_type):
-        fill_type_table(hardware_type,['machine','disk','cpu','nic','ram'])
-
-def populate_machine_type():
-    if empty(machine_type):
-        fill_type_table(machine_type,['rackmount', 'blade', 'workstation'])
+        print "Populating hardware_type"
+        fill_type_table(hardware_type,['rackmount', 'blade', 'workstation','disk','cpu','nic','ram'])
 
 def populate_model():
     if empty(model):
+        print "Populating model table"
         s = Session()
         v_cache = gen_id_cache(Vendor)
 
@@ -229,30 +208,27 @@ def populate_model():
         for c in s.query(HardwareType).all():
             hwt_cache[str(c)] = c
 
-        m_cache={}
-        for t in s.query(MachineType).all():
-            m_cache[str(t)] = t
-
-        f = [['ibm', 'hs20', 'machine', 'blade'],
-            ['ibm', 'ls20', 'machine','blade'],
-            ['ibm','hs21','machine','blade'],
-            ['ibm','hs40','machine','blade'],
-            ['hp','bl35p','machine','blade'],
-            ['hp','bl465c','machine','blade'],
-            ['hp','bl480c','machine','blade'],
-            ['hp','bl680c','machine','blade'],
-            ['hp','bl685c','machine','blade'],
-            ['hp','dl145','machine','rackmount'],
-            ['hp','dl580','machine','rackmount'],
-            ['sun','ultra-10','machine','workstation'],
-            ['dell','poweredge_6850','machine','rackmount'],
-            ['dell','poweredge_6650', 'machine', 'rackmount'],
-            ['dell','poweredge_2650','machine','rackmount'],
-            ['dell','poweredge_2850','machine','rackmount'],
-            ['dell','optiplex_260','machine','workstation']]
+        f = [['ibm', 'hs20','blade'],
+            ['ibm', 'ls20','blade'],
+            ['ibm','hs21','blade'],
+            ['ibm','hs40','blade'],
+            ['hp','bl35p','blade'],
+            ['hp','bl465c','blade'],
+            ['hp','bl480c','blade'],
+            ['hp','bl680c','blade'],
+            ['hp','bl685c','blade'],
+            ['hp','dl145','rackmount'],
+            ['hp','dl580','rackmount'],
+            ['sun','ultra-10','workstation'],
+            ['dell','poweredge_6850','rackmount'],
+            ['dell','poweredge_6650', 'rackmount'],
+            ['dell','poweredge_2650','rackmount'],
+            ['dell','poweredge_2850','rackmount'],
+            ['dell','optiplex_260','workstation']]
 
         for i in f:
-            m=Model(i[1],v_cache[i[0]],hwt_cache[i[2]],m_cache[i[3]])
+            m=Model(i[1],v_cache[i[0]],hwt_cache[i[2]])
+            print m
             s.merge(m)
         try:
             s.commit()
@@ -264,5 +240,4 @@ def populate_model():
 if __name__ == '__main__':
     populate_vendor()
     populate_hardware_type()
-    populate_machine_type()
     populate_model()
