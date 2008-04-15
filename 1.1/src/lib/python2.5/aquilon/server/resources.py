@@ -52,22 +52,17 @@ from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
         NotFoundException
+from aquilon.server.formats import Formatter
 
 class ResponsePage(resource.Resource):
 
-    def __init__(self, broker, path, path_variable=None):
+    def __init__(self, broker, path, formatter, path_variable=None):
         self.path = path
         self.broker = broker
         self.path_variable = path_variable
         self.dynamic_child = None
         resource.Resource.__init__(self)
-        self.formats = []
-        for attr in dir(self):
-            if not attr.startswith("format_"):
-                continue
-            if not callable(getattr(self,attr)):
-                continue
-            self.formats.append(attr[7:])
+        self.formatter = formatter
 
     def getChildWithDefault(self, path, request):
         """Overriding this method to parse formatting requests out
@@ -75,7 +70,7 @@ class ResponsePage(resource.Resource):
 
         # A good optimization here would be to have the resource store
         # a compiled regular expression to use instead of this loop.
-        for style in self.formats:
+        for style in self.formatter.formats:
             #log.msg("Checking style: %s" % style)
             extension = "." + style
             if path.endswith(extension):
@@ -133,70 +128,6 @@ class ResponsePage(resource.Resource):
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
         return m(request)
 
-    # All of these wrap* functions should probably be elsewhere, and
-    # change depending on what should go back to the client.
-    def wrapRowsInTable(self, rp):
-        retval = []
-        if ( rp is None ):
-            return "<p>No results.</p>"
-        for row in rp:
-            data = [ "<td>%s</td>" % elem for elem in row ]
-            retval.append( "<tr>\n" + "\n".join(data) + "\n</tr>\n" )
-        retstr = "<table>\n" + "\n".join(retval) + "\n</table>\n"
-        return str(retstr)
-
-    # This is the wrong spot for this - but where should it go?  Should
-    # it be in one of the Host* classes, which is then inherited by the
-    # other?
-    def wrapHostInTable(self, rp):
-        print "Attempting results"
-        retval = []
-        if ( rp is None ):
-            return "<p>No results.</p>"
-        for h in rp:
-            data = "<td>%s</td><td>%s</td>" % (h.id, h.name)
-            retval.append( "<tr>\n" + data + "\n</tr>\n" )
-        retstr = "<table>\n" + "\n".join(retval) + "\n</table>\n"
-        print "returning ", retstr
-        return str(retstr)
-
-    # This is the wrong spot for this - but where should it go?
-    def wrapAqdbTypeInTable(self, rp):
-        print "Attempting results"
-        retval = []
-        if ( rp is None ):
-            return "<p>No results.</p>"
-        for o in rp:
-            data = "<td>%s</td><td>%s</td>" % (o.id, o.type)
-            retval.append( "<tr>\n" + data + "\n</tr>\n" )
-        retstr = "<table>\n" + "\n".join(retval) + "\n</table>\n"
-        print "returning ", retstr
-        return str(retstr)
-
-    # This is the wrong spot for this - but where should it go?
-    def wrapLocationInTable(self, rp):
-        print "Attempting results"
-        retval = []
-        if ( rp is None ):
-            return "<p>No results.</p>"
-        for loc in rp:
-            data = "<td>%s</td><td>%s</td>" % (loc.id, loc.name)
-            retval.append( "<tr>\n" + data + "\n</tr>\n" )
-        retstr = "<table>\n" + "\n".join(retval) + "\n</table>\n"
-        print "returning ", retstr
-        return str(retstr)
-
-    def wrapTableInBody(self, result):
-        retval = """
-        <html>
-        <head><title>%s</title></head>
-        <body>
-        %s
-        </body>
-        </html>
-        """ % (self.path, result)
-        return str(retval)
-
     def check_arguments(self, request, required = [], optional = []):
         """Check for the required and optional arguments.
 
@@ -239,41 +170,7 @@ class ResponsePage(resource.Resource):
         style = getattr(self, "output_format", None)
         if style is None:
             style = getattr(request, "output_format", "raw")
-        formatter = getattr(self, "format_" + style, self.format_raw)
-        return formatter(result, request)
-
-    def format_raw(self, result, request):
-        # Any sort of custom printing here might be better suited for
-        # a different formatting function.
-        if isinstance(result, list):
-            return "\n".join([str(item) for item in result])
-        return str(result)
-
-    # FIXME: This should eventually be some sort of dynamic system...
-    # maybe try to ask result how it should be rendered, or check the
-    # request for hints.  For now, just wrap in a basic document.
-    def format_html(self, result, request):
-        if request.code and request.code >= 300:
-            title = "%d %s" % (request.code, request.code_message)
-        else:
-            simpleargs = {}
-            for (key, value) in request.args.items():
-                simpleargs[key] = value and value[0] or value
-            title = self.path % simpleargs
-        if isinstance(result, list):
-            msg = "<ul>\n<li>" + "</li>\n<li>".join(
-                    [str(item) for item in result]) + "</li>\n</ul>\n"
-        else:
-            msg = str(result)
-        retval = """
-        <html>
-        <head><title>%s</title></head>
-        <body>
-        %s
-        </body>
-        </html>
-        """ % (title, msg)
-        return str(retval)
+        return self.formatter.format(style, result, request)
 
     def finishRender(self, result, request):
         if result:
@@ -329,86 +226,26 @@ class ResponsePage(resource.Resource):
 
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
-        #print 'render_GET called'
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "show", "/host")
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
 
-        #d = self.broker.dbbroker.showHostAll()
-        #d = d.addCallback( self.wrapHostInTable )
-        #d = d.addCallback( self.wrapTableInBody )
-        #d = d.addCallback( self.finishRender, request )
-        #d = d.addErrback(self.wrapNonInternalError, request)
-        #d = d.addErrback(self.wrapError, request)
-        #return server.NOT_DONE_YET
-        request.setResponseCode( http.NOT_IMPLEMENTED )
+        request.setResponseCode(http.NOT_IMPLEMENTED)
         return "aq show_host --all has not been implemented yet"
 
     def command_show_host_hostname(self, request):
         """aqcommand: aq show host --hostname=<host>"""
-        name = request.args['hostname'][0]
 
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "show", "/host/%s" % name)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        #d = self.broker.dbbroker.showHost(name)
-        #d = d.addCallback( self.wrapHostInTable )
-        #d = d.addCallback( self.wrapTableInBody )
-        #d = d.addCallback( self.finishRender, request )
-        #d = d.addErrback(self.wrapNonInternalError, request)
-        #d = d.addErrback(self.wrapError, request)
-        #return server.NOT_DONE_YET
-        request.setResponseCode( http.NOT_IMPLEMENTED )
+        request.setResponseCode(http.NOT_IMPLEMENTED)
         return "aq show_host --hostname has not been implemented yet"
 
     def command_add_host(self, request):
         """aqcommand: aq add host --hostname=<host>"""
-        name = request.args['hostname'][0]
-        #request.content.seek(0)
 
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "add", "/host/%s" % name)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        #d = self.broker.dbbroker.addHost(name)
-        ## FIXME: Trap specific exceptions (host exists, etc.)
-        #d = d.addCallback( self.wrapHostInTable )
-        #d = d.addCallback( self.wrapTableInBody )
-        #d = d.addCallback( self.finishRender, request )
-        #d = d.addErrback(self.wrapNonInternalError, request)
-        #d = d.addErrback(self.wrapError, request)
-        #return server.NOT_DONE_YET
-        request.setResponseCode( http.NOT_IMPLEMENTED )
+        request.setResponseCode(http.NOT_IMPLEMENTED)
         return "aq add_host has not been implemented yet"
 
     def command_del_host(self, request):
         """aqcommand: aq del host --hostname=<host>"""
-        name = request.args['hostname'][0]
 
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "del", "/host/%s" % name)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        #d = self.broker.dbbroker.delHost(name)
-        ## FIXME: Trap specific exceptions (host exists, etc.)
-        #d = d.addCallback( self.finishOK, request )
-        #d = d.addErrback(self.wrapNonInternalError, request)
-        #d = d.addErrback(self.wrapError, request)
-        #return server.NOT_DONE_YET
-        request.setResponseCode( http.NOT_IMPLEMENTED )
+        request.setResponseCode(http.NOT_IMPLEMENTED)
         return "aq del_host has not been implemented yet"
 
     def command_assoc(self, request):
@@ -681,7 +518,8 @@ class ResponsePage(resource.Resource):
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
     def __init__(self, broker):
-        ResponsePage.__init__(self, broker, '')
+        formatter = Formatter()
+        ResponsePage.__init__(self, broker, '', formatter)
 
         # Regular Expression for matching variables in a path definition.
         # Currently only supports stuffing a single variable in a path
@@ -717,7 +555,8 @@ class RestServer(ResponsePage):
                         child = container.getStaticEntity(component)
                         if child is None:
                             #log.msg("Creating new static component '" + component + "'.")
-                            child = ResponsePage(self.broker, relative)
+                            child = ResponsePage(self.broker, relative,
+                                    formatter)
                             container.putChild(component, child)
                         container = child
                     else:
@@ -740,7 +579,7 @@ class RestServer(ResponsePage):
                         else:
                             #log.msg("Creating new dynamic component '" + component + "'.")
                             child = ResponsePage(self.broker, relative,
-                                                    path_variable=path_variable)
+                                    formatter, path_variable=path_variable)
                             container.dynamic_child = child
                             container = child
 
