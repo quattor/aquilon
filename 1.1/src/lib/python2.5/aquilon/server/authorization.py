@@ -22,8 +22,9 @@ class AuthorizationBroker(object):
             if action == 'show':
                 return True
             else:
-                raise AuthorizationException(
-                        "Unauthorized anonymous access attempt to %s on %s" % 
-                        (action, resource))
+                log.err("UNAUTHORIZED ACCESS to %s on %s" % (action, resource))
+                #raise AuthorizationException(
+                #        "Unauthorized anonymous access attempt to %s on %s" % 
+                #        (action, resource))
         return True
 

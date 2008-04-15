@@ -8,7 +8,13 @@
 #
 # This module is part of Aquilon
 """All database access should funnel through this module to ensure that it
-is properly backgrounded within twisted, and not blocking execution."""
+is properly backgrounded within twisted, and not blocking execution.
+
+Most methods will be called as part of a callback chain, and should
+expect to handle a generic result from whatever happened earlier in
+the chain.
+
+"""
 
 import os
 import re
@@ -23,11 +29,13 @@ from twisted.python.failure import Failure
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
         AuthorizationException
-from aquilon.aqdb.location import *
-from aquilon.aqdb.service import *
-from aquilon.aqdb.configuration import *
-from aquilon.aqdb.auth import *
-from aquilon.aqdb.hardware import *
+from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
+        Continent, Country, City, Building, Rack, Chassis, Desk
+from aquilon.aqdb.network import DnsDomain
+from aquilon.aqdb.service import Host, QuattorServer, Domain
+from aquilon.aqdb.configuration import Archetype
+from aquilon.aqdb.auth import UserPrincipal
+from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine
 
 # FIXME: This probably belongs in location.py
 const.location_types = ("company", "hub", "continent", "country", "city",
@@ -74,7 +82,7 @@ class DatabaseBroker(AccessBroker):
     #    return self.session.query(Host).filter_by(name=name).all()
 
     @transact
-    def add_location(self, name, type, parentname, parenttype,
+    def add_location(self, result, name, type, parentname, parenttype,
             fullname, comments, user, **kwargs):
         newLocation = self.session.query(Location).filter_by(name=name
                 ).join('type').filter_by(type=type).first()
@@ -122,7 +130,8 @@ class DatabaseBroker(AccessBroker):
             raise ArgumentError("unknown type %s", type)
 
         optional_args = {}
-        optional_args["fullname"] = fullname
+        if fullname:
+            optional_args["fullname"] = fullname
         if comments:
             optional_args["comments"] = comments
 
@@ -131,7 +140,7 @@ class DatabaseBroker(AccessBroker):
         return [newLocation]
 
     @transact
-    def del_location(self, name, type, user, **kwargs):
+    def del_location(self, result, name, type, user, **kwargs):
         try:
             oldLocation = self.session.query(Location).filter_by(name=name
                     ).join('type').filter_by(type=type).one()
@@ -143,40 +152,36 @@ class DatabaseBroker(AccessBroker):
         return
 
     @transact
-    def show_location(self, type=None, name=None, **kwargs):
-        log.msg("Attempting to generate a query...")
+    def show_location(self, result, type=None, name=None, **kwargs):
+        #log.msg("Attempting to generate a query...")
         query = self.session.query(Location)
         if type:
             # Not this easy...
             #kwargs["LocationType.type"] = type
-            log.msg("Attempting to add a type...")
+            #log.msg("Attempting to add a type...")
             query = query.join('type').filter_by(type=type)
             query = query.reset_joinpoint()
         if name:
             try:
-                log.msg("Attempting query for one...")
+                #log.msg("Attempting query for one...")
                 return [query.filter_by(name=name).one()]
             except InvalidRequestError:
                 raise NotFoundException(
                         "Location type='%s' name='%s' not found."
                         % (type, name))
-        log.msg("Attempting to query for all...")
+        #log.msg("Attempting to query for all...")
         return query.all()
 
     @transact
-    def show_location_type(self, **kwargs):
+    def show_location_type(self, result, user, **kwargs):
         return self.session.query(LocationType).filter_by(**kwargs).all()
 
     @transact
-    def make_aquilon(self, authorized, hostname, os, **kwargs):
+    def make_aquilon(self, result, hostname, os, **kwargs):
         """This creates a template file and saves a copy in the DB.
 
         It does *not* do pan compile... that happens outside this method.
         """
-
-        # The authorized variable is a dummy variable, as this is currently
-        # a callback of the authorization check.  That check would have
-        # raised an error if not authorized (so far).
 
         # FIXME: Uniqueness constraint needs to be addressed.
         #hostname = "ab1c1n12"
@@ -246,7 +251,7 @@ class DatabaseBroker(AccessBroker):
         return (user, None)
 
     @transact
-    def add_domain(self, domain, user, **kwargs):
+    def add_domain(self, result, domain, user, **kwargs):
         """Add the domain to the database, initialize as necessary."""
         (user, realm) = self.split_principal(user)
         # FIXME: UserPrincipal should include the realm...
@@ -275,7 +280,7 @@ class DatabaseBroker(AccessBroker):
         return dbdomain.name
 
     @transact
-    def del_domain(self, domain, user, **kwargs):
+    def del_domain(self, result, domain, user, **kwargs):
         """Remove the domain from the database."""
         # Do we need to delete any dependencies before deleting the domain?
         (user, realm) = self.split_principal(user)
@@ -297,7 +302,7 @@ class DatabaseBroker(AccessBroker):
         return domain
 
     @transact
-    def verify_domain(self, domain):
+    def verify_domain(self, result, domain, **kwargs):
         """This checks both that the domain exists *and* that this is
         the correct server to handle requests for the domain."""
         # NOTE: Defaulting the name of the quattor server to quattorsrv.
@@ -312,7 +317,7 @@ class DatabaseBroker(AccessBroker):
         return dbdomain.name
 
     @transact
-    def status(self, stat, user, **kwargs):
+    def status(self, result, stat, user, **kwargs):
         """Return status information from the database."""
         stat.extend(self.session.query(Domain).all())
         (user, realm) = self.split_principal(user)
@@ -325,7 +330,7 @@ class DatabaseBroker(AccessBroker):
             stat.append(dbuser)
 
     @transact
-    def add_model (self, name, vendor, hardware, **kwargs):
+    def add_model(self, result, name, vendor, hardware, **kwargs):
         try:
             v = self.session.query(Vendor).filter_by(name = vendor).first()
         except:
@@ -344,7 +349,7 @@ class DatabaseBroker(AccessBroker):
         return "New model successfully created"
 
     @transact
-    def add_machine (self, name, location, model, **kwargs):
+    def add_machine(self, result, name, location, model, **kwargs):
         try:
             loc = self.session.query(Location).filter_by(name = location).first()
         except:
@@ -355,8 +360,25 @@ class DatabaseBroker(AccessBroker):
             raise ArgumentError("Model name '"+model+"' not found!");
 
         try:
-            m = Machine (name, loc, mod)
+            m = Machine(loc, mod, name=name)
             self.session.save(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
         return "New machine succesfully created"
+
+    @transact
+    def manage(self, result, domain, hostname, user, **kwargs):
+        try:
+            dbdomain = self.session.query(Domain).filter_by(name=domain).one()
+        except InvalidRequestError:
+            raise NotFoundException("Domain '%s' not found." % domain)
+        try:
+            # FIXME: The hostname will need to account for domain.
+            dbhost = self.session.query(Host).join('system', aliased=True
+                    ).filter_by(name=hostname).one()
+        except InvalidRequestError:
+            raise NotFoundException("Host '%s' not found." % hostname)
+        dbhost.domain = dbdomain
+        self.session.save_or_update(dbhost)
+        return
+

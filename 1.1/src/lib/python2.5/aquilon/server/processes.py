@@ -7,7 +7,13 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Handling of external processes for the broker happens here."""
+"""Handling of external processes for the broker happens here.
+
+Most methods will be called as part of a callback chain, and should
+expect to handle a generic result from whatever happened earlier in
+the chain.
+
+"""
 
 import os
 from tempfile import mkdtemp, mkstemp
@@ -83,7 +89,7 @@ class ProcessBroker(object):
                 self.cb_shell_command_error,
                 callbackArgs=[command], errbackArgs=[command])
 
-    def sync(self, domain, git_path, templatesdir, **kwargs):
+    def sync(self, result, domain, git_path, templatesdir, **kwargs):
         """Implements the heavy lifting of the aq sync command.
         
         Will raise ProcessException if one of the commands fails."""
@@ -163,7 +169,7 @@ class ProcessBroker(object):
 
     def add_domain(self, result, domain, git_path, templatesdir, kingdir,
             **kwargs):
-        """Domain has been added to the database (results in result).
+        """Domain has been added to the database.
 
         Now create the git repository.
 
@@ -200,7 +206,8 @@ class ProcessBroker(object):
         #decoded = b64decode(encoded)
         #return self.write_file(filename, decoded)
 
-    def put(self, domain, bundle, basedir, templatesdir, git_path, **kwargs):
+    def put(self, result, domain, bundle, basedir, templatesdir, git_path,
+            **kwargs):
         # FIXME: Check that it exists.
         domaindir = templatesdir + "/" + domain
         # FIXME: How long can mkstemp() block?
@@ -220,8 +227,8 @@ class ProcessBroker(object):
         d = d.addBoth(_cb_cleanup_file, filename)
         return d
 
-    def deploy(self, fromdomain, todomain, basedir, templatesdir, kingdir,
-            git_path, **kwargs):
+    def deploy(self, result, fromdomain, todomain, basedir, templatesdir,
+            kingdir, git_path, **kwargs):
         # FIXME: Check that it exists.
         fromdomaindir = templatesdir + "/" + fromdomain
         d = self.run_shell_command(
@@ -229,14 +236,16 @@ class ProcessBroker(object):
                 % (git_path, fromdomaindir), path=kingdir)
         return d
     
-    def pxeswitch (self, host, **kwargs):
+    def pxeswitch(self, result, hostname, **kwargs):
         command = '/ms/dist/elfms/PROJ/aii/1.3.10-1/sbin/aii-installf'
         args = []
         if (kwargs.has_key('boot')):
             args.append('--boot')
-        else:
+        elif (kwargs.has_key('install')):
             args.append('--install')
-        args.append(host)
+        else:
+            raise ArgumentError("Missing required boot or install parameter.")
+        args.append(hostname)
         args.append('2>&1')
         return utils.getProcessOutputAndValue(command, args)
 

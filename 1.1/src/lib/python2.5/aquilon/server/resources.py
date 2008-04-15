@@ -133,46 +133,6 @@ class ResponsePage(resource.Resource):
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
         return m(request)
 
-    def format(self, result, request):
-        style = getattr(self, "output_format", None)
-        if style is None:
-            style = getattr(request, "output_format", "raw")
-        formatter = getattr(self, "format_" + style, self.format_raw)
-        return formatter(result, request)
-
-    def format_raw(self, result, request):
-        # Any sort of custom printing here might be better suited for
-        # a different formatting function.
-        if isinstance(result, list):
-            return "\n".join([str(item) for item in result])
-        return str(result)
-
-    # FIXME: This should eventually be some sort of dynamic system...
-    # maybe try to ask result how it should be rendered, or check the
-    # request for hints.  For now, just wrap in a basic document.
-    def format_html(self, result, request):
-        if request.code and request.code >= 300:
-            title = "%d %s" % (request.code, request.code_message)
-        else:
-            simpleargs = {}
-            for (key, value) in request.args.items():
-                simpleargs[key] = value and value[0] or value
-            title = self.path % simpleargs
-        if isinstance(result, list):
-            msg = "<ul>\n<li>" + "</li>\n<li>".join(
-                    [str(item) for item in result]) + "</li>\n</ul>\n"
-        else:
-            msg = str(result)
-        retval = """
-        <html>
-        <head><title>%s</title></head>
-        <body>
-        %s
-        </body>
-        </html>
-        """ % (title, msg)
-        return str(retval)
-
     # All of these wrap* functions should probably be elsewhere, and
     # change depending on what should go back to the client.
     def wrapRowsInTable(self, rp):
@@ -237,9 +197,90 @@ class ResponsePage(resource.Resource):
         """ % (self.path, result)
         return str(retval)
 
+    def check_arguments(self, request, required = [], optional = []):
+        """Check for the required and optional arguments.
+
+        Returns a Deferred that will have a dictionary of the arguments
+        found.  Any unsupplied optional arguments will have a value of 
+        None.  If there are any problems, the Deferred will errback with
+        a failure.
+        
+        This should probably rely on the input.xml file for the list
+        of required and optional arguments.  For now, it is just a 
+        utility function.
+        """
+
+        required_map = {}
+        for arg in optional or []:
+            required_map[arg] = False
+        for arg in required or []:
+            required_map[arg] = True
+
+        arguments = {}
+        for (arg, req) in required_map.items():
+            if not request.args.has_key(arg):
+                if req:
+                    return defer.fail(ArgumentError(
+                        "Missing mandatory argument %s" % arg))
+                else:
+                    arguments[arg] = None
+                    continue
+            values = request.args[arg]
+            if not isinstance(values, list):
+                # FIXME: This should be something that raises a 500
+                # (Internal Server Error)... this is handled internally.
+                return defer.fail(ArgumentError(
+                    "Internal Error: Expected list for %s, got '%s'"
+                    % (arg, str(values))))
+            arguments[arg] = values[0]
+        return defer.succeed(arguments)
+
+    def format(self, result, request):
+        style = getattr(self, "output_format", None)
+        if style is None:
+            style = getattr(request, "output_format", "raw")
+        formatter = getattr(self, "format_" + style, self.format_raw)
+        return formatter(result, request)
+
+    def format_raw(self, result, request):
+        # Any sort of custom printing here might be better suited for
+        # a different formatting function.
+        if isinstance(result, list):
+            return "\n".join([str(item) for item in result])
+        return str(result)
+
+    # FIXME: This should eventually be some sort of dynamic system...
+    # maybe try to ask result how it should be rendered, or check the
+    # request for hints.  For now, just wrap in a basic document.
+    def format_html(self, result, request):
+        if request.code and request.code >= 300:
+            title = "%d %s" % (request.code, request.code_message)
+        else:
+            simpleargs = {}
+            for (key, value) in request.args.items():
+                simpleargs[key] = value and value[0] or value
+            title = self.path % simpleargs
+        if isinstance(result, list):
+            msg = "<ul>\n<li>" + "</li>\n<li>".join(
+                    [str(item) for item in result]) + "</li>\n</ul>\n"
+        else:
+            msg = str(result)
+        retval = """
+        <html>
+        <head><title>%s</title></head>
+        <body>
+        %s
+        </body>
+        </html>
+        """ % (title, msg)
+        return str(retval)
+
     def finishRender(self, result, request):
-        request.setHeader('content-length', str(len(result)))
-        request.write(result)
+        if result:
+            request.setHeader('content-length', str(len(result)))
+            request.write(result)
+        else:
+            request.setHeader('content-length', 0)
         request.finish()
         return
 
@@ -254,9 +295,9 @@ class ResponsePage(resource.Resource):
         if r == NotFoundException:
             request.setResponseCode(http.NOT_FOUND)
         elif r == AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
+            request.setResponseCode(http.UNAUTHORIZED)
         elif r == ArgumentError:
-            request.setResponseCode( http.BAD_REQUEST )
+            request.setResponseCode(http.BAD_REQUEST)
         formatted = self.format(failure.value, request)
         return self.finishRender(formatted, request)
 
@@ -270,6 +311,21 @@ class ResponsePage(resource.Resource):
         #failure.printDetailedTraceback()
         request.setResponseCode(http.INTERNAL_SERVER_ERROR)
         return self.finishRender(msg, request)
+
+    def format_or_fail(self, d, request):
+        """Utility method for finishing a request that needs to be formatted."""
+        d = d.addCallback(self.format, request)
+        d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
+        return server.NOT_DONE_YET
+
+    def finish_or_fail(self, d, request):
+        """Utility method for finishing up a request that produces no output."""
+        d = d.addCallback(self.finishOK, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
+        return server.NOT_DONE_YET
 
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
@@ -381,29 +437,19 @@ class ResponsePage(resource.Resource):
 
     def command_add_domain(self, request):
         """aqcommand: aq add domain --domain=<domain>"""
-        domain = request.args['domain'][0]
-
-        # FIXME: Add authorization.
-
-        d = self.broker.add_domain(domain=domain,
+        d = self.check_arguments(request, ["domain"])
+        d = d.addCallback(self.broker.add_domain,
+                request_path=request.path,
                 user=request.channel.getPrinciple())
-        d = d.addCallback(self.finishOK, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        return self.finish_or_fail(d, request)
 
     def command_del_domain(self, request):
         """aqcommand: aq del domain --domain=<domain>"""
-        domain = request.args['domain'][0]
-
-        # FIXME: Add authorization.
-
-        d = self.broker.del_domain(domain=domain,
+        d = self.check_arguments(request, ["domain"])
+        d = d.addCallback(self.broker.del_domain,
+                request_path=request.path,
                 user=request.channel.getPrinciple())
-        d = d.addCallback(self.finishOK, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        return self.finish_or_fail(d, request)
 
     def command_add_template(self, request):
         """aqcommand: aq add template --name=<name> --domain=<domain>"""
@@ -422,52 +468,35 @@ class ResponsePage(resource.Resource):
 
     def command_get_domain(self, request):
         """aqcommand: aq get --domain=<domain>"""
-        domain = request.args['domain'][0]
-
-        # FIXME: Lookup whether this server handles this domain
-        # redirect as necessary.
-
-        return self.broker.get(domain)
+        d = self.check_arguments(request, ["domain"])
+        d = d.addCallback(self.broker.get,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_put(self, request):
         """aqcommand: aq put --domain=<domain>"""
-        bundle = request.args["bundle"][0]
-        domain = request.args['domain'][0]
-
-        # FIXME: Lookup whether this server handles this domain
-        # redirect as necessary.
-
-        d = self.broker.put(bundle=bundle, domain=domain,
+        d = self.check_arguments(request, ["domain", "bundle"])
+        d = d.addCallback(self.broker.put,
+                request_path=request.path,
                 user=request.channel.getPrinciple())
-        #d = d.addCallback(self.format, request)
-        #d = d.addCallback(self.finishRender, request)
-        d = d.addCallback(self.finishOK, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        return self.finish_or_fail(d, request)
 
     def command_deploy(self, request):
         """aqcommand: aq deploy --domain=<domain> --to=<domain>"""
-        fromdomain = request.args["domain"][0]
-        todomain = request.args.get("to", [None])[0]
-
-        # FIXME: Lookup whether this server handles this domain
-        # redirect as necessary.
-
-        d = self.broker.deploy(fromdomain=fromdomain, todomain=todomain,
+        d = self.check_arguments(request, ["domain"], ["to"])
+        d = d.addCallback(self.broker.deploy,
+                request_path=request.path,
                 user=request.channel.getPrinciple())
-        #d = d.addCallback(self.format, request)
-        #d = d.addCallback(self.finishRender, request)
-        d = d.addCallback(self.finishOK, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        return self.finish_or_fail(d, request)
 
     def command_manage(self, request):
         """aqcommand: aq manage --hostname=<name> --domain=<domain>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq manage has not been implemented yet"
+        d = self.check_arguments(request, ["hostname", "domain"])
+        d = d.addCallback(self.broker.manage,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
     def command_sync(self, request):
         """aqcommand: aq sync"""
@@ -479,130 +508,53 @@ class ResponsePage(resource.Resource):
 
     def command_sync_domain(self, request):
         """aqcommand: aq sync --domain=<domain>"""
-        domain = request.args['domain'][0]
-
-        # FIXME: Lookup whether this server handles this domain
-        # and redirect as necessary.
-        # Presumably, that lookup will catch domains that do not
-        # actually exist.
-
-        d = self.broker.sync(domain=domain, user=request.channel.getPrinciple())
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        d = self.check_arguments(request, ["domain"])
+        d = d.addCallback(self.broker.sync,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_show_location_types(self, request):
         """aqcommand: aq show location"""
-        #print 'render_GET called'
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "show", "/location")
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        d = self.broker.show_location_type()
-        #d = d.addCallback(self.wrapAqdbTypeInTable)
-        #d = d.addCallback(self.wrapTableInBody)
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        d = self.check_arguments(request)
+        d = d.addCallback(self.broker.show_location_type,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_show_location_type(self, request):
         """aqcommand: aq show location --type"""
-        type = request.args['type'][0]
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "show", "/location/%s" % type)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        # FIXME: Treat an empty list as a 404.
-        d = self.broker.show_location(type=type)
-        #d = d.addCallback( self.wrapLocationInTable )
-        #d = d.addCallback( self.wrapTableInBody )
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        d = self.check_arguments(request, ["type"])
+        d = d.addCallback(self.broker.show_location,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_show_location_name(self, request):
         """aqcommand: aq show location --name=<location>"""
-        type = request.args['type'][0]
-        name = request.args['name'][0]
-
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "show", "/location/%s" % name)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        # FIXME: Treat an empty list as a 404.
-        d = self.broker.show_location(type=type, name=name)
-        #d = d.addCallback( self.wrapLocationInTable )
-        #d = d.addCallback( self.wrapTableInBody )
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        d = self.check_arguments(request, ["type", "name"])
+        d = d.addCallback(self.broker.show_location,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_add_location(self, request):
         """aqcommand: aq add location --locationname=<location>"""
-        type = request.args['type'][0]
-        name = request.args['name'][0]
-        parenttype = request.args['parenttype'][0]
-        parentname = request.args['parentname'][0]
-        fullname = request.args.has_key('fullname') and \
-                request.args["fullname"][0] or None
-        comments = request.args.has_key('comments') and \
-                request.args["comments"][0] or None
-
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "add", "/location/%s" % name)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        d = self.broker.add_location(name=name, type=type,
-                parentname=parentname, parenttype=parenttype,
-                fullname=fullname, comments=comments,
+        d = self.check_arguments(request,
+                ["type", "name", "parenttype", "parentname"],
+                ["fullname", "comments"])
+        d = d.addCallback(self.broker.add_location,
+                request_path=request.path,
                 user=request.channel.getPrinciple())
-        # FIXME: Trap specific exceptions (location exists, etc.)
-        #d = d.addCallback( self.wrapLocationInTable )
-        #d = d.addCallback( self.wrapTableInBody )
-        d = d.addCallback(self.format, request)
-        d = d.addCallback( self.finishRender, request )
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        return self.format_or_fail(d, request)
 
     def command_del_location(self, request):
-        """aqcommand: aq del location --locationname=<location>"""
-        type = request.args['type'][0]
-        name = request.args['name'][0]
-
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "del", "/location/%s" % name)
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        d = self.broker.del_location(name=name, type=type,
+        """aqcommand: aq del location --type=<type> --name=<name>"""
+        d = self.check_arguments(request, ["type", "name"])
+        d = d.addCallback(self.broker.del_location,
+                request_path=request.path,
                 user=request.channel.getPrinciple())
-        # FIXME: Trap specific exceptions (location exists, etc.)
-        d = d.addCallback( self.finishOK, request )
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        return self.finish_or_fail(d, request)
 
     def command_add_city(self, request):
         if not request.args.has_key('parenttype'):
@@ -659,20 +611,11 @@ class ResponsePage(resource.Resource):
 
     def command_status(self, request):
         """aqcommand: aq status"""
-
-        try:
-            self.broker.azbroker.check(None, request.channel.getPrinciple(),
-                    "show", "/")
-        except AuthorizationException:
-            request.setResponseCode( http.UNAUTHORIZED )
-            return ""
-
-        d = self.broker.status(user=request.channel.getPrinciple())
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+        d = self.check_arguments(request)
+        d = d.addCallback(self.broker.status,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     # FIXME: Probably going to change...
     def command_add_hardware(self, request):
@@ -705,62 +648,33 @@ class ResponsePage(resource.Resource):
     def command_make_aquilon(self, request):
         """aqcommand: aq make aquilon --hostname=<name> --os=<os>
             [--personality=<personality>]"""
-        hostname = request.args['hostname'][0]
-        os = request.args['os'][0]
-        personality = request.args.get('personality', [None])[0]
-
-        d = defer.maybeDeferred(self.broker.make_aquilon,
-                hostname=hostname, personality=personality, os=os,
+        d = self.check_arguments(request, ["hostname", "os"], ["personality"])
+        d = d.addCallback(self.broker.make_aquilon,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+    def command_add_model(self, request):
+        d = self.check_arguments(request,
+                ["name", "vendor", "hardware"])
+        d = d.addCallback(self.broker.add_model,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
-    def command_add_model (self, request):
-        try:
-            name = request.args['name'][0]
-            vendor = request.args['vendor'][0]
-            hardware = request.args['hardware'][0]
-        except Error, e:
-            self.wrapError('Invalid parameter sequence',request);
-            return server.ERROR
-
-        d = self.broker.add_model(name, vendor, hardware)
-
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
-
-    def command_pxeswitch (self, request):
-        if (request.args.has_key('boot')):
-            d = self.broker.pxeswitch(request.args['hostname'][0], boot = True)
-        elif (request.args.has_key('install')):
-            d = self.broker.pxeswitch(request.args['hostname'][0], install = True)
-        else:
-            self.wrapError('Invalid parameter sequence!', request)
-            return server.ERROR
-
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
+    def command_pxeswitch(self, request):
+        d = self.check_arguments(request, ["hostname"], ["boot", "install"])
+        d = d.addCallback(self.broker.pxeswitch,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
     def command_add_machine (self, request):
-        try:
-            name = request.args['name'][0]
-            location = request.args['location'][0]
-            model = request.args['model'][0]
-        except:
-            raise ArgumentError('Argument error')
-        d=self.broker.add_machine(name, location, model)
-        return server.NOT_DONE_YET
+        d = self.check_arguments(request, ["name", "location", "model"])
+        d = d.addCallback(self.broker.add_machine,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
 #==============================================================================
 

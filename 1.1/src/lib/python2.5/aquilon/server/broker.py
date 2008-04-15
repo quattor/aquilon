@@ -59,29 +59,44 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def show_location(self, **kwargs):
+    def show_location(self, arguments, request_path, user):
         # just a facade method
-        return self.dbbroker.show_location(session=True, **kwargs)
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_location, session=True,
+                user=user, **arguments)
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def show_location_type(self, **kwargs):
-        # just a facade method
-        return self.dbbroker.show_location_type(session=True, **kwargs)
+    def show_location_type(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_location_type, session=True,
+                user=user, **arguments)
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def add_location(self, **kwargs):
-        return self.dbbroker.add_location(session=True, **kwargs)
+    def add_location(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_location, session=True,
+                user=user, **arguments)
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def del_location(self, **kwargs):
-        return self.dbbroker.del_location(session=True, **kwargs)
+    def del_location(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "del", request_path)
+        d = d.addCallback(self.dbbroker.del_location, session=True,
+                user=user, **arguments)
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def make_aquilon(self, **kwargs):
+    def make_aquilon(self, arguments, request_path, user):
         """This should do all the database work, then try to compile the
         file, and then finish or cancel the database transaction.
 
@@ -94,9 +109,9 @@ class Broker(object):
 
         """
 
-        d = defer.maybeDeferred(self.azbroker.check, None, kwargs["user"],
-                "make", kwargs["request_path"])
-        d = d.addCallback(self.dbbroker.make_aquilon, session=True, **kwargs)
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "make", request_path)
+        d = d.addCallback(self.dbbroker.make_aquilon, session=True, **arguments)
         d = d.addCallback(self.pbroker.make_aquilon, basedir=self.basedir)
         d = d.addCallback(self.dbbroker.confirm_make, session=True)
         d = d.addErrback(self.dbbroker.cancel_make, session=True)
@@ -104,12 +119,14 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def sync (self, **kwargs):
-        d = self.dbbroker.verify_domain(session=True,
-                domain=kwargs.pop("domain"))
+    def sync(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "sync", request_path)
+        d = d.addCallback(self.dbbroker.verify_domain, session=True,
+                user=user, **arguments)
         d = d.addCallback(self.pbroker.sync,
                 git_path=self.git_path, templatesdir=self.templatesdir,
-                **kwargs)
+                **arguments)
         # If no errors are raised from the commands, send a command back
         # to the client to execute.
         d = d.addCallback(lambda _:
@@ -118,72 +135,117 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def get (self, domain, **kwargs):
+    def get(self, arguments, request_path, user):
         # FIXME: Return absolute paths to git?
         # 1.0 just hard-codes the path modificatin into the client.
-        return """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":domain}
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "get", request_path)
+        d = d.addCallback(self.dbbroker.verify_domain, session=True,
+                user=user, **arguments)
+        d = d.addCallback(lambda _: """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":arguments["domain"]})
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def add_domain (self, **kwargs):
-        d = self.dbbroker.add_domain(session=True, **kwargs)
+    def add_domain(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_domain, session=True,
+                user=user, **arguments)
         d = d.addCallback(self.pbroker.add_domain, git_path=self.git_path,
                 templatesdir=self.templatesdir, kingdir=self.kingdir,
-                **kwargs)
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
 
-    def del_domain (self, **kwargs):
-        d = self.dbbroker.del_domain(session=True, **kwargs)
+    def del_domain(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "del", request_path)
+        d = d.addCallback(self.dbbroker.del_domain, session=True,
+                user=user, **arguments)
         d = d.addCallback(self.pbroker.del_domain,
-                templatesdir=self.templatesdir, **kwargs)
+                templatesdir=self.templatesdir, **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
 
-    def put (self, **kwargs):
+    def put(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "put", request_path)
+        d = d.addCallback(self.dbbroker.verify_domain, session=True,
+                user=user, **arguments)
         # FIXME: Does the database need to be updated with this info?
-        d = self.pbroker.put(templatesdir=self.templatesdir,
-                git_path=self.git_path, basedir=self.basedir, **kwargs)
+        d = d.addCallback(self.pbroker.put, templatesdir=self.templatesdir,
+                git_path=self.git_path, basedir=self.basedir,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
 
-    def deploy (self, **kwargs):
+    def deploy(self, arguments, request_path, user):
+        arguments["fromdomain"] = arguments.pop("domain")
+        arguments["todomain"] = arguments.pop("to")
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "deploy", request_path)
+        d = d.addCallback(self.dbbroker.verify_domain, session=True,
+                user=user, domain=arguments["fromdomain"], **arguments)
         # FIXME: Does the database need to be updated with this info?
-        # For now, just verify that the domain exists.
-        d = self.dbbroker.verify_domain(session=True,
-                domain=kwargs.pop("fromdomain"))
         d = d.addCallback(self.pbroker.deploy, basedir=self.basedir,
                 templatesdir=self.templatesdir, kingdir=self.kingdir,
-                git_path=self.git_path, **kwargs)
+                git_path=self.git_path, **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
 
-    def status(self, **kwargs):
+    def status(self, arguments, request_path, user):
         stat = []
         # FIXME: Hard coded version number.
         stat.append("Aquilon Broker v1.1")
-        d = self.dbbroker.status(session=True, stat=stat, **kwargs)
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.status, session=True, user=user,
+                stat=stat, **arguments)
         d = d.addCallback(lambda _: stat)
         return d
 
 # --------------------------------------------------------------------------- #
 
-    def add_model (self, name, vendor, hardware):
+    def add_model(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
         # NOTE: This does not try to verify that the model exists on the
         # filesystem anywhere.
-        return self.dbbroker.add_model(name, vendor, hardware, session=True)
+        d = d.addCallback(self.dbbroker.add_model, session=True, **arguments)
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def pxeswitch (self, host, **kwargs):
-        return self.pbroker.pxeswitch(host, **kwargs)
+    def pxeswitch(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "pxeswitch", request_path)
+        d = d.addCallback(self.pbroker.pxeswitch, **arguments)
+        return d
 
 # --------------------------------------------------------------------------- #
 
-    def add_machine (self, name, location, model):
-        return self.dbbroker.add_machine(name, location, model, session=True)
+    def manage(self, arguments, request_path, user):
+        """Associate a host with a domain."""
+
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "manage", request_path)
+        d = d.addCallback(self.dbbroker.verify_domain, session=True,
+                user=user, **arguments)
+        d = d.addCallback(self.dbbroker.manage, session=True, user=user,
+                **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def add_machine(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_machine, session=True, user=user,
+                **arguments)
+        return d
 
