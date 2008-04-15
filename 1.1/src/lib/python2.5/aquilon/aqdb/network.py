@@ -140,7 +140,7 @@ if empty(dns_domain):
     i=insert(dns_domain)
     i.execute(name='ms.com', comments='root node')
     i.execute(name='one-nyp',parent_id=1, comments='1 NYP test domain')
-    print 'created ms.com dns domain root'
+    print 'created ms.com and one-nyp.ms.com dns domains'
 
 class DnsDomain(aqdbBase):
     """ To store dns domains in an adjacency list """
@@ -159,13 +159,16 @@ class DnsDomain(aqdbBase):
 
     def parent_fqd(self):
         pl=[]
-        p_node=self.parent
-        while p_node.parent is not None:
+        if not self.parent:
+            return self.name
+        else:
+            p_node=self.parent
+            while p_node.parent is not None:
+                pl.append(p_node.name)
+                p_node=p_node.parent.name
             pl.append(p_node.name)
-            p_node=p_node.parent.name
-        pl.append(p_node.name)
-        pl.reverse()
-        return '.'.join(pl)
+            pl.reverse()
+            return '.'.join(pl)
 
     def append(self,node):
         if isinstance(node, DnsDomain):
@@ -173,7 +176,10 @@ class DnsDomain(aqdbBase):
             self.sublocations[node] = node
 
     def __repr__(self):
-        return '.'.join([self.name,self.parent_fqd()])
+        if not self.parent:
+            return str(self.name)
+        else:
+            return '.'.join([self.name,self.parent_fqd()])
 
 
 mapper(DnsDomain, dns_domain, properties={
