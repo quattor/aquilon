@@ -507,7 +507,7 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
 
     def command_add_machine (self, request):
-        d = self.check_arguments(request, ["name", "location", "model"])
+        d = self.check_arguments(request, ["name", "location", "type", "model"])
         d = d.addCallback(self.broker.add_machine,
                 request_path=request.path,
                 user=request.channel.getPrinciple())

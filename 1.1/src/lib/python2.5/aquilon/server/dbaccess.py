@@ -28,7 +28,7 @@ from twisted.python.failure import Failure
 
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
-        AuthorizationException
+        AuthorizationException, ArgumentError
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
@@ -328,14 +328,12 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def add_model(self, result, name, vendor, hardware, **kwargs):
-        try:
-            v = self.session.query(Vendor).filter_by(name = vendor).first()
-        except:
+        v = self.session.query(Vendor).filter_by(name = vendor).first()
+        if (v is None):
             raise ArgumentError("Vendor '"+vendor+"' not found!")
 
-        try:
-            h = self.session.query(HardwareType).filter_by(type = hardware).first()
-        except:
+        h = self.session.query(HardwareType).filter_by(type = hardware).first()
+        if (h is None):
             raise ArgumentError("Hardware type '"+hardware+"' not found!")
 
         try:
@@ -346,14 +344,21 @@ class DatabaseBroker(AccessBroker):
         return "New model successfully created"
 
     @transact
-    def add_machine(self, result, name, location, model, **kwargs):
-        try:
-            loc = self.session.query(Location).filter_by(name = location).first()
-        except:
+    def add_machine(self, result, name, location, type, model, **kwargs):
+        if (type not in ['chassis', 'rack', 'desk']):
+            raise ArgumentError ('Invalid location type: '+type)
+        if (type == 'chassis'):
+            loc = self.session.query(Chassis).filter_by(name = location).first()
+        elif (type == 'rack'):
+            loc = self.session.query(Rack).filter_by(name = location).first()
+        else:
+            loc = self.session.query(Desk).filter_by(name = location).first()
+
+        if (loc is None):
             raise ArgumentError("Location name '"+location+"' not found!")
-        try:
-            mod = self.session.query(Model).filter_by(name = model).first()
-        except:
+        
+        mod = self.session.query(Model).filter_by(name = model).first()
+        if (mod is None):
             raise ArgumentError("Model name '"+model+"' not found!");
 
         try:
