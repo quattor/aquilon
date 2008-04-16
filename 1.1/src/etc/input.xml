@@ -390,7 +390,7 @@
    </command>
 
    <command name="add_machine">
-      %prog  add machine --name MACHINE_NAME --location LOCATION --model MODEL
+      %prog  add machine --name MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
       <optgroup name="del_city_opts" mandatory="True" fields="all">
          <option name="name" type="string">machine name</option>
          <option name="location" type="string">location of the new machine</option>
@@ -398,6 +398,16 @@
          <option name="model" type="string">machine model</option>
       </optgroup>
       <transport method="put" path="/machine/%(name)s/%(location)s/%(type)s/%(model)s" />
+   </command>
+
+   <command name="del_machine">
+      %prog del machine --name MACHINE_NAME --location LOCATION
+      <optgroup name="del_machine_opts" mandatory="True" fields="all">
+         <option name="name" type="string">machine name</option>
+         <option name="location" type="string">location of the machine</option>
+         <option name="type" type="string">location type of the machine</option>
+      </optgroup>
+      <transport method="delete" path="/machine/%(name)s/%(location)s/%(type)s" />
    </command>
 
    <command name="run_dummy_command">

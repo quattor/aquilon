@@ -353,10 +353,9 @@ class DatabaseBroker(AccessBroker):
             loc = self.session.query(Rack).filter_by(name = location).first()
         else:
             loc = self.session.query(Desk).filter_by(name = location).first()
-
         if (loc is None):
             raise ArgumentError("Location name '"+location+"' not found!")
-        
+
         mod = self.session.query(Model).filter_by(name = model).first()
         if (mod is None):
             raise ArgumentError("Model name '"+model+"' not found!");
@@ -367,6 +366,26 @@ class DatabaseBroker(AccessBroker):
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
         return "New machine succesfully created"
+
+    @transact
+    def del_machine(self, result, name, location, type, **kwargs):
+        if (type not in ['chassis', 'rack', 'desk']):
+            raise ArgumentError ('Invalid location type: '+type)
+        if (type == 'chassis'):
+            loc = self.session.query(Chassis).filter_by(name = location).first()
+        elif (type == 'rack'):
+            loc = self.session.query(Rack).filter_by(name = location).first()
+        else:
+            loc = self.session.query(Desk).filter_by(name = location).first()
+        if (loc is None):
+            raise ArgumentError("Location name '"+location+"' not found!")
+
+        try:
+            m = self.session.query(Machine).filter_by(name = name, location = loc).one()
+            self.session.delete(m)
+        except InvalidRequestError, e:
+            raise ValueError("Requested machine could not be deleted!\n"+e.__str__())
+        return "Successfull deletion"
 
     @transact
     def manage(self, result, domain, hostname, user, **kwargs):

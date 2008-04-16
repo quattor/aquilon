@@ -249,3 +249,11 @@ class Broker(object):
                 **arguments)
         return d
 
+# --------------------------------------------------------------------------- #
+
+    def del_machine(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "delete", request_path)
+        d = d.addCallback(self.dbbroker.del_machine, session=True, user=user,
+                **arguments)
+        return d
