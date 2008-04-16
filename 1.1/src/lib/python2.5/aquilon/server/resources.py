@@ -499,6 +499,14 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.format_or_fail(d, request)
 
+    def command_del_model(self, request):
+        d = self.check_arguments(request,
+                ["name", "vendor", "hardware"])
+        d = d.addCallback(self.broker.del_model,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
     def command_pxeswitch(self, request):
         d = self.check_arguments(request, ["hostname"], ["boot", "install"])
         d = d.addCallback(self.broker.pxeswitch,

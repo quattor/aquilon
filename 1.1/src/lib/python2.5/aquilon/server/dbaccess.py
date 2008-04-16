@@ -344,6 +344,26 @@ class DatabaseBroker(AccessBroker):
         return "New model successfully created"
 
     @transact
+    def del_model(self, result, name, vendor, hardware, **kwargs):
+        v = self.session.query(Vendor).filter_by(name = vendor).first()
+        if (v is None):
+            raise ArgumentError("Vendor '"+vendor+"' not found!")
+
+        h = self.session.query(HardwareType).filter_by(type = hardware).first()
+        if (h is None):
+            raise ArgumentError("Hardware type '"+hardware+"' not found!")
+
+        m = self.session.query(Model).filter_by(name = name, vendor = v, hardware_type = h).first()
+        if (m is None):
+            raise ArgumentError('Requested model was not found in the database')
+
+        try:
+            self.session.delete(m)
+        except InvalidRequestError, e:
+            raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
+        return "Model successfully deleted"
+
+    @transact
     def add_machine(self, result, name, location, type, model, **kwargs):
         if (type not in ['chassis', 'rack', 'desk']):
             raise ArgumentError ('Invalid location type: '+type)
