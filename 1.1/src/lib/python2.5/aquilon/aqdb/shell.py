@@ -34,7 +34,10 @@ else:
     from IPython.Shell import IPShellEmbed
     ipshell = IPShellEmbed()
 
-
+#TODO: write this for oracle instance...
+#for now, run sqlplus @utils/drop.sql, over and over until nothing is left
+#def tear_down_instance():
+#    meta.drop_all()
 
 if __name__ == '__main__':
     sys.path.append('../..')
@@ -48,5 +51,7 @@ if __name__ == '__main__':
     from hardware import *
     from interface import *
     from auth import *
+    #from population_scripts import least_loaded
     s=Session()
+
     ipshell()

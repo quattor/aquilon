@@ -142,6 +142,7 @@ if empty(dns_domain):
     i.execute(name='one-nyp',parent_id=1, comments='1 NYP test domain')
     print 'created ms.com and one-nyp.ms.com dns domains'
 
+#TODO: remove adjacency list and make it a full string.
 class DnsDomain(aqdbBase):
     """ To store dns domains in an adjacency list """
 

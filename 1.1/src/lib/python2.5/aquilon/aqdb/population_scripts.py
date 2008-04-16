@@ -258,7 +258,7 @@ def npipm1():
     s.flush()
     make_syslog_si('npipm1')
 
-def get_server_for(svc,hname):
+def get_server_for(svc,host):
     #passing it in for now, this isn't efficient in a loop
     #try:
     #    svc=s.query(Service).filter_by(name=svc_name).one()
@@ -266,74 +266,96 @@ def get_server_for(svc,hname):
     #except Exception, e:
     #    print "Can't find service named '%s' "%(svc_name)
     #    return
-    try:
-        host=s.query(Host).filter_by(name=hname).one()
-        assert(host)
-    except Exception, e:
-        print "Can't find host named '%s' "%(hname)
-        return
-
 
     """ for afs search first in the building, then in the hub
         A later extension is to add chassis, rack first """
 
     for loc in [host.location.building,host.location.hub]:
-        si=s.query(ServiceMap).filter_by(
+        sm=s.query(ServiceMap).filter_by(
                 location=loc).join(
                 'service_instance').filter(
                 ServiceInstance.service==svc).all()
-        if len(si) > 1:
-                return pick_best_server(si)
-        elif len(si) == 1:
-            return si[0]
+        if len(sm) > 1:
+                return least_loaded(sm)
+        elif len(sm) == 1:
+            return sm[0]
 
     print 'Unable to find an appropriate service mapping'
     return False
     #TODO: create an exception and raise it, log it
-
-def pick_best_server(si_list):
+def pick_random_server(sm_list):
     """ a starter function who only chooses at random for now """
-    index=random.randint(0,len(si_list) - 1)
-    return si_list[index]
+    index=random.randint(0,len(sm_list) - 1)
+    return sm_list[index]
 
-def pick_afs_servers():
+def sm_iterator(sm_list,n):
+    """ generator for service instances by a list of service maps.
+        Useful to iterate through candidate lists of service maps """
+    while n >= 0:
+        yield sm_list[n]
+        n-=1
+
+def show_load():
+    sm_list = s.query(ServiceMap).all()
+    sml = []
+    for sm in sm_iterator(sm_list,len(sm_list)-1):
+        i = sm.service_instance
+        sml.append((i.counter,sm))
+    sml.sort()
+    return sml
+
+def least_loaded(sm_list):
+    """ return the service instance with the fewest clients using it """
+
+    candidates = []
+    for sm in sm_iterator(sm_list,len(sm_list)-1):
+        i = sm.service_instance
+        candidates.append((i.counter,sm))
+    candidates.sort()
+    #print candidates
+    return candidates[0][1] #if there's a tie, just return the first one
+
+    #return the lowest...construct a dict of name, count.
+
+def pick_servers():
     s=Session()
 
     try:
         svc=s.query(Service).filter_by(name='afs').one()
     except Exception, e:
         print "Can't find service named '%s' "%(svc_name)
+        return
+    #TODO: make this iterative over all services in the "service_list" of
+    #aquilon instead of hardcoded afs.
 
-    #full_chassis_list=s.query(Location).filter(
-    #    location.c.name.like('%c1n%')).all() ##hack until we fix 2_in_each
-    full_chassis_list=s.query(Chassis).all()
-
-    for c in full_chassis_list:
-        nodename = 'n'.join([c.name,str(random.randint(1,12))])
-        print nodename 
-        m=re.match("[a-z]{2}\d{1,2}c1n\d+",nodename)
-        if not m:
-            print 'skipping %s'%nodename
-            continue
-        try:
-            h=s.query(Host).filter_by(name=nodename).one()
-        except Exception, e:
-            print Exception, e, 'for query Host(%s)'%(nodename)
-            s.rollback()
-            continue
-        
-        srv_map=get_server_for(svc,nodename)
-        if srv_map:
-            #print "picked %s for %s"%(srv_map,nodename)
-            #TODO: should be client path, not instance path
-            bi=BuildItem(h,srv_map.service_instance.cfg_path,3)
+    hlist = s.query(Host).all()
+    for h in hlist:
+        if len(h.templates) < 1:
             try:
-                s.save(bi)
-            except Exception, e:
-                print Exception, e
-                s.close()
-                return False
+                srv_map=get_server_for(svc,h)
+            except Exception,e:
+                print Exception,e
+                continue
+
+            if srv_map:
+                #print "    picked %s for %s"%(
+                    #srv_map.service_instance.system.fqdn,h.name)
+                bi=BuildItem(h,srv_map.service_instance.cfg_path,3)
+                try:
+                    s.save(bi)
+                    #s.commit()
+                except Exception, e:
+                    print Exception, e
+                    s.rollback()
+                    return False
+            else:
+                #print "    can't determine a cell for %s"%(h.name)
+                pass
+        else:
+            #print '%s already has a cell: %s'%(h.name,h.templates[0])
+            pass
     s.commit()
+
 
 def all_cells():
     cnt=afs_cell.count().execute().fetchall()[0][0]
@@ -353,6 +375,9 @@ def all_cells():
     buildings={}
     for b in s.query(Building).all():
         buildings[str(b.name)]=b
+
+    tld=s.query(CfgTLD).filter_by(type='service').one()
+    assert(tld)
 
     count = 0
     with open('../../../../etc/data/afs_cells') as f:
@@ -381,8 +406,8 @@ def all_cells():
                     except exceptions.OSError, e:
                         print e
                         print 'fix this later...'
-                #TODO: lookup/create the config path here. use it in bi creation. 
-            
+                #TODO: lookup/create the config path here. use it in bi creation.
+
                 try:
                     a=AfsCell(line, comments='afs cell %s'%(line))
                     s.save(a)
@@ -390,6 +415,7 @@ def all_cells():
                     s.rollback()
                     print e
                     continue
+            #make cfg_path
             si=ServiceInstance(afs,a,comments='afs')
             s.save(si)
             s.commit()
@@ -452,12 +478,16 @@ def clone_dsdb_host(hostname):
 
 
 if __name__ == '__main__':
-    two_in_each()
+    #two_in_each()
     #just_hosts()
 
     #npipm1()
-    all_cells()
-    pick_afs_servers()
+    #all_cells()
+    pick_servers()
+    a=show_load()
+    a.reverse()
+    for i in a:
+        print i
     #ipshell()
 
 
@@ -476,3 +506,51 @@ if __name__ == '__main__':
     delete from location where comments like '%FAKE%';
     """
 #a=s.query(Archetype).filter_by(name='aquilon').one()
+
+
+
+
+def not_pick_afs_servers():
+    s=Session()
+
+    try:
+        svc=s.query(Service).filter_by(name='afs').one()
+    except Exception, e:
+        print "Can't find service named '%s' "%(svc_name)
+
+    #c2 doesn't work at the moment, till we fix it...
+    full_chassis_list=s.query(Location).join('type').filter(
+        LocationType.type=='chassis').filter(location.c.name.like('%c1%')).all()
+
+    for c in full_chassis_list:
+        print "working on chassis %s"%c.name
+        #nodename = 'n'.join([c.name,str(random.randint(1,12))])
+        #print nodename
+        for n in range(1,12):
+            nodename = 'n'.join([c.name,str(n)])
+        try:
+            h=s.query(Host).filter_by(name=nodename).one()
+        except Exception, e:
+            print Exception, e, 'for query Host(%s)'%(nodename)
+            s.rollback()
+            continue
+
+        if len(h.templates) < 1:
+            try:
+                srv_map=get_server_for(svc,h)
+            except Exception,e:
+                print Exception,e
+                continue
+            if srv_map:
+                print "picked %s for %s"%(srv_map,nodename)
+                bi=BuildItem(h,srv_map.service_instance.cfg_path,3)
+                try:
+                    s.save(bi)
+                    s.commit()
+                except Exception, e:
+                    print Exception, e
+                    s.rollback()
+                    return False
+            else:
+                print '%s already has a cell'%(h.name)
+    s.commit()

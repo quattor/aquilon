@@ -42,7 +42,7 @@ from configuration import *
 
 from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
 from sqlalchemy import select, insert
-from sqlalchemy.orm import mapper, relation, deferred, synonym, backref
+from sqlalchemy.orm import mapper, relation, deferred, synonym, backref, object_session
 from sqlalchemy.orm.collections import attribute_mapped_collection
 #from sqlalchemy.ext import associationproxy
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -258,6 +258,7 @@ host=Table('host', meta,
     Column('id', Integer, ForeignKey('system.id'), primary_key=True),
     Column('machine_id', Integer, ForeignKey('machine.id')),
     Column('domain_id', Integer, ForeignKey('domain.id')),
+    #Column('archetype_id',Integer, ForeignKey('archetype.id'),nullable=False),
     Column('status_id', Integer, ForeignKey('status.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
@@ -293,7 +294,7 @@ class Host(System):
                 raise ArgumentError("Host name must be type 'str'")
         else:
             self.name=kw.pop('name',mach.name)
-
+        #TODO: archetype, defaulting to aquilon
 
     def _get_location(self):
         return self.machine.location
@@ -302,10 +303,6 @@ class Host(System):
     def _sysloc(self):
         return self.machine.location.sysloc()
     sysloc = property(_sysloc)
-
-    #def _fqdn(self):
-    #    return '.'.join([str(self.name),str(self.dns_domain)])
-    #fqdn = property(_fqdn)
 
     def __repr__(self):
         return 'Host %s'%(self.name)
@@ -318,17 +315,18 @@ build_item = Table('build_item', meta,
     Column('cfg_path_id', Integer,
            ForeignKey('cfg_path.id'),
            nullable=False),
-    Column('order', Integer, nullable=False),
+    Column('position', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('id','host_id','cfg_path_id','order'))
+    UniqueConstraint('host_id','cfg_path_id'),
+    UniqueConstraint('host_id','position'))
 build_item.create(checkfirst=True)
 
 class BuildItem(aqdbBase):
     """ Identifies the build process of a given Host.
         Parent of 'build_element' """
     @optional_comments
-    def __init__(self,host,cp,order):
+    def __init__(self,host,cp,position):
         if isinstance(host,Host):
             self.host=host
         else:
@@ -340,8 +338,8 @@ class BuildItem(aqdbBase):
         else:
             msg = 'Build Item requires a Config Path as its second arg'
             raise ArgumentError(msg)
-        if isinstance(order,int):
-            self.order=order
+        if isinstance(position,int):
+            self.position=position
         else:
             msg='Build Item only accepts integer as its third argument'
             raise(msg)
@@ -366,10 +364,11 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
                                    primaryjoin=host.c.domain_id==domain.c.id,
                                    backref=backref('hosts')),
         #TODO: Archetype (for base/final)
+        #TODO: synonym for location, sysloc, fqdn (in system)
         'status'        : relation(Status),
         'templates'     : relation(BuildItem,
-                                   collection_class=ordering_list('order'),
-                                   order_by=[build_item.c.order]),
+                                   collection_class=ordering_list('position'),
+                                   order_by=[build_item.c.position]),
         'creation_date' : deferred(host.c.creation_date),
         'comments'      : deferred(host.c.comments)
 })
@@ -420,7 +419,7 @@ mapper(AfsCell,afs_cell,
         inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='afs_cell'").fetchone()[0],
        properties={
-        'system' : relation(System,backref='afs_cell')})
+        'system' : relation(System, uselist=False, backref='afs_cell')})
 
 service_instance = Table('service_instance',meta,
     Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
@@ -449,7 +448,7 @@ class ServiceInstance(aqdbBase):
         else:
             raise ArgumentError('Second Argument must be a valid System')
 
-        path='%s/%s'%(self.service.name,self.system.name)
+        path='%s/%s'%(self.service.name,self.system.fqdn)
 
         service_id=engine.execute(
                 select([cfg_tld.c.id],cfg_tld.c.type=='service')).fetchone()[0]
@@ -473,6 +472,10 @@ class ServiceInstance(aqdbBase):
                 raise ArgumentError('unable to create cfg path')
             #TODO: a better exception and a much better message
 
+    def _client_count(self):
+        return object_session(self).query(BuildItem).filter_by(
+            cfg_path=self.cfg_path).count()
+    client_count = property(_client_count)
 
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,
@@ -482,6 +485,7 @@ mapper(ServiceInstance,service_instance, properties={
     'service'       : relation(Service),
     'system'        : relation(System, uselist=False, backref='svc_inst'),
     'cfg_path'      : relation(CfgPath, uselist=False, backref='svc_inst'),
+    'counter'       : synonym('client_count'),
     'creation_date' : deferred(service_instance.c.creation_date),
     'comments'      : deferred(service_instance.c.comments)
 })
@@ -546,7 +550,7 @@ service_list_item = Table('service_list_item', meta,
     Column('service_id',Integer,
            ForeignKey('service.id'), unique=True),
     Column('archetype_id',Integer,
-           ForeignKey('archetype.id')),
+           ForeignKey('archetype.id'),nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('archetype_id','service_id'))
