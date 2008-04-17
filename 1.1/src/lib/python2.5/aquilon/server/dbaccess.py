@@ -198,16 +198,13 @@ class DatabaseBroker(AccessBroker):
         It does *not* do pan compile... that happens outside this method.
         """
 
-        # FIXME: Uniqueness constraint needs to be addressed.
-        #hostname = "ab1c1n12"
-        try:
-            dbhost = self.session.query(Host).filter_by(name=hostname).one()
-        except InvalidRequestError:
-            raise NotFoundException("Host '%s' not found." % hostname)
+        dbhost = self._hostname_to_host(hostname)
+        # Currently, for the Host to be created it *must* be associated with
+        # a Machine already.  If that ever changes, need to check here and
+        # bail if dbhost.machine does not exist.
 
-        # We may not do anything with this... just verifying that it's there.
+        # FIXME: This should be saved/stored with the Host.
         # The archetype will factor into the include path for the compiler.
-        # It will probably be stored with Host.
         archetype = self.session.query(Archetype).filter(
                 Archetype.name=="aquilon").one()
 
@@ -227,8 +224,6 @@ class DatabaseBroker(AccessBroker):
         os_template = "os/linux/4.0.1-x86_64/config"
         personality_template = "usage/grid/config"
 
-        # The Host should be associated with a Machine already.
-        # If not, bail, and recommend running ...
 
         # The hardware should be a file in basedir/"plenary", and refers
         # to nodename of the machine.  It should include any info passed
@@ -465,12 +460,7 @@ class DatabaseBroker(AccessBroker):
             dbdomain = self.session.query(Domain).filter_by(name=domain).one()
         except InvalidRequestError:
             raise NotFoundException("Domain '%s' not found." % domain)
-        try:
-            # FIXME: The hostname will need to account for domain.
-            dbhost = self.session.query(Host).join('system', aliased=True
-                    ).filter_by(name=hostname).one()
-        except InvalidRequestError:
-            raise NotFoundException("Host '%s' not found." % hostname)
+        dbhost = self._hostname_to_host(hostname)
         dbhost.domain = dbdomain
         self.session.save_or_update(dbhost)
         return
@@ -490,23 +480,24 @@ class DatabaseBroker(AccessBroker):
         short = components.pop(0)
         root = components.pop(-2) + "." + components.pop(-1)
         try:
-            domain = self.session.query(DnsDomain).filter_by(name=root).one()
+            dns_domain = self.session.query(DnsDomain).filter_by(
+                    name=root, parent=None).one()
         except InvalidRequestError, e:
-            raise NotFoundException("Root domain '%s' not found." % root)
+            raise NotFoundException("Root DNS domain '%s' not found." % root)
         while components:
             component = components.pop(-1)
             try:
-                domain = self.session.query(DnsDomain).filter_by(
-                        name=component, parent=domain).one()
+                dns_domain = self.session.query(DnsDomain).filter_by(
+                        name=component, parent=dns_domain).one()
             except InvalidRequestError, e:
                 raise NotFoundException(
-                        "Domain '%s' with parent '%s' not found."
+                        "DNS domain '%s' with parent '%s' not found."
                         % (component, repr(domain)))
         try:
             host = self.session.query(Host).filter_by(
-                    name=short, domain=domain).one()
+                    name=short, dns_domain=dns_domain).one()
         except InvalidRequestError, e:
-            raise NotFoundException("Host '%s' with domain '%s' not found."
-                    % (short, repr(domain)))
+            raise NotFoundException("Host '%s' with DNS domain '%s' not found."
+                    % (short, repr(dns_domain)))
         return printprep(host)
 

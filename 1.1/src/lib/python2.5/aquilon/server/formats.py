@@ -86,8 +86,8 @@ class Formatter(object):
     # I don't really like this way of doing things, but needed to 
     # start somewhere...
     def elaborate_raw(self, item, indent=""):
-        log.msg("Asked to elaborate on '%s' of type '%s'"
-                % (str(item), type(item)))
+        #log.msg("Asked to elaborate on '%s' of type '%s'"
+        #        % (str(item), type(item)))
         if isinstance(item, Host):
             return self.elaborate_raw_host(item, indent)
         elif isinstance(item, Domain):
@@ -162,7 +162,7 @@ class Formatter(object):
         if isinstance(result, list):
             log.msg("Formatting html list")
             msg = "<ul>\n<li>" + "</li>\n<li>".join(
-                    ["<pre>" + str(item) + "</pre>"
+                    ["<pre>" + self.elaborate_raw(item) + "</pre>"
                         for item in result]) + "</li>\n</ul>\n"
         else:
             msg = "<pre>" + self.elaborate_raw(result) + "</pre>"
