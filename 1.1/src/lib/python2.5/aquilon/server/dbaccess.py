@@ -22,6 +22,7 @@ import exceptions
 
 from sasync.database import AccessBroker, transact
 from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy import and_, or_
 from twisted.internet import defer
 from twisted.python import log
 from twisted.python.failure import Failure
@@ -433,6 +434,25 @@ class DatabaseBroker(AccessBroker):
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
         return "New machine succesfully created"
+
+    @transact
+    def show_machine(self, result, **kwargs):
+        try:
+            q = self.session.query(Machine)
+            if (kwargs['name'] is not None):
+                q = q.filter(Machine.name.like(kwargs['name']+'%'))
+            if (kwargs['location'] is not None and 
+                kwargs['type'] is not None):
+                if (kwargs['type'] not in ['chassis', 'rack', 'desk']):
+                    raise ArgumentError ('Invalid location type')
+                q = q.join('location').filter(Location.name.like(kwargs['location']+'%'))
+                q = q.filter(LocationType.type == kwargs['type'])
+                q = q.reset_joinpoint()
+            if (kwargs['model'] is not None):
+                q = q.join('model').filter(Model.name.like(kwargs['model']+'%'))
+            return printprep(q.all())
+        except InvalidRequestError, e:
+            raise ValueError("Error while querying the database!\n"+e.__str__())
 
     @transact
     def del_machine(self, result, name, location, type, **kwargs):

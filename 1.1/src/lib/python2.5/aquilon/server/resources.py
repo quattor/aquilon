@@ -490,6 +490,13 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
+    def command_show_machine (self, request):
+        d = self.check_arguments(request, optional = ["name", "location", "type", "model"])
+        d = d.addCallback(self.broker.show_machine,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
     def command_del_machine (self, request):
         d = self.check_arguments(request, ["name", "location", "type"])
         d = d.addCallback(self.broker.del_machine,
