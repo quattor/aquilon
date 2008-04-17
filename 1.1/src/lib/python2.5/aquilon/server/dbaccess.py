@@ -35,7 +35,7 @@ from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain
-from aquilon.aqdb.configuration import Archetype
+from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
 from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine
 
@@ -222,9 +222,29 @@ class DatabaseBroker(AccessBroker):
         # - many features
 
         # So, OS and personality probably stored with BuildItem.
-        os_template = "os/linux/4.0.1-x86_64/config"
-        personality_template = "usage/grid/config"
+        try:
+            os_cfgpath = self.session.query(CfgPath).filter_by(relative_path=os
+                    ).join('tld').filter_by(type="os").one()
+        except InvalidRequestError, e:
+            raise NotFoundException(
+                "OS '%s' config path information not found: %s"
+                % (os, str(e)))
+        # This might need "/config" appended.
+        # os/linux/4.0.1-x86_64
+        os_template = repr(os_cfgpath)
 
+        try:
+            personality = kwargs.get("personality", "ms/fid/spg/ice")
+            personality_cfgpath = self.session.query(CfgPath).filter_by(
+                    relative_path=personality).join('tld').filter_by(
+                    type="personality").one()
+        except InvalidRequestError, e:
+            raise NotFoundException(
+                "Personality '%s' config path information not found: %s"
+                % (personality, str(e)))
+        # This might need "/config" appended.
+        # personality/ms/fid/spg/ice
+        personality_template = repr(personality_cfgpath)
 
         # The hardware should be a file in basedir/"plenary", and refers
         # to nodename of the machine.  It should include any info passed
@@ -262,7 +282,7 @@ class DatabaseBroker(AccessBroker):
         template_lines.append("""include { "pan/units" };\n""")
         template_lines.append(""""/hardware" = create("%s");\n""" % hardware)
         for interface in interfaces:
-            template_lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""")
+            template_lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
         for template in templates:
             template_lines.append("""include { "%s" };""" % template)
         template_string = "\n".join(template_lines)
