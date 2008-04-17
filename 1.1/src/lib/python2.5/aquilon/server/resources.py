@@ -226,15 +226,19 @@ class ResponsePage(resource.Resource):
 
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
-
-        request.setResponseCode(http.NOT_IMPLEMENTED)
-        return "aq show_host --all has not been implemented yet"
+        d = self.check_arguments(request)
+        d = d.addCallback(self.broker.show_host_all,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_show_host_hostname(self, request):
         """aqcommand: aq show host --hostname=<host>"""
-
-        request.setResponseCode(http.NOT_IMPLEMENTED)
-        return "aq show_host --hostname has not been implemented yet"
+        d = self.check_arguments(request, ["hostname"])
+        d = d.addCallback(self.broker.show_host,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_add_host(self, request):
         """aqcommand: aq add host --hostname=<host>"""

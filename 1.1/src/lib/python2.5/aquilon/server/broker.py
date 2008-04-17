@@ -267,3 +267,21 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.del_machine, session=True, user=user,
                 **arguments)
         return d
+
+# --------------------------------------------------------------------------- #
+
+    def show_host(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_host, session=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def show_host_all(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_host_all, session=True,
+                user=user, **arguments)
+        return d

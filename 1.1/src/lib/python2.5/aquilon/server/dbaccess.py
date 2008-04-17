@@ -29,6 +29,7 @@ from twisted.python.failure import Failure
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
         AuthorizationException, ArgumentError
+from formats import printprep
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
@@ -56,30 +57,43 @@ class DatabaseBroker(AccessBroker):
         """
         pass
 
-    # FIXME: For now, the host methods are broken...
-    #@transact
-    #def addHost(self, name):
-    #    #return self.host.insert().execute(name=name)
-    #    newHost = Host(name)
-    #    self.session.save(newHost)
-    #    return [newHost]
+    @transact
+    def add_host(self, result, hostname, machine):
+        # To be able to enter this host into DSDB, there must be
+        # - A valid machine being attached
+        # - A bootable interface attached to the machine
+        # - An IP Address attached to the interface
+        # All interfaces present must be entered into DSDB at this
+        # point.  Calls to add_interface will need to check if the
+        # machine is associated with a host... if it is, a DSDB
+        # call will need to be made there to create the interface.
+        # The same goes for del_interface... if a host is associated
+        # with the machine, a dsdb command will need to be issued.
+        newHost = Host(name)
+        self.session.save(newHost)
+        return printprep(newHost)
 
-    #@transact
-    #def delHost(self, name):
-    #    oldHost = self.session.query(Host).filter_by(name=name).one()
-    #    self.session.delete(oldHost)
-    #    return
+    @transact
+    def del_host(self, result, hostname):
+        # Not sure whether to delete the host first from DSDB or from
+        # here.  Both need to happen.
+        oldHost = self.session.query(Host).filter_by(name=name).one()
+        self.session.delete(oldHost)
+        return
 
-    #@transact
-    #def showHostAll(self):
-    #    #return self.host.select().execute().fetchall()
-    #    #log.msg(meta.__dict__)
-    #    return self.session.query(AfsCell).all()
+    @transact
+    def show_host_all(self, result, **kwargs):
+        """Hacked such that printing the list out to a client only
+        shows fqdn.  Ideally, the printing layer would handle this
+        intelligently - print only fqdn for a list of hosts in raw 
+        mode, or fqdn plus links in html.
+        
+        """
+        return [host.fqdn for host in self.session.query(Host).all()]
 
-    #@transact
-    #def showHost(self, name):
-    #    #return self.session.query(Host).filter_by(name=name).one()
-    #    return self.session.query(Host).filter_by(name=name).all()
+    @transact
+    def show_host(self, result, hostname, **kwargs):
+        return printprep(self._hostname_to_host(hostname))
 
     @transact
     def add_location(self, result, name, type, parentname, parenttype,
@@ -137,7 +151,7 @@ class DatabaseBroker(AccessBroker):
 
         newLocation = location_type(name=name, type_name=dblt,
                 parent=parent, owner=user, **optional_args)
-        return [newLocation]
+        return printprep([newLocation])
 
     @transact
     def del_location(self, result, name, type, user, **kwargs):
@@ -164,17 +178,18 @@ class DatabaseBroker(AccessBroker):
         if name:
             try:
                 #log.msg("Attempting query for one...")
-                return [query.filter_by(name=name).one()]
+                return printprep([query.filter_by(name=name).one()])
             except InvalidRequestError:
                 raise NotFoundException(
                         "Location type='%s' name='%s' not found."
                         % (type, name))
         #log.msg("Attempting to query for all...")
-        return query.all()
+        return printprep(query.all())
 
     @transact
     def show_location_type(self, result, user, **kwargs):
-        return self.session.query(LocationType).filter_by(**kwargs).all()
+        return printprep(
+                self.session.query(LocationType).filter_by(**kwargs).all())
 
     @transact
     def make_aquilon(self, result, hostname, os, **kwargs):
@@ -191,18 +206,52 @@ class DatabaseBroker(AccessBroker):
             raise NotFoundException("Host '%s' not found." % hostname)
 
         # We may not do anything with this... just verifying that it's there.
+        # The archetype will factor into the include path for the compiler.
+        # It will probably be stored with Host.
         archetype = self.session.query(Archetype).filter(
                 Archetype.name=="aquilon").one()
 
+        # For now, these are assumed.
         base_template = "archetype/base"
         final_template = "archetype/final"
+
+        # Need to get all the BuildItem objects for this host.
+        # They should include:
+        # - exactly one OS
+        # - exactly one personality
+        # And may include:
+        # - many services
+        # - many features
+
+        # So, OS and personality probably stored with BuildItem.
         os_template = "os/linux/4.0.1-x86_64/config"
         personality_template = "usage/grid/config"
+
+        # The Host should be associated with a Machine already.
+        # If not, bail, and recommend running ...
+
+        # The hardware should be a file in basedir/"plenary", and refers
+        # to nodename of the machine.  It should include any info passed
+        # in from 'add machine'.
         hardware = "machine/na/np/6/31_c1n3"
+        #hardware = "plenary/machine/<fullname hub>/<fullname building>/<name rack>/nodename"
+
+        # machine should have interfaces as a list
+        # Need at least one interface marked boot - that one first
+        # Currently missing netmask / broadcast / gateway
+        # because the IPAddress table has not yet been defined in interface.py
+        # Since we are only creating from certain chassis at the moment...
+        # Hard code for now for 172.31.29.0-127 and 128-255.
         interfaces = [ {"ip":"172.31.29.82", "netmask":"255.255.255.128",
                 "broadcast":"172.31.29.127", "gateway":"172.31.29.1",
                 "bootproto":"dhcp", "name":"eth0"} ]
+
+        # Services are on the build item table...
+        # Features are on the build item table...
         services = [ "service/afs/q.ny.ms.com/client/config" ]
+        # Service - has a CfgPath
+        # ServiceInstance - combo of Service and System
+        # ServiceMap
 
         templates = []
         templates.append(base_template)
@@ -325,6 +374,9 @@ class DatabaseBroker(AccessBroker):
             self.session.save_or_update(dbuser)
         if dbuser:
             stat.append(dbuser)
+        for line in stat:
+            printprep(line)
+
 
     @transact
     def add_model(self, result, name, vendor, hardware, **kwargs):
@@ -422,4 +474,39 @@ class DatabaseBroker(AccessBroker):
         dbhost.domain = dbdomain
         self.session.save_or_update(dbhost)
         return
+
+    # Expects to be run under a @transact method with session=True.
+    def _hostname_to_host(self, hostname):
+        components = hostname.split(".")
+        if len(components) <= 1:
+            raise ArgumentError(
+                    "'%s' invalid, hostname must be fully qualified."
+                    % hostname)
+        if len(components) == 2:
+            # Try .ms.com?
+            raise ArgumentError(
+                    "'%s' invalid, hostname must be fully qualified."
+                    % hostname)
+        short = components.pop(0)
+        root = components.pop(-2) + "." + components.pop(-1)
+        try:
+            domain = self.session.query(DnsDomain).filter_by(name=root).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Root domain '%s' not found." % root)
+        while components:
+            component = components.pop(-1)
+            try:
+                domain = self.session.query(DnsDomain).filter_by(
+                        name=component, parent=domain).one()
+            except InvalidRequestError, e:
+                raise NotFoundException(
+                        "Domain '%s' with parent '%s' not found."
+                        % (component, repr(domain)))
+        try:
+            host = self.session.query(Host).filter_by(
+                    name=short, domain=domain).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Host '%s' with domain '%s' not found."
+                    % (short, repr(domain)))
+        return printprep(host)
 
