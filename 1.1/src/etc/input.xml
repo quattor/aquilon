@@ -421,10 +421,5 @@
       <transport method="delete" path="/machine/%(name)s/%(location)s/%(type)s" />
    </command>
 
-   <command name="run_dummy_command">
-      Ask the broker for a command to run locally...
-      Also using this to test the broker running commands...
-      <transport method="get" path="dummy_command" expect="command" />
-   </command>
 </commandline>
 

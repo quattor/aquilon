@@ -415,41 +415,6 @@ class ResponsePage(resource.Resource):
         request.args["type"] = ["city"]
         return self.command_del_location(request)
 
-    def command_run_dummy_command(self, request):
-        def _cb_command_output((out, err, code)):
-            log.msg("echo finished with return code %d" % code)
-            # FIXME: do stuff with err and code
-            return out
-
-        def _cb_command_error((out, err, signalNum)):
-            # FIXME: do stuff with err and signalNum
-            return out
-
-        # Here's what is happening...
-        # Set up a Deferred to run a process and get the output.
-        d = utils.getProcessOutputAndValue("/bin/sleep",
-                [ "60" ] )
-        # Set up callbacks to just return the stdout output
-        d = d.addCallbacks(_cb_command_output, _cb_command_error)
-        # Ignore the data being brought in (demo purposes, although
-        # similar would happen in a real command chain... generally
-        # we're not parsing output, just looking for a successful
-        # command with the return code).
-        # Create a new Deferred within the callback!  Twisted will
-        # then run the results through this (existing) callback chain!
-        d = d.addCallback(lambda _: utils.getProcessOutputAndValue(
-                "/bin/echo",
-                ["/bin/env && echo hello there && sleep 1 && echo bye"]))
-        # Same callbacks as before - just return stdout
-        d = d.addCallbacks(_cb_command_output, _cb_command_error)
-        # Pass the output of *only* the second command (the first
-        # one was thrown away) back to the client with finishRender.
-        d = d.addCallback( self.finishRender, request )
-        # Catch any uncaught expceptions and finish the request.
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
-
     def command_status(self, request):
         """aqcommand: aq status"""
         d = self.check_arguments(request)
