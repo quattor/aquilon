@@ -23,7 +23,7 @@ from sqlalchemy.orm import mapper, relation, deferred
 import os
 osuser = os.environ.get('USER')
 qdir = os.path.join( '/var/tmp', osuser, 'quattor/')
-const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor/')
+const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor', 'template-king')
 
 def splitall(path):
     """
@@ -129,31 +129,51 @@ def populate_tld():
         import os
         tlds=[]
         for i in os.listdir(const.cfg_base):
-            if os.path.isdir(os.path.abspath(
-                os.path.join(const.cfg_base,i ))) :
+            p = os.path.abspath(os.path.join(const.cfg_base, i))
+            if os.path.isdir(p):
+                # Hack to consider all subdirectories of the archetype 
+                # as a tld.
+                if i == "aquilon":
+                    for j in os.listdir(p):
+                        if os.path.isdir(os.path.abspath(os.path.join(p, j))):
+                            tlds.append(j)
+                elif i == ".git":
+                    continue
+                else:
                     tlds.append(i)
 
+        print "Adding these CfgTLDs: ", str(tlds)
         fill_type_table(cfg_tld, tlds)
 
 def create_paths():
     s = Session()
-    created=[]
     if empty(cfg_path):
-        for root,dirs,files in os.walk(const.cfg_base):
-            for d in dirs:
-                c=os.path.join(root,d)
-                if not d in created:
-                    (a,b,c)=c.partition('quattor/')
-                    tld=s.query(CfgTLD).filter_by(type=splitall(c)[0]).one()
-                if c.find('/') >= 0:
-                    try:
-                        f=CfgPath(tld, c)
-                        s.save(f)
-                        created.append(c)
-                    except Exception,e:
-                        print e
-                        s.rollback()
-                        continue
+        for root, dirs, files in os.walk(const.cfg_base):
+            if ".git" in dirs:
+                dirs.remove(".git")
+            if root == const.cfg_base:
+                continue
+            tail = root.replace(const.cfg_base + "/", "", 1)
+            # Treat everything under aquilon as equivalent to a tld.
+            # It might be better to have an archetype attribute on
+            # the cfgpath...
+            if tail == "aquilon":
+                continue
+            if tail.startswith("aquilon/"):
+                tail = tail.replace("aquilon/", "", 1)
+            slash = tail.find("/")
+            if slash < 0:
+                continue
+            tld = tail[0:slash]
+            try:
+                #print "Adding path '%s' (tld='%s')" % (tail, tld)
+                dbtld = s.query(CfgTLD).filter_by(type=tld).one()
+                f = CfgPath(dbtld, tail)
+                s.save_or_update(f)
+            except Exception, e:
+                print e
+                s.rollback()
+                continue
         s.commit()
         print 'created configuration paths'
 
@@ -175,12 +195,13 @@ def get_quattor_src():
     if os.path.exists(const.cfg_base):
         return
 
-    remote_dir = 'blackcomb:/var/tmp/daqscott/quattor/*'
+    remote_dir = 'quattorsrv:/var/quattor/template-king/*'
     try:
         os.makedirs(const.cfg_base)
     except exceptions.OSError, e:
         pass
-    print 'run "scp -r %s %s in a seperate window."'%(remote_dir,const.cfg_base)
+    print ("run `rsync -avP -e ssh '%s' '%s'` in a seperate window."
+        % (remote_dir,const.cfg_base))
     raw_input("When you've completed this, press any key")
 
 

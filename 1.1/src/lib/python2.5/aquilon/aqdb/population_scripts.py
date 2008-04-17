@@ -478,11 +478,11 @@ def clone_dsdb_host(hostname):
 
 
 if __name__ == '__main__':
-    #two_in_each()
-    #just_hosts()
+    two_in_each()
+    just_hosts()
 
-    #npipm1()
-    #all_cells()
+    npipm1()
+    all_cells()
     pick_servers()
     a=show_load()
     a.reverse()
