@@ -393,7 +393,6 @@ class DatabaseBroker(AccessBroker):
         for line in stat:
             printprep(line)
 
-
     @transact
     def add_model(self, result, name, vendor, hardware, **kwargs):
         v = self.session.query(Vendor).filter_by(name = vendor).first()
@@ -410,6 +409,17 @@ class DatabaseBroker(AccessBroker):
         except InvalidRequestError, e:
             raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
         return "New model successfully created"
+
+    @transact
+    def show_model(self, result, **kwargs):
+        q = self.session.query(Model)
+        if (kwargs['name'] is not None):
+            q = q.filter(Model.name.like(kwargs['name']+'%'))
+        if (kwargs['vendor'] is not None):
+            q = q.join('vendor').filter(Vendor.name.like(kwargs['vendor']+'%')).reset_joinpoint()
+        if (kwargs['hardware'] is not None):
+            q = q.join('hardware_type').filter(HardwareType.type.like(kwargs['hardware']+'%'))
+        return printprep(q.all())
 
     @transact
     def del_model(self, result, name, vendor, hardware, **kwargs):

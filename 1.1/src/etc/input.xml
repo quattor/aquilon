@@ -91,6 +91,17 @@
       <transport method="put" path="hardware/%(hardware)s/%(vendor)s/%(name)s" />
    </command>
 
+   <command name="show_model">
+      %prog show model --name NAME --vendor VENDOR_NAME --hardware HARDWARE_TYPE --machine MACHINE_TYPE
+      Show a model
+      <optgroup name="show_model_opts" mandatory="True" fields="any">
+         <option name="name" type="string">Name of the model</option>
+         <option name="vendor" type="string">Vendor name</option>
+         <option name="hardware" type="string">Hardware type name</option>
+      </optgroup>
+      <transport method="post" path="hardware/model" />
+   </command>
+
    <command name="del_model">
       %prog del model --name NAME --vendor VENDOR_NAME --hardware HARDWARE_TYPE --machine MACHINE_TYPE
       Decomission model

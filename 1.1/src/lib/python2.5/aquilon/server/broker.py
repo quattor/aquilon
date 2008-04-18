@@ -221,6 +221,16 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def show_model(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        # NOTE: This does not try to verify that the model exists on the
+        # filesystem anywhere.
+        d = d.addCallback(self.dbbroker.show_model, session=True, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def del_model(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "delete", request_path)
