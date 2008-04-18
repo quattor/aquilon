@@ -237,16 +237,18 @@ class ProcessBroker(object):
         return d
     
     def pxeswitch(self, result, hostname, **kwargs):
-        command = '/ms/dist/elfms/PROJ/aii/1.3.10-1/sbin/aii-installf'
+        command = '/ms/dist/elfms/PROJ/aii/1.3.10-1/sbin/aii-installfe'
         args = []
-        if (kwargs.has_key('boot')):
+        if kwargs.get('boot'):
             args.append('--boot')
-        elif (kwargs.has_key('install')):
+        elif kwargs.get('install'):
             args.append('--install')
         else:
             raise ArgumentError("Missing required boot or install parameter.")
+        # We may want to use result here, as it (should be) a gauranteed fqdn.
         args.append(hostname)
         args.append('2>&1')
-        return utils.getProcessOutputAndValue(command, args)
+        d = self.run_shell_command(command + ' ' + ' '.join(args))
+        return d
 
 #if __name__=='__main__':

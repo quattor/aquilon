@@ -244,6 +244,8 @@ class Broker(object):
     def pxeswitch(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "pxeswitch", request_path)
+        d = d.addCallback(self.dbbroker.verify_host, session=True, user=user,
+                **arguments)
         d = d.addCallback(self.pbroker.pxeswitch, **arguments)
         return d
 

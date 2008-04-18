@@ -98,6 +98,11 @@ class DatabaseBroker(AccessBroker):
         return printprep(self._hostname_to_host(hostname))
 
     @transact
+    def verify_host(self, result, hostname, **kwargs):
+        dbhost = self._hostname_to_host(hostname)
+        return dbhost.fqdn
+
+    @transact
     def add_location(self, result, name, type, parentname, parenttype,
             fullname, comments, user, **kwargs):
         newLocation = self.session.query(Location).filter_by(name=name
