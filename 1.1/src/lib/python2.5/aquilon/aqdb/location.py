@@ -68,6 +68,8 @@ meta.create_all()
 def parents(loc):
     pl=[]
     p_node=loc.parent
+    if not p_node:
+        return pl
     while p_node.parent is not None:
         pl.append(p_node)
         p_node=p_node.parent

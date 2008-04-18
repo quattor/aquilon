@@ -51,6 +51,8 @@ def printprep(dbobject):
     elif isinstance(dbobject, Location):
         printprep(dbobject.type)
         printprep(dbobject.fullname)
+        # FIXME: This will cause n! calls...
+        printprep(dbobject.parents)
     elif isinstance(dbobject, Model):
         printprep(dbobject.vendor)
         printprep(dbobject.hardware_type)
@@ -141,6 +143,10 @@ class Formatter(object):
             details.append(indent + "  Fullname: %s" % location.fullname)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
+        if location.parents:
+            details.append(indent + "  Parents: [%s]" %
+                    ", ".join("%s=%s" % (repr(p.type), p.name)
+                    for p in location.parents))
         return "\n".join(details)
 
     def elaborate_raw_model(self, model, indent=""):
