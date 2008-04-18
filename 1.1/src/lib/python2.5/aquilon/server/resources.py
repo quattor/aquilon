@@ -242,15 +242,20 @@ class ResponsePage(resource.Resource):
 
     def command_add_host(self, request):
         """aqcommand: aq add host --hostname=<host>"""
-
-        request.setResponseCode(http.NOT_IMPLEMENTED)
-        return "aq add_host has not been implemented yet"
+        d = self.check_arguments(request,
+                ["hostname", "machine", "domain", "status"])
+        d = d.addCallback(self.broker.add_host,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_del_host(self, request):
         """aqcommand: aq del host --hostname=<host>"""
-
-        request.setResponseCode(http.NOT_IMPLEMENTED)
-        return "aq del_host has not been implemented yet"
+        d = self.check_arguments(request, ["hostname"])
+        d = d.addCallback(self.broker.del_host,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
     def command_assoc(self, request):
         """aqcommand: aq assoc --hostname=<host>"""
@@ -513,9 +518,17 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
 
     def command_add_interface (self, request):
-        #FIXME add dsdb functionality!!!
+        #FIXME add dsdb functionality to the broker!!!
         d = self.check_arguments(request, ["name", "machine", "mac"], ['ip'])
         d = d.addCallback(self.broker.add_interface,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_del_interface (self, request):
+        #FIXME add dsdb functionality to the broker!!!
+        d = self.check_arguments(request, optional=["name", "machine", "mac", "ip"])
+        d = d.addCallback(self.broker.del_interface,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)

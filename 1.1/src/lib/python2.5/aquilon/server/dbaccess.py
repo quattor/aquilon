@@ -37,7 +37,7 @@ from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
-from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine
+from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine, Status
 from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
@@ -60,7 +60,7 @@ class DatabaseBroker(AccessBroker):
         pass
 
     @transact
-    def add_host(self, result, hostname, machine):
+    def add_host(self, result, hostname, machine, domain, status, **kwargs):
         # To be able to enter this host into DSDB, there must be
         # - A valid machine being attached
         # - A bootable interface attached to the machine
@@ -71,16 +71,34 @@ class DatabaseBroker(AccessBroker):
         # call will need to be made there to create the interface.
         # The same goes for del_interface... if a host is associated
         # with the machine, a dsdb command will need to be issued.
-        newHost = Host(name)
-        self.session.save(newHost)
-        return printprep(newHost)
+        try:
+            dbdomain = self.session.query(Domain).filter_by(name=domain).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Domain %s not found: %s"
+                    % (domain, str(e)))
+        try:
+            dbstatus = self.session.query(Status).filter_by(name=status).one()
+        except InvalidRequestError, e:
+            raise ArgumentError("Status %s invalid (try one of %s): %s"
+                    % (status, str(self.session.query(Status).all()), str(e)))
+        try:
+            dbmachine = self.session.query(Machine).filter_by(
+                    name=machine).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Machine %s not found: %s"
+                    % (machine, str(e)))
+        (short, dns_domain) = self._hostname_to_domain_and_string(hostname)
+        host = Host(dbmachine, dbdomain, dbstatus, name=short,
+                dns_domain=dns_domain)
+        self.session.save(host)
+        return printprep(host)
 
     @transact
-    def del_host(self, result, hostname):
+    def del_host(self, result, hostname, **kwargs):
         # Not sure whether to delete the host first from DSDB or from
         # here.  Both need to happen.
-        oldHost = self.session.query(Host).filter_by(name=name).one()
-        self.session.delete(oldHost)
+        host = self._hostname_to_host(hostname)
+        self.session.delete(host)
         return
 
     @transact
@@ -525,6 +543,26 @@ class DatabaseBroker(AccessBroker):
         return "Success"
 
     @transact
+    def del_interface(self, result, name, machine, mac, ip, **kwargs):
+        q = self.session.query(PhysicalInterface)
+        if name:
+            q = q.filter_by(name=name)
+        if machine:
+            q = q.join('machine').filter_by(name=machine)
+            q = q.reset_joinpoint()
+        if mac:
+            q = q.filter_by(mac=mac)
+        if ip:
+            q = q.filter_by(ip=ip)
+            q = q.join('model').filter(Model.name.like(kwargs['model']+'%'))
+        try:
+            interface = q.one()
+        except InvalidRequestError, e:
+            raise ArgumentError("Could not locate the interface, make sure it has been specified uniquely: " + str(e))
+        self.session.delete(interface)
+        return True
+
+    @transact
     def manage(self, result, domain, hostname, user, **kwargs):
         try:
             dbdomain = self.session.query(Domain).filter_by(name=domain).one()
@@ -536,7 +574,7 @@ class DatabaseBroker(AccessBroker):
         return
 
     # Expects to be run under a @transact method with session=True.
-    def _hostname_to_host(self, hostname):
+    def _hostname_to_domain_and_string(self, hostname):
         components = hostname.split(".")
         if len(components) <= 1:
             raise ArgumentError(
@@ -563,11 +601,16 @@ class DatabaseBroker(AccessBroker):
                 raise NotFoundException(
                         "DNS domain '%s' with parent '%s' not found."
                         % (component, repr(domain)))
+        return (short, dns_domain)
+
+    # Expects to be run under a @transact method with session=True.
+    def _hostname_to_host(self, hostname):
+        (short, dns_domain) = self._hostname_to_domain_and_string(hostname)
         try:
             host = self.session.query(Host).filter_by(
                     name=short, dns_domain=dns_domain).one()
         except InvalidRequestError, e:
             raise NotFoundException("Host '%s' with DNS domain '%s' not found."
                     % (short, repr(dns_domain)))
-        return printprep(host)
+        return host
 

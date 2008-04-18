@@ -301,6 +301,15 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def del_interface(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "del", request_path)
+        d = d.addCallback(self.dbbroker.del_interface, session=True, user=user,
+                **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def show_host(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "show", request_path)
@@ -316,3 +325,24 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.show_host_all, session=True,
                 user=user, **arguments)
         return d
+
+# --------------------------------------------------------------------------- #
+
+    def add_host(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.verify_domain, session=True,
+                user=user, **arguments)
+        d = d.addCallback(self.dbbroker.add_host, session=True, user=user,
+                **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def del_host(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "del", request_path)
+        d = d.addCallback(self.dbbroker.del_host, session=True, user=user,
+                **arguments)
+        return d
+

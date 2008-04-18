@@ -63,9 +63,13 @@
 
    <command name="add_host">
       %prog add host --name NAME
-      Add a new host to the database.
+      Add a new host to the database.  Requires a machine with a bootable
+      interface and a valid IP address.
       <optgroup name="add_host_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Host name</option>
+         <option name="hostname" type="string">Fully qualified Host name</option>
+         <option name="machine" type="string">Machine (Node) name</option>
+         <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <option name="status" type="string">Status: prod, dev, qa, build</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
    </command>
@@ -124,7 +128,19 @@
       <optgroup name="add_interface_optional" mandatory="False" fields="all">
          <option name="ip" type="string">IP address</option>
       </optgroup>
-      <transport method="post" path="interface" />
+      <transport method="post" path="interface/command/add" />
+   </command>
+
+   <command name="del_interface">
+      %prog add interface
+      Add a new network interface to the database
+      <optgroup name="del_interface_opts" mandatory="True" fields="any">
+         <option name="name" type="string">Interface name</option>
+         <option name="machine" type="string">Machine name</option>
+         <option name="mac" type="string">MAC address</option>
+         <option name="ip" type="string">IP address</option>
+      </optgroup>
+      <transport method="post" path="interface/command/del" />
    </command>
 
    <command name="add_service">
