@@ -296,6 +296,13 @@ class Host(System):
             self.name=kw.pop('name',mach.name)
         #TODO: archetype, defaulting to aquilon
 
+        if kw.has_key('dns_domain'):
+            dns_domain = kw.pop('dns_domain')
+            if isinstance(dns_domain, DnsDomain):
+                self.dns_domain = dns_domain
+            else:
+                raise ArgumentError("dns_domain must be a valid DnsDomain")
+
     def _get_location(self):
         return self.machine.location
     location = property(_get_location) #TODO: make these synonms?
