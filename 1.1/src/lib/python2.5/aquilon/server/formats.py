@@ -48,6 +48,7 @@ def printprep(dbobject):
     elif isinstance(dbobject, Machine):
         printprep(dbobject.location)
         printprep(dbobject.model)
+        printprep(dbobject.interfaces)
     elif isinstance(dbobject, Location):
         printprep(dbobject.type)
         printprep(dbobject.fullname)
@@ -126,6 +127,9 @@ class Formatter(object):
         details = [ indent + "Machine: %s" % machine.name ]
         details.append(self.elaborate_raw(machine.location, indent + "  "))
         details.append(self.elaborate_raw(machine.model, indent + "  "))
+        for i in machine.interfaces:
+            details.append(indent + "  Interface: %s %s %s boot=%s" 
+                    % (i.name, i.mac, i.ip, i.boot))
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
         return "\n".join(details)
