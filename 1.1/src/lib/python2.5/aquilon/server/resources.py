@@ -512,6 +512,14 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
+    def command_add_interface (self, request):
+        #FIXME add dsdb functionality!!!
+        d = self.check_arguments(request, ["name", "machine", "mac"], ['ip'])
+        d = d.addCallback(self.broker.add_interface,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
 #==============================================================================
 
 class RestServer(ResponsePage):

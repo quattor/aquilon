@@ -289,6 +289,16 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def add_interface (self, arguments, request_path, user):
+        #FIXME add dsdb functionality HERE
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_interface, session=True, user=user,
+                **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def show_host(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "show", request_path)

@@ -14,6 +14,7 @@ import sys
 sys.path.append('../..')
 
 import os
+import re
 import datetime
 
 from db import *
@@ -65,6 +66,10 @@ class Interface(aqdbBase):
     """ Base Class of various network interface structures """
     def __init__(self, name, *args,**kw):
         self.name = name.strip().lower()
+        if (kw.has_key('ip')):
+            self.ip = kw['ip']
+        else:
+            self.ip = ''
 
 mapper(Interface,interface,
        polymorphic_on=interface.c.interface_type_id,
@@ -93,8 +98,12 @@ class PhysicalInterface(Interface):
     """ Class to model up the physical nic cards/devices in machines """
     @optional_comments
     def __init__(self, name, mac, machine, *args,**kw):
+        Interface.__init__(self, name, *args, **kw)
         self.name = name.strip().lower()
         self.mac  = mac.strip().lower()
+        reg = re.compile('^([a-f0-9]{2,2}:){5,5}[a-f0-9]{2,2}$')
+        if (not reg.match(self.mac)):
+            raise ArgumentError ('Invalid MAC address: '+slef.mac)
         self.machine= machine
         if kw.has_key('boot'):
             self.boot=kw.pop('boot')

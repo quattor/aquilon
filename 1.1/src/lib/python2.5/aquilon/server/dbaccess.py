@@ -38,6 +38,7 @@ from aquilon.aqdb.service import Host, QuattorServer, Domain
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
 from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine
+from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
 const.location_types = ("company", "hub", "continent", "country", "city",
@@ -503,6 +504,20 @@ class DatabaseBroker(AccessBroker):
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be deleted!\n"+e.__str__())
         return "Successfull deletion"
+
+    @transact
+    def add_interface(self, result, **kwargs):
+        if (kwargs['name'] is None):
+            raise ArgumentError ('Name is not set!')
+        if (kwargs['mac'] is None):
+            raise ArgumentError('MAC address not set!')
+        if (kwargs['machine'] is None):
+            raise ArgumentError('Machine name isnot set!')
+        ip_addr = (kwargs['ip'] is None) and '' or kwargs['ip']
+        m = self.session.query(Machine).filter_by(name = kwargs['machine']).one()
+        i = PhysicalInterface(kwargs['name'], kwargs['mac'], m, ip = ip_addr)
+        self.session.save(i)
+        return "Success"
 
     @transact
     def manage(self, result, domain, hostname, user, **kwargs):
