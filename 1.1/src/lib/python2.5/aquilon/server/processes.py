@@ -23,7 +23,7 @@ from twisted.internet import utils, threads, defer
 from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, RollbackException, \
-        PanException
+        DetailedProcessException, ArgumentError
 
 
 def _cb_cleanup_dir(arg, dir):
@@ -79,7 +79,7 @@ class ProcessBroker(object):
         raise ProcessException(command=command, out=out, err=err,
                 signalNum=signalNum)
 
-    def run_shell_command(self, command, env={}, path="."):
+    def run_shell_command(self, result, command, env={}, path="."):
         # Forcibly string-ifying the command in the long run might not be such
         # a great idea, but this makes dealing with unicode simpler...
         command = str(command)
@@ -95,14 +95,14 @@ class ProcessBroker(object):
         Will raise ProcessException if one of the commands fails."""
 
         domaindir = templatesdir + "/" + domain
-        d = self.run_shell_command(
+        d = self.run_shell_command(True,
                 """env PATH="%s:$PATH" git pull""" % git_path,
                 path=domaindir)
         # The 1.0 code notes that this should probably be done as a
         # hook in git... just need to make sure it runs.
-        d = d.addCallback(lambda _: self.run_shell_command(
+        d = d.addCallback(self.run_shell_command,
             """env PATH="%s:$PATH" git-update-server-info"""
-            % git_path, path=domaindir))
+            % git_path, path=domaindir)
         return d
 
     def wrap_failure_with_rollback(self, failure, **kwargs):
@@ -129,7 +129,7 @@ class ProcessBroker(object):
         output = failure.value.out
         if os.path.exists(outfile):
             output = file(outfile).read()
-        raise PanException(failure.value, input, output)
+        raise DetailedProcessException(failure.value, input, output)
 
     def make_aquilon(self, (fqdn, domain, buildid, template_string),
             basedir):
@@ -154,11 +154,11 @@ class ProcessBroker(object):
         for i in includes:
             include_line = include_line + ' -I "' + i + '" '
         outfile = os.path.join(tempdir, fqdn + '.xml')
-        fix_path = """env PATH="/ms/dist/msjava/PROJ/sunjdk/1.6.0_04/bin:$PATH" """
-        d = d.addCallback(lambda _: self.run_shell_command(fix_path +
-                compiler +
+        d = d.addCallback(self.run_shell_command,
+                """env PATH="/ms/dist/msjava/PROJ/sunjdk/1.6.0_04/bin:$PATH" """
+                + compiler +
                 include_line + ' -y ' + filename
-                + ' >' + outfile))
+                + ' >' + outfile)
         d = d.addErrback(self.eb_pan_compile, filename, outfile)
         # FIXME: Do we want to save off the built xml file anywhere
         # before the temp directory gets cleaned up?  (On failure,
@@ -178,14 +178,14 @@ class ProcessBroker(object):
         # FIXME: If this command fails, the user should be notified.
         # FIXME: If this command fails, should the domain entry be
         # removed from the database?
-        d = self.run_shell_command(
+        d = self.run_shell_command(True,
                 """env PATH="%s:$PATH" git clone "%s" "%s" """
                 % (git_path, kingdir, domaindir))
         # The 1.0 code notes that this should probably be done as a
         # hook in git... just need to make sure it runs.
-        d = d.addCallback(lambda _: self.run_shell_command(
+        d = d.addCallback(self.run_shell_command,
             """env PATH="%s:$PATH" git-update-server-info"""
-            % git_path, path=domaindir))
+            % git_path, path=domaindir)
         # FIXME: 1.0 contains an initdomain() that would run here.
         # Most of it looks to now be irrelevant (part of the previous
         # ant build system)... none of it is included here (yet).
@@ -215,15 +215,15 @@ class ProcessBroker(object):
         (handle, filename) = mkstemp()
         d = threads.deferToThread(b64decode, bundle)
         d = d.addCallback(self.write_file, filename)
-        d = d.addCallback(lambda _: self.run_shell_command(
+        d = d.addCallback(self.run_shell_command,
             """env PATH="%s:$PATH" git bundle verify "%s" """
-            % (git_path, filename), path=domaindir))
-        d = d.addCallback(lambda _: self.run_shell_command(
+            % (git_path, filename), path=domaindir)
+        d = d.addCallback(self.run_shell_command,
             """env PATH="%s:$PATH" git pull "%s" HEAD"""
-            % (git_path, filename), path=domaindir))
-        d = d.addCallback(lambda _: self.run_shell_command(
+            % (git_path, filename), path=domaindir)
+        d = d.addCallback(self.run_shell_command,
             """env PATH="%s:$PATH" git-update-server-info"""
-            % git_path, path=domaindir))
+            % git_path, path=domaindir)
         d = d.addBoth(_cb_cleanup_file, filename)
         return d
 
@@ -231,7 +231,7 @@ class ProcessBroker(object):
             kingdir, git_path, **kwargs):
         # FIXME: Check that it exists.
         fromdomaindir = templatesdir + "/" + fromdomain
-        d = self.run_shell_command(
+        d = self.run_shell_command(True,
                 """env PATH="%s:$PATH" git pull "%s" """
                 % (git_path, fromdomaindir), path=kingdir)
         return d
@@ -248,7 +248,103 @@ class ProcessBroker(object):
         # We may want to use result here, as it (should be) a gauranteed fqdn.
         args.append(hostname)
         args.append('2>&1')
-        d = self.run_shell_command(command + ' ' + ' '.join(args))
+        d = self.run_shell_command(True, command + ' ' + ' '.join(args))
+        return d
+
+    def eb_detailed_command(self, failure):
+        failure.trap(ProcessException)
+        raise DetailedProcessException(failure.value)
+
+    # Expects to be run after dbaccess.verify_add_host.
+    def add_host(self, (short, dbdns_domain, dbmachine), dsdb, **kwargs):
+        # FIXME: Run 'dsdb show host' for each of the IP addresses and
+        # names before doing anything else to ensure that they are free.
+        env = {"DSDB_USE_TESTDB": "true"}
+        for interface in dbmachine.interfaces:
+            if not interface.boot:
+                continue
+            fqdn = "%s.%s" % (short, repr(dbdns_domain))
+            d = self.run_shell_command(True,
+                """%s add host -host_name "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" """
+                % (dsdb, fqdn, interface.ip,
+                interface.name, interface.mac),
+                env=env)
+            d = d.addErrback(self.eb_detailed_command)
+        # FIXME: At any point here, one of these commands could fail.
+        # Should the others be "rolled back"?
+        for interface in dbmachine.interfaces:
+            if interface.boot:
+                continue
+            d = d.addCallback(self.run_shell_command,
+                # FIXME: Making the non-primary hostname:
+                # short dash interface name
+                # Need to find out if this is correct/valid... 
+                # this info should really be coming from the DB.
+                """%s add host -host_name "%s-%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" -primary_host_name "%s" """
+                % (dsdb, short, interface.name, repr(dbdns_domain),
+                interface.ip, interface.name, interface.mac, fqdn),
+                env=env)
+            d = d.addErrback(self.eb_detailed_command)
+        return d
+    
+    # Expects to be run after dbaccess.verify_del_host.
+    def del_host(self, result, dsdb, **kwargs):
+        dbmachine = result
+        env = {"DSDB_USE_TESTDB": "true"}
+        d = defer.succeed(True)
+        # FIXME: At any point here, one of these commands could fail.
+        # Should the others be "rolled back"?  It would require more
+        # info being passed into this method.
+        for interface in dbmachine.interfaces:
+            if interface.boot:
+                continue
+            d = d.addCallback(self.run_shell_command,
+                """%s delete host -ip_address "%s" """
+                % (dsdb, interface.ip),
+                env=env)
+            d = d.addErrback(self.eb_detailed_command)
+        for interface in dbmachine.interfaces:
+            if not interface.boot:
+                continue
+            d = d.addCallback(self.run_shell_command,
+                """%s delete host -ip_address "%s" """
+                % (dsdb, interface.ip),
+                env=env)
+            d = d.addErrback(self.eb_detailed_command)
+        return d
+
+    # Expects to be run after dbaccess.verify_add_interface.
+    def add_interface(self, (short, dns_domain), dsdb, name, mac, machine, ip,
+            **kwargs):
+        if not short:
+            # There is no host in dsdb yet for this machine, no need to
+            # add the interface there.
+            return True
+        # FIXME: Run 'dsdb show host' for the new IP address and
+        # name before doing anything else to ensure that they are free.
+        env = {"DSDB_USE_TESTDB": "true"}
+        d = self.run_shell_command(True,
+            """%s add host -host_name "%s-%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" -primary_host_name "%s.%s" """
+            % (dsdb, short, name, dns_domain, ip, name, mac, short, dns_domain),
+            env=env)
+        d = d.addErrback(self.eb_detailed_command)
+        return d
+
+    # Expects to be run after dbaccess.verify_del_interface
+    def del_interface(self, result, dsdb, **kwargs):
+        dbinterface = result
+        if not dbinterface:
+            # There is no host in dsdb yet for this machine/interface,
+            # no need to add the interface there.
+            return True
+        env = {"DSDB_USE_TESTDB": "true"}
+        if dbinterface.boot:
+            raise ArgumentError("Cannot delete the boot interface, use del host")
+        d = self.run_shell_command(True,
+            """%s delete host -ip_address "%s" """
+            % (dsdb, dbinterface.ip),
+            env=env)
+        d = d.addErrback(self.eb_detailed_command)
         return d
 
 #if __name__=='__main__':

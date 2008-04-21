@@ -69,9 +69,13 @@ class NotFoundException(AquilonError):
     """Raised when a requested resource cannot be found."""
 
 
-class PanException(AquilonError):
-    """Raised when a pan compile fails."""
-    def __init__(self, pe, input, output):
+class DetailedProcessException(AquilonError):
+    """Raised when more details about a process exception should
+    be shown to the client.
+    
+    """
+
+    def __init__(self, pe, input=None, output=None):
         self.processException = pe
         self.output = output
         msg = str(pe) + "\n"
@@ -79,6 +83,8 @@ class PanException(AquilonError):
             msg = msg + "\ninput:\n" + input + "\n"
         if output:
             msg = msg + "\nstdout:\n" + output + "\n"
+        elif pe.out:
+            msg = msg + "\nstdout:\n" + pe.out + "\n"
         if pe.err:
             msg = msg + "\nstderr:\n" + pe.err + "\n"
         AquilonError.__init__(self, msg)

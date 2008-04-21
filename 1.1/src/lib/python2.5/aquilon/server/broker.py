@@ -56,6 +56,7 @@ class Broker(object):
         self.localhost = socket.gethostname()
         self.git_templates_url = "http://%s:6901/templates" % self.localhost
         self.domain_name = "production"
+        self.dsdb = "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb"
 
 # --------------------------------------------------------------------------- #
 
@@ -292,9 +293,12 @@ class Broker(object):
 # --------------------------------------------------------------------------- #
 
     def add_interface (self, arguments, request_path, user):
-        #FIXME add dsdb functionality HERE
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)
+        d = d.addCallback(self.dbbroker.verify_add_interface, session=True,
+                user=user, **arguments)
+        d = d.addCallback(self.pbroker.add_interface, session=True, user=user,
+                dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.add_interface, session=True, user=user,
                 **arguments)
         return d
@@ -304,6 +308,10 @@ class Broker(object):
     def del_interface(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "del", request_path)
+        d = d.addCallback(self.dbbroker.verify_del_interface,
+                session=True, user=user, **arguments)
+        d = d.addCallback(self.pbroker.del_interface,
+                dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.del_interface, session=True, user=user,
                 **arguments)
         return d
@@ -333,6 +341,9 @@ class Broker(object):
                 "add", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
                 user=user, **arguments)
+        d = d.addCallback(self.dbbroker.verify_add_host,
+                session=True, user=user, **arguments)
+        d = d.addCallback(self.pbroker.add_host, dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.add_host, session=True, user=user,
                 **arguments)
         return d
@@ -342,6 +353,9 @@ class Broker(object):
     def del_host(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "del", request_path)
+        d = d.addCallback(self.dbbroker.verify_del_host,
+                session=True, user=user, **arguments)
+        d = d.addCallback(self.pbroker.del_host, self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.del_host, session=True, user=user,
                 **arguments)
         return d

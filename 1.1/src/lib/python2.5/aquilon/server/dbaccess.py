@@ -59,8 +59,37 @@ class DatabaseBroker(AccessBroker):
         """
         pass
 
+    # expects to be run in a transact with a session...
+    def _get_domain(self, domain):
+        try:
+            dbdomain = self.session.query(Domain).filter_by(name=domain).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Domain %s not found: %s"
+                    % (domain, str(e)))
+        return dbdomain
+
+    # expects to be run in a transact with a session...
+    def _get_status(self, status):
+        try:
+            dbstatus = self.session.query(Status).filter_by(name=status).one()
+        except InvalidRequestError, e:
+            raise ArgumentError("Status %s invalid (try one of %s): %s"
+                    % (status, str(self.session.query(Status).all()), str(e)))
+        return dbstatus
+
+    # expects to be run in a transact with a session...
+    def _get_machine(self, machine):
+        try:
+            dbmachine = self.session.query(Machine).filter_by(
+                    name=machine).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Machine %s not found: %s"
+                    % (machine, str(e)))
+        return dbmachine
+
     @transact
-    def add_host(self, result, hostname, machine, domain, status, **kwargs):
+    def verify_add_host(self, result, hostname, machine, domain, status,
+            **kwargs):
         # To be able to enter this host into DSDB, there must be
         # - A valid machine being attached
         # - A bootable interface attached to the machine
@@ -71,27 +100,43 @@ class DatabaseBroker(AccessBroker):
         # call will need to be made there to create the interface.
         # The same goes for del_interface... if a host is associated
         # with the machine, a dsdb command will need to be issued.
-        try:
-            dbdomain = self.session.query(Domain).filter_by(name=domain).one()
-        except InvalidRequestError, e:
-            raise NotFoundException("Domain %s not found: %s"
-                    % (domain, str(e)))
-        try:
-            dbstatus = self.session.query(Status).filter_by(name=status).one()
-        except InvalidRequestError, e:
-            raise ArgumentError("Status %s invalid (try one of %s): %s"
-                    % (status, str(self.session.query(Status).all()), str(e)))
-        try:
-            dbmachine = self.session.query(Machine).filter_by(
-                    name=machine).one()
-        except InvalidRequestError, e:
-            raise NotFoundException("Machine %s not found: %s"
-                    % (machine, str(e)))
+        # Assumes domain has been verified separately with verify_domain...
+        dbdomain = self._get_domain(domain)
+        dbstatus = self._get_status(status)
+        dbmachine = self._get_machine(machine)
+        if not dbmachine.interfaces:
+            raise ArgumentError("Machine '%s' has no interfaces." % machine)
+        found_boot = False
+        for interface in dbmachine.interfaces:
+            if interface.boot:
+                if found_boot:
+                    # FIXME: Is this actually a problem?
+                    raise ArgumentError("Multiple interfaces on machine '%s' are marked bootable" % machine)
+                found_boot = True
+        if not found_boot:
+            raise ArgumentError("Machine '%s' requires a bootable interface." % machine)
+        (short, dbdns_domain) = self._hostname_to_domain_and_string(hostname)
+        if self.session.query(Host).filter_by(name=short,
+                dns_domain=dbdns_domain).all():
+            # The dsdb call would fail since the IP address is already in use...
+            raise ArgumentError("Host '%s' already exists." % hostname)
+        return printprep((short, dbdns_domain, dbmachine))
+
+    @transact
+    def add_host(self, result, hostname, machine, domain, status, **kwargs):
+        dbdomain = self._get_domain(domain)
+        dbstatus = self._get_status(status)
+        dbmachine = self._get_machine(machine)
         (short, dns_domain) = self._hostname_to_domain_and_string(hostname)
         host = Host(dbmachine, dbdomain, dbstatus, name=short,
                 dns_domain=dns_domain)
         self.session.save(host)
         return printprep(host)
+
+    @transact
+    def verify_del_host(self, result, hostname, **kwargs):
+        host = self._hostname_to_host(hostname)
+        return printprep(host.machine)
 
     @transact
     def del_host(self, result, hostname, **kwargs):
@@ -532,6 +577,17 @@ class DatabaseBroker(AccessBroker):
         return "Successfull deletion"
 
     @transact
+    def verify_add_interface(self, result, name, mac, machine, ip, **kwargs):
+        dbmachine = self._get_machine(machine)
+        # FIXME: Check to see if the interface already exists?
+        if not dbmachine.host:
+            return (None, None)
+        # If there is a valid host object, dsdb has already been contacted.
+        # The new interface will need to be added.  To do that, we need the
+        # primary name.
+        return (dbmachine.host[0].name, repr(dbmachine.host[0].dns_domain))
+        
+    @transact
     def add_interface(self, result, **kwargs):
         if (kwargs['name'] is None):
             raise ArgumentError ('Name is not set!')
@@ -545,8 +601,8 @@ class DatabaseBroker(AccessBroker):
         self.session.save(i)
         return "Success"
 
-    @transact
-    def del_interface(self, result, name, machine, mac, ip, **kwargs):
+    # Expects to run under a transact with a session.
+    def _find_interface(self, name, mac, machine, ip):
         q = self.session.query(PhysicalInterface)
         if name:
             q = q.filter_by(name=name)
@@ -557,11 +613,23 @@ class DatabaseBroker(AccessBroker):
             q = q.filter_by(mac=mac)
         if ip:
             q = q.filter_by(ip=ip)
-            q = q.join('model').filter(Model.name.like(kwargs['model']+'%'))
         try:
             interface = q.one()
         except InvalidRequestError, e:
             raise ArgumentError("Could not locate the interface, make sure it has been specified uniquely: " + str(e))
+        return interface
+
+    @transact
+    def verify_del_interface(self, result, name, mac, machine, ip, **kwargs):
+        interface = self._find_interface(name, machine, mac, ip)
+        if not interface.machine.host:
+            # No need to contact dsdb if it is not tracking a host.
+            return None
+        return printprep(interface)
+
+    @transact
+    def del_interface(self, result, name, machine, mac, ip, **kwargs):
+        interface = self._find_interface(name, machine, mac, ip)
         self.session.delete(interface)
         return True
 
