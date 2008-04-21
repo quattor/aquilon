@@ -523,6 +523,9 @@ class DatabaseBroker(AccessBroker):
 
         try:
             m = self.session.query(Machine).filter_by(name = name, location = loc).one()
+            i = self.session.query(PhysicalInterface).filter_by(machine = m).all()
+            for iface in i:
+                self.session.delete(iface)
             self.session.delete(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be deleted!\n"+e.__str__())
