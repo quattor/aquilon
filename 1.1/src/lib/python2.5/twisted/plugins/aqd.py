@@ -105,7 +105,7 @@ class AQDMaker(object):
         mon.addProcess("knc", ["/usr/bin/env",
             "KRB5_KTNAME=FILE:/var/spool/keytabs/%s" % broker.osuser,
             #"/ms/dev/kerberos/knc/1.3/install/exec/bin/knc",
-            "/ms/dist/kerberos/PROJ/knc/1.3/bin/knc",
+            "/ms/dist/kerberos/PROJ/knc/prod/bin/knc",
             "-lS", sockname, str(options["kncport"]) ])
         mon.startService()
         reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
