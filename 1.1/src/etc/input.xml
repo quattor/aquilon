@@ -103,7 +103,7 @@
          <option name="vendor" type="string">Vendor name</option>
          <option name="hardware" type="string">Hardware type name</option>
       </optgroup>
-      <transport method="post" path="hardware/model" />
+      <transport method="post" path="/find/hardware/model" />
    </command>
 
    <command name="del_model">
@@ -121,14 +121,14 @@
       %prog add interface
       Add a new network interface to the database
       <optgroup name="add_interface_opts" mandatory="True" fields="all">
-         <option name="name" type="string">Interface name</option>
+         <option name="interface" type="string">Interface name</option>
          <option name="machine" type="string">Machine name</option>
          <option name="mac" type="string">MAC address</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="all">
          <option name="ip" type="string">IP address</option>
       </optgroup>
-      <transport method="post" path="interface/command/add" />
+      <transport method="put" path="machine/%(machine)s/interface/%(interface)s" />
    </command>
 
    <command name="del_interface">
@@ -215,7 +215,7 @@
       </optgroup>
       <!-- Not sure if this is purely informational, or if there are side-
            effects -->
-      <transport method="put" path="host/%(hostname)s/command/pxeswitch" />
+      <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
    </command>
 
    <command name="reconfigure">
@@ -442,37 +442,36 @@
    </command>
 
    <command name="add_machine">
-      %prog  add machine --name MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
+      %prog  add machine --machine MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
       <optgroup name="add_machine_opts" mandatory="True" fields="all">
-         <option name="name" type="string">machine name</option>
+         <option name="machine" type="string">machine name</option>
          <option name="location" type="string">location of the new machine</option>
          <option name="type" type="string">location type (chassis|rack|desk)</option>
          <option name="model" type="string">machine model</option>
       </optgroup>
-      <transport method="put" path="/machine/%(name)s/%(location)s/%(type)s/%(model)s" />
+      <transport method="put" path="/machine/%(machine)s" />
    </command>
 
    <command name="show_machine">
-      %prog show machine --name MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
+      %prog show machine --machine MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
-         <option name="name" type="string">machine name</option>
+         <option name="machine" type="string">machine name</option>
          <optgroup name="location" mandatory="False" fields="all">
             <option name="location" type="string">location of the new machine</option>
             <option name="type" type="string">location type (chassis|rack|desk)</option>
          </optgroup>
          <option name="model" type="string">machine model</option>
       </optgroup>
-      <transport method="post" path="/machine/" />
+      <transport trigger="machine" method="post" path="/machine/%(machine)s" />
+      <transport method="post" path="/find/machine" />
    </command>
 
    <command name="del_machine">
-      %prog del machine --name MACHINE_NAME --location LOCATION
+      %prog del machine --machine MACHINE_NAME
       <optgroup name="del_machine_opts" mandatory="True" fields="all">
-         <option name="name" type="string">machine name</option>
-         <option name="location" type="string">location of the machine</option>
-         <option name="type" type="string">location type of the machine</option>
+         <option name="machine" type="string">machine name</option>
       </optgroup>
-      <transport method="delete" path="/machine/%(name)s/%(location)s/%(type)s" />
+      <transport method="delete" path="/machine/%(machine)s" />
    </command>
 
 </commandline>

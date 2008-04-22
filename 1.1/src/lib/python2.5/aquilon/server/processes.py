@@ -257,94 +257,35 @@ class ProcessBroker(object):
 
     # Expects to be run after dbaccess.verify_add_host.
     def add_host(self, (short, dbdns_domain, dbmachine), dsdb, **kwargs):
-        # FIXME: Run 'dsdb show host' for each of the IP addresses and
-        # names before doing anything else to ensure that they are free.
+        """add_host only adds the primary interface (marked boot) to dsdb."""
         env = {"DSDB_USE_TESTDB": "true"}
         for interface in dbmachine.interfaces:
             if not interface.boot:
                 continue
-            fqdn = "%s.%s" % (short, repr(dbdns_domain))
             d = self.run_shell_command(True,
-                """%s add host -host_name "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" """
-                % (dsdb, fqdn, interface.ip,
+                """%s add host -host_name "%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" """
+                % (dsdb, short, repr(dbdns_domain), interface.ip,
                 interface.name, interface.mac),
                 env=env)
             d = d.addErrback(self.eb_detailed_command)
-        # FIXME: At any point here, one of these commands could fail.
-        # Should the others be "rolled back"?
-        for interface in dbmachine.interfaces:
-            if interface.boot:
-                continue
-            d = d.addCallback(self.run_shell_command,
-                # FIXME: Making the non-primary hostname:
-                # short dash interface name
-                # Need to find out if this is correct/valid... 
-                # this info should really be coming from the DB.
-                """%s add host -host_name "%s-%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" -primary_host_name "%s" """
-                % (dsdb, short, interface.name, repr(dbdns_domain),
-                interface.ip, interface.name, interface.mac, fqdn),
-                env=env)
-            d = d.addErrback(self.eb_detailed_command)
-        return d
+            return d
+        raise ArgumentError("No boot interface found for host to remove from dsdb.")
     
     # Expects to be run after dbaccess.verify_del_host.
     def del_host(self, result, dsdb, **kwargs):
+        """del_host only removes the primary interface (boot) from dsdb."""
+
         dbmachine = result
         env = {"DSDB_USE_TESTDB": "true"}
-        d = defer.succeed(True)
-        # FIXME: At any point here, one of these commands could fail.
-        # Should the others be "rolled back"?  It would require more
-        # info being passed into this method.
-        for interface in dbmachine.interfaces:
-            if interface.boot:
-                continue
-            d = d.addCallback(self.run_shell_command,
-                """%s delete host -ip_address "%s" """
-                % (dsdb, interface.ip),
-                env=env)
-            d = d.addErrback(self.eb_detailed_command)
         for interface in dbmachine.interfaces:
             if not interface.boot:
                 continue
-            d = d.addCallback(self.run_shell_command,
+            d = self.run_shell_command(True,
                 """%s delete host -ip_address "%s" """
                 % (dsdb, interface.ip),
                 env=env)
             d = d.addErrback(self.eb_detailed_command)
-        return d
-
-    # Expects to be run after dbaccess.verify_add_interface.
-    def add_interface(self, (short, dns_domain), dsdb, name, mac, machine, ip,
-            **kwargs):
-        if not short:
-            # There is no host in dsdb yet for this machine, no need to
-            # add the interface there.
-            return True
-        # FIXME: Run 'dsdb show host' for the new IP address and
-        # name before doing anything else to ensure that they are free.
-        env = {"DSDB_USE_TESTDB": "true"}
-        d = self.run_shell_command(True,
-            """%s add host -host_name "%s-%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" -primary_host_name "%s.%s" """
-            % (dsdb, short, name, dns_domain, ip, name, mac, short, dns_domain),
-            env=env)
-        d = d.addErrback(self.eb_detailed_command)
-        return d
-
-    # Expects to be run after dbaccess.verify_del_interface
-    def del_interface(self, result, dsdb, **kwargs):
-        dbinterface = result
-        if not dbinterface:
-            # There is no host in dsdb yet for this machine/interface,
-            # no need to add the interface there.
-            return True
-        env = {"DSDB_USE_TESTDB": "true"}
-        if dbinterface.boot:
-            raise ArgumentError("Cannot delete the boot interface, use del host")
-        d = self.run_shell_command(True,
-            """%s delete host -ip_address "%s" """
-            % (dsdb, dbinterface.ip),
-            env=env)
-        d = d.addErrback(self.eb_detailed_command)
-        return d
+            return d
+        raise ArgumentError("No boot interface found for host to add to dsdb.")
 
 #if __name__=='__main__':

@@ -13,6 +13,7 @@ import socket
 
 from twisted.internet import defer
 from twisted.internet import reactor
+from twisted.python import log
 
 from aquilon.server.processes import ProcessBroker
 from aquilon.exceptions_ import AquilonError
@@ -276,7 +277,7 @@ class Broker(object):
 
     def show_machine(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
-                "post", request_path)
+                "show", request_path)
         d = d.addCallback(self.dbbroker.show_machine, session=True, user=user,
                 **arguments)
         return d
@@ -295,10 +296,6 @@ class Broker(object):
     def add_interface (self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)
-        d = d.addCallback(self.dbbroker.verify_add_interface, session=True,
-                user=user, **arguments)
-        d = d.addCallback(self.pbroker.add_interface, session=True, user=user,
-                dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.add_interface, session=True, user=user,
                 **arguments)
         return d
@@ -308,10 +305,6 @@ class Broker(object):
     def del_interface(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "del", request_path)
-        d = d.addCallback(self.dbbroker.verify_del_interface,
-                session=True, user=user, **arguments)
-        d = d.addCallback(self.pbroker.del_interface,
-                dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.del_interface, session=True, user=user,
                 **arguments)
         return d

@@ -94,12 +94,6 @@ class DatabaseBroker(AccessBroker):
         # - A valid machine being attached
         # - A bootable interface attached to the machine
         # - An IP Address attached to the interface
-        # All interfaces present must be entered into DSDB at this
-        # point.  Calls to add_interface will need to check if the
-        # machine is associated with a host... if it is, a DSDB
-        # call will need to be made there to create the interface.
-        # The same goes for del_interface... if a host is associated
-        # with the machine, a dsdb command will need to be issued.
         # Assumes domain has been verified separately with verify_domain...
         dbdomain = self._get_domain(domain)
         dbstatus = self._get_status(status)
@@ -124,6 +118,7 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def add_host(self, result, hostname, machine, domain, status, **kwargs):
+        # Assumes host has been added to dsdb.
         dbdomain = self._get_domain(domain)
         dbstatus = self._get_status(status)
         dbmachine = self._get_machine(machine)
@@ -140,8 +135,7 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def del_host(self, result, hostname, **kwargs):
-        # Not sure whether to delete the host first from DSDB or from
-        # here.  Both need to happen.
+        # Assumes host has been deleted from dsdb.
         host = self._hostname_to_host(hostname)
         self.session.delete(host)
         return
@@ -511,7 +505,7 @@ class DatabaseBroker(AccessBroker):
         return "Model successfully deleted"
 
     @transact
-    def add_machine(self, result, name, location, type, model, **kwargs):
+    def add_machine(self, result, machine, location, type, model, **kwargs):
         if (type not in ['chassis', 'rack', 'desk']):
             raise ArgumentError ('Invalid location type: '+type)
         if (type == 'chassis'):
@@ -528,7 +522,7 @@ class DatabaseBroker(AccessBroker):
             raise ArgumentError("Model name '"+model+"' not found!");
 
         try:
-            m = Machine(loc, mod, name=name)
+            m = Machine(loc, mod, name=machine)
             self.session.save(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
@@ -538,8 +532,8 @@ class DatabaseBroker(AccessBroker):
     def show_machine(self, result, **kwargs):
         try:
             q = self.session.query(Machine)
-            if (kwargs['name'] is not None):
-                q = q.filter(Machine.name.like(kwargs['name']+'%'))
+            if (kwargs['machine'] is not None):
+                q = q.filter(Machine.name.like(kwargs['machine']+'%'))
             if (kwargs['location'] is not None and 
                 kwargs['type'] is not None):
                 if (kwargs['type'] not in ['chassis', 'rack', 'desk']):
@@ -554,22 +548,10 @@ class DatabaseBroker(AccessBroker):
             raise ValueError("Error while querying the database!\n"+e.__str__())
 
     @transact
-    def del_machine(self, result, name, location, type, **kwargs):
-        if (type not in ['chassis', 'rack', 'desk']):
-            raise ArgumentError ('Invalid location type: '+type)
-        if (type == 'chassis'):
-            loc = self.session.query(Chassis).filter_by(name = location).first()
-        elif (type == 'rack'):
-            loc = self.session.query(Rack).filter_by(name = location).first()
-        else:
-            loc = self.session.query(Desk).filter_by(name = location).first()
-        if (loc is None):
-            raise ArgumentError("Location name '"+location+"' not found!")
-
+    def del_machine(self, result, machine, **kwargs):
         try:
-            m = self.session.query(Machine).filter_by(name = name, location = loc).one()
-            i = self.session.query(PhysicalInterface).filter_by(machine = m).all()
-            for iface in i:
+            m = self.session.query(Machine).filter_by(name=machine).one()
+            for iface in m.interfaces:
                 self.session.delete(iface)
             self.session.delete(m)
         except InvalidRequestError, e:
@@ -577,32 +559,21 @@ class DatabaseBroker(AccessBroker):
         return "Successfull deletion"
 
     @transact
-    def verify_add_interface(self, result, name, mac, machine, ip, **kwargs):
-        dbmachine = self._get_machine(machine)
-        # FIXME: Check to see if the interface already exists?
-        if not dbmachine.host:
-            return (None, None)
-        # If there is a valid host object, dsdb has already been contacted.
-        # The new interface will need to be added.  To do that, we need the
-        # primary name.
-        return (dbmachine.host[0].name, repr(dbmachine.host[0].dns_domain))
-        
-    @transact
     def add_interface(self, result, **kwargs):
-        if (kwargs['name'] is None):
-            raise ArgumentError ('Name is not set!')
+        if (kwargs['interface'] is None):
+            raise ArgumentError ('Interface name is not set!')
         if (kwargs['mac'] is None):
             raise ArgumentError('MAC address not set!')
         if (kwargs['machine'] is None):
             raise ArgumentError('Machine name isnot set!')
         ip_addr = (kwargs['ip'] is None) and '' or kwargs['ip']
         m = self.session.query(Machine).filter_by(name = kwargs['machine']).one()
-        i = PhysicalInterface(kwargs['name'], kwargs['mac'], m, ip = ip_addr)
+        i = PhysicalInterface(kwargs['interface'], kwargs['mac'], m, ip=ip_addr)
         self.session.save(i)
         return "Success"
 
     # Expects to run under a transact with a session.
-    def _find_interface(self, name, mac, machine, ip):
+    def _find_interface(self, name, machine, mac, ip):
         q = self.session.query(PhysicalInterface)
         if name:
             q = q.filter_by(name=name)
@@ -620,16 +591,13 @@ class DatabaseBroker(AccessBroker):
         return interface
 
     @transact
-    def verify_del_interface(self, result, name, mac, machine, ip, **kwargs):
-        interface = self._find_interface(name, machine, mac, ip)
-        if not interface.machine.host:
-            # No need to contact dsdb if it is not tracking a host.
-            return None
-        return printprep(interface)
-
-    @transact
     def del_interface(self, result, name, machine, mac, ip, **kwargs):
         interface = self._find_interface(name, machine, mac, ip)
+        # FIXME: Should be able to access this as interface.machine.host[0],
+        # but something is not quite right.
+        host = self.session.query(Host).filter_by(machine=interface.machine).first()
+        if host and interface.boot:
+            raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %` first." % host.fqdn)
         self.session.delete(interface)
         return True
 

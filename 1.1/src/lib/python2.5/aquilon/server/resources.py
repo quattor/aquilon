@@ -496,22 +496,27 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
-    def command_add_machine (self, request):
-        d = self.check_arguments(request, ["name", "location", "type", "model"])
+    def command_add_machine(self, request):
+        d = self.check_arguments(request,
+                ["machine", "location", "type", "model"])
         d = d.addCallback(self.broker.add_machine,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
-    def command_show_machine (self, request):
-        d = self.check_arguments(request, optional = ["name", "location", "type", "model"])
+    def command_show_machine_machine(self, request):
+        return self.command_show_machine(request)
+
+    def command_show_machine(self, request):
+        d = self.check_arguments(request,
+                optional=["machine", "location", "type", "model"])
         d = d.addCallback(self.broker.show_machine,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.format_or_fail(d, request)
 
-    def command_del_machine (self, request):
-        d = self.check_arguments(request, ["name", "location", "type"])
+    def command_del_machine(self, request):
+        d = self.check_arguments(request, ["machine"])
         d = d.addCallback(self.broker.del_machine,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
@@ -519,7 +524,8 @@ class ResponsePage(resource.Resource):
 
     def command_add_interface (self, request):
         #FIXME add dsdb functionality to the broker!!!
-        d = self.check_arguments(request, ["name", "machine", "mac"], ['ip'])
+        d = self.check_arguments(request, ["interface", "machine", "mac"],
+                ['ip'])
         d = d.addCallback(self.broker.add_interface,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
