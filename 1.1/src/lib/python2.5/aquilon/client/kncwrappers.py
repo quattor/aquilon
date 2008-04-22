@@ -28,8 +28,8 @@ class KNCController(NetCatController):
     # before calling nc.  Once resolved, NetCatConnector could
     # return correct IPv4Address values for getHost() and getPeer()
     def startProcess(self):
-        executable = '/ms/dev/kerberos/knc/1.3/install/exec/bin/knc'
-        #executable = '/ms/dist/kerberos/PROJ/knc/1.2/bin/knc'
+        #executable = '/ms/dev/kerberos/knc/1.3/install/exec/bin/knc'
+        executable = '/ms/dist/kerberos/PROJ/knc/prod/bin/knc'
         env = os.environ
         self.connector = NetCatConnector(self.proto, self)
         address = self.service + "@" + self.host         
