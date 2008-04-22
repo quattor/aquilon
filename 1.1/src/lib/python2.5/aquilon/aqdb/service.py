@@ -366,9 +366,10 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='host'").fetchone()[0],
     properties={
         'system'        : relation(System),
-        'machine'       : relation(Machine,backref='host'),
+        'machine'       : relation(Machine, uselist=False, backref='host'),
         'domain'        : relation(Domain,
                                    primaryjoin=host.c.domain_id==domain.c.id,
+                                   uselist=False,
                                    backref=backref('hosts')),
         #TODO: Archetype (for base/final)
         #TODO: synonym for location, sysloc, fqdn (in system)

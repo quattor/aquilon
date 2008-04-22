@@ -20,9 +20,10 @@ from location import Location
 from sqlalchemy import *
 from sqlalchemy.orm import *
 
-from location import Location,Building
-location = Table('location', meta, autoload=True)
-building = Table('building', meta, autoload=True)
+from location import Location,location, Building, building
+#location = Table('location', meta, autoload=True)
+#building = Table('building', meta, autoload=True)
+
 
 network_type = mk_type_table('network_type',meta)
 network_type.create(checkfirst=True)
@@ -39,7 +40,6 @@ class NetworkType(aqdbType):
 mapper(NetworkType,network_type, properties={
         'creation_date' : deferred(network_type.c.creation_date),
         'comments': deferred(network_type.c.comments)})
-
 
 netmask = Table('netmask', meta,
     Column('mask', Integer, primary_key=True),
@@ -77,24 +77,58 @@ def populate_profile():
             i.execute(cidr=int(line[0]), netmask=line[1] , mask=int(line[2]))
         f.close()
 
+def ip_iter(a,b,c,d,i):
+    """ iterate from a.b.c.d to max_ip with integer value of # ips:
+        get the lowest and the highest. add 1. if > 255, add one to
+        next highest byte """
+    while i > 1:
+        d+=1
+        if d > 255:
+            d=0
+            c +=1
+        if c > 255:
+            c=0
+            b+=1
+        if b > 255:
+            b=0
+            a+=1
+        i-=1
+        yield '%s.%s.%s.%s'%(a,b,c,d)
+
 network = Table('network', meta,
     Column('id', Integer, Sequence('network_id_seq'), primary_key=True),
     Column('location_id', Integer,
-        ForeignKey('location.id'), index=True),
+        ForeignKey('location.id'), nullable=False, index=True),
     Column('network_type_id', Integer,
-           ForeignKey('network_type.id')),
+           ForeignKey('network_type.id'), nullable=False),
     Column('mask', Integer,
-           ForeignKey('netmask.mask')),
-    Column('name', String(255)),
-    Column('ip', String(15), index=True),
-    Column('ip_integer', Integer),
-    Column('byte_mask', Integer),
+           ForeignKey('netmask.mask'), nullable=False),
+    Column('name', String(255), nullable=False),
+    Column('ip', String(15), nullable=False, index=True),
+    Column('ip_integer', Integer, nullable=False),
+    Column('byte_mask', Integer, nullable=False),
     Column('side', String(4), nullable=True),
     Column('campus', String(32), nullable=True),
     Column('bucket', String(32), nullable=True),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 network.create(checkfirst=True)
+
+ip_addr = Table('ip_addr', meta,
+    Column('id', Integer, Sequence('ip_addr_seq'), primary_key=True),
+    Column('byte1', Integer, CheckConstraint('byte1<256'), nullable=False),
+    Column('byte2', Integer, CheckConstraint('byte2<256'), nullable=False),
+    Column('byte3', Integer, CheckConstraint('byte3<256'), nullable=False),
+    Column('byte4', Integer, CheckConstraint('byte4<256'), nullable=False),
+    Column('is_network', Boolean, nullable=False, default=False),
+    Column('is_broadcast', Boolean, nullable=False, default=False),
+    Column('is_used', Boolean, nullable=False, default=False),
+    Column('network_id', Integer, ForeignKey('network.id'), nullable=False),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True)
+)
+ip_addr.create(checkfirst=True)
+
 
 class Network(aqdbBase):
     @optional_comments
@@ -115,16 +149,43 @@ class Network(aqdbBase):
 
         bkt = kw.pop('bucket',None)
         if bkt:
-            self.bucket = bkt.strip().lower()   #TODO: implement campus + bunker
+            self.bucket = bkt.strip().lower()   #TODO: implement bunker
         #TODO: snarf comments from DSDB too
 
+class IpAddr(aqdbBase):
+    """ One thing DSDB missed out on is that every IP address is a valid and
+    important resource regardless of whether its assigned to an interface or
+    not. This table reflects all the ips available at the firm and ties them
+    to what interface or network they're assigned to, and that they're free if
+    not assigned. """
+    @optional_comments
+    def __init__(self, a, b, c, d, is_network=False, is_broadcast=False,
+                 is_used=False,**kw):
+        self.byte1=a
+        self.byte2=b
+        self.byte3=c
+        self.byte4=d
+        self.is_network == is_network
+        self.is_broadcast == is_broadcast
+        self.is_used == is_used
+        #self.network_id???
+
+    def __repr__(self):
+        return '%s.%s.%s.%s'%(self.byte1,self.byte2,self.byte3,self.byte4)
+
 mapper(Network,network,properties={
-    'type': relation(NetworkType),
-    'location':relation(Location),
-    'profile' :relation(Netmask),
-    'netmask':synonym('profile'),
+    'type'          : relation(NetworkType),
+    'location'      : relation(Location),
+    'profile'       : relation(Netmask),
+    'netmask'       : synonym('profile'),
     'creation_date' : deferred(network.c.creation_date),
-    'comments': deferred(network.c.comments)
+    'comments'      : deferred(network.c.comments)
+})
+
+mapper(IpAddr,ip_addr, properties={
+    'network'       : relation(Network),
+    'creation_date' : deferred(ip_addr.c.creation_date),
+    'comments'      : deferred(ip_addr.c.comments)
 })
 
 dns_domain = Table('dns_domain', meta,

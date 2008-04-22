@@ -199,12 +199,12 @@ def fill_type_table(table,items):
         i.execute(type=t)
 
 
-def mk_name_id_table(name, my_meta, *args, **kw):
+def mk_name_id_table(name, meta=meta, *args, **kw):
     """
         Many tables simply contain name and id columns, use this
         to reduce code volume and standardize DDL
     """
-    return Table(name, my_meta, \
+    return Table(name, meta, \
                 Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
                 Column('name', String(32), unique=True, index=True),
@@ -212,12 +212,12 @@ def mk_name_id_table(name, my_meta, *args, **kw):
                        default=datetime.datetime.now),
                 Column('comments', String(255), nullable=True), *args, **kw)
 
-def mk_type_table(name, my_meta, *args, **kw):
+def mk_type_table(name, meta=meta, *args, **kw):
     """
         Variant on name_id. Can and should reduce them to a single function
         (later)
     """
-    return Table(name, my_meta, \
+    return Table(name, meta, \
                 Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
                 Column('type', String(32), unique=True, index=True),

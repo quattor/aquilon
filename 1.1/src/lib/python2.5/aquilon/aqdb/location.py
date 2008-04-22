@@ -38,19 +38,22 @@ location_type.create(checkfirst=True)
 
 if empty(location_type):
     fill_type_table(location_type,['company','hub','continent','country',
-                                   'city','building','rack','chassis','desk',
-                                   'base_location_type'])
+                                   'city','bucket', 'building','rack','chassis',
+                                   'desk', 'base_location_type'])
 
 location = Table('location', meta,
-   Column('id', Integer, Sequence('location_id_seq'), primary_key=True),
-   Column('parent_id', Integer, ForeignKey('location.id')),
-   Column('name', String(16)),
-   Column('fullname',String(64),nullable=True),
-   Column('location_type_id', Integer,
-          ForeignKey('location_type.id')),
-   Column('creation_date', DateTime, default=datetime.datetime.now),
-   Column('comments', String(255), nullable=True),
-   UniqueConstraint('name','location_type_id'))
+    Column('id', Integer, Sequence('location_id_seq'), primary_key=True),
+    Column('parent_id', Integer, ForeignKey('location.id')),
+    Column('name', String(16), nullable=False),
+    Column('fullname', String(64), nullable=True),
+    Column('location_type_id', Integer,
+           ForeignKey('location_type.id'), nullable=False),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('name', 'location_type_id', 'parent_id'))
+    #parent_id required for buildings inside of buckets. Now we have 2
+    #different things: the WHOLE building, and the bunker. Bunker names
+    #could be concatenated, but this is LAME!!! from dsdb
 
 company = mk_loc_table('company', meta)
 hub = mk_loc_table('hub', meta)

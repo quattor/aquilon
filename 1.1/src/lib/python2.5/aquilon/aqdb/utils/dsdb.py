@@ -19,7 +19,6 @@ get_country = """
     select country_symbol, country_name, continent
     from country where state >= 0
 """
-
 get_city = """
     select A.city_symbol, A.city_name, B.country_symbol
     from city A, country B
@@ -34,6 +33,14 @@ get_bldg = """
     AND A.state >= 0
     AND B.state >= 0
 """
+
+#get_bucket = "select lower(bucket_name), comments from bucket where state >= 0"
+get_bucket = """
+    SELECT loc_name FROM loc_name WHERE state >= 0
+    AND loc_name LIKE '%B%'
+    AND loc_name NOT LIKE '%GLOBAL%'
+    AND loc_name NOT LIKE '%pod%'
+    ORDER BY loc_name """
 
 # NOTE: the network_type tables id #'s actually match up with dsdb's
 # network_type table's id column, so we just import it directly for speed.
@@ -57,7 +64,7 @@ SELECT
         D.maker, D.model, D.arch, D.karch,                          /* model */
         E.sys_loc, E.afscell --,                               /* minfo*/
         --G.iface_name, G.ip_addr, G.ether_addr            /* interface info */
-        
+
 
                 FROM   network_host A, machine B, os C, model D, machine_info E
                 --, network_iface G
@@ -155,6 +162,10 @@ def dump_city():
 def dump_bldg():
     db = aqsyb('NYP_DSDB11','dsdb')
     return db.run_query(get_bldg).fetchall()
+
+def dump_bucket():
+    db = aqsyb('NYP_DSDB11','dsdb')
+    return db.run_query(get_bucket).fetchall()
 
 def dump_network():
     db = aqsyb('NYP_DSDB11','dsdb')
