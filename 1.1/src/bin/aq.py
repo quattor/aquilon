@@ -236,6 +236,8 @@ if __name__ == "__main__":
         # All command line options are (hopefully) in the URI already.
         # Might also get away without something like this:
         # uri = uri + '?' + urllib.urlencode(config['parameters'])
+        # FIXME: This should go through the optional parameters and 
+        # add them to the url.
         d = RESTResource(uri).get()
     elif transport.method == 'put':
         # FIXME: This will need to be more complicated.
