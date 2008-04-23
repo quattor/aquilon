@@ -103,7 +103,7 @@
          <option name="vendor" type="string">Vendor name</option>
          <option name="hardware" type="string">Hardware type name</option>
       </optgroup>
-      <transport method="post" path="/find/hardware/model" />
+      <transport method="get" path="/find/hardware/model" />
    </command>
 
    <command name="del_model">
@@ -462,8 +462,8 @@
          </optgroup>
          <option name="model" type="string">machine model</option>
       </optgroup>
-      <transport trigger="machine" method="post" path="/machine/%(machine)s" />
-      <transport method="post" path="/find/machine" />
+      <transport trigger="machine" method="get" path="/machine/%(machine)s" />
+      <transport method="get" path="/find/machine" />
    </command>
 
    <command name="del_machine">
