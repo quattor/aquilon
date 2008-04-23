@@ -17,6 +17,7 @@ connect directly.
 import sys
 import os
 import urllib
+import re
 # Using this for gethostname for now...
 import socket
 
@@ -233,11 +234,22 @@ if __name__ == "__main__":
         cleanOptions[str(k)] = str(v)
 
     if transport.method == 'get':
-        # All command line options are (hopefully) in the URI already.
-        # Might also get away without something like this:
-        # uri = uri + '?' + urllib.urlencode(config['parameters'])
-        # FIXME: This should go through the optional parameters and 
-        # add them to the url.
+        # Fun hackery here to get optional parameters into the path...
+        # First, figure out what was already included in the path,
+        # looking for %(var)s.
+        c = re.compile(r'(?<!%)%\(([^)]*)\)s')
+        exclude = c.findall(transport.path)
+        # Now, pull each of these out of the options.  This is not
+        # strictly necessary, but simplifies the url.
+        remainder = cleanOptions.copy()
+        for e in exclude:
+            remainder.pop(e, None)
+        # Almost done.  Just need to account for whether the uri
+        # already has a query string.
+        if uri.find("?") >= 0:
+            uri = uri + '&' + urllib.urlencode(remainder)
+        else:
+            uri = uri + '?' + urllib.urlencode(remainder)
         d = RESTResource(uri).get()
     elif transport.method == 'put':
         # FIXME: This will need to be more complicated.
