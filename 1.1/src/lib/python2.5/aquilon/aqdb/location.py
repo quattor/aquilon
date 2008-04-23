@@ -50,10 +50,10 @@ location = Table('location', meta,
            ForeignKey('location_type.id'), nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('name', 'location_type_id', 'parent_id'))
-    #parent_id required for buildings inside of buckets. Now we have 2
-    #different things: the WHOLE building, and the bunker. Bunker names
-    #could be concatenated, but this is LAME!!! from dsdb
+    UniqueConstraint('name', 'location_type_id'))
+    #TODO: fix bunker names: we have  the WHOLE building, and each bunker.
+    #Bunker names can/will be concatenated as in dsdb at first, but this is
+    #inellegant, IMHO to say the least.
 
 company = mk_loc_table('company', meta)
 hub = mk_loc_table('hub', meta)
