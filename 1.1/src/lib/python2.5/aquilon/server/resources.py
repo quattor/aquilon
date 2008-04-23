@@ -402,10 +402,28 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
+    def command_add_chassis(self, request):
+        request.args['type'] = ['chassis']
+        request.args['parenttype'] = ['rack']
+        request.args['parentname'] = request.args['rack']
+        return self.command_add_location(request)
+
+    def command_add_rack(self, request):
+        request.args['type'] = ['rack']
+        request.args['parenttype'] = ['building']
+        request.args['parentname'] = request.args['building']
+        return self.command_add_location(request)
+
+    def command_add_building(self, request):
+        request.args['type'] = ['building']
+        request.args['parenttype'] = ['city']
+        request.args['parentname'] = request.args['city']
+        return self.command_add_location(request)
+
     def command_add_city(self, request):
-        if not request.args.has_key('parenttype'):
-            request.args["parenttype"] = ["country"]
         request.args["type"] = ["city"]
+        request.args["parenttype"] = ["country"]
+        request.args["parentname"] = request.args["country"]
         return self.command_add_location(request)
 
     def command_show_city(self, request):
