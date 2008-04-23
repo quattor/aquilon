@@ -32,6 +32,7 @@ get_bldg = """
     where A.city_id = B.city_id
     AND A.state >= 0
     AND B.state >= 0
+    AND A.bldg_name != ' '
 """
 
 #get_bucket = "select lower(bucket_name), comments from bucket where state >= 0"
