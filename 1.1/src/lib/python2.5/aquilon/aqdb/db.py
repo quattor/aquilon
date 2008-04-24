@@ -8,10 +8,15 @@
 #
 # This module is part of Aquilon
 """To be imported by classes and modules requiring aqdb access"""
+from __future__ import with_statement
+
+import sys
+import datetime
+import os
+from socket import gethostname
 
 import msversion
 msversion.addpkg('sqlalchemy','0.4.4','dist')
-import datetime
 
 from sqlalchemy import MetaData, create_engine,  UniqueConstraint
 from sqlalchemy import Table, Integer, DateTime, Sequence, String
@@ -20,19 +25,28 @@ from sqlalchemy import ForeignKey as _fk
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import insert
 
-def make_sqlite_dsn():
-    import os
-    import exceptions
-    """Set up a default sqlite URI for use when none given."""
-    osuser = os.environ.get('USER')
-    dbdir = os.path.join( '/var/tmp', osuser, 'aquilondb' )
-    try:
-        os.makedirs( dbdir )
-    except exceptions.OSError:
-        pass
-    return "sqlite:///" + os.path.join( dbdir, 'aquilon.db' )
 
-sqlite_dsn = make_sqlite_dsn()
+USER = os.environ.get('USER')
+TEMPDIR=os.path.join('/var/tmp',USER)
+DBDIR=os.path.join(TEMPDIR,'aquilondb')
+LOGDIR=os.path.join(TEMPDIR,'log')
+LOGFILE=os.path.join(LOGDIR,'aqdb.log')
+
+for d in [LOGDIR,DBDIR]:
+    if not os.path.exists(d):
+        try:
+            os.makedirs(d)
+        except OSError, e:
+            print >> sys.stderr, 'makedirs(%s)'%(d),'\n', e
+            sys.exit(1)
+
+import logging
+logging.basicConfig(level=logging.ERROR,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename=os.path.join(LOGDIR,'aqdb.log'),
+                    filemode='w')
+
+sqlite_dsn = os.path.join(DBDIR, 'aquilon.db')
 oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
 
 """
@@ -41,34 +55,26 @@ oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
 dsn = sqlite_dsn
 #dsn = oracle_dsn
 
+if USER == 'daqscott' and gethostname() == 'oziyp2':
+    dsn=oracle_dsn
+
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
     import cx_Oracle
-    import os
-    import sys
 
-    o_home = os.environ.get('ORACLE_HOME')
-    if not o_home:
-        print 'Oracle Home is not set, check the environment'
-        sys.exit(1)
-    o_sid = os.environ.get('ORACLE_SID')
-    if not o_sid:
-        print 'Oracle SID not found in environment, setting to test instance'
+    if not os.environ.get('ORACLE_HOME'):
+        os.environment['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
+    if not os.environ.get('ORACLE_SID'):
+        print >> os.stderr, 'Oracle SID not found, setting to test instance'
         os.environment['ORACLE_SID']='LNTO_AQUILON_NY'
 
 engine = create_engine(dsn)
 engine.connect()
 meta  = MetaData(engine)
 
-#if dsn.startswith('oracle'):
-    #        meta.bind.echo = True
-
-
 Session = scoped_session(sessionmaker(bind=engine,
                                       autoflush=True,
                                       transactional=True))
-
-
 
 def optional_comments(func):
     """ reduce repeated code to handle 'comments' column """
@@ -78,8 +84,6 @@ def optional_comments(func):
             setattr(__args[0], ATTR, __kw.pop(ATTR))
         return func(*__args, **__kw)
     return comments_decorator
-
-
 
 class aqdbBase(object):
     """ AQDB base class: All ORM classes will extend aqdbBase. While the code
