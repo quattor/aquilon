@@ -367,3 +367,32 @@ class Broker(object):
                 **arguments)
         return d
 
+# --------------------------------------------------------------------------- #
+
+    def add_service (self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "put", request_path)
+        d = d.addCallback(self.dbbroker.add_service, session = True,
+                user = user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def show_service (self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "get", request_path)
+        d = d.addCallback(self.dbbroker.show_service, session = True,
+                user = user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def del_service (self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "del", request_path)
+        d = d.addCallback(self.dbbroker.del_service, session = True,
+                user = user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+

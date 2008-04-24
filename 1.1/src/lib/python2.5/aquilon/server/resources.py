@@ -543,12 +543,34 @@ class ResponsePage(resource.Resource):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add hardware has not been implemented yet"
 
-    # FIXME: Probably going to change...
+    # FIXME: check for template existence 
     def command_add_service(self, request):
-        """aqcommand: aq add service --service=<service> --domain=<domain>"""
+        d = self.check_arguments(request, ['name'])
+        d = d.addCallback(self.broker.add_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq add service has not been implemented yet"
+    def command_show_service_name(self, request):
+        d = self.check_arguments(request, [], ['name'])
+        d = d.addCallback(self.broker.show_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_show_service(self, request):
+        d = self.check_arguments(request, [], ['name'])
+        d = d.addCallback(self.broker.show_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_del_service(self, request):
+        d = self.check_arguments(request, [], ['name'])
+        d = d.addCallback(self.broker.del_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
     # FIXME: Probably going to change...
     def command_add_service_instance(self, request):

@@ -34,7 +34,7 @@ from formats import printprep
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
-from aquilon.aqdb.service import Host, QuattorServer, Domain
+from aquilon.aqdb.service import Host, QuattorServer, Domain, Service
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
 from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine, Status
@@ -620,6 +620,25 @@ class DatabaseBroker(AccessBroker):
         dbhost.domain = dbdomain
         self.session.save_or_update(dbhost)
         return
+
+    @transact
+    def add_service (self, result, name, **kwargs):
+        s = Service(name)
+        self.session.save(s)
+        return "Success"
+
+    @transact
+    def show_service (self, result, name, **kwargs):
+        q = self.session.query(Service)
+        if (name is not None):
+            q = q.filter(name.like(name+'%'))
+        return printprep(q.all())
+
+    @transact
+    def del_service (self, result, name, **kwargs):
+        s = self.session.query(Service).filter_by(name = name).one()
+        self.session.delete(s)
+        return "Success"
 
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_domain_and_string(self, hostname):
