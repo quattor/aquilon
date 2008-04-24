@@ -14,10 +14,9 @@ import logging
 import sys
 
 sys.path.append('../..')
-
+from db import *
+from location import Location, location, Building, building
 from aquilon.aqdb.utils import ipcalc
-from aquilon.aqdb.db import *
-from aquilon.aqdb.location import Location, location, Building,building
 
 from sqlalchemy import Column, Table, Integer, Sequence, String, Index, Boolean
 from sqlalchemy import CheckConstraint, UniqueConstraint, DateTime, ForeignKey
@@ -34,7 +33,7 @@ class NetworkType(aqdbType):
         *   management: no networks have it(@ 3/27/08), it's probably useless
         *   transit: for the phyical interfaces of zebra nodes
         *   vip:     for the zebra addresses themselves
-        *   unknown: for network rows in DSDB with NULL values for 'type' (GRRR...)
+        *   unknown: for network rows in DSDB with NULL values for 'type'
     """
     pass
 mapper(NetworkType,network_type, properties={
