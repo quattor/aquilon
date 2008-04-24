@@ -244,12 +244,13 @@ if __name__ == "__main__":
         remainder = cleanOptions.copy()
         for e in exclude:
             remainder.pop(e, None)
-        # Almost done.  Just need to account for whether the uri
-        # already has a query string.
-        if uri.find("?") >= 0:
-            uri = uri + '&' + urllib.urlencode(remainder)
-        else:
-            uri = uri + '?' + urllib.urlencode(remainder)
+        if remainder:
+            # Almost done.  Just need to account for whether the uri
+            # already has a query string.
+            if uri.find("?") >= 0:
+                uri = uri + '&' + urllib.urlencode(remainder)
+            else:
+                uri = uri + '?' + urllib.urlencode(remainder)
         d = RESTResource(uri).get()
     elif transport.method == 'put':
         # FIXME: This will need to be more complicated.
