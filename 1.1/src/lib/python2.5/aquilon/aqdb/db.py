@@ -46,7 +46,7 @@ logging.basicConfig(level=logging.ERROR,
                     filename=os.path.join(LOGDIR,'aqdb.log'),
                     filemode='w')
 
-sqlite_dsn = os.path.join(DBDIR, 'aquilon.db')
+sqlite_dsn = "sqlite:///" + os.path.join(DBDIR, 'aquilon.db')
 oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
 
 """
