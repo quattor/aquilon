@@ -526,7 +526,7 @@ class DatabaseBroker(AccessBroker):
             self.session.save(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
-        return "New machine succesfully created"
+        return printprep(m)
 
     @transact
     def show_machine(self, result, **kwargs):
@@ -546,6 +546,11 @@ class DatabaseBroker(AccessBroker):
             return printprep(q.all())
         except InvalidRequestError, e:
             raise ValueError("Error while querying the database!\n"+e.__str__())
+
+    @transact
+    def verify_del_machine(self, result, machine, **kwargs):
+        dbmachine = self._get_machine(machine)
+        return printprep(dbmachine)
 
     @transact
     def del_machine(self, result, machine, **kwargs):
@@ -570,7 +575,9 @@ class DatabaseBroker(AccessBroker):
         m = self.session.query(Machine).filter_by(name = kwargs['machine']).one()
         i = PhysicalInterface(kwargs['interface'], kwargs['mac'], m, ip=ip_addr)
         self.session.save(i)
-        return "Success"
+        # Hack to make sure machine is accessible...
+        printprep(i.machine)
+        return printprep(i)
 
     # Expects to run under a transact with a session.
     def _find_interface(self, name, machine, mac, ip):
@@ -593,13 +600,15 @@ class DatabaseBroker(AccessBroker):
     @transact
     def del_interface(self, result, name, machine, mac, ip, **kwargs):
         interface = self._find_interface(name, machine, mac, ip)
-        # FIXME: Should be able to access this as interface.machine.host[0],
-        # but something is not quite right.
-        host = self.session.query(Host).filter_by(machine=interface.machine).first()
-        if host and interface.boot:
-            raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %` first." % host.fqdn)
+        dbmachine = interface.machine
+        if dbmachine.host and interface.boot:
+            # FIXME: The host backref is currently broken...
+            #raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
+            raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname` first.")
         self.session.delete(interface)
-        return True
+        self.session.flush()
+        self.session.refresh(dbmachine)
+        return printprep(dbmachine)
 
     @transact
     def manage(self, result, domain, hostname, user, **kwargs):

@@ -82,7 +82,7 @@ mapper(Interface,interface,
 
 physical_interface=Table('physical_interface', meta,
     Column('interface_id', Integer,
-           ForeignKey('interface.id'), primary_key=True),
+           ForeignKey('interface.id', ondelete='CASCADE'), primary_key=True),
     Column('machine_id', Integer,
            ForeignKey('machine.id',ondelete='CASCADE'),
            nullable=False),
@@ -103,7 +103,7 @@ class PhysicalInterface(Interface):
         self.mac  = mac.strip().lower()
         reg = re.compile('^([a-f0-9]{2,2}:){5,5}[a-f0-9]{2,2}$')
         if (not reg.match(self.mac)):
-            raise ArgumentError ('Invalid MAC address: '+slef.mac)
+            raise ArgumentError ('Invalid MAC address: '+self.mac)
         self.machine= machine
         if kw.has_key('boot'):
             self.boot=kw.pop('boot')

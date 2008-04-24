@@ -46,6 +46,13 @@ def printprep(dbobject):
         printprep(dbobject.server)
         printprep(dbobject.owner)
     elif isinstance(dbobject, Machine):
+        # FIXME: Currently broken... backref not working properly.  The
+        # host attribute should be a single item, not a list.
+        #if dbobject.host:
+        #    # Avoid recursion (not calling printprep(dbobject.host), but still
+        #    # want to be able to print the host name if printing only machine
+        #    # info.
+        #    printprep(dbobject.host.fqdn)
         printprep(dbobject.location)
         printprep(dbobject.model)
         printprep(dbobject.interfaces)
@@ -125,6 +132,10 @@ class Formatter(object):
 
     def elaborate_raw_machine(self, machine, indent=""):
         details = [ indent + "Machine: %s" % machine.name ]
+        # FIXME: Backref currently broken.
+        #if machine.host:
+        #    details.append(indent + "  Allocated to host: %s"
+        #            % machine.host.fqdn)
         details.append(self.elaborate_raw(machine.location, indent + "  "))
         details.append(self.elaborate_raw(machine.model, indent + "  "))
         for i in machine.interfaces:

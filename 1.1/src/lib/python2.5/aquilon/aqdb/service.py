@@ -366,6 +366,7 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='host'").fetchone()[0],
     properties={
         'system'        : relation(System),
+        # FIXME: The uselist=False does not seem to be working correctly here.
         'machine'       : relation(Machine, uselist=False, backref='host'),
         'domain'        : relation(Domain,
                                    primaryjoin=host.c.domain_id==domain.c.id,

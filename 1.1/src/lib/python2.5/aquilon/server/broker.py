@@ -16,6 +16,7 @@ from twisted.internet import reactor
 from twisted.python import log
 
 from aquilon.server.processes import ProcessBroker
+from aquilon.server.templates import TemplateCreator
 from aquilon.exceptions_ import AquilonError
 
 #=============================================================================#
@@ -42,6 +43,7 @@ class Broker(object):
         self.dbbroker = dbbroker
         self.azbroker = azbroker
         self.pbroker = ProcessBroker()
+        self.template_creator = TemplateCreator()
         self.osuser = os.environ.get('USER')
         self.basedir = "/var/tmp/%s/quattor" % self.osuser
         self.profilesdir = "%s/web/htdocs/profiles" % self.basedir
@@ -271,6 +273,8 @@ class Broker(object):
                 "add", request_path)
         d = d.addCallback(self.dbbroker.add_machine, session=True, user=user,
                 **arguments)
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                basedir=self.basedir, **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -287,6 +291,10 @@ class Broker(object):
     def del_machine(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "delete", request_path)
+        d = d.addCallback(self.dbbroker.verify_del_machine, session=True,
+                user=user, **arguments)
+        d = d.addCallback(self.template_creator.remove_plenary, user=user,
+                basedir=self.basedir, **arguments)
         d = d.addCallback(self.dbbroker.del_machine, session=True, user=user,
                 **arguments)
         return d
@@ -298,6 +306,8 @@ class Broker(object):
                 "add", request_path)
         d = d.addCallback(self.dbbroker.add_interface, session=True, user=user,
                 **arguments)
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                basedir=self.basedir, **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -307,6 +317,8 @@ class Broker(object):
                 "del", request_path)
         d = d.addCallback(self.dbbroker.del_interface, session=True, user=user,
                 **arguments)
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                basedir=self.basedir, **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -339,6 +351,8 @@ class Broker(object):
         d = d.addCallback(self.pbroker.add_host, dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.add_host, session=True, user=user,
                 **arguments)
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                basedir=self.basedir, **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
