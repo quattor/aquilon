@@ -360,6 +360,25 @@
       <transport method="put" path="location/add_chassis/%(rack)s/%(name)s" />
    </command>
 
+   <command name="show_chassis">
+      %prog show chassis [--name CHASSIS]
+      Show the chassis list, or details about a particular chassis.
+      <optgroup name="show_chassis_opts">
+         <option name="name" type="string">chassis name</option>
+      </optgroup>
+      <transport method="get" path="location/chassis" />
+      <transport trigger="name" method="get" path="location/chassis/%(name)s" />
+   </command>
+
+   <command name="del_chassis">
+      %prog del chassis --name CITY
+      Delete a chassis.
+      <optgroup name="del_chassis_opts" mandatory="True" fields="all">
+         <option name="name" type="string">chassis name</option>
+      </optgroup>
+      <transport method="delete" path="location/chassis/%(name)s" />
+   </command>
+
    <command name="add_rack">
       %prog add rack --name NAME --rack RACK_NAME
       Add a new rack to the database
@@ -376,6 +395,25 @@
       <transport method="put" path="location/add_rack/%(building)s/%(name)s" />
    </command>
 
+   <command name="show_rack">
+      %prog show rack [--name RACK]
+      Show the rack list, or details about a particular rack.
+      <optgroup name="show_rack_opts">
+         <option name="name" type="string">rack name</option>
+      </optgroup>
+      <transport method="get" path="location/rack" />
+      <transport trigger="name" method="get" path="location/rack/%(name)s" />
+   </command>
+
+   <command name="del_rack">
+      %prog del rack --name CITY
+      Delete a rack.
+      <optgroup name="del_rack_opts" mandatory="True" fields="all">
+         <option name="name" type="string">rack name</option>
+      </optgroup>
+      <transport method="delete" path="location/rack/%(name)s" />
+   </command>
+
    <command name="add_building">
       %prog add building --name NAME --city CITY_NAME
       Add a new building to the database
@@ -390,6 +428,25 @@
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="location/add_building/%(city)s/%(name)s" />
+   </command>
+
+   <command name="show_building">
+      %prog show building [--name RACK]
+      Show the building list, or details about a particular building.
+      <optgroup name="show_building_opts">
+         <option name="name" type="string">building name</option>
+      </optgroup>
+      <transport method="get" path="location/building" />
+      <transport trigger="name" method="get" path="location/building/%(name)s" />
+   </command>
+
+   <command name="del_building">
+      %prog del building --name CITY
+      Delete a building.
+      <optgroup name="del_building_opts" mandatory="True" fields="all">
+         <option name="name" type="string">building name</option>
+      </optgroup>
+      <transport method="delete" path="location/building/%(name)s" />
    </command>
 
    <command name="add_city">
@@ -409,7 +466,7 @@
    </command>
 
    <command name="show_city">
-      %prog del city [--name CITY]
+      %prog show city [--name CITY]
       Show the list of cities, or details about a particular city.
       <optgroup name="show_city_opts">
          <option name="name" type="string">city name</option>
@@ -425,6 +482,110 @@
          <option name="name" type="string">city name</option>
       </optgroup>
       <transport method="delete" path="location/city/%(name)s" />
+   </command>
+
+   <command name="add_country">
+      %prog add city --name NAME --country COUNTRY_NAME
+      Add a new city to the database
+      <optgroup name="add_city_options" mandatory="True" fields="all">
+         Mandatory options:
+         <option name="name" type="string">Name of the new city</option>
+         <option name="country" type="string">Name of the country that contains the city</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         Optional options:
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_country/%(country)s/%(name)s" />
+   </command>
+
+   <command name="show_country">
+      %prog show country [--name COUNTRY]
+      Show the list of countries, or details about a particular country.
+      <optgroup name="show_country_opts">
+         <option name="name" type="string">country name</option>
+      </optgroup>
+      <transport method="get" path="location/country" />
+      <transport trigger="name" method="get" path="location/country/%(name)s" />
+   </command>
+
+   <command name="del_country">
+      %prog del country --name CITY
+      Delete a country.
+      <optgroup name="del_country_opts" mandatory="True" fields="all">
+         <option name="name" type="string">country name</option>
+      </optgroup>
+      <transport method="delete" path="location/country/%(name)s" />
+   </command>
+
+   <command name="add_continent">
+      %prog add continent --name NAME --hub HUB_NAME
+      Add a new continent to the database
+      <optgroup name="add_continent_options" mandatory="True" fields="all">
+         Mandatory options:
+         <option name="name" type="string">Name of the new continent</option>
+         <option name="hub" type="string">Name of the hub, which the continent belongs to</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         Optional options:
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_continent/%(hub)s/%(name)s" />
+   </command>
+
+   <command name="show_continent">
+      %prog show continent [--name CONTINENT]
+      Show the list of continents, or details about a particular continent.
+      <optgroup name="show_continent_opts">
+         <option name="name" type="string">continent name</option>
+      </optgroup>
+      <transport method="get" path="location/continent" />
+      <transport trigger="name" method="get" path="location/continent/%(name)s" />
+   </command>
+
+   <command name="del_continent">
+      %prog del continent --name CITY
+      Delete a continent.
+      <optgroup name="del_continent_opts" mandatory="True" fields="all">
+         <option name="name" type="string">continent name</option>
+      </optgroup>
+      <transport method="delete" path="location/continent/%(name)s" />
+   </command>
+
+   <command name="add_hub">
+      %prog add hub --name NAME
+      Add a new hub to the database
+      <optgroup name="add_hub_options" mandatory="True" fields="all">
+         Mandatory options:
+         <option name="name" type="string">Name of the new hub</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         Optional options:
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_hub/%(name)s" />
+   </command>
+
+   <command name="show_hub">
+      %prog show hub [--name HUB]
+      Show the list of hubs, or details about a particular hub.
+      <optgroup name="show_hub_opts">
+         <option name="name" type="string">hub name</option>
+      </optgroup>
+      <transport method="get" path="location/hub" />
+      <transport trigger="name" method="get" path="location/hub/%(name)s" />
+   </command>
+
+   <command name="del_hub">
+      %prog del hub --name CITY
+      Delete a hub.
+      <optgroup name="del_hub_opts" mandatory="True" fields="all">
+         <option name="name" type="string">hub name</option>
+      </optgroup>
+      <transport method="delete" path="location/hub/%(name)s" />
    </command>
 
    <command name="make_aquilon">

@@ -408,17 +408,53 @@ class ResponsePage(resource.Resource):
         request.args['parentname'] = request.args['rack']
         return self.command_add_location(request)
 
+    def command_show_chassis(self, request):
+        request.args["type"] = ["chassis"]
+        return self.command_show_location_type(request)
+
+    def command_show_chassis_name(self, request):
+        request.args["type"] = ["chassis"]
+        return self.command_show_location_name(request)
+
+    def command_del_chassis(self, request):
+        request.args["type"] = ["chassis"]
+        return self.command_del_location(request)
+
     def command_add_rack(self, request):
         request.args['type'] = ['rack']
         request.args['parenttype'] = ['building']
         request.args['parentname'] = request.args['building']
         return self.command_add_location(request)
 
+    def command_show_rack(self, request):
+        request.args["type"] = ["rack"]
+        return self.command_show_location_type(request)
+
+    def command_show_rack_name(self, request):
+        request.args["type"] = ["rack"]
+        return self.command_show_location_name(request)
+
+    def command_del_rack(self, request):
+        request.args["type"] = ["rack"]
+        return self.command_del_location(request)
+
     def command_add_building(self, request):
         request.args['type'] = ['building']
         request.args['parenttype'] = ['city']
         request.args['parentname'] = request.args['city']
         return self.command_add_location(request)
+
+    def command_show_building(self, request):
+        request.args["type"] = ["building"]
+        return self.command_show_location_type(request)
+
+    def command_show_building_name(self, request):
+        request.args["type"] = ["building"]
+        return self.command_show_location_name(request)
+
+    def command_del_building(self, request):
+        request.args["type"] = ["building"]
+        return self.command_del_location(request)
 
     def command_add_city(self, request):
         request.args["type"] = ["city"]
@@ -436,6 +472,60 @@ class ResponsePage(resource.Resource):
 
     def command_del_city(self, request):
         request.args["type"] = ["city"]
+        return self.command_del_location(request)
+
+    def command_add_country (self, request):
+        request.args["type"] = ["country"]
+        request.args["parenttype"] = ["continent"]
+        request.args["parentname"] = request.args["continent"]
+        return self.command_add_location(request)
+
+    def command_show_country(self, request):
+        request.args["type"] = ["country"]
+        return self.command_show_location_type(request)
+
+    def command_show_country_name(self, request):
+        request.args["type"] = ["country"]
+        return self.command_show_location_name(request)
+
+    def command_del_country(self, request):
+        request.args["type"] = ["country"]
+        return self.command_del_location(request)
+
+    def command_add_continent (self, request):
+        request.args["type"] = ["continent"]
+        request.args["parenttype"] = ["hub"]
+        request.args["parentname"] = request.args["hub"]
+        return self.command_add_location(request)
+
+    def command_show_continent(self, request):
+        request.args["type"] = ["continent"]
+        return self.command_show_location_type(request)
+
+    def command_show_continent_name(self, request):
+        request.args["type"] = ["continent"]
+        return self.command_show_location_name(request)
+
+    def command_del_continent(self, request):
+        request.args["type"] = ["continent"]
+        return self.command_del_location(request)
+
+    def command_add_hub (self, request):
+        request.args["type"] = ["hub"]
+        request.args["parenttype"] = ["company"]
+        request.args["parentname"] = "ms" 
+        return self.command_add_location(request)
+
+    def command_show_hub(self, request):
+        request.args["type"] = ["hub"]
+        return self.command_show_location_type(request)
+
+    def command_show_hub_name(self, request):
+        request.args["type"] = ["hub"]
+        return self.command_show_location_name(request)
+
+    def command_del_hub(self, request):
+        request.args["type"] = ["hub"]
         return self.command_del_location(request)
 
     def command_status(self, request):
