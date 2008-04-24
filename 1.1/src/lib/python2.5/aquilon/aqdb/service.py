@@ -175,7 +175,7 @@ class System(aqdbBase):
             raise ArgumentError('you must provide a DNS Domain')
 
     def _fqdn(self):
-        return '.'.join([str(self.name),str(self.dns_domain)])
+        return '.'.join([str(self.name),str(self.dns_domain.name)])
     fqdn = property(_fqdn)
 
 mapper(System, system, polymorphic_on=system.c.type_id, \
@@ -366,8 +366,11 @@ mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
            "select id from system_type where type='host'").fetchone()[0],
     properties={
         'system'        : relation(System),
-        # FIXME: The uselist=False does not seem to be working correctly here.
-        'machine'       : relation(Machine, uselist=False, backref='host'),
+        # Not 100% sure why the uselist=False needs to be on the backref here,
+        # instead of in the relation.  See the "One To One" section of the docs.
+        # http://www.sqlalchemy.org/docs/04/mappers.html
+        'machine'       : relation(Machine,
+                                   backref=backref('host', uselist=False)),
         'domain'        : relation(Domain,
                                    primaryjoin=host.c.domain_id==domain.c.id,
                                    uselist=False,

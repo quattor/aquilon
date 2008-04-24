@@ -122,9 +122,9 @@ class DatabaseBroker(AccessBroker):
         dbdomain = self._get_domain(domain)
         dbstatus = self._get_status(status)
         dbmachine = self._get_machine(machine)
-        (short, dns_domain) = self._hostname_to_domain_and_string(hostname)
+        (short, dbdns_domain) = self._hostname_to_domain_and_string(hostname)
         host = Host(dbmachine, dbdomain, dbstatus, name=short,
-                dns_domain=dns_domain)
+                dns_domain=dbdns_domain)
         self.session.save(host)
         return printprep(host)
 
@@ -137,7 +137,11 @@ class DatabaseBroker(AccessBroker):
     def del_host(self, result, hostname, **kwargs):
         # Assumes host has been deleted from dsdb.
         host = self._hostname_to_host(hostname)
+        # Hack to make sure the machine object is refreshed in future queries.
+        dbmachine = host.machine
         self.session.delete(host)
+        self.session.flush()
+        self.session.refresh(dbmachine)
         return
 
     @transact
@@ -602,9 +606,7 @@ class DatabaseBroker(AccessBroker):
         interface = self._find_interface(name, machine, mac, ip)
         dbmachine = interface.machine
         if dbmachine.host and interface.boot:
-            # FIXME: The host backref is currently broken...
-            #raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
-            raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname` first.")
+            raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
         self.session.delete(interface)
         self.session.flush()
         self.session.refresh(dbmachine)
@@ -642,42 +644,31 @@ class DatabaseBroker(AccessBroker):
 
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_domain_and_string(self, hostname):
-        components = hostname.split(".")
-        if len(components) <= 1:
+        if not hostname:
+            raise ArgumentError("No hostname specified.")
+        (short, dot, dns_domain) = hostname.partition(".")
+        if not dns_domain:
             raise ArgumentError(
                     "'%s' invalid, hostname must be fully qualified."
                     % hostname)
-        if len(components) == 2:
-            # Try .ms.com?
-            raise ArgumentError(
-                    "'%s' invalid, hostname must be fully qualified."
-                    % hostname)
-        short = components.pop(0)
-        root = components.pop(-2) + "." + components.pop(-1)
+        if not short:
+            raise ArgumentError( "'%s' invalid, missing host name." % hostname)
         try:
-            dns_domain = self.session.query(DnsDomain).filter_by(
-                    name=root, parent=None).one()
+            dbdns_domain = self.session.query(DnsDomain).filter_by(
+                    name=dns_domain).one()
         except InvalidRequestError, e:
-            raise NotFoundException("Root DNS domain '%s' not found." % root)
-        while components:
-            component = components.pop(-1)
-            try:
-                dns_domain = self.session.query(DnsDomain).filter_by(
-                        name=component, parent=dns_domain).one()
-            except InvalidRequestError, e:
-                raise NotFoundException(
-                        "DNS domain '%s' with parent '%s' not found."
-                        % (component, repr(domain)))
-        return (short, dns_domain)
+            raise NotFoundException("DNS domain '%s' for '%s' not found: %s"
+                    % (dns_domain, hostname, e))
+        return (short, dbdns_domain)
 
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_host(self, hostname):
-        (short, dns_domain) = self._hostname_to_domain_and_string(hostname)
+        (short, dbdns_domain) = self._hostname_to_domain_and_string(hostname)
         try:
             host = self.session.query(Host).filter_by(
-                    name=short, dns_domain=dns_domain).one()
+                    name=short, dns_domain=dbdns_domain).one()
         except InvalidRequestError, e:
             raise NotFoundException("Host '%s' with DNS domain '%s' not found."
-                    % (short, repr(dns_domain)))
+                    % (short, dbdns_domain.name))
         return host
 

@@ -264,7 +264,7 @@ class ProcessBroker(object):
                 continue
             d = self.run_shell_command(True,
                 """%s add host -host_name "%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" """
-                % (dsdb, short, repr(dbdns_domain), interface.ip,
+                % (dsdb, short, dbdns_domain.name, interface.ip,
                 interface.name, interface.mac),
                 env=env)
             d = d.addErrback(self.eb_detailed_command)
