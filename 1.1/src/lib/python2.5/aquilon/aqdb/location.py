@@ -274,8 +274,10 @@ def populate_hubs():
     s=Session()
 
     if empty(location):
+        company_type_id=engine.execute(
+           "select id from location_type where type='company'").fetchone()[0]
         i=location.insert()
-        i.execute(name='ms',location_type_id=1,
+        i.execute(name='ms',location_type_id=company_type_id,
             fullname='root node',comments='root of location tree')
         i=company.insert()
         i.execute(id=1)
@@ -358,8 +360,12 @@ def populate_bldg():
 
     with s.begin():
         for row in dump_bldg():
-            c=Building(row[0],'building',fullname=row[1],parent=cache[row[2]])
-            s.save(c)
+            if row[0] is None:
+                print 'Empty building name: %s'%row
+                continue
+            else:
+                c=Building(row[0],'building',fullname=row[1],parent=cache[row[2]])
+                s.save(c)
     s.flush()
     s.close()
 
