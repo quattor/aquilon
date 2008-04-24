@@ -46,8 +46,8 @@ get_bucket = """
 # NOTE: the network_type tables id #'s actually match up with dsdb's
 # network_type table's id column, so we just import it directly for speed.
 get_network = """
-    SELECT  A.net_name, A.net_ip_addr, A.net_ip_value, A.net_mask, A.byte_mask,
-    isnull(net_type_id,4),
+    SELECT  A.net_name, A.net_ip_addr, abs(A.net_ip_value), abs(A.net_mask),
+    abs(A.byte_mask), isnull(net_type_id,4),
     SUBSTRING(A.location,CHAR_LENGTH(A.location) - 7,2) as sysloc, A.side,
     B.campus_name, C.bucket_name
     FROM network A, campus B, bucket C

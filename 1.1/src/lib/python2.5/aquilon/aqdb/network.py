@@ -9,21 +9,21 @@
 # This module is part of Aquilon
 """ The module governing tables and objects that represent IP networks in
     Aquilon."""
-
+import datetime
+import logging
 import sys
-if __name__ == '__main__':
-    sys.path.append('../..')
 
-from db import *
-from location import Location
+sys.path.append('../..')
 
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from aquilon.aqdb.utils import ipcalc
+from aquilon.aqdb.db import *
+from aquilon.aqdb.location import Location, location, Building,building
 
-from location import Location,location, Building, building
-#location = Table('location', meta, autoload=True)
-#building = Table('building', meta, autoload=True)
-
+from sqlalchemy import Column, Table, Integer, Sequence, String, Index, Boolean
+from sqlalchemy import CheckConstraint, UniqueConstraint, DateTime, ForeignKey
+from sqlalchemy import insert, select
+from sqlalchemy.orm import mapper, relation, deferred, synonym
+from sqlalchemy.exceptions import IntegrityError
 
 network_type = mk_type_table('network_type',meta)
 network_type.create(checkfirst=True)
@@ -77,24 +77,6 @@ def populate_profile():
             i.execute(cidr=int(line[0]), netmask=line[1] , mask=int(line[2]))
         f.close()
 
-def ip_iter(a,b,c,d,i):
-    """ iterate from a.b.c.d to max_ip with integer value of # ips:
-        get the lowest and the highest. add 1. if > 255, add one to
-        next highest byte """
-    while i > 1:
-        d+=1
-        if d > 255:
-            d=0
-            c +=1
-        if c > 255:
-            c=0
-            b+=1
-        if b > 255:
-            b=0
-            a+=1
-        i-=1
-        yield '%s.%s.%s.%s'%(a,b,c,d)
-
 network = Table('network', meta,
     Column('id', Integer, Sequence('network_id_seq'), primary_key=True),
     Column('location_id', Integer,
@@ -125,15 +107,27 @@ ip_addr = Table('ip_addr', meta,
     Column('is_used', Boolean, nullable=False, default=False),
     Column('network_id', Integer, ForeignKey('network.id'), nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True)
-)
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('byte1','byte2','byte3','byte4','network_id'),)
+    #Index('byte1','byte2','byte3','byte4'))
+    #TODO: create ALL indexes after population
+    #TODO: unique the bcast and network ips against network_id
 ip_addr.create(checkfirst=True)
 
 
 class Network(aqdbBase):
     @optional_comments
-    def __init__(self,location,**kw):
-        self.location=location
+    def __init__(self,**kw):
+        if kw.has_key('location'):
+            if isinstance(location,Location):
+                self.location=location
+            else:
+                raise ArgumentError('location arg should be a location object')
+        elif kw.has_key('location_id'):
+            self.location_id=kw.pop('location_id')
+        else:
+            raise ArgumentError('no location info specified')
+
         self.name = kw.pop('name', kw['ip'])
         self.name  = self.name.strip().lower()
         self.ip = kw.pop('ip')
@@ -142,15 +136,18 @@ class Network(aqdbBase):
         self.byte_mask = kw.pop('byte_mask')
         self.side = kw.pop('side','a')       # defaults to side A, like dsdb
         self.profile_id = self.mask
-
+        self.network_type_id = kw.pop('network_type',4)
         cmps = kw.pop('campus',None)
         if cmps:
             self.campus=cmps.strip().lower()
 
         bkt = kw.pop('bucket',None)
         if bkt:
-            self.bucket = bkt.strip().lower()   #TODO: implement bunker
-        #TODO: snarf comments from DSDB too
+            self.bucket = bkt.strip().lower()
+    #TODO: get dsdb network ids
+    #TODO: implement bunker,bucket
+    #TODO: snarf comments from DSDB, async
+
 
 class IpAddr(aqdbBase):
     """ One thing DSDB missed out on is that every IP address is a valid and
@@ -168,7 +165,12 @@ class IpAddr(aqdbBase):
         self.is_network == is_network
         self.is_broadcast == is_broadcast
         self.is_used == is_used
-        #self.network_id???
+        if kw.has_key('network'):
+            self.network=kw.pop('network')
+        elif kw.has_key('network_id'):
+            self.network_id=kw.pop('network_id')
+        else:
+            raise ArgumentError('no network information provided')
 
     def __repr__(self):
         return '%s.%s.%s.%s'%(self.byte1,self.byte2,self.byte3,self.byte4)
@@ -177,7 +179,6 @@ mapper(Network,network,properties={
     'type'          : relation(NetworkType),
     'location'      : relation(Location),
     'profile'       : relation(Netmask),
-    'netmask'       : synonym('profile'),
     'creation_date' : deferred(network.c.creation_date),
     'comments'      : deferred(network.c.comments)
 })
@@ -191,96 +192,55 @@ mapper(IpAddr,ip_addr, properties={
 dns_domain = Table('dns_domain', meta,
     Column('id', Integer, Sequence('dns_domain_id_seq'),primary_key=True),
     Column('name',String(32), unique=True, nullable=False, index=True),
-    Column('parent_id', Integer,
-           ForeignKey('dns_domain.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 dns_domain.create(checkfirst=True)
 
-if empty(dns_domain):
-    i=insert(dns_domain)
-    i.execute(name='ms.com', comments='root node')
-    i.execute(name='one-nyp',parent_id=1, comments='1 NYP test domain')
-    print 'created ms.com and one-nyp.ms.com dns domains'
-
-#TODO: remove adjacency list and make it a full string.
 class DnsDomain(aqdbBase):
-    """ To store dns domains in an adjacency list """
-
-    @optional_comments
-    def __init__(self,name,parent,**kw):
-        self.name = name.strip().lower()
-
-        if isinstance(parent,DnsDomain):
-            self.parent=parent
-            parent.append(self)
-        else:
-            msg="parent argument must be type 'DnsDomain'"
-            raise TypeError(msg)
-            #TODO: accept string
-
-    def parent_fqd(self):
-        pl=[]
-        if not self.parent:
-            return self.name
-        else:
-            p_node=self.parent
-            while p_node.parent is not None:
-                pl.append(p_node.name)
-                p_node=p_node.parent.name
-            pl.append(p_node.name)
-            pl.reverse()
-            return '.'.join(pl)
-
-    def append(self,node):
-        if isinstance(node, DnsDomain):
-            node.parent = self
-            self.sublocations[node] = node
-
-    def __repr__(self):
-        if not self.parent:
-            return str(self.name)
-        else:
-            return '.'.join([self.name,self.parent_fqd()])
-
+    """ To store dns domains """
+    pass
 
 mapper(DnsDomain, dns_domain, properties={
-            'parent':relation(DnsDomain,
-                              remote_side=[dns_domain.c.id],
-                              backref='subdomains'),
-            'creation_date' : deferred(location.c.creation_date),
-            'comments': deferred(location.c.comments)
+    'creation_date' : deferred(location.c.creation_date),
+    'comments'      : deferred(location.c.comments)
 })
 
 def populate_networks():
     s = Session()
-    cache=gen_id_cache(Building)
+    b_cache={}
+    sel=select([location.c.name,building.c.id], location.c.id==building.c.id)
+    for row in engine.execute(sel).fetchall():
+        b_cache[row[0]]=row[1]
+
     count=0
-    for row in dump_network():
+    #TODO: forget campus, bucket. make this whole thing an insert ?
+    for (name,ip,ip_int,mask,byte_mask,type,bldg_name,side,
+        campus,bucket) in dump_network():
+
         kw = {}
         try:
-            b = cache[row[6]]
+            kw['location_id'] = b_cache[bldg_name]
         except KeyError:
-            print "Can't find building '%s'\n%s"%(row[6],row)
-            #TODO: log error somewhere: AND, pull the new building in from dsdb
+            logging.error("Can't find building '%s'\n%s"%(bldg_name,row))
+            #TODO: pull the new building in from dsdb somehow
             continue
 
-        kw['name']       = row[0].lower().strip()
-        kw['ip']         = row[1]
-        kw['ip_int']     = abs(row[2])
-        kw['mask']       = abs(row[3])
-        kw['byte_mask']  = abs(row[4])
-        if row[5]:
-            kw['type']   = row[5]
-        if row[7]:
-            kw['side']   = str(row[7]).lower().strip()
-        if row[8]:
-            kw['campus'] = str(row[8]).lower().strip()
-        if row[9]:
-            kw['bucket'] = str(row[9]).lower().strip()
+        kw['name']       = name.lower().strip()
+        kw['ip']         = ip
+        kw['ip_int']     = ip_int
+        kw['mask']       = mask
+        kw['byte_mask']  = byte_mask
+        if type:
+            kw['network_type']   = type
+        if side:
+            kw['side']   = side.lower().strip()
+        if campus:
+            kw['campus'] = campus.lower().strip()
+        if bucket:
+            kw['bucket'] = bucket.lower().strip()
 
-        c=Network(b,**kw)
-        s.save_or_update(c)
+        c=Network(**kw)
+        s.save(c)
         count += 1
         if count % 1000 == 0:
             s.commit()
@@ -296,6 +256,14 @@ if __name__ == '__main__':
                         ['transit', 'vip', 'management', 'unknown'])
 
     populate_profile()
+
+    if empty(dns_domain):
+        ms   = DnsDomain('ms.com', comments='root node')
+        onyp = DnsDomain('one-nyp.ms.com', comments='1 NYP test domain')
+        Session.save(ms)
+        Session.save(onyp)
+        Session.commit()
+        print 'created ms.com and one-nyp.ms.com dns domains'
 
     if empty(network):
         from aquilon.aqdb.utils.dsdb import dump_network
