@@ -163,14 +163,12 @@ class System(aqdbBase):
         #remove it provided I can validate it's always automated.
 
         if kw.has_key('dns_domain'):
-            if isinstance(dns_domain, str):
-                dns_dom_id=engine.execute(
-                "select id from dns_domain where name = '%s'"%(kw['dns_domain'])
-                ).fetchone()[0]
-                if dns_domain_id:
-                    self.dns_domain_id=dns_dom_id
-                else:
-                    raise ArgumentError("can't find dns domain '%s'"%(kw['dns_domain']))
+            if isinstance(kw['dns_domain'],str):
+                self.dns_domain = s.query(DnsDomain).filter_by(name=kw['dns_domain']).one()
+            elif isinstance(kw['dns_domain'], DnsDomain):
+                self.dns_domain = kw['dns_domain']
+            else:
+                raise ArgumentError('You must provide either a string, or a DnsDomain object')
         else:
             raise ArgumentError('you must provide a DNS Domain')
 
