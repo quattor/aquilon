@@ -103,10 +103,17 @@ mapper(Model,model,properties={
     'creation_date':deferred(model.c.creation_date),
     'comments': deferred(model.c.comments)})
 
-""" Machine is defined at this point so that physical hardware components can
-    ForeignKey off machine.id, which is to become an association object
-    variant of our old friend the Many to Many
-"""
+disk_type=mk_type_table('disk_type')
+disk_type.create(checkfirst=True)
+
+class DiskType(aqdbType):
+    """ Disk Type: scsi, ccis, sata, etc. """
+    pass
+
+mapper(DiskType,disk_type,properties={
+    'creation_date':deferred(disk_type.c.creation_date),
+    'comments':deferred(disk_type.c.comments)})
+
 machine = Table('machine', meta,
     Column('id', Integer, Sequence('machine_id_seq'), primary_key=True),
     Column('name', String(32), unique=True, index=True), #nodename
@@ -186,22 +193,58 @@ if empty(status):
 def populate_vendor():
     if empty(vendor):
         print "Populating vendor"
-        s = Session()
-        for i in ['sun','ibm','hp','dell','intel','amd','broadcom', 'generic']:
-            a=Vendor(i)
-            s.save(a)
-        s.commit()
-        s.close()
+        import configuration as cfg
+        from aquilon import const
+        #get all dir names immediately under template-king/hardware/*/
+        d=os.path.join(str(const.cfg_base),'hardware')
+        created=[]
+        for i in os.listdir(d):
+            if i == 'ram':
+                continue
+            for j in os.listdir(os.path.join(d,i)):
+                if j in created:
+                    continue
+                else:
+                    a=Vendor(j)
+                    try:
+                        Session.save(a)
+                    except Exception,e:
+                        Session.rollback()
+                        print >> sys.stderr, e
+                        continue
+                    created.append(j)
+        try:
+            Session.commit()
+        except Exception,e:
+            print >> sys.stderr, e
+        finally:
+            Session.close()
 
 def populate_hardware_type():
     if empty(hardware_type):
         print "Populating hardware_type"
-        fill_type_table(hardware_type,['rackmount', 'blade', 'workstation','disk','cpu','nic','ram'])
+        fill_type_table(hardware_type,['rackmount', 'blade', 'workstation',
+                                       'disk','cpu','nic','ram'])
+def populate_disk_type():
+    if empty(disk_type):
+        print 'Populating disk_type'
+        import configuration as cfg
+        from aquilon import const
+        d=os.path.join(const.cfg_base,'hardware/harddisk/generic')
+        disk_types=[]
+        for i in os.listdir(d):
+            #disk_types.append(i.rstrip('.tpl').strip())
+            disk_types.append(os.path.splitext(i)[0])
+        fill_type_table(disk_type,disk_types)
+        print 'created disk types %s'%(disk_types)
 
-def populate_model():
-    if empty(model):
+def populate_machines():
+    s = Session()
+    mlist=s.query(Model).all()
+
+    if not mlist:
         print "Populating model table"
-        s = Session()
+
         v_cache = gen_id_cache(Vendor)
 
         hwt_cache={}
@@ -240,4 +283,5 @@ def populate_model():
 if __name__ == '__main__':
     populate_vendor()
     populate_hardware_type()
-    populate_model()
+    populate_machines()
+    populate_disk_type()
