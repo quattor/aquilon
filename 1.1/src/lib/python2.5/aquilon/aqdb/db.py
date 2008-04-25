@@ -32,6 +32,7 @@ DBDIR=os.path.join(TEMPDIR,'aquilondb')
 LOGDIR=os.path.join(TEMPDIR,'log')
 LOGFILE=os.path.join(LOGDIR,'aqdb.log')
 
+
 for d in [LOGDIR,DBDIR]:
     if not os.path.exists(d):
         try:
@@ -46,27 +47,39 @@ logging.basicConfig(level=logging.ERROR,
                     filename=os.path.join(LOGDIR,'aqdb.log'),
                     filemode='w')
 
-sqlite_dsn = "sqlite:///" + os.path.join(DBDIR, 'aquilon.db')
-oracle_dsn='oracle://aqd:aqd@LNTO_AQUILON_NY'
+QA_ORACLE_SID='LNTO_AQUILON_NY'
+PROD_ORACLE_SID='LNTO_AQUILON_NY'
+ORACLE_SID=QA_ORACLE_SID
+QA_SCHEMA='aqd'
+PROD_SCHEMA='cdb'
+SQLITE_DSN   = 'sqlite:///' + os.path.join(DBDIR, 'aquilon.db')
+PROD_ORA_DSN = 'oracle://'+PROD_SCHEMA+':'+PROD_SCHEMA+'@'+ORACLE_SID
+QA_ORA_DSN   = 'oracle://'+QA_SCHEMA+':'+QA_SCHEMA+'@'+ORACLE_SID
 
 """
-    CONFIGURES THE DSN FOR THE ENTIRE PROJECT
+    CONFIGURE THE DSN FOR THE ENTIRE PROJECT:
+        this is low tech, its just for a start.
+        TODO: a proper aqdb.conf file.
 """
-dsn = sqlite_dsn
-#dsn = oracle_dsn
+dsn = SQLITE_DSN
+#dsn = PROD_ORA_DSN
+
+#If you're like me (and I know *I AM*), you like things to just work...
 
 if USER == 'daqscott' and gethostname() == 'oziyp2':
-    dsn=oracle_dsn
+    dsn=QA_ORA_DSN
+
+if gethostname() == 'oy604c2n7':
+    dsn=PROD_ORA_DSN
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
     import cx_Oracle
 
-    if not os.environ.get('ORACLE_HOME'):
-        os.environment['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
+    os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
         print >> os.stderr, 'Oracle SID not found, setting to test instance'
-        os.environment['ORACLE_SID']='LNTO_AQUILON_NY'
+        os.environment['ORACLE_SID']=ORACLE_SID
 
 engine = create_engine(dsn)
 engine.connect()
@@ -86,10 +99,11 @@ def optional_comments(func):
     return comments_decorator
 
 class aqdbBase(object):
-    """ AQDB base class: All ORM classes will extend aqdbBase. While the code
-    is a bit trite, it would be silly not to have this class such that we can
-    make use of it later when and if needed. All schema modules need to import
-    db, so this is the best place for it
+    """ AQDB base class: All ORM classes will extend aqdbBase.
+
+    While the code is a bit trite, it would be silly not to have this class
+    such that we can make use of it later when and if needed. All schema modules
+    need to import db, so this is the best place for it
     """
     @optional_comments
     def __init__(self,cn,*args,**kw):
