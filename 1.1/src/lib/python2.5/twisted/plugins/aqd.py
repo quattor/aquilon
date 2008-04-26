@@ -9,7 +9,8 @@
 # This module is part of Aquilon
 '''If you can read this, you should be Documenting'''
 
-#import sys, os
+import os
+#import sys
 #
 #sys.path.append( os.path.join(
 #            os.path.dirname( os.path.realpath(sys.argv[0]) ),
@@ -98,15 +99,19 @@ class AQDMaker(object):
         if options["noknc"]:
             return strports.service(str(options["openport"]), openSite )
 
+        if os.environ.get("ID_EXEC") == "x86_64.linux.2.6.glibc.2.3":
+            knc = "/ms/dist/kerberos/PROJ/knc/prod/.exec/ia32.linux.2.4.glibc.2.3/bin/knc"
+        else:
+            #knc = "/ms/dev/kerberos/knc/1.3/install/exec/bin/knc"
+            knc = "/ms/dist/kerberos/PROJ/knc/prod/bin/knc"
+
         sockname = broker.basedir + "/kncsock"
         mon = ProcessMonitor()
         # FIXME: Should probably run krb5_keytab here as well.
         # and/or verify that the keytab file exists.
         mon.addProcess("knc", ["/usr/bin/env",
             "KRB5_KTNAME=FILE:/var/spool/keytabs/%s" % broker.osuser,
-            #"/ms/dev/kerberos/knc/1.3/install/exec/bin/knc",
-            "/ms/dist/kerberos/PROJ/knc/prod/bin/knc",
-            "-lS", sockname, str(options["kncport"]) ])
+            knc, "-lS", sockname, str(options["kncport"]) ])
         mon.startService()
         reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
 
