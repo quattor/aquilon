@@ -127,43 +127,54 @@ class ProcessBroker(object):
         if os.path.exists(infile):
             input = file(infile).read()
         output = failure.value.out
-        if os.path.exists(outfile):
+        if not output and os.path.exists(outfile):
             output = file(outfile).read()
         raise DetailedProcessException(failure.value, input, output)
 
-    def make_aquilon(self, (fqdn, domain, buildid, template_string),
-            basedir):
+    def compile_host(self, result, build_info, basedir):
         """This expects to be called with the results of the dbaccess
         method of the same name."""
         # FIXME: This should probably be done off on a thread, and maybe
         # in a specific subdirectory...
         tempdir = mkdtemp()
+        # FIXME
+        fqdn = "aquilon02.one-nyp.ms.com"
         filename = os.path.join(tempdir, fqdn) + '.tpl'
+        # FIXME
+        template_string = open(os.path.join(basedir, "hosts", "%s.tpl" % fqdn)).read()
         d = self.write_file(template_string, filename)
-        if os.path.exists(os.path.join(basedir, "recent_raw")):
-            d = d.addCallback(lambda _: self.write_file(template_string,
-                    os.path.join(basedir, "recent_raw", "%s.tpl" % fqdn)))
         # FIXME: Pass these in from the broker...
+        # 1.0 stores the compiler per-domain...
         compiler = "/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc"
+        # FIXME: Domain should come from the host.
+        domain = "njw"
         domaindir = os.path.join(basedir, "templates", domain)
-        # FIXME: Not sure if we need this, or if it's correct
+        # FIXME: Should be based on the archetype of the host.
         aquilondir = os.path.join(domaindir, "aquilon")
-        includes = [ aquilondir, domaindir,
+        includes = [ aquilondir, domaindir, os.path.join(basedir, "plenary"),
                 "/ms/dev/elfms/ms-templates/1.0/src/distro" ]
-        include_line = ""
-        for i in includes:
-            include_line = include_line + ' -I "' + i + '" '
+        include_line = " ".join(['-I "%s"' % include for include in includes])
         outfile = os.path.join(tempdir, fqdn + '.xml')
+        outdep = outfile + '.dep'  # Yes, this ends with .xml.dep
         d = d.addCallback(self.run_shell_command,
-                """env PATH="/ms/dist/msjava/PROJ/sunjdk/1.6.0_04/bin:$PATH" """
-                + compiler +
-                include_line + ' -y ' + filename
-                + ' >' + outfile)
+                'env PATH="/ms/dist/msjava/PROJ/sunjdk/1.6.0_04/bin:$PATH" '
+                + compiler + ' ' + include_line + ' -y ' + filename,
+                path=tempdir)
         d = d.addErrback(self.eb_pan_compile, filename, outfile)
         # FIXME: Do we want to save off the built xml file anywhere
         # before the temp directory gets cleaned up?  (On failure,
         # it will be in the exception.)
+        d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
+                % (outfile, os.path.join(basedir, "web", "htdocs", "profiles")))
+        d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
+                % (outdep, os.path.join(basedir, "deps")))
         d = d.addBoth(_cb_cleanup_dir, tempdir)
+        # FIXME: Should be "hosts", not "recent_raw"
+        if os.path.exists(os.path.join(basedir, "recent_raw")):
+            d = d.addCallback(lambda _: self.write_file(template_string,
+                    os.path.join(basedir, "recent_raw", "%s.tpl" % fqdn)))
+        # FIXME
+        buildid = -1
         d = d.addErrback(self.wrap_failure_with_rollback, jobid=buildid)
         return d
 

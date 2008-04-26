@@ -260,7 +260,7 @@ class DatabaseBroker(AccessBroker):
                 self.session.query(LocationType).filter_by(**kwargs).all())
 
     @transact
-    def make_aquilon(self, result, hostname, os, **kwargs):
+    def make_aquilon(self, result, build_info, hostname, os, **kwargs):
         """This creates a template file and saves a copy in the DB.
 
         It does *not* do pan compile... that happens outside this method.
@@ -313,53 +313,16 @@ class DatabaseBroker(AccessBroker):
         # personality/ms/fid/spg/ice
         personality_template = repr(personality_cfgpath)
 
-        # The hardware should be a file in basedir/"plenary", and refers
-        # to nodename of the machine.  It should include any info passed
-        # in from 'add machine'.
-        hardware = "machine/na/np/6/31_c1n3"
-        #hardware = "plenary/machine/<fullname hub>/<fullname building>/<name rack>/nodename"
+        # FIXME: auto-configuration of services for the host goes here.
 
-        # machine should have interfaces as a list
-        # Need at least one interface marked boot - that one first
-        # Currently missing netmask / broadcast / gateway
-        # because the IPAddress table has not yet been defined in interface.py
-        # Since we are only creating from certain chassis at the moment...
-        # Hard code for now for 172.31.29.0-127 and 128-255.
-        interfaces = [ {"ip":"172.31.29.82", "netmask":"255.255.255.128",
-                "broadcast":"172.31.29.127", "gateway":"172.31.29.1",
-                "bootproto":"dhcp", "name":"eth0"} ]
-
-        # Services are on the build item table...
-        # Features are on the build item table...
-        services = [ "service/afs/q.ny.ms.com/client/config" ]
-        # Service - has a CfgPath
-        # ServiceInstance - combo of Service and System
-        # ServiceMap
-
-        templates = []
-        templates.append(base_template)
-        templates.append(os_template)
-        for service in services:
-            templates.append(service)
-        templates.append(personality_template)
-        templates.append(final_template)
-
-        template_lines = []
-        template_lines.append("object template %s;\n" % dbhost.fqdn)
-        template_lines.append("""include { "pan/units" };\n""")
-        template_lines.append(""""/hardware" = create("%s");\n""" % hardware)
-        for interface in interfaces:
-            template_lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
-        for template in templates:
-            template_lines.append("""include { "%s" };""" % template)
-        template_string = "\n".join(template_lines)
-
-        # FIXME: Save this to the build table...
-        buildid = -1
-        return dbhost.fqdn, dbhost.domain.name, buildid, template_string
+        build_info["dbhost"] = printprep(dbhost)
+        # FIXME: Save this to the build table... maybe just carry around
+        # the database object...
+        build_info["buildid"] = -1
+        return True
 
     @transact
-    def cancel_make(self, failure):
+    def cancel_make(self, failure, build_info):
         """Gets called as an Errback if the make_aquilon build fails."""
         error = failure.check(RollbackException)
         if not error:
@@ -368,7 +331,7 @@ class DatabaseBroker(AccessBroker):
         return Failure(failure.value.cause)
 
     @transact
-    def confirm_make(self, buildid):
+    def confirm_make(self, result, build_info):
         """Gets called if the make_aquilon build succeeds."""
         # FIXME: Should finalize the build table...
 
@@ -577,17 +540,21 @@ class DatabaseBroker(AccessBroker):
             raise ArgumentError('Machine name isnot set!')
         ip_addr = (kwargs['ip'] is None) and '' or kwargs['ip']
         m = self.session.query(Machine).filter_by(name = kwargs['machine']).one()
-        i = PhysicalInterface(kwargs['interface'], kwargs['mac'], m, ip=ip_addr)
+        extra = {}
+        if kwargs['interface'] == 'eth0':
+            extra["boot"] = True
+        i = PhysicalInterface(kwargs['interface'], kwargs['mac'], m, ip=ip_addr,
+                **extra)
         self.session.save(i)
         # Hack to make sure machine is accessible...
         printprep(i.machine)
         return printprep(i)
 
     # Expects to run under a transact with a session.
-    def _find_interface(self, name, machine, mac, ip):
+    def _find_interface(self, interface, machine, mac, ip):
         q = self.session.query(PhysicalInterface)
-        if name:
-            q = q.filter_by(name=name)
+        if interface:
+            q = q.filter_by(name=interface)
         if machine:
             q = q.join('machine').filter_by(name=machine)
             q = q.reset_joinpoint()
@@ -596,18 +563,18 @@ class DatabaseBroker(AccessBroker):
         if ip:
             q = q.filter_by(ip=ip)
         try:
-            interface = q.one()
+            dbinterface = q.one()
         except InvalidRequestError, e:
             raise ArgumentError("Could not locate the interface, make sure it has been specified uniquely: " + str(e))
-        return interface
+        return dbinterface
 
     @transact
-    def del_interface(self, result, name, machine, mac, ip, **kwargs):
-        interface = self._find_interface(name, machine, mac, ip)
-        dbmachine = interface.machine
-        if dbmachine.host and interface.boot:
+    def del_interface(self, result, interface, machine, mac, ip, **kwargs):
+        dbinterface = self._find_interface(interface, machine, mac, ip)
+        dbmachine = dbinterface.machine
+        if dbmachine.host and dbinterface.boot:
             raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
-        self.session.delete(interface)
+        self.session.delete(dbinterface)
         self.session.flush()
         self.session.refresh(dbmachine)
         return printprep(dbmachine)

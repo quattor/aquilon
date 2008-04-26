@@ -653,7 +653,6 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
 
     def command_add_interface (self, request):
-        #FIXME add dsdb functionality to the broker!!!
         d = self.check_arguments(request, ["interface", "machine", "mac"],
                 ['ip'])
         d = d.addCallback(self.broker.add_interface,
@@ -662,8 +661,7 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
 
     def command_del_interface (self, request):
-        #FIXME add dsdb functionality to the broker!!!
-        d = self.check_arguments(request, optional=["name", "machine", "mac", "ip"])
+        d = self.check_arguments(request, optional=["interface", "machine", "mac", "ip"])
         d = d.addCallback(self.broker.del_interface,
                 request_path=request.path,
                 user=request.channel.getPrinciple())

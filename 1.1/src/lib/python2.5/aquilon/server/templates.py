@@ -11,6 +11,7 @@
 
 import os
 #from tempfile import mkdtemp, mkstemp
+from datetime import datetime
 
 from twisted.internet import utils, threads, defer
 from twisted.python import log
@@ -44,22 +45,37 @@ class TemplateCreator(object):
         plenary_info["hub"] = dbmachine.location.hub.fullname
         plenary_info["building"] = dbmachine.location.building.name
         plenary_info["rack"] = dbmachine.location.rack.name
-        plenary_info["plenary_reldir"] = (
-                "plenary/machine/%(hub)s/%(building)s/%(rack)s" % plenary_info)
+        plenary_info["sysloc"] = dbmachine.location.sysloc()
         plenary_info["machine"] = dbmachine.name
         plenary_info["model"] = dbmachine.model.name
         plenary_info["vendor"] = dbmachine.model.vendor.name
+        # FIXME: Hard-coded.
+        plenary_info["serialnumber"] = "99C5553"
+        # FIXME: Hard-coded.
+        plenary_info["ram"] = 8192
+        # FIXME: Hard-coded.
+        plenary_info["num_cpus"] = 2
+        # FIXME: Hard-coded.
+        plenary_info["cpu_relpath"] = "hardware/cpu/intel/xeon_2660"
+        # FIXME: Hard-coded.
+        plenary_info["harddisk_relpath"] = "hardware/harddisk/generic/scsi"
+        # FIXME: Hard-coded.
+        plenary_info["harddisk_gb"] = 34
         plenary_info["model_relpath"] = (
             "hardware/machine/%(vendor)s/%(model)s" % plenary_info)
-        plenary_info["plenary_relpath"] = (
-                "%(plenary_reldir)s/%(machine)s" % plenary_info)
+        plenary_info["plenary_core"] = (
+                "machine/%(hub)s/%(building)s/%(rack)s" % plenary_info)
+        plenary_info["plenary_reldir"] = (
+                "plenary/%(plenary_core)s" % plenary_info)
+        plenary_info["plenary_struct"] = (
+                "%(plenary_core)s/%(machine)s" % plenary_info)
         plenary_info["plenary_template"] = (
-                "%(plenary_relpath)s.tpl" % plenary_info)
+                "%(plenary_reldir)s/%(machine)s.tpl" % plenary_info)
         return plenary_info
 
     # Expects to be run after dbaccess.add_machine, dbaccess.add_interface,
-    # dbaccess.add_host, and dbaccess.del_interface
-    def generate_plenary(self, result, basedir, **kwargs):
+    # dbaccess.add_host, or dbaccess.del_interface
+    def generate_plenary(self, result, basedir, user, localhost, **kwargs):
         """This writes out the machine file to the filesystem."""
         if isinstance(result, Machine):
             dbmachine = result
@@ -70,22 +86,30 @@ class TemplateCreator(object):
         else:
             raise ValueError("generate_plenary cannot handle type %s" 
                     % type(result))
+        # FIXME: There are hard-coded values in get_plenary_info()
         plenary_info = self.get_plenary_info(dbmachine)
         lines = []
-        # FIXME: Add a comment with the date generated.
-        lines.append("structure template %(plenary_relpath)s;\n" % plenary_info)
+        lines.append("#Generated on %s for %s at %s"
+                % (localhost, user, datetime.now().ctime()))
+        lines.append("structure template %(plenary_struct)s;\n" % plenary_info)
+        lines.append('"location" = "%(sysloc)s";' % plenary_info)
+        lines.append('"serialnumber" = "%(serialnumber)s";\n' % plenary_info)
         lines.append("include %(model_relpath)s;\n" % plenary_info)
-        # FIXME: Need any other machine-specific info, like serial number.
+        lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
+                % plenary_info)
+        lines.append('"cpu" = list(' + ", \n             ".join(
+                ['create("%(cpu_relpath)s")' % plenary_info
+                for cpu_num in range(plenary_info["num_cpus"])]) + ');')
+        lines.append('"harddisks" = nlist("sda", create("%(harddisk_relpath)s", "capacity", %(harddisk_gb)d*GB));\n'
+                % plenary_info)
         for interface in dbmachine.interfaces:
             # FIXME: May need more information here...
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
-                    % (interface.name, interface.mac))
+                    % (interface.name, interface.mac.upper()))
             if interface.boot:
-                lines.append('"cards/nic/%s/boot" = "%s";'
-                        % (interface.name, interface.boot))
-        lines.append("\n")
-        # Original hardware templates had ram, cpu, harddisks here - has
-        # this been rolled into model?
+                lines.append('"cards/nic/%s/boot" = %s;'
+                        % (interface.name, str(interface.boot).lower()))
+
         plenary_path = os.path.join(basedir, plenary_info["plenary_reldir"])
         plenary_file = os.path.join(basedir, plenary_info["plenary_template"])
         d = threads.deferToThread(self._write_file, plenary_path,
@@ -101,5 +125,55 @@ class TemplateCreator(object):
         d = threads.deferToThread(self._remove_file, plenary_file)
         d = d.addCallback(lambda _: result)
         return d
+
+    def make_aquilon(self, result, build_info, basedir, **kwargs):
+        # The hardware should be a file in basedir/"plenary", and refers
+        # to nodename of the machine.  It should include any info passed
+        # in from 'add machine'.
+        hardware = "machine/na/np/6/31_c1n3"
+        #hardware = "plenary/machine/<fullname hub>/<fullname building>/<name rack>/nodename"
+
+        # machine should have interfaces as a list
+        # Need at least one interface marked boot - that one first
+        # Currently missing netmask / broadcast / gateway
+        # because the IPAddress table has not yet been defined in interface.py
+        # Since we are only creating from certain chassis at the moment...
+        # Hard code for now for 172.31.29.0-127 and 128-255.
+        interfaces = [ {"ip":"172.31.29.82", "netmask":"255.255.255.128",
+                "broadcast":"172.31.29.127", "gateway":"172.31.29.1",
+                "bootproto":"dhcp", "name":"eth0"} ]
+
+        # Services are on the build item table...
+        # Features are on the build item table...
+        services = [ "service/afs/q.ny.ms.com/client/config" ]
+        # Service - has a CfgPath
+        # ServiceInstance - combo of Service and System
+        # ServiceMap
+
+        templates = []
+        templates.append(base_template)
+        templates.append(os_template)
+        for service in services:
+            templates.append(service)
+        templates.append(personality_template)
+        templates.append(final_template)
+
+        template_lines = []
+        template_lines.append("object template %s;\n" % dbhost.fqdn)
+        template_lines.append("""include { "pan/units" };\n""")
+        template_lines.append(""""/hardware" = create("%s");\n""" % hardware)
+        for interface in interfaces:
+            template_lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
+        for template in templates:
+            template_lines.append("""include { "%s" };""" % template)
+        build_info["template_string"] = "\n".join(template_lines)
+
+        return True
+
+    def cleanup_make(self, failure, build_info):
+        if build_info.has_key("tempdir"):
+            # Cleanup the directory
+            pass
+        return failure
 
 #if __name__=='__main__':

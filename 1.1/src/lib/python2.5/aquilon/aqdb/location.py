@@ -82,7 +82,7 @@ def parents(loc):
 
 def p_dict(loc):
     d={}
-    p_node=loc.parent
+    p_node=loc
     while p_node.parent is not None:
         d[str(p_node.type)]=p_node
         p_node=p_node.parent
@@ -182,8 +182,8 @@ class Location(aqdbBase):
 
     def sysloc(self):
         if str(self.type) in ['building','rack','chassis','desk']:
-            l=self.p_dict
-            return str('.'.join([l['building'], l['city'], l['continent']]))
+            return str('.'.join([str(self.p_dict[item]) for item in
+                ['building', 'city', 'continent']]))
 
     #def __repr__(self):
     #    return self.__class__.__name__ + " " + self.name
