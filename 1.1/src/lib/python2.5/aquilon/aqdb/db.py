@@ -67,9 +67,11 @@ dsn = SQLITE_DSN
 #If you're like me (and I know *I AM*), you like things to just work...
 
 if USER == 'daqscott' and gethostname() == 'oziyp2':
+    print 'USING ORACLE QA INSTANCE (aqd)'
     dsn=QA_ORA_DSN
 
 if gethostname() == 'oy604c2n7':
+    print 'USING ORACLE PROD INSTANCE (CDB)'
     dsn=PROD_ORA_DSN
 
 if dsn.startswith('oracle'):
@@ -139,8 +141,10 @@ class aqdbType(aqdbBase):
             return
     def name(self):
         return str(self.type)
-    def __repr__(self):
+    def __str__(self):
         return str(self.type)
+    def __repr__(self):
+        return self.__class__.__name__+" " +str(self.type)
 
 """
     Utilities to decrease repeated code in generating schema
