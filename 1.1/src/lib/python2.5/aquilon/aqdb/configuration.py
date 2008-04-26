@@ -131,7 +131,7 @@ def populate_tld():
         for i in os.listdir(const.cfg_base):
             p = os.path.abspath(os.path.join(const.cfg_base, i))
             if os.path.isdir(p):
-                # Hack to consider all subdirectories of the archetype 
+                # Hack to consider all subdirectories of the archetype
                 # as a tld.
                 if i == "aquilon":
                     for j in os.listdir(p):
@@ -189,7 +189,9 @@ def create_aquilon_archetype():
 
 def get_quattor_src():
     """ ugly ugly way to initialize a quattor repo for import"""
-
+#TODO: improve and remove : we'll need it for our development environments
+#       so having a good sanity check will avoid db rebuilds...
+#-or- is the database simply the source in the future?
     import os
     import exceptions
     if os.path.exists(const.cfg_base):
@@ -221,30 +223,3 @@ if __name__ == '__main__':
     assert(a)
     assert(b)
     assert(c)
-
-""" Config Source Type are labels for the 'type' attribute in the
-    config_source table, supplied to satisfy 2NF. Currently we support
-    2 types of configuration, aqdb, and quattor. Later, we'll be supporting
-    a new type, 'Cola'
-"""
-"""
-###We're not using it yet, and it hangs out like a sore thumb in the schema.
-
-cfg_source_type = mk_type_table('cfg_source_type',meta)
-meta.create_all()
-
-
-class CfgSourceType(aqdbType):
-    "" Config Source Type are labels for the 'type' attribute in the
-        config_source table, supplied to satisfy 2NF. Currently we support
-        2 types of configuration, aqdb, and quattor. Later, we'll be supporting
-        a new type, 'Cola'
-    ""
-mapper(CfgSourceType, cfg_source_type, properties={
-    'creation_date' : deferred(cfg_source_type.c.creation_date)})
-
-
-def populate_cst():
-    if empty(cfg_source_type):
-        fill_type_table(cfg_source_type,['quattor','aqdb'])
-"""
