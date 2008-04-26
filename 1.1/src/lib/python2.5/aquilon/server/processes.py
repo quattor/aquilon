@@ -89,6 +89,22 @@ class ProcessBroker(object):
                 self.cb_shell_command_error,
                 callbackArgs=[command], errbackArgs=[command])
 
+    def _create_tempdir(self, result, build_info):
+        build_info["tempdir"] = mkdtemp()
+        return result
+
+    def create_tempdir(self, result, build_info):
+        return threads.deferToThread(self._create_tempdir, result, build_info)
+
+    def _cleanup_tempdir(self, result, build_info):
+        tempdir = build_info.pop("tempdir", None)
+        if tempdir:
+            _cb_cleanup_dir(True, tempdir)
+        return result
+
+    def cleanup_tempdir(self, result, build_info):
+        return threads.deferToThread(self._cleanup_tempdir, result, build_info)
+
     def sync(self, result, domain, git_path, templatesdir, **kwargs):
         """Implements the heavy lifting of the aq sync command.
         
@@ -131,51 +147,44 @@ class ProcessBroker(object):
             output = file(outfile).read()
         raise DetailedProcessException(failure.value, input, output)
 
-    def compile_host(self, result, build_info, basedir):
-        """This expects to be called with the results of the dbaccess
-        method of the same name."""
-        # FIXME: This should probably be done off on a thread, and maybe
-        # in a specific subdirectory...
-        tempdir = mkdtemp()
-        # FIXME
-        fqdn = "aquilon02.one-nyp.ms.com"
+    def compile_host(self, result, build_info, templatesdir, plenarydir,
+            profilesdir, depsdir, hostsdir):
+        """This expects build_info to have a dbhost and a tempdir with a
+        template to try compiling.  On success, those files will be saved
+        into the appropriate broker directories."""
+        tempdir = build_info["tempdir"]
+        dbhost = build_info["dbhost"]
+        fqdn = dbhost.fqdn
         filename = os.path.join(tempdir, fqdn) + '.tpl'
-        # FIXME
-        template_string = open(os.path.join(basedir, "hosts", "%s.tpl" % fqdn)).read()
-        d = self.write_file(template_string, filename)
         # FIXME: Pass these in from the broker...
         # 1.0 stores the compiler per-domain...
         compiler = "/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc"
-        # FIXME: Domain should come from the host.
-        domain = "njw"
-        domaindir = os.path.join(basedir, "templates", domain)
+        domain = dbhost.domain.name
         # FIXME: Should be based on the archetype of the host.
+        domaindir = os.path.join(templatesdir, domain)
         aquilondir = os.path.join(domaindir, "aquilon")
-        includes = [ aquilondir, domaindir, os.path.join(basedir, "plenary"),
+        includes = [ aquilondir, domaindir, plenarydir,
                 "/ms/dev/elfms/ms-templates/1.0/src/distro" ]
         include_line = " ".join(['-I "%s"' % include for include in includes])
         outfile = os.path.join(tempdir, fqdn + '.xml')
         outdep = outfile + '.dep'  # Yes, this ends with .xml.dep
-        d = d.addCallback(self.run_shell_command,
+        d = self.run_shell_command(True,
                 'env PATH="/ms/dist/msjava/PROJ/sunjdk/1.6.0_04/bin:$PATH" '
                 + compiler + ' ' + include_line + ' -y ' + filename,
                 path=tempdir)
+        # On error, the tempfile contents are captured into the
+        # exception (since it will be cleaned out higher up).
         d = d.addErrback(self.eb_pan_compile, filename, outfile)
-        # FIXME: Do we want to save off the built xml file anywhere
-        # before the temp directory gets cleaned up?  (On failure,
-        # it will be in the exception.)
+        # On success, the files get saved off.
         d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
-                % (outfile, os.path.join(basedir, "web", "htdocs", "profiles")))
+                % (outfile, profilesdir))
         d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
-                % (outdep, os.path.join(basedir, "deps")))
-        d = d.addBoth(_cb_cleanup_dir, tempdir)
-        # FIXME: Should be "hosts", not "recent_raw"
-        if os.path.exists(os.path.join(basedir, "recent_raw")):
-            d = d.addCallback(lambda _: self.write_file(template_string,
-                    os.path.join(basedir, "recent_raw", "%s.tpl" % fqdn)))
+                % (outdep, depsdir))
+        d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
+                % (filename, hostsdir))
         # FIXME
-        buildid = -1
-        d = d.addErrback(self.wrap_failure_with_rollback, jobid=buildid)
+        d = d.addErrback(self.wrap_failure_with_rollback,
+                jobid=build_info["buildid"])
         return d
 
     def add_domain(self, result, domain, git_path, templatesdir, kingdir,
@@ -266,6 +275,15 @@ class ProcessBroker(object):
         failure.trap(ProcessException)
         raise DetailedProcessException(failure.value)
 
+    # Hack to deal with IPs already in dsdb.  In theory, we *want* dsdb to
+    # tell us when there are conflicts, but right now it isn't helping.
+    def eb_ignore_already_defined(self, failure):
+        failure.trap(ProcessException)
+        if failure.value.out and failure.value.out.find("already defined") >= 0:
+            log.msg("DSDB check failed, continuing anyway!")
+            return True
+        return failure
+
     # Expects to be run after dbaccess.verify_add_host.
     def add_host(self, (short, dbdns_domain, dbmachine), dsdb, **kwargs):
         """add_host only adds the primary interface (marked boot) to dsdb."""
@@ -278,6 +296,8 @@ class ProcessBroker(object):
                 % (dsdb, short, dbdns_domain.name, interface.ip,
                 interface.name, interface.mac),
                 env=env)
+            # FIXME: This should not be used...
+            d = d.addErrback(self.eb_ignore_already_defined)
             d = d.addErrback(self.eb_detailed_command)
             return d
         raise ArgumentError("No boot interface found for host to remove from dsdb.")

@@ -1,7 +1,30 @@
-This should eventually turn into wrapper scripts that look like the
-current (1.0) aq/aqd...
+Quickstart to getting a broker running in development:
 
-For now...
+mkdir -p /var/tmp/$USER/quattor
+rsync -avP -e ssh --delete quattorsrv:/var/quattor/templates /var/tmp/$USER/quattor
+rsync -avP -e ssh --delete quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
+cd ~/dev/aquilon/aqd/1.1/src     # your shadow
+cd lib/python2.5/aquilon/aqdb
+./utils/REBUILD.sh
+
+To start the broker, from the bin directory of your shadow and without a proid:
+./twistd -no -l - aqd --noknc
+
+This will start the broker in the foreground and have it skip knc for 
+authentication and encryption.
+
+To run the client against this server:
+./aq.py --noknc --aqport=6901 [commands]
+
+Try help for a list of commands, and help command for more details.
+
+To stop aqd:
+If running with -no (foreground), ctrl-c will bring the server down
+gracefully.  Otherwise, kill -TERM `cat twistd.pid` works as well.
+
+
+Below are notes for writing the wrapper scripts that will make this
+look like the 1.0 aq/aqd...
 
 To start aqd:
 ./twistd aqd
@@ -39,14 +62,4 @@ To run aq without knc:
 ./aq.py --noknc --aqport=6901 [commands]
 
 Options should be the same / similar to options to aq 1.0.
-
-An initial/test database can be built by following this procedure:
-# move or remove any old DBs at /var/tmp/$USER/aquilon/aquilon.db
-# This directory/file will be created automatically if needed.
-mkdir -p /var/tmp/$USER/quattor
-# This may not be sufficient - try Scott's q-tmpl-king.tbz file.
-rsync -avP quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
-cd ~/dev/aquilon/aqd/1.1/src     # your shadow
-cd lib/python2.5/aquilon/aqdb
-./utils/REBUILD.sh
 

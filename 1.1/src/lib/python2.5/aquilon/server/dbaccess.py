@@ -261,9 +261,11 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def make_aquilon(self, result, build_info, hostname, os, **kwargs):
-        """This creates a template file and saves a copy in the DB.
+        """This takes the specified parameters and sets up the database
+        relationships to create a quattor managed host.
 
-        It does *not* do pan compile... that happens outside this method.
+        It does *not* create the pan template or compile the template -
+        that logic is outside this method.
         """
 
         dbhost = self._hostname_to_host(hostname)
@@ -273,12 +275,10 @@ class DatabaseBroker(AccessBroker):
 
         # FIXME: This should be saved/stored with the Host.
         # The archetype will factor into the include path for the compiler.
+        # There are several other scattered FIXMEs that where the aquilon
+        # archetype is hard coded.
         archetype = self.session.query(Archetype).filter(
                 Archetype.name=="aquilon").one()
-
-        # For now, these are assumed.
-        base_template = "archetype/base"
-        final_template = "archetype/final"
 
         # Need to get all the BuildItem objects for this host.
         # They should include:
@@ -298,7 +298,7 @@ class DatabaseBroker(AccessBroker):
                 % (os, str(e)))
         # This might need "/config" appended.
         # os/linux/4.0.1-x86_64
-        os_template = repr(os_cfgpath)
+        #os_template = repr(os_cfgpath)
 
         try:
             personality = kwargs.get("personality", "ms/fid/spg/ice")
@@ -311,7 +311,7 @@ class DatabaseBroker(AccessBroker):
                 % (personality, str(e)))
         # This might need "/config" appended.
         # personality/ms/fid/spg/ice
-        personality_template = repr(personality_cfgpath)
+        #personality_template = repr(personality_cfgpath)
 
         # FIXME: auto-configuration of services for the host goes here.
 

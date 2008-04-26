@@ -65,17 +65,15 @@ class TemplateCreator(object):
             "hardware/machine/%(vendor)s/%(model)s" % plenary_info)
         plenary_info["plenary_core"] = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % plenary_info)
-        plenary_info["plenary_reldir"] = (
-                "plenary/%(plenary_core)s" % plenary_info)
         plenary_info["plenary_struct"] = (
                 "%(plenary_core)s/%(machine)s" % plenary_info)
         plenary_info["plenary_template"] = (
-                "%(plenary_reldir)s/%(machine)s.tpl" % plenary_info)
+                "%(plenary_struct)s.tpl" % plenary_info)
         return plenary_info
 
     # Expects to be run after dbaccess.add_machine, dbaccess.add_interface,
     # dbaccess.add_host, or dbaccess.del_interface
-    def generate_plenary(self, result, basedir, user, localhost, **kwargs):
+    def generate_plenary(self, result, plenarydir, user, localhost, **kwargs):
         """This writes out the machine file to the filesystem."""
         if isinstance(result, Machine):
             dbmachine = result
@@ -110,70 +108,82 @@ class TemplateCreator(object):
                 lines.append('"cards/nic/%s/boot" = %s;'
                         % (interface.name, str(interface.boot).lower()))
 
-        plenary_path = os.path.join(basedir, plenary_info["plenary_reldir"])
-        plenary_file = os.path.join(basedir, plenary_info["plenary_template"])
+        plenary_path = os.path.join(plenarydir, plenary_info["plenary_core"])
+        plenary_file = os.path.join(plenarydir, plenary_info["plenary_template"])
         d = threads.deferToThread(self._write_file, plenary_path,
                 plenary_file, "\n".join(lines))
         d = d.addCallback(lambda _: result)
         return d
 
     # Expects to be run after dbaccess.del_machine
-    def remove_plenary(self, result, basedir, **kwargs):
+    def remove_plenary(self, result, plenarydir, **kwargs):
         dbmachine = result
         plenary_info = self.get_plenary_info(dbmachine)
-        plenary_file = os.path.join(basedir, plenary_info["plenary_template"])
+        plenary_file = os.path.join(plenarydir, plenary_info["plenary_template"])
         d = threads.deferToThread(self._remove_file, plenary_file)
         d = d.addCallback(lambda _: result)
         return d
 
-    def make_aquilon(self, result, build_info, basedir, **kwargs):
-        # The hardware should be a file in basedir/"plenary", and refers
-        # to nodename of the machine.  It should include any info passed
-        # in from 'add machine'.
-        hardware = "machine/na/np/6/31_c1n3"
-        #hardware = "plenary/machine/<fullname hub>/<fullname building>/<name rack>/nodename"
+    def make_aquilon(self, result, build_info, localhost, user,
+            **kwargs):
+        tempdir = build_info["tempdir"]
+        dbhost = build_info["dbhost"]
+        fqdn = dbhost.fqdn
+        plenary_info = self.get_plenary_info(dbhost.machine)
 
-        # machine should have interfaces as a list
-        # Need at least one interface marked boot - that one first
-        # Currently missing netmask / broadcast / gateway
+        # FIXME: Need at least one interface marked boot - that one first
+        # FIXME: Currently missing netmask / broadcast / gateway
         # because the IPAddress table has not yet been defined in interface.py
         # Since we are only creating from certain chassis at the moment...
-        # Hard code for now for 172.31.29.0-127 and 128-255.
-        interfaces = [ {"ip":"172.31.29.82", "netmask":"255.255.255.128",
-                "broadcast":"172.31.29.127", "gateway":"172.31.29.1",
-                "bootproto":"dhcp", "name":"eth0"} ]
+        # Hard code for now for 172.31.32.0-127.
+        interfaces = []
+        for dbinterface in dbhost.machine.interfaces:
+            if not dbinterface.ip or dbinterface.ip == '0.0.0.0':
+                continue
+            interfaces.append({"ip":dbinterface.ip,
+                    "netmask":"255.255.255.128",
+                    "broadcast":"172.31.32.127",
+                    "gateway":"172.31.32.1",
+                    "bootproto":"dhcp",
+                    "name":dbinterface.name})
 
-        # Services are on the build item table...
-        # Features are on the build item table...
-        services = [ "service/afs/q.ny.ms.com/client/config" ]
+        # FIXME: Services are on the build item table...
+        # FIXME: Features are on the build item table...
+        services = [ "service/afs/q.ny.ms.com/client/config",
+                "service/dns/nyinfratest/client/config",
+                "service/bootserver/np.test/client/config",
+                "service/ntp/pa.ny.na/client/config"
+                ]
         # Service - has a CfgPath
         # ServiceInstance - combo of Service and System
         # ServiceMap
 
+        # FIXME: Get this from build_info
         templates = []
-        templates.append(base_template)
-        templates.append(os_template)
+        templates.append("archetype/base")
+        templates.append("os/linux/4.0.1-x86_64/config")
         for service in services:
             templates.append(service)
-        templates.append(personality_template)
-        templates.append(final_template)
+        templates.append("personality/ms/fid/spg/ice/config")
+        templates.append("archetype/final")
 
-        template_lines = []
-        template_lines.append("object template %s;\n" % dbhost.fqdn)
-        template_lines.append("""include { "pan/units" };\n""")
-        template_lines.append(""""/hardware" = create("%s");\n""" % hardware)
+        lines = []
+        lines.append("#Generated on %s for %s at %s"
+                % (localhost, user, datetime.now().ctime()))
+        lines.append("object template %s;\n" % fqdn)
+        lines.append("""include { "pan/units" };\n""")
+        lines.append(""""/hardware" = create("%(plenary_struct)s");\n"""
+                % plenary_info)
         for interface in interfaces:
-            template_lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
+            lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
+        lines.append("\n")
         for template in templates:
-            template_lines.append("""include { "%s" };""" % template)
-        build_info["template_string"] = "\n".join(template_lines)
+            lines.append("""include { "%s" };""" % template)
 
+        template_file = os.path.join(tempdir, fqdn + '.tpl')
+        d = threads.deferToThread(self._write_file, tempdir,
+                template_file, "\n".join(lines))
+        d = d.addCallback(lambda _: True)
         return True
-
-    def cleanup_make(self, failure, build_info):
-        if build_info.has_key("tempdir"):
-            # Cleanup the directory
-            pass
-        return failure
 
 #if __name__=='__main__':

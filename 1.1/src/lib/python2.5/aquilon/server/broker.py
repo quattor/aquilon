@@ -50,6 +50,7 @@ class Broker(object):
         self.depsdir = "%s/deps" % self.basedir
         self.hostsdir = "%s/hosts" % self.basedir
         self.templatesdir = "%s/templates" % self.basedir
+        self.plenarydir = "%s/plenary" % self.basedir
         self.kingdir = "%s/template-king" % self.basedir
         self.default_domain = ".ms.com"
         self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
@@ -60,6 +61,15 @@ class Broker(object):
         self.git_templates_url = "http://%s:6901/templates" % self.localhost
         self.domain_name = "production"
         self.dsdb = "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb"
+
+        for d in [self.basedir, self.profilesdir, self.depsdir, self.hostsdir,
+                self.plenarydir]:
+            if os.path.exists(d):
+                continue
+            try:
+                os.makedirs(d)
+            except OSError, e:
+                log.err(e)
 
 # --------------------------------------------------------------------------- #
 
@@ -115,14 +125,21 @@ class Broker(object):
 
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "make", request_path)
+        # It gets very annoying trying to coordinate which methods need
+        # to pass what variables into which other methods in the execution
+        # chain.  Create a dictionary to pass along to each method that
+        # can then access any of the transient variables.
         build_info = {}
-        #d = d.addCallback(self.dbbroker.make_aquilon, build_info,
-        #        session=True, **arguments)
-        #d = d.addCallback(self.template_creator.make_aquilon, build_info,
-        #        basedir=self.basedir, **arguments)
+        d = d.addCallback(self.dbbroker.make_aquilon, build_info,
+                session=True, **arguments)
+        d = d.addCallback(self.pbroker.create_tempdir, build_info)
+        d = d.addCallback(self.template_creator.make_aquilon, build_info,
+                localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(self.pbroker.compile_host, build_info,
-                basedir=self.basedir)
-        #d = d.addErrback(self.template_creator.cleanup_make, build_info)
+                templatesdir=self.templatesdir, plenarydir=self.plenarydir,
+                profilesdir=self.profilesdir, depsdir=self.depsdir,
+                hostsdir=self.hostsdir)
+        d = d.addBoth(self.pbroker.cleanup_tempdir, build_info)
         #d = d.addCallback(self.dbbroker.confirm_make, build_info, session=True)
         #d = d.addErrback(self.dbbroker.cancel_make, build_info, session=True)
         return d
@@ -280,7 +297,8 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.add_machine, session=True, user=user,
                 **arguments)
         d = d.addCallback(self.template_creator.generate_plenary, user=user,
-                basedir=self.basedir, localhost=self.localhost, **arguments)
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -313,7 +331,8 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.add_interface, session=True, user=user,
                 **arguments)
         d = d.addCallback(self.template_creator.generate_plenary, user=user,
-                basedir=self.basedir, localhost=self.localhost, **arguments)
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -324,7 +343,8 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.del_interface, session=True, user=user,
                 **arguments)
         d = d.addCallback(self.template_creator.generate_plenary, user=user,
-                basedir=self.basedir, localhost=self.localhost, **arguments)
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -358,7 +378,8 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.add_host, session=True, user=user,
                 **arguments)
         d = d.addCallback(self.template_creator.generate_plenary, user=user,
-                basedir=self.basedir, localhost=self.localhost, **arguments)
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
