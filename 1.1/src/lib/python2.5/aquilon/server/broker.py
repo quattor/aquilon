@@ -318,7 +318,7 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.verify_del_machine, session=True,
                 user=user, **arguments)
         d = d.addCallback(self.template_creator.remove_plenary, user=user,
-                basedir=self.basedir, **arguments)
+                plenarydir=self.plenarydir, **arguments)
         d = d.addCallback(self.dbbroker.del_machine, session=True, user=user,
                 **arguments)
         return d

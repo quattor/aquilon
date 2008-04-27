@@ -42,6 +42,7 @@ def printprep(dbobject):
         printprep(dbobject.machine)
         printprep(dbobject.domain)
         printprep(dbobject.status)
+        printprep(dbobject.templates)
     elif isinstance(dbobject, Domain):
         printprep(dbobject.server)
         printprep(dbobject.owner)
@@ -117,6 +118,8 @@ class Formatter(object):
         details.append(self.elaborate_raw(host.machine, indent+"  "))
         details.append(self.elaborate_raw(host.domain, indent+"  "))
         details.append(self.elaborate_raw(host.status, indent+"  "))
+        for build_item in host.templates:
+            details.append(indent + "  Template: %s" % build_item.cfg_path)
         if host.comments:
             details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)

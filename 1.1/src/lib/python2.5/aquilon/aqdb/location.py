@@ -117,7 +117,7 @@ class Location(aqdbBase):
         #TODO: if there is no parent raise a Warning.
         #TODO: maintenance: a periodic sweep of this table for null parents?
 
-    def parents(loc):
+    def get_parents(loc):
         pl=[]
         p_node=loc.parent
         if not p_node:
@@ -129,20 +129,20 @@ class Location(aqdbBase):
         pl.reverse()
         return pl
 
-    def p_dict(loc):
+    def get_p_dict(loc):
         d={}
         p_node=loc
         while p_node.parent is not None:
             d[str(p_node.type)]=p_node
             p_node=p_node.parent
-        return
-    d
+        return d
+
     def _parents(self):
-        return parents(self)
+        return self.get_parents()
     parents = property(_parents)
 
     def _p_dict(self):
-        return p_dict(self)
+        return self.get_p_dict()
     p_dict = property(_p_dict)
 
     def _hub(self):

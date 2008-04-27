@@ -147,6 +147,14 @@ class TemplateCreator(object):
                     "bootproto":"dhcp",
                     "name":dbinterface.name})
 
+        os_template = None
+        personality_template = None
+        for t in dbhost.templates:
+            if t.cfg_path.tld.type == 'os':
+                os_template = str(t.cfg_path) + '/config'
+            elif t.cfg_path.tld.type == 'personality':
+                personality_template = str(t.cfg_path) + '/config'
+
         # FIXME: Services are on the build item table...
         # FIXME: Features are on the build item table...
         services = [ "service/afs/q.ny.ms.com/client/config",
@@ -158,13 +166,12 @@ class TemplateCreator(object):
         # ServiceInstance - combo of Service and System
         # ServiceMap
 
-        # FIXME: Get this from build_info
         templates = []
         templates.append("archetype/base")
-        templates.append("os/linux/4.0.1-x86_64/config")
+        templates.append(os_template)
         for service in services:
             templates.append(service)
-        templates.append("personality/ms/fid/spg/ice/config")
+        templates.append(personality_template)
         templates.append("archetype/final")
 
         lines = []

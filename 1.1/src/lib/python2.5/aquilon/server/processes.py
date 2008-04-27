@@ -302,6 +302,16 @@ class ProcessBroker(object):
             return d
         raise ArgumentError("No boot interface found for host to remove from dsdb.")
     
+    # Hack to deal with IPs already in dsdb.  In theory, we *want* dsdb to
+    # tell us when there are conflicts, but right now it isn't helping.
+    def eb_ignore_node_host(self, failure):
+        failure.trap(ProcessException)
+        if failure.value.out and failure.value.out.find(
+                "Run dsdb_delete_node_host") >= 0:
+            log.msg("DSDB check failed, continuing anyway!")
+            return True
+        return failure
+
     # Expects to be run after dbaccess.verify_del_host.
     def del_host(self, result, dsdb, **kwargs):
         """del_host only removes the primary interface (boot) from dsdb."""
@@ -315,6 +325,8 @@ class ProcessBroker(object):
                 """%s delete host -ip_address "%s" """
                 % (dsdb, interface.ip),
                 env=env)
+            # FIXME: This should not be used...
+            d = d.addErrback(self.eb_ignore_node_host)
             d = d.addErrback(self.eb_detailed_command)
             return d
         raise ArgumentError("No boot interface found for host to add to dsdb.")

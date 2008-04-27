@@ -34,7 +34,7 @@ from formats import printprep
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
-from aquilon.aqdb.service import Host, QuattorServer, Domain, Service
+from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
 from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine, Status
@@ -139,6 +139,10 @@ class DatabaseBroker(AccessBroker):
         host = self._hostname_to_host(hostname)
         # Hack to make sure the machine object is refreshed in future queries.
         dbmachine = host.machine
+        for template in host.templates:
+            log.msg("Before deleting host '%s', removing template '%s'"
+                    % (host.fqdn, template.cfg_path))
+            self.session.delete(template)
         self.session.delete(host)
         self.session.flush()
         self.session.refresh(dbmachine)
@@ -288,7 +292,6 @@ class DatabaseBroker(AccessBroker):
         # - many services
         # - many features
 
-        # So, OS and personality probably stored with BuildItem.
         try:
             os_cfgpath = self.session.query(CfgPath).filter_by(relative_path=os
                     ).join('tld').filter_by(type="os").one()
@@ -296,9 +299,14 @@ class DatabaseBroker(AccessBroker):
             raise NotFoundException(
                 "OS '%s' config path information not found: %s"
                 % (os, str(e)))
-        # This might need "/config" appended.
-        # os/linux/4.0.1-x86_64
-        #os_template = repr(os_cfgpath)
+        os_bi = self.session.query(BuildItem).filter_by(host=dbhost).join(
+                'cfg_path').filter_by(tld=os_cfgpath.tld).first()
+        if os_bi:
+            os_bi.cfg_path = os_cfgpath
+        else:
+            # FIXME: This could fail if there is already an item at 0
+            os_bi = BuildItem(dbhost, os_cfgpath, 0)
+        self.session.save_or_update(os_bi)
 
         try:
             personality = kwargs.get("personality", "ms/fid/spg/ice")
@@ -309,12 +317,20 @@ class DatabaseBroker(AccessBroker):
             raise NotFoundException(
                 "Personality '%s' config path information not found: %s"
                 % (personality, str(e)))
-        # This might need "/config" appended.
-        # personality/ms/fid/spg/ice
-        #personality_template = repr(personality_cfgpath)
+        personality_bi = self.session.query(BuildItem).filter_by(
+                host=dbhost).join('cfg_path').filter_by(
+                tld=personality_cfgpath.tld).first()
+        if personality_bi:
+            personality_bi.cfg_path = personality_cfgpath
+        else:
+            # FIXME: This could fail if there is already an item at 1
+            personality_bi = BuildItem(dbhost, personality_cfgpath, 1)
+        self.session.save_or_update(personality_bi)
 
         # FIXME: auto-configuration of services for the host goes here.
 
+        self.session.flush()
+        self.session.refresh(dbhost)
         build_info["dbhost"] = printprep(dbhost)
         # FIXME: Save this to the build table... maybe just carry around
         # the database object...
@@ -524,6 +540,7 @@ class DatabaseBroker(AccessBroker):
         try:
             m = self.session.query(Machine).filter_by(name=machine).one()
             for iface in m.interfaces:
+                log.msg("Before deleting machine '%s', removing interface '%s' [%s] [%s] boot=%s)" % (m.name, iface.name, iface.mac, iface.ip, iface.boot))
                 self.session.delete(iface)
             self.session.delete(m)
         except InvalidRequestError, e:
