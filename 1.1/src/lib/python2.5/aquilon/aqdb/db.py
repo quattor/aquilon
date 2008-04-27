@@ -23,7 +23,8 @@ from sqlalchemy import Table, Integer, DateTime, Sequence, String
 from sqlalchemy import Column as _Column
 from sqlalchemy import ForeignKey as _fk
 from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.sql import insert
+from sqlalchemy.sql import insert, text
+from sqlalchemy.exceptions import SQLError
 
 
 USER = os.environ.get('USER')
@@ -67,11 +68,11 @@ dsn = SQLITE_DSN
 #If you're like me (and I know *I AM*), you like things to just work...
 
 if USER == 'daqscott' and gethostname() == 'oziyp2':
-    print 'USING ORACLE QA INSTANCE (aqd)'
+    print 'USING ORACLE QA SCHEMA (aqd)'
     dsn=QA_ORA_DSN
 
 if gethostname() == 'oy604c2n7':
-    print 'USING ORACLE PROD INSTANCE (CDB)'
+    print 'USING ORACLE PROD SCHEMA (CDB)'
     dsn=PROD_ORA_DSN
 
 if dsn.startswith('oracle'):
@@ -80,8 +81,8 @@ if dsn.startswith('oracle'):
 
     os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
-        print >> os.stderr, 'Oracle SID not found, setting to test instance'
-        os.environment['ORACLE_SID']=ORACLE_SID
+        print >> sys.stderr, 'Oracle SID not found, setting to test instance'
+        os.environ['ORACLE_SID']=ORACLE_SID
 
 engine = create_engine(dsn)
 engine.connect()
@@ -246,3 +247,39 @@ def mk_type_table(name, meta=meta, *args, **kw):
                 Column('creation_date', DateTime,
                        default=datetime.datetime.now),
                 Column('comments', String(255), nullable=True), *args, **kw)
+
+def get_table_list_from_db():
+    """
+    return a list of table names from the current
+    databases public schema
+    """
+    sql="select table_name from user_tables"
+    execute = engine.execute
+    return [name for (name, ) in execute(text(sql))]
+
+def get_seq_list_from_db():
+    """return a list of the sequence names from the current
+       databases public schema
+    """
+    sql="select sequence_name from user_sequences"
+    execute = engine.execute
+    return [name for (name, ) in execute(text(sql))]
+
+def drop_all_tables_and_sequences():
+    """ MetaData.drop_all() doesn't play nice with db's that have sequences.
+        you're alternative is to call this"""
+    if not dsn.startswith('ora'):
+        print 'dsn is not oracle, exiting'
+        return False
+    execute = engine.execute
+    for table in get_table_list_from_db():
+        try:
+            execute(text("DROP TABLE %s CASCADE CONSTRAINTS" %table))
+        except SQLError, e:
+            print >> sys.stderr, e
+
+    for seq in get_seq_list_from_db():
+        try:
+            execute(text("DROP SEQUENCE %s " %seq))
+        except SQLError, e:
+            print >> sys.stderr, e

@@ -20,7 +20,7 @@ from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.exceptions_ import ArgumentError
 
-s = Session()
+#s = Session()
 
 def mk_loc_table(name, meta, *args, **kw):
     return Table(name, meta,
@@ -68,25 +68,11 @@ chassis = mk_loc_table('chassis', meta)
 
 meta.create_all()
 
-def parents(loc):
-    pl=[]
-    p_node=loc.parent
-    if not p_node:
-        return pl
-    while p_node.parent is not None:
-        pl.append(p_node)
-        p_node=p_node.parent
-    pl.append(p_node)
-    pl.reverse()
-    return pl
-
-def p_dict(loc):
-    d={}
-    p_node=loc
-    while p_node.parent is not None:
-        d[str(p_node.type)]=p_node
-        p_node=p_node.parent
-    return d
+def get_loc_type_id(typ_nm):
+    stmt="select id from location_type where type='%s'"%(typ_nm)
+    typ_id = engine.execute(stmt).scalar()
+    assert(typ_id)
+    return typ_id
 
 class Location(aqdbBase):
     """ Location is the base class for all location subtypes to
@@ -106,11 +92,11 @@ class Location(aqdbBase):
             self.type = type_name
         elif isinstance(type_name,str):
             try:
-                self.type_id = s.query(LocationType).\
-                    filter_by(type=type_name).one()
+                t_id=get_loc_type_id(type_name)
+                assert(t_id)
             except Exception, e:
-                print "Error looking up location type '%s': %s"%(type_name,e)
-                return
+                msg="Error looking up location type '%s': %s"%(type_name,e)
+                raise ArgumentError(msg)
         else:
             raise ArgumentError("Location type argument expects a string")
             return
@@ -131,6 +117,26 @@ class Location(aqdbBase):
         #TODO: if there is no parent raise a Warning.
         #TODO: maintenance: a periodic sweep of this table for null parents?
 
+    def parents(loc):
+        pl=[]
+        p_node=loc.parent
+        if not p_node:
+            return pl
+        while p_node.parent is not None:
+            pl.append(p_node)
+            p_node=p_node.parent
+        pl.append(p_node)
+        pl.reverse()
+        return pl
+
+    def p_dict(loc):
+        d={}
+        p_node=loc
+        while p_node.parent is not None:
+            d[str(p_node.type)]=p_node
+            p_node=p_node.parent
+        return
+    d
     def _parents(self):
         return parents(self)
     parents = property(_parents)
@@ -169,7 +175,7 @@ class Location(aqdbBase):
 
     def get_typed_children(self,type):
         """ return all child location objects of a given location type """
-        return s.query(Location).with_polymorphic('*').\
+        return Session.query(Location).with_polymorphic('*').\
             join('type').filter(LocationType.type==type).all()
 
     def append(self,node):
@@ -184,9 +190,6 @@ class Location(aqdbBase):
         if str(self.type) in ['building','rack','chassis','desk']:
             return str('.'.join([str(self.p_dict[item]) for item in
                 ['building', 'city', 'continent']]))
-
-    #def __repr__(self):
-    #    return self.__class__.__name__ + " " + self.name
 
     def __str__(self):
         return str(self.name)
@@ -224,9 +227,7 @@ class Desk(Location):
     an adjacency list """
 
 mapper(Location, location, polymorphic_on=location.c.location_type_id, \
-        polymorphic_identity=s.execute(
-           "select id from location_type where type='base_location_type'").\
-        fetchone()[0], properties={
+        polymorphic_identity=get_loc_type_id('base_location_type'), properties={
             'parent':relation(
                 Location,remote_side=[location.c.id],backref='sublocations'),
             'type':relation(LocationType),
@@ -235,47 +236,37 @@ mapper(Location, location, polymorphic_on=location.c.location_type_id, \
 })
 
 mapper(Company,company,inherits=Location,
-       polymorphic_identity=engine.execute(
-           "select id from location_type where type='company'").fetchone()[0])
+       polymorphic_identity=get_loc_type_id('company'))
 
 mapper(Hub, hub, inherits=Location,
-       polymorphic_identity=engine.execute(
-        "select id from location_type where type='hub'").fetchone()[0])
+       polymorphic_identity=get_loc_type_id('hub'))
 
 mapper(Continent, continent, inherits=Location,
-       polymorphic_identity=engine.execute(
-           "select id from location_type where type='continent'").fetchone()[0])
+       polymorphic_identity=get_loc_type_id('continent'))
 
 mapper(Country, country,inherits=Location,
-       polymorphic_identity=engine.execute(
-           "select id from location_type where type='country'").fetchone()[0])
+       polymorphic_identity= get_loc_type_id('country'))
 
 mapper(City, city, inherits=Location,
-       polymorphic_identity=engine.execute(
-        "select id from location_type where type='city'").fetchone()[0])
+       polymorphic_identity= get_loc_type_id('city'))
 
 mapper(Building, building, inherits=Location,
-       polymorphic_identity=engine.execute(
-        "select id from location_type where type='building'").fetchone()[0])
+       polymorphic_identity= get_loc_type_id('building'))
 
 mapper(Rack,rack, inherits=Location,
-       polymorphic_identity=engine.execute(
-        "select id from location_type where type='rack'").fetchone()[0])
+       polymorphic_identity= get_loc_type_id('rack'))
 
 mapper(Chassis,chassis,inherits=Location,
-       polymorphic_identity=engine.execute(
-        "select id from location_type where type='chassis'").fetchone()[0])
+       polymorphic_identity= get_loc_type_id('chassis'))
 
 mapper(Desk,desk,inherits=Location,
-       polymorphic_identity=engine.execute(
-        "select id from location_type where type='desk'").fetchone()[0])
+       polymorphic_identity= get_loc_type_id('desk'))
 
 def populate_hubs():
     s=Session()
 
     if empty(location):
-        company_type_id=engine.execute(
-           "select id from location_type where type='company'").fetchone()[0]
+        company_type_id= get_loc_type_id('company')
         i=location.insert()
         i.execute(name='ms',location_type_id=company_type_id,
             fullname='root node',comments='root of location tree')

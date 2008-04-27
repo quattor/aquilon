@@ -109,6 +109,12 @@ mapper(Service,service,properties={
 system_type=mk_type_table('system_type', meta)
 system_type.create(checkfirst=True)
 
+def get_sys_type_id(typ_nm):
+    stmt="select id from system_type where type='%s'"%(typ_nm)
+    typ_id = engine.execute(stmt).scalar()
+    assert(typ_id)
+    return typ_id
+
 class SystemType(aqdbType):
     """ System Type is a discrimintor for polymorphic System object/table """
     pass
@@ -164,7 +170,12 @@ class System(aqdbBase):
 
         if kw.has_key('dns_domain'):
             if isinstance(kw['dns_domain'],str):
-                self.dns_domain = s.query(DnsDomain).filter_by(name=kw['dns_domain']).one()
+                stmt="select id from dns_domain where name ='%s'"%(
+                    kw['dns_domain'])
+                self.dns_domain_id = engine.execute(stmt).scalar()
+                assert(self.dns_domain_id)
+                if not self.dns_domain_id:
+                    raise ArgumentError('cant find domain %s'%(dns_domain))
             elif isinstance(kw['dns_domain'], DnsDomain):
                 self.dns_domain = kw['dns_domain']
             else:
@@ -177,8 +188,7 @@ class System(aqdbBase):
     fqdn = property(_fqdn)
 
 mapper(System, system, polymorphic_on=system.c.type_id, \
-       polymorphic_identity=s.execute(
-    "select id from system_type where type='base_system_type'").fetchone()[0],
+       polymorphic_identity=get_sys_type_id('base_system_type'),
     properties={
         'type'          : relation(SystemType),
         'dns_domain'    : relation(DnsDomain),
@@ -203,14 +213,9 @@ class QuattorServer(System):
 
 
 mapper(QuattorServer,quattor_server,
-        inherits=System, polymorphic_identity=s.execute(
-          "select id from system_type where type='quattor_server'").fetchone()[0],
+        inherits=System, polymorphic_identity=get_sys_type_id('quattor_server'),
        properties={'system': relation(System,backref='quattor_server')})
 
-""" TODO: a better place for dns-domain. We'll need to flesh out DNS
-        support within aqdb in the coming weeks after the handoff, but for now,
-        it's an innocuous place since hosts can only be in one domain
-    """
 domain = Table('domain', meta,
     Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
     Column('name', String(32), unique=True, index=True),
@@ -220,8 +225,7 @@ domain = Table('domain', meta,
            default='/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'),
     Column('owner_id', Integer,
            ForeignKey('user_principal.id'),nullable=False,
-           default=s.execute(
-    "select id from user_principal where name='quattor'").fetchone()[0]),
+           default=get_sys_type_id('quattor_server')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 domain.create(checkfirst=True)
@@ -316,7 +320,7 @@ class Host(System):
 build_item = Table('build_item', meta,
     Column('id', Integer, Sequence('build_item_id_seq'), primary_key=True),
     Column('host_id', Integer,
-           ForeignKey('host.id'), unique=True, nullable=False),
+           ForeignKey('host.id'), nullable=False),
     Column('cfg_path_id', Integer,
            ForeignKey('cfg_path.id'),
            nullable=False),
@@ -360,8 +364,8 @@ mapper(BuildItem,build_item,properties={
 
 #Uses Ordering List, an advanced data mapping pattern for this kind of thing
 #more at http://www.sqlalchemy.org/docs/04/plugins.html#plugins_orderinglist
-mapper(Host, host, inherits=System, polymorphic_identity=s.execute(
-           "select id from system_type where type='host'").fetchone()[0],
+mapper(Host, host, inherits=System,
+       polymorphic_identity=get_sys_type_id('host'),
     properties={
         'system'        : relation(System),
         # Not 100% sure why the uselist=False needs to be on the backref here,
@@ -426,8 +430,7 @@ class AfsCell(System):
         ###   one really wouldn't make a whole lot of sense...
 
 mapper(AfsCell,afs_cell,
-        inherits=System, polymorphic_identity=s.execute(
-           "select id from system_type where type='afs_cell'").fetchone()[0],
+        inherits=System, polymorphic_identity=get_sys_type_id('afs_cell'),
        properties={
         'system' : relation(System, uselist=False, backref='afs_cell')})
 
@@ -624,6 +627,7 @@ def populate_service():
         s.close()
 
 def populate_service_list():
+    s=Session()
     svc = s.query(Service).filter_by(name='afs').one()
     assert(svc)
 
@@ -638,7 +642,7 @@ def populate_service_list():
     s.close()
 
 if __name__ == '__main__':
-
+    s=Session()
     create_domains()
     d=s.query(Domain).first()
     assert(d)
