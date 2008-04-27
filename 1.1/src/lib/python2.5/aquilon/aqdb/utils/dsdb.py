@@ -14,6 +14,10 @@ msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
 
 import os
+if os.environ['SYS_REGION'] == 'eu':
+    DATABASE='LNP_DSDB11'
+else:
+    DATABASE='NYP_DSDB11'
 
 get_country = """
     select country_symbol, country_name, continent
@@ -141,7 +145,7 @@ class aqsyb:
 
 
 def test():
-    syb = aqsyb('NYP_DSDB11','dsdb')
+    syb = aqsyb(DATABASE,'dsdb')
     sql    = '''select boot_path from network_host A, bootparam B where
             A.host_name = \'blackcomb\'
             AND A.machine_id = B.machine_id
@@ -153,27 +157,27 @@ def test():
     print pod
 
 def dump_country():
-    db = aqsyb('NYP_DSDB11','dsdb')
+    db = aqsyb(DATABASE,'dsdb')
     return db.run_query(get_country).fetchall()
 
 def dump_city():
-    db = aqsyb('NYP_DSDB11','dsdb')
+    db = aqsyb(DATABASE,'dsdb')
     return db.run_query(get_city).fetchall()
 
 def dump_bldg():
-    db = aqsyb('NYP_DSDB11','dsdb')
+    db = aqsyb(DATABASE,'dsdb')
     return db.run_query(get_bldg).fetchall()
 
 def dump_bucket():
-    db = aqsyb('NYP_DSDB11','dsdb')
+    db = aqsyb(DATABASE,'dsdb')
     return db.run_query(get_bucket).fetchall()
 
 def dump_network():
-    db = aqsyb('NYP_DSDB11','dsdb')
+    db = aqsyb(DATABASE,'dsdb')
     return db.run_query(get_network).fetchall()
 
 def esp():
-    db = aqsyb('NYP_DSDB11','dsdb')
+    db = aqsyb(DATABASE,'dsdb')
     return db.run_query(host_info).fetchall()
 
 if __name__ == '__main__':
