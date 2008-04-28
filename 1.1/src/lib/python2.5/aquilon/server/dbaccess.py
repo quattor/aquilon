@@ -37,7 +37,7 @@ from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
-from aquilon.aqdb.hardware import Vendor, HardwareType, Model, Machine, Status
+from aquilon.aqdb.hardware import Vendor, Model, Machine, Status
 from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
