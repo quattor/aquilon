@@ -272,10 +272,11 @@ class Machine(aqdbBase):
         return str(self.model.machine_type)
 
 mapper(Machine,machine, properties={
-    'location': relation(Location),
-    'model':    relation(Model),
+    'location'      : relation(Location,uselist=False),
+    'model'         : relation(Model,uselist=False),
+    'cpu'           : relation(Cpu,uselist=False),
     'creation_date' : deferred(machine.c.creation_date),
-    'comments': deferred(machine.c.comments)
+    'comments'      : deferred(machine.c.comments)
 })
 
 disk=Table('disk',meta,
