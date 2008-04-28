@@ -37,7 +37,7 @@ from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
-from aquilon.aqdb.hardware import Vendor, Model, Machine, Status
+from aquilon.aqdb.hardware import Vendor, Model, Machine, Status, Cpu
 from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
@@ -471,6 +471,19 @@ class DatabaseBroker(AccessBroker):
         for line in stat:
             printprep(line)
 
+    @transact
+    def add_cpu(self, result, name, vendor, speed, **kwargs):
+        print name, vendor, speed
+        v = self.session.query(Vendor).filter_by(name=vendor).first()
+        if (v is None):
+            raise ArgumentError("Vendor '"+vendor+"' not found!")
+
+        c = Cpu (name=name, vendor=v, speed=speed)
+        try:
+            self.session.save(c)
+        except InvalidRequestError, e:
+            raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
+    
     @transact
     def add_model(self, result, name, vendor, hardware, **kwargs):
         v = self.session.query(Vendor).filter_by(name = vendor).first()

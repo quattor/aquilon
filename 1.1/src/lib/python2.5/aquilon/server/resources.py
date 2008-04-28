@@ -538,7 +538,14 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.format_or_fail(d, request)
 
-    # FIXME: Probably going to change...
+    def command_add_cpu (self, request):
+        """aqcommand add cpu --name name --vedor vendor --speed speed"""
+        d = self.check_arguments(request, ['name', 'vendor', 'speed'])
+        d = d.addCallback(self.broker.add_cpu,
+            request_path=request.path,
+            user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+    
     def command_add_hardware(self, request):
         """aqcommand: aq add hardware --location=<location>"""
 

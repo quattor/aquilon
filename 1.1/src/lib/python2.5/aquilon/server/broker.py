@@ -262,6 +262,14 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def add_cpu(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_cpu, session=True, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def add_model(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)

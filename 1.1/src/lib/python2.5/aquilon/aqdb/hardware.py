@@ -164,6 +164,11 @@ class Cpu(aqdbBase):
             raise ArgumentError('no name provided for cpu')
         if kw['speed'] and isinstance(kw['speed'],int):
             self.speed=kw.pop('speed')
+        else:
+            try:
+                self.speed = int(kw['speed'])
+            except:
+                raise ArgumentError('Speed must be an integer number')
 
 mapper(Cpu,cpu,properties={
     'vendor'         : relation(Vendor),

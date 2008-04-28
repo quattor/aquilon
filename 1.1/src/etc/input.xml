@@ -50,6 +50,22 @@
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
    </command>
 
+   <command name="add_cpu">
+      %prog add cpu --name NAME --vendor VENDOR --speed SPEED
+      Add a new CPU type to the database
+      <optgroup name="add_cpu_opts" mandatory="True" fields="all">
+         Mandatory options:
+         <option name="name" type="string">CPU type name</option>
+         <option name="vendor" type="string">name of the vendor</option>
+         <option name="speed" type="string">CPU speed</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         Optional options:
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="cpu/%(vendor)s/%(name)s/%(speed)s" />
+   </command>
+
    <command name="add_hardware">
       %prog add hardware --hostname name
       Add new hardware to the database.
