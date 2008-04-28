@@ -133,7 +133,7 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.make_aquilon, build_info,
                 session=True, **arguments)
         d = d.addCallback(self.pbroker.create_tempdir, build_info)
-        d = d.addCallback(self.template_creator.make_aquilon, build_info,
+        d = d.addCallback(self.template_creator.reconfigure, build_info,
                 localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(self.pbroker.compile_host, build_info,
                 templatesdir=self.templatesdir, plenarydir=self.plenarydir,
@@ -142,6 +142,26 @@ class Broker(object):
         d = d.addBoth(self.pbroker.cleanup_tempdir, build_info)
         #d = d.addCallback(self.dbbroker.confirm_make, build_info, session=True)
         #d = d.addErrback(self.dbbroker.cancel_make, build_info, session=True)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def reconfigure(self, arguments, request_path, user):
+        # Cut-n-paste from make aquilon, above, except for the
+        # dbaccess call.
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "make", request_path)
+        build_info = {}
+        d = d.addCallback(self.dbbroker.verify_aquilon, build_info,
+                session=True, **arguments)
+        d = d.addCallback(self.pbroker.create_tempdir, build_info)
+        d = d.addCallback(self.template_creator.reconfigure, build_info,
+                localhost=self.localhost, user=user, **arguments)
+        d = d.addCallback(self.pbroker.compile_host, build_info,
+                templatesdir=self.templatesdir, plenarydir=self.plenarydir,
+                profilesdir=self.profilesdir, depsdir=self.depsdir,
+                hostsdir=self.hostsdir)
+        d = d.addBoth(self.pbroker.cleanup_tempdir, build_info)
         return d
 
 # --------------------------------------------------------------------------- #
@@ -419,6 +439,24 @@ class Broker(object):
                 "del", request_path)
         d = d.addCallback(self.dbbroker.del_service, session = True,
                 user = user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def bind_service (self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "bind", request_path)
+        d = d.addCallback(self.dbbroker.bind_service, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def unbind_service (self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "unbind", request_path)
+        d = d.addCallback(self.dbbroker.unbind_service, session=True,
+                user=user, **arguments)
         return d
         
 # --------------------------------------------------------------------------- #

@@ -265,9 +265,11 @@ class ResponsePage(resource.Resource):
 
     def command_reconfigure(self, request):
         """aqcommand: aq reconfigure --hostname=<host>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq reconfigure has not been implemented yet"
+        d = self.check_arguments(request, ["hostname"])
+        d = d.addCallback(self.broker.reconfigure,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
     def command_cat_hostname(self, request):
         """aqcommand: aq cat --hostname=<host>"""
@@ -543,48 +545,61 @@ class ResponsePage(resource.Resource):
         request.setResponseCode( http.NOT_IMPLEMENTED )
         return "aq add hardware has not been implemented yet"
 
-    # FIXME: check for template existence 
     def command_add_service(self, request):
-        d = self.check_arguments(request, ['name'])
+        d = self.check_arguments(request, ['service'], ['instance'])
         d = d.addCallback(self.broker.add_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
+        return self.format_or_fail(d, request)
 
-    def command_show_service_name(self, request):
-        d = self.check_arguments(request, [], ['name'])
-        d = d.addCallback(self.broker.show_service,
+    def command_add_service_instance(self, request):
+        d = self.check_arguments(request, ['service', 'instance'])
+        d = d.addCallback(self.broker.add_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
+        return self.format_or_fail(d, request)
 
     def command_show_service(self, request):
-        d = self.check_arguments(request, [], ['name'])
+        d = self.check_arguments(request, [], ['service'])
         d = d.addCallback(self.broker.show_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
+        return self.format_or_fail(d, request)
+
+    def command_show_service_service(self, request):
+        d = self.check_arguments(request, ['service'])
+        d = d.addCallback(self.broker.show_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_del_service(self, request):
-        d = self.check_arguments(request, [], ['name'])
+        d = self.check_arguments(request, ['service'], ['instance'])
         d = d.addCallback(self.broker.del_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
-    # FIXME: Probably going to change...
-    def command_add_service_instance(self, request):
-        """aqcommand: aq add service --service=<service> --domain=<domain> --instance=<instance>"""
+    def command_del_service_instance(self, request):
+        d = self.check_arguments(request, ['service', 'instance'])
+        d = d.addCallback(self.broker.del_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq add service --instance has not been implemented yet"
-
-    # FIXME: Probably going to change...
     def command_bind_service(self, request):
-        """aqcommand: aq bind service --service=<service> --hostname=<hostname>"""
+        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
+        d = d.addCallback(self.broker.bind_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq bind service has not been implemented yet"
+    def command_unbind_service(self, request):
+        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
+        d = d.addCallback(self.broker.unbind_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_make_aquilon(self, request):
         """aqcommand: aq make aquilon --hostname=<name> --os=<os>

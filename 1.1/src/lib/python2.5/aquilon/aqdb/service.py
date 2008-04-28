@@ -46,7 +46,7 @@ from sqlalchemy.orm import mapper, relation, deferred, synonym, backref, object_
 from sqlalchemy.orm.collections import attribute_mapped_collection
 #from sqlalchemy.ext import associationproxy
 from sqlalchemy.ext.orderinglist import ordering_list
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, not_
 
 service = Table('service',meta,
     Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
@@ -184,7 +184,11 @@ class System(aqdbBase):
             raise ArgumentError('you must provide a DNS Domain')
 
     def _fqdn(self):
-        return '.'.join([str(self.name),str(self.dns_domain.name)])
+        if self.dns_domain:
+            return '.'.join([str(self.name),str(self.dns_domain.name)])
+        # FIXME: Is it correct for a system to not have dns_domain?  If
+        # it does not have one, should this return name + '.' anyway?
+        return str(self.name)
     fqdn = property(_fqdn)
 
 mapper(System, system, polymorphic_on=system.c.type_id, \
@@ -618,7 +622,13 @@ def create_domains():
 
 def populate_service():
     if empty(service):
-        svcs = ['dns', 'dhcp', 'syslog', 'afs']
+        cfg_paths = s.query(CfgPath).filter(
+                not_(CfgPath.relative_path.like('%/%'))).join('tld').filter_by(
+                type='service').all()
+        if cfg_paths:
+            svcs = [str(cp.relative_path) for cp in cfg_paths]
+        else:
+            svcs = ['dns', 'dhcp', 'syslog', 'afs']
         for i in svcs:
             srv = Service(i)
             s.save(srv)

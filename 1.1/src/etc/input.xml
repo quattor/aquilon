@@ -160,39 +160,46 @@
    </command>
 
    <command name="add_service">
-      %prog add service --name SERVICE_NAME
+      %prog add service --service SERVICE_NAME [--instance INSTANCE_NAME]
       Add new service
       <optgroup name="add_service_opts" mandatory="True" fields="all">
-         <option name="name" type="string" mandatory="True">service name</option>
+         <option name="service" type="string" mandatory="True">service name</option>
       </optgroup>
       <optgroup name="optional_opts">
          Optional options:
          <option name="comments" type="string">Comments</option>
+         <option name="instance" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="service/%(name)s" />
+      <transport method="put" path="service/%(service)s" />
+      <transport trigger="instance" method="put" path="service/%(service)s/%(instance)s" />
    </command>
 
    <command name="show_service">
-      %prog show service --name SERVICE_NAME
+      %prog show service --service SERVICE_NAME
       Show an existing service
       <optgroup name="show_service_opts">
-         <option name="name" type="string">service name</option>
+         <option name="service" type="string">service name</option>
       </optgroup>
       <transport method="get" path="service" />
-      <transport trigger="name" method="post" path="service/%(name)s"/>
+      <transport trigger="service" method="get" path="service/%(service)s"/>
    </command>
 
    <command name="del_service">
-      %prog del service --name SERVICE_NAME]
+      %prog del service --service SERVICE_NAME]
       Delete a service
       <optgroup name="del_service_opts" mandatory="True" fields="all">
-         <option name="name" type="string" mandatory="True">service name</option>
+         <option name="service" type="string" mandatory="True">service name</option>
       </optgroup>
-      <transport method="delete" path="service/%(name)s" />
+      <optgroup name="optional_opts">
+         Optional options:
+         <option name="instance" type="string">instance name</option>
+      </optgroup>
+      <transport method="delete" path="service/%(service)s" />
+      <transport trigger="instance" method="delete" path="service/%(service)s/%(instance)s" />
    </command>
 
    <command name="bind_service">
-      %prog bind service --host NAME --service SERVICE_NAME 
+      %prog bind service --hostname NAME --service SERVICE_NAME 
       --instance INSTANCE_NAME
       Bind a service on a host.
       <optgroup name="bind_service_opts" mandatory="True" fields="all">
@@ -200,8 +207,19 @@
          <option name="service" type="string">Service name</option>
          <option name="instance" type="string">Instance name</option>
       </optgroup>
-      <!-- In 1.0, only one service can be bound to a host at once. -->
-      <transport method="post" path="host/%(hostname)s/service" />
+      <transport method="put" path="host/%(hostname)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="unbind_service">
+      %prog unbind service --hostname NAME --service SERVICE_NAME 
+      --instance INSTANCE_NAME
+      Unbind a service from a host.
+      <optgroup name="bind_service_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Host name</option>
+         <option name="service" type="string">Service name</option>
+         <option name="instance" type="string">Instance name</option>
+      </optgroup>
+      <transport method="delete" path="host/%(hostname)s/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="del_host">
@@ -254,9 +272,9 @@
    </command>
 
    <command name="reconfigure">
-      %prog reconfigure --host HOSTNAME
+      %prog reconfigure --hostname HOSTNAME
       <optgroup name="reconfigure options" mandatory="True" fields="all">
-         <option name="host" type="string">Host name</option>
+         <option name="hostname" type="string">Host name</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>

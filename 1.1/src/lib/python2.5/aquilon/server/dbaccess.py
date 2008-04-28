@@ -87,6 +87,15 @@ class DatabaseBroker(AccessBroker):
                     % (machine, str(e)))
         return dbmachine
 
+    # expects to be run in a transact with a session...
+    def _get_service(self, service):
+        try:
+            dbservice = self.session.query(Service).filter_by(
+                    name=service).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service '%s' not found: %s" % (service, e))
+        return dbservice
+
     @transact
     def verify_add_host(self, result, hostname, machine, domain, status,
             **kwargs):
@@ -331,6 +340,29 @@ class DatabaseBroker(AccessBroker):
 
         self.session.flush()
         self.session.refresh(dbhost)
+        build_info["dbhost"] = printprep(dbhost)
+        # FIXME: Save this to the build table... maybe just carry around
+        # the database object...
+        build_info["buildid"] = -1
+        return True
+
+    @transact
+    def verify_aquilon(self, result, build_info, hostname, **kwargs):
+        dbhost = self._hostname_to_host(hostname)
+        self.session.refresh(dbhost)
+
+        found_os = False
+        found_personality = False
+        for t in dbhost.templates:
+            if t.cfg_path.tld.type == 'os':
+                found_os = True
+            elif t.cfg_path.tld.type == 'personality':
+                found_personality = True
+            if found_os and found_personality:
+                break
+        if not found_os or not found_personality:
+            raise ArgumentError("Please run `make aquilon --hostname %s` to give the host an os and personality." % hostname)
+
         build_info["dbhost"] = printprep(dbhost)
         # FIXME: Save this to the build table... maybe just carry around
         # the database object...
@@ -608,23 +640,116 @@ class DatabaseBroker(AccessBroker):
         return
 
     @transact
-    def add_service (self, result, name, **kwargs):
-        s = Service(name)
-        self.session.save(s)
-        return "Success"
+    def add_service(self, result, service, instance, **kwargs):
+        dbservice = self.session.query(Service).filter_by(name=service).first()
+        if not dbservice:
+            dbservice = Service(service)
+            self.session.save(dbservice)
+        if not instance:
+            return printprep(dbservice)
+        # FIXME: Treatment of instance is over-simplified, and needs to be
+        # revisited.
+        relative_path = "%s/%s/client" % (service, instance)
+        dbinstance = self.session.query(CfgPath).filter_by(
+                relative_path=relative_path,
+                tld=dbservice.cfg_path.tld).first()
+        if not dbinstance:
+            dbinstance = CfgPath(dbservice.cfg_path.tld,
+                    'service/' + relative_path)
+            self.session.save(dbinstance)
+            self.session.flush()
+            self.session.refresh(dbservice)
+        return printprep(dbservice)
 
     @transact
-    def show_service (self, result, name, **kwargs):
+    def show_service(self, result, service, **kwargs):
         q = self.session.query(Service)
-        if (name is not None):
-            q = q.filter(name.like(name+'%'))
-        return printprep(q.all())
+        if not service:
+            return printprep(q.all())
+        try:
+            dbservice = q.filter_by(name=service).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service '%s' not found: %s" % (service, e))
+        # FIXME: Treatment of instance is over-simplified, and needs to be
+        # revisited.  This hack treats CfgPath as a ServiceInstance and shows
+        # them after showing the service.
+        q = self.session.query(CfgPath).filter(
+                CfgPath.tld==dbservice.cfg_path.tld).filter(
+                CfgPath.relative_path.like(service + "/%"))
+        instances = q.all()
+        instances.insert(0, dbservice)
+        return printprep(instances)
 
     @transact
-    def del_service (self, result, name, **kwargs):
-        s = self.session.query(Service).filter_by(name = name).one()
-        self.session.delete(s)
+    def del_service(self, result, service, instance, **kwargs):
+        dbservice = self._get_service(service)
+        if not instance:
+            self.session.delete(dbservice)
+            return "Success"
+        # FIXME: Treatment of instance is over-simplified, and needs to be
+        # revisited.  For delete, this may be just plain wrong.
+        relative_path = "%s/%s/client" % (service, instance)
+        try:
+            dbinstance = self.session.query(CfgPath).filter_by(
+                    relative_path=relative_path,
+                    tld=dbservice.cfg_path.tld).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service instance '%s/%s' not found: %s"
+                    % (service, instance, e))
+        self.session.delete(dbinstance)
         return "Success"
+
+    @transact
+    def bind_service(self, result, hostname, service, instance, **kwargs):
+        dbhost = self._hostname_to_host(hostname)
+        dbservice = self._get_service(service)
+        # FIXME: Treatment of instance is over-simplified, and needs to be
+        # revisited.
+        relative_path = "%s/%s/client" % (service, instance)
+        try:
+            dbinstance = self.session.query(CfgPath).filter_by(
+                    relative_path=relative_path,
+                    tld=dbservice.cfg_path.tld).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service instance '%s/%s' not found: %s"
+                    % (service, instance, e))
+        positions = []
+        self.session.refresh(dbhost)
+        for template in dbhost.templates:
+            positions.append(template.position)
+            if template.cfg_path == dbinstance:
+                return printprep(dbhost)
+        # Do not bind to 0 (os) or 1 (personality)
+        i = 2
+        while i in positions:
+            i += 1
+        bi = BuildItem(dbhost, dbinstance, i)
+        self.session.save(bi)
+        self.session.flush()
+        self.session.refresh(dbhost)
+        return printprep(dbhost)
+
+    @transact
+    def unbind_service(self, result, hostname, service, instance, **kwargs):
+        dbhost = self._hostname_to_host(hostname)
+        dbservice = self._get_service(service)
+        # FIXME: Treatment of instance is over-simplified, and needs to be
+        # revisited.
+        relative_path = "%s/%s/client" % (service, instance)
+        try:
+            dbinstance = self.session.query(CfgPath).filter_by(
+                    relative_path=relative_path,
+                    tld=dbservice.cfg_path.tld).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service instance '%s/%s' not found: %s"
+                    % (service, instance, e))
+        bi = self.session.query(BuildItem).filter_by(host=dbhost,
+                cfg_path=dbinstance).first()
+        if bi:
+            self.session.delete(bi)
+            self.session.flush()
+            self.session.refresh(dbhost)
+        return printprep(dbhost)
 
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_domain_and_string(self, hostname):

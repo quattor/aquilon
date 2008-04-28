@@ -124,8 +124,7 @@ class TemplateCreator(object):
         d = d.addCallback(lambda _: result)
         return d
 
-    def make_aquilon(self, result, build_info, localhost, user,
-            **kwargs):
+    def reconfigure(self, result, build_info, localhost, user, **kwargs):
         tempdir = build_info["tempdir"]
         dbhost = build_info["dbhost"]
         fqdn = dbhost.fqdn
@@ -149,22 +148,15 @@ class TemplateCreator(object):
 
         os_template = None
         personality_template = None
+        services = []
         for t in dbhost.templates:
             if t.cfg_path.tld.type == 'os':
-                os_template = str(t.cfg_path) + '/config'
+                os_template = repr(t.cfg_path) + '/config'
             elif t.cfg_path.tld.type == 'personality':
-                personality_template = str(t.cfg_path) + '/config'
-
-        # FIXME: Services are on the build item table...
-        # FIXME: Features are on the build item table...
-        services = [ "service/afs/q.ny.ms.com/client/config",
-                "service/dns/nyinfratest/client/config",
-                "service/bootserver/np.test/client/config",
-                "service/ntp/pa.ny.na/client/config"
-                ]
-        # Service - has a CfgPath
-        # ServiceInstance - combo of Service and System
-        # ServiceMap
+                personality_template = repr(t.cfg_path) + '/config'
+            elif t.cfg_path.tld.type == 'service':
+                services.append(repr(t.cfg_path) + '/config')
+            # FIXME: Features should also be here...
 
         templates = []
         templates.append("archetype/base")
