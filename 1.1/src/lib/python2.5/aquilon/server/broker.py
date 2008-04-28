@@ -45,7 +45,13 @@ class Broker(object):
         self.pbroker = ProcessBroker()
         self.template_creator = TemplateCreator()
         self.osuser = os.environ.get('USER')
-        self.basedir = "/var/tmp/%s/quattor" % self.osuser
+        self.localhost = socket.gethostname()
+        if self.osuser == 'cdb' and os.path.exists('/var/quattor'):
+            self.basedir = "/var/quattor"
+            self.git_templates_url = "http://%s/templates" % self.localhost
+        else:
+            self.basedir = "/var/tmp/%s/quattor" % self.osuser
+            self.git_templates_url = "http://%s:6901/templates" % self.localhost
         self.profilesdir = "%s/web/htdocs/profiles" % self.basedir
         self.depsdir = "%s/deps" % self.basedir
         self.hostsdir = "%s/hosts" % self.basedir
@@ -57,8 +63,6 @@ class Broker(object):
         self.git = "%s/git" % self.git_path
         self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
         self.cdpport = 7777
-        self.localhost = socket.gethostname()
-        self.git_templates_url = "http://%s:6901/templates" % self.localhost
         self.domain_name = "production"
         self.dsdb = "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb"
 
