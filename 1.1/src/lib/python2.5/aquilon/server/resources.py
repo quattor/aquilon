@@ -546,6 +546,14 @@ class ResponsePage(resource.Resource):
             user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
     
+    def command_add_disk (self, request):
+        """aqcommand add disk --machine machine --type type --capacity capacity"""
+        d = self.check_arguments(request, ['machine', 'type', 'capacity'])
+        d = d.addCallback(self.broker.add_disk,
+            request_path=request.path,
+            user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+    
     def command_add_hardware(self, request):
         """aqcommand: aq add hardware --location=<location>"""
 

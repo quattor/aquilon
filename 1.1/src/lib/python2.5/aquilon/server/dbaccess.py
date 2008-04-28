@@ -37,7 +37,7 @@ from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal
-from aquilon.aqdb.hardware import Vendor, Model, Machine, Status, Cpu
+from aquilon.aqdb.hardware import *
 from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
@@ -473,7 +473,6 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def add_cpu(self, result, name, vendor, speed, **kwargs):
-        print name, vendor, speed
         v = self.session.query(Vendor).filter_by(name=vendor).first()
         if (v is None):
             raise ArgumentError("Vendor '"+vendor+"' not found!")
@@ -483,7 +482,22 @@ class DatabaseBroker(AccessBroker):
             self.session.save(c)
         except InvalidRequestError, e:
             raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
-    
+
+    @transact
+    def add_disk(self, result, machine, type, capacity, **kwargs):
+        m = self.session.query(Machine).filter_by(name=machine).first()
+        if (m is None):
+            raise ArgumentError('Unknown machine name')
+        dt = self.session.query(DiskType).filter_by(type=type).one()
+        if (dt is None):
+            raise ArgumentError('Unknown disk type')
+
+        d = Disk(machine=m,type=dt,capahub=capacity)
+        try:
+            self.session.save(d)
+        except InvalidRequestError, e:
+            raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
+
     @transact
     def add_model(self, result, name, vendor, hardware, **kwargs):
         v = self.session.query(Vendor).filter_by(name = vendor).first()

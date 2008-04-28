@@ -63,7 +63,23 @@
          Optional options:
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="cpu/%(vendor)s/%(name)s/%(speed)s" />
+      <transport method="put" path="hardware/cpu/%(vendor)s/%(name)s/%(speed)s" />
+   </command>
+
+   <command name="add_disk">
+      %prog add disk --machine MACHINE --type TYPE --capacity CAPACITY
+      Add a new disk to a machine
+      <optgroup name="add_cpu_opts" mandatory="True" fields="all">
+         Mandatory options:
+         <option name="machine" type="string">machine ID</option>
+         <option name="type" type="string">type of the disk</option>
+         <option name="capacity" type="string">capacity of the disk</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         Optional options:
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="hardware/disk/%(machine)s/%(type)s/%(capacity)s" />
    </command>
 
    <command name="add_hardware">

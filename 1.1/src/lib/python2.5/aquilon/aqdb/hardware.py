@@ -303,9 +303,9 @@ class Disk(aqdbBase):
                 ' '.join([msg,'got %s'%(type(machine))])
                 raise ArgumentError(msg)
         if kw['type']:
-            if isinstance(type,DiskType):
-                self.disk_type=type
-            elif isinstance(type,str):
+            if isinstance(kw['type'],DiskType):
+                self.type=kw['type']
+            elif isinstance(kw['type'],str):
                 try:
                     type_id=engine.execute(
                         select([disk_type.c.id]).where(
@@ -315,7 +315,13 @@ class Disk(aqdbBase):
                     print e
                     raise ArgumentError("can't find disk_type '%s'"%type)
                 self.disk_type_id=type_id
-        self.capacity=int(kw.pop('capacity',0))
+            else:
+                raise ArgumentError('Disk type mist be DiskType or string type')
+        try:
+            self.capacity=int(kw.pop('capacity',0))
+        except:
+            raise ArgumentError('Capacity must be an integer number')
+
     def __repr__(self):
         return str(self.type)+" disk with %d capacity"%(self.capacity)
 
