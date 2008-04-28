@@ -181,6 +181,7 @@ machine = Table('machine', meta,
     Column('name', String(32), unique=True, nullable=False, index=True), #nodename
     Column('location_id', Integer, ForeignKey('location.id'), nullable=False),
     Column('model_id', Integer, ForeignKey('model.id'), nullable=False),
+    Column('serial_no', String(64),nullable=True),
     Column('cpu_id', Integer, ForeignKey('cpu.id'), nullable=False), #DEFAULT ME
     Column('cpu_quantity', Integer, nullable=False, default=2), #CheckContstraint
     Column('memory', Integer, nullable=False, default=512), #IN MB. Default better
