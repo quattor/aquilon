@@ -211,7 +211,6 @@ def npipm1():
         return
 
     np=s.query(Building).filter_by(name='np').one()
-    #mod=s.query(Model).filter_by(name='hs20').one()
 
     rk = s.query(Rack).filter_by(name='np302').first()
     if not rk:
