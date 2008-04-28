@@ -742,6 +742,15 @@
          <option name="location" type="string">location of the new machine</option>
          <option name="type" type="string">location type (chassis|rack|desk)</option>
          <option name="model" type="string">machine model</option>
+	 <!-- These are required for now, but should be optional later. -->
+	 <option name="cpuname" type="string">cpu name</option>
+	 <option name="cpuvendor" type="string">cpu vendor</option>
+	 <option name="cpuspeed" type="string">cpu speed</option>
+	 <option name="cpucount" type="string">cpu count</option>
+	 <option name="memory" type="string">memory in MB</option>
+      </optgroup>
+      <optgroup name="add_machine_optional">
+	 <option name="serial" type="string">serial number</option>
       </optgroup>
       <transport method="put" path="/machine/%(machine)s" />
    </command>

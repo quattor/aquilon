@@ -658,7 +658,9 @@ class ResponsePage(resource.Resource):
 
     def command_add_machine(self, request):
         d = self.check_arguments(request,
-                ["machine", "location", "type", "model"])
+                ["machine", "location", "type", "model", 
+                    "cpuname", "cpuvendor", "cpuspeed", "cpucount", "memory"],
+                ["serial"])
         d = d.addCallback(self.broker.add_machine,
                 request_path=request.path,
                 user=request.channel.getPrinciple())

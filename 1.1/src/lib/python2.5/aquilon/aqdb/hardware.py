@@ -202,6 +202,8 @@ class Machine(aqdbBase):
         else:
             #TODO accept from kw location rack or chassis
             raise ArgumentError('No Location specified')
+        if kw.has_key("serial_no"):
+            self.serial_no = str(kw.pop("serial_no"))
         #model was arg2
         #self.model = model
         if args[1]:
@@ -259,10 +261,21 @@ class Machine(aqdbBase):
 
 #        from shell import ipshell
 #        ipshell()
-        assert(specs)
-        self.cpu_id       = specs['cpu_id']
-        self.cpu_quantity = specs['cpu_quantity']
-        self.memory          = specs['memory']
+        #assert(specs)
+        if specs:
+            self.cpu_id       = specs['cpu_id']
+            self.cpu_quantity = specs['cpu_quantity']
+            self.memory          = specs['memory']
+        if kw.has_key("cpu"):
+            if isinstance(kw["cpu"],Cpu):
+                self.cpu=kw.pop("cpu")
+            else:
+                msg='cpu argument should be a cpu object got '
+                raise ArgumentError(msg + str(type(kw["cpu"])))
+        if kw.has_key("cpu_quantity"):
+            self.cpu_quantity = int(kw.pop("cpu_quantity"))
+        if kw.has_key("memory"):
+            self.memory = int(kw.pop("memory"))
 
         #TODO: we should probably let the caller get this althogether
 

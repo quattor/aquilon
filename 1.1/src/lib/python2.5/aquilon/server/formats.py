@@ -16,7 +16,7 @@ from twisted.python import log
 
 from aquilon.aqdb.db import aqdbBase, aqdbType
 from aquilon.aqdb.location import Location
-from aquilon.aqdb.hardware import Machine, Status, Model, Vendor
+from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
 from aquilon.aqdb.service import Host, Domain
 
 def printprep(dbobject):
@@ -55,6 +55,8 @@ def printprep(dbobject):
         printprep(dbobject.location)
         printprep(dbobject.model)
         printprep(dbobject.interfaces)
+        printprep(dbobject.cpu)
+        printprep(dbobject.disks)
     elif isinstance(dbobject, Location):
         printprep(dbobject.type)
         printprep(dbobject.fullname)
@@ -62,7 +64,10 @@ def printprep(dbobject):
         printprep(dbobject.parents)
     elif isinstance(dbobject, Model):
         printprep(dbobject.vendor)
-        printprep(dbobject.hardware_type)
+    elif isinstance(dbobject, Disk):
+        printprep(dbobject.type)
+    elif isinstance(dbobject, Cpu):
+        printprep(dbobject.vendor)
     else:
         str(dbobject)
 
@@ -138,6 +143,14 @@ class Formatter(object):
                     % machine.host.fqdn)
         details.append(self.elaborate_raw(machine.location, indent + "  "))
         details.append(self.elaborate_raw(machine.model, indent + "  "))
+        details.append(indent + "  Cpu: %s x %d" %
+                (machine.cpu, machine.cpu_quantity))
+        details.append(indent + "  Memory: %d MB" % machine.memory)
+        if machine.serial_no:
+            details.append(indent + "  Serial: %s" % machine.serial_no)
+        for d in machine.disks:
+            details.append(indent + "  Disk: %d GB %s"
+                    % (d.capacity, d.type.type))
         for i in machine.interfaces:
             details.append(indent + "  Interface: %s %s %s boot=%s" 
                     % (i.name, i.mac, i.ip, i.boot))
@@ -165,8 +178,7 @@ class Formatter(object):
         return "\n".join(details)
 
     def elaborate_raw_model(self, model, indent=""):
-        details = [ indent + "Model: %s %s (%s)" % (model.vendor.name,
-            model.name, str(model.hardware_type.type)) ]
+        details = [indent + "Model: %s %s" % (model.vendor.name, model.name)]
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
         return "\n".join(details)

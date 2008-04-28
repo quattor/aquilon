@@ -492,11 +492,14 @@ class DatabaseBroker(AccessBroker):
         if (dt is None):
             raise ArgumentError('Unknown disk type')
 
-        d = Disk(machine=m,type=dt,capahub=capacity)
+        d = Disk(machine=m,type=dt,capacity=capacity)
         try:
             self.session.save(d)
         except InvalidRequestError, e:
             raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
+        # Hack to make sure machine is accessible...
+        printprep(d.machine)
+        return d
 
     @transact
     def add_model(self, result, name, vendor, hardware, **kwargs):
@@ -546,8 +549,20 @@ class DatabaseBroker(AccessBroker):
             raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
         return "Model successfully deleted"
 
+    # FIXME: This utility method may be better suited elsewhere.
+    def force_int(self, label, value):
+        if value is None:
+            return None
+        try:
+            result = int(value)
+        except Exception, e:
+            raise ArgumentError("Expected an integer for %s: %s" % (label, e))
+        return result
+
     @transact
-    def add_machine(self, result, machine, location, type, model, **kwargs):
+    def add_machine(self, result, machine, location, type, model,
+            cpuname, cpuvendor, cpuspeed, cpucount, memory, serial,
+            **kwargs):
         if (type not in ['chassis', 'rack', 'desk']):
             raise ArgumentError ('Invalid location type: '+type)
         if (type == 'chassis'):
@@ -559,12 +574,31 @@ class DatabaseBroker(AccessBroker):
         if (loc is None):
             raise ArgumentError("Location name '"+location+"' not found!")
 
+        cpuspeed = self.force_int("cpuspeed", cpuspeed)
+        cpucount = self.force_int("cpucount", cpucount)
+        memory = self.force_int("memory", memory)
+
         mod = self.session.query(Model).filter_by(name = model).first()
         if (mod is None):
             raise ArgumentError("Model name '"+model+"' not found!");
 
         try:
-            m = Machine(loc, mod, name=machine)
+            # If cpu.name format changes (currently name_speed), may need
+            # to revisit this.
+            cpu = self.session.query(Cpu).filter(
+                    Cpu.name.like(cpuname.lower() + '%')).filter_by(
+                    speed=cpuspeed).join('vendor').filter_by(
+                    name=cpuvendor.lower()).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Could not find cpu with name like '%s%%', speed='%d', and vendor='%s': %s"
+                    % (cpuname, cpuspeed, cpuvendor, e))
+
+        try:
+            # FIXME: These should have been optional.  Only override as needed.
+            optional = {"cpu":cpu, "cpu_quantity":cpucount, "memory":memory}
+            if serial:
+                optional["serial_no"] = serial
+            m = Machine(loc, mod, name=machine, **optional)
             self.session.save(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
@@ -601,6 +635,9 @@ class DatabaseBroker(AccessBroker):
             for iface in m.interfaces:
                 log.msg("Before deleting machine '%s', removing interface '%s' [%s] [%s] boot=%s)" % (m.name, iface.name, iface.mac, iface.ip, iface.boot))
                 self.session.delete(iface)
+            for disk in m.disks:
+                log.msg("Before deleting machine '%s', removing disk '%s'" % (m.name, disk))
+                self.session.delete(disk)
             self.session.delete(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be deleted!\n"+e.__str__())

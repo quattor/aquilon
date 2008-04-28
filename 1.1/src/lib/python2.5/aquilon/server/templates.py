@@ -18,9 +18,10 @@ from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, RollbackException, \
         DetailedProcessException, ArgumentError
-from aquilon.aqdb.hardware import Machine
+from aquilon.aqdb.hardware import Machine, Disk
 from aquilon.aqdb.interface import PhysicalInterface
 from aquilon.aqdb.service import Host
+from aquilon.aqdb.utils.ipcalc import Network
 
 class TemplateCreator(object):
 
@@ -49,18 +50,16 @@ class TemplateCreator(object):
         plenary_info["machine"] = dbmachine.name
         plenary_info["model"] = dbmachine.model.name
         plenary_info["vendor"] = dbmachine.model.vendor.name
-        # FIXME: Hard-coded.
-        plenary_info["serialnumber"] = "99C5553"
-        # FIXME: Hard-coded.
-        plenary_info["ram"] = 8192
-        # FIXME: Hard-coded.
-        plenary_info["num_cpus"] = 2
-        # FIXME: Hard-coded.
-        plenary_info["cpu_relpath"] = "hardware/cpu/intel/xeon_2660"
-        # FIXME: Hard-coded.
-        plenary_info["harddisk_relpath"] = "hardware/harddisk/generic/scsi"
-        # FIXME: Hard-coded.
-        plenary_info["harddisk_gb"] = 34
+        plenary_info["serial"] = dbmachine.serial_no
+        plenary_info["ram"] = dbmachine.memory
+        plenary_info["num_cpus"] = dbmachine.cpu_quantity
+        plenary_info["cpu_relpath"] = "hardware/cpu/%s/%s" % (
+                dbmachine.cpu.vendor.name, dbmachine.cpu.name)
+        harddisks = []
+        for harddisk in dbmachine.disks:
+            relpath = "hardware/harddisk/generic/%s" % harddisk.type.type
+            harddisks.append({"relpath":relpath, "capacity":harddisk.capacity})
+        plenary_info["harddisks"] = harddisks
         plenary_info["model_relpath"] = (
             "hardware/machine/%(vendor)s/%(model)s" % plenary_info)
         plenary_info["plenary_core"] = (
@@ -81,6 +80,8 @@ class TemplateCreator(object):
             dbmachine = result.machine
         elif isinstance(result, Host):
             dbmachine = result.machine
+        elif isinstance(result, Disk):
+            dbmachine = result.machine
         else:
             raise ValueError("generate_plenary cannot handle type %s" 
                     % type(result))
@@ -91,15 +92,19 @@ class TemplateCreator(object):
                 % (localhost, user, datetime.now().ctime()))
         lines.append("structure template %(plenary_struct)s;\n" % plenary_info)
         lines.append('"location" = "%(sysloc)s";' % plenary_info)
-        lines.append('"serialnumber" = "%(serialnumber)s";\n' % plenary_info)
+        if plenary_info.get("serial"):
+            lines.append('"serialnumber" = "%(serial)s";\n' % plenary_info)
         lines.append("include %(model_relpath)s;\n" % plenary_info)
         lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
                 % plenary_info)
         lines.append('"cpu" = list(' + ", \n             ".join(
                 ['create("%(cpu_relpath)s")' % plenary_info
                 for cpu_num in range(plenary_info["num_cpus"])]) + ');')
-        lines.append('"harddisks" = nlist("sda", create("%(harddisk_relpath)s", "capacity", %(harddisk_gb)d*GB));\n'
-                % plenary_info)
+        if plenary_info["harddisks"]:
+            # FIXME: Stuck at one, for now.
+            lines.append('"harddisks" = nlist("sda", create("%s", "capacity", %d*GB));\n'
+                    % (plenary_info["harddisks"][0]["relpath"], 
+                    plenary_info["harddisks"][0]["capacity"]))
         for interface in dbmachine.interfaces:
             # FIXME: May need more information here...
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
@@ -131,18 +136,21 @@ class TemplateCreator(object):
         plenary_info = self.get_plenary_info(dbhost.machine)
 
         # FIXME: Need at least one interface marked boot - that one first
-        # FIXME: Currently missing netmask / broadcast / gateway
-        # because the IPAddress table has not yet been defined in interface.py
-        # Since we are only creating from certain chassis at the moment...
-        # Hard code for now for 172.31.32.0-127.
+        # FIXME: Method for obtaining broadcast / gateway, netmask hard-coded.
+        # The IPAddress table has not yet been defined in interface.py.
         interfaces = []
         for dbinterface in dbhost.machine.interfaces:
             if not dbinterface.ip or dbinterface.ip == '0.0.0.0':
                 continue
-            interfaces.append({"ip":dbinterface.ip,
-                    "netmask":"255.255.255.128",
-                    "broadcast":"172.31.32.127",
-                    "gateway":"172.31.32.1",
+            net = Network(dbinterface.ip, 25)
+            # Fudge the gateway as the network + 1
+            gateway_components = net.network().dq.split('.')
+            gateway_components[-1] = str(int(gateway_components[-1]) + 1)
+            gateway = ".".join(gateway_components)
+            interfaces.append({"ip":net.dq,
+                    "netmask":net.netmask().dq,
+                    "broadcast":net.broadcast().dq,
+                    "gateway":gateway,
                     "bootproto":"dhcp",
                     "name":dbinterface.name})
 

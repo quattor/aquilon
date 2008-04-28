@@ -253,6 +253,8 @@ class Broker(object):
         stat = []
         # FIXME: Hard coded version number.
         stat.append("Aquilon Broker v1.1")
+        stat.append("Server: %s" % self.localhost)
+        stat.append("Database: %s" % self.dbbroker.engineParams[0])
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "show", request_path)
         d = d.addCallback(self.dbbroker.status, session=True, user=user,
@@ -274,6 +276,9 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)
         d = d.addCallback(self.dbbroker.add_disk, session=True, **arguments)
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #
