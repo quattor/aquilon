@@ -15,7 +15,7 @@ sys.path.append('../..')
 
 from db import *
 
-from sqlalchemy import Column, Integer, Sequence, String
+from sqlalchemy import Column, Integer, Sequence, String, select
 from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.exceptions_ import ArgumentError
@@ -50,7 +50,7 @@ location = Table('location', meta,
            ForeignKey('location_type.id'), nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('name', 'location_type_id'))
+    UniqueConstraint('name', 'location_type_id', name='loc_name_type_uk'))
     #TODO: fix bunker names: we have  the WHOLE building, and each bunker.
     #Bunker names can/will be concatenated as in dsdb at first, but this is
     #inellegant, IMHO to say the least.
@@ -69,8 +69,8 @@ chassis = mk_loc_table('chassis', meta)
 meta.create_all()
 
 def get_loc_type_id(typ_nm):
-    stmt="select id from location_type where type='%s'"%(typ_nm)
-    typ_id = engine.execute(stmt).scalar()
+    sel=select([location_type.c.id], location_type.c.type=='%s'%(typ_nm))
+    typ_id=engine.execute(sel).scalar()
     assert(typ_id)
     return typ_id
 
@@ -85,21 +85,16 @@ class Location(aqdbBase):
             msg = """You cannot instance Base Location Type.
             Init the exact type of location needed directly."""
             raise ValueError(msg)
-            return
-        # FIXME: Should not reference a session within the contructor.
-        # For now, leaving it for backware compatibility...
-        if isinstance(type_name, LocationType):
+        elif isinstance(type_name, LocationType):
             self.type = type_name
         elif isinstance(type_name,str):
             try:
                 t_id=get_loc_type_id(type_name)
-                assert(t_id)
             except Exception, e:
                 msg="Error looking up location type '%s': %s"%(type_name,e)
                 raise ArgumentError(msg)
         else:
             raise ArgumentError("Location type argument expects a string")
-            return
 
         if kw.has_key('fullname'):
             fn = kw.pop('fullname')
@@ -173,10 +168,10 @@ class Location(aqdbBase):
         return self.p_dict['chassis']
     chassis = property(_chassis)
 
-    def get_typed_children(self,type):
-        """ return all child location objects of a given location type """
-        return Session.query(Location).with_polymorphic('*').\
-            join('type').filter(LocationType.type==type).all()
+    #def get_typed_children(self,type):
+    #    """ return all child location objects of a given location type """
+    #    return Session.query(Location).with_polymorphic('*').\
+    #        join('type').filter(LocationType.type==type).all()
 
     def append(self,node):
         if isinstance(node, Location):
@@ -300,10 +295,14 @@ def populate_hubs():
     s.save_or_update(na)
     s.save_or_update(sa)
 
-    asia=Continent('as', 'continent', parent=hk_hub, fullname='Asia')
-    au=Continent('au', 'continent', parent=hk_hub, fullname='Autstralia')
+    asia = Continent('as', 'continent', parent=hk_hub, fullname='Asia')
+    au   = Continent('au', 'continent', parent=hk_hub, fullname='Autstralia')
     s.save_or_update(au)
     s.save_or_update(asia)
+
+    jp=Country('jp', 'country', parent=tk_hub, fullname='Japan')
+    s.save_or_update(jp)
+
     try:
         s.commit()
     except Exception,e:
@@ -321,6 +320,8 @@ def populate_country():
 
     with s.begin():
         for row in dump_country():
+            if row[0] == 'jp':
+                continue
             c=Country(row[0],'country',fullname=row[1],parent=cache[row[2]])
             s.save(c)
     s.flush()
@@ -366,13 +367,14 @@ if __name__ == '__main__':
         print 'populating hubs'
         populate_hubs()
 
-    if empty(country):
+    if engine.execute(country.count()).scalar() <2: #japan precreated
         print 'populating country'
         populate_country()
 
     if empty(city):
         print 'populating city'
         populate_city()
+
     if empty(building):
         print 'populating buildings'
         populate_bldg()
