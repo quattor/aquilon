@@ -81,8 +81,6 @@ SELECT
                        AND B.model_id *= D.id
                        AND B.machine_id = E.machine_id
                        --AND B.machine_id *= G.machine_id
-
-
                        AND A.state >= 0
                        AND B.state >= 0
                        AND C.state >= 0
@@ -98,7 +96,7 @@ SELECT
 class aqsyb:
     '''Wraps connections and calls to sybase'''
     def __init__(self,dsn,database):
-        if os.environ['USER'] == 'daqscott':
+        if os.environ['USER'] == 'daqscott' and database == 'NYP_DSDB11':
             #print 'using kerberos authentication'
             principal = None
             for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():

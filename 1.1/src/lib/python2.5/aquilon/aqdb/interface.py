@@ -117,7 +117,7 @@ mapper(PhysicalInterface, physical_interface,
            "select id from interface_type where type='physical'").\
             fetchone()[0], properties={
     'machine':      relation(Machine,backref='interfaces'),
-    'interface':    relation(Interface,backref='physical')})
+    'interface':    relation(Interface,lazy=False,backref='physical')})
     #collection_clas=attribute_mapped_collection('name'))})
 
 

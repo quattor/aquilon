@@ -91,6 +91,7 @@ def two_in_each():
         print 'machine count > 2000, skipping creation'
         return
 
+    model='hs21'
     for b in s.query(Building).all():
         racks = (Rack(r,'rack',fullname='rack %s'%r,
                       parent=b,comments=cmnt)
@@ -129,12 +130,13 @@ def two_in_each():
 
     try:
         for node in nodelist:
+            print node,type(node)
             h=Host(node,prod,stat,name=node.name,comments=cmnt)
             s.save(h)
     except Exception, e:
         print e
-        s.close()
-        sys.exit(1)
+        s.rollback()
+
 
     try:
         s.commit()
@@ -154,15 +156,16 @@ def just_hosts():
         print 'host count > 2000, skipping creation'
         return
     nodelist=s.query(Machine).all()
-    try:
-        for node in nodelist:
-            h=Host(node,prod,stat,name=node.name,comments=cmnt)
-            s.save(h)
-    except Exception, e:
-        print e
-        s.close()
-        sys.exit(1)
 
+    for node in nodelist:
+            print node, type(node), node.name
+            h=Host(node,prod,stat,name=node.name,comments=cmnt)
+            try:
+                s.save(h)
+            except Exception, e:
+                print e
+                s.rollback()
+                continue
     try:
         s.commit()
     except Exception, e:
@@ -178,7 +181,7 @@ def just_hosts():
 """
 def random_mac():
     mac=[]
-    for i in range(4):
+    for i in range(6):
         byte=''
         for a in n_of_rand_hex(2):
             byte=''.join([byte,a])
@@ -208,7 +211,7 @@ def npipm1():
         return
 
     np=s.query(Building).filter_by(name='np').one()
-    mod=s.query(Model).filter_by(name='ls20').one()
+    #mod=s.query(Model).filter_by(name='hs20').one()
 
     rk = s.query(Rack).filter_by(name='np302').first()
     if not rk:
@@ -227,10 +230,10 @@ def npipm1():
         print 'created chassis np302c1'
 
     try:
-        m=s.query(Machine).filter_by(name='npipm1').one()
+        m=s.query(Machine).filter_by(name='np302c1n1').one()
     except Exception, e:
-        print 'creating a machine npipm1'
-        m=Machine(c,mod,node=1,comments='test npipm1 machine')
+        print 'creating a machine np301c1n1'
+        m=Machine(c,'hs20',node=1,comments='test npipm1 machine')
         s.save(m)
 
     pi=PhysicalInterface('e0','00:14:5e:86:d8:84',
@@ -473,7 +476,51 @@ def clone_dsdb_host(hostname):
     #need building, rack and chassis
     #need model/type, afs cell, pod
 
+def fill_ips(ip,mask,cidr,net_id):
+    s=Session()
+    cidr=cidr_cache[mask]
 
+    icn= ipcalc.Network('%s/%s'%(ip,cidr))
+
+    for x in icn:
+        is_net=False
+        is_bcast=False
+        used=False
+
+        p=str(x).split('.')
+        a=int(ip[0])
+        b=int(ip[1])
+        c=int(ip[2])
+        d=int(ip[3])
+
+        if str(x) == str(icn.network()):
+            i_n=True
+            used=True
+        elif str(x) == str(icn.broadcast()):
+            i_b=True
+            used=True
+        else:
+            pass
+        t=IpAddr( a, b, c, d, is_network=is_net, is_broadcast=is_bcast,
+                 is_used=used, network_id=net_id )
+        try:
+            s.save(t)
+        except Exception,e:
+            logging.error(e)
+            s.rollback()
+            return
+    try:
+        s.commit()
+    except IntegrityError,e:
+        logging.error("Can't commit IPs for %s"%(ip))
+        logging.error(e)
+        s.rollback()
+        pass
+    except Exception,e:
+        logging.error('In Ip Address commit for %s'%(ip))
+        logging.error(Exception, e)
+        s.rollback()
+        pass
 
 
 
@@ -504,53 +551,4 @@ if __name__ == '__main__':
     delete from rack where id in (select id from location where comments like '%FAKE%');
     delete from chassis where id in (select id from location where comments like '%FAKE%');
     delete from location where comments like '%FAKE%';
-    """
-#a=s.query(Archetype).filter_by(name='aquilon').one()
-
-
-
-
-def not_pick_afs_servers():
-    s=Session()
-
-    try:
-        svc=s.query(Service).filter_by(name='afs').one()
-    except Exception, e:
-        print "Can't find service named '%s' "%(svc_name)
-
-    #c2 doesn't work at the moment, till we fix it...
-    full_chassis_list=s.query(Location).join('type').filter(
-        LocationType.type=='chassis').filter(location.c.name.like('%c1%')).all()
-
-    for c in full_chassis_list:
-        print "working on chassis %s"%c.name
-        #nodename = 'n'.join([c.name,str(random.randint(1,12))])
-        #print nodename
-        for n in range(1,12):
-            nodename = 'n'.join([c.name,str(n)])
-        try:
-            h=s.query(Host).filter_by(name=nodename).one()
-        except Exception, e:
-            print Exception, e, 'for query Host(%s)'%(nodename)
-            s.rollback()
-            continue
-
-        if len(h.templates) < 1:
-            try:
-                srv_map=get_server_for(svc,h)
-            except Exception,e:
-                print Exception,e
-                continue
-            if srv_map:
-                print "picked %s for %s"%(srv_map,nodename)
-                bi=BuildItem(h,srv_map.service_instance.cfg_path,3)
-                try:
-                    s.save(bi)
-                    s.commit()
-                except Exception, e:
-                    print Exception, e
-                    s.rollback()
-                    return False
-            else:
-                print '%s already has a cell'%(h.name)
-    s.commit()
+"""

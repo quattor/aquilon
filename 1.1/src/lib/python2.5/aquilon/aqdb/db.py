@@ -81,7 +81,7 @@ if dsn.startswith('oracle'):
 
     os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
-        print >> sys.stderr, 'Oracle SID not found, setting to test instance'
+        #print >> sys.stderr, 'Oracle SID not found, setting to test instance'
         os.environ['ORACLE_SID']=ORACLE_SID
 
 engine = create_engine(dsn)
