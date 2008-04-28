@@ -56,7 +56,7 @@ PROD_SCHEMA='cdb'
 SQLITE_DSN   = 'sqlite:///' + os.path.join(DBDIR, 'aquilon.db')
 PROD_ORA_DSN = 'oracle://'+PROD_SCHEMA+':'+PROD_SCHEMA+'@'+ORACLE_SID
 QA_ORA_DSN   = 'oracle://'+QA_SCHEMA+':'+QA_SCHEMA+'@'+ORACLE_SID
-
+ORACLE_USERS =['cdb','daqscott']
 """
     CONFIGURE THE DSN FOR THE ENTIRE PROJECT:
         this is low tech, its just for a start.
@@ -66,14 +66,17 @@ dsn = SQLITE_DSN
 #dsn = PROD_ORA_DSN
 
 #If you're like me (and I know *I AM*), you like things to just work...
+hostname = gethostname()
 
-if USER == 'daqscott' and gethostname() == 'oziyp2':
+if USER in ORACLE_USERS and hostname == 'oziyp2':
     print 'USING ORACLE QA SCHEMA (aqd)'
     dsn=QA_ORA_DSN
 
-if gethostname() == 'oy604c2n7':
+
+if USER in ORACLE_USERS and hostname == 'oy604c2n7':
     print 'USING ORACLE PROD SCHEMA (CDB)'
     dsn=PROD_ORA_DSN
+
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
@@ -81,7 +84,6 @@ if dsn.startswith('oracle'):
 
     os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
-        #print >> sys.stderr, 'Oracle SID not found, setting to test instance'
         os.environ['ORACLE_SID']=ORACLE_SID
 
 engine = create_engine(dsn)
@@ -248,6 +250,45 @@ def mk_type_table(name, meta=meta, *args, **kw):
                        default=datetime.datetime.now),
                 Column('comments', String(255), nullable=True), *args, **kw)
 
+def confirm(prompt=None, resp=False):
+    """prompts for yes or no response from the user. Returns True for yes and
+    False for no.
+
+    'resp' should be set to the default value assumed by the caller when
+    user simply types ENTER.
+
+    >>> confirm(prompt='Create Directory?', resp=True)
+    Create Directory? [y]|n:
+    True
+    >>> confirm(prompt='Create Directory?', resp=False)
+    Create Directory? [n]|y:
+    False
+    >>> confirm(prompt='Create Directory?', resp=False)
+    Create Directory? [n]|y: y
+    True
+
+    """
+
+    if prompt is None:
+        prompt = 'Confirm'
+
+    if resp:
+        prompt = '%s [%s]|%s: ' % (prompt, 'y', 'n')
+    else:
+        prompt = '%s [%s]|%s: ' % (prompt, 'n', 'y')
+
+    while True:
+        ans = raw_input(prompt)
+        if not ans:
+            return resp
+        if ans not in ['y', 'Y', 'n', 'N']:
+            print 'please enter y or n.'
+            continue
+        if ans == 'y' or ans == 'Y':
+            return True
+        if ans == 'n' or ans == 'N':
+            return False
+
 def get_table_list_from_db():
     """
     return a list of table names from the current
@@ -271,15 +312,30 @@ def drop_all_tables_and_sequences():
     if not dsn.startswith('ora'):
         print 'dsn is not oracle, exiting'
         return False
-    execute = engine.execute
-    for table in get_table_list_from_db():
-        try:
-            execute(text("DROP TABLE %s CASCADE CONSTRAINTS" %table))
-        except SQLError, e:
-            print >> sys.stderr, e
+    msg="You've asked to wipe out the"
 
-    for seq in get_seq_list_from_db():
-        try:
-            execute(text("DROP SEQUENCE %s " %seq))
-        except SQLError, e:
-            print >> sys.stderr, e
+    if dsn == PROD_ORA_DSN:
+        msg +=" PRODUCTION "
+    elif dsn == QA_ORA_DSN:
+        msg += " QA "
+    else:
+        print "can't determine which oracle instance you want to wipe."
+        return False
+    msg += "aqd database, please confirm."
+
+    if confirm(prompt=msg, resp=False):
+        execute = engine.execute
+        for table in get_table_list_from_db():
+            try:
+                execute(text("DROP TABLE %s CASCADE CONSTRAINTS" %table))
+            except SQLError, e:
+                print >> sys.stderr, e
+
+        for seq in get_seq_list_from_db():
+            try:
+                execute(text("DROP SEQUENCE %s " %seq))
+            except SQLError, e:
+                print >> sys.stderr, e
+
+if __name__ == '__main__':
+    print 'your dsn is %s'%dsn
