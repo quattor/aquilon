@@ -99,11 +99,8 @@ class AQDMaker(object):
         if options["noknc"]:
             return strports.service(str(options["openport"]), openSite )
 
-        if os.environ.get("ID_EXEC") == "x86_64.linux.2.6.glibc.2.3":
-            knc = "/ms/dist/kerberos/PROJ/knc/prod/.exec/ia32.linux.2.4.glibc.2.3/bin/knc"
-        else:
-            #knc = "/ms/dev/kerberos/knc/1.3/install/exec/bin/knc"
-            knc = "/ms/dist/kerberos/PROJ/knc/prod/bin/knc"
+        #knc = "/ms/dev/kerberos/knc/1.3/install/exec/bin/knc"
+        knc = "/ms/dist/kerberos/PROJ/knc/prod/bin/knc"
 
         sockname = broker.basedir + "/kncsock"
         mon = ProcessMonitor()
