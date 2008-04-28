@@ -69,8 +69,7 @@ cfg_path = Table('cfg_path',meta,
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('last_used', DateTime, default=datetime.datetime.now),
     Column('comments',String(255),nullable=True),
-    UniqueConstraint('cfg_tld_id','relative_path'))
-#TODO: unique tld/relative_path
+    UniqueConstraint('cfg_tld_id','relative_path',name='cfg_path_uk'))
 cfg_path.create(checkfirst=True)
 
 class CfgPath(aqdbBase):
@@ -106,9 +105,10 @@ mapper(CfgPath,cfg_path,properties={
 
 archetype = Table('archetype', meta,
     Column('id', Integer, Sequence('archetype_id_seq'), primary_key=True),
-    Column('name', String(32), unique=True, nullable=True, index=True),
+    Column('name', String(32), nullable=False, index=True),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('name', name='archetype_uk'))
 archetype.create(checkfirst=True)
 
 class Archetype(aqdbBase):
@@ -166,7 +166,6 @@ def create_paths():
                 continue
             tld = tail[0:slash]
             try:
-                #print "Adding path '%s' (tld='%s')" % (tail, tld)
                 dbtld = s.query(CfgTLD).filter_by(type=tld).one()
                 f = CfgPath(dbtld, tail)
                 s.save_or_update(f)
@@ -180,36 +179,13 @@ def create_paths():
 def create_aquilon_archetype():
     s = Session()
     if empty(archetype):
-        print 'CREATING AQUILON'
         a=Archetype('aquilon')
         s.save(a)
         s.commit()
         print 'created aquilon archetype'
     s.close()
 
-def get_quattor_src():
-    """ ugly ugly way to initialize a quattor repo for import"""
-#TODO: improve and remove : we'll need it for our development environments
-#       so having a good sanity check will avoid db rebuilds...
-#-or- is the database simply the source in the future?
-    import os
-    import exceptions
-    if os.path.exists(const.cfg_base):
-        return
-
-    remote_dir = 'quattorsrv:/var/quattor/template-king/*'
-    try:
-        os.makedirs(const.cfg_base)
-    except exceptions.OSError, e:
-        pass
-    print ("run `rsync -avP -e ssh '%s' '%s'` in a seperate window."
-        % (remote_dir,const.cfg_base))
-    raw_input("When you've completed this, press any key")
-
-
-
 if __name__ == '__main__':
-    get_quattor_src()
     populate_tld()
     create_paths()
     create_aquilon_archetype()
