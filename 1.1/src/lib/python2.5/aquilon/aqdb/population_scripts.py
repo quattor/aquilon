@@ -366,6 +366,17 @@ def all_cells():
         print 'afs cell count is %s, skipping'%(str(cnt))
         return
 
+    _cells=['a.bv', 'a.ca', 'a.cc', 'a.cs', 'a.ct', 'a.cu', 'a.dp', 'a.ec',
+            'a.fb', 'a.fl', 'a.hc', 'a.hk', 'a.hl', 'a.hn', 'a.hq', 'a.ia',
+            'a.id', 'a.kb', 'a.ko', 'a.ln', 'a.ls', 'a.np', 'a.ny', 'a.oy',
+            'a.oz', 'a.pa', 'a.pi', 'a.sf', 'a.ti', 'a.tk', 'a.ty', 'a.yq',
+            'b.hk', 'b.hn', 'b.hq', 'b.ia', 'b.ln', 'b.np', 'b.ny', 'b.oy',
+            'b.oz', 'b.tk', 'c.ln', 'c.ny', 'c.oy', 'c.oz', 'c.tk', 'd.ln',
+            'd.ny', 'd.oy', 'd.oz', 'e.oz', 'm.hk', 'n.hk', 'q.hk', 'q.ia',
+            'q.ln', 'q.ny', 'q.ti', 'q.tk', 'u.ny', 'v.ny', 'w.hk', 'w.ln',
+            'w.ny', 'w.tk', 'z.ny']
+
+
     s=Session()
 
     afs=s.query(Service).filter_by(name='afs').one()
@@ -383,61 +394,50 @@ def all_cells():
     assert(tld)
 
     count = 0
-    with open('../../../../etc/data/afs_cells') as f:
-        for line in f.readlines():
-            if line.isspace():
-                continue
-            line = line.strip()
-
-            a=s.query(AfsCell).filter_by(name=line).first()
-            if a:
-                print "'%s' already created"%(a)
-            else:
-                """ The routine to create the config directory here is a
-                    convenience, or a hack depending on how you see it, or
-                    may be just plain uneeeded. We'll see how the broker will
-                    handle the complex work flow required for this task
-                    """
-                path=os.path.join('service/afs/',line)
-                    #mkdir cfg_base/path/client
-                client_path=os.path.join(str(configuration.const.cfg_base),
-                                         path,
-                                         'client')
-                if not os.path.isdir(client_path):
-                    try:
-                        os.makedirs(client_path)
-                    except exceptions.OSError, e:
-                        print e
-                        print 'fix this later...'
-                #TODO: lookup/create the config path here. use it in bi creation.
-
+    for cell in _cells:
+        a=s.query(AfsCell).filter_by(name=cell).first()
+        if a:
+            print "'%s' already created"%(a)
+        else:
+            """ The routine to create the config directory here is a
+                convenience, or a hack depending on how you see it, or
+                may be just plain uneeeded. We'll see how the broker will
+                handle the complex work flow required for this task
+                """
+            path=os.path.join('service/afs/',cell)
+            client_path=os.path.join(str(configuration.const.cfg_base),
+                                     path, 'client')
+            if not os.path.isdir(client_path):
                 try:
-                    a=AfsCell(line, comments='afs cell %s'%(line))
-                    s.save(a)
-                except Exception,e:
-                    s.rollback()
+                    os.makedirs(client_path)
+                except exceptions.OSError, e:
                     print e
-                    continue
-            #make cfg_path
-            si=ServiceInstance(afs,a,comments='afs')
-            s.save(si)
-            s.commit()
+                    print 'fix this later...'
+            #TODO: lookup/create the config path here. use it in bi creation.
 
-            loc_name = line.partition('.')[2].partition('.')[0]
-            if loc_name in hubs:
-                print 'Creating hub level service map at %s for %s'%(
-                    loc_name,line)
-                sm=ServiceMap(si,hubs[loc_name], comments='afs')
-                s.save(sm)
-            elif loc_name in buildings:
-                print 'Creating building level svc map %s for %s '%(
-                    loc_name,line)
-                sm=ServiceMap(si,buildings[loc_name],comments='afs')
-                s.save(sm)
-                s.commit()
-                count +=1
-            else:
-                print "FOUND NOTHING FOR '%s'"%(loc_name)
+            try:
+                a=AfsCell(cell, comments='afs cell %s'%(cell))
+                s.save(a)
+            except Exception,e:
+                s.rollback()
+                print e
+                continue
+        #make cfg_path
+        si=ServiceInstance(afs,a,comments='afs')
+        s.save(si)
+        s.commit()
+
+        loc_name = cell.partition('.')[2].partition('.')[0]
+        if loc_name in hubs:
+            sm=ServiceMap(si,hubs[loc_name], comments='afs')
+            s.save(sm)
+        elif loc_name in buildings:
+            sm=ServiceMap(si,buildings[loc_name],comments='afs')
+            s.save(sm)
+            s.commit()
+            count +=1
+        else:
+            print "FOUND NOTHING FOR '%s'"%(loc_name)
 
     print 'initialized %s cells with svc instances+maps'%(count)
 
@@ -449,9 +449,7 @@ def all_cells():
         print e
         return False
     print 'persisted %s afs cells to database'%(count)
-    print s.query(AfsCell).all()
     return True
-
 
 
 def make_syslog_si(hostname):
