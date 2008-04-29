@@ -89,8 +89,8 @@ def populate_profile():
             [0, '000.000.000.000', 4294967296]]
 
 
-    for a in _data:
-        i.execute(cidr=a[0], netmask=a[1] , mask=a[2])
+        for a in _data:
+            i.execute(cidr=a[0], netmask=a[1] , mask=a[2])
 
 network = Table('network', meta,
     Column('id', Integer, Sequence('network_id_seq'), primary_key=True),
