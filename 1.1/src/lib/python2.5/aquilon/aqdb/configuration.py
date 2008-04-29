@@ -105,7 +105,7 @@ mapper(CfgPath,cfg_path,properties={
 
 archetype = Table('archetype', meta,
     Column('id', Integer, Sequence('archetype_id_seq'), primary_key=True),
-    Column('name', String(32), nullable=False, index=True),
+    Column('name', String(32), nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('name', name='archetype_uk'))

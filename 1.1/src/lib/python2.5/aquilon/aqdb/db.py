@@ -246,10 +246,11 @@ def mk_type_table(name, meta=meta, *args, **kw):
     return Table(name, meta, \
                 Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
-                Column('type', String(32), unique=True, index=True),
+                Column('type', String(32)),
                 Column('creation_date', DateTime,
                        default=datetime.datetime.now),
-                Column('comments', String(255), nullable=True), *args, **kw)
+                Column('comments', String(255), nullable=True),
+                UniqueConstraint('type',name='%s_uk'%name), *args, **kw)
 
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
