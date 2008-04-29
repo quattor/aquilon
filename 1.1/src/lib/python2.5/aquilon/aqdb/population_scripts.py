@@ -31,8 +31,8 @@ from service import *
 s=Session()
 
 cmnt = 'FAKE'
-model  = s.query(Model).filter_by(name='hs21').one()
-assert(model)
+#model  = s.query(Model).filter_by(name='hs21').one()
+#assert(model)
 
 syslog = s.query(Service).filter_by(name='syslog').one()
 assert(syslog)

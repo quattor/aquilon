@@ -138,7 +138,7 @@ system = Table('system',meta,
            ForeignKey('dns_domain.id'), nullable=False, default=1),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('name',name='system_name_uk'))
+    UniqueConstraint('name','dns_domain_id','type_id',name='system_name_uk'))
 system.create(checkfirst=True)
 
 class System(aqdbBase):
@@ -267,7 +267,7 @@ host=Table('host', meta,
     Column('id', Integer, ForeignKey('system.id'), primary_key=True),
     Column('machine_id', Integer, ForeignKey('machine.id')),
     Column('domain_id', Integer, ForeignKey('domain.id')),
-    #Column('archetype_id',Integer, ForeignKey('archetype.id'),nullable=False),
+    Column('archetype_id',Integer, ForeignKey('archetype.id'),nullable=False),
     Column('status_id', Integer, ForeignKey('status.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
@@ -303,7 +303,10 @@ class Host(System):
                 raise ArgumentError("Host name must be type 'str'")
         else:
             self.name=kw.pop('name',mach.name)
-        #TODO: archetype, defaulting to aquilon
+
+        arch=kw.pop('archetype','aquilon')
+        self.archetype_id=id_getter(archetype,name,arch)
+        assert(self.archetype_id)
 
         if kw.has_key('dns_domain'):
             dns_domain = kw.pop('dns_domain')

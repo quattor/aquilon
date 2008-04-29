@@ -63,7 +63,6 @@ ORACLE_USERS =['cdb','daqscott']
         TODO: a proper aqdb.conf file.
 """
 dsn = SQLITE_DSN
-#dsn = PROD_ORA_DSN
 
 #If you're like me (and I know *I AM*), you like things to just work...
 hostname = gethostname()
@@ -71,7 +70,6 @@ hostname = gethostname()
 if USER in ORACLE_USERS and hostname == 'oziyp2':
     print 'USING ORACLE QA SCHEMA (aqd)'
     dsn=PROD_ORA_DSN
-
 
 if USER in ORACLE_USERS and hostname == 'oy604c2n7':
     print 'USING ORACLE PROD SCHEMA (CDB)'
@@ -148,11 +146,6 @@ class aqdbType(aqdbBase):
     def __repr__(self):
         return self.__class__.__name__+" " +str(self.type)
 
-"""
-    Utilities to decrease repeated code in generating schema
-    and associated baseline data
-"""
-
 def Column(*args, **kw):
     """ some curry: default column from SA to default as null=False
         unless it's comments, which we hardcode to standardize
@@ -172,14 +165,15 @@ def ForeignKey(*args, **kw):
         kw.pop('onupdate')
     return _fk(*args, **kw)
 
+def id_getter(table,key,value):
+    """ Get the id of a row given a table name, and the specification of a
+    unique attribute. Useful for defaults and type_ids.
 
-""" Example of a 'mock' engine to output sql as print statments
-
-    buf = StringIO.StringIO()
-    def foo(s, p=None):
-        print s
-    engine=create_engine('sqlite:///:memory:',strategy='mock',executor=foo)
-"""
+    id_getter('archtype','name','aquilon')
+    >>> 1
+    """
+    sel = select([table.c.id],table.c.key==value)
+    return engine.execute(sel).scalar()
 
 def gen_id_cache(obj_name):
     """ A helper function for bulk creation. When you need to iterate over a
@@ -340,3 +334,11 @@ def drop_all_tables_and_sequences():
 
 if __name__ == '__main__':
     print 'your dsn is %s'%dsn
+
+""" Example of a 'mock' engine to output sql as print statments
+
+    buf = StringIO.StringIO()
+    def foo(s, p=None):
+        print s
+    engine=create_engine('sqlite:///:memory:',strategy='mock',executor=foo)
+"""
