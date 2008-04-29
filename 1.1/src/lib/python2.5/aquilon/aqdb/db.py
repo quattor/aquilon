@@ -232,7 +232,7 @@ def mk_name_id_table(name, meta=meta, *args, **kw):
     return Table(name, meta, \
                 Column('id', Integer, Sequence('%s_id_seq'%name),
                        primary_key=True),
-                Column('name', String(32), index=True),
+                Column('name', String(32)),
                 Column('creation_date', DateTime,
                        default=datetime.datetime.now),
                 Column('comments', String(255), nullable=True),
