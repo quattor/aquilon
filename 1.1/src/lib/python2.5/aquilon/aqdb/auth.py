@@ -47,6 +47,7 @@ user_principal.create(checkfirst=True)
 
 class UserPrincipal(aqdbBase):
     """ Simple class for strings representing users kerberos credential """
+    @optional_comments
     def __init__(self,princ,**kw):
         if princ.isspace() or len(princ) < 1 :
             msg='Names must contain some non-whitespace characters'

@@ -130,7 +130,6 @@ def two_in_each():
 
     try:
         for node in nodelist:
-            print node,type(node)
             h=Host(node,prod,stat,name=node.name,comments=cmnt)
             s.save(h)
     except Exception, e:
@@ -158,7 +157,6 @@ def just_hosts():
     nodelist=s.query(Machine).all()
 
     for node in nodelist:
-            print node, type(node), node.name
             h=Host(node,prod,stat,name=node.name,comments=cmnt)
             try:
                 s.save(h)

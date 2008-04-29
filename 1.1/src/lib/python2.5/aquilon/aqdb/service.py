@@ -44,16 +44,17 @@ from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
 from sqlalchemy import select, insert
 from sqlalchemy.orm import mapper, relation, deferred, synonym, backref, object_session
 from sqlalchemy.orm.collections import attribute_mapped_collection
-#from sqlalchemy.ext import associationproxy
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_, not_
 
 service = Table('service',meta,
     Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
-    Column('name',String(64), unique=True, index=True),
-    Column('cfg_path_id', Integer, ForeignKey('cfg_path.id'), unique=True),
+    Column('name',String(64)),
+    Column('cfg_path_id', Integer, ForeignKey('cfg_path.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('name',name='svc_name_uk'),
+    UniqueConstraint('cfg_path_id',name='svc_template_uk'))
 service.create(checkfirst=True)
 
 class Service(aqdbBase):
@@ -110,8 +111,9 @@ system_type=mk_type_table('system_type', meta)
 system_type.create(checkfirst=True)
 
 def get_sys_type_id(typ_nm):
-    stmt="select id from system_type where type='%s'"%(typ_nm)
-    typ_id = engine.execute(stmt).scalar()
+    #stmt="select id from system_type where type='%s'"%(typ_nm)
+    sl=select([system_type.c.id],system_type.c.type=='%s'%(typ_nm))
+    typ_id = engine.execute(sl).scalar()
     assert(typ_id)
     return typ_id
 
@@ -127,7 +129,7 @@ if empty(system_type):
 
 system = Table('system',meta,
     Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
-    Column('name', String(64), unique=True, index=True),
+    Column('name', String(64)),
     Column('type_id', Integer,
            ForeignKey('system_type.id'), nullable=False),
     #TODO: don't hard code the ID in dns_domain as default
@@ -135,7 +137,8 @@ system = Table('system',meta,
     Column('dns_domain_id', Integer,
            ForeignKey('dns_domain.id'), nullable=False, default=1),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('name',name='system_name_uk'))
 system.create(checkfirst=True)
 
 class System(aqdbBase):
@@ -222,16 +225,16 @@ mapper(QuattorServer,quattor_server,
 
 domain = Table('domain', meta,
     Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
-    Column('name', String(32), unique=True, index=True),
-    Column('server_id', Integer,
-           ForeignKey('quattor_server.id'), nullable=False),
+    Column('name', String(32)),
+    Column('server_id', Integer, ForeignKey('quattor_server.id'), nullable=False),
     Column('compiler', String(255), nullable=False,
            default='/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'),
     Column('owner_id', Integer,
-           ForeignKey('user_principal.id'),nullable=False,
+           ForeignKey('user_principal.id'), nullable=False,
            default=get_sys_type_id('quattor_server')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('name',name='domain_uk'))
 domain.create(checkfirst=True)
 
 class Domain(aqdbBase):
@@ -331,8 +334,8 @@ build_item = Table('build_item', meta,
     Column('position', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('host_id','cfg_path_id'),
-    UniqueConstraint('host_id','position'))
+    UniqueConstraint('host_id','cfg_path_id',name='host_tmplt_uk'),
+    UniqueConstraint('host_id','position',name='host_position_uk'))
 build_item.create(checkfirst=True)
 
 class BuildItem(aqdbBase):
@@ -445,7 +448,7 @@ service_instance = Table('service_instance',meta,
     Column('cfg_path_id', Integer, ForeignKey('cfg_path.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('service_id','system_id'))
+    UniqueConstraint('service_id','system_id',name='svc_inst_system_uk'))
 
 service_instance.create(checkfirst=True)
 
@@ -517,7 +520,8 @@ service_map=Table('service_map',meta,
            nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments',String(255), nullable=True),
-    UniqueConstraint('service_instance_id','location_id'))
+    UniqueConstraint('service_instance_id','location_id',
+                     name='svc_map_loc_inst_uk'))
 
 service_map.create(checkfirst=True)
 
@@ -564,13 +568,11 @@ mapper(ServiceMap,service_map,properties={
 service_list_item = Table('service_list_item', meta,
     Column('id', Integer,
            Sequence('service_list_item_id_seq'), primary_key=True),
-    Column('service_id',Integer,
-           ForeignKey('service.id'), unique=True),
-    Column('archetype_id',Integer,
-           ForeignKey('archetype.id'),nullable=False),
+    Column('service_id', Integer, ForeignKey('service.id')),
+    Column('archetype_id', Integer, ForeignKey('archetype.id'), nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
-    UniqueConstraint('archetype_id','service_id'))
+    UniqueConstraint('archetype_id','service_id',name='svc_list_svc_uk'))
 Index('idx_srvlst_arch_id', service_list_item.c.archetype_id)
 service_list_item.create(checkfirst=True)
 
