@@ -172,7 +172,7 @@ def id_getter(table,key,value):
     id_getter('archtype','name','aquilon')
     >>> 1
     """
-    sel = select([table.c.id],table.c.key==value)
+    sel = select([table.c.id],key==value)
     return engine.execute(sel).scalar()
 
 def gen_id_cache(obj_name):

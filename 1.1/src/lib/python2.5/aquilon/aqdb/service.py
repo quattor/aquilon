@@ -305,7 +305,7 @@ class Host(System):
             self.name=kw.pop('name',mach.name)
 
         arch=kw.pop('archetype','aquilon')
-        self.archetype_id=id_getter(archetype,name,arch)
+        self.archetype_id=id_getter(archetype,archetype.c.name,arch)
         assert(self.archetype_id)
 
         if kw.has_key('dns_domain'):
