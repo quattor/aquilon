@@ -19,7 +19,7 @@ import msversion
 msversion.addpkg('sqlalchemy','0.4.4','dist')
 
 from sqlalchemy import MetaData, create_engine,  UniqueConstraint
-from sqlalchemy import Table, Integer, DateTime, Sequence, String
+from sqlalchemy import Table, Integer, DateTime, Sequence, String, select
 from sqlalchemy import Column as _Column
 from sqlalchemy import ForeignKey as _fk
 from sqlalchemy.orm import sessionmaker, scoped_session
