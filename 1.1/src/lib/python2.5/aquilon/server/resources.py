@@ -627,7 +627,7 @@ class ResponsePage(resource.Resource):
 
     def command_add_model(self, request):
         d = self.check_arguments(request,
-                ["name", "vendor", "hardware"])
+                ["name", "vendor", "type"])
         d = d.addCallback(self.broker.add_model,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
@@ -635,7 +635,7 @@ class ResponsePage(resource.Resource):
 
     def command_show_model(self, request):
         d = self.check_arguments(request, [],
-                ["name", "vendor", "hardware"])
+                ["name", "vendor", "type"])
         d = d.addCallback(self.broker.show_model,
                 request_path=request.path,
                 user=request.channel.getPrinciple())

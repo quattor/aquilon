@@ -512,17 +512,17 @@ class DatabaseBroker(AccessBroker):
         return d
 
     @transact
-    def add_model(self, result, name, vendor, hardware, **kwargs):
+    def add_model(self, result, name, vendor, type, **kwargs):
         v = self.session.query(Vendor).filter_by(name = vendor).first()
         if (v is None):
             raise ArgumentError("Vendor '"+vendor+"' not found!")
 
-        h = self.session.query(HardwareType).filter_by(type = hardware).first()
-        if (h is None):
-            raise ArgumentError("Hardware type '"+hardware+"' not found!")
+        m = self.session.query(MachineType).filter_by(type=type).first()
+        if (m is None):
+            raise ArgumentError("Machine type '"+type+"' not found!")
 
         try:
-            model = Model(name, v, h)
+            model = Model(name, v, m)
             self.session.save(model)
         except InvalidRequestError, e:
             raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
@@ -535,8 +535,8 @@ class DatabaseBroker(AccessBroker):
             q = q.filter(Model.name.like(kwargs['name']+'%'))
         if (kwargs['vendor'] is not None):
             q = q.join('vendor').filter(Vendor.name.like(kwargs['vendor']+'%')).reset_joinpoint()
-        if (kwargs['hardware'] is not None):
-            q = q.join('hardware_type').filter(HardwareType.type.like(kwargs['hardware']+'%'))
+        if (kwargs['type'] is not None):
+            q = q.join('machine_type').filter(MachineType.type.like(kwargs['type']+'%'))
         return printprep(q.all())
 
     @transact

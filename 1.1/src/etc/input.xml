@@ -125,27 +125,27 @@
    </command>
 
    <command name="add_model">
-      %prog add model --name NAME --vendor VENDOR_NAME --hardware HARDWARE_TYPE --machine MACHINE_TYPE
+      %prog add model --name NAME --vendor VENDOR_NAME --type MACHINE_TYPE
       Add a new model
       <optgroup name="add_model_opts" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new model</option>
          <option name="vendor" type="string">Vendor name</option>
-         <option name="hardware" type="string">Hardware type name</option>
+         <option name="type" type="string">Machine type name</option>
       </optgroup>
       <optgroup name="optional_opts">
          Optional options:
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/%(hardware)s/%(vendor)s/%(name)s" />
+      <transport method="put" path="hardware/%(type)s/%(vendor)s/%(name)s" />
    </command>
 
    <command name="show_model">
-      %prog show model --name NAME --vendor VENDOR_NAME --hardware HARDWARE_TYPE --machine MACHINE_TYPE
+      %prog show model --name NAME --vendor VENDOR_NAME --type MACHINE_TYPE
       Show a model
       <optgroup name="show_model_opts" mandatory="True" fields="any">
          <option name="name" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
-         <option name="hardware" type="string">Hardware type name</option>
+         <option name="type" type="string">Machine type name</option>
       </optgroup>
       <transport method="get" path="/find/hardware/model" />
    </command>
