@@ -36,7 +36,7 @@ from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
 from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
-from aquilon.aqdb.auth import UserPrincipal
+from aquilon.aqdb.auth import UserPrincipal, Realm
 from aquilon.aqdb.hardware import *
 from aquilon.aqdb.interface import PhysicalInterface
 
@@ -51,6 +51,12 @@ class DatabaseBroker(AccessBroker):
     As a general rule, the methods here should reflect the actions
     being invoked by the client.
     """
+    def __init__(self, *url, **kwargs):
+        AccessBroker.__init__(self, *url, **kwargs)
+        self.safe_url = url and url[0] or ""
+        m = re.match(r'^(oracle://.*?:)(.*)(@.*?)$', self.safe_url)
+        if m:
+            self.safe_url = m.group(1) + '********' + m.group(3)
 
     def startup(self):
         """This method normally creates Deferred objects for setting up
@@ -385,26 +391,37 @@ class DatabaseBroker(AccessBroker):
 
     # This should probably move over to UserPrincipal
     principal_re = re.compile(r'^(.*)@([^@]+)$')
-    def split_principal(self, user):
-        if not user:
-            return (user, None)
+
+    # This should be run under a @transact with a session
+    def _get_or_create_UserPrincipal(self, user):
+        if user is None:
+            return user
         m = self.principal_re.match(user)
-        if m:
-            return (m.group(1), m.group(2))
-        return (user, None)
+        if not m:
+            raise ArgumentError("Could not parse user principal '%s'" % user)
+        realm = m.group(2)
+        user = m.group(1)
+        dbrealm = self.session.query(Realm).filter_by(name=realm).first()
+        if not dbrealm:
+            dbrealm = Realm(realm)
+            self.session.save(dbrealm)
+            dbuser = UserPrincipal(user, realm=dbrealm)
+            self.session.save(dbuser)
+            return dbuser
+        dbuser = self.session.query(UserPrincipal).filter_by(
+                name=user.strip().lower(), realm=dbrealm).first()
+        if not dbuser:
+            dbuser = UserPrincipal(user, dbrealm)
+            self.session.save(dbuser)
+        return dbuser
 
     @transact
     def add_domain(self, result, domain, user, **kwargs):
         """Add the domain to the database, initialize as necessary."""
-        (user, realm) = self.split_principal(user)
-        # FIXME: UserPrincipal should include the realm...
-        dbuser = self.session.query(UserPrincipal).filter_by(name=user).first()
+        dbuser = self._get_or_create_UserPrincipal(user)
         if not dbuser:
-            if not user:
-                raise AuthorizationException("Cannot create a domain without"
-                        + " an authenticated connection.")
-            dbuser = UserPrincipal(user)
-            self.session.save_or_update(dbuser)
+            raise AuthorizationException("Cannot create a domain without"
+                    + " an authenticated connection.")
         # NOTE: Defaulting the name of the quattor server to quattorsrv.
         quattorsrv = self.session.query(QuattorServer).filter_by(
                 name='quattorsrv').one()
@@ -422,8 +439,6 @@ class DatabaseBroker(AccessBroker):
     @transact
     def del_domain(self, result, domain, user, **kwargs):
         """Remove the domain from the database."""
-        # Do we need to delete any dependencies before deleting the domain?
-        (user, realm) = self.split_principal(user)
         # NOTE: Defaulting the name of the quattor server to quattorsrv.
         quattorsrv = self.session.query(QuattorServer).filter_by(
                 name='quattorsrv').one()
@@ -460,14 +475,9 @@ class DatabaseBroker(AccessBroker):
     def status(self, result, stat, user, **kwargs):
         """Return status information from the database."""
         stat.extend(self.session.query(Domain).all())
-        (user, realm) = self.split_principal(user)
-        # FIXME: UserPrincipal should include the realm...
-        dbuser = self.session.query(UserPrincipal).filter_by(name=user).first()
-        if user and not dbuser:
-            dbuser = UserPrincipal(user)
-            self.session.save_or_update(dbuser)
+        dbuser = self._get_or_create_UserPrincipal(user)
         if dbuser:
-            stat.append(dbuser)
+            stat.append("Connected as: %s" % dbuser)
         for line in stat:
             printprep(line)
 
