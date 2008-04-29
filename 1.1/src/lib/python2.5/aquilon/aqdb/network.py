@@ -162,33 +162,14 @@ class Network(aqdbBase):
     #TODO: get dsdb network ids
     #TODO: implement bunker,bucket
     #TODO: snarf comments from DSDB, async
+    def _ipcalc(self):
+        return ipcalc.Network('%s/%s'%(self.ip,self.profile.cidr))
+    ipcalc = property(_ipcalc)
 
+    def _broadcast(self):
+        return str(self.ipcalc.broadcast())
+    broadcast = property(_broadcast)
 
-class IpAddr(aqdbBase):
-    """ One thing DSDB missed out on is that every IP address is a valid and
-    important resource regardless of whether its assigned to an interface or
-    not. This table reflects all the ips available at the firm and ties them
-    to what interface or network they're assigned to, and that they're free if
-    not assigned. """
-    @optional_comments
-    def __init__(self, a, b, c, d, is_network=False, is_broadcast=False,
-                 is_used=False,**kw):
-        self.byte1=a
-        self.byte2=b
-        self.byte3=c
-        self.byte4=d
-        self.is_network == is_network
-        self.is_broadcast == is_broadcast
-        self.is_used == is_used
-        if kw.has_key('network'):
-            self.network=kw.pop('network')
-        elif kw.has_key('network_id'):
-            self.network_id=kw.pop('network_id')
-        else:
-            raise ArgumentError('no network information provided')
-
-    def __repr__(self):
-        return '%s.%s.%s.%s'%(self.byte1,self.byte2,self.byte3,self.byte4)
 
 mapper(Network,network,properties={
     'type'          : relation(NetworkType),
@@ -198,11 +179,6 @@ mapper(Network,network,properties={
     'comments'      : deferred(network.c.comments)
 })
 
-mapper(IpAddr,ip_addr, properties={
-    'network'       : relation(Network),
-    'creation_date' : deferred(ip_addr.c.creation_date),
-    'comments'      : deferred(ip_addr.c.comments)
-})
 
 dns_domain = Table('dns_domain', meta,
     Column('id', Integer, Sequence('dns_domain_id_seq'),primary_key=True),
