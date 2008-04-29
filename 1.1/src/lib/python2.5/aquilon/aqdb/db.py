@@ -70,18 +70,12 @@ hostname = gethostname()
 
 if USER in ORACLE_USERS and hostname == 'oziyp2':
     print 'USING ORACLE QA SCHEMA (aqd)'
-    dsn=QA_ORA_DSN
+    dsn=PROD_ORA_DSN
 
 
 if USER in ORACLE_USERS and hostname == 'oy604c2n7':
     print 'USING ORACLE PROD SCHEMA (CDB)'
-    dsn=PROD_ORA_DSN
-
-#HACK
-if USER == 'cdb' and hostname == 'oziyp2':
-    print 'Using Stable CDB schema'
-    dsn=PROD_ORA_DSN
-
+    dsn=QA_ORA_DSN
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
