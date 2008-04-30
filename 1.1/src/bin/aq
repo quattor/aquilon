@@ -176,6 +176,7 @@ def handleFailure(failure, uri):
         print "Error:", failure.getErrorMessage()
 
 if __name__ == "__main__":
+    progpath = sys.argv[0]
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
     try:
         (command, transport, commandOptions, globalOptions) = \
@@ -188,7 +189,14 @@ if __name__ == "__main__":
     if globalOptions.get('debug'):
         log.startLogging(sys.stderr)
 
-    host = globalOptions.get('aqhost') or socket.gethostname()
+    if progpath.startswith("/ms/dist"):
+        default_aqhost = "oziyp2"
+    elif progpath.startswith("/ms/dev"):
+        default_aqhost = "oziyp2"
+    else:
+        default_aqhost = socket.gethostname()
+
+    host = globalOptions.get('aqhost') or default_aqhost
     port = globalOptions.get('aqport') or "6900"
 
     if transport is None:
