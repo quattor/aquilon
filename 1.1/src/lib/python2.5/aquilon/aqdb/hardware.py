@@ -374,7 +374,6 @@ class MachineSpecs(aqdbBase):
     def __init__(self,**kw):
         #TODO: fix this hackish ugly stuff
         typ=None #temporary var
-        print "MODEL"
         if kw['model']:
             m=kw.pop('model')
             if isinstance(m,Model):
@@ -401,7 +400,6 @@ class MachineSpecs(aqdbBase):
                 machine_type_id from model where id = %s)"""%(self.model_id)
             typ=engine.execute(stmt).scalar()
             assert(typ)
-        print "CPU"
         if kw['cpu']:
             m=kw.pop('cpu')
             if isinstance(m,Model):
@@ -435,11 +433,8 @@ class MachineSpecs(aqdbBase):
             'disk_type','scsi'))
         self.disk_type_id=engine.execute(stmt).scalar()
         assert(self.disk_type_id)
-        print "MEM", typ
         self.memory=int(kw.pop('memory', MachineSpecs._def_memory[typ]))
-        print "DISK"
         self.disk_capacity=int(kw.pop('disk_capacity','36'))
-        print "NIC"
         self.nic_count=kw.pop('nic_count',MachineSpecs._def_nic_cnt[typ])
 
 

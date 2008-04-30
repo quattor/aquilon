@@ -104,6 +104,7 @@
       <optgroup name="add_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
+         <option name="archetype" type="string">Archetype name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
          <option name="status" type="string">Status: prod, dev, qa, build</option>
       </optgroup>

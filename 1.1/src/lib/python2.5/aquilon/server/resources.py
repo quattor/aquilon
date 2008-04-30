@@ -243,7 +243,7 @@ class ResponsePage(resource.Resource):
     def command_add_host(self, request):
         """aqcommand: aq add host --hostname=<host>"""
         d = self.check_arguments(request,
-                ["hostname", "machine", "domain", "status"])
+                ["hostname", "machine", "domain", "status", "archetype"])
         d = d.addCallback(self.broker.add_host,
                 request_path=request.path,
                 user=request.channel.getPrinciple())

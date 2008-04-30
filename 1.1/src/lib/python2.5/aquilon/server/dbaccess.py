@@ -132,14 +132,14 @@ class DatabaseBroker(AccessBroker):
         return printprep((short, dbdns_domain, dbmachine))
 
     @transact
-    def add_host(self, result, hostname, machine, domain, status, **kwargs):
+    def add_host(self, result, hostname, machine, archetype, domain, status, **kwargs):
         # Assumes host has been added to dsdb.
         dbdomain = self._get_domain(domain)
         dbstatus = self._get_status(status)
         dbmachine = self._get_machine(machine)
         (short, dbdns_domain) = self._hostname_to_domain_and_string(hostname)
         host = Host(dbmachine, dbdomain, dbstatus, name=short,
-                dns_domain=dbdns_domain)
+                dns_domain=dbdns_domain,archetype=archetype)
         self.session.save(host)
         return printprep(host)
 
