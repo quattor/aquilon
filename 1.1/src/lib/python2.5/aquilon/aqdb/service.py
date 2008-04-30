@@ -354,7 +354,7 @@ class BuildItem(aqdbBase):
 
         if isinstance(cp,CfgPath):
             self.cfg_path=cp
-        else:
+      #  else:
             msg = 'Build Item requires a Config Path as its second arg'
             raise ArgumentError(msg)
         if isinstance(position,int):
@@ -387,14 +387,14 @@ mapper(Host, host, inherits=System,
                                    primaryjoin=host.c.domain_id==domain.c.id,
                                    uselist=False,
                                    backref=backref('hosts')),
-        #TODO: Archetype (for base/final)
-        #TODO: synonym for location, sysloc, fqdn (in system)
+        'archetype'     : relation(Archetype, uselist=False),
         'status'        : relation(Status),
         'templates'     : relation(BuildItem,
                                    collection_class=ordering_list('position'),
                                    order_by=[build_item.c.position]),
         'creation_date' : deferred(host.c.creation_date),
         'comments'      : deferred(host.c.comments)
+#TODO: synonym for location, sysloc, fqdn (in system)
 })
 
 afs_cell = Table('afs_cell',meta,
