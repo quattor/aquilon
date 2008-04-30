@@ -176,7 +176,6 @@ def handleFailure(failure, uri):
         print "Error:", failure.getErrorMessage()
 
 if __name__ == "__main__":
-    progpath = sys.argv[0]
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
     try:
         (command, transport, commandOptions, globalOptions) = \
@@ -189,15 +188,22 @@ if __name__ == "__main__":
     if globalOptions.get('debug'):
         log.startLogging(sys.stderr)
 
-    if progpath.startswith("/ms/dist"):
+    # Default for /ms/dist
+    if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
         default_aqhost = "oziyp2"
-    elif progpath.startswith("/ms/dev"):
+    # Default for /ms/dev
+    elif re.match(r"/ms(/.(global|local)/[^/]+)?/dev/", BINDIR):
         default_aqhost = "oziyp2"
     else:
         default_aqhost = socket.gethostname()
 
+    if globalOptions.get('noknc'):
+        default_aqport = "6901"
+    else:
+        default_aqport = "6900"
+
     host = globalOptions.get('aqhost') or default_aqhost
-    port = globalOptions.get('aqport') or "6900"
+    port = globalOptions.get('aqport') or default_aqport
 
     if transport is None:
         print >>sys.stderr, "Unimplemented command ", command
