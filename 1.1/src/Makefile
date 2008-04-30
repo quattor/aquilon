@@ -62,7 +62,7 @@ $(COMMON)etc/%: etc/%
 
 $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 	@mkdir -p `dirname $@`
-	install -m 055 $< $@
+	install -m 0555 $< $@
 
 .PHONY: install
 install: $(INSTALLFILES)
