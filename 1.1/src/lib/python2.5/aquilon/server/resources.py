@@ -627,7 +627,8 @@ class ResponsePage(resource.Resource):
 
     def command_add_model(self, request):
         d = self.check_arguments(request,
-                ["name", "vendor", "type"])
+                ["name", "vendor", "type"],
+                ["cputype","cpunum","mem","disktype","disksize","nics"])
         d = d.addCallback(self.broker.add_model,
                 request_path=request.path,
                 user=request.channel.getPrinciple())

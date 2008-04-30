@@ -132,11 +132,19 @@
          <option name="vendor" type="string">Vendor name</option>
          <option name="type" type="string">Machine type name</option>
       </optgroup>
+      <optgroup name="default_config_opts" mandatory="False" fields="all">
+         <option name="cputype" type="string">CPU type</option>
+         <option name="cpunum" type="string">CPU count</option>
+         <option name="mem" type="string">amount of installed memory</option>
+         <option name="disktype" type="string">installed disk type</option>
+         <option name="disksize" type="string">installed disk capacity</option>
+         <option name="nics" type="string">number of NIC interfaces</option>
+      </optgroup>
       <optgroup name="optional_opts">
          Optional options:
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/%(type)s/%(vendor)s/%(name)s" />
+      <transport method="put" path="hardware/model/%(type)s/%(vendor)s/%(name)s" />
    </command>
 
    <command name="show_model">

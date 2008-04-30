@@ -512,7 +512,10 @@ class DatabaseBroker(AccessBroker):
         return d
 
     @transact
-    def add_model(self, result, name, vendor, type, **kwargs):
+    def add_model(self, result, name, vendor, type, **kw):
+        m = self.session.query(Model).filter_by(name=name).first()
+        if (m is not None):
+            raise ArgumentError('Specified model already exists')
         v = self.session.query(Vendor).filter_by(name = vendor).first()
         if (v is None):
             raise ArgumentError("Vendor '"+vendor+"' not found!")
@@ -521,11 +524,20 @@ class DatabaseBroker(AccessBroker):
         if (m is None):
             raise ArgumentError("Machine type '"+type+"' not found!")
 
-        try:
-            model = Model(name, v, m)
-            self.session.save(model)
-        except InvalidRequestError, e:
-            raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
+        model = Model(name, v, m)
+        self.session.save(model)
+
+        if (kw.has_key('cputype') and kw['cputype'] is not None):
+            ms = MachineSpecs(
+                model=model,
+                cpu=kw['cputype'],
+                cpu_quantity=kw['cpunum'],
+                memory=kw['mem'],
+                disk_type=kw['disktype'],
+                disk_capacity=kw['disksize'],
+                nic_count=kw['nics']
+            )
+            self.session.save(ms)
         return "New model successfully created"
 
     @transact

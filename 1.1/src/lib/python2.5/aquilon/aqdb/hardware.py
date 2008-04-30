@@ -368,20 +368,18 @@ class MachineSpecs(aqdbBase):
     #TODO: put disk capacity, type in here, make it consisitent
     _def_cpu_cnt={ 'workstation':1, 'blade': 2, 'rackmount' : 4 }
     _def_nic_cnt={ 'workstation':1, 'blade': 2, 'rackmount' : 2 }
-    _def_memory    ={ 'workstation': 2048, 'blade': 8192, 'rackmount': 16384 }
+    _def_memory ={ 'workstation': 2048, 'blade': 8192, 'rackmount': 16384 }
 
     @optional_comments
     def __init__(self,**kw):
         #TODO: fix this hackish ugly stuff
-        _def_cpu_cnt={ 'workstation':1, 'blade': 2, 'rackmount' : 4 }
-        _def_nic_cnt={ 'workstation':1, 'blade': 2, 'rackmount' : 2 }
-        _def_memory    ={ 'workstation': 2048, 'blade': 8192, 'rackmount': 16384 }
         typ=None #temporary var
+        print "MODEL"
         if kw['model']:
             m=kw.pop('model')
             if isinstance(m,Model):
                 self.model=m
-                typ=m.machine_type
+                typ=m.machine_type.type
             elif isinstance(m,str):
                 m=m.strip().lower()
                 stmnt="select id from model where name = '%s'"%(m)
@@ -403,6 +401,7 @@ class MachineSpecs(aqdbBase):
                 machine_type_id from model where id = %s)"""%(self.model_id)
             typ=engine.execute(stmt).scalar()
             assert(typ)
+        print "CPU"
         if kw['cpu']:
             m=kw.pop('cpu')
             if isinstance(m,Model):
@@ -422,24 +421,26 @@ class MachineSpecs(aqdbBase):
 
         cc=kw.pop('cpu_quantity',None)
         if cc:
-            if isinstance(cc,int):
-                self.cpu_quantity=cc
-            else:
-                e='cpu_quantity should be integer type (got %s %s)'%(type(cc),cc)
-                raise ArgumentError(e)
+            try:
+                self.cpu_quantity=int(cc)
+            except:
+                raise ArgumentError('CPU count should be a positive integer number')
+            if self.cpu_quantity < 1:
+                raise ArgumentError('CPU count should be a positive integer number')
         else:
             assert(typ)
-            self.cpu_quantity=_def_cpu_cnt[typ]
+            self.cpu_quantity=MachineSpecs._def_cpu_cnt[typ]
         #TODO: remove default scsi type.
         stmt="select id from disk_type where type = '%s'"%(kw.pop(
             'disk_type','scsi'))
         self.disk_type_id=engine.execute(stmt).scalar()
         assert(self.disk_type_id)
-
-        self.memory=int(kw.pop('memory', _def_memory[typ]))
-
+        print "MEM", typ
+        self.memory=int(kw.pop('memory', MachineSpecs._def_memory[typ]))
+        print "DISK"
         self.disk_capacity=int(kw.pop('disk_capacity','36'))
-        self.nic_count=kw.pop('nic_count',_def_nic_cnt[typ])
+        print "NIC"
+        self.nic_count=kw.pop('nic_count',MachineSpecs._def_nic_cnt[typ])
 
 
 mapper(MachineSpecs,machine_specs, properties={
