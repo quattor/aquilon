@@ -1,3 +1,4 @@
+PYTHON = //ms/dist/python/PROJ/core/2.5/bin/python2.5
 SHELL  = /bin/ksh
 COMMON = ../install/common/
 QACOMMENT = -comment cmrs=qa
@@ -34,30 +35,34 @@ print-%: ; @$(error $* is $($*) ($(value $*)))
 # The goal is to be readable by someone who doesn't know make very well,
 # to make it maintainable, not to impress you with how well I know the tool
 
-LIB_DIRS  := $(shell find lib -type d)
-INSTALL_DIRS := $(addprefix $(COMMON), $(shell find lib -type d) bin man/man1, etc)
-
 BIN_FILES := $(shell find bin -type f)
 LIB_FILES := $(shell find lib -type f)
 ETC_FILES := $(shell find etc -type f)
+PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
 
-FILES = $(BIN_FILES) $(LIB_FILES) $(MAN_FILES) $(ETC_FILES)
-INSTALLFILES = $(addprefix $(COMMON)/,$(FILES))
+FILES = $(BIN_FILES) $(LIB_FILES) $(MAN_FILES) $(ETC_FILES) $(PYC_FILES)
+INSTALLFILES = $(addprefix $(COMMON),$(FILES))
 
-$(COMMON)/bin/%: bin/%
+$(COMMON)bin/%: bin/%
+	@mkdir -p `dirname $@`
 	install -m $(PERMS) $< $@
 
-$(COMMON)/lib/%: lib/%
+$(COMMON)%.pyc: $(COMMON)%.py
+	@echo "compiling $@"
+	@rm -f $@
+	@$(PYTHON) -mpy_compile $<
+
+$(COMMON)lib/%: lib/%
+	@mkdir -p `dirname $@`
 	install -m $(LIB_PERMS) $< $@
 
-$(COMMON)/etc/%: etc/%
+$(COMMON)etc/%: etc/%
+	@mkdir -p `dirname $@`
 	install -m $(LIB_PERMS) $< $@
 
-$(INSTALLFILES): installdirs
-
-.PHONY: installdirs
-installdirs:
-	mkdir -p $(INSTALL_DIRS)
+$(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
+	@mkdir -p `dirname $@`
+	install -m 055 $< $@
 
 .PHONY: install
 install: $(INSTALLFILES)
