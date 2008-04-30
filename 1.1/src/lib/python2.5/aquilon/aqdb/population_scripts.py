@@ -16,11 +16,7 @@ sys.path.append('../..')
 import random
 import re
 
-from shell import ipshell
-from db import Session
-
-from sqlalchemy.sql import and_
-
+from db import meta,engine,Session
 from location import *
 from network import *
 from hardware import *
@@ -28,11 +24,11 @@ from configuration import *
 from interface import *
 from service import *
 
+from sqlalchemy.sql import and_
+
 s=Session()
 
 cmnt = 'FAKE'
-#model  = s.query(Model).filter_by(name='hs21').one()
-#assert(model)
 
 syslog = s.query(Service).filter_by(name='syslog').one()
 assert(syslog)
@@ -530,6 +526,7 @@ if __name__ == '__main__':
     a.reverse()
     for i in a:
         print i
+    #from shell import ipshell
     #ipshell()
 
 

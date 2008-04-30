@@ -354,7 +354,7 @@ class BuildItem(aqdbBase):
 
         if isinstance(cp,CfgPath):
             self.cfg_path=cp
-      #  else:
+        else:
             msg = 'Build Item requires a Config Path as its second arg'
             raise ArgumentError(msg)
         if isinstance(position,int):

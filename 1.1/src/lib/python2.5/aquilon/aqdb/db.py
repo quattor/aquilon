@@ -68,12 +68,12 @@ dsn = SQLITE_DSN
 hostname = gethostname()
 
 if USER in ORACLE_USERS and hostname == 'oziyp2':
-    print 'USING ORACLE QA SCHEMA (aqd)'
+    print 'USING ORACLE QA SCHEMA (CDB)'
     dsn=PROD_ORA_DSN
     ORACLE_SID=PROD_ORACLE_SID
 
 if USER in ORACLE_USERS and hostname == 'oy604c2n7':
-    print 'USING ORACLE PROD SCHEMA (CDB)'
+    print 'USING ORACLE PROD SCHEMA (AQD)'
     dsn=QA_ORA_DSN
     ORACLE_SID=QA_ORACLE_SID
 
