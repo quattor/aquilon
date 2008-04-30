@@ -49,7 +49,7 @@ get_bucket = """
 
 # NOTE: the network_type tables id #'s actually match up with dsdb's
 # network_type table's id column, so we just import it directly for speed.
-get_network = """
+old_network = """
     SELECT  A.net_name, A.net_ip_addr, abs(A.net_ip_value), abs(A.net_mask),
     abs(A.byte_mask), isnull(net_type_id,4),
     SUBSTRING(A.location,CHAR_LENGTH(A.location) - 7,2) as sysloc, A.side,
@@ -61,6 +61,15 @@ get_network = """
     AND B.state >=0
     AND C.state >=0
 """
+
+get_network="""
+    SELECT net_name, net_ip_addr, abs(net_ip_value), abs(net_mask),
+    abs(byte_mask), isnull(net_type_id,4),
+    SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
+    side, net_id FROM network WHERE state >= 0
+"""
+
+
 host_info  = """
 SELECT
         A.host_name,                                          /* network_host */
@@ -96,7 +105,7 @@ SELECT
 class aqsyb:
     '''Wraps connections and calls to sybase'''
     def __init__(self,dsn,database):
-        if os.environ['USER'] == 'daqscott' and database == 'NYP_DSDB11':
+        if os.environ['USER'] == 'daqscott' and dsn == 'NYP_DSDB11':
             #print 'using kerberos authentication'
             principal = None
             for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():

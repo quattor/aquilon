@@ -49,13 +49,13 @@ logging.basicConfig(level=logging.ERROR,
                     filemode='w')
 
 QA_ORACLE_SID='LNTO_AQUILON_NY'
-PROD_ORACLE_SID='LNTO_AQUILON_NY'
-ORACLE_SID=QA_ORACLE_SID
+PROD_ORACLE_SID='LNPO_AQUILON_NY'
+ORACLE_SID=''
 QA_SCHEMA='aqd'
 PROD_SCHEMA='cdb'
 SQLITE_DSN   = 'sqlite:///' + os.path.join(DBDIR, 'aquilon.db')
-PROD_ORA_DSN = 'oracle://'+PROD_SCHEMA+':'+PROD_SCHEMA+'@'+ORACLE_SID
-QA_ORA_DSN   = 'oracle://'+QA_SCHEMA+':'+QA_SCHEMA+'@'+ORACLE_SID
+PROD_ORA_DSN = 'oracle://'+PROD_SCHEMA+':'+PROD_SCHEMA+'@'+PROD_ORACLE_SID
+QA_ORA_DSN   = 'oracle://'+QA_SCHEMA+':'+QA_SCHEMA+'@'+QA_ORACLE_SID
 ORACLE_USERS =['cdb','daqscott']
 """
     CONFIGURE THE DSN FOR THE ENTIRE PROJECT:
@@ -70,10 +70,12 @@ hostname = gethostname()
 if USER in ORACLE_USERS and hostname == 'oziyp2':
     print 'USING ORACLE QA SCHEMA (aqd)'
     dsn=PROD_ORA_DSN
+    ORACLE_SID=PROD_ORACLE_SID
 
 if USER in ORACLE_USERS and hostname == 'oy604c2n7':
     print 'USING ORACLE PROD SCHEMA (CDB)'
     dsn=QA_ORA_DSN
+    ORACLE_SID=QA_ORACLE_SID
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')

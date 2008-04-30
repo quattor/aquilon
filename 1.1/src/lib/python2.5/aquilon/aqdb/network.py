@@ -105,8 +105,7 @@ network = Table('network', meta,
     Column('ip_integer', Integer, nullable=False),
     Column('byte_mask', Integer, nullable=False),
     Column('side', String(4), nullable=True),
-    Column('campus', String(32), nullable=True),
-    Column('bucket', String(32), nullable=True),
+    Column('dsdb_id', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True))
 network.create(checkfirst=True)
@@ -152,16 +151,17 @@ class Network(aqdbBase):
         self.side = kw.pop('side','a')       # defaults to side A, like dsdb
         self.profile_id = self.mask
         self.network_type_id = kw.pop('network_type',4)
-        cmps = kw.pop('campus',None)
-        if cmps:
-            self.campus=cmps.strip().lower()
-
-        bkt = kw.pop('bucket',None)
-        if bkt:
-            self.bucket = bkt.strip().lower()
+        self.dsdb_id = kw.pop('dsdb_id',0)
+        #cmps = kw.pop('campus',None)
+        #if cmps:
+        #    self.campus=cmps.strip().lower()
+        #
+        #bkt = kw.pop('bucket',None)
+        #if bkt:
+        #    self.bucket = bkt.strip().lower()
     #TODO: get dsdb network ids
-    #TODO: implement bunker,bucket
-    #TODO: snarf comments from DSDB, async
+
+    #TODO: snarf comments  and xx,xw sysloc nets from DSDB, async
     def _ipcalc(self):
         return ipcalc.Network('%s/%s'%(self.ip,self.profile.cidr))
     ipcalc = property(_ipcalc)
@@ -206,7 +206,7 @@ def populate_networks():
     count=0
     #TODO: forget campus, bucket. make this whole thing an insert ?
     for (name,ip,ip_int,mask,byte_mask,type,bldg_name,side,
-        campus,bucket) in dump_network():
+        dsdb_id) in dump_network():
 
         kw = {}
         try:
@@ -225,10 +225,7 @@ def populate_networks():
             kw['network_type']   = type
         if side:
             kw['side']   = side.lower().strip()
-        if campus:
-            kw['campus'] = campus.lower().strip()
-        if bucket:
-            kw['bucket'] = bucket.lower().strip()
+        kw['dsdb_id']    = dsdb_id
 
         c=Network(**kw)
         s.save(c)
