@@ -17,7 +17,7 @@ from twisted.internet import utils, threads, defer
 from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, RollbackException, \
-        DetailedProcessException, ArgumentError
+        DetailedProcessException, ArgumentError, AquilonError
 from aquilon.aqdb.hardware import Machine, Disk
 from aquilon.aqdb.interface import PhysicalInterface
 from aquilon.aqdb.service import Host
@@ -40,6 +40,14 @@ class TemplateCreator(object):
             # This means no error will get back to the client - is that
             # correct?
             log.err("Could not remove file '%s': %s" % (filename, e))
+
+    def _read_file(self, path, filename):
+        fullfile = os.path.join(path, filename)
+        try:
+            return open(fullfile).read()
+        except OSError, e:
+            raise AquilonError("Could not read contents of %s: %s"
+                    % (fullfile, e))
 
     def get_plenary_info(self, dbmachine):
         plenary_info = {}
@@ -191,6 +199,17 @@ class TemplateCreator(object):
         d = threads.deferToThread(self._write_file, tempdir,
                 template_file, "\n".join(lines))
         d = d.addCallback(lambda _: True)
-        return True
+        return d
+
+    def cat_hostname(self, result, hostname, hostsdir, **kwargs):
+        d = threads.deferToThread(self._read_file, hostsdir, hostname + '.tpl')
+        return d
+
+    def cat_machine(self, result, plenarydir, **kwargs):
+        dbmachine = result
+        plenary_info = self.get_plenary_info(dbmachine)
+        d = threads.deferToThread(self._read_file, plenarydir,
+                plenary_info["plenary_template"])
+        return d
 
 #if __name__=='__main__':

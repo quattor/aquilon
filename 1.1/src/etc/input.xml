@@ -317,17 +317,13 @@
    </command>
 
    <command name="cat">
-      %prog cat ( --hostname HOSTNAME | 
-      (--domain DOMAIN_NAME  --template TEMPLATE_NAME ))
+      %prog cat ( --hostname HOSTNAME | --machine MACHINE )
       <optgroup name="cat options" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="template">Name of the host</option>
-         <optgroup name="cat template options" fields="all">
-            <option name="template" type="string" conflicts="hostname">Name of the template</option>
-            <option name="domain" type="string">Name of the domain</option>
-         </optgroup>
+         <option name="machine" type="string" conflicts="template">Name of the machine</option>
       </optgroup>
-      <transport trigger="hostname" method="post" path="host/%(hostname)s/command/cat" />
-      <transport trigger="template" method="post" path="template/%(template)s/command/cat" />
+      <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
+      <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
    </command>
 
    <command name="sync">

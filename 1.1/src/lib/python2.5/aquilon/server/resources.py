@@ -267,15 +267,19 @@ class ResponsePage(resource.Resource):
 
     def command_cat_hostname(self, request):
         """aqcommand: aq cat --hostname=<host>"""
+        d = self.check_arguments(request, ["hostname"])
+        d = d.addCallback(self.broker.cat_hostname,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq cat --hostname has not been implemented yet"
-
-    def command_cat_template(self, request):
-        """aqcommand: aq cat --template=<template> --domain=<domain>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq cat --template has not been implemented yet"
+    def command_cat_machine(self, request):
+        """aqcommand: aq cat --machine=<machine>"""
+        d = self.check_arguments(request, ["machine"])
+        d = d.addCallback(self.broker.cat_machine,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
 
     def command_add_domain(self, request):
         """aqcommand: aq add domain --domain=<domain>"""

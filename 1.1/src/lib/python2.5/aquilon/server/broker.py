@@ -363,7 +363,7 @@ class Broker(object):
     def del_machine(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "delete", request_path)
-        d = d.addCallback(self.dbbroker.verify_del_machine, session=True,
+        d = d.addCallback(self.dbbroker.verify_machine, session=True,
                 user=user, **arguments)
         d = d.addCallback(self.template_creator.remove_plenary, user=user,
                 plenarydir=self.plenarydir, **arguments)
@@ -487,6 +487,28 @@ class Broker(object):
                 "unbind", request_path)
         d = d.addCallback(self.dbbroker.unbind_service, session=True,
                 user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def cat_hostname(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "cat", request_path)
+        d = d.addCallback(self.dbbroker.verify_host, session=True, user=user,
+                **arguments)
+        d = d.addCallback(self.template_creator.cat_hostname,
+                hostsdir=self.hostsdir, user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def cat_machine(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "cat", request_path)
+        d = d.addCallback(self.dbbroker.verify_machine, session=True, user=user,
+                **arguments)
+        d = d.addCallback(self.template_creator.cat_machine,
+                plenarydir=self.plenarydir, user=user, **arguments)
         return d
         
 # --------------------------------------------------------------------------- #

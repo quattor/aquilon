@@ -646,7 +646,7 @@ class DatabaseBroker(AccessBroker):
             raise ValueError("Error while querying the database!\n"+e.__str__())
 
     @transact
-    def verify_del_machine(self, result, machine, **kwargs):
+    def verify_machine(self, result, machine, **kwargs):
         dbmachine = self._get_machine(machine)
         return printprep(dbmachine)
 
