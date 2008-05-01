@@ -49,7 +49,9 @@ logging.basicConfig(level=logging.ERROR,
                     filemode='w')
 
 QA_ORACLE_SID='LNTO_AQUILON_NY'
-PROD_ORACLE_SID='LNPO_AQUILON_NY'
+#PROD_ORACLE_SID='LNPO_AQUILON_NY'
+#temoprary till Boris finshes Gazelle/Oracle testing 4/30/08 daqscott
+PROD_ORACLE_SID='LNTO_AQUILON_NY'
 ORACLE_SID=''
 QA_SCHEMA='aqd'
 PROD_SCHEMA='cdb'
@@ -333,6 +335,24 @@ def drop_all_tables_and_sequences():
                 execute(text("DROP SEQUENCE %s " %seq))
             except SQLError, e:
                 print >> sys.stderr, e
+
+def clean_fake_date():
+    #TODO: add service_inst, service_map, and use Session if only
+    # to test session.delete()
+    _drop= """
+        delete from physical_interface where interface_id in \
+            (select id from interface where comments like '%FAKE%');
+        delete from interface where comments like '%FAKE%';
+        delete from host where comments like '%FAKE';
+        delete from machine where comments like '%FAKE%';
+        delete from system where comments like '%FAKE';
+        delete from rack where id in (select id from location where comments \
+            like '%FAKE%');
+        delete from chassis where id in (select id from location where \
+            comments like '%FAKE%');
+        delete from location where comments like '%FAKE%'; """
+    engine.execute(_drop)
+
 
 if __name__ == '__main__':
     print 'your dsn is %s'%dsn
