@@ -49,9 +49,7 @@ logging.basicConfig(level=logging.ERROR,
                     filemode='w')
 
 QA_ORACLE_SID='LNTO_AQUILON_NY'
-#PROD_ORACLE_SID='LNPO_AQUILON_NY'
-#temoprary till Boris finshes Gazelle/Oracle testing 4/30/08 daqscott
-PROD_ORACLE_SID='LNTO_AQUILON_NY'
+PROD_ORACLE_SID='LNPO_AQUILON_NY'
 ORACLE_SID=''
 QA_SCHEMA='aqd'
 PROD_SCHEMA='cdb'
