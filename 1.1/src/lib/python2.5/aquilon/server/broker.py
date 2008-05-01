@@ -422,7 +422,8 @@ class Broker(object):
                 user=user, **arguments)
         d = d.addCallback(self.dbbroker.verify_add_host,
                 session=True, user=user, **arguments)
-        d = d.addCallback(self.pbroker.add_host, dsdb=self.dsdb, **arguments)
+        # FIXME: Should be re-enabled.
+        #d = d.addCallback(self.pbroker.add_host, dsdb=self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.add_host, session=True, user=user,
                 **arguments)
         d = d.addCallback(self.template_creator.generate_plenary, user=user,
@@ -437,7 +438,8 @@ class Broker(object):
                 "del", request_path)
         d = d.addCallback(self.dbbroker.verify_del_host,
                 session=True, user=user, **arguments)
-        d = d.addCallback(self.pbroker.del_host, self.dsdb, **arguments)
+        # FIXME: Should be re-enabled.
+        #d = d.addCallback(self.pbroker.del_host, self.dsdb, **arguments)
         d = d.addCallback(self.dbbroker.del_host, session=True, user=user,
                 **arguments)
         return d
