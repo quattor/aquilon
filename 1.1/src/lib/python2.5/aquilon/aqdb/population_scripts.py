@@ -514,7 +514,6 @@ def fill_ips(ip,mask,cidr,net_id):
         pass
 
 
-
 if __name__ == '__main__':
     two_in_each()
     just_hosts()
@@ -529,18 +528,3 @@ if __name__ == '__main__':
     #from shell import ipshell
     #ipshell()
 
-
-###### Look into doing stuff like below:
-    #for sql in _testsql: e.execute(sql) #doctest: +ELLIPSIS
-"""
-    delete from physical_interface where interface_id in \
-        (select id from interface where comments like '%FAKE%');
-
-    delete from interface where comments like '%FAKE%';
-    delete from host where comments like '%FAKE';
-    delete from machine where comments like '%FAKE%';
-    delete from system where comments like '%FAKE';
-    delete from rack where id in (select id from location where comments like '%FAKE%');
-    delete from chassis where id in (select id from location where comments like '%FAKE%');
-    delete from location where comments like '%FAKE%';
-"""
