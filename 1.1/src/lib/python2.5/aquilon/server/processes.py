@@ -148,7 +148,7 @@ class ProcessBroker(object):
         raise DetailedProcessException(failure.value, input, output)
 
     def compile_host(self, result, build_info, templatesdir, plenarydir,
-            profilesdir, depsdir, hostsdir):
+            profilesdir, depsdir, hostsdir, repdir):
         """This expects build_info to have a dbhost and a tempdir with a
         template to try compiling.  On success, those files will be saved
         into the appropriate broker directories."""
@@ -163,7 +163,6 @@ class ProcessBroker(object):
         # FIXME: Should be based on the archetype of the host.
         domaindir = os.path.join(templatesdir, domain)
         aquilondir = os.path.join(domaindir, "aquilon")
-        repdir    = os.path.join(self.basedir, "swrep");
         includes = [ aquilondir, domaindir, plenarydir, repdir ]
         include_line = " ".join(['-I "%s"' % include for include in includes])
         outfile = os.path.join(tempdir, fqdn + '.xml')

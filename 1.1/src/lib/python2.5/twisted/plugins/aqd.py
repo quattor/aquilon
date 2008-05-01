@@ -102,7 +102,7 @@ class AQDMaker(object):
         #knc = "/ms/dev/kerberos/knc/1.3/install/exec/bin/knc"
         knc = "/ms/dist/kerberos/PROJ/knc/prod/bin/knc"
 
-        sockname = broker.basedir + "/run/kncsock"
+        sockname = os.path.join(broker.rundir, "kncsock")
         mon = ProcessMonitor()
         # FIXME: Should probably run krb5_keytab here as well.
         # and/or verify that the keytab file exists.

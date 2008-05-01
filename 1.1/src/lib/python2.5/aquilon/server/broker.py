@@ -52,22 +52,25 @@ class Broker(object):
         else:
             self.basedir = "/var/tmp/%s/quattor" % self.osuser
             self.git_templates_url = "http://%s:6901/templates" % self.localhost
-        self.profilesdir = "%s/web/htdocs/profiles" % self.basedir
-        self.depsdir = "%s/deps" % self.basedir
-        self.hostsdir = "%s/hosts" % self.basedir
-        self.templatesdir = "%s/templates" % self.basedir
-        self.plenarydir = "%s/plenary" % self.basedir
-        self.kingdir = "%s/template-king" % self.basedir
+        self.profilesdir = os.path.join(self.basedir,
+                "web", "htdocs", "profiles")
+        self.depsdir = os.path.join(self.basedir, "deps")
+        self.hostsdir = os.path.join(self.basedir, "hosts")
+        self.templatesdir = os.path.join(self.basedir, "templates")
+        self.plenarydir = os.path.join(self.basedir, "plenary")
+        self.kingdir = os.path.join(self.basedir, "template-king")
+        self.repdir = os.path.join(self.basedir, "swrep")
+        self.rundir = os.path.join(self.basedir, "run")
         self.default_domain = ".ms.com"
         self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
-        self.git = "%s/git" % self.git_path
+        self.git = os.path.join(self.git_path, "git")
         self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
         self.cdpport = 7777
         self.domain_name = "production"
         self.dsdb = "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb"
 
         for d in [self.basedir, self.profilesdir, self.depsdir, self.hostsdir,
-                self.plenarydir]:
+                self.plenarydir, self.rundir]:
             if os.path.exists(d):
                 continue
             try:
@@ -142,7 +145,7 @@ class Broker(object):
         d = d.addCallback(self.pbroker.compile_host, build_info,
                 templatesdir=self.templatesdir, plenarydir=self.plenarydir,
                 profilesdir=self.profilesdir, depsdir=self.depsdir,
-                hostsdir=self.hostsdir)
+                hostsdir=self.hostsdir, repdir=self.repdir)
         d = d.addBoth(self.pbroker.cleanup_tempdir, build_info)
         #d = d.addCallback(self.dbbroker.confirm_make, build_info, session=True)
         #d = d.addErrback(self.dbbroker.cancel_make, build_info, session=True)
@@ -164,7 +167,7 @@ class Broker(object):
         d = d.addCallback(self.pbroker.compile_host, build_info,
                 templatesdir=self.templatesdir, plenarydir=self.plenarydir,
                 profilesdir=self.profilesdir, depsdir=self.depsdir,
-                hostsdir=self.hostsdir)
+                hostsdir=self.hostsdir, repdir=self.repdir)
         d = d.addBoth(self.pbroker.cleanup_tempdir, build_info)
         return d
 

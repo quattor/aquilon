@@ -3,6 +3,7 @@ Quickstart to getting a broker running in development:
 mkdir -p /var/tmp/$USER/quattor
 rsync -avP -e ssh --delete quattorsrv:/var/quattor/templates /var/tmp/$USER/quattor
 rsync -avP -e ssh --delete quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
+rsync -avP -e ssh --delete quattorsrv:/var/quattor/swrep /var/tmp/$USER/quattor
 cd ~/dev/aquilon/aqd/1.1/src     # your shadow
 cd lib/python2.5/aquilon/aqdb
 ./utils/REBUILD.sh
