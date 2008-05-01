@@ -863,7 +863,6 @@ class DatabaseBroker(AccessBroker):
             host = self.session.query(Host).filter_by(
                     name=short, dns_domain=dbdns_domain).one()
         except InvalidRequestError, e:
-            raise NotFoundException("Host '%s' with DNS domain '%s' not found."
-                    % (short, dbdns_domain.name))
+            raise NotFoundException("Host '%s' not found." % hostname)
         return host
 
