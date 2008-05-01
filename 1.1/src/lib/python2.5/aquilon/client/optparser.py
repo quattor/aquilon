@@ -103,7 +103,8 @@ class commandline(Element):
                 print self.__commandlist[helpfor].recursiveHelp()
                 exit(1)
             else:
-                print "The requested command is not known to this server"
+                if helpfor:
+                    print "The command '%s' is not known to this server." % helpfor
                 print "Available commands are:"
                 k = self.__commandlist.keys()
                 k.sort()
@@ -153,7 +154,7 @@ class command(Element):
         Element.__init__(self, name, attributes)
         self.name = attributes['name']
         self.optgroups = []
-        self.help = ''
+        #self.help = '%prog ' + self.name + '\n'
         self.transports = []
 
 # --------------------------------------------------------------------------- #
@@ -210,6 +211,11 @@ class optgroup(Element):
             self.fields = attributes['fields']
         else:
             self.fields = 'none'
+
+        if self.mandatory:
+            self.help = "    Requires %s of these options:\n" % self.fields
+        else:
+            self.help = "    Optional:\n"
 
         if (attributes.has_key('conflicts')):
             self.conflicts = attributes['conflicts'].split(' ')

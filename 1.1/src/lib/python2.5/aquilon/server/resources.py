@@ -257,12 +257,6 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
-    def command_assoc(self, request):
-        """aqcommand: aq assoc --hostname=<host>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq assoc has not been implemented yet"
-
     def command_reconfigure(self, request):
         """aqcommand: aq reconfigure --hostname=<host>"""
         d = self.check_arguments(request, ["hostname"])
@@ -298,14 +292,6 @@ class ResponsePage(resource.Resource):
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
-
-    def command_add_template(self, request):
-        """aqcommand: aq add template --name=<name> --domain=<domain>"""
-        domain = request.args['domain'][0]
-        template = request.args['name'][0]
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq add_template has not been implemented yet"
 
     def command_get(self, request):
         """aqcommand: aq get"""
@@ -554,12 +540,6 @@ class ResponsePage(resource.Resource):
             user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
     
-    def command_add_hardware(self, request):
-        """aqcommand: aq add hardware --location=<location>"""
-
-        request.setResponseCode( http.NOT_IMPLEMENTED )
-        return "aq add hardware has not been implemented yet"
-
     def command_add_service(self, request):
         d = self.check_arguments(request, ['service'], ['instance'])
         d = d.addCallback(self.broker.add_service,
