@@ -247,7 +247,7 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.broker.add_host,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_del_host(self, request):
         """aqcommand: aq del host --hostname=<host>"""
@@ -394,7 +394,7 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.broker.add_location,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_del_location(self, request):
         """aqcommand: aq del location --type=<type> --name=<name>"""
@@ -565,14 +565,14 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.broker.add_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_add_service_instance(self, request):
         d = self.check_arguments(request, ['service', 'instance'])
         d = d.addCallback(self.broker.add_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_show_service(self, request):
         d = self.check_arguments(request, [], ['service'])
@@ -607,14 +607,14 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.broker.bind_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_unbind_service(self, request):
         d = self.check_arguments(request, ['hostname', 'service', 'instance'])
         d = d.addCallback(self.broker.unbind_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_make_aquilon(self, request):
         """aqcommand: aq make aquilon --hostname=<name> --os=<os>
@@ -632,7 +632,7 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.broker.add_model,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_show_model(self, request):
         d = self.check_arguments(request, [],
@@ -648,7 +648,7 @@ class ResponsePage(resource.Resource):
         d = d.addCallback(self.broker.del_model,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
+        return self.finish_or_fail(d, request)
 
     def command_pxeswitch(self, request):
         d = self.check_arguments(request, ["hostname"], ["boot", "install"])

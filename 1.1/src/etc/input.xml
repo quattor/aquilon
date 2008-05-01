@@ -12,6 +12,10 @@
          <option name="debug" short="d" type="boolean" conflicts="">
             Generate debug statements sent to stderr.
          </option>
+         <option name="httpinfo" short="u" type="boolean" conflicts="">
+            Show the URL being accessed and the response code.
+            Implied by --debug.
+         </option>
          <option name="format" short="f" type="string" conflicts="">
             Specify output format as raw (default) or html.
          </option>
