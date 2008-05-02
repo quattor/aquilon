@@ -65,7 +65,6 @@ class Broker(object):
         self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
         self.git = os.path.join(self.git_path, "git")
         self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
-        self.cdpport = 7777
         self.domain_name = "production"
         self.dsdb = "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb"
 

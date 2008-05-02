@@ -16,6 +16,9 @@ the chain.
 """
 
 import os
+import time
+import socket
+
 from tempfile import mkdtemp, mkstemp
 from base64 import b64decode
 
@@ -25,6 +28,13 @@ from twisted.python import log
 from aquilon.exceptions_ import ProcessException, RollbackException, \
         DetailedProcessException, ArgumentError
 
+CCM_NOTIF = 1
+CDB_NOTIF = 2
+
+notification_types = {
+        CCM_NOTIF : "ccm",
+        CDB_NOTIF : "cdb"
+}
 
 def _cb_cleanup_dir(arg, dir):
     """This callback is meant as a finally block to clean up the directory."""
@@ -181,10 +191,49 @@ class ProcessBroker(object):
                 % (outdep, depsdir))
         d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
                 % (filename, hostsdir))
+        d = d.addCallback(self.buildIndex, profilesdir)
         # FIXME
         d = d.addErrback(self.wrap_failure_with_rollback,
                 jobid=build_info["buildid"])
         return d
+
+    def buildIndex (self, profilesdir):
+        ''' compare the mtimes of everything in profiledir against
+        and index file (profiles-info.xml). Produce a new index
+        and send out notifications to everything that's been updated
+        and to all subscribers of the index (bootservers currently)
+        '''
+
+        pass
+
+        #files = filter(lambda x: os.path.splitext(x) == "xml", os.listdir(profilesdir))
+        
+        # examples:
+        #self.notify(CCM_NOTIF, ["aquilon01.one-nyp.ms.com"])
+        #self.notify(CDB_NOTIF, ["np3c1n4", "np3c5n8", "np3c5n14"])
+
+
+    def send_notification(self, type, machines):
+        '''send CDP notification messages to a list of hosts. This
+        are sent synchronously, but we don't wait (or care) for any
+        reply, so it shouldn't be a problem.
+        type should be CCM_NOTIF or CDB_NOTIF
+        '''
+        packet = notification_types[type] + "\0" + str(int(time.time()))
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        try:
+            port = socket.getservbyname("cdp")
+        except:
+            port = 7777
+
+        for host in machines:
+            ip = socket.gethostbyname(host)
+            try:
+                sock.sendto(packet, (ip, port))
+            except:
+                pass
+
 
     def add_domain(self, result, domain, git_path, templatesdir, kingdir,
             **kwargs):
