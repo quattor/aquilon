@@ -90,12 +90,23 @@ class ProcessBroker(object):
         raise ProcessException(command=command, out=out, err=err,
                 signalNum=signalNum)
 
-    def run_shell_command(self, result, command, env={}, path="."):
+    def run_shell_command(self, result, command, env=None, path="."):
+        if env:
+            shell_env = env.copy()
+        else:
+            shell_env = {}
+
+        # Make sure that environment is properly kerberized.
+        for envname, envvalue in os.environ.items():
+            if not envname.startswith("KRB"):
+                continue
+            shell_env[envname] = envvalue
+
         # Forcibly string-ifying the command in the long run might not be such
         # a great idea, but this makes dealing with unicode simpler...
         command = str(command)
         d = utils.getProcessOutputAndValue("/bin/sh", ["-c", command],
-                env, path)
+                shell_env, path)
         return d.addCallbacks(self.cb_shell_command_finished,
                 self.cb_shell_command_error,
                 callbackArgs=[command], errbackArgs=[command])
