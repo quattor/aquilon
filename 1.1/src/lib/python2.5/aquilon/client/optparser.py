@@ -215,7 +215,10 @@ class optgroup(Element):
         if self.mandatory:
             self.help = "    Requires %s of these options:\n" % self.fields
         else:
-            self.help = "    Optional:\n"
+            if self.fields == 'all':
+                self.help = "    Optional, but must use all or none:\n"
+            else:
+                self.help = "    Optional:\n"
 
         if (attributes.has_key('conflicts')):
             self.conflicts = attributes['conflicts'].split(' ')

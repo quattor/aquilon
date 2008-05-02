@@ -114,6 +114,8 @@
          <option name="disktype" type="string">installed disk type</option>
          <option name="disksize" type="string">installed disk capacity</option>
          <option name="nics" type="string">number of NIC interfaces</option>
+      </optgroup>
+      <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/model/%(type)s/%(vendor)s/%(name)s" />
@@ -149,7 +151,7 @@
          <option name="machine" type="string">Machine name</option>
          <option name="mac" type="string">MAC address</option>
       </optgroup>
-      <optgroup name="add_interface_optional" mandatory="False" fields="all">
+      <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="ip" type="string">IP address</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
