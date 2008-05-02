@@ -26,56 +26,50 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import insert, text
 from sqlalchemy.exceptions import SQLError
 
-
-USER = os.environ.get('USER')
-TEMPDIR=os.path.join('/var/tmp',USER)
-DBDIR=os.path.join(TEMPDIR,'aquilondb')
-LOGDIR=os.path.join(TEMPDIR,'log')
-LOGFILE=os.path.join(LOGDIR,'aqdb.log')
-
-
-for d in [LOGDIR,DBDIR]:
-    if not os.path.exists(d):
+# TODO: This should go away and use the aquilonConfig when it's 
+# available...
+class dbConfig:
+    def __init__(self, defaults):
+        from ConfigParser import SafeConfigParser
+        self.config = SafeConfigParser()
+        self.defaults = defaults
+        configfile = "/etc/aqd.conf"
         try:
-            os.makedirs(d)
-        except OSError, e:
-            print >> sys.stderr, 'makedirs(%s)'%(d),'\n', e
-            sys.exit(1)
+            if (os.environ.has_key("AQDCONF")):
+                configfile = os.environ["AQDCONF"]
+            print "using config file of %s" % configfile
+            self.config.read(configfile)
+        except:
+            print >>sys.stderr, "failed to read configfile %s" % configfile
+            sys.exit(9)
+
+    def __getitem__(self, key):
+        try:
+            return self.config.get("database", key)
+        except:
+            if key in self.defaults:
+                return self.defaults[key]
+            return None
+
+config=dbConfig( {
+    "logfile" : "/var/quattor/logs/aqdb.log",
+})
+
+print "using logfile of %s" % config["logfile"]
 
 import logging
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(LOGDIR,'aqdb.log'),
+                    filename=config["logfile"],
                     filemode='w')
 
-QA_ORACLE_SID='LNTO_AQUILON_NY'
-PROD_ORACLE_SID='LNPO_AQUILON_NY'
-ORACLE_SID=''
-QA_SCHEMA='aqd'
-PROD_SCHEMA='cdb'
-SQLITE_DSN   = 'sqlite:///' + os.path.join(DBDIR, 'aquilon.db')
-PROD_ORA_DSN = 'oracle://'+PROD_SCHEMA+':'+PROD_SCHEMA+'@'+PROD_ORACLE_SID
-QA_ORA_DSN   = 'oracle://'+QA_SCHEMA+':'+QA_SCHEMA+'@'+QA_ORACLE_SID
-ORACLE_USERS =['cdb','daqscott']
-"""
-    CONFIGURE THE DSN FOR THE ENTIRE PROJECT:
-        this is low tech, its just for a start.
-        TODO: a proper aqdb.conf file.
-"""
-dsn = SQLITE_DSN
-
-#If you're like me (and I know *I AM*), you like things to just work...
-hostname = gethostname()
-
-if USER in ORACLE_USERS and hostname == 'oziyp2':
-    print 'USING ORACLE QA SCHEMA (CDB)'
-    dsn=PROD_ORA_DSN
-    ORACLE_SID=PROD_ORACLE_SID
-
-if USER in ORACLE_USERS and hostname == 'oy604c2n7':
-    print 'USING ORACLE PROD SCHEMA (AQD)'
-    dsn=QA_ORA_DSN
-    ORACLE_SID=QA_ORACLE_SID
+dsn = config["dsn"]
+if dsn is None:
+    # should really raise an error, but right now
+    # it doesn't really matter what we do - it blows up twisted
+    # in a big way to do anything bad here... 
+    # TODO: raise(somethingBad)
+    sys.exit(9)
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
@@ -83,7 +77,7 @@ if dsn.startswith('oracle'):
 
     os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
-        os.environ['ORACLE_SID']=ORACLE_SID
+        os.environ['ORACLE_SID']=config["server"]
 
 engine = create_engine(dsn)
 engine.connect()
@@ -309,16 +303,7 @@ def drop_all_tables_and_sequences():
     if not dsn.startswith('ora'):
         print 'dsn is not oracle, exiting'
         return False
-    msg="You've asked to wipe out the"
-
-    if dsn == PROD_ORA_DSN:
-        msg +=" PRODUCTION "
-    elif dsn == QA_ORA_DSN:
-        msg += " QA "
-    else:
-        print "can't determine which oracle instance you want to wipe."
-        return False
-    msg += "aqd database, please confirm."
+    msg="You've asked to wipe out the %s database. Please confirm." % dsn
 
     if confirm(prompt=msg, resp=False):
         execute = engine.execute

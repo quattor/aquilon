@@ -17,11 +17,12 @@ import os
 import datetime
 
 from db import *
-import logging
-logging.basicConfig(level=logging.ERROR,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(LOGDIR,'aqdb.log'),
-                    filemode='w')
+# logging done within db, why again?
+#import logging
+#logging.basicConfig(level=logging.ERROR,
+                    #format='%(asctime)s %(levelname)s %(message)s',
+                    #filename=os.path.join(LOGDIR,'aqdb.log'),
+                    #filemode='w')
 from aquilon.exceptions_ import ArgumentError,NoSuchRowException
 
 from location import Location,Chassis
