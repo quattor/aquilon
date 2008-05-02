@@ -132,10 +132,9 @@ system = Table('system',meta,
     Column('name', String(64)),
     Column('type_id', Integer,
            ForeignKey('system_type.id'), nullable=False),
-    #TODO: don't hard code the ID in dns_domain as default
-    #This will probably break on Oracle
     Column('dns_domain_id', Integer,
-           ForeignKey('dns_domain.id'), nullable=False, default=1),
+           ForeignKey('dns_domain.id'), nullable=False,
+           default=id_getter(dns_domain,dns_domain.c.name,'ms.com')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('name','dns_domain_id','type_id',name='system_name_uk'))
@@ -203,7 +202,8 @@ mapper(System, system, polymorphic_on=system.c.type_id, \
         'comments'      : deferred(system.c.comments)})
 
 quattor_server = Table('quattor_server',meta,
-    Column('id', Integer, ForeignKey('system.id'), primary_key=True),)
+    Column('id', Integer,
+           ForeignKey('system.id',ondelete='CASCADE'), primary_key=True))
 quattor_server.create(checkfirst=True)
 
 class QuattorServer(System):
@@ -220,8 +220,10 @@ class QuattorServer(System):
 
 
 mapper(QuattorServer,quattor_server,
-        inherits=System, polymorphic_identity=get_sys_type_id('quattor_server'),
-       properties={'system': relation(System,backref='quattor_server')})
+        inherits=System,
+        polymorphic_identity=get_sys_type_id('quattor_server'), properties={
+        'system'        : relation(System,backref='quattor_server'),
+})
 
 domain = Table('domain', meta,
     Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
@@ -264,13 +266,12 @@ mapper(Domain,domain,properties={
     'comments':         deferred(domain.c.comments)})
 
 host=Table('host', meta,
-    Column('id', Integer, ForeignKey('system.id'), primary_key=True),
+    Column('id', Integer, ForeignKey('system.id',ondelete='CASCADE'),
+           primary_key=True),
     Column('machine_id', Integer, ForeignKey('machine.id')),
     Column('domain_id', Integer, ForeignKey('domain.id')),
     Column('archetype_id',Integer, ForeignKey('archetype.id'),nullable=False),
-    Column('status_id', Integer, ForeignKey('status.id')),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True))
+    Column('status_id', Integer, ForeignKey('status.id')))
 host.create(checkfirst=True)
 
 class Host(System):
@@ -330,7 +331,7 @@ class Host(System):
 build_item = Table('build_item', meta,
     Column('id', Integer, Sequence('build_item_id_seq'), primary_key=True),
     Column('host_id', Integer,
-           ForeignKey('host.id'), nullable=False),
+           ForeignKey('host.id',ondelete='CASCADE'), nullable=False),
     Column('cfg_path_id', Integer,
            ForeignKey('cfg_path.id'),
            nullable=False),
@@ -391,9 +392,7 @@ mapper(Host, host, inherits=System,
         'status'        : relation(Status),
         'templates'     : relation(BuildItem,
                                    collection_class=ordering_list('position'),
-                                   order_by=[build_item.c.position]),
-        'creation_date' : deferred(host.c.creation_date),
-        'comments'      : deferred(host.c.comments)
+                                   order_by=[build_item.c.position])
 #TODO: synonym for location, sysloc, fqdn (in system)
 })
 
@@ -447,7 +446,7 @@ mapper(AfsCell,afs_cell,
 service_instance = Table('service_instance',meta,
     Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
     Column('service_id',Integer, ForeignKey('service.id')),
-    Column('system_id', Integer, ForeignKey('system.id')),
+    Column('system_id', Integer, ForeignKey('system.id',ondelete='CASCADE')),
     Column('cfg_path_id', Integer, ForeignKey('cfg_path.id')),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
@@ -599,7 +598,14 @@ mapper(ServiceListItem,service_list_item,properties={
     'comments'      : deferred(service_list_item.c.comments)
 })
 
+SVC_TABLES=[service,system_type,system,quattor_server,domain,host,build_item,
+            afs_cell,service_instance,service_map,service_list_item]
 
+def clean_svc():
+    for t in SVC_TABLES:
+        #engine.execute('drop sequence %s_seq_id'%s(t[0]))
+        #engine.execute('drop sequence %s_id_seq'%(t.name))
+        engine.execute('drop table %s cascade constraints'%(t.name))
 ####POPULATION ROUTINES####
 
 def create_domains():

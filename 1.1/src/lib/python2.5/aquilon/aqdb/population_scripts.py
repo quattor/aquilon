@@ -82,9 +82,9 @@ def make_interfaces():
 def two_in_each():
     nodelist=[]
 
-    cnt=machine.count().execute()
-    if cnt.fetchall()[0][0] > 2000:
-        print 'machine count > 2000, skipping creation'
+    cnt=machine.count().execute().scalar()
+    if cnt > 2000:
+        print 'machine count > 2000 (%s), skipping creation'%(cnt)
         return
 
     model='hs21'
@@ -146,9 +146,9 @@ def two_in_each():
     print 'done'
 
 def just_hosts():
-    cnt=host.count().execute()
-    if cnt.fetchall()[0][0] > 2000:
-        print 'host count > 2000, skipping creation'
+    cnt=host.count().execute().scalar()
+    if cnt > 2000:
+        print 'host count > 2000 (%s), skipping creation'%(cnt)
         return
     nodelist=s.query(Machine).all()
 
@@ -520,11 +520,10 @@ if __name__ == '__main__':
 
     npipm1()
     all_cells()
-    pick_servers()
-    a=show_load()
-    a.reverse()
-    for i in a:
-        print i
+    #pick_servers()
+    #a=show_load()
+    #a.reverse()
+    #for i in a:
+    #    print i
     #from shell import ipshell
     #ipshell()
-

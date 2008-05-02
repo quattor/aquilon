@@ -87,10 +87,11 @@ physical_interface=Table('physical_interface', meta,
            ForeignKey('machine.id',ondelete='CASCADE'),
            nullable=False),
     Column('name',String(32), nullable=False), #like e0, hme1, etc.
-    Column('mac', String(32), nullable=False, unique=True, index=True),
+    Column('mac', String(32), nullable=False),
     Column('boot', Boolean, default=False),
     #creation/comments supplied by Super (Interface)
-    UniqueConstraint('machine_id','name'))
+    UniqueConstraint('mac',name='mac_addr_uk'),
+    UniqueConstraint('machine_id','name',name='phy_iface_uk'))
 Index('idx_phys_int_machine_id', physical_interface.c.machine_id)
 physical_interface.create(checkfirst=True)
 
