@@ -18,6 +18,7 @@ the chain.
 import os
 import time
 import socket
+import xml.etree.ElementTree as ET
 
 from tempfile import mkdtemp, mkstemp
 from base64 import b64decode
@@ -191,27 +192,89 @@ class ProcessBroker(object):
                 % (outdep, depsdir))
         d = d.addCallback(self.run_shell_command, 'cp "%s" "%s"'
                 % (filename, hostsdir))
-        d = d.addCallback(self.buildIndex, profilesdir)
+        d = d.addCallback(lambda _: threads.deferToThread(
+                self.buildIndex, profilesdir))
         # FIXME
         d = d.addErrback(self.wrap_failure_with_rollback,
                 jobid=build_info["buildid"])
         return d
 
-    def buildIndex (self, profilesdir):
+    # This functionality (buildIndex, send_notification) may be better
+    # suited in a different module.  Here for now, though.
+    def buildIndex(self, profilesdir):
         ''' compare the mtimes of everything in profiledir against
         and index file (profiles-info.xml). Produce a new index
         and send out notifications to everything that's been updated
         and to all subscribers of the index (bootservers currently)
         '''
 
-        pass
+        profile_index = "profiles-info.xml"
 
-        #files = filter(lambda x: os.path.splitext(x) == "xml", os.listdir(profilesdir))
-        
-        # examples:
-        #self.notify(CCM_NOTIF, ["aquilon01.one-nyp.ms.com"])
-        #self.notify(CDB_NOTIF, ["np3c1n4", "np3c5n8", "np3c5n14"])
+        old_host_index = {}
+        index_path = os.path.join(profilesdir, profile_index)
+        if os.path.exists(index_path):
+            try:
+                tree = ET.parse(index_path)
+                for profile in tree.getiterator("profile"):
+                    if (profile.text and profile.attrib.has_key("mtime")):
+                        host = profile.text.strip()
+                        if host:
+                            if host.endswith(".xml"):
+                                host = host[:-4]
+                            old_host_index[host] = int(profile.attrib["mtime"])
+                            #log.msg("Stored %d for %s" % (old_host_index[host],
+                            #    host))
+            except Exception, e:
+                log.msg("Error processing %s, continuing: %s" % (index_path, e))
 
+        host_index = {}
+        modified_index = {}
+        for profile in os.listdir(profilesdir):
+            if profile == profile_index:
+                continue
+            if not profile.endswith(".xml"):
+                continue
+            host = profile[:-4]
+            host_index[host] = os.path.getmtime(
+                    os.path.join(profilesdir, profile))
+            #log.msg("Found profile for %s with mtime %d"
+            #        % (host, host_index[host]))
+            if (old_host_index.has_key(host)
+                    and host_index[host] > old_host_index[host]):
+                #log.msg("xml for %s has a newer mtime, will notify" % host)
+                modified_index[host] = host_index[host]
+
+        content = []
+        content.append("<?xml version='1.0' encoding='utf-8'?>")
+        content.append("<profiles>")
+        for host, mtime in host_index.items():
+            content.append("<profile mtime='%d'>%s.xml</profile>"
+                    % (mtime, host))
+        content.append("</profiles>")
+
+        f = open(index_path, 'w')
+        f.write("\n".join(content))
+        f.close()
+
+        # Read cdb.conf on demand so that it can be updated while the
+        # broker is running.
+        server_modules = []
+        try:
+            f = open("/etc/cdb.conf")
+            for line in f.readlines():
+                line = line.strip()
+                if not line.startswith("server_module"):
+                    continue
+                servers = line.split()
+                for server in servers[1:]:
+                    if server.strip():
+                        server_modules.append(server)
+            f.close()
+        except Exception, e:
+            log.msg("Could not retrieve list of server_modules: %s" % e)
+
+        self.send_notification(CCM_NOTIF, modified_index.keys())
+        self.send_notification(CDB_NOTIF, server_modules)
 
     def send_notification(self, type, machines):
         '''send CDP notification messages to a list of hosts. This
@@ -228,12 +291,13 @@ class ProcessBroker(object):
             port = 7777
 
         for host in machines:
-            ip = socket.gethostbyname(host)
             try:
+                log.msg("Sending %s notification to %s"
+                        % (notification_types[type], host))
+                ip = socket.gethostbyname(host)
                 sock.sendto(packet, (ip, port))
-            except:
-                pass
-
+            except Exception, e:
+                log.msg("Error notifying %s: %s", host, e)
 
     def add_domain(self, result, domain, git_path, templatesdir, kingdir,
             **kwargs):
