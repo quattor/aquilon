@@ -37,7 +37,8 @@ from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal, Realm
-from aquilon.aqdb.hardware import *
+from aquilon.aqdb.hardware import Status, Vendor, MachineType, Model, \
+        DiskType, Cpu, Machine, Disk, MachineSpecs
 from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
@@ -551,25 +552,39 @@ class DatabaseBroker(AccessBroker):
             q = q.join('machine_type').filter(MachineType.type.like(kwargs['type']+'%'))
         return printprep(q.all())
 
-    @transact
-    def del_model(self, result, name, vendor, hardware, **kwargs):
-        v = self.session.query(Vendor).filter_by(name = vendor).first()
-        if (v is None):
-            raise ArgumentError("Vendor '"+vendor+"' not found!")
-
-        h = self.session.query(HardwareType).filter_by(type = hardware).first()
-        if (h is None):
-            raise ArgumentError("Hardware type '"+hardware+"' not found!")
-
-        m = self.session.query(Model).filter_by(name = name, vendor = v, hardware_type = h).first()
-        if (m is None):
-            raise ArgumentError('Requested model was not found in the database')
-
+    # Expects to be run under a transact with a session.
+    def _get_vendor(self, vendor):
         try:
-            self.session.delete(m)
+            dbvendor = self.session.query(Vendor).filter_by(name=vendor).one()
         except InvalidRequestError, e:
-            raise ValueError("Requested operation could not be completed!\n"+ e.__str__())
-        return "Model successfully deleted"
+            raise NotFoundException("Vendor '%s' not found: %s" % (vendor, e))
+        return dbvendor
+
+    # Expects to be run under a transact with a session.
+    def _get_machine_type(self, type):
+        try:
+            dbtype = self.session.query(MachineType).filter_by(type=type).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Machine type '%s' not found: %s"
+                    % (type, e))
+        return dbtype
+
+    @transact
+    def del_model(self, result, name, vendor, type, **kwargs):
+        dbvendor = self._get_vendor(vendor)
+        dbmachine_type = self._get_machine_type(type)
+        try:
+            dbmodel = self.session.query(Model).filter_by(name=name,
+                    vendor=dbvendor, machine_type=dbmachine_type).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Model '%s' with vendor %s and type %s not found: %s"
+                    % (name, vendor, type, e))
+        for ms in dbmodel.specifications:
+            # FIXME: Log some details...
+            log.msg("Before deleting model %s %s '%s', removing machine specifications." % (type, vendor, name))
+            self.session.delete(ms)
+        self.session.delete(dbmodel)
+        return True
 
     # FIXME: This utility method may be better suited elsewhere.
     def force_int(self, label, value):

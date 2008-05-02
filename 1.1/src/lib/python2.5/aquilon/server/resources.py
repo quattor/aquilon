@@ -628,7 +628,7 @@ class ResponsePage(resource.Resource):
     
     def command_del_model(self, request):
         d = self.check_arguments(request,
-                ["name", "vendor", "hardware"])
+                ["name", "vendor", "type"])
         d = d.addCallback(self.broker.del_model,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
