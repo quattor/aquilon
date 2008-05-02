@@ -1,12 +1,27 @@
 Quickstart to getting a broker running in development:
 
+# Set up some directories for the server to use...
 mkdir -p /var/tmp/$USER/quattor
 rsync -avP -e ssh --delete quattorsrv:/var/quattor/templates /var/tmp/$USER/quattor
 rsync -avP -e ssh --delete quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
 rsync -avP -e ssh --delete quattorsrv:/var/quattor/swrep /var/tmp/$USER/quattor
-cd ~/dev/aquilon/aqd/1.1/src     # your shadow
+
+# Set up a config file for the database.  Config file could be anywhere.
+export AQDCONF="~/dev/aquilon/aqd/1.1/src/etc/aqd.conf.$USER"
+cat >$AQDCONF <<EOF;
+[database]
+logfile = /var/tmp/$USER/aqdb.log
+dsn = sqlite:////var/tmp/$USER/aquilondb/aquilon.db
+EOF
+
+# From your shadow, build a blank database.
+cd ~/dev/aquilon/aqd/1.1/src
 cd lib/python2.5/aquilon/aqdb
 ./utils/REBUILD.sh
+
+# If desired, run population_scripts.py for some fake data...
+./population_scripts.py
+
 
 To start the broker, from the bin directory of your shadow and without a proid:
 ./twistd -no -l - aqd --noknc
