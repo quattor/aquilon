@@ -472,6 +472,33 @@ class Broker(object):
         
 # --------------------------------------------------------------------------- #
 
+    def add_required_service(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_required_service, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def show_archetype(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_archetype, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def del_required_service(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "del", request_path)
+        d = d.addCallback(self.dbbroker.del_required_service, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
     def bind_service (self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "bind", request_path)

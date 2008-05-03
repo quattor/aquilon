@@ -29,12 +29,13 @@ from twisted.python.failure import Failure
 
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
-        AuthorizationException, ArgumentError
+        AuthorizationException, ArgumentError, AquilonError
 from formats import printprep
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
-from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, BuildItem
+from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, \
+        BuildItem, ServiceListItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal, Realm
 from aquilon.aqdb.hardware import Status, Vendor, MachineType, Model, \
@@ -105,7 +106,7 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def verify_add_host(self, result, hostname, machine, domain, status,
-            **kwargs):
+            archetype, **kwargs):
         # To be able to enter this host into DSDB, there must be
         # - A valid machine being attached
         # - A bootable interface attached to the machine
@@ -114,6 +115,7 @@ class DatabaseBroker(AccessBroker):
         dbdomain = self._get_domain(domain)
         dbstatus = self._get_status(status)
         dbmachine = self._get_machine(machine)
+        dbarchetype = self._get_archetype(archetype)
         if not dbmachine.interfaces:
             raise ArgumentError("Machine '%s' has no interfaces." % machine)
         found_boot = False
@@ -140,7 +142,7 @@ class DatabaseBroker(AccessBroker):
         dbmachine = self._get_machine(machine)
         (short, dbdns_domain) = self._hostname_to_domain_and_string(hostname)
         host = Host(dbmachine, dbdomain, dbstatus, name=short,
-                dns_domain=dbdns_domain,archetype=archetype)
+                dns_domain=dbdns_domain, archetype=archetype)
         self.session.save(host)
         return printprep(host)
 
@@ -292,13 +294,6 @@ class DatabaseBroker(AccessBroker):
         # Currently, for the Host to be created it *must* be associated with
         # a Machine already.  If that ever changes, need to check here and
         # bail if dbhost.machine does not exist.
-
-        # FIXME: This should be saved/stored with the Host.
-        # The archetype will factor into the include path for the compiler.
-        # There are several other scattered FIXMEs that where the aquilon
-        # archetype is hard coded.
-        archetype = self.session.query(Archetype).filter(
-                Archetype.name=="aquilon").one()
 
         # Need to get all the BuildItem objects for this host.
         # They should include:
@@ -783,6 +778,8 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def del_service(self, result, service, instance, **kwargs):
+        # This should fail nicely if there the service is required for 
+        # an archetype.
         dbservice = self._get_service(service)
         if not instance:
             self.session.delete(dbservice)
@@ -799,6 +796,48 @@ class DatabaseBroker(AccessBroker):
                     % (service, instance, e))
         self.session.delete(dbinstance)
         return "Success"
+
+    # Expects to be run under a transact with a session
+    def _get_archetype(self, archetype):
+        try:
+            dbarchetype = self.session.query(Archetype).filter_by(
+                    name=archetype).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Archetype %s not found: %s"
+                    % (archetype, e))
+        return dbarchetype
+
+    @transact
+    def add_required_service(self, result, archetype, service, comments,
+            **kwargs):
+        dbarchetype = self._get_archetype(archetype)
+        dbservice = self._get_service(service)
+        try:
+            dbsli = ServiceListItem(dbarchetype, dbservice, comments=comments)
+            self.session.save_or_update(dbsli)
+        except InvalidRequestError, e:
+            # FIXME: Is there a better generic failure error?
+            raise AquilonError("Could not add required service %s to %s: %s"
+                    % (service, archetype, e))
+
+    @transact
+    def show_archetype(self, result, archetype, **kwargs):
+        if archetype:
+            return printprep(self._get_archetype(archetype))
+        return printprep(self.session.query(Archetype).all())
+
+    @transact
+    def del_required_service(self, result, archetype, service, **kwargs):
+        dbarchetype = self._get_archetype(archetype)
+        dbservice = self._get_service(service)
+        try:
+            dbsli = self.session.query(ServiceListItem).filter_by(
+                    service=dbservice, archetype=dbarchetype).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Could not find required service %s for %s: %s"
+                    % (service, archetype, e))
+        self.session.delete(dbsli)
+        return True
 
     @transact
     def bind_service(self, result, hostname, service, instance, **kwargs):

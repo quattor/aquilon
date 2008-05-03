@@ -184,8 +184,8 @@ class ProcessBroker(object):
         domain = dbhost.domain.name
         # FIXME: Should be based on the archetype of the host.
         domaindir = os.path.join(templatesdir, domain)
-        aquilondir = os.path.join(domaindir, "aquilon")
-        includes = [ aquilondir, domaindir, plenarydir, repdir ]
+        archetypedir = os.path.join(domaindir, dbhost.archetype.name)
+        includes = [ archetypedir, domaindir, plenarydir, repdir ]
         include_line = " ".join(['-I "%s"' % include for include in includes])
         outfile = os.path.join(tempdir, fqdn + '.xml')
         outdep = outfile + '.dep'  # Yes, this ends with .xml.dep

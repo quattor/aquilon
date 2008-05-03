@@ -17,7 +17,8 @@ from twisted.python import log
 from aquilon.aqdb.db import aqdbBase, aqdbType
 from aquilon.aqdb.location import Location
 from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
-from aquilon.aqdb.service import Host, Domain
+from aquilon.aqdb.configuration import Archetype
+from aquilon.aqdb.service import Host, Domain, ServiceListItem
 
 def printprep(dbobject):
     """Make sure that any methods that will be needed later have already
@@ -43,6 +44,7 @@ def printprep(dbobject):
         printprep(dbobject.domain)
         printprep(dbobject.status)
         printprep(dbobject.templates)
+        printprep(dbobject.archetype)
     elif isinstance(dbobject, Domain):
         printprep(dbobject.server)
         printprep(dbobject.owner)
@@ -68,6 +70,12 @@ def printprep(dbobject):
         printprep(dbobject.type)
     elif isinstance(dbobject, Cpu):
         printprep(dbobject.vendor)
+    elif isinstance(dbobject, Archetype):
+        printprep(dbobject.service_list)
+    elif isinstance(dbobject, ServiceListItem):
+        # Being careful about recursion here...
+        str(dbobject.archetype)
+        str(dbobject.service)
     else:
         str(dbobject)
 
@@ -116,11 +124,14 @@ class Formatter(object):
             return self.elaborate_raw_model(item, indent)
         elif isinstance(item, Vendor):
             return self.elaborate_raw_vendor(item, indent)
+        elif isinstance(item, Archetype):
+            return self.elaborate_raw_archetype(item, indent)
         return indent + str(item)
 
     def elaborate_raw_host(self, host, indent=""):
         details = [ indent + "Hostname: %s" % host.prepped_fqdn ]
         details.append(self.elaborate_raw(host.machine, indent+"  "))
+        details.append(self.elaborate_raw(host.archetype, indent+"  "))
         details.append(self.elaborate_raw(host.domain, indent+"  "))
         details.append(self.elaborate_raw(host.status, indent+"  "))
         for build_item in host.templates:
@@ -181,6 +192,17 @@ class Formatter(object):
         details = [indent + "Model: %s %s" % (model.vendor.name, model.name)]
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
+        return "\n".join(details)
+
+    def elaborate_raw_archetype(self, archetype, indent=""):
+        details = [indent + "Archetype: %s" % archetype.name]
+        for item in archetype.service_list:
+            details.append(indent + "  Required Service: %s"
+                    % item.service.name)
+            if item.comments:
+                details.append(indent + "    Comments: %s" % item.comments)
+        if archetype.comments:
+            details.append(indent + "  Comments: %s" % archetype.comments)
         return "\n".join(details)
 
     # FIXME: This should eventually be some sort of dynamic system...

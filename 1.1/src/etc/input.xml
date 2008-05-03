@@ -231,6 +231,39 @@
       <transport method="delete" path="host/%(hostname)s/service/%(service)s/%(instance)s" />
    </command>
 
+   <command name="add_required_service">
+      %prog add required service
+      Add a required service for an archetype.
+      <optgroup name="add_required_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+         <option name="archetype" type="string" mandatory="True">archetype name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="archetype/%(archetype)s/service/%(service)s" />
+   </command>
+
+   <command name="show_archetype">
+      %prog show archetype
+      Show information about an archetype, including required services.
+      <optgroup name="show_archetype_opts">
+         <option name="archetype" type="string">archetype name</option>
+      </optgroup>
+      <transport trigger="archetype" method="get" path="archetype/%(archetype)s" />
+      <transport method="get" path="archetype" />
+   </command>
+
+   <command name="del_required_service">
+      %prog del required service
+      Delete a service from the list of required services for an archetype.
+      <optgroup name="del_required_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+         <option name="archetype" type="string" mandatory="True">archetype name</option>
+      </optgroup>
+      <transport method="delete" path="archetype/%(archetype)s/service/%(service)s" />
+   </command>
+
    <command name="del_host">
       %prog del host --name HOSTNAME
       Delete a host.

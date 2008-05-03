@@ -600,6 +600,35 @@ class ResponsePage(resource.Resource):
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
+    def command_add_required_service(self, request):
+        d = self.check_arguments(request, ['service', 'archetype'],
+                ['comments'])
+        d = d.addCallback(self.broker.add_required_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_show_archetype(self, request):
+        d = self.check_arguments(request, optional=['archetype'])
+        d = d.addCallback(self.broker.show_archetype,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_show_archetype_archetype(self, request):
+        d = self.check_arguments(request, ['archetype'])
+        d = d.addCallback(self.broker.show_archetype,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_del_required_service(self, request):
+        d = self.check_arguments(request, ['service', 'archetype'])
+        d = d.addCallback(self.broker.del_required_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
     def command_make_aquilon(self, request):
         """aqcommand: aq make aquilon --hostname=<name> --os=<os>
             [--personality=<personality>]"""
