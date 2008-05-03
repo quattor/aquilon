@@ -224,6 +224,26 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
+    def command_show_hostiplist(self, request):
+        """aqcommand: aq show hosiplist"""
+        if not getattr(request, "output_format", None):
+            request.output_format = 'csv'
+        d = self.check_arguments(request, optional=["archetype"])
+        d = d.addCallback(self.broker.show_hostiplist,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_show_hostiplist_archetype(self, request):
+        """aqcommand: aq show hosiplist"""
+        if not getattr(request, "output_format", None):
+            request.output_format = 'csv'
+        d = self.check_arguments(request, ["archetype"])
+        d = d.addCallback(self.broker.show_hostiplist,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
         d = self.check_arguments(request)

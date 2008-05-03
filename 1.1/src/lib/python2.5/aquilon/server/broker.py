@@ -414,6 +414,15 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def show_hostiplist(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_hostiplist, session=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def add_host(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)

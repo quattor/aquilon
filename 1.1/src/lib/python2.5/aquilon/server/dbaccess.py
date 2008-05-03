@@ -30,7 +30,7 @@ from twisted.python.failure import Failure
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
         AuthorizationException, ArgumentError, AquilonError
-from formats import printprep
+from formats import printprep, HostIPList
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
@@ -179,6 +179,15 @@ class DatabaseBroker(AccessBroker):
     @transact
     def show_host(self, result, hostname, **kwargs):
         return printprep(self._hostname_to_host(hostname))
+
+    @transact
+    def show_hostiplist(self, result, archetype, **kwargs):
+        hosts = HostIPList()
+        q = self.session.query(Host)
+        if archetype:
+            q = q.join('archetype').filter_by(name=archetype)
+        hosts.extend(q.all())
+        return printprep(hosts)
 
     @transact
     def verify_host(self, result, hostname, **kwargs):

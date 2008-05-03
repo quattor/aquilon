@@ -54,6 +54,16 @@
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
    </command>
 
+   <command name="show_hostiplist">
+      %prog show hostiplist
+      Shows a list of all hosts.  Can be narrowed by archetype.
+      <optgroup name="show_hostiplist_options">
+         <option name="archetype" type="string">Archetype name</option>
+      </optgroup>
+      <transport trigger="archetype" method="get" path="archetype/%(archetype)s/hostiplist" />
+      <transport method="get" path="search/hostiplist" />
+   </command>
+
    <command name="add_cpu">
       %prog add cpu --name NAME --vendor VENDOR --speed SPEED
       Add a new CPU type to the database

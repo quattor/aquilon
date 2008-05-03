@@ -28,6 +28,9 @@ def printprep(dbobject):
     SQLalchemy may not be a good idea.  What gets accessed here should
     match what is needed by the format_* methods.
     """
+    if isinstance(dbobject, FormatterList):
+        return dbobject.printprep()
+
     if isinstance(dbobject, list):
         for obj in dbobject:
             printprep(obj)
@@ -101,9 +104,18 @@ class Formatter(object):
     def format_raw(self, result, request):
         # Any sort of custom printing here might be better suited for
         # a different formatting function.
+        if isinstance(result, FormatterList):
+            return result.format_raw()
         if isinstance(result, list):
             return str("\n".join([self.elaborate_raw(item) for item in result]))
         return str(self.elaborate_raw(result))
+
+    def format_csv(self, result, request):
+        if isinstance(result, FormatterList):
+            return result.format_csv()
+        if isinstance(result, list):
+            return str("\n".join([self.elaborate_csv(item) for item in result]))
+        return str(self.elaborate_csv(result))
 
     # I don't really like this way of doing things, but needed to 
     # start somewhere...
@@ -209,19 +221,18 @@ class Formatter(object):
     # maybe try to ask result how it should be rendered, or check the
     # request for hints.  For now, just wrap in a basic document.
     def format_html(self, result, request):
-        log.msg("Formatting html")
         if request.code and request.code >= 300:
             title = "%d %s" % (request.code, request.code_message)
         else:
             title = request.path
-        if isinstance(result, list):
-            log.msg("Formatting html list")
+        if isinstance(result, FormatterList):
+            msg = result.format_html()
+        elif isinstance(result, list):
             msg = "<ul>\n<li>" + "</li>\n<li>".join(
                     ["<pre>" + self.elaborate_raw(item) + "</pre>"
                         for item in result]) + "</li>\n</ul>\n"
         else:
             msg = "<pre>" + self.elaborate_raw(result) + "</pre>"
-        log.msg("Creating return value")
         retval = """
         <html>
         <head><title>%s</title></head>
@@ -232,5 +243,47 @@ class Formatter(object):
         """ % (title, msg)
         return str(retval)
 
+    # Expects to be formatting a single record... not sure if there is
+    # anything fancier that could be done by default.
+    def elaborate_csv(self, result):
+        return str(result)
+
+
+# Some refactoring is needed before this container would make any sense on
+# its own...
+class FormatterList(list):
+    def printprep(self):
+        for item in self:
+            str(self)
+        return self
+
+    def format_raw(self):
+        return str("\n".join([str(item) for item in self]))
+
+    def format_csv(self):
+        return str("\n".join([str(item) for item in self]))
+
+    def format_html(self):
+        return str("\n".join([str(item) for item in self]))
+
+
+# By convention, holds Host objects.
+class HostIPList(FormatterList):
+    def printprep(self):
+        for host in self:
+            str(host.fqdn)
+            self.get_host_ip(host)
+        return self
+
+    def format_csv(self):
+        return str("\n".join(
+                [str(",".join([host.fqdn, self.get_host_ip(host)]))
+                    for host in self]))
+
+    def get_host_ip(self, host):
+        for interface in host.machine.interfaces:
+            if interface.boot:
+                return str(interface.ip)
+        return ""
 
 #if __name__=='__main__':
