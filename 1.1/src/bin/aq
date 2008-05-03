@@ -31,6 +31,8 @@ from twisted.web import http, error as web_error
 
 from aquilon.client.optparser import OptParser, ParsingError
 
+return_code = 0
+
 # FIXME: This should probably be broken out into its own file at some
 # point.  The tricky part is making sure getPage is picked up correctly.
 # The getPage method will need to handle different response types
@@ -87,9 +89,11 @@ class CommandPassThrough(protocol.ProcessProtocol):
 def cb_command_response(code):
     if code:
         print >>sys.stderr, "Return code: %d" % code
+        globals()["return_code"] = code
 
 def cb_command_error(signalNum):
     print >>sys.stderr, "Error running command, received signal %d" % signalNum
+    globals()["return_code"] = 1
 
 def gotPage(pageData, uri, expect, globalOptions):
     if expect == 'command':
@@ -98,7 +102,6 @@ def gotPage(pageData, uri, expect, globalOptions):
             return
         d = defer.Deferred()
         p = CommandPassThrough(d)
-        # FIXME: Does the command transport need to be any more complicated?
         reactor.spawnProcess(p, "/bin/sh", ("/bin/sh", "-c", pageData),
                                 os.environ, '.')
         d = d.addCallbacks(cb_command_response, cb_command_error)
@@ -168,15 +171,22 @@ def handleFailure(failure, uri, globalOptions):
     if failure.check(error.ProcessTerminated):
         print "Communications subprocess terminated:", failure.getErrorMessage()
     elif failure.check(web_error.Error):
-        # FIXME: The 500 responses are nicely formatted html that do not
-        # look right... maybe try to run them through a local formatter?
-        # Or could just try to configure the server to send something raw...
         if globalOptions.get("httpinfo"):
             print "[%s] %s" % (failure.value.status, uri)
         print "%s: %s" % (http.RESPONSES.get(int(failure.value.status)),
                 failure.value.response)
+        # Quick hack... failure codes will usually be 4xx or 5xx...
+        # maybe it will help to encode that in the return code.
+        try:
+            return_code = int(failure.value.status) / 100
+        except ValueError, e:
+            # No big deal - return_code will be set to 1 later.
+            pass
     else:
         print "Error:", failure.getErrorMessage()
+    if not return_code:
+        return_code = 1
+    globals()["return_code"] = return_code
 
 if __name__ == "__main__":
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
@@ -292,4 +302,6 @@ if __name__ == "__main__":
     #import pdb
     #pdb.set_trace()
     reactor.run()
+    # The global variable return_code gets set in the various error handlers.
+    sys.exit(return_code)
 
