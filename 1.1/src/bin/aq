@@ -178,15 +178,14 @@ def handleFailure(failure, uri, globalOptions):
         # Quick hack... failure codes will usually be 4xx or 5xx...
         # maybe it will help to encode that in the return code.
         try:
-            return_code = int(failure.value.status) / 100
+            globals()["return_code"] = int(failure.value.status) / 100
         except ValueError, e:
             # No big deal - return_code will be set to 1 later.
             pass
     else:
         print "Error:", failure.getErrorMessage()
-    if not return_code:
-        return_code = 1
-    globals()["return_code"] = return_code
+    if not globals()["return_code"]:
+        globals()["return_code"] = 1
 
 if __name__ == "__main__":
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
