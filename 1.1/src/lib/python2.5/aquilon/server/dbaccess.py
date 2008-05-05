@@ -416,7 +416,7 @@ class DatabaseBroker(AccessBroker):
         dbuser = self.session.query(UserPrincipal).filter_by(
                 name=user.strip().lower(), realm=dbrealm).first()
         if not dbuser:
-            dbuser = UserPrincipal(user, dbrealm)
+            dbuser = UserPrincipal(user, realm=dbrealm)
             self.session.save(dbuser)
         return dbuser
 
