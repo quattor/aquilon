@@ -37,6 +37,7 @@ from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, \
         BuildItem, ServiceListItem, ServiceMap
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
+from aquilon.aqdb.roles import Role
 from aquilon.aqdb.auth import UserPrincipal, Realm
 from aquilon.aqdb.hardware import Status, Vendor, MachineType, Model, \
         DiskType, Cpu, Machine, Disk, MachineSpecs
@@ -408,7 +409,7 @@ class DatabaseBroker(AccessBroker):
         user = m.group(1)
         dbrealm = self.session.query(Realm).filter_by(name=realm).first()
         if not dbrealm:
-            dbrealm = Realm(realm)
+            dbrealm = Realm(name=realm)
             self.session.save(dbrealm)
             dbuser = UserPrincipal(user, realm=dbrealm)
             self.session.save(dbuser)
@@ -419,6 +420,10 @@ class DatabaseBroker(AccessBroker):
             dbuser = UserPrincipal(user, realm=dbrealm)
             self.session.save(dbuser)
         return dbuser
+
+    @transact
+    def get_user(self, result, user):
+        return printprep(self._get_or_create_UserPrincipal(user))
 
     @transact
     def add_domain(self, result, domain, user, **kwargs):
@@ -482,7 +487,7 @@ class DatabaseBroker(AccessBroker):
         stat.extend(self.session.query(Domain).all())
         dbuser = self._get_or_create_UserPrincipal(user)
         if dbuser:
-            stat.append("Connected as: %s" % dbuser)
+            stat.append("Connected as: %s [%s]" % (dbuser, dbuser.role.name))
         for line in stat:
             printprep(line)
 
@@ -947,6 +952,65 @@ class DatabaseBroker(AccessBroker):
         # FIXME: Instance is ignored for now.
         dblocation = self._get_location(**kwargs)
         raise UnimplementedError("aq unmap service has not been implemented yet.")
+
+    @transact
+    def show_principal(self, result, principal, **kwargs):
+        if not principal:
+            return printprep(self.session.query(UserPrincipal).all())
+        m = self.principal_re.match(principal)
+        if not m:
+            raise ArgumentError("Could not parse user principal '%s'"
+                    % principal)
+        realm = m.group(2)
+        user = m.group(1)
+        try:
+            dbuser = self.session.query(UserPrincipal).filter_by(
+                    name=user).join('realm').filter_by(name=realm).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Principal '%s' not found: %s"
+                    % (principal, e))
+        return printprep(dbuser)
+
+    # Expects to be run under a @transact with a session.
+    def _get_role(self, role):
+        try:
+            dbrole = self.session.query(Role).filter_by(name=role).one()
+        except InvalidRequestError, e:
+            raise ArgumentError("Role %s invalid (try one of %s): %s"
+                    % (role, [str(role.name) for role in
+                        self.session.query(Role).all()], str(e)))
+        return dbrole
+
+    @transact
+    def permission(self, result, principal, role, createuser, createrealm,
+            **kwargs):
+        dbrole = self._get_role(role)
+        m = self.principal_re.match(principal)
+        if not m:
+            raise ArgumentError("Could not parse user principal '%s'"
+                    % principal)
+        realm = m.group(2)
+        user = m.group(1)
+        dbrealm = self.session.query(Realm).filter_by(name=realm).first()
+        if not dbrealm:
+            if not createrealm:
+                raise ArgumentError("Could not find realm '%s' to create principal '%s', use --createrealm to create a new record for the realm."
+                        % (realm, principal))
+            dbrealm = Realm(name=realm)
+            self.session.save(dbrealm)
+        dbuser = self.session.query(UserPrincipal).filter_by(name=user,
+                realm=dbrealm).first()
+        if not dbuser:
+            if not createuser and not createrealm:
+                raise ArgumentError("Could not find principal '%s' to permission, use --createuser to create a new record for the principal."
+                        % principal)
+            dbuser = UserPrincipal(user, realm=dbrealm)
+            self.session.save(dbuser)
+        # FIXME: Might want to force that at least one user retains aqd_admin
+        # rights after this process.
+        dbuser.role = dbrole
+        self.session.save_or_update(dbuser)
+        return True
 
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_domain_and_string(self, hostname):

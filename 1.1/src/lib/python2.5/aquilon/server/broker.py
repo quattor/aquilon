@@ -575,3 +575,21 @@ class Broker(object):
         
 # --------------------------------------------------------------------------- #
 
+    def show_principal(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_principal, session=True, user=user,
+                **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def permission(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "permission", request_path)
+        d = d.addCallback(self.dbbroker.permission, session=True, user=user,
+                **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+

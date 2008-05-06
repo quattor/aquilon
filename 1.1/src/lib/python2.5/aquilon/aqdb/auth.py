@@ -11,6 +11,7 @@
 from __future__ import with_statement
 import datetime
 import sys
+import os
 sys.path.append('../..')
 
 from db import *
@@ -76,11 +77,28 @@ if __name__ == '__main__':
         r=s.query(Realm).first()
         assert(r.name == 'is1.morgan')
 
-        for nm in ['njw', 'daqscott', 'wesleyhe', 'guyrol', 'quattor','cdb']:
+        userlist = ['njw', 'daqscott', 'wesleyhe', 'guyrol', 'quattor','cdb']
+        for nm in userlist:
             up=UserPrincipal(nm,realm=r)
             s.save(up)
             s.commit()
-    print 'inserted some example user principals'
+
+        print 'inserted some example user principals'
+
+        currentuser = os.environ.get('USER')
+        if not currentuser in userlist:
+            up = UserPrincipal(currentuser, realm=r)
+            s.save(up)
+            s.commit()
+
+        adminrole = s.query(Role).filter_by(name='aqd_admin').one()
+        dbuser = s.query(UserPrincipal).filter_by(
+                name=currentuser, realm=r).one()
+        dbuser.role = adminrole
+        s.save_or_update(dbuser)
+        s.commit()
+
+        print 'made %s an admin' % dbuser.name
 
     a = s.query(UserPrincipal).first()
     assert(a)

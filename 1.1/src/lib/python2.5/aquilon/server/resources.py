@@ -747,6 +747,28 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
+    def command_show_principal(self, request):
+        d = self.check_arguments(request, optional=["principal"])
+        d = d.addCallback(self.broker.show_principal,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_show_principal_principal(self, request):
+        d = self.check_arguments(request, ["principal"])
+        d = d.addCallback(self.broker.show_principal,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_permission(self, request):
+        d = self.check_arguments(request, ["principal", "role"],
+                ["createuser", "createrealm"])
+        d = d.addCallback(self.broker.permission,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
 #==============================================================================
 
 class RestServer(ResponsePage):

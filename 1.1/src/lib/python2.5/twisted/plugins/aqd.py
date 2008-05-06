@@ -81,7 +81,8 @@ class AQDMaker(object):
         #    return dbbroker.startup().addCallback(carryOn)
         #reactor.callWhenRunning(initDatabase, dbbroker)
 
-        azbroker = AuthorizationBroker()
+        # FIXME: This is due to be reworked.
+        azbroker = AuthorizationBroker(dbbroker)
 
         # FIXME: This object should probably be handed a config file,
         # and then go off and create the dbbroker and azbroker...

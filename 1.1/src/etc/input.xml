@@ -139,7 +139,7 @@
          <option name="vendor" type="string">Vendor name</option>
          <option name="type" type="string">Machine type name</option>
       </optgroup>
-      <transport method="get" path="/find/hardware/model" />
+      <transport method="get" path="find/hardware/model" />
    </command>
 
    <command name="del_model">
@@ -741,7 +741,7 @@
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">serial number</option>
       </optgroup>
-      <transport method="put" path="/machine/%(machine)s" />
+      <transport method="put" path="machine/%(machine)s" />
    </command>
 
    <command name="show_machine">
@@ -754,8 +754,8 @@
          </optgroup>
          <option name="model" type="string">machine model</option>
       </optgroup>
-      <transport trigger="machine" method="get" path="/machine/%(machine)s" />
-      <transport method="get" path="/find/machine" />
+      <transport trigger="machine" method="get" path="machine/%(machine)s" />
+      <transport method="get" path="find/machine" />
    </command>
 
    <command name="del_machine">
@@ -763,7 +763,29 @@
       <optgroup name="del_machine_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine name</option>
       </optgroup>
-      <transport method="delete" path="/machine/%(machine)s" />
+      <transport method="delete" path="machine/%(machine)s" />
+   </command>
+
+   <command name="show_principal">
+      %prog show principal
+      <optgroup name="show_role_opts" mandatory="False">
+         <option name="principal" type="string">User Principal to check</option>
+      </optgroup>
+      <transport method="get" path="principal" />
+      <transport trigger="principal" method="get" path="principal/%(principal)s" />
+   </command>
+
+   <command name="permission">
+      %prog permission
+      <optgroup name="permission_opts" mandatory="True">
+         <option name="principal" type="string">User Principal to change</option>
+         <option name="role" type="string">Role to use</option>
+      </optgroup>
+      <optgroup name="permission_optional_opts">
+         <option name="createuser" type="boolean">Create an entry for the user if one does not exist</option>
+         <option name="createrealm" type="boolean">Create an entry for the realm if one does not exist (implies --createuser)</option>
+      </optgroup>
+      <transport method="put" path="principal/%(principal)s/role" />
    </command>
 
 </commandline>

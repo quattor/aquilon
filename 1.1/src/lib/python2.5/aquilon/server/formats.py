@@ -19,6 +19,7 @@ from aquilon.aqdb.location import Location
 from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
 from aquilon.aqdb.configuration import Archetype
 from aquilon.aqdb.service import Host, Domain, ServiceListItem
+from aquilon.aqdb.auth import UserPrincipal
 
 def printprep(dbobject):
     """Make sure that any methods that will be needed later have already
@@ -79,6 +80,9 @@ def printprep(dbobject):
         # Being careful about recursion here...
         str(dbobject.archetype)
         str(dbobject.service)
+    elif isinstance(dbobject, UserPrincipal):
+        printprep(dbobject.realm)
+        printprep(dbobject.role)
     else:
         str(dbobject)
 
@@ -138,6 +142,8 @@ class Formatter(object):
             return self.elaborate_raw_vendor(item, indent)
         elif isinstance(item, Archetype):
             return self.elaborate_raw_archetype(item, indent)
+        elif isinstance(item, UserPrincipal):
+            return self.elaborate_raw_userprincipal(item, indent)
         return indent + str(item)
 
     def elaborate_raw_host(self, host, indent=""):
@@ -215,6 +221,13 @@ class Formatter(object):
                 details.append(indent + "    Comments: %s" % item.comments)
         if archetype.comments:
             details.append(indent + "  Comments: %s" % archetype.comments)
+        return "\n".join(details)
+
+    def elaborate_raw_userprincipal(self, userprincipal, indent=""):
+        details = [indent + "UserPrincipal: %s [role: %s]" % 
+                (userprincipal, userprincipal.role.name)]
+        if userprincipal.comments:
+            details.append(indent + "  Comments: %s" % userprincipal.comments)
         return "\n".join(details)
 
     # FIXME: This should eventually be some sort of dynamic system...
