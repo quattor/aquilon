@@ -320,13 +320,6 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
 
     def command_get(self, request):
-        """aqcommand: aq get"""
-
-        request.args["domain"] = [self.broker.domain_name]
-
-        return self.command_get_domain(request)
-
-    def command_get_domain(self, request):
         """aqcommand: aq get --domain=<domain>"""
         d = self.check_arguments(request, ["domain"])
         d = d.addCallback(self.broker.get,
@@ -359,14 +352,6 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
 
     def command_sync(self, request):
-        """aqcommand: aq sync"""
-
-        # FIXME: This should be the user's current domain, as set by aq config.
-        request.args["domain"] = [self.broker.domain_name]
-
-        return self.command_sync_domain(request)
-
-    def command_sync_domain(self, request):
         """aqcommand: aq sync --domain=<domain>"""
         d = self.check_arguments(request, ["domain"])
         d = d.addCallback(self.broker.sync,
