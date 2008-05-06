@@ -274,6 +274,69 @@
       <transport method="delete" path="archetype/%(archetype)s/service/%(service)s" />
    </command>
 
+   <command name="map_service">
+      %prog map service
+      Map a service instance to a location.
+      <optgroup name="map_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+         <option name="instance" type="string" mandatory="True">instance name</option>
+      </optgroup>
+      <optgroup name="map_service_location_opts" mandatory="True" fields="any">
+         <option name="company" type="string">Company</option>
+         <option name="hub" type="string">Hub</option>
+         <option name="continent" type="string">Continent</option>
+         <option name="country" type="string">Country</option>
+         <option name="city" type="string">City</option>
+         <option name="building" type="string">Building</option>
+         <option name="rack" type="string">Rack</option>
+         <option name="chassis" type="string">Chassis</option>
+         <option name="desk" type="string">Desk</option>
+      </optgroup>
+      <transport method="post" path="service/%(service)s/%(instance)s/command/map" />
+   </command>
+
+   <command name="show_map">
+      %prog show map
+      Show any relevant mappings for the given service, instance, or location.
+      <optgroup name="show_map_opts" mandatory="True" fields="any">
+         <option name="service" type="string">service name</option>
+         <option name="instance" type="string">instance name</option>
+         <optgroup name="show_map_location_opts" fields="any">
+            <option name="company" type="string">Company</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="chassis" type="string">Chassis</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="get" path="show/map" />
+   </command>
+
+   <command name="unmap_service">
+      %prog unmap service
+      Remove the map from a service instance to a location.
+      <optgroup name="unmap_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+         <option name="instance" type="string" mandatory="True">instance name</option>
+      </optgroup>
+      <optgroup name="unmap_service_location_opts" mandatory="True" fields="any">
+         <option name="company" type="string">Company</option>
+         <option name="hub" type="string">Hub</option>
+         <option name="continent" type="string">Continent</option>
+         <option name="country" type="string">Country</option>
+         <option name="city" type="string">City</option>
+         <option name="building" type="string">Building</option>
+         <option name="rack" type="string">Rack</option>
+         <option name="chassis" type="string">Chassis</option>
+         <option name="desk" type="string">Desk</option>
+      </optgroup>
+      <transport method="post" path="service/%(service)s/%(instance)s/command/unmap" />
+   </command>
+
    <command name="del_host">
       %prog del host --name HOSTNAME
       Delete a host.

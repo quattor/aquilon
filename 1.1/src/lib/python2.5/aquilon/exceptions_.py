@@ -69,6 +69,10 @@ class NotFoundException(AquilonError):
     """Raised when a requested resource cannot be found."""
 
 
+class UnimplementedError(AquilonError):
+    """Raised when a command has not been implemented."""
+
+
 class DetailedProcessException(AquilonError):
     """Raised when more details about a process exception should
     be shown to the client.

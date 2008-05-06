@@ -526,6 +526,33 @@ class Broker(object):
         
 # --------------------------------------------------------------------------- #
 
+    def map_service(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "map", request_path)
+        d = d.addCallback(self.dbbroker.map_service, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def show_map(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_map, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def unmap_service(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "unmap", request_path)
+        d = d.addCallback(self.dbbroker.unmap_service, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
     def cat_hostname(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "cat", request_path)

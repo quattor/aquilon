@@ -51,7 +51,7 @@ from twisted.internet import defer, utils, threads
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
-        NotFoundException
+        NotFoundException, UnimplementedError
 from aquilon.server.formats import Formatter
 
 class ResponsePage(resource.Resource):
@@ -188,13 +188,15 @@ class ResponsePage(resource.Resource):
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
         r = failure.trap(NotFoundException, AuthorizationException,
-                ArgumentError)
+                ArgumentError, UnimplementedError)
         if r == NotFoundException:
             request.setResponseCode(http.NOT_FOUND)
         elif r == AuthorizationException:
             request.setResponseCode(http.UNAUTHORIZED)
         elif r == ArgumentError:
             request.setResponseCode(http.BAD_REQUEST)
+        elif r == UnimplementedError:
+            request.setResponseCode(http.NOT_IMPLEMENTED)
         formatted = self.format(failure.value, request)
         return self.finishRender(formatted, request)
 
@@ -645,6 +647,33 @@ class ResponsePage(resource.Resource):
     def command_del_required_service(self, request):
         d = self.check_arguments(request, ['service', 'archetype'])
         d = d.addCallback(self.broker.del_required_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_map_service(self, request):
+        d = self.check_arguments(request, ['service', 'instance'],
+                ['company', 'hub', 'continent', 'country', 'city', 'building',
+                    'rack', 'chassis', 'desk'])
+        d = d.addCallback(self.broker.map_service,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_show_map(self, request):
+        d = self.check_arguments(request, optional=['service', 'instance',
+                'company', 'hub', 'continent', 'country', 'city', 'building',
+                    'rack', 'chassis', 'desk'])
+        d = d.addCallback(self.broker.show_map,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_unmap_service(self, request):
+        d = self.check_arguments(request, ['service', 'instance'],
+                ['company', 'hub', 'continent', 'country', 'city', 'building',
+                    'rack', 'chassis', 'desk'])
+        d = d.addCallback(self.broker.unmap_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)

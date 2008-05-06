@@ -29,13 +29,13 @@ from twisted.python.failure import Failure
 
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
-        AuthorizationException, ArgumentError, AquilonError
+        AuthorizationException, ArgumentError, AquilonError, UnimplementedError
 from formats import printprep, HostIPList
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, \
-        BuildItem, ServiceListItem
+        BuildItem, ServiceListItem, ServiceMap
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal, Realm
 from aquilon.aqdb.hardware import Status, Vendor, MachineType, Model, \
@@ -899,6 +899,54 @@ class DatabaseBroker(AccessBroker):
             self.session.flush()
             self.session.refresh(dbhost)
         return printprep(dbhost)
+
+    # Expects to be run under a @transact method with session=True.
+    def _get_location(self, **kwargs):
+        location_type = None
+        for lt in const.location_types:
+            if kwargs.get(lt):
+                if location_type:
+                    raise ArgumentError("Single location can not be both %s and %s"
+                            % (lt, location_type))
+                location_type = lt
+        if not location_type:
+            return None
+        try:
+            dblocation = self.session.query(Location).filter_by(
+                    name=kwargs[location_type]).join('type').filter_by(
+                    type=location_type).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("%s '%s' not found: %s"
+                    % (location_type.capitalize(), kwargs[location_type], e))
+        return dblocation
+
+    @transact
+    def map_service(self, result, service, instance, **kwargs):
+        dbservice = service and self._get_service(service) or None
+        # FIXME: Instance is ignored for now.
+        dblocation = self._get_location(**kwargs)
+        raise UnimplementedError("aq map service has not been implemented yet.")
+
+    @transact 
+    def show_map(self, result, service, instance, **kwargs):
+        dbservice = service and self._get_service(service) or None
+        # FIXME: Instance is ignored for now.
+        dblocation = self._get_location(**kwargs)
+        # Nothing fancy for now - just show any relevant explicit bindings.
+        q = self.session.query(ServiceMap)
+        if dbservice:
+            q = q.join('service_instance').filter_by(service=dbservice)
+            q = q.reset_joinpoint()
+        if dblocation:
+            q = q.filter_by(location=dblocation)
+        return printprep(q.all())
+
+    @transact
+    def unmap_service(self, result, service, instance, **kwargs):
+        dbservice = service and self._get_service(service) or None
+        # FIXME: Instance is ignored for now.
+        dblocation = self._get_location(**kwargs)
+        raise UnimplementedError("aq unmap service has not been implemented yet.")
 
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_domain_and_string(self, hostname):
