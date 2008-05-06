@@ -16,17 +16,20 @@ import os
 from socket import gethostname
 
 import msversion
-msversion.addpkg('sqlalchemy','0.4.4','dist')
+msversion.addpkg('sqlalchemy','0.4.5','dist')
 
-from sqlalchemy import MetaData, create_engine,  UniqueConstraint
-from sqlalchemy import Table, Integer, DateTime, Sequence, String, select
-from sqlalchemy import Column as _Column
-from sqlalchemy import ForeignKey as _fk
+from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
+                        Integer, DateTime, Sequence, String, select,
+                        Column as _Column, ForeignKey as _fk )
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import insert, text
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exceptions import SQLError
 
-# TODO: This should go away and use the aquilonConfig when it's 
+
+
+
+# TODO: This should go away and use the aquilonConfig when it's
 # available...
 class dbConfig:
     def __init__(self, defaults):
@@ -67,25 +70,44 @@ dsn = config["dsn"]
 if dsn is None:
     # should really raise an error, but right now
     # it doesn't really matter what we do - it blows up twisted
-    # in a big way to do anything bad here... 
+    # in a big way to do anything bad here...
     # TODO: raise(somethingBad)
     sys.exit(9)
 
 if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
     import cx_Oracle
-
-    os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
+    if not os.environ['ORACLE_HOME']:
+        os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
         os.environ['ORACLE_SID']=config["server"]
 
 engine = create_engine(dsn)
-engine.connect()
+
+try:
+    engine.connect()
+except Exception,e:
+    print e
+    print 'DSN ',dsn
+    if dsn.startswith('oracle'):
+        print 'ENVIRONMENT VARS:'
+        print os.environ['ORACLE_HOME']
+        print os.environ['ORACLE_SID']
+    sys.exit(1)
+
 meta  = MetaData(engine)
 
 Session = scoped_session(sessionmaker(bind=engine,
                                       autoflush=True,
                                       transactional=True))
+
+# for trying out the declarative mapper for Role. The hope is this will
+# cut more time off the development cycle since Base includes a constructor
+
+Base = declarative_base(metadata=meta)
+
+#class aqdbDeclarativeBase(Base):
+#    pass
 
 def optional_comments(func):
     """ reduce repeated code to handle 'comments' column """
@@ -95,6 +117,46 @@ def optional_comments(func):
             setattr(__args[0], ATTR, __kw.pop(ATTR))
         return func(*__args, **__kw)
     return comments_decorator
+
+class newaqdbBase(object):
+    """ Attempt to be even more general than the first one """
+    def set_attributes (self, kw):
+        columns = list(self.__class__.table.columns)
+        columnhash = {}
+        for i in columns:
+            columnhash[i.name] = i
+        for key, value in kw.iteritems():
+            if columnhash.has_key(key):
+                setattr(self, key, value)
+            else: # we've got something which is not in the table
+                key_id = key+"_id"
+                # ex: if we've got "vendor", we find "vendor_id"
+                if columnhash.has_key(key_id):
+                    # check the type
+                    if isinstance(value, str): # we've got string, which means we'll look name column
+                        try:
+                            # get the class
+                            baseclass = globals()[key.capitalize()]
+                        except KeyError:
+                            pass # FIXME
+                        result = s.query(baseclass).filter(baseclass.name==value).all()
+                        if len(result) == 0: # not found
+                            pass # FIXME
+                        else:
+                            setattr(self, key, result[0])
+                    else: # it's something different than string
+                        setattr(self, key, value)
+
+    @optional_comments
+    def __init__(self,**kw):
+        self.set_attributes(kw)
+    def __repr__(self):
+        if hasattr(self,'name'):
+            return self.__class__.__name__ + " " + str(self.name)
+        elif hasattr(self,'system'):
+            return self.__class__.__name__ + " " + str(self.system.name)
+        else:
+            return '%s instance '%(self.__class__.__name__)
 
 class aqdbBase(object):
     """ AQDB base class: All ORM classes will extend aqdbBase.
@@ -319,7 +381,7 @@ def drop_all_tables_and_sequences():
             except SQLError, e:
                 print >> sys.stderr, e
 
-def clean_fake_date():
+def clean_fake_data():
     #TODO: add service_inst, service_map, and use Session if only
     # to test session.delete()
     _drop= """

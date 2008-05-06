@@ -19,26 +19,17 @@ from sqlalchemy import Table, Column, Integer, Sequence, String
 from sqlalchemy import DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
-realm = Table('realm', meta,
-    Column('id', Integer, Sequence('realm_id_seq'), primary_key=True),
-    Column('name', String(64), nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('name',name='realm_uk'))
-realm.create(checkfirst=True)
-
-class Realm(aqdbBase):
-    pass
-
-mapper(Realm,realm,properties={
-    'creation_date' : deferred(realm.c.creation_date),
-    'comments'      : deferred(realm.c.comments)
-})
+from roles import Role,Realm
 
 user_principal = Table('user_principal', meta,
     Column('id', Integer, Sequence('user_principal_id_seq'), primary_key=True),
     Column('name', String(32), nullable=False),
-    Column('realm_id', Integer, ForeignKey('realm.id'), nullable=False),
+    Column('realm_id', Integer,
+           ForeignKey('realm.id', name='usr_princ_rlm_fk'), nullable=False),
+    Column('role_id', Integer,
+           ForeignKey('role.id', name='usr_princ_role_fk'),
+           nullable=False, default = id_getter(Role.__table__,
+                                               Role.__table__.c.name,'nobody')),
     Column('creation_date', DateTime,
            nullable=False, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
@@ -71,7 +62,8 @@ class UserPrincipal(aqdbBase):
         return ' '.join([self.__class__.__name__,str(self)])
 
 mapper(UserPrincipal,user_principal, properties={
-    'realm'         : relation(Realm,uselist=False),
+    'realm'         : relation(Realm, uselist=False),
+    'role'          : relation(Role, uselist=False),
     'creation_date' : deferred(user_principal.c.creation_date),
     'comments'      : deferred(user_principal.c.comments)
 })
@@ -79,15 +71,8 @@ mapper(UserPrincipal,user_principal, properties={
 
 if __name__ == '__main__':
     s = Session()
-    if empty(realm):
-        r=Realm('is1.morgan')
-        s.save(r)
-        s.commit()
-        assert(r)
-        s.close()
 
     if empty(user_principal):
-        #i=user_principal.insert()
         r=s.query(Realm).first()
         assert(r.name == 'is1.morgan')
 

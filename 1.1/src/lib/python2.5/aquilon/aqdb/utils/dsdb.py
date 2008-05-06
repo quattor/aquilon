@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""If you can read this, you should be Documenting"""
 
 import msversion
 msversion.addpkg('sybase', '0.38-py25', 'dist')
@@ -103,7 +103,7 @@ SELECT
 
 
 class aqsyb:
-    '''Wraps connections and calls to sybase'''
+    """Wraps connections and calls to sybase"""
     def __init__(self,dsn,database):
         if os.environ['USER'] == 'daqscott' and dsn == 'NYP_DSDB11':
             #print 'using kerberos authentication'
@@ -124,22 +124,22 @@ class aqsyb:
                                   database,datetime='auto',auto_commit = '0')
 
     def run_query(self,sql):
-        '''Runs query sql. Note use runSybaseProc to call a stored procedure.
+        """Runs query sql. Note use runSybaseProc to call a stored procedure.
             Parameters:
                 sql - SQL to run
             Returns:
-                Sybase cursor object'''
+                Sybase cursor object"""
         rs = self.syb.cursor()
         rs.execute(sql)
         return rs
 
     def run_proc(self, proc, parameters):
-        '''Runs procedure with supplied parameters.
+        """Runs procedure with supplied parameters.
             Parameters:
                 proc - Proc to call
                 paramaters - List of parameters to the stored proc.
             Returns:
-                Sybase cursor object'''
+                Sybase cursor object"""
         rs = self.syb.cursor()
         try:              #not so sure we need all the fancyness
             rs.callproc(proc, parameters)
@@ -153,11 +153,11 @@ class aqsyb:
 
 def test():
     syb = aqsyb(DATABASE,'dsdb')
-    sql    = '''select boot_path from network_host A, bootparam B where
+    sql    = """select boot_path from network_host A, bootparam B where
             A.host_name = \'blackcomb\'
             AND A.machine_id = B.machine_id
             AND B.boot_key = \'podname\'
-            AND B.state >= 0'''
+            AND B.state >= 0"""
     foo = syb.run_query(sql)
     pod = foo.fetchall()[0][0]
     assert pod == 'eng.ny'
@@ -184,6 +184,7 @@ def dump_network():
     return db.run_query(get_network).fetchall()
 
 def esp():
+    print DATABASE
     db = aqsyb(DATABASE,'dsdb')
     return db.run_query(host_info).fetchall()
 

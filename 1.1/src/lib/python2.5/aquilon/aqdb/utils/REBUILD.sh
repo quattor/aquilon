@@ -15,6 +15,8 @@ time ./location.py
 echo
 time ./network.py
 echo
+time ./roles.py
+echo
 time ./auth.py
 echo
 time ./configuration.py

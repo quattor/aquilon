@@ -25,7 +25,8 @@ from aquilon.exceptions_ import ArgumentError
 def mk_loc_table(name, meta, *args, **kw):
     return Table(name, meta,
                 Column('id',Integer, Sequence('%s_id_seq'%name),
-                       ForeignKey('location.id'), primary_key=True),
+                       ForeignKey('location.id',name='%s_loc_fk'%(name)),
+                       primary_key=True),
             *args,**kw)
 
 location_type = mk_type_table('location_type',meta)
@@ -43,11 +44,13 @@ if empty(location_type):
 
 location = Table('location', meta,
     Column('id', Integer, Sequence('location_id_seq'), primary_key=True),
-    Column('parent_id', Integer, ForeignKey('location.id')),
+    Column('parent_id', Integer, ForeignKey('location.id',
+                                            name='loc_parent_fk')),
     Column('name', String(16), nullable=False),
     Column('fullname', String(64), nullable=True),
     Column('location_type_id', Integer,
-           ForeignKey('location_type.id'), nullable=False),
+           ForeignKey('location_type.id', name='loc_loc_type_fk'),
+           nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('name', 'location_type_id', name='loc_name_type_uk'))

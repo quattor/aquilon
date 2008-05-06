@@ -7,10 +7,9 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
-'''The Twisted modules used by the server really do not get along
-well with ipython.  If we are in the server, wrap the call so that
-it does not get brought in.'''
+"""The Twisted modules used by the server really do not get along well with
+    ipython.  If we are in the server, wrap the call so that it does not get
+    brought in. """
 
 import sys
 import os
@@ -49,5 +48,14 @@ if __name__ == '__main__':
     from auth import *
     #from population_scripts import *
     s=Session()
+
+    #hl=s.query(HostList).first()
+    #print 'hl is %s'%(hl)
+    #
+    #hosts=s.query(Host).all()
+    #print '%s hosts is list'%(len(hosts))
+    #
+    #hli=HostListItem(hostlist=hl,host=hosts[1], postition=1, comments='FAKE')
+
 
     ipshell()

@@ -42,8 +42,9 @@ from configuration import *
 
 from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
 from sqlalchemy import select, insert
-from sqlalchemy.orm import mapper, relation, deferred, synonym, backref, object_session
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm import (mapper, relation, deferred, synonym, backref,
+                            object_session)
+
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_, not_
 
@@ -125,7 +126,7 @@ if empty(system_type):
     fill_type_table(system_type,['base_system_type',
                                  'host', 'afs_cell',
                                  'quattor_server',
-                                 'sybase_instance'])
+                                 'host_list'])
 
 system = Table('system',meta,
     Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
@@ -203,7 +204,8 @@ mapper(System, system, polymorphic_on=system.c.type_id, \
 
 quattor_server = Table('quattor_server',meta,
     Column('id', Integer,
-           ForeignKey('system.id',ondelete='CASCADE'), primary_key=True))
+           ForeignKey('system.id', ondelete='CASCADE',name='qs_system_fk'),
+           primary_key=True))
 quattor_server.create(checkfirst=True)
 
 class QuattorServer(System):
@@ -222,7 +224,8 @@ class QuattorServer(System):
 mapper(QuattorServer,quattor_server,
         inherits=System,
         polymorphic_identity=get_sys_type_id('quattor_server'), properties={
-        'system'        : relation(System,backref='quattor_server'),
+        'system'        : relation(System, uselist=False,
+                                   backref='quattor_server'),
 })
 
 domain = Table('domain', meta,
@@ -266,7 +269,9 @@ mapper(Domain,domain,properties={
     'comments':         deferred(domain.c.comments)})
 
 host=Table('host', meta,
-    Column('id', Integer, ForeignKey('system.id',ondelete='CASCADE'),
+    Column('id', Integer, ForeignKey('system.id',
+                                     ondelete='CASCADE',
+                                     name='host_system_fk'),
            primary_key=True),
     Column('machine_id', Integer, ForeignKey('machine.id')),
     Column('domain_id', Integer, ForeignKey('domain.id')),
@@ -331,9 +336,11 @@ class Host(System):
 build_item = Table('build_item', meta,
     Column('id', Integer, Sequence('build_item_id_seq'), primary_key=True),
     Column('host_id', Integer,
-           ForeignKey('host.id',ondelete='CASCADE'), nullable=False),
+           ForeignKey('host.id', ondelete='CASCADE', name='build_item_host_fk'),
+           nullable=False),
     Column('cfg_path_id', Integer,
-           ForeignKey('cfg_path.id'),
+           ForeignKey('cfg_path.id',
+                      name='build_item_cfg_path_fk'),
            nullable=False),
     Column('position', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.datetime.now),
@@ -373,15 +380,10 @@ mapper(BuildItem,build_item,properties={
     'creation_date' : deferred(build_item.c.creation_date),
     'comments'      : deferred(build_item.c.comments)})
 
-#Uses Ordering List, an advanced data mapping pattern for this kind of thing
-#more at http://www.sqlalchemy.org/docs/04/plugins.html#plugins_orderinglist
 mapper(Host, host, inherits=System,
        polymorphic_identity=get_sys_type_id('host'),
     properties={
         'system'        : relation(System),
-        # Not 100% sure why the uselist=False needs to be on the backref here,
-        # instead of in the relation.  See the "One To One" section of the docs.
-        # http://www.sqlalchemy.org/docs/04/mappers.html
         'machine'       : relation(Machine,
                                    backref=backref('host', uselist=False)),
         'domain'        : relation(Domain,
@@ -395,6 +397,52 @@ mapper(Host, host, inherits=System,
                                    order_by=[build_item.c.position])
 #TODO: synonym for location, sysloc, fqdn (in system)
 })
+
+host_list = Table('host_list', meta,
+    Column('id', Integer, ForeignKey('system.id',
+                                     ondelete='CASCADE',
+                                     name='host_list_fk'),
+           primary_key=True))
+host_list.create(checkfirst=True)
+
+class HostList(System):
+    pass
+
+host_list_item = Table('host_list_item', meta,
+    #Column('id', Integer,
+    #       Sequence('host_list_item_id_seq'), primary_key=True),
+    Column('host_list_id', Integer,
+           ForeignKey('host_list.id', ondelete='CASCADE', name='hli_hl_fk'),
+           primary_key = True),
+    Column('host_id', Integer,
+           ForeignKey('host.id',ondelete='CASCADE',name='hli_host_fk'),
+           nullable=False, primary_key=True),
+    Column('position', Integer, nullable=False),
+    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('host_id', name='host_list_uk')) #hosts only on one list?
+#Index('host_list_idx', host_list_item.c.host_id)
+host_list_item.create(checkfirst=True)
+
+class HostListItem(newaqdbBase):
+    table=host_list_item
+    def __init__(self,**kw):
+        self.set_attributes(kw)
+
+mapper(HostListItem, host_list_item, properties={
+    #'host'          : relation(Host),
+    'creation_date' : deferred(host_list_item.c.creation_date),
+    'comments'      : deferred(host_list_item.c.comments)
+})
+
+mapper(HostList, host_list, inherits=System,
+       polymorphic_identity=get_sys_type_id('host_list'), properties = {
+        'system' : relation(System, uselist=False, backref='host_list'),
+        'hosts'  : relation(HostListItem,
+                            collection_class=ordering_list('position'),
+                            order_by=[host_list_item.c.position]),
+})
+
 
 afs_cell = Table('afs_cell',meta,
     Column('system_id', Integer, ForeignKey('system.id',
@@ -598,14 +646,12 @@ mapper(ServiceListItem,service_list_item,properties={
     'comments'      : deferred(service_list_item.c.comments)
 })
 
+
+
 SVC_TABLES=[service,system_type,system,quattor_server,domain,host,build_item,
             afs_cell,service_instance,service_map,service_list_item]
 
-def clean_svc():
-    for t in SVC_TABLES:
-        #engine.execute('drop sequence %s_seq_id'%s(t[0]))
-        #engine.execute('drop sequence %s_id_seq'%(t.name))
-        engine.execute('drop table %s cascade constraints'%(t.name))
+
 ####POPULATION ROUTINES####
 
 def create_domains():

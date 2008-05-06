@@ -92,16 +92,17 @@ class Model(aqdbBase):
     """ Model is a combination of vendor and product name used to
         catalogue various different kinds of hardware """
     @optional_comments
-    def __init__(self,name,vndr,h_typ):
+    def __init__(self,name,vndr,m_typ):
         self.name = name.lower().strip()
 
         if isinstance(vndr,Vendor):
-            self.vendor = vndr
+            #self.vendor = vndr
+            self.vendor_id=vndr.id
         elif isinstance(vndr,str):
             s = Session()
             try:
                 self.vendor = s.query(Vendor).filter_by(name=vndr).one()
-            except NoSuchRowExceptioncfgmst:
+            except NoSuchRowException:
                 print "Can not find vendor '%s'"%(vndr)
                 return
             except Exception, e:
@@ -112,8 +113,9 @@ class Model(aqdbBase):
         else:
             raise ArgumentError("Incorrect vendor specification '%s'" % vndr)
         #TODO: handle string arguments?
-        if isinstance(h_typ,MachineType):
-            self.machine_type = h_typ
+        if isinstance(m_typ,MachineType):
+            #print m_typ.__dict__
+            self.machine_type_id = m_typ.id
         else:
             raise ArgumentError("Incorrect hardware type specified '%s'" %
                     h_typ)
@@ -124,7 +126,7 @@ class Model(aqdbBase):
 
 mapper(Model,model,properties={
     'vendor'         : relation(Vendor),
-    'machine_type'  : relation(MachineType),
+    'machine_type'   : relation(MachineType),
     'creation_date'  : deferred(model.c.creation_date),
     'comments'       : deferred(model.c.comments)})
 
@@ -481,8 +483,8 @@ def populate_vendor():
 def populate_machine_type():
     if empty(machine_type):
         print "Populating machine_type"
-        fill_type_table(machine_type,['rackmount',
-                                       'blade', 'workstation','nic'])
+        fill_type_table(machine_type,['rackmount', 'blade', 'workstation',])
+
 def populate_disk_type():
     if empty(disk_type):
         print 'Populating disk_types... ',
@@ -507,7 +509,6 @@ def populate_machines():
         hwt_cache={}
         for c in s.query(MachineType).all():
             hwt_cache[str(c)] = c
-        print hwt_cache
 
         f = [['ibm', 'hs20','blade'],
             ['ibm', 'ls20','blade'],
@@ -530,8 +531,8 @@ def populate_machines():
 
         for i in f:
             m=Model(i[1],v_cache[i[0]],hwt_cache[i[2]])
-            print m
-            s.merge(m)
+            #s.merge(m)
+            s.save(m)
         try:
             s.commit()
         except Exception,e:
