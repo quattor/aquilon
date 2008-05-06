@@ -148,20 +148,12 @@ class Network(aqdbBase):
         self.ip_integer = kw.pop('ip_int')
         self.mask = kw.pop('mask')
         self.byte_mask = kw.pop('byte_mask')
-        self.side = kw.pop('side','a')       # defaults to side A, like dsdb
+        self.side = kw.pop('side','a')    # defaults to side A, like dsdb
         self.profile_id = self.mask
         self.network_type_id = kw.pop('network_type',4)
         self.dsdb_id = kw.pop('dsdb_id',0)
-        #cmps = kw.pop('campus',None)
-        #if cmps:
-        #    self.campus=cmps.strip().lower()
-        #
-        #bkt = kw.pop('bucket',None)
-        #if bkt:
-        #    self.bucket = bkt.strip().lower()
-    #TODO: get dsdb network ids
 
-    #TODO: snarf comments  and xx,xw sysloc nets from DSDB, async
+    #TODO: snarf comments  and xx,xw sysloc nets from DSDB, asynchronously
     def _ipcalc(self):
         return ipcalc.Network('%s/%s'%(self.ip,self.profile.cidr))
     ipcalc = property(_ipcalc)
