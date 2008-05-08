@@ -39,7 +39,7 @@ from sqlalchemy.sql.expression import alias
 status=Table('status', meta,
     Column('id', Integer, Sequence('status_id_seq'),primary_key=True),
     Column('name', String(16), unique=True, index=True, nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255)))
 status.create(checkfirst=True)
 
@@ -84,7 +84,7 @@ model = Table('model',meta,
     Column('vendor_id', Integer, ForeignKey('vendor.id')),
     Column('machine_type_id', Integer,
            ForeignKey('machine_type.id'),nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments',String(255)))
 model.create(checkfirst=True)
 
@@ -146,7 +146,7 @@ cpu=Table('cpu', meta,
     Column('name', String(64),nullable=False),
     Column('vendor_id', Integer,ForeignKey('vendor.id'),nullable=False),
     Column('speed', Integer, nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('vendor_id','name','speed', name='cpu_nm_speed_uk'))
 cpu.create(checkfirst=True)
@@ -188,7 +188,7 @@ machine = Table('machine', meta,
     Column('cpu_id', Integer, ForeignKey('cpu.id'), nullable=False), #DEFAULT ME
     Column('cpu_quantity', Integer, nullable=False, default=2), #CheckContstraint
     Column('memory', Integer, nullable=False, default=512), #IN MB. Default better
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
 machine.create(checkfirst=True)
 
@@ -304,7 +304,7 @@ disk=Table('disk',meta,
     Column('disk_type_id', Integer,
            ForeignKey('disk_type.id'), nullable=False),
     Column('capacity', Integer, nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
 disk.create(checkfirst=True)
 
@@ -361,7 +361,7 @@ machine_specs=Table('machine_specs', meta,
     #TODO: merge old nic code
     #Column('nic_driver', String(32), nullable=True),
     Column('nic_count', Integer, nullable=False, default=2),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
 machine_specs.create(checkfirst=True)
 

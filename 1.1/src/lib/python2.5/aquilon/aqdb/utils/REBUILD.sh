@@ -11,6 +11,8 @@ IPY='/ms/dist/python/PROJ/ipython/0.7.2/bin/ipython '
 echo starting at
 /bin/date
 
+time ./subtypes.py
+echo
 time ./location.py
 echo
 time ./network.py
@@ -24,6 +26,8 @@ echo
 time ./hardware.py
 echo
 time ./interface.py
+echo
+time ./systems.py
 echo
 time ./service.py
 echo Run population_scripts if you need to

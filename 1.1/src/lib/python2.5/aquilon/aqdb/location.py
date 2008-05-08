@@ -14,13 +14,11 @@ import sys
 sys.path.append('../..')
 
 from db import *
-
+from subtypes import location_type, LocationType, get_loc_type_id
 from sqlalchemy import Column, Integer, Sequence, String, select
 from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.exceptions_ import ArgumentError
-
-#s = Session()
 
 def mk_loc_table(name, meta, *args, **kw):
     return Table(name, meta,
@@ -29,19 +27,19 @@ def mk_loc_table(name, meta, *args, **kw):
                        primary_key=True),
             *args,**kw)
 
-location_type = mk_type_table('location_type',meta)
-class LocationType(aqdbType):
-    """To wrap rows in location_type table"""
-    pass
-mapper(LocationType,location_type)
+class LocationSearchList(Base):
+    """ The named parent table for lists of location types to search service
+    maps later on when automatic configuration of services takes places """
+    __table__ = Table('location_search_list', Base.metadata,
+        get_id_col('location_search_list'),
+        Column('name', String(32), nullable = False),
+        UniqueConstraint('name', name = 'loc_srch_list_uk'))
 
-location_type.create(checkfirst=True)
+    creation_date = get_date_col()
+    comments      = get_comment_col()
 
-if empty(location_type):
-    fill_type_table(location_type,['company','hub','continent','country',
-                                   'city','bucket', 'building','rack','chassis',
-                                   'desk', 'base_location_type'])
 
+#####
 location = Table('location', meta,
     Column('id', Integer, Sequence('location_id_seq'), primary_key=True),
     Column('parent_id', Integer, ForeignKey('location.id',
@@ -51,7 +49,7 @@ location = Table('location', meta,
     Column('location_type_id', Integer,
            ForeignKey('location_type.id', name='loc_loc_type_fk'),
            nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('name', 'location_type_id', name='loc_name_type_uk'))
     #TODO: fix bunker names: we have  the WHOLE building, and each bunker.
@@ -68,14 +66,6 @@ building = mk_loc_table('building', meta)
 rack = mk_loc_table('rack', meta)
 desk = mk_loc_table('desk', meta)
 chassis = mk_loc_table('chassis', meta)
-
-meta.create_all()
-
-def get_loc_type_id(typ_nm):
-    sel=select([location_type.c.id], location_type.c.type=='%s'%(typ_nm))
-    typ_id=engine.execute(sel).scalar()
-    assert(typ_id)
-    return typ_id
 
 class Location(aqdbBase):
     """ Location is the base class for all location subtypes to
@@ -260,6 +250,32 @@ mapper(Chassis,chassis,inherits=Location,
 mapper(Desk,desk,inherits=Location,
        polymorphic_identity= get_loc_type_id('desk'))
 
+class SearchListItem(Base):
+    """ Association object for location types to various lists for
+        searching against service mapping. """
+
+    __table__ = Table('search_list_item', Base.metadata,
+    Column('id', Integer, Sequence('sli_seq'), primary_key=True),
+    Column('location_search_list_id', Integer,
+        ForeignKey('location_search_list.id', ondelete='CASCADE',
+            name='sli_list_fk'), nullable=False),
+    Column('location_type_id', Integer,
+           ForeignKey('location_type.id', ondelete='CASCADE',
+               name='sli_loc_typ__fk'), nullable=False),
+    Column('position', Integer, nullable=False),
+    Column('creation_date', DateTime, default=datetime.now),
+    Column('comments', String(255), nullable=True),
+    UniqueConstraint('id','location_type_id',name='sli_loc_typ_uk'),
+    UniqueConstraint('location_type_id','position',name='sli_loc_typ_pos_uk'))
+
+    location_search_list = relation(LocationSearchList, backref='items')
+    location_type        = relation(LocationType)
+
+    def __repr__(self):
+        return (self.__class__.__name__ + ' ' + self.location_type.type +
+                ' position: ' + str(self.position))
+
+
 def populate_hubs():
     s=Session()
 
@@ -362,9 +378,18 @@ def populate_bldg():
                 c=Building(row[0],'building',fullname=row[1],parent=cache[row[2]])
                 s.save(c)
     s.flush()
+    s.transactional=True
     s.close()
 
 if __name__ == '__main__':
+    meta.create_all(checkfirst=True)
+    #since we're straddling both worlds, we need both for now...
+    Base.metadata.create_all(checkfirst=True)
+
+    if empty(location_type):
+        fill_type_table(location_type,['company','hub','continent','country',
+                                   'city','bucket', 'building','rack','chassis',
+                                   'desk', 'base_location_type'])
 
     if empty(hub):
         print 'populating hubs'
@@ -381,3 +406,33 @@ if __name__ == '__main__':
     if empty(building):
         print 'populating buildings'
         populate_bldg()
+
+    fl_name = 'full search'
+    s=Session()
+
+    fl = s.query(LocationSearchList).filter_by(name=fl_name).first()
+
+    if not isinstance(fl,LocationSearchList):
+        fl=LocationSearchList(name=fl_name, comments='Every location type')
+        assert(fl)
+        s.save(fl)
+        s.commit()
+        print 'created %s'%(fl)
+
+        fl_list = ['company', 'hub', 'continent', 'country', 'city', 'bucket',
+                       'building','rack','chassis']
+        fl_list.reverse()
+
+        count = 1
+        for l in fl_list:
+            lt=s.query(LocationType).filter_by(type=l).one()
+            assert(lt)
+            fli=SearchListItem(location_search_list=fl,
+                               location_type=lt,
+                               position=count)
+            assert(fli)
+            s.save(fli)
+            #print fli
+            count +=1
+        s.commit()
+        print 'created full location_type search list'

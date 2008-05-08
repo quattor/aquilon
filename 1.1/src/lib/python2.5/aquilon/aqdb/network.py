@@ -44,7 +44,7 @@ netmask = Table('netmask', meta,
     Column('mask', Integer, primary_key=True),
     Column('cidr', Integer, unique=True),
     Column('netmask', String(16), unique=True),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
 netmask.create(checkfirst=True)
 
@@ -106,7 +106,7 @@ network = Table('network', meta,
     Column('byte_mask', Integer, nullable=False),
     Column('side', String(4), nullable=True),
     Column('dsdb_id', Integer, nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
 network.create(checkfirst=True)
 
@@ -120,7 +120,7 @@ ip_addr = Table('ip_addr', meta,
     Column('is_broadcast', Boolean, nullable=False, default=False),
     Column('is_used', Boolean, nullable=False, default=False),
     Column('network_id', Integer, ForeignKey('network.id'), nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('byte1','byte2','byte3','byte4','network_id'),)
     #Index('byte1','byte2','byte3','byte4'))
@@ -175,7 +175,7 @@ mapper(Network,network,properties={
 dns_domain = Table('dns_domain', meta,
     Column('id', Integer, Sequence('dns_domain_id_seq'),primary_key=True),
     Column('name',String(32), unique=True, nullable=False, index=True),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
 dns_domain.create(checkfirst=True)
 

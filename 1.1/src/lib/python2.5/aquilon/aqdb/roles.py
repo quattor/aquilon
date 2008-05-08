@@ -20,9 +20,9 @@ class Role(Base):
                primary_key=True),
         Column('name', String(32), nullable=False),
         UniqueConstraint('name', name='role_name_uk'))
-    comments = deferred(Column('comments',String(255),nullable=True))
-    creation_date = deferred(
-        Column('creation_date', DateTime, default=datetime.datetime.now))
+
+    comments = get_comment_col()
+    creation_date = get_date_col()
 
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.name)
@@ -35,7 +35,7 @@ class Realm(Base):
 
     comments = deferred(Column('comments',String(255),nullable=True))
     creation_date = deferred(
-        Column('creation_date', DateTime, default=datetime.datetime.now))
+        Column('creation_date', DateTime, default=datetime.now))
 
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.name)

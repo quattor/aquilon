@@ -58,7 +58,7 @@ interface = Table('interface',meta,
     Column('interface_type_id', Integer,
            ForeignKey('interface_type.id'), nullable=False),
     Column('ip',String(16), default='0.0.0.0', index=True),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments',String(255))) #TODO FK to IP table)
 interface.create(checkfirst=True)
 

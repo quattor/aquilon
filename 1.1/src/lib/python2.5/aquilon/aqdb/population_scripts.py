@@ -22,7 +22,9 @@ from network import *
 from hardware import *
 from configuration import *
 from interface import *
+from systems import *
 from service import *
+import configuration #FIXME: for busted line #403
 
 from sqlalchemy.sql import and_
 
@@ -227,6 +229,7 @@ def npipm1():
     except Exception, e:
         print 'creating a machine np301c1n1'
         m=Machine(c,'hs20',node=1,comments='test npipm1 machine')
+        print m.__dict__
         s.save(m)
 
     pi=PhysicalInterface('e0','00:14:5e:86:d8:84',
@@ -251,7 +254,7 @@ def npipm1():
     except Exception,e:
         print e
         s.rollback()
-    s.flush()
+    #s.flush()
     make_syslog_si('npipm1')
 
 def get_server_for(svc,host):
@@ -398,7 +401,7 @@ def all_cells():
                 handle the complex work flow required for this task
                 """
             path=os.path.join('service/afs/',cell)
-            client_path=os.path.join(str(configuration.const.cfg_base),
+            client_path=os.path.join(str(const.cfg_base),
                                      path, 'client')
             if not os.path.isdir(client_path):
                 try:
@@ -513,13 +516,35 @@ def fill_ips(ip,mask,cidr,net_id):
         s.rollback()
         pass
 
+def make_host_list():
+    s=Session()
+    hl=s.query(HostList).first()
+    if not hl:
+        dd=s.query(DnsDomain).first()
+        #TODO: decorate me damn it
+        hl=HostList(name='test',dns_domain=dd,comments='FAKE')
+        s.save(hl)
+        s.commit()
+        assert(hl)
+
+    hosts=s.query(Host).all()
+    print '%s hosts is in hosts'%(len(hosts))
+    if len(hosts) > 0:
+        hli=HostListItem(hostlist=hl,host=hosts[1], position=1, comments='FAKE')
+        s.save(hli)
+        s.commit()
+        assert(hli)
+        print 'created %s with list items: %s'%(hl,hl.hosts)
+    else:
+        print "can't create host lists without any hosts"
 
 if __name__ == '__main__':
     two_in_each()
     just_hosts()
-
+    make_host_list()
     npipm1()
     all_cells()
+
     #pick_servers()
     #a=show_load()
     #a.reverse()

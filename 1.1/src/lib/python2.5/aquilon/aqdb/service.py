@@ -21,38 +21,32 @@
     [1] http://en.wikipedia.org/wiki/Truthiness """
 from __future__ import with_statement
 
-import sys, datetime
+import sys
 sys.path.append('../..')
 
 import os
 import re
-import exceptions
 
 from db import *
 from aquilon.exceptions_ import ArgumentError
 
 from location import *
-from network import DnsDomain,dns_domain
-from hardware import Machine, machine, Status, status
-from auth import UserPrincipal,user_principal
-
-import configuration
 from configuration import *
-##import * for all the table definitions...
+from systems import System,system
 
-from sqlalchemy import Integer, Sequence, String, Table, DateTime, Index
-from sqlalchemy import select, insert
+from sqlalchemy import (Integer, Sequence, String, DateTime, Index,
+                        select, insert)
 from sqlalchemy.orm import (mapper, relation, deferred, synonym, backref,
                             object_session)
 
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_, not_
 
-service = Table('service',meta,
+service = Table('service', meta,
     Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
-    Column('name',String(64)),
+    Column('name', String(64)),
     Column('cfg_path_id', Integer, ForeignKey('cfg_path.id')),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('name',name='svc_name_uk'),
     UniqueConstraint('cfg_path_id',name='svc_template_uk'))
@@ -70,8 +64,8 @@ class Service(aqdbBase):
 
         We're not currently subtyping or 'grading' services with 'prod/qa/dev' etc.
         It would have to be accomplished with the name, i.e. production-dns, and
-        the burden of naming can be greatly reduced by service lists (which make
-        their presence known shortly), though this may be revamped later. """
+        the burden of naming can be greatly reduced by service lists,
+        though this may be revamped later. """
 
     @optional_comments
     def __init__(self,name):
@@ -103,400 +97,18 @@ class Service(aqdbBase):
         The path on filesystem is not created here like I did for the
         afs cells in all_cells() in population_scripts (did em manaully) """
 
-mapper(Service,service,properties={
+mapper(Service, service, properties={
     'cfg_path'      : relation(CfgPath,backref='service'),
     'creation_date' : deferred(service.c.creation_date),
     'comments'      : deferred(service.c.comments)})
 
-system_type=mk_type_table('system_type', meta)
-system_type.create(checkfirst=True)
-
-def get_sys_type_id(typ_nm):
-    #stmt="select id from system_type where type='%s'"%(typ_nm)
-    sl=select([system_type.c.id],system_type.c.type=='%s'%(typ_nm))
-    typ_id = engine.execute(sl).scalar()
-    assert(typ_id)
-    return typ_id
-
-class SystemType(aqdbType):
-    """ System Type is a discrimintor for polymorphic System object/table """
-    pass
-mapper(SystemType,system_type)
-if empty(system_type):
-    fill_type_table(system_type,['base_system_type',
-                                 'host', 'afs_cell',
-                                 'quattor_server',
-                                 'host_list'])
-
-system = Table('system',meta,
-    Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
-    Column('name', String(64)),
-    Column('type_id', Integer,
-           ForeignKey('system_type.id'), nullable=False),
-    Column('dns_domain_id', Integer,
-           ForeignKey('dns_domain.id'), nullable=False,
-           default=id_getter(dns_domain,dns_domain.c.name,'ms.com')),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('name','dns_domain_id','type_id',name='system_name_uk'))
-system.create(checkfirst=True)
-
-class System(aqdbBase):
-    """ System: a base class which abstracts out the details of between
-        all the various kinds of service providers we may use. A System might be
-        a host/server/workstation, router, firewall, netapp, etc. Naming this
-        is kind of difficult, but "system" seems neutral, and happens not to
-        be overloaded by anything I am aware of.
-
-        This is exactly what system does. System_id holds a name, and presents
-        an abstract entity that can provide, or utilize services, hardware,
-        networks, configuration sources, etc. It's subtyped for flexibilty to
-        weather future expansion and enhancement without breaking the
-        fundamental archetypes we're building today.
-
-        It is perhaps the most important table so far, and replaces the notion of
-        'host' as we've used it in our discussions and designs thus far.
-    """
-    def __init__(self,name,**kw):
-        if isinstance (name,str):
-            self.name = name.strip().lower()
-        else:
-            raise ArgumentError('name must be string type')
-
-        if kw.has_key('type'):
-            if isinstance (typ,SystemType):
-                self.type=typ
-            else:
-                raise ArgumentError('type argument must be SystemType')
-        #polymorphic inheritance should cover this anyway, and I might
-        #remove it provided I can validate it's always automated.
-
-        if kw.has_key('dns_domain'):
-            if isinstance(kw['dns_domain'],str):
-                stmt="select id from dns_domain where name ='%s'"%(
-                    kw['dns_domain'])
-                self.dns_domain_id = engine.execute(stmt).scalar()
-                assert(self.dns_domain_id)
-                if not self.dns_domain_id:
-                    raise ArgumentError('cant find domain %s'%(dns_domain))
-            elif isinstance(kw['dns_domain'], DnsDomain):
-                self.dns_domain = kw['dns_domain']
-            else:
-                raise ArgumentError('You must provide either a string, or a DnsDomain object')
-        else:
-            raise ArgumentError('you must provide a DNS Domain')
-
-    def _fqdn(self):
-        if self.dns_domain:
-            return '.'.join([str(self.name),str(self.dns_domain.name)])
-        # FIXME: Is it correct for a system to not have dns_domain?  If
-        # it does not have one, should this return name + '.' anyway?
-        return str(self.name)
-    fqdn = property(_fqdn)
-
-mapper(System, system, polymorphic_on=system.c.type_id, \
-       polymorphic_identity=get_sys_type_id('base_system_type'),
-    properties={
-        'type'          : relation(SystemType),
-        'dns_domain'    : relation(DnsDomain),
-        'creation_date' : deferred(system.c.creation_date),
-        'comments'      : deferred(system.c.comments)})
-
-quattor_server = Table('quattor_server',meta,
-    Column('id', Integer,
-           ForeignKey('system.id', ondelete='CASCADE',name='qs_system_fk'),
-           primary_key=True))
-quattor_server.create(checkfirst=True)
-
-class QuattorServer(System):
-    """ Quattor Servers are a speicalized system to provide configuration
-        services for the others on the network. This also helps to
-        remove cyclical dependencies of hosts, and domains (hosts must be
-        in exaclty one domain, and a domain must have a host as it's server)
-    """
-    def __init__(self,name,**kw):
-        #default dns domain for quattor servers to ms.com
-        if not kw.has_key('dns_domain'):
-            kw['dns_domain'] = 'ms.com'
-        super(QuattorServer, self).__init__(name,**kw)
-
-
-mapper(QuattorServer,quattor_server,
-        inherits=System,
-        polymorphic_identity=get_sys_type_id('quattor_server'), properties={
-        'system'        : relation(System, uselist=False,
-                                   backref='quattor_server'),
-})
-
-domain = Table('domain', meta,
-    Column('id', Integer, Sequence('domain_id_seq'), primary_key=True),
-    Column('name', String(32)),
-    Column('server_id', Integer, ForeignKey('quattor_server.id'), nullable=False),
-    Column('compiler', String(255), nullable=False,
-           default='/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'),
-    Column('owner_id', Integer,
-           ForeignKey('user_principal.id'), nullable=False,
-           default=get_sys_type_id('quattor_server')),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('name',name='domain_uk'))
-domain.create(checkfirst=True)
-
-class Domain(aqdbBase):
-    """ Domain is to be used as the top most level for path traversal of the SCM
-            Represents individual config repositories
-    """
-    def __init__(self, name, server, owner, **kw):
-        self.name=name.strip().lower()
-        if isinstance(server,QuattorServer):
-            self.server = server
-        else:
-            raise ArgumentError('second argument must be a Quattor Server')
-        if isinstance(owner, UserPrincipal):
-            self.owner = owner
-        else:
-            raise ArgumentError('third argument must be a Kerberos Principal')
-
-        if kw.has_key('compiler'):
-            self.compiler = kw.pop('compiler')
-        else:
-            self.compiler = '/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc'
-
-mapper(Domain,domain,properties={
-    'server':           relation(QuattorServer,backref='domain'),
-    'owner':            relation(UserPrincipal,remote_side=user_principal.c.id),
-    'creation_date':    deferred(domain.c.creation_date),
-    'comments':         deferred(domain.c.comments)})
-
-host=Table('host', meta,
-    Column('id', Integer, ForeignKey('system.id',
-                                     ondelete='CASCADE',
-                                     name='host_system_fk'),
-           primary_key=True),
-    Column('machine_id', Integer, ForeignKey('machine.id')),
-    Column('domain_id', Integer, ForeignKey('domain.id')),
-    Column('archetype_id',Integer, ForeignKey('archetype.id'),nullable=False),
-    Column('status_id', Integer, ForeignKey('status.id')))
-host.create(checkfirst=True)
-
-class Host(System):
-    """ Here's our most common kind of System, the Host. Putting a physical
-        machine into a chassis and powering it up leaves it in a state with a
-        few more attributes not filled in: what Domain configures this host?
-        What is the build/mcm 'status'? If Ownership is captured, this is the
-        place for it.
-    """
-    @optional_comments
-    def __init__(self,mach,dom,stat,**kw):
-
-        if isinstance(dom,Domain):
-            self.domain = dom
-        else:
-            raise ArgumentError('second argument must be a valid domain')
-
-        if isinstance(stat, Status):
-            self.status = stat
-        else:
-            raise ArgumentError('third argument must be a valid status')
-
-        if isinstance(mach,Machine):
-            self.machine=mach
-        if kw.has_key('name'):
-            name = kw.pop('name')
-            if isinstance(name,str):
-                self.name=name.strip().lower()
-            else:
-                raise ArgumentError("Host name must be type 'str'")
-        else:
-            self.name=kw.pop('name',mach.name)
-
-        arch=kw.pop('archetype','aquilon')
-        self.archetype_id=id_getter(archetype,archetype.c.name,arch)
-        assert(self.archetype_id)
-
-        if kw.has_key('dns_domain'):
-            dns_domain = kw.pop('dns_domain')
-            if isinstance(dns_domain, DnsDomain):
-                self.dns_domain = dns_domain
-            else:
-                raise ArgumentError("dns_domain must be a valid DnsDomain")
-
-    def _get_location(self):
-        return self.machine.location
-    location = property(_get_location) #TODO: make these synonms?
-
-    def _sysloc(self):
-        return self.machine.location.sysloc()
-    sysloc = property(_sysloc)
-
-    def __repr__(self):
-        return 'Host %s'%(self.name)
-#Host mapper deferred for ordering list to build_item...
-
-build_item = Table('build_item', meta,
-    Column('id', Integer, Sequence('build_item_id_seq'), primary_key=True),
-    Column('host_id', Integer,
-           ForeignKey('host.id', ondelete='CASCADE', name='build_item_host_fk'),
-           nullable=False),
-    Column('cfg_path_id', Integer,
-           ForeignKey('cfg_path.id',
-                      name='build_item_cfg_path_fk'),
-           nullable=False),
-    Column('position', Integer, nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('host_id','cfg_path_id',name='host_tmplt_uk'),
-    UniqueConstraint('host_id','position',name='host_position_uk'))
-build_item.create(checkfirst=True)
-
-class BuildItem(aqdbBase):
-    """ Identifies the build process of a given Host.
-        Parent of 'build_element' """
-    @optional_comments
-    def __init__(self,host,cp,position):
-        if isinstance(host,Host):
-            self.host=host
-        else:
-            msg = 'Build object requires a Host for its constructor'
-            raise ArgumentError(msg)
-
-        if isinstance(cp,CfgPath):
-            self.cfg_path=cp
-        else:
-            msg = 'Build Item requires a Config Path as its second arg'
-            raise ArgumentError(msg)
-        if isinstance(position,int):
-            self.position=position
-        else:
-            msg='Build Item only accepts integer as its third argument'
-            raise(msg)
-
-    def __repr__(self):
-        return '%s: %s'%(self.host.name,self.cfg_path)
-
-mapper(BuildItem,build_item,properties={
-    'host'          : relation(Host),
-    'cfg_path'      : relation(CfgPath),
-    'creation_date' : deferred(build_item.c.creation_date),
-    'comments'      : deferred(build_item.c.comments)})
-
-mapper(Host, host, inherits=System,
-       polymorphic_identity=get_sys_type_id('host'),
-    properties={
-        'system'        : relation(System),
-        'machine'       : relation(Machine,
-                                   backref=backref('host', uselist=False)),
-        'domain'        : relation(Domain,
-                                   primaryjoin=host.c.domain_id==domain.c.id,
-                                   uselist=False,
-                                   backref=backref('hosts')),
-        'archetype'     : relation(Archetype, uselist=False),
-        'status'        : relation(Status),
-        'templates'     : relation(BuildItem,
-                                   collection_class=ordering_list('position'),
-                                   order_by=[build_item.c.position])
-#TODO: synonym for location, sysloc, fqdn (in system)
-})
-
-host_list = Table('host_list', meta,
-    Column('id', Integer, ForeignKey('system.id',
-                                     ondelete='CASCADE',
-                                     name='host_list_fk'),
-           primary_key=True))
-host_list.create(checkfirst=True)
-
-class HostList(System):
-    pass
-
-host_list_item = Table('host_list_item', meta,
-    #Column('id', Integer,
-    #       Sequence('host_list_item_id_seq'), primary_key=True),
-    Column('host_list_id', Integer,
-           ForeignKey('host_list.id', ondelete='CASCADE', name='hli_hl_fk'),
-           primary_key = True),
-    Column('host_id', Integer,
-           ForeignKey('host.id',ondelete='CASCADE',name='hli_host_fk'),
-           nullable=False, primary_key=True),
-    Column('position', Integer, nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('host_id', name='host_list_uk')) #hosts only on one list?
-#Index('host_list_idx', host_list_item.c.host_id)
-host_list_item.create(checkfirst=True)
-
-class HostListItem(newaqdbBase):
-    table=host_list_item
-    def __init__(self,**kw):
-        self.set_attributes(kw)
-
-mapper(HostListItem, host_list_item, properties={
-    #'host'          : relation(Host),
-    'creation_date' : deferred(host_list_item.c.creation_date),
-    'comments'      : deferred(host_list_item.c.comments)
-})
-
-mapper(HostList, host_list, inherits=System,
-       polymorphic_identity=get_sys_type_id('host_list'), properties = {
-        'system' : relation(System, uselist=False, backref='host_list'),
-        'hosts'  : relation(HostListItem,
-                            collection_class=ordering_list('position'),
-                            order_by=[host_list_item.c.position]),
-})
-
-
-afs_cell = Table('afs_cell',meta,
-    Column('system_id', Integer, ForeignKey('system.id',
-                                            ondelete='CASCADE'),
-           primary_key=True))
-afs_cell.create(checkfirst=True)
-
-class AfsCell(System):
-    """ AfsCell class is an example of a way we'll override system to
-        model other types of service providers besides just host
-    """
-    @optional_comments
-    def __init__(self,name,**kw):
-        if isinstance(name,str):
-            name=name.strip().lower()
-            #FIX ME: this was a rush job to get it working before I leave for
-            #someone please implement this with a better message
-            #m=re.match("^([a-z]{1})\.([a-z]{2})$",name)
-            #m.groups should equal 2.
-            if name.count('.') != 1:
-                msg="""
-                    Names of afs cell's must match the pattern 'X.YZ'
-                    where X.YZ are all single alphabetic characters, and YZ
-                    must match the name of a valid HUB or BUILDING. """
-                    ###FIX ME: BROKER HAS TO ENFORCE THIS (NO SESSION CALLS ARE
-                    ###        ALLOWED IN __init__() METHODS.)
-                    ### Long term, a check constraint would be better to keep
-                    ### bad data out of the DB, but also afs cell creation will
-                    ### be highly restricted.
-                raise ArgumentError(msg.strip())
-                return
-        else:
-            msg="name of Afs Cell must be a string, received '%s', %s"%(
-                name,type(name))
-            raise ArgumentError(msg)
-
-        if not kw.has_key('dns_domain'):
-            kw['dns_domain'] = 'ms.com'
-
-        super(AfsCell, self).__init__(name,**kw)
-        ###TODO: Would it be ok to make a service instance here? a cell without
-        ###   one really wouldn't make a whole lot of sense...
-
-mapper(AfsCell,afs_cell,
-        inherits=System, polymorphic_identity=get_sys_type_id('afs_cell'),
-       properties={
-        'system' : relation(System, uselist=False, backref='afs_cell')})
 
 service_instance = Table('service_instance',meta,
     Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
     Column('service_id',Integer, ForeignKey('service.id')),
     Column('system_id', Integer, ForeignKey('system.id',ondelete='CASCADE')),
     Column('cfg_path_id', Integer, ForeignKey('cfg_path.id')),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('service_id','system_id',name='svc_inst_system_uk'))
 
@@ -568,7 +180,7 @@ service_map=Table('service_map',meta,
     Column('location_id', Integer,
            ForeignKey('location.id', ondelete='CASCADE'),
            nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments',String(255), nullable=True),
     UniqueConstraint('service_instance_id','location_id',
                      name='svc_map_loc_inst_uk'))
@@ -620,7 +232,7 @@ service_list_item = Table('service_list_item', meta,
            Sequence('service_list_item_id_seq'), primary_key=True),
     Column('service_id', Integer, ForeignKey('service.id')),
     Column('archetype_id', Integer, ForeignKey('archetype.id'), nullable=False),
-    Column('creation_date', DateTime, default=datetime.datetime.now),
+    Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('archetype_id','service_id',name='svc_list_svc_uk'))
 Index('idx_srvlst_arch_id', service_list_item.c.archetype_id)
@@ -646,36 +258,7 @@ mapper(ServiceListItem,service_list_item,properties={
     'comments'      : deferred(service_list_item.c.comments)
 })
 
-
-
-SVC_TABLES=[service,system_type,system,quattor_server,domain,host,build_item,
-            afs_cell,service_instance,service_map,service_list_item]
-
-
 ####POPULATION ROUTINES####
-
-def create_domains():
-    s=Session()
-    if empty(quattor_server):
-        qs=QuattorServer('quattorsrv')
-        s.save(qs)
-        s.commit()
-    else:
-        qs=s.query(QuattorServer).filter_by(name='quattorsrv').one()
-
-    njw = s.query(UserPrincipal).filter_by(name='njw').one()
-    quattor = s.query(UserPrincipal).filter_by(name='quattor').one()
-
-    if empty(domain):
-        p = Domain('production', qs, njw,
-                comments='The master production area')
-        q = Domain('qa', qs, quattor, comments='Do your testing here')
-        s.save_or_update(p)
-        s.save_or_update(q)
-
-        s.commit()
-        print 'created production and qa domains'
-        s.close()
 
 def populate_service():
     if empty(service):
@@ -687,7 +270,7 @@ def populate_service():
         else:
             svcs = ['dns', 'dhcp', 'syslog', 'afs']
         for i in svcs:
-            srv = Service(i)
+            srv = Service(name=i)
             s.save(srv)
         s.commit()
         print 'populated services'
@@ -709,12 +292,8 @@ def populate_service_list():
     s.close()
 
 if __name__ == '__main__':
+    meta.create_all(checkfirst=True)
     s=Session()
-    create_domains()
-    d=s.query(Domain).first()
-    assert(d)
 
     populate_service()
-    #assert for afs service within the next function call...
     populate_service_list()
-    #TODO: assert, and MAKE NOSE testFunctions out of all these

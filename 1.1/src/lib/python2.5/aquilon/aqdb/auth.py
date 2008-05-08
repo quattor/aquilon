@@ -32,7 +32,7 @@ user_principal = Table('user_principal', meta,
            nullable=False, default = id_getter(Role.__table__,
                                                Role.__table__.c.name,'nobody')),
     Column('creation_date', DateTime,
-           nullable=False, default=datetime.datetime.now),
+           nullable=False, default=datetime.now),
     Column('comments', String(255), nullable=True),
     UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
 user_principal.create(checkfirst=True)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         r=s.query(Realm).first()
         assert(r.name == 'is1.morgan')
 
-        userlist = ['njw', 'daqscott', 'wesleyhe', 'guyrol', 'quattor','cdb']
+        userlist = ['njw', 'daqscott', 'wesleyhe', 'guyrol','cdb','jasona']
         for nm in userlist:
             up=UserPrincipal(nm,realm=r)
             s.save(up)
