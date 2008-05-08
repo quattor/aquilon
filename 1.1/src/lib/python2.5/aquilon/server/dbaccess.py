@@ -484,14 +484,12 @@ class DatabaseBroker(AccessBroker):
     @transact
     def show_domain_all(self, result, **kwargs):
         #stat.extend(self.session.query(Domain).all())
-        for line in self.session.query(Domain).all():
-            printprep(line)
+        return printprep(self.session.query(Domain).all())
 
     @transact
     def show_domain(self, result, domain, **kwargs):
         # FIXME: verify_domain(domain)
-        for line in self.session.query(Domain).filter_by(name=domain):
-            printprep(line)
+        return printprep(self.session.query(Domain).filter_by(name=domain).all())
 
     @transact
     def status(self, result, stat, user, **kwargs):
