@@ -54,6 +54,17 @@
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
    </command>
 
+   <command name="show_domain">
+      %prog show domain [--domain name]
+      Shows the configuration for a given domain, or for all domains
+      <optgroup name="show_domain_Input" mandatory="True" fields="any">
+         <option name="domain" type="string" conflicts="all">Domain name</option>
+         <option name="all" type="boolean" conflicts="hostname">Select all domains</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="domain" />
+      <transport trigger="domain" method="get" path="domain/%(domain)s" />
+   </command>
+
    <command name="show_hostiplist">
       %prog show hostiplist
       Shows a list of all hosts.  Can be narrowed by archetype.

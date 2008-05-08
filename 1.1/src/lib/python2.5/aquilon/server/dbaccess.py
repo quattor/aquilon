@@ -482,9 +482,21 @@ class DatabaseBroker(AccessBroker):
         return dbdomain.name
 
     @transact
+    def show_domain_all(self, result, **kwargs):
+        #stat.extend(self.session.query(Domain).all())
+        for line in self.session.query(Domain).all():
+            printprep(line)
+
+    @transact
+    def show_domain(self, result, domain, **kwargs):
+        # FIXME: verify_domain(domain)
+        for line in self.session.query(Domain).filter_by(name=domain):
+            printprep(line)
+
+    @transact
     def status(self, result, stat, user, **kwargs):
         """Return status information from the database."""
-        stat.extend(self.session.query(Domain).all())
+        #stat.extend(self.session.query(Domain).all())
         dbuser = self._get_or_create_UserPrincipal(user)
         if dbuser:
             stat.append("Connected as: %s [%s]" % (dbuser, dbuser.role.name))

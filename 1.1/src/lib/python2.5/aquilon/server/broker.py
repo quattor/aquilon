@@ -212,6 +212,26 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def show_domain(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        # NOTE: This does not try to verify that the domain exists on the
+        # filesystem anywhere.
+        d = d.addCallback(self.dbbroker.show_domain, session=True, **arguments)
+
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def show_domain_all(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_domain_all, session=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def del_domain(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "del", request_path)

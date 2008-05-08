@@ -246,6 +246,22 @@ class ResponsePage(resource.Resource):
                 user=request.channel.getPrinciple())
         return self.format_or_fail(d, request)
 
+    def command_show_domain_all(self, request):
+        """aqcommand: aq show domain --all"""
+        d = self.check_arguments(request)
+        d = d.addCallback(self.broker.show_domain_all,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_show_domain_domain(self, request):
+        """aqcommand: aq show domain --domain=<name>"""
+        d = self.check_arguments(request, ["domain"])
+        d = d.addCallback(self.broker.show_domain,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
     def command_show_host_all(self, request):
         """aqcommand: aq show host --all"""
         d = self.check_arguments(request)
