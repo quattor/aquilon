@@ -26,9 +26,10 @@ system = Table('system', meta,
     Column('id', Integer, Sequence('system_id_seq'), primary_key=True),
     Column('name', String(64)),
     Column('type_id', Integer,
-           ForeignKey('system_type.id'), nullable=False),
+           ForeignKey('system_type.id', name='system_sys_typ_fk'),
+           nullable=False),
     Column('dns_domain_id', Integer,
-           ForeignKey('dns_domain.id'), nullable=False,
+           ForeignKey('dns_domain.id', name='sys_dns_fk'), nullable=False,
            default=id_getter(dns_domain,dns_domain.c.name,'ms.com')),
     Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True),
@@ -98,7 +99,7 @@ mapper(System, system, polymorphic_on=system.c.type_id, \
 
 quattor_server = Table('quattor_server',meta,
     Column('id', Integer,
-           ForeignKey('system.id', ondelete='CASCADE',name='qs_system_fk'),
+           ForeignKey('system.id', ondelete='CASCADE', name='qs_system_fk'),
            primary_key=True))
 
 class QuattorServer(System):
@@ -166,12 +167,15 @@ mapper(Domain,domain,properties={
 host=Table('host', meta,
     Column('id', Integer, ForeignKey('system.id',
                                      ondelete='CASCADE',
-                                     name='host_system_fk'),
-           primary_key=True),
-    Column('machine_id', Integer, ForeignKey('machine.id')),
-    Column('domain_id', Integer, ForeignKey('domain.id')),
-    Column('archetype_id',Integer, ForeignKey('archetype.id'),nullable=False),
-    Column('status_id', Integer, ForeignKey('status.id')))
+                                     name='host_system_fk'), primary_key=True),
+    Column('machine_id', Integer,
+           ForeignKey('machine.id', name='host_machine_fk'), nullable=False),
+    Column('domain_id', Integer,
+           ForeignKey('domain.id', name='host_domain_fk'), nullable=False),
+    Column('archetype_id',Integer,
+           ForeignKey('archetype.id', name='host_arch_fk'), nullable=False),
+    Column('status_id', Integer,
+           ForeignKey('status.id', name='host_status_fk'), nullable=False))
 
 
 class Host(System):
@@ -342,8 +346,9 @@ mapper(HostList, host_list, inherits=System,
 })
 
 afs_cell = Table('afs_cell',meta,
-    Column('system_id', Integer, ForeignKey('system.id',
-                                            ondelete='CASCADE'),
+    Column('system_id', Integer,
+           ForeignKey('system.id',
+                      name='afs_system_fk', ondelete='CASCADE'),
            primary_key=True))
 
 
