@@ -34,8 +34,10 @@ from formats import printprep, HostIPList
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
-from aquilon.aqdb.service import Host, QuattorServer, Domain, Service, \
-        BuildItem, ServiceListItem, ServiceMap
+from aquilon.aqdb.service import Service, ServiceInstance, \
+        ServiceListItem, ServiceMap
+from aquilon.aqdb.systems import System, Host, HostList, QuattorServer, \
+        Domain, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.roles import Role
 from aquilon.aqdb.auth import UserPrincipal, Realm
@@ -425,16 +427,27 @@ class DatabaseBroker(AccessBroker):
     def get_user(self, result, user):
         return printprep(self._get_or_create_UserPrincipal(user))
 
+    # Expects to be run under a transact with a session.
+    def _get_or_create_quattorsrv(self, localhost):
+        quattorsrv = self.session.query(QuattorServer).filter_by(
+                name=localhost).first()
+        if quattorsrv:
+            return quattorsrv
+        # FIXME: Assumes the QuattorServer is Aurora, and also that the
+        # localhost is not defined as a System.
+        quattorsrv = QuattorServer(name=localhost, dns_domain='ms.com',
+                comments='Automatically generated entry')
+        self.session.save(quattorsrv)
+        return quattorsrv
+
     @transact
-    def add_domain(self, result, domain, user, **kwargs):
+    def add_domain(self, result, domain, user, localhost, **kwargs):
         """Add the domain to the database, initialize as necessary."""
         dbuser = self._get_or_create_UserPrincipal(user)
         if not dbuser:
             raise AuthorizationException("Cannot create a domain without"
                     + " an authenticated connection.")
-        # NOTE: Defaulting the name of the quattor server to quattorsrv.
-        quattorsrv = self.session.query(QuattorServer).filter_by(
-                name='quattorsrv').one()
+        quattorsrv = self._get_or_create_quattorsrv(localhost)
         # For now, succeed without error if the domain already exists.
         dbdomain = self.session.query(Domain).filter_by(name=domain).first()
         # FIXME: Check that the domain name is composed only of characters
@@ -449,17 +462,18 @@ class DatabaseBroker(AccessBroker):
     @transact
     def del_domain(self, result, domain, user, **kwargs):
         """Remove the domain from the database."""
-        # NOTE: Defaulting the name of the quattor server to quattorsrv.
-        quattorsrv = self.session.query(QuattorServer).filter_by(
-                name='quattorsrv').one()
         # For now, succeed without error if the domain does not exist.
         try:
             dbdomain = self.session.query(Domain).filter_by(name=domain).one()
         except InvalidRequestError:
             return domain
-        if quattorsrv != dbdomain.server:
-            log.err("FIXME: Should be redirecting this operation.")
-        # FIXME: Entitlements will need to happen at this point.
+        # Ignoring quattorsrv for now...
+        # NOTE: Defaulting the name of the quattor server to quattorsrv.
+        #quattorsrv = self.session.query(QuattorServer).filter_by(
+        #        name='quattorsrv').one()
+        #if quattorsrv != dbdomain.server:
+        #    log.err("FIXME: Should be redirecting this operation.")
+        # FIXME: Should check for hosts...
         if dbdomain:
             self.session.delete(dbdomain)
         # We just need to confirm that domain was removed from the db...
@@ -467,12 +481,10 @@ class DatabaseBroker(AccessBroker):
         return domain
 
     @transact
-    def verify_domain(self, result, domain, **kwargs):
+    def verify_domain(self, result, domain, localhost, **kwargs):
         """This checks both that the domain exists *and* that this is
         the correct server to handle requests for the domain."""
-        # NOTE: Defaulting the name of the quattor server to quattorsrv.
-        quattorsrv = self.session.query(QuattorServer).filter_by(
-                name='quattorsrv').one()
+        quattorsrv = self._get_or_create_quattorsrv(localhost)
         try:
             dbdomain = self.session.query(Domain).filter_by(name=domain).one()
         except InvalidRequestError:
@@ -759,6 +771,25 @@ class DatabaseBroker(AccessBroker):
         self.session.save_or_update(dbhost)
         return
 
+    # Expects to be run under a transact with a session.
+    def _get_instance_parts(self, instance):
+        dbdns_domain = None
+        # A general solution would check all known dns domains for a match,
+        # instead of assuming that the short name cannot contain dots.
+        (short, dot, dns_domain) = instance.partition(".")
+        if dns_domain:
+            dbdns_domain = self.session.query(DnsDomain).filter_by(
+                    name=dns_domain).first()
+        if not dbdns_domain:
+            # Hack for something like afs cell...
+            if instance.endswith('.ms.com'):
+                short = instance[:-7]
+            else:
+                short = instance
+            dbdns_domain = self.session.query(DnsDomain).filter_by(
+                    name='ms.com').one()
+        return (short, dbdns_domain)
+
     @transact
     def add_service(self, result, service, instance, **kwargs):
         dbservice = self.session.query(Service).filter_by(name=service).first()
@@ -767,19 +798,21 @@ class DatabaseBroker(AccessBroker):
             self.session.save(dbservice)
         if not instance:
             return printprep(dbservice)
-        # FIXME: Treatment of instance is over-simplified, and needs to be
-        # revisited.
-        relative_path = "%s/%s/client" % (service, instance)
-        dbinstance = self.session.query(CfgPath).filter_by(
-                relative_path=relative_path,
-                tld=dbservice.cfg_path.tld).first()
-        if not dbinstance:
-            dbinstance = CfgPath(dbservice.cfg_path.tld,
-                    'service/' + relative_path)
-            self.session.save(dbinstance)
-            self.session.flush()
-            self.session.refresh(dbservice)
-        return printprep(dbservice)
+
+        # FIXME: This will autocreate a service/instance CfgPath.  Does
+        # there need to be a separate/explicit create of a
+        # service/instance/client CfgPath?
+        (short, dbdns_domain) = self._get_instance_parts(instance)
+        dbsystem = self.session.query(System).filter_by(name=short,
+                dns_domain=dbdns_domain).first()
+        if not dbsystem:
+            dbsystem = HostList(short, dns_domain=dbdns_domain)
+            self.session.save(dbsystem)
+        dbsi = ServiceInstance(dbservice, dbsystem)
+        self.session.save(dbsi)
+        self.session.flush()
+        self.session.refresh(dbservice)
+        return printprep(dbsi)
 
     @transact
     def show_service(self, result, service, **kwargs):
@@ -790,35 +823,30 @@ class DatabaseBroker(AccessBroker):
             dbservice = q.filter_by(name=service).one()
         except InvalidRequestError, e:
             raise NotFoundException("Service '%s' not found: %s" % (service, e))
-        # FIXME: Treatment of instance is over-simplified, and needs to be
-        # revisited.  This hack treats CfgPath as a ServiceInstance and shows
-        # them after showing the service.
-        q = self.session.query(CfgPath).filter(
-                CfgPath.tld==dbservice.cfg_path.tld).filter(
-                CfgPath.relative_path.like(service + "/%"))
-        instances = q.all()
-        instances.insert(0, dbservice)
-        return printprep(instances)
+        return printprep(dbservice)
 
     @transact
     def del_service(self, result, service, instance, **kwargs):
-        # This should fail nicely if there the service is required for 
-        # an archetype.
+        # This should fail nicely if the service is required for an archetype.
         dbservice = self._get_service(service)
         if not instance:
+            if dbservice.instances:
+                raise ArgumentError("Cannot remove service with instances defined.")
             self.session.delete(dbservice)
             return "Success"
-        # FIXME: Treatment of instance is over-simplified, and needs to be
-        # revisited.  For delete, this may be just plain wrong.
-        relative_path = "%s/%s/client" % (service, instance)
+        (short, dbdns_domain) = self._get_instance_parts(instance)
         try:
-            dbinstance = self.session.query(CfgPath).filter_by(
-                    relative_path=relative_path,
-                    tld=dbservice.cfg_path.tld).one()
+            dbsystem = self.session.query(System).filter_by(name=short,
+                    dns_domain=dbdns_domain).one()
         except InvalidRequestError, e:
-            raise NotFoundException("Service instance '%s/%s' not found: %s"
-                    % (service, instance, e))
-        self.session.delete(dbinstance)
+            raise NotFoundException(
+                    "Could not find a system matching instance %s: %s"
+                    % (instance, e))
+        dbsi = self.session.query(ServiceInstance).filter_by(
+                system=dbsystem, service=dbservice).first()
+        # FIXME: There may be dependencies...
+        if dbsi:
+            self.session.delete(dbsi)
         return "Success"
 
     # Expects to be run under a transact with a session
@@ -863,13 +891,30 @@ class DatabaseBroker(AccessBroker):
         self.session.delete(dbsli)
         return True
 
+    # Expects to be run under a transact with a session.
+    def _get_host_builditem(self, dbhost, dbservice):
+        for template in dbhost.templates:
+            si = template.cfg_path.svc_inst
+            if si and si.service == dbservice:
+                return template
+        return None
+
     @transact
-    def bind_service(self, result, hostname, service, instance, **kwargs):
+    def bind_client(self, result, hostname, service, instance, force, **kwargs):
         dbhost = self._hostname_to_host(hostname)
         dbservice = self._get_service(service)
-        # FIXME: Treatment of instance is over-simplified, and needs to be
-        # revisited.
-        relative_path = "%s/%s/client" % (service, instance)
+        if not instance:
+            raise UnimplementedError("aq bind client (without specifying an instance) has not been implemented yet.")
+        relative_path = "%s/%s" % (service, instance)
+        dbtemplate = self._get_host_builditem(dbhost, dbservice)
+        if dbtemplate:
+            if dbtemplate.cfg_path.relative_path == relative_path:
+                # Already set - no problems.
+                return True
+            if not force:
+                raise ArgumentError("Host %s is already bound to service %s instance %s, use unbind to clear first or rebind to force."
+                        % (hostname, service, instance))
+            self.session.delete(dbtemplate)
         try:
             dbinstance = self.session.query(CfgPath).filter_by(
                     relative_path=relative_path,
@@ -877,7 +922,9 @@ class DatabaseBroker(AccessBroker):
         except InvalidRequestError, e:
             raise NotFoundException("Service instance '%s/%s' not found: %s"
                     % (service, instance, e))
+        # FIXME: Should enforce that the instance has a server bound to it.
         positions = []
+        self.session.flush()
         self.session.refresh(dbhost)
         for template in dbhost.templates:
             positions.append(template.position)
@@ -894,25 +941,14 @@ class DatabaseBroker(AccessBroker):
         return printprep(dbhost)
 
     @transact
-    def unbind_service(self, result, hostname, service, instance, **kwargs):
+    def unbind_client(self, result, hostname, service, **kwargs):
         dbhost = self._hostname_to_host(hostname)
         dbservice = self._get_service(service)
-        # FIXME: Treatment of instance is over-simplified, and needs to be
-        # revisited.
-        relative_path = "%s/%s/client" % (service, instance)
-        try:
-            dbinstance = self.session.query(CfgPath).filter_by(
-                    relative_path=relative_path,
-                    tld=dbservice.cfg_path.tld).one()
-        except InvalidRequestError, e:
-            raise NotFoundException("Service instance '%s/%s' not found: %s"
-                    % (service, instance, e))
-        bi = self.session.query(BuildItem).filter_by(host=dbhost,
-                cfg_path=dbinstance).first()
-        if bi:
-            self.session.delete(bi)
+        template = self._get_host_builditem(dbhost, dbservice)
+        if template:
+            self.session.delete(template)
             self.session.flush()
-            self.session.refresh(dbhost)
+        self.session.refresh(dbhost)
         return printprep(dbhost)
 
     # Expects to be run under a @transact method with session=True.

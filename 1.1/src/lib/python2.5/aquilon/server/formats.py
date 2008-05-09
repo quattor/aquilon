@@ -17,8 +17,9 @@ from twisted.python import log
 from aquilon.aqdb.db import aqdbBase, aqdbType
 from aquilon.aqdb.location import Location
 from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
-from aquilon.aqdb.configuration import Archetype
-from aquilon.aqdb.service import Host, Domain, ServiceListItem
+from aquilon.aqdb.configuration import Archetype, CfgPath
+from aquilon.aqdb.service import Service, ServiceInstance, ServiceListItem
+from aquilon.aqdb.systems import Domain, Host
 from aquilon.aqdb.auth import UserPrincipal
 
 def printprep(dbobject):
@@ -83,6 +84,15 @@ def printprep(dbobject):
     elif isinstance(dbobject, UserPrincipal):
         printprep(dbobject.realm)
         printprep(dbobject.role)
+    elif isinstance(dbobject, Service):
+        printprep(dbobject.cfg_path)
+        printprep(dbobject.instances)
+    elif isinstance(dbobject, ServiceInstance):
+        # Being careful about recursion here...
+        str(dbobject.service)
+        printprep(dbobject.system)
+        printprep(dbobject.cfg_path)
+        dbobject.cached_counter = dbobject.counter
     else:
         str(dbobject)
 
@@ -144,6 +154,12 @@ class Formatter(object):
             return self.elaborate_raw_archetype(item, indent)
         elif isinstance(item, UserPrincipal):
             return self.elaborate_raw_userprincipal(item, indent)
+        elif isinstance(item, Service):
+            return self.elaborate_raw_service(item, indent)
+        elif isinstance(item, ServiceInstance):
+            return self.elaborate_raw_serviceinstance(item, indent)
+        elif isinstance(item, CfgPath):
+            return self.elaborate_raw_cfgpath(item, indent)
         return indent + str(item)
 
     def elaborate_raw_host(self, host, indent=""):
@@ -153,7 +169,7 @@ class Formatter(object):
         details.append(self.elaborate_raw(host.domain, indent+"  "))
         details.append(self.elaborate_raw(host.status, indent+"  "))
         for build_item in host.templates:
-            details.append(indent + "  Template: %s" % build_item.cfg_path)
+            details.append(self.elaborate_raw(build_item.cfg_path, indent+"  "))
         if host.comments:
             details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)
@@ -229,6 +245,28 @@ class Formatter(object):
         if userprincipal.comments:
             details.append(indent + "  Comments: %s" % userprincipal.comments)
         return "\n".join(details)
+
+    def elaborate_raw_service(self, service, indent=""):
+        details = [indent + "Service: %s" % service.name]
+        details.append(self.elaborate_raw(service.cfg_path, indent+"  "))
+        if service.comments:
+            details.append(indent + "  Comments: %s" % service.comments)
+        for instance in service.instances:
+            details.append(self.elaborate_raw(instance, indent+"  "))
+        return "\n".join(details)
+
+    def elaborate_raw_serviceinstance(self, si, indent=""):
+        details = [indent + "Service: %s Instance: %s"
+                % (si.service.name, si.system.name)]
+        details.append(self.elaborate_raw(si.cfg_path, indent+"  "))
+        if getattr(si, "cached_counter", None) is not None:
+            details.append(indent + "  Client Count: %d" % si.cached_counter)
+        if si.comments:
+            details.append(indent + "  Comments: %s" % si.comments)
+        return "\n".join(details)
+
+    def elaborate_raw_cfgpath(self, cfg_path, indent=""):
+        return indent + "Template: %s" % cfg_path
 
     # FIXME: This should eventually be some sort of dynamic system...
     # maybe try to ask result how it should be rendered, or check the

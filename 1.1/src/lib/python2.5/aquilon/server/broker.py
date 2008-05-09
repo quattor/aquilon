@@ -176,7 +176,7 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "sync", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
-                user=user, **arguments)
+                localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(self.pbroker.sync,
                 git_path=self.git_path, templatesdir=self.templatesdir,
                 **arguments)
@@ -194,7 +194,7 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "get", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
-                user=user, **arguments)
+                localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(lambda _: """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {"path":self.git_path, "url":self.git_templates_url, "domain":arguments["domain"]})
         return d
 
@@ -204,7 +204,7 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)
         d = d.addCallback(self.dbbroker.add_domain, session=True,
-                user=user, **arguments)
+                localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(self.pbroker.add_domain, git_path=self.git_path,
                 templatesdir=self.templatesdir, kingdir=self.kingdir,
                 **arguments)
@@ -247,7 +247,7 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "put", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
-                user=user, **arguments)
+                localhost=self.localhost, user=user, **arguments)
         # FIXME: Does the database need to be updated with this info?
         d = d.addCallback(self.pbroker.put, templatesdir=self.templatesdir,
                 git_path=self.git_path, basedir=self.basedir,
@@ -262,7 +262,8 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "deploy", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
-                user=user, domain=arguments["fromdomain"], **arguments)
+                localhost=self.localhost, user=user,
+                domain=arguments["fromdomain"], **arguments)
         # FIXME: Does the database need to be updated with this info?
         d = d.addCallback(self.pbroker.deploy, basedir=self.basedir,
                 templatesdir=self.templatesdir, kingdir=self.kingdir,
@@ -351,7 +352,7 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "manage", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
-                user=user, **arguments)
+                localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(self.dbbroker.manage, session=True, user=user,
                 **arguments)
         return d
@@ -447,7 +448,7 @@ class Broker(object):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)
         d = d.addCallback(self.dbbroker.verify_domain, session=True,
-                user=user, **arguments)
+                localhost=self.localhost, user=user, **arguments)
         d = d.addCallback(self.dbbroker.verify_add_host,
                 session=True, user=user, **arguments)
         # FIXME: Should be re-enabled.
@@ -474,29 +475,83 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
-    def add_service (self, arguments, request_path, user):
+    def add_service(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
-                "put", request_path)
-        d = d.addCallback(self.dbbroker.add_service, session = True,
-                user = user, **arguments)
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_service, session=True,
+                user=user, **arguments)
         return d
         
 # --------------------------------------------------------------------------- #
 
-    def show_service (self, arguments, request_path, user):
+    def show_service(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
-                "get", request_path)
-        d = d.addCallback(self.dbbroker.show_service, session = True,
-                user = user, **arguments)
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_service, session=True,
+                user=user, **arguments)
         return d
         
 # --------------------------------------------------------------------------- #
 
-    def del_service (self, arguments, request_path, user):
+    def del_service(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "del", request_path)
-        d = d.addCallback(self.dbbroker.del_service, session = True,
-                user = user, **arguments)
+        d = d.addCallback(self.dbbroker.del_service, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def bind_client(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "bind", request_path)
+        d = d.addCallback(self.dbbroker.bind_client, session=True, force=False,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def rebind_client(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "rebind", request_path)
+        d = d.addCallback(self.dbbroker.bind_client, session=True, force=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def unbind_client(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "unbind", request_path)
+        d = d.addCallback(self.dbbroker.unbind_client, session=True,
+                user=user, **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def bind_server(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "bind", request_path)
+        d = d.addCallback(self.dbbroker.bind_server, session=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def rebind_server(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "rebind", request_path)
+        d = d.addCallback(self.dbbroker.rebind_server, session=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def unbind_server(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "unbind", request_path)
+        d = d.addCallback(self.dbbroker.unbind_server, session=True,
+                user=user, **arguments)
         return d
         
 # --------------------------------------------------------------------------- #
@@ -525,25 +580,7 @@ class Broker(object):
         d = d.addCallback(self.dbbroker.del_required_service, session=True,
                 user=user, **arguments)
         return d
-        
-# --------------------------------------------------------------------------- #
 
-    def bind_service (self, arguments, request_path, user):
-        d = defer.maybeDeferred(self.azbroker.check, None, user,
-                "bind", request_path)
-        d = d.addCallback(self.dbbroker.bind_service, session=True,
-                user=user, **arguments)
-        return d
-        
-# --------------------------------------------------------------------------- #
-
-    def unbind_service (self, arguments, request_path, user):
-        d = defer.maybeDeferred(self.azbroker.check, None, user,
-                "unbind", request_path)
-        d = d.addCallback(self.dbbroker.unbind_service, session=True,
-                user=user, **arguments)
-        return d
-        
 # --------------------------------------------------------------------------- #
 
     def map_service(self, arguments, request_path, user):

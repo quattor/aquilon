@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ProcessException, RollbackException, \
         DetailedProcessException, ArgumentError, AquilonError
 from aquilon.aqdb.hardware import Machine, Disk
 from aquilon.aqdb.interface import PhysicalInterface
-from aquilon.aqdb.service import Host
+from aquilon.aqdb.systems import Host
 from aquilon.aqdb.utils.ipcalc import Network
 
 class TemplateCreator(object):
@@ -171,7 +171,7 @@ class TemplateCreator(object):
             elif t.cfg_path.tld.type == 'personality':
                 personality_template = repr(t.cfg_path) + '/config'
             elif t.cfg_path.tld.type == 'service':
-                services.append(repr(t.cfg_path) + '/config')
+                services.append(repr(t.cfg_path) + '/client/config')
             # FIXME: Features should also be here...
 
         templates = []

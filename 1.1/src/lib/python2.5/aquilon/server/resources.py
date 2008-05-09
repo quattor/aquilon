@@ -568,21 +568,21 @@ class ResponsePage(resource.Resource):
         return self.finish_or_fail(d, request)
     
     def command_add_service(self, request):
-        d = self.check_arguments(request, ['service'], ['instance'])
+        d = self.check_arguments(request, ['service'], ['instance', 'comments'])
         d = d.addCallback(self.broker.add_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
     def command_add_service_instance(self, request):
-        d = self.check_arguments(request, ['service', 'instance'])
+        d = self.check_arguments(request, ['service', 'instance'], ['comments'])
         d = d.addCallback(self.broker.add_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
     def command_show_service(self, request):
-        d = self.check_arguments(request, [], ['service'])
+        d = self.check_arguments(request, optional=['service'])
         d = d.addCallback(self.broker.show_service,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
@@ -609,16 +609,51 @@ class ResponsePage(resource.Resource):
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
-    def command_bind_service(self, request):
-        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
-        d = d.addCallback(self.broker.bind_service,
+    def command_bind_client(self, request):
+        d = self.check_arguments(request, ['hostname', 'service'], ['instance'])
+        d = d.addCallback(self.broker.bind_client,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
 
-    def command_unbind_service(self, request):
+    def command_rebind_client(self, request):
+        d = self.check_arguments(request, ['hostname', 'service'], ['instance'])
+        d = d.addCallback(self.broker.rebind_client,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_unbind_client(self, request):
+        d = self.check_arguments(request, ['hostname', 'service'])
+        d = d.addCallback(self.broker.unbind_client,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_bind_server(self, request):
         d = self.check_arguments(request, ['hostname', 'service', 'instance'])
-        d = d.addCallback(self.broker.unbind_service,
+        d = d.addCallback(self.broker.bind_server,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_rebind_server(self, request):
+        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
+        d = d.addCallback(self.broker.rebind_server,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_unbind_server(self, request):
+        d = self.check_arguments(request, ['hostname', 'service'], ['instance'])
+        d = d.addCallback(self.broker.unbind_server,
+                request_path = request.path,
+                user = request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_unbind_server_instance(self, request):
+        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
+        d = d.addCallback(self.broker.unbind_server,
                 request_path = request.path,
                 user = request.channel.getPrinciple())
         return self.finish_or_fail(d, request)

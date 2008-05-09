@@ -32,7 +32,7 @@ from aquilon.exceptions_ import ArgumentError
 
 from location import *
 from configuration import *
-from systems import System,system
+from systems import System, system, BuildItem, HostList
 
 from sqlalchemy import (Integer, Sequence, String, DateTime, Index,
                         select, insert)
@@ -136,7 +136,14 @@ class ServiceInstance(aqdbBase):
         else:
             raise ArgumentError('Second Argument must be a valid System')
 
-        path='%s/%s'%(self.service.name,self.system.fqdn)
+        # FIXME: This is a hack.  Either:
+        # - Make this an attribute of system that is overridden
+        # or
+        # - Force all git repositories to be fqdn
+        servicename = self.system.fqdn
+        if isinstance(self.system, HostList):
+            servicename = self.system.name
+        path = '%s/%s' % (self.service.name, servicename)
 
         service_id=engine.execute(
                 select([cfg_tld.c.id],cfg_tld.c.type=='service')).fetchone()[0]
@@ -171,8 +178,10 @@ class ServiceInstance(aqdbBase):
 
 mapper(ServiceInstance,service_instance, properties={
     'service'       : relation(Service, backref='instances'),
-    'system'        : relation(System, uselist=False, backref='svc_inst'),
-    'cfg_path'      : relation(CfgPath, uselist=False, backref='svc_inst'),
+    'system'        : relation(System,
+                               backref=backref('svc_inst', uselist=False)),
+    'cfg_path'      : relation(CfgPath,
+                               backref=backref('svc_inst', uselist=False)),
     'counter'       : synonym('client_count'),
     'creation_date' : deferred(service_instance.c.creation_date),
     'comments'      : deferred(service_instance.c.comments)
