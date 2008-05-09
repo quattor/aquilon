@@ -36,8 +36,8 @@ from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
 from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Service, ServiceInstance, \
         ServiceListItem, ServiceMap
-from aquilon.aqdb.systems import System, Host, HostList, QuattorServer, \
-        Domain, BuildItem
+from aquilon.aqdb.systems import System, Host, HostList, HostListItem, \
+        QuattorServer, Domain, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.roles import Role
 from aquilon.aqdb.auth import UserPrincipal, Realm
@@ -950,6 +950,63 @@ class DatabaseBroker(AccessBroker):
             self.session.flush()
         self.session.refresh(dbhost)
         return printprep(dbhost)
+
+    # Expects to be run under a transact with a session.
+    def _get_serviceinstance(self, dbhost, dbservice, instance):
+        relative_path = "%s/%s" % (dbservice.name, instance)
+        try:
+            dbinstance = self.session.query(CfgPath).filter_by(
+                    relative_path=relative_path,
+                    tld=dbservice.cfg_path.tld).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service %s instance %s not found (try aq add service to add it): %s"
+                    % (dbservice.name, instance, e))
+        if not dbinstance.svc_inst:
+            raise NotFoundException("Service %s instance %s not found (try aq add service to add it) : %s"
+                    % (dbservice.name, instance, e))
+        return dbinstance.svc_inst
+
+    @transact
+    def bind_server(self, result, hostname, service, instance, force, **kwargs):
+        dbhost = self._hostname_to_host(hostname)
+        dbservice = self._get_service(service)
+        dbsi = self._get_serviceinstance(dbhost, dbservice, instance)
+        dbsystem = dbsi.system
+        if not isinstance(dbsystem, HostList):
+            raise ArgumentError("Cannot add a host to %s (System type: %s)"
+                    % (dbsystem.fqdn, dbsystem.type))
+        # FIXME: Does not check to see if the server is bound to some other
+        # instance, so the force flag is never needed.
+        self.session.refresh(dbsystem)
+        positions = []
+        for host in dbsystem.hosts:
+            positions.append(host.position)
+        position = 0
+        while position in positions:
+            position += 1
+        hli = HostListItem(hostlist=dbsystem, host=dbhost, position=position)
+        self.session.save(hli)
+        self.session.flush()
+        self.session.refresh(dbsystem)
+        return True
+        
+    @transact
+    def unbind_server(self, result, hostname, service, instance, **kwargs):
+        dbhost = self._hostname_to_host(hostname)
+        dbservice = self._get_service(service)
+        dbsi = self._get_serviceinstance(dbhost, dbservice, instance)
+        dbsystem = dbsi.system
+        if not isinstance(dbsystem, HostList):
+            self.session.delete(dbsi)
+            self.session.flush()
+            self.session.refresh(dbservice)
+            return True
+        for item in dbsystem.hosts:
+            if item.host == dbhost:
+                self.session.delete(item)
+        self.session.flush()
+        self.session.refresh(dbsystem)
+        return True
 
     # Expects to be run under a @transact method with session=True.
     def _get_location(self, **kwargs):

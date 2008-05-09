@@ -19,7 +19,7 @@ from aquilon.aqdb.location import Location
 from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
 from aquilon.aqdb.configuration import Archetype, CfgPath
 from aquilon.aqdb.service import Service, ServiceInstance, ServiceListItem
-from aquilon.aqdb.systems import Domain, Host
+from aquilon.aqdb.systems import Domain, Host, HostList, HostListItem
 from aquilon.aqdb.auth import UserPrincipal
 
 def printprep(dbobject):
@@ -93,6 +93,10 @@ def printprep(dbobject):
         printprep(dbobject.system)
         printprep(dbobject.cfg_path)
         dbobject.cached_counter = dbobject.counter
+    elif isinstance(dbobject, HostList):
+        printprep(dbobject.hosts)
+    elif isinstance(dbobject, HostListItem):
+        printprep(dbobject.host.fqdn)
     else:
         str(dbobject)
 
@@ -259,6 +263,9 @@ class Formatter(object):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.system.name)]
         details.append(self.elaborate_raw(si.cfg_path, indent+"  "))
+        if isinstance(si.system, HostList):
+            for hli in si.system.hosts:
+                details.append(indent + "  Server: %s" % hli.host.fqdn)
         if getattr(si, "cached_counter", None) is not None:
             details.append(indent + "  Client Count: %d" % si.cached_counter)
         if si.comments:

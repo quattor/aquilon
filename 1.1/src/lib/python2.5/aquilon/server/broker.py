@@ -532,7 +532,7 @@ class Broker(object):
     def bind_server(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "bind", request_path)
-        d = d.addCallback(self.dbbroker.bind_server, session=True,
+        d = d.addCallback(self.dbbroker.bind_server, session=True, force=False,
                 user=user, **arguments)
         return d
 
@@ -541,7 +541,7 @@ class Broker(object):
     def rebind_server(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "rebind", request_path)
-        d = d.addCallback(self.dbbroker.rebind_server, session=True,
+        d = d.addCallback(self.dbbroker.bind_server, session=True, force=True,
                 user=user, **arguments)
         return d
 
