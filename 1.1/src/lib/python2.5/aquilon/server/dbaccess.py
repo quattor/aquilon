@@ -293,6 +293,25 @@ class DatabaseBroker(AccessBroker):
         return printprep(
                 self.session.query(LocationType).filter_by(**kwargs).all())
 
+    # Expects to be run under a transact with a session
+    def _bind_required_services(self, dbhost):
+        self.session.flush()
+        self.session.refresh(dbhost)
+        service_tld = self.session.query(CfgTLD).filter_by(type='service').one()
+        for item in dbhost.archetype.service_list:
+            service_bi = self.session.query(BuildItem).filter_by(
+                    host=dbhost).join('cfg_path').filter_by(
+                    tld=service_tld).filter(CfgPath.relative_path.like(
+                    item.service.name + '/%')).first()
+            if service_bi:
+                continue
+            dbinstance = self._choose_serviceinstance(dbhost, item.service)
+            service_bi = BuildItem(dbhost, dbinstance.cfg_path, 3)
+            dbhost.templates.append(service_bi)
+            dbhost.templates._reorder()
+            self.session.save(service_bi)
+        self.session.flush()
+
     @transact
     def make_aquilon(self, result, build_info, hostname, os, **kwargs):
         """This takes the specified parameters and sets up the database
@@ -350,7 +369,7 @@ class DatabaseBroker(AccessBroker):
             personality_bi = BuildItem(dbhost, personality_cfgpath, 1)
         self.session.save_or_update(personality_bi)
 
-        # FIXME: auto-configuration of services for the host goes here.
+        self._bind_required_services(dbhost)
 
         self.session.flush()
         self.session.refresh(dbhost)
@@ -376,6 +395,8 @@ class DatabaseBroker(AccessBroker):
                 break
         if not found_os or not found_personality:
             raise ArgumentError("Please run `make aquilon --hostname %s` to give the host an os and personality." % hostname)
+
+        self._bind_required_services(dbhost)
 
         build_info["dbhost"] = printprep(dbhost)
         # FIXME: Save this to the build table... maybe just carry around
@@ -896,10 +917,10 @@ class DatabaseBroker(AccessBroker):
         least_clients = None
         least_loaded = None
         for map in dbmaps:
-            client_count = map.counter
-            if not least_loaded or client_count < clients:
+            client_count = map.service_instance.counter
+            if not least_loaded or client_count < least_clients:
                 least_clients = client_count
-                least_loaded = map
+                least_loaded = map.service_instance
         return least_loaded
 
     # Expects to run under a transact with a session.
@@ -916,7 +937,7 @@ class DatabaseBroker(AccessBroker):
             if len(maps) == 1:
                 return maps[0].service_instance
             if len(maps) > 1:
-                return self._choose_least_loaded(maps).service_instance
+                return self._choose_least_loaded(maps)
         raise ArgumentError("Could not find a relevant service map for service %s on host %s" %
                 (dbservice.name, dbhost.fqdn))
 
