@@ -255,7 +255,7 @@
       <optgroup name="rebind_client_optional_opts">
          <option name="instance" type="string">Instance name</option>
       </optgroup>
-      <transport method="put" path="host/%(hostname)s/client_of_service/%(service)s/instance/%(instance)s" />
+      <transport method="post" path="host/%(hostname)s/client_of_service/%(service)s/rebind" />
    </command>
 
    <command name="unbind_client">

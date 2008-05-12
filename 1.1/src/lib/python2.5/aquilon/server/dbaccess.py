@@ -890,29 +890,53 @@ class DatabaseBroker(AccessBroker):
                 return template
         return None
 
+    # Expects to run under a transact with a session.
+    # Modeled after least_loaded in aqdb/population_scripts.py
+    def _choose_least_loaded(self, dbmaps):
+        least_clients = None
+        least_loaded = None
+        for map in dbmaps:
+            client_count = map.counter
+            if not least_loaded or client_count < clients:
+                least_clients = client_count
+                least_loaded = map
+        return least_loaded
+
+    # Expects to run under a transact with a session.
+    # Modeled after get_server_for in aqdb/population_scripts.py
+    def _choose_serviceinstance(self, dbhost, dbservice):
+        # FIXME: The database will support multiple algorithms...
+        locations = [dbhost.location]
+        while locations[-1].parent is not None:
+            locations.append(locations[-1].parent)
+        for location in locations:
+            maps = self.session.query(ServiceMap).filter_by(
+                    location=location).join('service_instance').filter_by(
+                    service=dbservice).all()
+            if len(maps) == 1:
+                return maps[0].service_instance
+            if len(maps) > 1:
+                return self._choose_least_loaded(maps).service_instance
+        raise ArgumentError("Could not find a relevant service map for service %s on host %s" %
+                (dbservice.name, dbhost.fqdn))
+
     @transact
     def bind_client(self, result, hostname, service, instance, force, **kwargs):
         dbhost = self._hostname_to_host(hostname)
         dbservice = self._get_service(service)
-        if not instance:
-            raise UnimplementedError("aq bind client (without specifying an instance) has not been implemented yet.")
-        relative_path = "%s/%s" % (service, instance)
+        if instance:
+            dbinstance = self._get_serviceinstance(dbservice, instance)
+        else:
+            dbinstance = self._choose_serviceinstance(dbhost, dbservice)
         dbtemplate = self._get_host_builditem(dbhost, dbservice)
         if dbtemplate:
-            if dbtemplate.cfg_path.relative_path == relative_path:
+            if dbtemplate.cfg_path == dbinstance.cfg_path:
                 # Already set - no problems.
                 return True
             if not force:
-                raise ArgumentError("Host %s is already bound to service %s instance %s, use unbind to clear first or rebind to force."
-                        % (hostname, service, instance))
+                raise ArgumentError("Host %s is already bound to %s, use unbind to clear first or rebind to force."
+                        % (hostname, dbtemplate.cfg_path.relative_path))
             self.session.delete(dbtemplate)
-        try:
-            dbinstance = self.session.query(CfgPath).filter_by(
-                    relative_path=relative_path,
-                    tld=dbservice.cfg_path.tld).one()
-        except InvalidRequestError, e:
-            raise NotFoundException("Service instance '%s/%s' not found: %s"
-                    % (service, instance, e))
         # FIXME: Should enforce that the instance has a server bound to it.
         positions = []
         self.session.flush()
@@ -925,7 +949,7 @@ class DatabaseBroker(AccessBroker):
         i = 2
         while i in positions:
             i += 1
-        bi = BuildItem(dbhost, dbinstance, i)
+        bi = BuildItem(dbhost, dbinstance.cfg_path, i)
         self.session.save(bi)
         self.session.flush()
         self.session.refresh(dbhost)
