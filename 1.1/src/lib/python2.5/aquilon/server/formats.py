@@ -18,7 +18,8 @@ from aquilon.aqdb.db import aqdbBase, aqdbType
 from aquilon.aqdb.location import Location
 from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
 from aquilon.aqdb.configuration import Archetype, CfgPath
-from aquilon.aqdb.service import Service, ServiceInstance, ServiceListItem
+from aquilon.aqdb.service import Service, ServiceInstance, ServiceListItem, \
+        ServiceMap
 from aquilon.aqdb.systems import Domain, Host, HostList, HostListItem
 from aquilon.aqdb.auth import UserPrincipal
 
@@ -92,7 +93,13 @@ def printprep(dbobject):
         str(dbobject.service)
         printprep(dbobject.system)
         printprep(dbobject.cfg_path)
+        printprep(dbobject.service_map)
         dbobject.cached_counter = dbobject.counter
+    elif isinstance(dbobject, ServiceMap):
+        # Being careful about recursion here...
+        str(dbobject.service)
+        str(dbobject.service_instance)
+        printprep(dbobject.location)
     elif isinstance(dbobject, HostList):
         printprep(dbobject.hosts)
     elif isinstance(dbobject, HostListItem):
@@ -162,6 +169,8 @@ class Formatter(object):
             return self.elaborate_raw_service(item, indent)
         elif isinstance(item, ServiceInstance):
             return self.elaborate_raw_serviceinstance(item, indent)
+        elif isinstance(item, ServiceMap):
+            return self.elaborate_raw_servicemap(item, indent)
         elif isinstance(item, CfgPath):
             return self.elaborate_raw_cfgpath(item, indent)
         return indent + str(item)
@@ -266,11 +275,19 @@ class Formatter(object):
         if isinstance(si.system, HostList):
             for hli in si.system.hosts:
                 details.append(indent + "  Server: %s" % hli.host.fqdn)
+        for map in si.service_map:
+            details.append(indent + "  Service Map: %s %s" %
+                    (map.location.type.type.capitalize(), map.location.name))
         if getattr(si, "cached_counter", None) is not None:
             details.append(indent + "  Client Count: %d" % si.cached_counter)
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
+
+    def elaborate_raw_servicemap(self, sm, indent=""):
+        return indent + "Service: %s Instance: %s Map: %s %s" % (
+                sm.service.name, sm.service_instance.system.name,
+                sm.location.type.type.capitalize(), sm.location.name)
 
     def elaborate_raw_cfgpath(self, cfg_path, indent=""):
         return indent + "Template: %s" % cfg_path

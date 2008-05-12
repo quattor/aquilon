@@ -952,7 +952,7 @@ class DatabaseBroker(AccessBroker):
         return printprep(dbhost)
 
     # Expects to be run under a transact with a session.
-    def _get_serviceinstance(self, dbhost, dbservice, instance):
+    def _get_serviceinstance(self, dbservice, instance):
         relative_path = "%s/%s" % (dbservice.name, instance)
         try:
             dbinstance = self.session.query(CfgPath).filter_by(
@@ -970,7 +970,7 @@ class DatabaseBroker(AccessBroker):
     def bind_server(self, result, hostname, service, instance, force, **kwargs):
         dbhost = self._hostname_to_host(hostname)
         dbservice = self._get_service(service)
-        dbsi = self._get_serviceinstance(dbhost, dbservice, instance)
+        dbsi = self._get_serviceinstance(dbservice, instance)
         dbsystem = dbsi.system
         if not isinstance(dbsystem, HostList):
             raise ArgumentError("Cannot add a host to %s (System type: %s)"
@@ -994,7 +994,7 @@ class DatabaseBroker(AccessBroker):
     def unbind_server(self, result, hostname, service, instance, **kwargs):
         dbhost = self._hostname_to_host(hostname)
         dbservice = self._get_service(service)
-        dbsi = self._get_serviceinstance(dbhost, dbservice, instance)
+        dbsi = self._get_serviceinstance(dbservice, instance)
         dbsystem = dbsi.system
         if not isinstance(dbsystem, HostList):
             self.session.delete(dbsi)
@@ -1030,10 +1030,18 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def map_service(self, result, service, instance, **kwargs):
-        dbservice = service and self._get_service(service) or None
-        # FIXME: Instance is ignored for now.
+        dbservice = self._get_service(service)
         dblocation = self._get_location(**kwargs)
-        raise UnimplementedError("aq map service has not been implemented yet.")
+        dbinstance = self._get_serviceinstance(dbservice, instance)
+        dbmap = self.session.query(ServiceMap).filter_by(location=dblocation,
+                service_instance=dbinstance).first()
+        if not dbmap:
+            dbmap = ServiceMap(dbinstance, dblocation)
+            self.session.save(dbmap)
+        self.session.flush()
+        self.session.refresh(dbservice)
+        self.session.refresh(dbinstance)
+        return True
 
     @transact 
     def show_map(self, result, service, instance, **kwargs):
@@ -1051,10 +1059,17 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def unmap_service(self, result, service, instance, **kwargs):
-        dbservice = service and self._get_service(service) or None
-        # FIXME: Instance is ignored for now.
+        dbservice = self._get_service(service)
         dblocation = self._get_location(**kwargs)
-        raise UnimplementedError("aq unmap service has not been implemented yet.")
+        dbinstance = self._get_serviceinstance(dbservice, instance)
+        dbmap = self.session.query(ServiceMap).filter_by(location=dblocation,
+                service_instance=dbinstance).first()
+        if dbmap:
+            self.session.delete(dbmap)
+        self.session.flush()
+        self.session.refresh(dbservice)
+        self.session.refresh(dbinstance)
+        return True
 
     @transact
     def show_principal(self, result, principal, **kwargs):
