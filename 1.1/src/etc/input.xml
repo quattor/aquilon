@@ -795,8 +795,6 @@
       %prog  add machine --machine MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
       <optgroup name="add_machine_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine name</option>
-         <option name="location" type="string">location of the new machine</option>
-         <option name="type" type="string">location type (chassis|rack|desk)</option>
          <option name="model" type="string">machine model</option>
 	 <!-- These are required for now, but should be optional later. -->
 	 <option name="cpuname" type="string">cpu name</option>
@@ -804,6 +802,11 @@
 	 <option name="cpuspeed" type="string">cpu speed</option>
 	 <option name="cpucount" type="string">cpu count</option>
 	 <option name="memory" type="string">memory in MB</option>
+      </optgroup>
+      <optgroup name="add_machine_location_opts" mandatory="True" fields="any">
+         <option name="chassis" type="string">Chassis name</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="desk" type="string">Desk name</option>
       </optgroup>
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">serial number</option>

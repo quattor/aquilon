@@ -231,7 +231,7 @@ class Formatter(object):
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
             details.append(indent + "  Parents: [%s]" %
-                    ", ".join("%s=%s" % (repr(p.type), p.name)
+                    ", ".join("%s=%s" % (p.type.type, p.name)
                     for p in location.parents))
         return "\n".join(details)
 

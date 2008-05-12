@@ -628,27 +628,18 @@ class DatabaseBroker(AccessBroker):
         return result
 
     @transact
-    def add_machine(self, result, machine, location, type, model,
+    def add_machine(self, result, machine, model,
             cpuname, cpuvendor, cpuspeed, cpucount, memory, serial,
             **kwargs):
-        if (type not in ['chassis', 'rack', 'desk']):
-            raise ArgumentError ('Invalid location type: '+type)
-        if (type == 'chassis'):
-            loc = self.session.query(Chassis).filter_by(name = location).first()
-        elif (type == 'rack'):
-            loc = self.session.query(Rack).filter_by(name = location).first()
-        else:
-            loc = self.session.query(Desk).filter_by(name = location).first()
-        if (loc is None):
-            raise ArgumentError("Location name '"+location+"' not found!")
+        dblocation = self._get_location(**kwargs)
 
         cpuspeed = self.force_int("cpuspeed", cpuspeed)
         cpucount = self.force_int("cpucount", cpucount)
         memory = self.force_int("memory", memory)
 
-        mod = self.session.query(Model).filter_by(name = model).first()
-        if (mod is None):
-            raise ArgumentError("Model name '"+model+"' not found!");
+        dbmodel = self.session.query(Model).filter_by(name=model).first()
+        if (dbmodel is None):
+            raise ArgumentError("Model name '%s' not found!" % model);
 
         try:
             # If cpu.name format changes (currently name_speed), may need
@@ -666,7 +657,7 @@ class DatabaseBroker(AccessBroker):
             optional = {"cpu":cpu, "cpu_quantity":cpucount, "memory":memory}
             if serial:
                 optional["serial_no"] = serial
-            m = Machine(loc, mod, name=machine, **optional)
+            m = Machine(dblocation, dbmodel, name=machine, **optional)
             self.session.save(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be created!\n"+e.__str__())
