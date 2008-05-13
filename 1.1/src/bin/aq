@@ -163,8 +163,6 @@ class CustomAction(object):
             os.unlink(filename)
 
 
-# FIXME: This behavior might be incorrect... might want to exit(1) in some
-# situations.
 def handleFailure(failure, uri, globalOptions):
     """Final stop handling for all errors - this will return success
     and let the reactor stop cleanly."""
@@ -203,10 +201,10 @@ if __name__ == "__main__":
 
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
-        default_aqhost = "oziyp2"
+        default_aqhost = "quattorsrv"
     # Default for /ms/dev
     elif re.match(r"/ms(/.(global|local)/[^/]+)?/dev/", BINDIR):
-        default_aqhost = "oziyp2"
+        default_aqhost = "quattorsrv"
     else:
         default_aqhost = socket.gethostname()
 
