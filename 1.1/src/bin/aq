@@ -137,6 +137,8 @@ class CustomAction(object):
         from tempfile import mkstemp
         from base64 import b64encode
 
+        p = Popen(("git", "fetch"), stderr=2)
+        p.wait()  ## wait for return, but it's okay if this fails
         p = Popen(("git", "status"), stdout=PIPE, stderr=2)
         (out, err) = p.communicate()
         # Looks like git status returns with "1" if there is nothing to commit.
@@ -149,9 +151,21 @@ class CustomAction(object):
             print >>sys.stderr, "Not ready to commit: %s" % out
             sys.exit(1)
 
+        p = Popen(("git", "log", "origin/master..HEAD"), stdout=PIPE, stderr=2)
+        (out,err) = p.communicate()
+
+        if out:
+            print >>sys.stdout, "\nThe following changes will be included in this push:\n"
+            print >>sys.stdout, "------------------------"
+            print >>sys.stdout, str(out)
+            print >>sys.stdout, "------------------------"
+        else:
+            print >>sys.stdout, "\nYou haven't made any changes on this branch\n"
+            sys.exit(0)
+            
         (handle, filename) = mkstemp()
         try:
-            rc = Popen(("git", "bundle", "create", filename, "HEAD"),
+            rc = Popen(("git", "bundle", "create", filename, "origin/master..HEAD"),
                         stdout=1, stderr=2).wait()
             if rc:
                 print >>sys.stderr, \
