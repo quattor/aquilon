@@ -442,6 +442,9 @@ class DatabaseBroker(AccessBroker):
         if not dbuser:
             dbuser = UserPrincipal(user, realm=dbrealm)
             self.session.save(dbuser)
+            # Since we rely on the role being set by default, this forces
+            # the role information to be loaded into the new object.
+            self.session.flush()
         return dbuser
 
     @transact
