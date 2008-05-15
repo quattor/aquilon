@@ -8,23 +8,26 @@
 #
 # This module is part of Aquilon
 """Exceptions to be used by Aquilon"""
-
 """The base exception class is AquilonError."""
 
 class AquilonError(StandardError):
     '''Generic error class.'''
 
+def deprecated(message):
+    import warnings
+    warnings.warn(message, DeprecationWarning, stacklevel=2)
 
 class ArgumentError(AquilonError):
     """Raised for all those conditions where invalid arguments are
     sent to constructed objects.  This error generally corresponds to
     construction time state errors.
-    
+
     """
 
-class NoSuchRowException(AquilonError):
-    '''thrown when a call to session.query.***.one() returns no rows'''
-    from sqlalchemy.exceptions import InvalidRequestError
+#class NoSuchRowException(AquilonError):
+#    TODO: implement decorator for one(), first() which raise this
+#    '''thrown when a call to session.query.***.one() returns no rows'''
+#
 
 class ProcessException(AquilonError):
     """Raised when a process being executed fails."""
@@ -76,7 +79,7 @@ class UnimplementedError(AquilonError):
 class DetailedProcessException(AquilonError):
     """Raised when more details about a process exception should
     be shown to the client.
-    
+
     """
 
     def __init__(self, pe, input=None, output=None):
