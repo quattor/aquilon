@@ -21,9 +21,7 @@ from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
 import os
-osuser = os.environ.get('USER')
-qdir = os.path.join( '/var/tmp', osuser, 'quattor/')
-const.cfg_base=os.path.join('/var/tmp', osuser, 'quattor', 'template-king')
+const.cfg_base = config.get("broker", "kingdir")
 
 def splitall(path):
     """

@@ -53,6 +53,7 @@ from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
         NotFoundException, UnimplementedError
 from aquilon.server.formats import Formatter
+from aquilon.server.broker import Broker
 
 class ResponsePage(resource.Resource):
 
@@ -824,8 +825,9 @@ class ResponsePage(resource.Resource):
 
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
-    def __init__(self, broker):
+    def __init__(self, config):
         formatter = Formatter()
+        broker = Broker(config)
         ResponsePage.__init__(self, broker, '', formatter)
 
         # Regular Expression for matching variables in a path definition.

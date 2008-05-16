@@ -9,6 +9,8 @@
 # This module is part of Aquilon
 """ Roles is a first cut at simple entitlements for the project """
 import sys
+if __name__ == '__main__':
+    sys.path.append('../..')
 
 from db import *
 

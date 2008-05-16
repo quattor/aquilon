@@ -23,7 +23,7 @@ from db import *
                     #format='%(asctime)s %(levelname)s %(message)s',
                     #filename=os.path.join(LOGDIR,'aqdb.log'),
                     #filemode='w')
-from aquilon.exceptions_ import ArgumentError,NoSuchRowException
+from aquilon.exceptions_ import ArgumentError
 
 from location import Location,Chassis
 from configuration import CfgPath

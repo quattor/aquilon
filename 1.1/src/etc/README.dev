@@ -1,46 +1,9 @@
-Quickstart to getting a broker running in development:
+The quickstart for setting up a development broker can now be found on the wiki:
 
-# Set up some directories for the server to use...
-mkdir -p /var/tmp/$USER/quattor
-rsync -avP -e ssh --delete quattorsrv:/var/quattor/templates /var/tmp/$USER/quattor
-rsync -avP -e ssh --delete quattorsrv:/var/quattor/template-king /var/tmp/$USER/quattor
-rsync -avP -e ssh --delete quattorsrv:/var/quattor/swrep /var/tmp/$USER/quattor
+http://wiki-eu.ms.com/twiki/cgi-bin/view/Aurora/AquilonHowTo#How_do_I_run_a_test_broker
 
-# Set up a config file for the database.  Config file could be anywhere.
-export AQDCONF="~/dev/aquilon/aqd/1.1/src/etc/aqd.conf.$USER"
-cat >$AQDCONF <<EOF;
-[database]
-logfile = /var/tmp/$USER/aqdb.log
-dsn = sqlite:////var/tmp/$USER/aquilondb/aquilon.db
-EOF
-
-# From your shadow, build a blank database.
-cd ~/dev/aquilon/aqd/1.1/src
-cd lib/python2.5/aquilon/aqdb
-./utils/REBUILD.sh
-
-# If desired, run population_scripts.py for some fake data...
-./population_scripts.py
-
-
-To start the broker, from the bin directory of your shadow and without a proid:
-./twistd -no -l - aqd --noknc
-
-This will start the broker in the foreground and have it skip knc for 
-authentication and encryption.
-
-To run the client against this server:
-./aq.py --noknc --aqport=6901 [commands]
-
-Try help for a list of commands, and help command for more details.
-
-To stop aqd:
-If running with -no (foreground), ctrl-c will bring the server down
-gracefully.  Otherwise, kill -TERM `cat twistd.pid` works as well.
-
-
-Below are notes for writing the wrapper scripts that will make this
-look like the 1.0 aq/aqd...
+Below are notes about the various options available, originally provided
+for the aqd wrapper script.
 
 To start aqd:
 ./twistd aqd
@@ -76,6 +39,4 @@ To run aq:
 
 To run aq without knc:
 ./aq.py --noknc --aqport=6901 [commands]
-
-Options should be the same / similar to options to aq 1.0.
 

@@ -9,12 +9,13 @@
 # This module is part of Aquilon
 
 import os
-import socket
 
 from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.python import log
 
+from aquilon.server.dbaccess import DatabaseBroker
+from aquilon.server.authorization import AuthorizationBroker
 from aquilon.server.processes import ProcessBroker
 from aquilon.server.templates import TemplateCreator
 from aquilon.exceptions_ import AquilonError
@@ -39,34 +40,31 @@ def raise_exception(msg):
 #=============================================================================#
 
 class Broker(object):
-    def __init__(self, dbbroker, azbroker):
-        self.dbbroker = dbbroker
-        self.azbroker = azbroker
+    def __init__(self, config):
+        self.config = config
+        self.dbbroker = DatabaseBroker(config.get("database", "dsn"))
+        # FIXME: This is due to be reworked.
+        self.azbroker = AuthorizationBroker(self.dbbroker)
         self.pbroker = ProcessBroker()
         self.template_creator = TemplateCreator()
-        self.osuser = os.environ.get('USER')
-        self.localhost = socket.gethostname()
-        if self.osuser == 'cdb' and os.path.exists('/var/quattor'):
-            self.basedir = "/var/quattor"
-            self.git_templates_url = "http://%s/templates" % self.localhost
-        else:
-            self.basedir = "/var/tmp/%s/quattor" % self.osuser
-            self.git_templates_url = "http://%s:6901/templates" % self.localhost
-        self.profilesdir = os.path.join(self.basedir,
-                "web", "htdocs", "profiles")
-        self.depsdir = os.path.join(self.basedir, "deps")
-        self.hostsdir = os.path.join(self.basedir, "hosts")
-        self.templatesdir = os.path.join(self.basedir, "templates")
-        self.plenarydir = os.path.join(self.basedir, "plenary")
-        self.kingdir = os.path.join(self.basedir, "template-king")
-        self.repdir = os.path.join(self.basedir, "swrep")
-        self.rundir = os.path.join(self.basedir, "run")
-        self.default_domain = ".ms.com"
-        self.git_path = "/ms/dist/fsf/PROJ/git/1.5.4.2/bin"
-        self.git = os.path.join(self.git_path, "git")
-        self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
-        self.domain_name = "production"
-        self.dsdb = "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb"
+        # FIXME: The broker can be reworked to just pass the config object.
+        self.localhost = config.get("broker", "servername")
+        self.git_templates_url = config.get("broker", "git_templates_url")
+        self.osuser = config.get("broker", "user")
+        self.basedir = config.get("broker", "quattordir")
+        self.profilesdir = config.get("broker", "profilesdir")
+        self.depsdir = config.get("broker", "depsdir")
+        self.hostsdir = config.get("broker", "hostsdir")
+        self.templatesdir = config.get("broker", "templatesdir")
+        self.plenarydir = config.get("broker", "plenarydir")
+        self.kingdir = config.get("broker", "kingdir")
+        self.repdir = config.get("broker", "swrepdir")
+        self.rundir = config.get("broker", "rundir")
+        self.git_path = config.get("broker", "git_path")
+        self.git = config.get("broker", "git")
+        #self.htpasswd = "/ms/dist/elfms/PROJ/apache/2.2.6/bin/htpasswd"
+        #self.domain_name = "production"
+        self.dsdb = config.get("broker", "dsdb")
 
         for d in [self.basedir, self.profilesdir, self.depsdir, self.hostsdir,
                 self.plenarydir, self.rundir]:

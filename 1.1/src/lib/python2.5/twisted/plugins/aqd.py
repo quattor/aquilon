@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""Provide a twistd plugin for aqd to start up."""
 
 import os
 #import sys
@@ -26,12 +26,10 @@ from twisted.application.service import IServiceMaker, MultiService
 from twisted.runner.procmon import ProcessMonitor
 from twisted.internet import reactor
 
-from aquilon.server.resources import RestServer
+from aquilon.config import Config
+#from aquilon.server.resources import RestServer
 from aquilon.server.kncwrappers import KNCSite
 from aquilon.server.anonwrappers import AnonSite
-from aquilon.server import dbaccess
-from aquilon.server.authorization import AuthorizationBroker
-from aquilon.server.broker import Broker, BrokerError
 
 #from aquilon.aqdb.utils.Debug import ipshell
 
@@ -51,13 +49,10 @@ from aquilon.server.broker import Broker, BrokerError
 class Options(usage.Options):
     optFlags = [
                 ["noknc", None, "Do not start the knc listener."],
-                ["usesock", None, "use a unix socket to connect"]
+                ["usesock", None, "use a unix socket to connect"],
             ]
     optParameters = [
-                ["kncport", "p", 6900, "The port number for knc to listen on."],
-                ["openport", "p", 6901, "The port number to listen on for anonymous connections."],
-                # For now, dburi must match dsn in aqdb.db.  (Backwards...)
-                # ["dburi", "d", "sqlite", "DB URI to use."]
+                ["config", None, "Configuration file to use."],
             ]
 
 class AQDMaker(object):
@@ -67,49 +62,33 @@ class AQDMaker(object):
     options = Options
 
     def makeService(self, options):
-        #dburi = options["dburi"]
-        #if options["dburi"] == 'sqlite':
-        #        dburi = dbaccess.sqlite()
-        from aquilon.aqdb.db import dsn as dburi
+        config = Config(configfile=options["config"])
+        # Dynamic import means that we can parse config options before
+        # importing aqdb.  This is a hack until aqdb can be imported without
+        # firing up database connections.
+        resources = __import__("aquilon.server.resources", globals(), locals(),
+                ["RestServer"], -1)
+        RestServer = getattr(resources, "RestServer")
 
-        dbbroker = dbaccess.DatabaseBroker(dburi)
-
-        # We seem to be OK without something like this...
-        #def initDatabase(dbbroker):
-        #    def carryOn(_):
-        #        print "Database Started", _
-        #    return dbbroker.startup().addCallback(carryOn)
-        #reactor.callWhenRunning(initDatabase, dbbroker)
-
-        # FIXME: This is due to be reworked.
-        azbroker = AuthorizationBroker(dbbroker)
-
-        # FIXME: This object should probably be handed a config file,
-        # and then go off and create the dbbroker and azbroker...
-        # (Or the RestServer could be handed the config, and then
-        # create this object.)
-        broker = Broker(dbbroker, azbroker)
-
-        restServer = RestServer(broker)
+        restServer = RestServer(config)
         openSite = AnonSite(restServer)
 
         if options["usesock"]:
             return strports.service("unix:%s/aqdsock:mode=600"
-                    % broker.basedir, openSite)
+                    % config.get("broker", "basedir"), openSite)
 
         if options["noknc"]:
-            return strports.service(str(options["openport"]), openSite )
+            return strports.service(config.get("broker", "openport"), openSite)
 
-        #knc = "/ms/dev/kerberos/knc/1.3/install/exec/bin/knc"
-        knc = "/ms/dist/kerberos/PROJ/knc/prod/bin/knc"
-
-        sockname = os.path.join(broker.rundir, "kncsock")
+        sockname = os.path.join(config.get("broker", "rundir"), "kncsock")
         mon = ProcessMonitor()
         # FIXME: Should probably run krb5_keytab here as well.
         # and/or verify that the keytab file exists.
         mon.addProcess("knc", ["/usr/bin/env",
-            "KRB5_KTNAME=FILE:/var/spool/keytabs/%s" % broker.osuser,
-            knc, "-lS", sockname, str(options["kncport"]) ])
+            "KRB5_KTNAME=FILE:/var/spool/keytabs/%s"
+            % config.get("broker", "user"),
+            config.get("broker", "knc"), "-lS", sockname,
+            config.get("broker", "kncport")])
         mon.startService()
         reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
 
@@ -120,8 +99,9 @@ class AQDMaker(object):
         # go back to returning strports.service() for a single
         # service.
         multiService = MultiService()
-        multiService.addService( strports.service( unixsocket, kncSite ) )
-        multiService.addService( strports.service( str(options["openport"]), openSite ) )
+        multiService.addService(strports.service(unixsocket, kncSite))
+        multiService.addService(strports.service(
+            config.get("broker", "openport"), openSite))
         return multiService
 
 serviceMaker = AQDMaker()

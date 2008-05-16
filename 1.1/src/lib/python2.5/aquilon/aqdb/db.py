@@ -27,44 +27,26 @@ from sqlalchemy.sql import insert, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exceptions import SQLError
 
-# TODO: This should go away and use the aquilonConfig when it's
-# available...
-class dbConfig:
-    def __init__(self, defaults):
-        from ConfigParser import SafeConfigParser
-        self.config = SafeConfigParser()
-        self.defaults = defaults
-        configfile = "/etc/aqd.conf"
-        try:
-            if (os.environ.has_key("AQDCONF")):
-                configfile = os.environ["AQDCONF"]
-            print "using config file of %s" % configfile
-            self.config.read(configfile)
-        except:
-            print >>sys.stderr, "failed to read configfile %s" % configfile
-            sys.exit(9)
+from aquilon.config import Config
 
-    def __getitem__(self, key):
-        try:
-            return self.config.get("database", key)
-        except:
-            if key in self.defaults:
-                return self.defaults[key]
-            return None
+# Something like this will/should be valid when the broker reads in a
+# config file first.  The config object is (essentially) a singleton
+# that will already be populated.  In this case, no exception will be thrown.
+try:
+    config = Config()
+except Exception, e:
+    print >>sys.stderr, "failed to read configuration: %s" % e
+    sys.exit(os.EX_CONFIG)
 
-config=dbConfig( {
-    "logfile" : "/var/quattor/logs/aqdb.log",
-})
-
-#print "using logfile of %s" % config["logfile"]
+#print "using logfile of %s" % config.get("database", "dblogfile")
 
 import logging
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename=config["logfile"],
+                    filename=config.get("database", "dblogfile"),
                     filemode='w')
 
-dsn = config["dsn"]
+dsn = config.get("database", "dsn")
 if dsn is None:
     # should really raise an error, but right now
     # it doesn't really matter what we do - it blows up twisted
@@ -78,7 +60,7 @@ if dsn.startswith('oracle'):
     if not os.environ['ORACLE_HOME']:
         os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
     if not os.environ.get('ORACLE_SID'):
-        os.environ['ORACLE_SID']=config["server"]
+        os.environ['ORACLE_SID']=config.get("database", "server")
 
 engine = create_engine(dsn)
 

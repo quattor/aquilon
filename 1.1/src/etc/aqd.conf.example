@@ -1,0 +1,13 @@
+# This is an example production configuration.
+# For additional options, see the defaults in aquilon/Config.py
+[DEFAULT]
+basedir = /var/quattor
+quattordir = %(basedir)s
+logdir = %(quattordir)s/logs
+[database]
+dbdir = %(basedir)s/aquilondb
+dblogfile = %(dbdir)s/aqdb.log
+# server = LNPO_AQUILON_NY
+# dsn = oracle://cdb:********@%(server)s
+[broker]
+git_templates_url = http://%(servername)s/templates

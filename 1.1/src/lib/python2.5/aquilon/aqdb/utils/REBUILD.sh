@@ -1,9 +1,11 @@
-#!/bin/bash
+#!/bin/bash -e
 
-DBFILE=/var/tmp/`whoami`/aquilondb/aquilon.db
-if [ -r "$DBFILE" ] ; then
-	mv "$DBFILE" "$DBFILE.saved"
-	echo "moved existing db to '$DBFILE.saved'"
+if [ -z "$AQDBFILE" ] ; then 
+	AQDBFILE=/var/tmp/`whoami`/aquilondb/aquilon.db
+fi
+if [ -r "$AQDBFILE" ] ; then
+	mv "$AQDBFILE" "$AQDBFILE.saved"
+	echo "moved existing db to '$AQDBFILE.saved'"
 fi
 
 IPY='/ms/dist/python/PROJ/ipython/0.7.2/bin/ipython '

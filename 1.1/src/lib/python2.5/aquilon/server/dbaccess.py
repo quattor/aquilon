@@ -1001,8 +1001,8 @@ class DatabaseBroker(AccessBroker):
             raise NotFoundException("Service %s instance %s not found (try aq add service to add it): %s"
                     % (dbservice.name, instance, e))
         if not dbinstance.svc_inst:
-            raise NotFoundException("Service %s instance %s not found (try aq add service to add it) : %s"
-                    % (dbservice.name, instance, e))
+            raise NotFoundException("Service %s instance %s not found (try aq add service to add it)"
+                    % (dbservice.name, instance))
         return dbinstance.svc_inst
 
     @transact
