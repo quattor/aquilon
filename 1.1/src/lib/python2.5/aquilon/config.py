@@ -48,7 +48,7 @@ global_defaults = {
 config_defaults = {
         "database": {
             "dbdir": "%(basedir)s/aquilondb",
-            "dbfile": "%(basedir)s/aquilon.db",
+            "dbfile": "%(dbdir)s/aquilon.db",
             "dsn": "sqlite:///%(dbfile)s",
             "dblogfile": "%(dbdir)s/aqdb.log",
         }, "broker": {
