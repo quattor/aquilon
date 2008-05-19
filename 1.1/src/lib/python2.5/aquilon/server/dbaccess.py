@@ -30,7 +30,8 @@ from twisted.python.failure import Failure
 from aquilon import const
 from aquilon.exceptions_ import RollbackException, NotFoundException, \
         AuthorizationException, ArgumentError, AquilonError, UnimplementedError
-from formats import printprep, HostIPList
+from aquilon.server import formats
+from formats import printprep
 from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
@@ -171,13 +172,9 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def show_host_all(self, result, **kwargs):
-        """Hacked such that printing the list out to a client only
-        shows fqdn.  Ideally, the printing layer would handle this
-        intelligently - print only fqdn for a list of hosts in raw 
-        mode, or fqdn plus links in html.
-        
-        """
-        return [host.fqdn for host in self.session.query(Host).all()]
+        hosts = formats.HostList()
+        hosts.extend(self.session.query(Host).all())
+        return printprep(hosts)
 
     @transact
     def show_host(self, result, hostname, **kwargs):
@@ -185,7 +182,7 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def show_hostiplist(self, result, archetype, **kwargs):
-        hosts = HostIPList()
+        hosts = formats.HostIPList()
         q = self.session.query(Host)
         if archetype:
             q = q.join('archetype').filter_by(name=archetype)

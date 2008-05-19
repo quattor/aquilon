@@ -361,4 +361,24 @@ class HostIPList(FormatterList):
                 return str(interface.ip)
         return ""
 
+
+# By convention, holds Host objects.
+class HostList(FormatterList):
+    def printprep(self):
+        for host in self:
+            str(host.fqdn)
+        return self
+
+    def format_raw(self):
+        return str("\n".join([host.fqdn for host in self]))
+
+    # Should probably display some useful info...
+    def format_csv(self):
+        return str("\n".join([host.fqdn for host in self]))
+
+    def format_html(self):
+        return "<ul>\n%s\n</ul>\n" % "\n".join([
+            """<li><a href="/host/%(fqdn)s.html">%(fqdn)s</a></li>"""
+            % {"fqdn": host.fqdn} for host in self])
+
 #if __name__=='__main__':
