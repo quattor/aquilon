@@ -72,7 +72,7 @@ config_defaults = {
             "git_path": "/ms/dist/fsf/PROJ/git/1.5.4.2/bin",
             "git": "%(git_path)s/git",
             "dsdb": "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb",
-            "knc": "/ms/dist/kerberos/PROJ/knc/prod/bin/knc",
+            "knc": "/ms/dist/kerberos/PROJ/knc/1.4/bin/knc",
         },
     }
 
