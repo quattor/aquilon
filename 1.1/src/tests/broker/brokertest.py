@@ -19,15 +19,14 @@ from aquilon.config import Config
 class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.config = Config()
 
     def tearDown(self):
         pass
 
-    def commandtest(self, command):
-        config = Config()
-        aq = os.path.join(config.get("broker", "srcdir"), "bin", "aq")
-        kncport = config.get("broker", "kncport")
+    def runcommand(self, command):
+        aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq")
+        kncport = self.config.get("broker", "kncport")
         if isinstance(command, list):
             args = command[:]
         else:
@@ -36,6 +35,10 @@ class TestBrokerCommand(unittest.TestCase):
         args.insert(1, "--aqport")
         args.insert(2, kncport)
         p = Popen(args, stdout=PIPE, stderr=PIPE)
+        return p
+
+    def commandtest(self, command):
+        p = self.runcommand(command)
         (out, err) = p.communicate()
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
@@ -50,6 +53,30 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(out, "",
                 "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
+
+    # Right now, commands are not implemented consistently.  When that is
+    # addressed, this unit test should be updated.
+    def notfoundtest(self, command):
+        p = self.runcommand(command)
+        (out, err) = p.communicate()
+        self.assertEqual(err, "",
+                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                % (command, err))
+        if p.returncode == 0:
+            self.assertEqual(out, "",
+                    "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                    % (command, out))
+        else:
+            self.assertEqual(p.returncode, 4)
+            self.assertEqual(out.find("Not Found"), 0,
+                    "STDOUT for %s did not start with Not Found:\n@@@\n'%s'\n@@@\n"
+                    % (command, out))
+        return
+
+    def matchoutput(self, out, s, command):
+        self.assert_(out.find(s) >= 0, 
+                "STDOUT for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                % (command, s, out))
 
 
 #if __name__=='__main__':

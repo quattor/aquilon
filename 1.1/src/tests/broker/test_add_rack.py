@@ -24,7 +24,14 @@ from brokertest import TestBrokerCommand
 class TestAddRack(TestBrokerCommand):
 
     def testaddnp3(self):
-        self.noouttest(["add", "rack", "--name", "np3", "--building", "np"])
+        command = "add rack --name np3 --building np"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddnp3(self):
+        command = "show rack --name np3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rack: np3", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRack)

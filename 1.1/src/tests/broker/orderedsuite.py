@@ -47,6 +47,14 @@ from test_stop import TestBrokerStop
 
 
 class BrokerTestSuite(unittest.TestSuite):
+    """Set up the broker's unit tests in an order that allows full coverage.
+
+    The general strategy is to start the broker, test adding things,
+    test deleting things, and then shut down the broker.  Most of the show
+    commands are tested as verification tests in add/del tests.  Those that
+    are not have explicit tests between add and delete.
+
+    """
 
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)

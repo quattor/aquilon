@@ -24,20 +24,42 @@ from brokertest import TestBrokerCommand
 class TestAddService(TestBrokerCommand):
 
     def testaddafsinstance(self):
-        self.noouttest(["add", "service",
-            "--service", "afs", "--instance", "q.ny.ms.com"])
+        command = "add service --service afs --instance q.ny.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddafsinstance(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        # Note: Instance does not display the .ms.com
+        self.matchoutput(out, "Service: afs Instance: q.ny", command)
 
     def testaddbootserverinstance(self):
-        self.noouttest(["add", "service",
-            "--service", "bootserver", "--instance", "np.test"])
+        command = "add service --service bootserver --instance np.test"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddbootserverinstance(self):
+        command = "show service --service bootserver"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
 
     def testadddnsinstance(self):
-        self.noouttest(["add", "service",
-            "--service", "dns", "--instance", "nyinfratest"])
+        command = "add service --service dns --instance nyinfratest"
+        self.noouttest(command.split(" "))
+
+    def testverifyadddnsinstance(self):
+        command = "show service --service dns"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: dns Instance: nyinfratest", command)
 
     def testaddntpinstance(self):
-        self.noouttest(["add", "service",
-            "--service", "ntp", "--instance", "pa.ny.na"])
+        command = "add service --service ntp --instance pa.ny.na"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddntpinstance(self):
+        command = "show service --service ntp"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

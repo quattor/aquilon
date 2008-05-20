@@ -24,7 +24,15 @@ from brokertest import TestBrokerCommand
 class TestDelDomain(TestBrokerCommand):
 
     def testdelunittestdomain(self):
-        self.noouttest(["del", "domain", "--domain", "unittest"])
+        command = "del domain --domain unittest"
+        self.noouttest(command.split(" "))
+        self.assert_(not os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "unittest")))
+
+    def testverifydelunittestdomain(self):
+        command = "show domain --domain unittest"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)

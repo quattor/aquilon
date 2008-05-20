@@ -223,14 +223,14 @@ class Formatter(object):
         return "\n".join(details)
 
     def elaborate_raw_location(self, location, indent=""):
-        details = [ indent + "Location: %s (%s)"
-                % (location.name, repr(location.type)) ]
+        details = [ indent + "%s: %s"
+                % (location.type.type.capitalize(), location.name) ]
         if location.fullname:
             details.append(indent + "  Fullname: %s" % location.fullname)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
-            details.append(indent + "  Parents: [%s]" %
+            details.append(indent + "  Location Parents: [%s]" %
                     ", ".join("%s=%s" % (p.type.type, p.name)
                     for p in location.parents))
         return "\n".join(details)

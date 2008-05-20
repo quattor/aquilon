@@ -24,20 +24,42 @@ from brokertest import TestBrokerCommand
 class TestDelService(TestBrokerCommand):
 
     def testdelafsinstance(self):
-        self.noouttest(["del", "service",
-            "--service", "afs", "--instance", "q.ny.ms.com"])
+        command = "del service --service afs --instance q.ny.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelafsinstance(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        # Note: For now, the .ms.com is not present in this output...
+        self.assert_(out.find("Service: afs Instance: q.ny") < 0)
 
     def testdelbootserverinstance(self):
-        self.noouttest(["del", "service",
-            "--service", "bootserver", "--instance", "np.test"])
+        command = "del service --service bootserver --instance np.test"
+        self.noouttest(command.split(" "))
+
+    def testverifydelbootserverinstance(self):
+        command = "show service --service bootserver"
+        out = self.commandtest(command.split(" "))
+        self.assert_(out.find("Service: bootserver Instance: np.test") < 0)
 
     def testdeldnsinstance(self):
-        self.noouttest(["del", "service",
-            "--service", "dns", "--instance", "nyinfratest"])
+        command = "del service --service dns --instance nyinfratest"
+        self.noouttest(command.split(" "))
+
+    def testverifydeldnsinstance(self):
+        command = "show service --service dns"
+        out = self.commandtest(command.split(" "))
+        self.assert_(out.find("Service: dns Instance: nyinfratest") < 0)
 
     def testdelntpinstance(self):
-        self.noouttest(["del", "service",
-            "--service", "ntp", "--instance", "pa.ny.na"])
+        command = "del service --service ntp --instance pa.ny.na"
+        self.noouttest(command.split(" "))
+
+    def testverifydelntpinstance(self):
+        command = "show service --service ntp"
+        out = self.commandtest(command.split(" "))
+        self.assert_(out.find("Service: ntp Instance: pa.ny.na") < 0)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)

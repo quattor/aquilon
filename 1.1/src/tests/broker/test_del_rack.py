@@ -24,7 +24,13 @@ from brokertest import TestBrokerCommand
 class TestDelRack(TestBrokerCommand):
 
     def testdelnp3(self):
-        self.noouttest(["del", "rack", "--name", "np3"])
+        command = "del rack --name np3"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp3(self):
+        command = "show rack --name np3"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRack)

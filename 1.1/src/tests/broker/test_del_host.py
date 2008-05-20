@@ -24,8 +24,13 @@ from brokertest import TestBrokerCommand
 class TestDelHost(TestBrokerCommand):
 
     def testdelaquilon02(self):
-        self.noouttest(["del", "host",
-            "--hostname", "aquilon02.one-nyp.ms.com"])
+        command = "del host --hostname aquilon02.one-nyp.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelaquilon02(self):
+        command = "show host --hostname aquilon02.one-nyp.ms.com"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

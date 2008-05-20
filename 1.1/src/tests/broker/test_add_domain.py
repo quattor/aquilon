@@ -25,7 +25,14 @@ class TestAddDomain(TestBrokerCommand):
 
     def testaddunittestdomain(self):
         self.noouttest(["add", "domain", "--domain", "unittest"])
-        # FIXME: Verify that a new directory exists under templates.
+        self.assert_(os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "unittest")))
+
+    def testverifyaddunittestdomain(self):
+        command = "show domain --domain unittest"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Domain: unittest", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDomain)

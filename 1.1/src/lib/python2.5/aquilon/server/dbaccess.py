@@ -148,6 +148,10 @@ class DatabaseBroker(AccessBroker):
         host = Host(dbmachine, dbdomain, dbstatus, name=short,
                 dns_domain=dbdns_domain, archetype=archetype)
         self.session.save(host)
+        # Working around funky archetype handling in host creation...
+        # Might not be necessary if/when Host uses the declarative mapper.
+        self.session.flush()
+        self.session.refresh(host)
         return printprep(host)
 
     @transact
@@ -989,6 +993,9 @@ class DatabaseBroker(AccessBroker):
 
     # Expects to be run under a transact with a session.
     def _get_serviceinstance(self, dbservice, instance):
+        # FIXME: Quick hack for afs services... this needs to be reworked.
+        if instance.endswith(".ms.com"):
+            instance = instance[:-7]
         relative_path = "%s/%s" % (dbservice.name, instance)
         try:
             dbinstance = self.session.query(CfgPath).filter_by(

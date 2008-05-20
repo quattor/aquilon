@@ -24,7 +24,13 @@ from brokertest import TestBrokerCommand
 class TestDelMachine(TestBrokerCommand):
 
     def testdelnp3c5n10(self):
-        self.noouttest(["del", "machine", "--machine", "np3c5n10"])
+        command = "del machine --machine np3c5n10"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp3c5n10(self):
+        command = "show machine --machine np3c5n10"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)

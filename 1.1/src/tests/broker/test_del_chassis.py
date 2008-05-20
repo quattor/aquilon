@@ -24,7 +24,13 @@ from brokertest import TestBrokerCommand
 class TestDelChassis(TestBrokerCommand):
 
     def testdelnp3c5(self):
-        self.noouttest(["del", "chassis", "--name", "np3c5"])
+        command = "del chassis --name np3c5"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp3c5(self):
+        command = "show chassis --name np3c5"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelChassis)

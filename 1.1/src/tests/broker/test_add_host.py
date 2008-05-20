@@ -28,6 +28,16 @@ class TestAddHost(TestBrokerCommand):
             "--machine", "np3c5n10", "--domain", "unittest",
             "--status", "prod", "--archetype", "aquilon"])
 
+    def testverifyaddaquilon02(self):
+        command = "show host --hostname aquilon02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: aquilon02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Machine: np3c5n10", command)
+        self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Status: prod", command)
+
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

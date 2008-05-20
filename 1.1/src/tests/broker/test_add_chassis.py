@@ -24,7 +24,14 @@ from brokertest import TestBrokerCommand
 class TestAddChassis(TestBrokerCommand):
 
     def testaddnp3c5(self):
-        self.noouttest(["add", "chassis", "--name", "np3c5", "--rack", "np3"])
+        command = "add chassis --name np3c5 --rack np3"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddnp3c5(self):
+        command = "show chassis --name np3c5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Chassis: np3c5", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)
