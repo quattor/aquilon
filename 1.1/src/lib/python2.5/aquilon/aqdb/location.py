@@ -14,11 +14,18 @@ import sys
 sys.path.append('../..')
 
 from db import *
-from subtypes import location_type, LocationType, get_loc_type_id
+from locationType import location_type, LocationType
 from sqlalchemy import Column, Integer, Sequence, String, select
 from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.exceptions_ import ArgumentError
+
+def get_loc_type_id(typ_nm):
+    """ To keep session out of __init__ methods for systems """
+    #### TRY THIS W/O __TABLE__ when you fix it
+    sl=select([LocationType.c.id], LocationType.c.type=='%s'%(typ_nm))
+    return engine.execute(sl).fetchone()[0]
+
 
 def mk_loc_table(name, meta, *args, **kw):
     return Table(name, meta,

@@ -15,8 +15,11 @@ import os
 from socket import gethostname
 from datetime import datetime
 
-import msversion
-msversion.addpkg('sqlalchemy','0.4.5','dist')
+#import msversion
+#msversion.addpkg('sqlalchemy','0.4.5','dist')
+sys.path.append(
+    '/v/global/user/d/da/daqscott/Desktop/SQLAlchemy-0.4.6/lib')
+import sqlalchemy
 
 from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
                         Integer, DateTime, Sequence, String, select,
@@ -38,7 +41,7 @@ except Exception, e:
     print >>sys.stderr, "failed to read configuration: %s" % e
     sys.exit(os.EX_CONFIG)
 
-#print "using logfile of %s" % config.get("database", "dblogfile")
+print "using logfile of %s" % config.get("database", "dblogfile")
 
 import logging
 logging.basicConfig(level=logging.ERROR,

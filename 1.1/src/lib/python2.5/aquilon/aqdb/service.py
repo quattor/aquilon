@@ -28,11 +28,12 @@ import os
 import re
 
 from db import *
+from name_table import get_name_table, populate_name_table
 from aquilon.exceptions_ import ArgumentError
 
 from location import *
 from configuration import *
-from systems import System, system, BuildItem, HostList
+from systems import System, system, BuildItem, Host, host
 
 from sqlalchemy import (Integer, Sequence, String, DateTime, Index,
                         select, insert)
@@ -103,6 +104,53 @@ mapper(Service, service, properties={
     'creation_date' : deferred(service.c.creation_date),
     'comments'      : deferred(service.c.comments)})
 
+
+#class HostList(Base):
+#    """ The default system type used for ServiceInstances will be this
+#        data structure, a list of hosts. """
+#
+#    __tablename__ = 'hostlist'
+#    id   = Column(Integer, primary_key=True)
+#    name = Column(String(64), nullable=False, unique=True)
+#    creation_date = deferred(Column(DateTime, nullable=False,
+#                                        default = get_date_default()))
+#    comments = deferred(Column(String(255)))
+
+HostList = get_name_table('HostList','host_list')
+
+host_list = HostList.__table__
+
+class HostListItem(Base):
+    __table__ = Table('host_list_item', meta,
+
+    Column('host_list_id', Integer,
+           ForeignKey('host_list.id', ondelete='CASCADE', name='hli_hl_fk'),
+           primary_key = True),
+    Column('host_id', Integer,
+           ForeignKey('host.id', ondelete='CASCADE',name='hli_host_fk'),
+           nullable=False, primary_key=True),
+    Column('position', Integer, nullable=False),
+    UniqueConstraint('host_id', name='host_list_uk')) #hosts only on one list?
+
+    creation_date = get_date_col()
+    comments      = get_comment_col()
+
+    host          = relation(Host)
+    hostlist      = relation(HostList)
+
+
+    def __repr__(self):
+        return self.__class__.__name__ + " " + str(self.host.name)
+
+HostList.hosts = relation(HostListItem,
+                          collection_class=ordering_list('position'),
+                            order_by=[HostListItem.__table__.c.position])
+
+#mapper(HostList, host_list, properties={
+#        'hosts'  : relation(HostListItem,
+#                            collection_class=ordering_list('position'),
+#                            order_by=[HostListItem.__table__.c.position]),
+#})
 
 service_instance = Table('service_instance',meta,
     Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
@@ -308,9 +356,35 @@ def populate_service_list():
         print 'populated service list'
     s.close()
 
+def populate_hli():
+    if empty(host):
+        print "can't populate host_list_items without hosts."
+        return
+    elif empty(host_list):
+        s=Session()
+
+        hl = HostList(name='test-host-list', comments='FAKE')
+
+        #from shell import ipshell
+        #ipshell()
+
+        s.save(hl)
+        s.commit()
+        assert(hl)
+
+        hosts=s.query(Host).all()
+        print '%s hosts is in hosts'%(len(hosts))
+
+        hli=HostListItem(hostlist=hl,host=hosts[1], position=1, comments='FAKE')
+        s.save(hli)
+        s.commit()
+        assert(hli)
+        print 'created %s with list items: %s'%(hl,hl.hosts)
+
 if __name__ == '__main__':
     meta.create_all(checkfirst=True)
     s=Session()
 
     populate_service()
     populate_service_list()
+    populate_hli()

@@ -120,7 +120,7 @@ mapper(PhysicalInterface, physical_interface,
     'machine':      relation(Machine,backref='interfaces'),
     'interface':    relation(Interface,lazy=False,backref='physical')})
     #collection_clas=attribute_mapped_collection('name'))})
-
+######PUT CASCADED DELETES IN FOR WES
 
 def populate_physical():
     if empty(physical_interface):

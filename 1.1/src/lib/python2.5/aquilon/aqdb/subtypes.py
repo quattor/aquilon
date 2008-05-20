@@ -14,69 +14,122 @@
 import sys
 sys.path.append('../..')
 
-from db import *
+import types
+from datetime import datetime
 
-from sqlalchemy.orm import (mapper, relation, deferred, backref)
+#from db_factory      import db_factory
+#from aqdbBase        import aqdbBase
+#from schema          import (get_id_col, get_comment_col, get_date_col,
+#                             get_date_default)
 
-class LocationType(Base):
-    """ The discriminator for Location subtypes """
-    __table__ = Table('location_type', Base.metadata,
-        get_id_col('location_type'),
-        Column('type', String(32), nullable = False),
-        UniqueConstraint('type', name='location_type_uk'))
+from db import (meta,engine, Session, Base, get_id_col, get_comment_col,
+                get_date_col, get_date_default)
 
-    creation_date = get_date_col()
-    comments      = get_comment_col()
-    def __str__(self):
-        return str(self.type)
+from sqlalchemy      import (Table, Column, Integer, String, DateTime, Index,
+                             UniqueConstraint, PrimaryKeyConstraint, select)
 
-location_type = LocationType.__table__
+from sqlalchemy.orm  import deferred
 
-def get_loc_type_id(typ_nm):
+#subtype Base, make it have new __repr__, __str__, __eq__ methods.
+
+# we want class level methods on the classes returned by subtype:
+# LocationType.populate(), LocationType.id('foo')
+
+#TODO: implement .id as a partial?
+#def id(nm):
+#    from sqlalchemy import select
+#    engine = db_factory.get_engine()
+#    sl=select([location_type.c.id], location_type.c.type=='%s'%(nm))
+#    return engine.execute(sl).fetchone()[0]
+
+def subtype(nm,tbl):
+    """ A factory object for subtypes in Aqdb."""
+    class klass(Base):
+        """ The Discriminator for %s types"""%(nm)
+        __tablename__ = 'location_type'
+        id = Column(Integer,primary_key=True)
+        type = Column(String(32), nullable = False)
+        creation_date = deferred(Column(DateTime, nullable=False,
+                                        default = get_date_default()))
+        comments = deferred(Column(String(255)))
+
+        def __str__(self):
+            return str(self.type)
+
+        def __repr__(self):
+            return self.__class__.__name__ + " " + str(self.type)
+
+        def __eq__(self,other):
+            if isinstance(other,str):
+                if self.type == other:
+                    return True
+                else:
+                    return False
+            else:
+                raise ArgumentError('Can only be compared to strings')
+    klass.__table__.append_constraint(
+        PrimaryKeyConstraint('id', name = '%s_pk'%(tbl)))
+    klass.__table__.append_constraint(
+        UniqueConstraint('type', name = '%s_uk'%(tbl)))
+    klass.__name__ = nm
+    return klass
+
+def populate_subtype(cls, items):
+    """ Shorthand for filling in types """
+    if not cls.__table__:
+        raise TypeError('class arg must have a __table__ attr')
+    if isinstance(items,list):
+        if len(items) > cls.__table__.count().execute().fetchone()[0]:
+            #dbf = db_factory('sqlite')
+            #s = dbf.session()
+            s = Session()
+            for t in items:
+                test = s.query(cls).filter_by(type=t).all()
+                if not test:
+                    st = cls(type=t, comments='auto populated')
+                    s.save(st)
+                    s.commit()
+    else:
+        raise TypeError('items arg must be a list')
+
+def get_subtype_id(nm=None,engine=None,cls=None):
     """ To keep session out of __init__ methods for systems """
-    sl=select([location_type.c.id], location_type.c.type=='%s'%(typ_nm))
+    tbl = cls.__table__
+
+    assert isinstance(tbl,Table)
+    sl=select([tbl.c.id], tbl.c.type=='%s'%(nm))
     return engine.execute(sl).fetchone()[0]
 
+#SystemType
+#Hardware/Machine Type
+#Interface Type
 
-class SystemType(Base):
-    """ The discriminator for System """
-    __table__ = Table('system_type', meta,
-        get_id_col('system_type'),
-        Column('type', String(32), nullable = False),
-        UniqueConstraint('type', name='system_type_uk'))
+#sys_types = ['base_system_type', 'host', 'afs_cell', 'host_list',
+#             'quattor_server']
 
-    creation_date = get_date_col()
-    comments      = get_comment_col()
-    def __str__(self):
-        return str(self.type)
-
-system_type = SystemType.__table__
-
-def get_sys_type_id(typ_nm):
-        """ To keep session out of __init__ methods for systems """
-        sl=select([system_type.c.id], system_type.c.type=='%s'%(typ_nm))
-        return engine.execute(sl).fetchone()[0]
-
-def populate_location_types():
-    if empty(location_type):
-        fill_type_table(location_type,['company','hub','continent','country',
-                                   'city','bucket', 'building','rack','chassis',
-                                   'desk', 'base_location_type'])
-
-def populate_system_types():
-    s = Session()
-    types = ['base_system_type', 'host', 'afs_cell', 'host_list',
-             'quattor_server']
-
-    for t in types:
-        test = s.query(SystemType).filter_by(type=t).all()
-        if not test:
-            st = SystemType(type=t, comments='auto populated')
-            s.save(st)
-            s.commit()
 
 if __name__ == '__main__':
+    pass
 
-    Base.metadata.create_all(checkfirst=True)
-    populate_location_types()
-    populate_system_types()
+"""
+Replaces:
+
+class aqdbType(aqdbBase):
+    ""To wrap rows in 'type' tables""
+    @optional_comments
+    def __init__(self,type,*args,**kw):
+        if type.isspace() or len(type) < 1:
+            msg='Names must contain some non-whitespace characters'
+            raise ArgumentError(msg)
+        if isinstance(type,str):
+            self.type = type.strip().lower()
+        else:
+            raise ArgumentError("Incorrect name argument %s" %(type))
+            return
+    def name(self):
+        return str(self.type)
+    def __str__(self):
+        return str(self.type)
+    def __repr__(self):
+        return self.__class__.__name__+" " +str(self.type)
+"""

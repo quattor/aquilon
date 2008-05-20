@@ -520,9 +520,9 @@ def make_host_list():
     s=Session()
     hl=s.query(HostList).first()
     if not hl:
-        dd=s.query(DnsDomain).first()
+        #dd=s.query(DnsDomain).first()
         #TODO: decorate me damn it
-        hl=HostList(name='test',dns_domain=dd,comments='FAKE')
+        hl=HostList(name='test',comments='FAKE')
         s.save(hl)
         s.commit()
         assert(hl)

@@ -13,7 +13,7 @@ sys.path.append('../..')
 
 from db import *
 from configuration import *
-from subtypes import SystemType, system_type, get_sys_type_id
+from systemType import SystemType, system_type, get_sys_type_id
 from network import DnsDomain, dns_domain
 from hardware import Machine, machine, Status, status
 from auth import UserPrincipal, user_principal
@@ -297,54 +297,6 @@ mapper(Host, host, inherits=System,
 #TODO: synonym for location, sysloc, fqdn (in system)
 })
 
-host_list = Table('host_list', meta,
-    Column('id', Integer, ForeignKey('system.id',
-                                     ondelete='CASCADE',
-                                     name='host_list_fk'),
-           primary_key=True))
-
-class HostList(System):
-    """ The default system type used for ServiceInstances will be this
-        data structure, a list of hosts. """
-
-    def __init__(self,name,**kw):
-        #default dns domain for host lists to ms.com (for now)
-        if not kw.has_key('dns_domain'):
-            kw['dns_domain'] = 'ms.com'
-        super(HostList, self).__init__(name,**kw)
-
-
-
-class HostListItem(Base):
-    __table__ = Table('host_list_item', meta,
-
-    Column('host_list_id', Integer,
-           ForeignKey('host_list.id', ondelete='CASCADE', name='hli_hl_fk'),
-           primary_key = True),
-    Column('host_id', Integer,
-           ForeignKey('host.id', ondelete='CASCADE',name='hli_host_fk'),
-           nullable=False, primary_key=True),
-    Column('position', Integer, nullable=False),
-    UniqueConstraint('host_id', name='host_list_uk')) #hosts only on one list?
-
-    creation_date = get_date_col()
-    comments      = get_comment_col()
-
-    host          = relation(Host)
-    hostlist      = relation(HostList)
-
-    def __repr__(self):
-        return self.__class__.__name__ + " " + str(self.host.name)
-
-
-mapper(HostList, host_list, inherits=System,
-       polymorphic_identity=get_sys_type_id('host_list'), properties = {
-        'system' : relation(System, uselist=False, backref='host_list'),
-        'hosts'  : relation(HostListItem,
-                            collection_class=ordering_list('position'),
-                            order_by=[HostListItem.__table__.c.position]),
-})
-
 afs_cell = Table('afs_cell',meta,
     Column('system_id', Integer,
            ForeignKey('system.id',
@@ -425,33 +377,9 @@ def populate_domains():
         print 'created production and qa domains'
         s.close()
 
-
-def populate_hli():
-    if empty(host):
-        print "can't populate host_list_items without hosts."
-        return
-    elif empty(host_list):
-        s=Session()
-        from shell import ipshell
-        hl = HostList(name='test-host-list', dns_domain='ms.com',
-                      comments='FAKE')
-        s.commit()
-        s.save(hl)
-        s.commit()
-        assert(hl)
-
-        hosts=s.query(Host).all()
-        print '%s hosts is in hosts'%(len(hosts))
-
-        hli=HostListItem(hostlist=hl,host=hosts[1], position=1, comments='FAKE')
-        s.save(hli)
-        s.commit()
-        assert(hli)
-        print 'created %s with list items: %s'%(hl,hl.hosts)
-
 if __name__ == '__main__':
     meta.create_all(checkfirst=True)
 
     populate_quattor_srv()
     populate_domains()
-    populate_hli()
+
