@@ -19,8 +19,8 @@ from aquilon.aqdb.location import Location
 from aquilon.aqdb.hardware import Machine, Status, Model, Vendor, Disk, Cpu
 from aquilon.aqdb.configuration import Archetype, CfgPath
 from aquilon.aqdb.service import Service, ServiceInstance, ServiceListItem, \
-        ServiceMap
-from aquilon.aqdb.systems import Domain, Host, HostList, HostListItem
+        ServiceMap, HostList, HostListItem
+from aquilon.aqdb.systems import Domain, Host
 from aquilon.aqdb.auth import UserPrincipal
 
 def printprep(dbobject):

@@ -36,8 +36,8 @@ from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
         Continent, Country, City, Building, Rack, Chassis, Desk
 from aquilon.aqdb.network import DnsDomain
 from aquilon.aqdb.service import Service, ServiceInstance, \
-        ServiceListItem, ServiceMap
-from aquilon.aqdb.systems import System, Host, HostList, HostListItem, \
+        ServiceListItem, ServiceMap, HostList, HostListItem
+from aquilon.aqdb.systems import System, Host, \
         QuattorServer, Domain, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
 from aquilon.aqdb.auth import UserPrincipal, Realm, Role

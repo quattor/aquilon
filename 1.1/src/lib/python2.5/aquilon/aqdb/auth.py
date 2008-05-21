@@ -132,7 +132,7 @@ if __name__ == '__main__':
     unixeng = ['cesarg','jasona', 'dankb','tonyc','goliaa','samsh','hagberg',
                'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert','af',
                'lillied']
-    ops     = ['nathand','premdasr','bestc','chawlav','wbarnes']
+    unixops     = ['nathand','premdasr','bestc','chawlav','wbarnes']
 
     if empty(user_principal):
         r=s.query(Realm).first()
@@ -140,6 +140,7 @@ if __name__ == '__main__':
 
         for nm in admins:
             up=UserPrincipal(nm,realm=r,role=admin,comment='AutoPopulated')
+            up.role=admin
             s.save(up)
             s.commit()
             assert(up)
@@ -147,21 +148,24 @@ if __name__ == '__main__':
 
         for nm in unixeng:
             up=UserPrincipal(nm,realm=r,role=eng,comment='AutoPopulated')
+            up.role=eng
             s.save(up)
             s.commit()
             assert(up)
         print 'created eng: %s'%(unixeng)
 
-        for nm in ops:
+        for nm in unixops:
             up=UserPrincipal(nm,realm=r, role=ops, comment='AutoPopulated')
+            up.role=ops
             s.save(up)
             s.commit()
             assert(up)
         print 'created eng: %s'%(ops)
 
         currentuser = os.environ.get('USER')
-        if not currentuser in userlist:
-            up = UserPrincipal(currentuser, realm=r)
+        if not s.query(UserPrincipal).filter_by(name=currentuser).first():
+            up = UserPrincipal(currentuser, realm=r, role=admin)
+            up.role=admin
             s.save(up)
             s.commit()
         print 'created ops: %s'%(ops)
