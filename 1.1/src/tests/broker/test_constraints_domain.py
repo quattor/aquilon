@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing the del domain command."""
+"""Module for testing constraints in commands involving domain."""
 
 import os
 import sys
@@ -36,6 +36,6 @@ class TestDomainConstraints(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDomainConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
