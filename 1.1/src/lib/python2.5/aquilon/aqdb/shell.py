@@ -27,8 +27,7 @@ elif user == 'quattor' or user == 'cdb':
     ipshell = dummy_ipshell("quattor prodid can't use ipython...")
 
 else:
-    import msversion
-    msversion.addpkg('ipython','0.7.2','dist')
+    import depends
 
     from IPython.Shell import IPShellEmbed
     ipshell = IPShellEmbed()

@@ -15,10 +15,8 @@ import os
 from socket import gethostname
 from datetime import datetime
 
-#import msversion
-#msversion.addpkg('sqlalchemy','0.4.5','dist')
-sys.path.append(
-    '/v/global/user/d/da/daqscott/Desktop/SQLAlchemy-0.4.6/lib')
+# FIXME: The dependencies should be pulled in elsewhere...
+import depends
 import sqlalchemy
 
 from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
@@ -58,6 +56,7 @@ if dsn is None:
     sys.exit(9)
 
 if dsn.startswith('oracle'):
+    import msversion
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
     import cx_Oracle
     if not os.environ['ORACLE_HOME']:

@@ -7,11 +7,9 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""Dependencies for aqdb code."""
 
 import msversion
 
-msversion.addpkg('zope.interface', '3.3.0')
-msversion.addpkg('twisted', '2.5.0')
-msversion.addpkg('asynqueue', '0.3', 'dist')
-msversion.addpkg('sasync', '0.6-ms1', 'dist')
+msversion.addpkg('sqlalchemy', '0.4.5', 'dist')
+msversion.addpkg('ipython', '0.7.2', 'dist')
