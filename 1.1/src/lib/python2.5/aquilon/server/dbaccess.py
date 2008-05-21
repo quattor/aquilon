@@ -500,7 +500,8 @@ class DatabaseBroker(AccessBroker):
         if dbdomain:
             self.session.refresh(dbdomain)
             if dbdomain.hosts:
-                raise ArgumentError("Cannot delete a domain with hosts still attached.")
+                raise ArgumentError("Cannot delete domain %s while hosts are still attached."
+                        % dbdomain.name)
             self.session.delete(dbdomain)
         # We just need to confirm that domain was removed from the db...
         # do not need anything from the DB to be passed to pbroker.
@@ -717,6 +718,10 @@ class DatabaseBroker(AccessBroker):
     def del_machine(self, result, machine, **kwargs):
         try:
             m = self.session.query(Machine).filter_by(name=machine).one()
+            self.session.refresh(m)
+            if m.host:
+                raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
+                        % (m.name, m.host.fqdn))
             for iface in m.interfaces:
                 log.msg("Before deleting machine '%s', removing interface '%s' [%s] [%s] boot=%s)" % (m.name, iface.name, iface.mac, iface.ip, iface.boot))
                 self.session.delete(iface)
