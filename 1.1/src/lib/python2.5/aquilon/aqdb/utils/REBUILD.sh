@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-if [ -z "$AQDBFILE" ] ; then 
+if [ -z "$AQDBFILE" ] ; then
 	AQDBFILE=/var/tmp/`whoami`/aquilondb/aquilon.db
 fi
 if [ -r "$AQDBFILE" ] ; then
@@ -13,7 +13,7 @@ IPY='/ms/dist/python/PROJ/ipython/0.7.2/bin/ipython '
 echo starting at
 /bin/date
 
-time ./subtypes.py
+time ./locationType.py
 echo
 time ./location.py
 echo
@@ -28,6 +28,8 @@ echo
 time ./hardware.py
 echo
 time ./interface.py
+echo
+time ./systemType.py
 echo
 time ./systems.py
 echo
