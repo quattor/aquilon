@@ -40,8 +40,7 @@ from aquilon.aqdb.service import Service, ServiceInstance, \
 from aquilon.aqdb.systems import System, Host, HostList, HostListItem, \
         QuattorServer, Domain, BuildItem
 from aquilon.aqdb.configuration import Archetype, CfgPath, CfgTLD
-from aquilon.aqdb.roles import Role
-from aquilon.aqdb.auth import UserPrincipal, Realm
+from aquilon.aqdb.auth import UserPrincipal, Realm, Role
 from aquilon.aqdb.hardware import Status, Vendor, MachineType, Model, \
         DiskType, Cpu, Machine, Disk, MachineSpecs
 from aquilon.aqdb.interface import PhysicalInterface
