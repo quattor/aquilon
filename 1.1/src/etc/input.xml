@@ -858,5 +858,15 @@
       <transport method="put" path="principal/%(principal)s/role" />
    </command>
 
+   <command name="regenerate_templates">
+      %prog regenerate_plenary --all
+      Force the server to regenerate all templates that it creates
+      automatically, assuming the latest state is valid.
+      <optgroup name="regenerate_templates_opts" mandatory="True">
+         <option name="all" type="boolean">Regenerate all template files</option>
+      </optgroup>
+      <transport method="post" path="command/regenerate_all" />
+   </command>
+
 </commandline>
 

@@ -18,7 +18,7 @@ from aquilon.server.dbaccess import DatabaseBroker
 from aquilon.server.authorization import AuthorizationBroker
 from aquilon.server.processes import ProcessBroker
 from aquilon.server.templates import TemplateCreator
-from aquilon.exceptions_ import AquilonError
+from aquilon.exceptions_ import AquilonError, PartialError
 
 #=============================================================================#
 
@@ -644,6 +644,47 @@ class Broker(object):
                 "permission", request_path)
         d = d.addCallback(self.dbbroker.permission, session=True, user=user,
                 **arguments)
+        return d
+        
+# --------------------------------------------------------------------------- #
+
+    def _check_regenerate(self, result, machine_list, host_list):
+        # FIXME: If all failed, raise an error.
+        # If only some failed, raise partial success.
+        success = []
+        failed = []
+        for (machine, failure) in machine_list.items():
+            if failure:
+                failed.append("Machine %s FAILED: %s"
+                        % (machine, failure.value))
+            else:
+                success.append("Machine %s SUCCESS" % machine)
+        for (host, failure) in host_list.items():
+            if failure:
+                failed.append("Host %s FAILED: %s"
+                        % (host, failure.value))
+            else:
+                success.append("Host %s SUCCESS" % host)
+        # FIXME: Raise some other error if they *all* failed?
+        if failed:
+            raise PartialError(success, failed)
+        return True
+
+    def regenerate_templates(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "regenerate_templates", request_path)
+        d = d.addCallback(self.dbbroker.regenerate_machines, session=True,
+                user=user, **arguments)
+        machine_list = {}
+        d = d.addCallback(self.template_creator.regenerate_machines, 
+                self.plenarydir, user, self.localhost, machine_list,
+                **arguments)
+        d = d.addCallback(self.dbbroker.regenerate_hosts, session=True,
+                user=user, **arguments)
+        host_list = {}
+        d = d.addCallback(self.template_creator.regenerate_hosts,
+                self.hostsdir, user, self.localhost, host_list, **arguments)
+        d = d.addCallback(self._check_regenerate, machine_list, host_list)
         return d
         
 # --------------------------------------------------------------------------- #

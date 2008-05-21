@@ -51,7 +51,7 @@ from twisted.internet import defer, utils, threads
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
-        NotFoundException, UnimplementedError
+        NotFoundException, UnimplementedError, PartialError
 from aquilon.server.formats import Formatter
 from aquilon.server.broker import Broker
 
@@ -189,7 +189,7 @@ class ResponsePage(resource.Resource):
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
         r = failure.trap(NotFoundException, AuthorizationException,
-                ArgumentError, UnimplementedError)
+                ArgumentError, UnimplementedError, PartialError)
         if r == NotFoundException:
             request.setResponseCode(http.NOT_FOUND)
         elif r == AuthorizationException:
@@ -198,6 +198,8 @@ class ResponsePage(resource.Resource):
             request.setResponseCode(http.BAD_REQUEST)
         elif r == UnimplementedError:
             request.setResponseCode(http.NOT_IMPLEMENTED)
+        elif r == PartialError:
+            request.setResponseCode(http.MULTI_STATUS)
         formatted = self.format(failure.value, request)
         return self.finishRender(formatted, request)
 
@@ -817,6 +819,13 @@ class ResponsePage(resource.Resource):
         d = self.check_arguments(request, ["principal", "role"],
                 ["createuser", "createrealm"])
         d = d.addCallback(self.broker.permission,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_regenerate_templates(self, request):
+        d = self.check_arguments(request, ["all"])
+        d = d.addCallback(self.broker.regenerate_templates,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)

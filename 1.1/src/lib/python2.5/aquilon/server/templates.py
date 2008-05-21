@@ -125,7 +125,7 @@ class TemplateCreator(object):
         plenary_file = os.path.join(plenarydir, plenary_info["plenary_template"])
         d = threads.deferToThread(self._write_file, plenary_path,
                 plenary_file, "\n".join(lines))
-        d = d.addCallback(lambda _: result)
+        d = d.addCallback(self._cb_inject, result)
         return d
 
     # Expects to be run after dbaccess.del_machine
@@ -134,7 +134,7 @@ class TemplateCreator(object):
         plenary_info = self.get_plenary_info(dbmachine)
         plenary_file = os.path.join(plenarydir, plenary_info["plenary_template"])
         d = threads.deferToThread(self._remove_file, plenary_file)
-        d = d.addCallback(lambda _: result)
+        d = d.addCallback(self._cb_inject, result)
         return d
 
     def reconfigure(self, result, build_info, localhost, user, **kwargs):
@@ -211,5 +211,42 @@ class TemplateCreator(object):
         d = threads.deferToThread(self._read_file, plenarydir,
                 plenary_info["plenary_template"])
         return d
+
+    def _cb_inject(self, result, arg):
+        return arg
+
+    def _cb_record_failure(self, failure, store, key):
+        store[key] = failure
+        return True
+
+    def _cb_record_success(self, result, store, key):
+        store[key] = None
+        return True
+
+    def regenerate_machines(self, result, plenarydir, user, localhost,
+            machine_list, **kwargs):
+        d = defer.succeed(True)
+        for dbmachine in result:
+            d = d.addCallback(self._cb_inject, dbmachine)
+            d = d.addCallback(self.generate_plenary, plenarydir, user,
+                    localhost)
+            d = d.addCallbacks(callback=self._cb_record_success,
+                    callbackArgs=[machine_list, dbmachine.name],
+                    errback=self._cb_record_failure,
+                    errbackArgs=[machine_list, dbmachine.name])
+        return d
+
+    def regenerate_hosts(self, result, hostsdir, user, localhost,
+            host_list, **kwargs):
+        d = defer.succeed(True)
+        for dbhost in result:
+            build_info = {"tempdir": hostsdir, "dbhost": dbhost}
+            d = d.addCallback(self.reconfigure, build_info, localhost, user)
+            d = d.addCallbacks(callback=self._cb_record_success,
+                    callbackArgs=[host_list, dbhost.fqdn],
+                    errback=self._cb_record_failure,
+                    errbackArgs=[host_list, dbhost.fqdn])
+        return d
+
 
 #if __name__=='__main__':

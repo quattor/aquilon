@@ -1173,6 +1173,14 @@ class DatabaseBroker(AccessBroker):
         self.session.save_or_update(dbuser)
         return True
 
+    @transact
+    def regenerate_machines(self, result, **kwargs):
+        return printprep(self.session.query(Machine).all())
+
+    @transact
+    def regenerate_hosts(self, result, **kwargs):
+        return printprep(self.session.query(Host).all())
+
     # Expects to be run under a @transact method with session=True.
     def _hostname_to_domain_and_string(self, hostname):
         if not hostname:

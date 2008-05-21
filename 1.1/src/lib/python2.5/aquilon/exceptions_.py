@@ -96,5 +96,22 @@ class DetailedProcessException(AquilonError):
             msg = msg + "\nstderr:\n" + pe.err + "\n"
         AquilonError.__init__(self, msg)
 
+class PartialError(AquilonError):
+    """Raised when a batch job has some failures."""
+
+    def __init__(self, success, failed, success_msg=None, failed_msg=None):
+        msg = []
+        if success_msg:
+            msg.append(success_msg)
+        else:
+            msg.append("The following were successful:")
+        msg.extend(success)
+        if failed_msg:
+            msg.append(failed_msg)
+        else:
+            msg.append("The following failed:")
+        msg.extend(failed)
+        AquilonError.__init__(self, "\n".join(msg))
+
 
 #if __name__=='__main__':
