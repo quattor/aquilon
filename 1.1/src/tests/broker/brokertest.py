@@ -73,6 +73,18 @@ class TestBrokerCommand(unittest.TestCase):
                     % (command, out))
         return
 
+    def badrequesttest(self, command):
+        p = self.runcommand(command)
+        (out, err) = p.communicate()
+        self.assertEqual(err, "",
+                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                % (command, err))
+        self.assertEqual(p.returncode, 4)
+        self.assertEqual(out.find("Bad Request"), 0,
+                "STDOUT for %s did not start with Bad Request:\n@@@\n'%s'\n@@@\n"
+                % (command, out))
+        return
+
     def matchoutput(self, out, s, command):
         self.assert_(out.find(s) >= 0, 
                 "STDOUT for %s did not include '%s':\n@@@\n'%s'\n@@@\n"

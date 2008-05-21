@@ -37,6 +37,7 @@ from test_add_interface import TestAddInterface
 from test_add_host import TestAddHost
 from test_bind_client import TestBindClient
 from test_make_aquilon import TestMakeAquilon
+from test_constraints_domain import TestDomainConstraints
 from test_del_host import TestDelHost
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
@@ -62,6 +63,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddDomain, TestAddService,
                 TestAddRack, TestAddChassis, TestAddMachine, TestAddDisk,
                 TestAddInterface, TestAddHost, TestBindClient, TestMakeAquilon,
+                TestDomainConstraints,
                 TestDelHost, TestDelMachine, TestDelChassis, TestDelRack,
                 TestDelService, TestDelDomain,
                 TestBrokerStop]:

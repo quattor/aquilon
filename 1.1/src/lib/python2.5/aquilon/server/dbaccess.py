@@ -497,8 +497,10 @@ class DatabaseBroker(AccessBroker):
         #        name='quattorsrv').one()
         #if quattorsrv != dbdomain.server:
         #    log.err("FIXME: Should be redirecting this operation.")
-        # FIXME: Should check for hosts...
         if dbdomain:
+            self.session.refresh(dbdomain)
+            if dbdomain.hosts:
+                raise ArgumentError("Cannot delete a domain with hosts still attached.")
             self.session.delete(dbdomain)
         # We just need to confirm that domain was removed from the db...
         # do not need anything from the DB to be passed to pbroker.
