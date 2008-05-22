@@ -32,6 +32,15 @@ class TestAddChassis(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Chassis: np3c5", command)
 
+    def testaddnp3c1(self):
+        command = "add chassis --name np3c1 --rack np3"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddnp3c1(self):
+        command = "show chassis --name np3c1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Chassis: np3c1", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)

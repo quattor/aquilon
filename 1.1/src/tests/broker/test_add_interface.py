@@ -50,7 +50,41 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out,
                 """"cards/nic/eth1/hwaddr" = "00:14:5E:D7:7F:50";""",
                 command)
-        self.assert_(out.find(""""cards/nic/eth1/boot" = true;""") < 0)
+        self.matchclean(out,
+                """"cards/nic/eth1/boot" = true;""",
+                command)
+
+    def testaddnp3c1n3eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "np3c1n3", "--mac", "00:11:25:4a:1a:34",
+            "--ip", "172.31.64.199"])
+
+    def testaddnp3c1n3eth1(self):
+        self.noouttest(["add", "interface", "--interface", "eth1",
+            "--machine", "np3c1n3", "--mac", "00:11:25:4a:1a:35"])
+
+    def testverifyaddnp3c1n3interfaces(self):
+        command = "show machine --machine np3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 00:11:25:4a:1a:34 172.31.64.199 boot=True", command)
+        self.matchoutput(out, "Interface: eth1 00:11:25:4a:1a:35 0.0.0.0 boot=False", command)
+
+    def testverifycatnp3c1n3interfaces(self):
+        command = "cat --machine np3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                """"cards/nic/eth0/hwaddr" = "00:11:25:4A:1A:34";""",
+                command)
+        self.matchoutput(out,
+                """"cards/nic/eth0/boot" = true;""",
+                command)
+        self.matchoutput(out,
+                """"cards/nic/eth1/hwaddr" = "00:11:25:4A:1A:35";""",
+                command)
+        self.matchclean(out,
+                """"cards/nic/eth1/boot" = true;""",
+                command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

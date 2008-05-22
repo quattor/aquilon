@@ -29,6 +29,7 @@ from test_start import TestBrokerStart
 from test_status import TestStatus
 from test_add_domain import TestAddDomain
 from test_add_service import TestAddService
+from test_add_required_service import TestAddRequiredService
 from test_add_rack import TestAddRack
 from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
@@ -40,9 +41,11 @@ from test_make_aquilon import TestMakeAquilon
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_del_host import TestDelHost
+from test_del_interface import TestDelInterface
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_rack import TestDelRack
+from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
 from test_del_domain import TestDelDomain
 from test_stop import TestBrokerStop
@@ -61,12 +64,13 @@ class BrokerTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart, TestStatus,
-                TestAddDomain, TestAddService,
+                TestAddDomain, TestAddService, TestAddRequiredService,
                 TestAddRack, TestAddChassis, TestAddMachine, TestAddDisk,
                 TestAddInterface, TestAddHost, TestBindClient, TestMakeAquilon,
                 TestDomainConstraints, TestMachineConstraints,
-                TestDelHost, TestDelMachine, TestDelChassis, TestDelRack,
-                TestDelService, TestDelDomain,
+                TestDelHost, TestDelInterface, TestDelMachine, TestDelChassis,
+                TestDelRack, TestDelRequiredService, TestDelService,
+                TestDelDomain,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 

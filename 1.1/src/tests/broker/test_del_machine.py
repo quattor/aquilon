@@ -31,6 +31,14 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine np3c5n10"
         self.notfoundtest(command.split(" "))
 
+    def testdelnp3c1n3(self):
+        command = "del machine --machine np3c1n3"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp3c1n3(self):
+        command = "show machine --machine np3c1n3"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)

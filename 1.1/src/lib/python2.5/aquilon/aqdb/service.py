@@ -120,7 +120,7 @@ class ServiceInstance(Base):
 
     service   = relation(Service, backref='instances')
     host_list = relation(HostList, uselist=False)
-    cfg_path  = relation(CfgPath, uselist=False, backref='svc_inst')
+    cfg_path  = relation(CfgPath, backref=backref('svc_inst', uselist=False))
     comments  = deferred(Column('comments', String(255), nullable=True))
     creation_date = deferred(
         Column('creation_date', DateTime, default=datetime.now))
@@ -132,7 +132,7 @@ class ServiceInstance(Base):
 
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,
-                           self.service.name ,self.system.name)
+                           self.service.name ,self.host_list.name)
 service_instance = ServiceInstance.__table__
 service_instance.create(checkfirst=True)
 

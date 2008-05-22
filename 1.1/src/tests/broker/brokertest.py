@@ -90,6 +90,11 @@ class TestBrokerCommand(unittest.TestCase):
                 "STDOUT for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
                 % (command, s, out))
 
+    def matchclean(self, out, s, command):
+        self.assert_(out.find(s) < 0, 
+                "STDOUT for %s includes '%s':\n@@@\n'%s'\n@@@\n"
+                % (command, s, out))
+
 
 #if __name__=='__main__':
 

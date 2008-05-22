@@ -63,6 +63,47 @@ class TestAddMachine(TestBrokerCommand):
             """create("hardware/cpu/intel/xeon_2660"));""",
             command)
 
+    # FIXME: Turn this into a test for model defaults...
+    def testaddnp3c1n3(self):
+        self.noouttest(["add", "machine", "--machine", "np3c1n3",
+            "--chassis", "np3c1", "--model", "hs21", "--cpucount", "2",
+            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
+            "--memory", "8192", "--serial", "KPDZ406"])
+
+    def testverifyaddnp3c1n3(self):
+        command = "show machine --machine np3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Machine: np3c1n3", command)
+        self.matchoutput(out, "Chassis: np3c1", command)
+        self.matchoutput(out, "Model: ibm hs21", command)
+        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Memory: 8192 MB", command)
+        self.matchoutput(out, "Serial: KPDZ406", command)
+
+    def testverifycatnp3c1n3(self):
+        command = "cat --machine np3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+            """"location" = "np.ny.na";""",
+            command)
+        self.matchoutput(out,
+            """"serialnumber" = "KPDZ406";""",
+            command)
+        self.matchoutput(out,
+            """include hardware/machine/ibm/hs21;""",
+            command)
+        self.matchoutput(out,
+            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
+            command)
+        # 1st cpu
+        self.matchoutput(out,
+            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
+            command)
+        # 2nd cpu
+        self.matchoutput(out,
+            """create("hardware/cpu/intel/xeon_2660"));""",
+            command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

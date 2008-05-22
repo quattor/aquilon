@@ -31,6 +31,14 @@ class TestDelChassis(TestBrokerCommand):
         command = "show chassis --name np3c5"
         self.notfoundtest(command.split(" "))
 
+    def testdelnp3c1(self):
+        command = "del chassis --name np3c1"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp3c1(self):
+        command = "show chassis --name np3c1"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelChassis)

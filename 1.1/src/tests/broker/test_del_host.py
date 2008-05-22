@@ -31,6 +31,14 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname aquilon02.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelaquilon00(self):
+        command = "del host --hostname aquilon00.one-nyp.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelaquilon00(self):
+        command = "show host --hostname aquilon00.one-nyp.ms.com"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

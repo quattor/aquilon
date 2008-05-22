@@ -63,6 +63,12 @@ p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
     stdout=1, stderr=2)
 rc = p.wait()
 # FIXME: check rc
+p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+    "quattorsrv:/var/quattor/swrep/repository",
+    config.get("broker", "swrepdir")),
+    stdout=1, stderr=2)
+rc = p.wait()
+# FIXME: check rc
 
 suite = unittest.TestSuite()
 suite.addTest(DatabaseTestSuite())

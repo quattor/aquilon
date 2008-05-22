@@ -175,7 +175,7 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def show_host_all(self, result, **kwargs):
-        hosts = formats.HostList()
+        hosts = formats.SimpleHostList()
         hosts.extend(self.session.query(Host).all())
         return printprep(hosts)
 
@@ -793,44 +793,34 @@ class DatabaseBroker(AccessBroker):
         self.session.save_or_update(dbhost)
         return
 
-    # Expects to be run under a transact with a session.
-    def _get_instance_parts(self, instance):
-        dbdns_domain = None
-        # A general solution would check all known dns domains for a match,
-        # instead of assuming that the short name cannot contain dots.
-        (short, dot, dns_domain) = instance.partition(".")
-        if dns_domain:
-            dbdns_domain = self.session.query(DnsDomain).filter_by(
-                    name=dns_domain).first()
-        if not dbdns_domain:
-            # Hack for something like afs cell...
-            if instance.endswith('.ms.com'):
-                short = instance[:-7]
-            else:
-                short = instance
-            dbdns_domain = self.session.query(DnsDomain).filter_by(
-                    name='ms.com').one()
-        return (short, dbdns_domain)
-
     @transact
     def add_service(self, result, service, instance, **kwargs):
         dbservice = self.session.query(Service).filter_by(name=service).first()
         if not dbservice:
-            dbservice = Service(service)
+            dbservice = Service(name=service)
             self.session.save(dbservice)
         if not instance:
             return printprep(dbservice)
 
+        # FIXME: Check that assuming hostlist name is unique is correct...
+        dbhostlist = self.session.query(HostList).filter_by(
+                name=instance).first()
+        if not dbhostlist:
+            dbhostlist = HostList(name=instance)
+            self.session.save(dbhostlist)
         # FIXME: This will autocreate a service/instance CfgPath.  Does
         # there need to be a separate/explicit create of a
         # service/instance/client CfgPath?
-        (short, dbdns_domain) = self._get_instance_parts(instance)
-        dbsystem = self.session.query(System).filter_by(name=short,
-                dns_domain=dbdns_domain).first()
-        if not dbsystem:
-            dbsystem = HostList(short, dns_domain=dbdns_domain)
-            self.session.save(dbsystem)
-        dbsi = ServiceInstance(dbservice, dbsystem)
+        # Update: See AQUILONAQD-82
+        relative_path = "%s/%s" % (service, instance)
+        dbcfg_path = self.session.query(CfgPath).filter_by(
+                tld=dbservice.cfg_path.tld, relative_path=relative_path).first()
+        if not dbcfg_path:
+            dbcfg_path = CfgPath(dbservice.cfg_path.tld,
+                    "%s/%s" % (dbservice.cfg_path.tld.type, relative_path))
+            self.session.save(dbcfg_path)
+        dbsi = ServiceInstance(service=dbservice, host_list=dbhostlist,
+                cfg_path=dbcfg_path)
         self.session.save(dbsi)
         self.session.flush()
         self.session.refresh(dbservice)
@@ -856,19 +846,19 @@ class DatabaseBroker(AccessBroker):
                 raise ArgumentError("Cannot remove service with instances defined.")
             self.session.delete(dbservice)
             return "Success"
-        (short, dbdns_domain) = self._get_instance_parts(instance)
         try:
-            dbsystem = self.session.query(System).filter_by(name=short,
-                    dns_domain=dbdns_domain).one()
+            dbhl = self.session.query(HostList).filter_by(
+                    name=instance).one()
         except InvalidRequestError, e:
             raise NotFoundException(
-                    "Could not find a system matching instance %s: %s"
+                    "Could not find instance %s: %s"
                     % (instance, e))
         dbsi = self.session.query(ServiceInstance).filter_by(
-                system=dbsystem, service=dbservice).first()
+                host_list=dbhl, service=dbservice).first()
         # FIXME: There may be dependencies...
         if dbsi:
             self.session.delete(dbsi)
+        # FIXME: Cascade to relevant objects...
         return "Success"
 
     # Expects to be run under a transact with a session
@@ -927,7 +917,7 @@ class DatabaseBroker(AccessBroker):
         least_clients = None
         least_loaded = None
         for map in dbmaps:
-            client_count = map.service_instance.counter
+            client_count = map.service_instance.client_count
             if not least_loaded or client_count < least_clients:
                 least_clients = client_count
                 least_loaded = map.service_instance
@@ -999,21 +989,18 @@ class DatabaseBroker(AccessBroker):
 
     # Expects to be run under a transact with a session.
     def _get_serviceinstance(self, dbservice, instance):
-        # FIXME: Quick hack for afs services... this needs to be reworked.
-        if instance.endswith(".ms.com"):
-            instance = instance[:-7]
-        relative_path = "%s/%s" % (dbservice.name, instance)
         try:
-            dbinstance = self.session.query(CfgPath).filter_by(
-                    relative_path=relative_path,
-                    tld=dbservice.cfg_path.tld).one()
+            dbhl = self.session.query(HostList).filter_by(name=instance).one()
         except InvalidRequestError, e:
-            raise NotFoundException("Service %s instance %s not found (try aq add service to add it): %s"
-                    % (dbservice.name, instance, e))
-        if not dbinstance.svc_inst:
-            raise NotFoundException("Service %s instance %s not found (try aq add service to add it)"
-                    % (dbservice.name, instance))
-        return dbinstance.svc_inst
+            raise NotFoundException("HostList %s not found (try `aq add service --service %s --instance %s` to add it): %s"
+                    % (instance, dbservice.name, instance, e))
+        try:
+            dbsi = self.session.query(ServiceInstance).filter_by(
+                    service=dbservice, host_list=dbhl).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Service %s instance %s not found (try `aq add service --service %s --instance %s` to add it)"
+                    % (dbservice.name, instance, dbservice.name, instance))
+        return dbsi
 
     @transact
     def bind_server(self, result, hostname, service, instance, force, **kwargs):

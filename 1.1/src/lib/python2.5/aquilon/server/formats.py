@@ -39,9 +39,11 @@ def printprep(dbobject):
             printprep(obj)
         return dbobject
 
-    if isinstance(dbobject, aqdbBase):
-        printprep(dbobject.comments)
-    if isinstance(dbobject, aqdbType):
+    if hasattr(dbobject, 'comments'):
+        str(dbobject.comments)
+    if hasattr(dbobject, 'name'):
+        str(dbobject.name)
+    if hasattr(dbobject, 'type'):
         printprep(dbobject.type)
 
     if isinstance(dbobject, Host):
@@ -91,10 +93,10 @@ def printprep(dbobject):
     elif isinstance(dbobject, ServiceInstance):
         # Being careful about recursion here...
         str(dbobject.service)
-        printprep(dbobject.system)
+        printprep(dbobject.host_list)
         printprep(dbobject.cfg_path)
         printprep(dbobject.service_map)
-        dbobject.cached_counter = dbobject.counter
+        dbobject.cached_counter = dbobject.client_count
     elif isinstance(dbobject, ServiceMap):
         # Being careful about recursion here...
         str(dbobject.service)
@@ -262,26 +264,27 @@ class Formatter(object):
     def elaborate_raw_service(self, service, indent=""):
         details = [indent + "Service: %s" % service.name]
         details.append(self.elaborate_raw(service.cfg_path, indent+"  "))
-        if service.comments:
-            details.append(indent + "  Comments: %s" % service.comments)
+        # FIXME: Waiting for aqdb fix.
+        #if service.comments:
+        #    details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:
             details.append(self.elaborate_raw(instance, indent+"  "))
         return "\n".join(details)
 
     def elaborate_raw_serviceinstance(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
-                % (si.service.name, si.system.name)]
+                % (si.service.name, si.host_list.name)]
         details.append(self.elaborate_raw(si.cfg_path, indent+"  "))
-        if isinstance(si.system, HostList):
-            for hli in si.system.hosts:
-                details.append(indent + "  Server: %s" % hli.host.fqdn)
+        for hli in si.host_list.hosts:
+            details.append(indent + "  Server: %s" % hli.host.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: %s %s" %
                     (map.location.type.type.capitalize(), map.location.name))
         if getattr(si, "cached_counter", None) is not None:
             details.append(indent + "  Client Count: %d" % si.cached_counter)
-        if si.comments:
-            details.append(indent + "  Comments: %s" % si.comments)
+        # FIXME: Waiting for aqdb fix.
+        #if si.comments:
+        #    details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
     def elaborate_raw_servicemap(self, sm, indent=""):
@@ -363,7 +366,7 @@ class HostIPList(FormatterList):
 
 
 # By convention, holds Host objects.
-class HostList(FormatterList):
+class SimpleHostList(FormatterList):
     def printprep(self):
         for host in self:
             str(host.fqdn)

@@ -30,8 +30,7 @@ class TestDelService(TestBrokerCommand):
     def testverifydelafsinstance(self):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
-        # Note: For now, the .ms.com is not present in this output...
-        self.assert_(out.find("Service: afs Instance: q.ny") < 0)
+        self.matchclean(out, "Service: afs Instance: q.ny.ms.com", command)
 
     def testdelbootserverinstance(self):
         command = "del service --service bootserver --instance np.test"
@@ -40,7 +39,7 @@ class TestDelService(TestBrokerCommand):
     def testverifydelbootserverinstance(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
-        self.assert_(out.find("Service: bootserver Instance: np.test") < 0)
+        self.matchclean(out, "Service: bootserver Instance: np.test", command)
 
     def testdeldnsinstance(self):
         command = "del service --service dns --instance nyinfratest"
@@ -49,7 +48,7 @@ class TestDelService(TestBrokerCommand):
     def testverifydeldnsinstance(self):
         command = "show service --service dns"
         out = self.commandtest(command.split(" "))
-        self.assert_(out.find("Service: dns Instance: nyinfratest") < 0)
+        self.matchclean(out, "Service: dns Instance: nyinfratest", command)
 
     def testdelntpinstance(self):
         command = "del service --service ntp --instance pa.ny.na"
@@ -58,7 +57,7 @@ class TestDelService(TestBrokerCommand):
     def testverifydelntpinstance(self):
         command = "show service --service ntp"
         out = self.commandtest(command.split(" "))
-        self.assert_(out.find("Service: ntp Instance: pa.ny.na") < 0)
+        self.matchclean(out, "Service: ntp Instance: pa.ny.na", command)
 
 
 if __name__=='__main__':

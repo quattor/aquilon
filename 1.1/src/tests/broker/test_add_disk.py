@@ -39,6 +39,22 @@ class TestAddDisk(TestBrokerCommand):
                 """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",
                 command)
 
+    def testaddnp3c1n3disk(self):
+        self.noouttest(["add", "disk", "--machine", "np3c1n3",
+            "--type", "scsi", "--capacity", "34"])
+
+    def testverifyaddnp3c1n3disk(self):
+        command = "show machine --machine np3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Disk: 34 GB scsi", command)
+
+    def testverifycatnp3c1n3disk(self):
+        command = "cat --machine np3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",
+                command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDisk)
