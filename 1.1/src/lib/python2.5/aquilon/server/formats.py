@@ -289,7 +289,7 @@ class Formatter(object):
 
     def elaborate_raw_servicemap(self, sm, indent=""):
         return indent + "Service: %s Instance: %s Map: %s %s" % (
-                sm.service.name, sm.service_instance.system.name,
+                sm.service.name, sm.service_instance.host_list.name,
                 sm.location.type.type.capitalize(), sm.location.name)
 
     def elaborate_raw_cfgpath(self, cfg_path, indent=""):

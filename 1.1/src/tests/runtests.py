@@ -25,7 +25,7 @@ from aqdb.orderedsuite import DatabaseTestSuite
 
 configfile = os.path.join(BINDIR, "unittest.conf")
 # FIXME: Allow AQDCONF environment var to override?  Allow it to be
-# passed in?
+# passed in?  Maybe make the rm statements below opt-in if that's the case.
 config = Config(configfile=configfile)
 if not config.has_section("unittest"):
     config.add_section("unittest")
@@ -37,13 +37,25 @@ if os.environ.get("USER") != config.get("broker", "user"):
             config.get("broker", "user"), os.environ.get("USER"))
     sys.exit(os.EX_CONFIG)
 
+for label in ["quattordir", "kingdir", "swrepdir", ]:
+    dir = config.get("broker", label)
+    if os.path.exists(dir):
+        continue
+    try:
+        os.makedirs(dir)
+    except OSError, e:
+        print >>sys.stderr, "Could not create %s: %s" % (dir, e)
+
 dirs = [config.get("database", "dbdir")]
-for label in ["quattordir", "kingdir", "templatesdir", "rundir", "logdir",
-        "profilesdir", "depsdir", "hostsdir", "plenarydir", "swrepdir", ]:
+for label in ["templatesdir", "rundir", "logdir", "profilesdir",
+        "depsdir", "hostsdir", "plenarydir", ]:
     dirs.append(config.get("broker", label))
 for dir in dirs:
     if os.path.exists(dir):
-        continue
+        print "Removing %s" % dir
+        p = Popen(("/bin/rm", "-rf", dir), stdout=1, stderr=2)
+        rc = p.wait()
+        # FIXME: check rc
     try:
         os.makedirs(dir)
     except OSError, e:

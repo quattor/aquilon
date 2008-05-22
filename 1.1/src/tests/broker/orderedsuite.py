@@ -36,10 +36,12 @@ from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
 from test_add_host import TestAddHost
+from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_make_aquilon import TestMakeAquilon
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
+from test_unmap_service import TestUnmapService
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
 from test_del_machine import TestDelMachine
@@ -66,8 +68,10 @@ class BrokerTestSuite(unittest.TestSuite):
         for test in [TestBrokerStart, TestStatus,
                 TestAddDomain, TestAddService, TestAddRequiredService,
                 TestAddRack, TestAddChassis, TestAddMachine, TestAddDisk,
-                TestAddInterface, TestAddHost, TestBindClient, TestMakeAquilon,
+                TestAddInterface, TestAddHost,
+                TestMapService, TestBindClient, TestMakeAquilon,
                 TestDomainConstraints, TestMachineConstraints,
+                TestUnmapService,
                 TestDelHost, TestDelInterface, TestDelMachine, TestDelChassis,
                 TestDelRack, TestDelRequiredService, TestDelService,
                 TestDelDomain,
