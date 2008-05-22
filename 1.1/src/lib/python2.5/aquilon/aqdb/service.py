@@ -115,6 +115,7 @@ class ServiceInstance(Base):
             ForeignKey('cfg_path.id', name='svc_inst_cfg_pth_fk'), nullable=False),
         UniqueConstraint('host_list_id',name='svc_inst_host_list_uk'))
 
+    service   = relation(Service, backref='instances')
     host_list = relation(HostList)
     cfg_path  = relation(CfgPath)
     comments  = deferred(Column('comments', String(255), nullable=True))
