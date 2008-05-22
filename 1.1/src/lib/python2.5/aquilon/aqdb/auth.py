@@ -17,8 +17,6 @@ sys.path.append('../..')
 
 #from schema import (get_comment_col, get_date_col, get_id_col)
 from db import *
-#sys.path.append(
-#    '/v/global/user/d/da/daqscott/Desktop/SQLAlchemy-0.4.6/lib')
 
 from sqlalchemy import Table, Column, Integer, Sequence, String
 from sqlalchemy import DateTime, UniqueConstraint, ForeignKey
@@ -47,53 +45,34 @@ class Realm(Base):
         Column('creation_date', DateTime, default=datetime.now))
 Realm.__table__.create(checkfirst=True)
 
-user_principal = Table('user_principal', meta,
-    Column('id', Integer, Sequence('user_principal_id_seq'), primary_key=True),
-    Column('name', String(32), nullable=False),
-    Column('realm_id', Integer,
-           ForeignKey('realm.id', name='usr_princ_rlm_fk'), nullable=False),
-    Column('role_id', Integer,
-           ForeignKey('role.id', name='usr_princ_role_fk'),
+class UserPrincipal(Base):
+    """ Simple class for strings representing users kerberos credential """
+    __table__ = Table('user_principal', meta,
+        Column('id', Integer, Sequence('user_principal_id_seq'),
+               primary_key=True),
+        Column('name', String(32), nullable=False),
+        Column('realm_id', Integer,
+               ForeignKey('realm.id', name='usr_princ_rlm_fk'), nullable=False),
+        Column('role_id', Integer,
+               ForeignKey('role.id', name='usr_princ_role_fk'),
            nullable=False, default = id_getter(Role.__table__,
                                                Role.__table__.c.name,'nobody')),
-    Column('creation_date', DateTime,
-           nullable=False, default=datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
-user_principal.create(checkfirst=True)
+        #Column('creation_date', DateTime,
+        #   nullable=False, default=datetime.now),
+        #Column('comments', String(255), nullable=True),
+        UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
 
-class UserPrincipal(aqdbBase):
-    """ Simple class for strings representing users kerberos credential """
-    @optional_comments
-    def __init__(self,princ,**kw):
-        if princ.isspace() or len(princ) < 1 :
-            msg='Names must contain some non-whitespace characters'
-            raise ArgumentError(msg)
-        if isinstance(princ,str):
-            self.name = princ.strip().lower()
-        else:
-            raise ArgumentError("Incorrect name argument %s" % princ)
-
-        realm=kw.pop('realm','is1.morgan')
-        if isinstance(realm,Realm):
-            self.realm=realm
-        else:
-            rid=engine.execute(select([realm.c.id],realm.c.name==realm)).scalar()
-            assert isinstance(rid,int), "Can't find realm '%s'"%realm
-            self.realm_id=rid
+    creation_date = deferred(Column('creation_date', DateTime,
+                                    nullable=False, default=datetime.now))
+    comments = deferred(Column('comments', String(255), nullable=True))
+    realm = relation(Realm, uselist = False)
+    role  = relation(Role, uselist = False)
 
     def __str__(self):
         return '@'.join([self.name,self.realm.name])
-    def __repr__(self):
-        return ' '.join([self.__class__.__name__,str(self)])
+user_principal = UserPrincipal.__table__
 
-mapper(UserPrincipal,user_principal, properties={
-    'realm'         : relation(Realm, uselist=False),
-    'role'          : relation(Role, uselist=False),
-    'creation_date' : deferred(user_principal.c.creation_date),
-    'comments'      : deferred(user_principal.c.comments)
-})
-
+user_principal.create(checkfirst=True)
 
 if __name__ == '__main__':
     s = Session()
@@ -127,48 +106,37 @@ if __name__ == '__main__':
     # can add anyone else into the frey.
     #TODO: sync from some ldap group ???
 
-    admins  = ['cdb','njw', 'wesleyhe','guyroleh','daqscott',
-               'kgreen', 'benjones']
-    unixeng = ['cesarg','jasona', 'dankb','tonyc','goliaa','samsh','hagberg',
-               'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert','af',
-               'lillied']
-    unixops     = ['nathand','premdasr','bestc','chawlav','wbarnes']
+    admins     = ['cdb','njw', 'wesleyhe','guyroleh','daqscott',
+                  'kgreen', 'benjones']
+    unixeng    = ['cesarg','jasona', 'dankb','goliaa','samsh','hagberg','af'
+                  'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert',
+                  'lillied']
+    operations = ['nathand','premdasr','bestc','chawlav','wbarnes']
 
     if empty(user_principal):
         r=s.query(Realm).first()
         assert(r.name == 'is1.morgan')
 
         for nm in admins:
-            up=UserPrincipal(nm,realm=r,role=admin,comment='AutoPopulated')
-            up.role=admin
+            up=UserPrincipal(name=nm,realm=r,role=admin,comments='AutoPopulated')
             s.save(up)
             s.commit()
             assert(up)
         print 'created admins: %s'%(admins)
 
         for nm in unixeng:
-            up=UserPrincipal(nm,realm=r,role=eng,comment='AutoPopulated')
-            up.role=eng
+            up=UserPrincipal(name=nm,realm=r,role=eng,comments='AutoPopulated')
             s.save(up)
             s.commit()
             assert(up)
         print 'created eng: %s'%(unixeng)
 
-        for nm in unixops:
-            up=UserPrincipal(nm,realm=r, role=ops, comment='AutoPopulated')
-            up.role=ops
+        for nm in operations:
+            up=UserPrincipal(name=nm,realm=r, role=ops, comments='AutoPopulated')
             s.save(up)
             s.commit()
             assert(up)
-        print 'created eng: %s'%(ops)
-
-        currentuser = os.environ.get('USER')
-        if not s.query(UserPrincipal).filter_by(name=currentuser).first():
-            up = UserPrincipal(currentuser, realm=r, role=admin)
-            up.role=admin
-            s.save(up)
-            s.commit()
-        print 'created ops: %s'%(ops)
+        print 'created operations: %s'%(ops)
 
     a = s.query(UserPrincipal).first()
     assert(a)
