@@ -61,9 +61,12 @@ class Service(Base):
                 UniqueConstraint('name', name='svc_name_uk'),
                 UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
-    cfg_path      = relation(CfgPath, backref='service')
-    creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
-    comments      = deferred(Column('comments', String(255), nullable=True))
+    cfg_path      = relation(CfgPath, uselist=False, backref='service')
+    comments  = deferred(Column('comments', String(255), nullable=True))
+    creation_date = deferred(
+        Column('creation_date', DateTime, default=datetime.now))
+
+
 
 service = Service.__table__
 service.create(checkfirst=True)
@@ -116,8 +119,8 @@ class ServiceInstance(Base):
         UniqueConstraint('host_list_id',name='svc_inst_host_list_uk'))
 
     service   = relation(Service, backref='instances')
-    host_list = relation(HostList)
-    cfg_path  = relation(CfgPath)
+    host_list = relation(HostList, uselist=False)
+    cfg_path  = relation(CfgPath, uselist=False, backref='svc_inst')
     comments  = deferred(Column('comments', String(255), nullable=True))
     creation_date = deferred(
         Column('creation_date', DateTime, default=datetime.now))
