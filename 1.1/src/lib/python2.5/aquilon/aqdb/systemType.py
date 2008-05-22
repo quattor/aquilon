@@ -7,49 +7,28 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-""" The types module incorporates all the various discriminator classes
-    used by the project. Since they all must be pre-seeded to make the
-    other modules load properly, we seperate them here to get them done
-    before ahead of the other modules. """
+"""  The discriminator for Systems """
 import sys
 sys.path.append('../..')
+#from aqdbBase import aqdbBase
+#from db_factory import db_factory
+from db import meta, engine, Base
+import subtypes as st
 
-from db import *
+from sqlalchemy import select
 
-from sqlalchemy.orm import (mapper, relation, deferred, backref)
-
-class SystemType(Base):
-    """ The discriminator for System """
-    __table__ = Table('system_type', meta,
-        get_id_col('system_type'),
-        Column('type', String(32), nullable = False),
-        UniqueConstraint('type', name='system_type_uk'))
-
-    creation_date = get_date_col()
-    comments      = get_comment_col()
-    def __str__(self):
-        return str(self.type)
-
+SystemType  = st.subtype('SystemType','system_type')
 system_type = SystemType.__table__
-
 def get_sys_type_id(typ_nm):
-        """ To keep session out of __init__ methods for systems """
-        sl=select([system_type.c.id], system_type.c.type=='%s'%(typ_nm))
-        return engine.execute(sl).fetchone()[0]
+    """ To keep session out of __init__ methods for systems """
+    sl=select([SystemType.c.id], SystemType.c.type=='%s'%(typ_nm))
+    return engine.execute(sl).fetchone()[0]
 
-def populate_system_types():
-    s = Session()
-    types = ['base_system_type', 'host', 'afs_cell', 'host_list',
-             'quattor_server']
-
-    for t in types:
-        test = s.query(SystemType).filter_by(type=t).all()
-        if not test:
-            st = SystemType(type=t, comments='auto populated')
-            s.save(st)
-            s.commit()
+_sys_types = ['base_system_type', 'host', 'afs_cell', 'quattor_server']
 
 if __name__ == '__main__':
+    #dbf = db_factory()
+    #aqdbBase.metadata.bind = dbf.engine
+    system_type.create(checkfirst=True)
 
-    Base.metadata.create_all(checkfirst=True)
-    populate_system_types()
+    st.populate_subtype(SystemType, _sys_types)

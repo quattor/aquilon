@@ -448,12 +448,13 @@ def all_cells():
     return True
 
 
-def make_syslog_si(hostname):
+def make_syslog_si():
     assert(syslog)
 
-    h=s.query(Host).filter_by(name=hostname).one()
+    hl=s.query(HostList).first()
+    assert(hl)
 
-    si=ServiceInstance(syslog,h)
+    si=ServiceInstance(service=syslog,host_list=hl)
     s.save(si)
     try:
         s.commit()
@@ -521,7 +522,7 @@ def make_host_list():
     hl=s.query(HostList).first()
     if not hl:
         #dd=s.query(DnsDomain).first()
-        #TODO: decorate me damn it
+        #TODO: use 'with' or decorate it.
         hl=HostList(name='test',comments='FAKE')
         s.save(hl)
         s.commit()
@@ -530,7 +531,7 @@ def make_host_list():
     hosts=s.query(Host).all()
     print '%s hosts is in hosts'%(len(hosts))
     if len(hosts) > 0:
-        hli=HostListItem(hostlist=hl,host=hosts[1], position=1, comments='FAKE')
+        hli=HostListItem(hostlist=hl,host=hosts[9], position=1, comments='FAKE')
         s.save(hli)
         s.commit()
         assert(hli)
@@ -543,7 +544,7 @@ if __name__ == '__main__':
     just_hosts()
     make_host_list()
     npipm1()
-    all_cells()
+    #all_cells()
 
     #pick_servers()
     #a=show_load()

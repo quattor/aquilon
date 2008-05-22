@@ -46,7 +46,7 @@ def subtype(nm,tbl):
     """ A factory object for subtypes in Aqdb."""
     class klass(Base):
         """ The Discriminator for %s types"""%(nm)
-        __tablename__ = 'location_type'
+        __tablename__ = tbl
         id = Column(Integer,primary_key=True)
         type = Column(String(32), nullable = False)
         creation_date = deferred(Column(DateTime, nullable=False,
@@ -80,8 +80,6 @@ def populate_subtype(cls, items):
         raise TypeError('class arg must have a __table__ attr')
     if isinstance(items,list):
         if len(items) > cls.__table__.count().execute().fetchone()[0]:
-            #dbf = db_factory('sqlite')
-            #s = dbf.session()
             s = Session()
             for t in items:
                 test = s.query(cls).filter_by(type=t).all()
@@ -95,18 +93,12 @@ def populate_subtype(cls, items):
 def get_subtype_id(nm=None,engine=None,cls=None):
     """ To keep session out of __init__ methods for systems """
     tbl = cls.__table__
-
     assert isinstance(tbl,Table)
     sl=select([tbl.c.id], tbl.c.type=='%s'%(nm))
     return engine.execute(sl).fetchone()[0]
 
-#SystemType
 #Hardware/Machine Type
 #Interface Type
-
-#sys_types = ['base_system_type', 'host', 'afs_cell', 'host_list',
-#             'quattor_server']
-
 
 if __name__ == '__main__':
     pass

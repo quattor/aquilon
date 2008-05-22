@@ -43,18 +43,7 @@ from sqlalchemy.orm import (mapper, relation, deferred, synonym, backref,
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_, not_
 
-service = Table('service', meta,
-    Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
-    Column('name', String(64)),
-    Column('cfg_path_id', Integer,
-           ForeignKey('cfg_path.id', name='svc_cfg_pth_fk')),
-    Column('creation_date', DateTime, default=datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('name',name='svc_name_uk'),
-    UniqueConstraint('cfg_path_id',name='svc_template_uk'))
-service.create(checkfirst=True)
-
-class Service(aqdbBase):
+class Service(Base):
     """ SERVICE: a central definition of service is composed of
         a simple name of a service consumable by OTHER hosts. Applications
         that run on a system like ssh are features, not services.
@@ -62,62 +51,24 @@ class Service(aqdbBase):
         The config source id/unique column says that there is one and only one
         config source for a service. DNS can not be configured by aqdb AND quattor
         Addtionally, remember that this points to a precise instance of
-        aqdb OR quattor as a mechansim.
+        aqdb OR quattor as a mechansim. """
 
-        We're not currently subtyping or 'grading' services with 'prod/qa/dev' etc.
-        It would have to be accomplished with the name, i.e. production-dns, and
-        the burden of naming can be greatly reduced by service lists,
-        though this may be revamped later. """
+    __table__ = Table('service', meta,
+                Column('id', Integer, Sequence('service_id_seq'), primary_key=True),
+                Column('name', String(64)),
+                Column('cfg_path_id', Integer,
+                                 ForeignKey('cfg_path.id', name='svc_cfg_pth_fk')),
+                UniqueConstraint('name', name='svc_name_uk'),
+                UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
-    @optional_comments
-    def __init__(self,name):
-        self.name=name.strip().lower()
+    cfg_path      = relation(CfgPath, backref='service')
+    creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
+    comments      = deferred(Column('comments', String(255), nullable=True))
 
-        service_id=engine.execute(
-            select([cfg_tld.c.id],cfg_tld.c.type=='service')).fetchone()[0]
-        if not service_id:
-            raise ArgumentError('Service TLD is undefined')
-
-        result=engine.execute(
-            """SELECT id FROM cfg_path WHERE
-                cfg_tld_id=%s
-                AND relative_path = '%s' """%(service_id,self.name)).fetchone()
-        if result:
-            self.cfg_path_id = result[0]
-        else:
-            print "No cfg path for service %s, creating..."%(self.name)
-            i=cfg_path.insert()
-            result=i.execute(relative_path=self.name,
-                              cfg_tld_id=service_id,
-                              comments='autocreated')
-            self.cfg_path_id=result.last_inserted_ids()[0]
-    """ We're being nice here. Don't know if we should be, but wanted to show
-        another way around the problem we had with using session in the init
-        functions. The line WAS:
-            raise ArgumentError('no cfg path for %s'%(self.name))
-
-        The path on filesystem is not created here like I did for the
-        afs cells in all_cells() in population_scripts (did em manaully) """
-
-mapper(Service, service, properties={
-    'cfg_path'      : relation(CfgPath,backref='service'),
-    'creation_date' : deferred(service.c.creation_date),
-    'comments'      : deferred(service.c.comments)})
-
-
-#class HostList(Base):
-#    """ The default system type used for ServiceInstances will be this
-#        data structure, a list of hosts. """
-#
-#    __tablename__ = 'hostlist'
-#    id   = Column(Integer, primary_key=True)
-#    name = Column(String(64), nullable=False, unique=True)
-#    creation_date = deferred(Column(DateTime, nullable=False,
-#                                        default = get_date_default()))
-#    comments = deferred(Column(String(255)))
+service = Service.__table__
+service.create(checkfirst=True)
 
 HostList = get_name_table('HostList','host_list')
-
 host_list = HostList.__table__
 
 class HostListItem(Base):
@@ -132,12 +83,14 @@ class HostListItem(Base):
     Column('position', Integer, nullable=False),
     UniqueConstraint('host_id', name='host_list_uk')) #hosts only on one list?
 
-    creation_date = get_date_col()
-    comments      = get_comment_col()
+    creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
+    comments      = deferred(Column('comments', String(255), nullable=True))
 
     host          = relation(Host)
     hostlist      = relation(HostList)
 
+    def __str__(self):
+        return str(self.host.name)
 
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.host.name)
@@ -146,74 +99,27 @@ HostList.hosts = relation(HostListItem,
                           collection_class=ordering_list('position'),
                             order_by=[HostListItem.__table__.c.position])
 
-#mapper(HostList, host_list, properties={
-#        'hosts'  : relation(HostListItem,
-#                            collection_class=ordering_list('position'),
-#                            order_by=[HostListItem.__table__.c.position]),
-#})
 
-service_instance = Table('service_instance',meta,
-    Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
-    Column('service_id',Integer,
-           ForeignKey('service.id', name='svc_inst_svc_fk'), nullable=False),
-    Column('system_id', Integer,
-           ForeignKey('system.id', ondelete='CASCADE', name='svc_inst_sys_fk'),
-           nullable=False),
-    Column('cfg_path_id', Integer,
-           ForeignKey('cfg_path.id', name='svc_inst_cfg_pth_fk'),
-           nullable=False),
-    Column('creation_date', DateTime, default=datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('service_id','system_id',name='svc_inst_system_uk'))
-
-service_instance.create(checkfirst=True)
-
-class ServiceInstance(aqdbBase):
+class ServiceInstance(Base):
     """ Service instance captures the data around assignment of a system for a
-        particular purpose (aka usage)
-        If machines have a 'personality' dictated by the application they run
-    """
-    @optional_comments
-    def __init__(self,svc,a_sys,*args,**kw):
-        if isinstance(svc,Service):
-            self.service = svc
-        else:
-            raise ArgumentError('First argument must be a valid Service')
-        if isinstance(a_sys,System):
-            self.system = a_sys
-        else:
-            raise ArgumentError('Second Argument must be a valid System')
+        particular purpose (aka usage). If machines have a 'personality'
+        dictated by the application they run """
 
-        # FIXME: This is a hack.  Either:
-        # - Make this an attribute of system that is overridden
-        # or
-        # - Force all git repositories to be fqdn
-        servicename = self.system.fqdn
-        if isinstance(self.system, HostList):
-            servicename = self.system.name
-        path = '%s/%s' % (self.service.name, servicename)
+    __table__ = Table('service_instance',meta,
+        Column('id', Integer, Sequence('service_instance_id_seq'),primary_key=True),
+        Column('service_id',Integer,
+               ForeignKey('service.id', name='svc_inst_svc_fk'), nullable=False),
+        Column('host_list_id', Integer,
+                ForeignKey('host_list.id', ondelete='CASCADE', name='svc_inst_sys_fk'), nullable=False),
+        Column('cfg_path_id', Integer,
+            ForeignKey('cfg_path.id', name='svc_inst_cfg_pth_fk'), nullable=False),
+        UniqueConstraint('host_list_id',name='svc_inst_host_list_uk'))
 
-        service_id=engine.execute(
-                select([cfg_tld.c.id],cfg_tld.c.type=='service')).fetchone()[0]
-        if not service_id:
-            raise ArgumentError('Service TLD is undefined')
-
-        result=engine.execute(
-                """ SELECT id FROM cfg_path WHERE
-                    cfg_tld_id=%s
-                    AND relative_path = '%s' """%(service_id,path)).fetchone()
-        if result:
-            self.cfg_path_id=result[0]
-        else:
-            i=cfg_path.insert()
-            result=i.execute(relative_path=path,
-                              cfg_tld_id=service_id,
-                              comments='autocreated')
-            if result:
-                self.cfg_path_id=result.last_inserted_ids()[0]
-            else:
-                raise ArgumentError('unable to create cfg path')
-            #TODO: a better exception and a much better message
+    host_list = relation(HostList)
+    cfg_path  = relation(CfgPath)
+    comments  = deferred(Column('comments', String(255), nullable=True))
+    creation_date = deferred(
+        Column('creation_date', DateTime, default=datetime.now))
 
     def _client_count(self):
         return object_session(self).query(BuildItem).filter_by(
@@ -223,17 +129,16 @@ class ServiceInstance(aqdbBase):
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,
                            self.service.name ,self.system.name)
+service_instance = ServiceInstance.__table__
+service_instance.create(checkfirst=True)
 
+"""
 mapper(ServiceInstance,service_instance, properties={
     'service'       : relation(Service, backref='instances'),
-    'system'        : relation(System,
-                               backref=backref('svc_inst', uselist=False)),
-    'cfg_path'      : relation(CfgPath,
-                               backref=backref('svc_inst', uselist=False)),
     'counter'       : synonym('client_count'),
-    'creation_date' : deferred(service_instance.c.creation_date),
-    'comments'      : deferred(service_instance.c.comments)
 })
+"""
+
 
 service_map=Table('service_map',meta,
     Column('id', Integer, Sequence('service_map_id_seq'), primary_key=True),
@@ -330,12 +235,10 @@ def populate_service():
         cfg_paths = s.query(CfgPath).filter(
                 not_(CfgPath.relative_path.like('%/%'))).join('tld').filter_by(
                 type='service').all()
-        if cfg_paths:
-            svcs = [str(cp.relative_path) for cp in cfg_paths]
-        else:
-            svcs = ['dns', 'dhcp', 'syslog', 'afs']
-        for i in svcs:
-            srv = Service(name=i)
+        assert(len(cfg_paths) > 1)
+
+        for i in cfg_paths:
+            srv = Service(name=str(i.relative_path),cfg_path=i)
             s.save(srv)
         s.commit()
         print 'populated services'

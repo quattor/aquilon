@@ -11,13 +11,13 @@
 from __future__ import with_statement
 
 import sys
+sys.path.append('../..')
+
 import os
 from socket import gethostname
 from datetime import datetime
 
-# FIXME: The dependencies should be pulled in elsewhere...
-import depends
-import sqlalchemy
+import depends #includes sqlalchemy for us
 
 from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
                         Integer, DateTime, Sequence, String, select,
@@ -36,7 +36,7 @@ from aquilon.config import Config
 try:
     config = Config()
 except Exception, e:
-    print >>sys.stderr, "failed to read configuration: %s" % e
+    print >> sys.stderr, "failed to read configuration: %s" % e
     sys.exit(os.EX_CONFIG)
 
 print "using logfile of %s" % config.get("database", "dblogfile")

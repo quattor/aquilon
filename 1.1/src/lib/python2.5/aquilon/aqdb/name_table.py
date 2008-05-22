@@ -58,6 +58,7 @@ def get_name_table(nm,tbl):
     klass.__table__.append_constraint(
         UniqueConstraint('name', name = '%s_uk'%(tbl)))
     klass.__name__ = nm
+
     return klass
 
 def populate_name_table(cls, items):

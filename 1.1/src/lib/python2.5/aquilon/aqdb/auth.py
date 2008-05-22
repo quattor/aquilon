@@ -57,9 +57,7 @@ class UserPrincipal(Base):
                ForeignKey('role.id', name='usr_princ_role_fk'),
            nullable=False, default = id_getter(Role.__table__,
                                                Role.__table__.c.name,'nobody')),
-        #Column('creation_date', DateTime,
-        #   nullable=False, default=datetime.now),
-        #Column('comments', String(255), nullable=True),
+
         UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
 
     creation_date = deferred(Column('creation_date', DateTime,
@@ -72,11 +70,10 @@ class UserPrincipal(Base):
         return '@'.join([self.name,self.realm.name])
 user_principal = UserPrincipal.__table__
 
-user_principal.create(checkfirst=True)
 
 if __name__ == '__main__':
     s = Session()
-    #Base.metadata.create_all(checkfirst=True)
+    Base.metadata.create_all(checkfirst=True)
     #meta.create_all(checkfirst=True)
 
 
@@ -95,8 +92,6 @@ if __name__ == '__main__':
             assert(r)
         s.commit()
         print 'created %s'%(roles)
-    #Since .one() raises exceptions, they're in effect a nice assertion style
-    #test that important roles are in place at module _run_ time.
 
     admin = s.query(Role).filter_by(name='aqd_admin').one()
     eng   = s.query(Role).filter_by(name='engineering').one()
@@ -106,11 +101,11 @@ if __name__ == '__main__':
     # can add anyone else into the frey.
     #TODO: sync from some ldap group ???
 
-    admins     = ['cdb','njw', 'wesleyhe','guyroleh','daqscott',
-                  'kgreen', 'benjones']
-    unixeng    = ['cesarg','jasona', 'dankb','goliaa','samsh','hagberg','af'
-                  'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert',
-                  'lillied']
+    admins  = ['cdb','njw', 'wesleyhe','guyroleh','daqscott',
+               'kgreen', 'benjones']
+    unixeng = ['cesarg','jasona', 'dankb','tonyc','goliaa','samsh','hagberg',
+               'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert','af',
+               'lillied']
     operations = ['nathand','premdasr','bestc','chawlav','wbarnes']
 
     if empty(user_principal):
@@ -125,18 +120,18 @@ if __name__ == '__main__':
         print 'created admins: %s'%(admins)
 
         for nm in unixeng:
-            up=UserPrincipal(name=nm,realm=r,role=eng,comments='AutoPopulated')
+            up=UserPrincipal(name = nm,realm=r,role=eng,comments='AutoPopulated')
             s.save(up)
             s.commit()
             assert(up)
         print 'created eng: %s'%(unixeng)
 
         for nm in operations:
-            up=UserPrincipal(name=nm,realm=r, role=ops, comments='AutoPopulated')
+            up=UserPrincipal(name = nm,realm=r, role=ops, comments='AutoPopulated')
             s.save(up)
             s.commit()
             assert(up)
-        print 'created operations: %s'%(ops)
+        print 'created operationss: %s'%(operations)
 
     a = s.query(UserPrincipal).first()
     assert(a)
