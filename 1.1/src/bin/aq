@@ -195,7 +195,13 @@ def handleFailure(failure, uri, globalOptions):
             # No big deal - return_code will be set to 1 later.
             pass
     else:
-        print "Error:", failure.getErrorMessage()
+        msg = failure.getErrorMessage()
+        if msg.find("Connection refused") >= 0:
+            print >>sys.stderr, "Failed to connect to %(aqhost)s port %(aqport)s: Connection refused." % globalOptions
+        elif msg.find("Unknown host") >= 0:
+            print >>sys.stderr, "Failed to connect to %(aqhost)s: Unknown host." % globalOptions
+        else:
+            print >>sys.stderr, "Error: %s" % msg
     if not globals()["return_code"]:
         globals()["return_code"] = 1
 
@@ -229,6 +235,9 @@ if __name__ == "__main__":
 
     host = globalOptions.get('aqhost') or default_aqhost
     port = globalOptions.get('aqport') or default_aqport
+    # Save these in case there are errors...
+    globalOptions["aqhost"] = host
+    globalOptions["aqport"] = port
 
     if transport is None:
         print >>sys.stderr, "Unimplemented command ", command

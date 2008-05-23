@@ -23,6 +23,7 @@ class NetCatConnector(protocol.ProcessProtocol):
     def __init__(self, proto, controller):
         self.proto = proto
         self.controller = controller
+        self.stderr_msgs = []
 
     def connectionMade(self):
         log.msg("Subprocess started.")
@@ -58,7 +59,10 @@ class NetCatConnector(protocol.ProcessProtocol):
         log.msg("Standard out closed")
         # For now, the child's standard out is "good enough"
         # that the connection is lost.
-        self.proto.connectionLost(error.ConnectionLost("Standard out closed"))
+        msg = "Standard out closed"
+        if self.stderr_msgs:
+            msg = msg + ": " + "".join(self.stderr_msgs)
+        self.proto.connectionLost(error.ConnectionLost(msg))
         protocol.ProcessProtocol.outConnectionLost(self)
 
     def errConnectionLost(self):
@@ -73,8 +77,8 @@ class NetCatConnector(protocol.ProcessProtocol):
         self.proto.dataReceived(data)
 
     def errReceived(self, data):
-        log.msg("Received stderr from subprocess: " + repr(data))
-        print >>sys.stderr, str(data)
+        log.msg("Received stderr from subprocess: " + str(data))
+        self.stderr_msgs.append(str(data))
 
     def processEnded(self, status):
         log.msg("Process ended")

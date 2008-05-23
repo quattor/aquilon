@@ -55,6 +55,7 @@ from test_del_rack import TestDelRack
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
 from test_del_domain import TestDelDomain
+from test_client_failure import TestClientFailure
 from test_stop import TestBrokerStop
 
 
@@ -82,6 +83,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelHost, TestDelInterface, TestDelMachine, TestDelChassis,
                 TestDelRack, TestDelRequiredService, TestDelService,
                 TestDelDomain,
+                TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 
