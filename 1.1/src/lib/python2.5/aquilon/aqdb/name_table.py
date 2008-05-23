@@ -14,30 +14,28 @@ sys.path.append('../..')
 import types
 from datetime import datetime
 
-#from db_factory      import db_factory
-#from aqdbBase        import aqdbBase
-#from schema         import (get_id_col, get_comment_col, get_date_col,
-#                             get_date_default)
-
 from db import (meta, engine, Base, Session, get_id_col, get_comment_col,
                 get_date_col, get_date_default)
 
 
-from sqlalchemy     import (Table, Column, Integer, String, DateTime, Index,
-                             UniqueConstraint, PrimaryKeyConstraint, select)
+from sqlalchemy     import (Table, Column, Integer, String, DateTime, Sequence,
+                            UniqueConstraint, PrimaryKeyConstraint, select)
 
 from sqlalchemy.orm import deferred
 
-def get_name_table(nm,tbl):
+def make_name_class(nm,tbl):
     """ A factory object for tables that consist only of a name attr """
     class klass(Base):
         """ The Object for %s rows"""%(nm)
-        __tablename__ = tbl
-        id            = Column(Integer, primary_key = True)
-        name          = Column(String(32), unique = True, nullable = False)
-        creation_date = deferred(Column(DateTime, nullable = False,
-                                        default = get_date_default()))
-        comments = deferred(Column(String(255)))
+        __table__= Table(tbl, Base.metadata,
+                Column('id', Integer,
+                       Sequence('%s_id_seq'%tbl), primary_key=True),
+                Column('name', String(32), nullable=False),
+                Column('creation_date', DateTime,
+                       default=datetime.now, nullable = False),
+                Column('comments', String(255), nullable = True),
+                PrimaryKeyConstraint('id', name = '%s_pk'%tbl),
+                UniqueConstraint('name', name = '%s_uk'%tbl))
 
         def __str__(self):
             return str(self.name)
@@ -53,10 +51,6 @@ def get_name_table(nm,tbl):
             else:
                 raise ArgumentError('Can only be compared to strings')
 
-    klass.__table__.append_constraint(
-        PrimaryKeyConstraint('id', name = '%s_pk'%(tbl)))
-    klass.__table__.append_constraint(
-        UniqueConstraint('name', name = '%s_uk'%(tbl)))
     klass.__name__ = nm
 
     return klass
@@ -77,15 +71,3 @@ def populate_name_table(cls, items):
                     s.commit()
     else:
         raise TypeError('items arg must be a list')
-
-
-#class HostList(Base):
-#    """ The default system type used for ServiceInstances will be this
-#        data structure, a list of hosts. """
-#
-#    __tablename__ = 'hostlist'
-#    id   = Column(Integer, primary_key=True)
-#    name = Column(String(64), nullable=False, unique=True)
-#    creation_date = deferred(Column(DateTime, nullable=False,
-#                                        default = get_date_default()))
-#    comments = deferred(Column(String(255)))

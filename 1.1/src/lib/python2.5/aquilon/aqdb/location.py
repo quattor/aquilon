@@ -22,7 +22,6 @@ from aquilon.exceptions_ import ArgumentError
 
 def get_loc_type_id(typ_nm):
     """ To keep session out of __init__ methods for systems """
-    #### TRY THIS W/O __TABLE__ when you fix it
     sl=select([LocationType.c.id], LocationType.c.type=='%s'%(typ_nm))
     return engine.execute(sl).fetchone()[0]
 

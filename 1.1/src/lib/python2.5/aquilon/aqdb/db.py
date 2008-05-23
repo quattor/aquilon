@@ -251,21 +251,6 @@ def fill_type_table(table,items):
     for t in items:
         i.execute(type=t)
 
-
-def mk_name_id_table(name, meta=meta, *args, **kw):
-    """
-        Many tables simply contain name and id columns, use this
-        to reduce code volume and standardize DDL
-    """
-    return Table(name, meta, \
-                Column('id', Integer, Sequence('%s_id_seq'%name),
-                       primary_key=True),
-                Column('name', String(32)),
-                Column('creation_date', DateTime,
-                       default=datetime.now),
-                Column('comments', String(255), nullable=True),
-                UniqueConstraint('name',name='%s_uk'%(name)), *args, **kw)
-
 def mk_type_table(name, meta=meta, *args, **kw):
     """
         Variant on name_id. Can and should reduce them to a single function

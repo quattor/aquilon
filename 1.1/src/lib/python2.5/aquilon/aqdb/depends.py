@@ -11,5 +11,5 @@
 
 import msversion
 
-msversion.addpkg('sqlalchemy', '0.4.5', 'dist')
+msversion.addpkg('sqlalchemy', '0.4.6', 'dist')
 msversion.addpkg('ipython', '0.7.2', 'dist')

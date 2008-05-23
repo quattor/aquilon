@@ -17,18 +17,13 @@ sys.path.append('../..')
 import types
 from datetime import datetime
 
-#from db_factory      import db_factory
-#from aqdbBase        import aqdbBase
-#from schema          import (get_id_col, get_comment_col, get_date_col,
-#                             get_date_default)
-
 from db import (meta,engine, Session, Base, get_id_col, get_comment_col,
                 get_date_col, get_date_default)
 
-from sqlalchemy      import (Table, Column, Integer, String, DateTime, Index,
-                             UniqueConstraint, PrimaryKeyConstraint, select)
+from sqlalchemy import (Table, Column, Sequence, Integer, String, DateTime,
+                        UniqueConstraint, PrimaryKeyConstraint, select)
 
-from sqlalchemy.orm  import deferred
+from sqlalchemy.orm import deferred
 
 #subtype Base, make it have new __repr__, __str__, __eq__ methods.
 
@@ -42,16 +37,20 @@ from sqlalchemy.orm  import deferred
 #    sl=select([location_type.c.id], location_type.c.type=='%s'%(nm))
 #    return engine.execute(sl).fetchone()[0]
 
-def subtype(nm,tbl):
+def subtype(nm,tbl,dstr=None):
     """ A factory object for subtypes in Aqdb."""
     class klass(Base):
         """ The Discriminator for %s types"""%(nm)
-        __tablename__ = tbl
-        id = Column(Integer,primary_key=True)
-        type = Column(String(32), nullable = False)
-        creation_date = deferred(Column(DateTime, nullable=False,
-                                        default = get_date_default()))
-        comments = deferred(Column(String(255)))
+
+        __table__= Table(tbl, Base.metadata,
+                Column('id', Integer,
+                       Sequence('%s_id_seq'%tbl), primary_key=True),
+                Column('type', String(32), nullable=False),
+                Column('creation_date', DateTime,
+                       default=datetime.now, nullable = False),
+                Column('comments', String(255), nullable = True),
+                PrimaryKeyConstraint('id', name = '%s_pk'%tbl),
+                UniqueConstraint('type',name = '%s_uk'%tbl))
 
         def __str__(self):
             return str(self.type)
@@ -67,10 +66,8 @@ def subtype(nm,tbl):
                     return False
             else:
                 raise ArgumentError('Can only be compared to strings')
-    klass.__table__.append_constraint(
-        PrimaryKeyConstraint('id', name = '%s_pk'%(tbl)))
-    klass.__table__.append_constraint(
-        UniqueConstraint('type', name = '%s_uk'%(tbl)))
+    if dstr:
+        klass.__doc__ = dstr
     klass.__name__ = nm
     return klass
 
@@ -102,26 +99,3 @@ def get_subtype_id(nm=None,engine=None,cls=None):
 
 if __name__ == '__main__':
     pass
-
-"""
-Replaces:
-
-class aqdbType(aqdbBase):
-    ""To wrap rows in 'type' tables""
-    @optional_comments
-    def __init__(self,type,*args,**kw):
-        if type.isspace() or len(type) < 1:
-            msg='Names must contain some non-whitespace characters'
-            raise ArgumentError(msg)
-        if isinstance(type,str):
-            self.type = type.strip().lower()
-        else:
-            raise ArgumentError("Incorrect name argument %s" %(type))
-            return
-    def name(self):
-        return str(self.type)
-    def __str__(self):
-        return str(self.type)
-    def __repr__(self):
-        return self.__class__.__name__+" " +str(self.type)
-"""

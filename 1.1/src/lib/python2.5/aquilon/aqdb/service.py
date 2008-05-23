@@ -28,7 +28,7 @@ import os
 import re
 
 from db import *
-from name_table import get_name_table, populate_name_table
+from name_table import make_name_class
 from aquilon.exceptions_ import ArgumentError
 
 from location import *
@@ -71,8 +71,9 @@ class Service(Base):
 service = Service.__table__
 service.create(checkfirst=True)
 
-HostList = get_name_table('HostList','host_list')
+HostList = make_name_class('HostList','host_list')
 host_list = HostList.__table__
+host_list.create(checkfirst=True)
 
 class HostListItem(Base):
     __table__ = Table('host_list_item', meta,
@@ -84,7 +85,7 @@ class HostListItem(Base):
            ForeignKey('host.id', ondelete='CASCADE',name='hli_host_fk'),
            nullable=False, primary_key=True),
     Column('position', Integer, nullable=False),
-    UniqueConstraint('host_id', name='host_list_uk')) #hosts only on one list?
+    UniqueConstraint('host_id', name='host_list_item_uk')) #hosts only on one list?
 
     creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
     comments      = deferred(Column('comments', String(255), nullable=True))
@@ -101,7 +102,8 @@ class HostListItem(Base):
 HostList.hosts = relation(HostListItem,
                           collection_class=ordering_list('position'),
                             order_by=[HostListItem.__table__.c.position])
-
+host_list_item=HostListItem.__table__
+host_list_item.create(checkfirst=True)
 
 class ServiceInstance(Base):
     """ Service instance captures the data around assignment of a system for a

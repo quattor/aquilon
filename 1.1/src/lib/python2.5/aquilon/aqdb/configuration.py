@@ -15,6 +15,8 @@ import sys
 sys.path.append('../..')
 
 from db import *
+from subtypes import subtype
+from name_table import make_name_class
 from aquilon import const
 
 from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
@@ -41,11 +43,7 @@ def splitall(path):
             allparts.insert(0, parts[1])
     return allparts
 
-cfg_tld = mk_type_table('cfg_tld',meta)
-cfg_tld.create(checkfirst=True)
-
-class CfgTLD(aqdbType):
-    """ Configuration Top Level Directory or 'cfg_tld' are really the high level
+tl_doc = """ Configuration Top Level Directory or 'cfg_tld' are really the high level
         namespace categories, or the directories in /var/quattor/template-king
             base      (only one for now)
             os        (major types (linux,solaris) prefabricated)
@@ -55,10 +53,10 @@ class CfgTLD(aqdbType):
             final     (only one for now)
             personality is really just app (or service if its consumable too)
     """
-    pass
-mapper(CfgTLD, cfg_tld, properties={
-    'creation_date' : deferred(cfg_tld.c.creation_date),
-    'comments'      : deferred(cfg_tld.c.comments)})
+CfgTLD= subtype('CfgTLD','cfg_tld',tl_doc)
+cfg_tld = CfgTLD.__table__
+cfg_tld.create(checkfirst=True)
+
 
 cfg_path = Table('cfg_path',meta,
     Column('id', Integer, Sequence('cfg_path_id_seq'), primary_key=True),
@@ -100,26 +98,10 @@ mapper(CfgPath,cfg_path,properties={
     'creation_date':deferred(cfg_path.c.creation_date),
     'comments':deferred(cfg_path.c.comments)})
 
-
-archetype = Table('archetype', meta,
-    Column('id', Integer, Sequence('archetype_id_seq'), primary_key=True),
-    Column('name', String(32), nullable=False),
-    Column('creation_date', DateTime, default=datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('name', name='archetype_uk'))
+Archetype = make_name_class('Archetype','archetype')
+archetype = Archetype.__table__
 archetype.create(checkfirst=True)
 
-class Archetype(aqdbBase):
-    """Describes high level template requirements for building hosts """
-    @optional_comments
-    def __init__(self,name,**kw):
-        if isinstance(name,str):
-            self.name=name.strip().lower()
-
-mapper(Archetype,archetype, properties={
-    'creation_date' : deferred(archetype.c.creation_date),
-    'comments': deferred(archetype.c.comments)
-})
 
 #######POPULATION FUNCTIONS########
 def populate_tld():
@@ -177,7 +159,7 @@ def create_paths():
 def create_aquilon_archetype():
     s = Session()
     if empty(archetype):
-        a=Archetype('aquilon')
+        a=Archetype(name='aquilon',comments='AutoPopulated')
         s.save(a)
         s.commit()
         print 'created aquilon archetype'

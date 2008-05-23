@@ -17,20 +17,16 @@ import os
 import datetime
 
 from db import *
-# logging done within db, why again?
-#import logging
-#logging.basicConfig(level=logging.ERROR,
-                    #format='%(asctime)s %(levelname)s %(message)s',
-                    #filename=os.path.join(LOGDIR,'aqdb.log'),
-                    #filemode='w')
+from name_table import make_name_class, populate_name_table
+from subtypes import subtype, get_subtype_id, populate_subtype
 from aquilon.exceptions_ import ArgumentError
 
-from location import Location,Chassis
-from configuration import CfgPath
+from location import Location, location, Chassis, chassis
+from configuration import CfgPath, cfg_path
 
-location=Table('location',meta,autoload=True)
-chassis=Table('chassis',meta,autoload=True)
-cfg_path=Table('cfg_path',meta, autoload=True)
+#location=Table('location',meta,autoload=True)
+#chassis=Table('chassis',meta,autoload=True)
+#cfg_path=Table('cfg_path',meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, select
 from sqlalchemy.orm import mapper, relation, deferred, backref
@@ -59,24 +55,28 @@ if empty(status):
     for name in ['prod','dev','qa','build']:
         i.execute(name=name)
 
-vendor = mk_name_id_table('vendor',meta)
+Vendor = make_name_class('Vendor','vendor')
+vendor = Vendor.__table__
 vendor.create(checkfirst=True)
-class Vendor(aqdbBase):
-    pass
 
-mapper(Vendor,vendor,properties={
-    'creation_date':deferred(vendor.c.creation_date),
-    'comments':deferred(vendor.c.comments)})
-
-machine_type = mk_type_table('machine_type', meta)
+MachineType = subtype('MachineType','machine_type')
+machine_type = MachineType.__table__
 machine_type.create(checkfirst=True)
 
-class MachineType(aqdbType):
-    """ Hardware Type is one of  blade/rackmount/workstation"""
-    pass
-mapper(MachineType,machine_type,properties={
-    'creation_date':deferred(machine_type.c.creation_date),
-    'comments':deferred(machine_type.c.comments)})
+DiskType = subtype('DiskType','disk_type','Disk Type: scsi, ccis, sata, etc.')
+disk_type = DiskType.__table__
+disk_type.create(checkfirst=True)
+
+#class DiskType(aqdbType):
+#    """ Disk Type: scsi, ccis, sata, etc. """
+#    pass
+#
+#class MachineType(aqdbType):
+#    """ Hardware Type is one of  blade/rackmount/workstation"""
+#    pass
+#mapper(MachineType,machine_type,properties={
+#    'creation_date':deferred(machine_type.c.creation_date),
+#    'comments':deferred(machine_type.c.comments)})
 
 model = Table('model',meta,
     Column('id', Integer, Sequence('model_id_seq'), primary_key=True),
@@ -130,16 +130,8 @@ mapper(Model,model,properties={
     'creation_date'  : deferred(model.c.creation_date),
     'comments'       : deferred(model.c.comments)})
 
-disk_type=mk_type_table('disk_type')
-disk_type.create(checkfirst=True)
 
-class DiskType(aqdbType):
-    """ Disk Type: scsi, ccis, sata, etc. """
-    pass
 
-mapper(DiskType,disk_type,properties={
-    'creation_date':deferred(disk_type.c.creation_date),
-    'comments':deferred(disk_type.c.comments)})
 
 cpu=Table('cpu', meta,
     Column('id', Integer, Sequence('cpu_id_seq'), primary_key=True),
@@ -462,7 +454,7 @@ def populate_vendor():
                 if j in created:
                     continue
                 else:
-                    a=Vendor(j)
+                    a=Vendor(name=j)
                     try:
                         Session.save(a)
                     except Exception,e:
@@ -471,7 +463,7 @@ def populate_vendor():
                         continue
                     created.append(j)
         #hack alert:
-        b=Vendor('hp')
+        b=Vendor(name = 'hp')
         Session.save(b)
         try:
             Session.commit()
@@ -633,6 +625,7 @@ def populate_m_configs():
 
 
 if __name__ == '__main__':
+    Base.metadata.create_all()
     populate_status()
     populate_vendor()
     populate_machine_type()
