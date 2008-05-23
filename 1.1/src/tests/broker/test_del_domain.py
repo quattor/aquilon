@@ -33,6 +33,26 @@ class TestDelDomain(TestBrokerCommand):
         command = "show domain --domain unittest"
         self.notfoundtest(command.split(" "))
 
+    def testdelchangetest1domain(self):
+        command = "del domain --domain changetest1"
+        self.noouttest(command.split(" "))
+        self.assert_(not os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "changetest1")))
+
+    def testverifydelchangetest1domain(self):
+        command = "show domain --domain changetest1"
+        self.notfoundtest(command.split(" "))
+
+    def testdelchangetest2domain(self):
+        command = "del domain --domain changetest2"
+        self.noouttest(command.split(" "))
+        self.assert_(not os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "changetest2")))
+
+    def testverifydelchangetest2domain(self):
+        command = "show domain --domain changetest2"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)

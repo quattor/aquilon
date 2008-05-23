@@ -47,6 +47,21 @@ class TestBrokerStart(unittest.TestCase):
         self.assertEqual(p.wait(), 0)
         # FIXME: Check that it is listening on the correct port(s)...
 
+    def testrsynctemplateking(self):
+        config = Config()
+        p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+            "quattorsrv:/var/quattor/template-king",
+            # Minor hack... ignores config kingdir...
+            config.get("broker", "quattordir")),
+            stdout=PIPE, stderr=PIPE)
+        (out, err) = p.communicate()
+        # Ignore out/err unless we get a non-zero return code, then log it.
+        self.assertEqual(p.returncode, 0,
+                "Non-zero return code for rsync of template-king, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                % (out, err))
+        return
+
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStart)
     unittest.TextTestRunner(verbosity=2).run(suite)

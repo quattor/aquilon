@@ -33,6 +33,26 @@ class TestAddDomain(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Domain: unittest", command)
 
+    def testaddchangetest1domain(self):
+        self.noouttest(["add", "domain", "--domain", "changetest1"])
+        self.assert_(os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "changetest1")))
+
+    def testverifyaddchangetest1domain(self):
+        command = "show domain --domain changetest1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Domain: changetest1", command)
+
+    def testaddchangetest2domain(self):
+        self.noouttest(["add", "domain", "--domain", "changetest2"])
+        self.assert_(os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "changetest2")))
+
+    def testverifyaddchangetest2domain(self):
+        command = "show domain --domain changetest2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Domain: changetest2", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDomain)

@@ -37,6 +37,12 @@ if os.environ.get("USER") != config.get("broker", "user"):
             config.get("broker", "user"), os.environ.get("USER"))
     sys.exit(os.EX_CONFIG)
 
+# Maybe just execute this every run...
+if not os.path.exists("/var/spool/keytabs/%s" % config.get("broker", "user")):
+    p = Popen(("/ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab"),
+            stdout=1, stderr=2)
+    rc = p.wait()
+
 for label in ["quattordir", "kingdir", "swrepdir", ]:
     dir = config.get("broker", label)
     if os.path.exists(dir):
@@ -46,7 +52,7 @@ for label in ["quattordir", "kingdir", "swrepdir", ]:
     except OSError, e:
         print >>sys.stderr, "Could not create %s: %s" % (dir, e)
 
-dirs = [config.get("database", "dbdir")]
+dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
 for label in ["templatesdir", "rundir", "logdir", "profilesdir",
         "depsdir", "hostsdir", "plenarydir", ]:
     dirs.append(config.get("broker", label))
@@ -61,20 +67,6 @@ for dir in dirs:
     except OSError, e:
         print >>sys.stderr, "Could not create %s: %s" % (dir, e)
 
-#p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-#    "quattorsrv:/var/quattor/templates/*",
-#    # Minor hack... ignores config templatesdir...
-#    config.get("broker", "quattordir")),
-#    stdout=1, stderr=2)
-#rc = p.wait()
-# FIXME: check rc
-p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-    "quattorsrv:/var/quattor/template-king",
-    # Minor hack... ignores config kingdir...
-    config.get("broker", "quattordir")),
-    stdout=1, stderr=2)
-rc = p.wait()
-# FIXME: check rc
 p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
     "quattorsrv:/var/quattor/swrep/repository",
     config.get("broker", "swrepdir")),
