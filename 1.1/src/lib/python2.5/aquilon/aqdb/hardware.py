@@ -24,11 +24,7 @@ from aquilon.exceptions_ import ArgumentError
 from location import Location, location, Chassis, chassis
 from configuration import CfgPath, cfg_path
 
-#location=Table('location',meta,autoload=True)
-#chassis=Table('chassis',meta,autoload=True)
-#cfg_path=Table('cfg_path',meta, autoload=True)
-
-from sqlalchemy import Column, Integer, Sequence, String, select
+from sqlalchemy import Column, Integer, Sequence, String, ForeignKey, select
 from sqlalchemy.orm import mapper, relation, deferred, backref
 from sqlalchemy.sql.expression import alias
 

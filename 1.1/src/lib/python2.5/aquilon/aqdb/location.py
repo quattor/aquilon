@@ -15,7 +15,7 @@ sys.path.append('../..')
 
 from db import *
 from locationType import location_type, LocationType
-from sqlalchemy import Column, Integer, Sequence, String, select
+from sqlalchemy import Column, Integer, Sequence, String, ForeignKey, select
 from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.exceptions_ import ArgumentError

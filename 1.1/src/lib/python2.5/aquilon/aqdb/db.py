@@ -49,10 +49,7 @@ logging.basicConfig(level=logging.ERROR,
 
 dsn = config.get("database", "dsn")
 if dsn is None:
-    # should really raise an error, but right now
-    # it doesn't really matter what we do - it blows up twisted
-    # in a big way to do anything bad here...
-    # TODO: raise(somethingBad)
+    raise KeyError("Can't determine DSN, Check config files and env.")
     sys.exit(9)
 
 if dsn.startswith('oracle'):
@@ -161,7 +158,6 @@ class aqdbBase(object):
             return self.__class__.__name__ + " " + str(self.system.name)
         else:
             return '%s instance '%(self.__class__.__name__)
-
 class aqdbType(aqdbBase):
     """To wrap rows in 'type' tables"""
     @optional_comments
@@ -181,6 +177,7 @@ class aqdbType(aqdbBase):
     def __repr__(self):
         return self.__class__.__name__+" " +str(self.type)
 
+
 def Column(*args, **kw):
     """ some curry: default column from SA to default as null=False
         unless it's comments, which we hardcode to standardize
@@ -189,16 +186,16 @@ def Column(*args, **kw):
         kw['nullable']=False;
     return _Column(*args, **kw)
 
-def ForeignKey(*args, **kw):
-    """ more curry: Oracle has 'on delete RESTRICT' by default
-        This removes it in case you need to """
-
-    if kw.has_key('ondelete'):
-        if kw['ondelete'] == 'RESTRICT':
-            kw.pop('ondelete')
-    if kw.has_key('onupdate'):
-        kw.pop('onupdate')
-    return _fk(*args, **kw)
+#def ForeignKey(*args, **kw):
+#    """ more curry: Oracle has 'on delete RESTRICT' by default
+#        This removes it in case you need to """
+#
+#    if kw.has_key('ondelete'):
+#        if kw['ondelete'] == 'RESTRICT':
+#            kw.pop('ondelete')
+#    if kw.has_key('onupdate'):
+#        kw.pop('onupdate')
+#    return _fk(*args, **kw)
 
 def id_getter(table,key,value):
     """ Get the id of a row given a table name, and the specification of a

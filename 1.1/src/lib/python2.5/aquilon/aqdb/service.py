@@ -66,8 +66,6 @@ class Service(Base):
     creation_date = deferred(
         Column('creation_date', DateTime, default=datetime.now))
 
-
-
 service = Service.__table__
 service.create(checkfirst=True)
 
@@ -137,14 +135,6 @@ class ServiceInstance(Base):
                            self.service.name ,self.host_list.name)
 service_instance = ServiceInstance.__table__
 service_instance.create(checkfirst=True)
-
-"""
-mapper(ServiceInstance,service_instance, properties={
-    'service'       : relation(Service, backref='instances'),
-    'counter'       : synonym('client_count'),
-})
-"""
-
 
 service_map=Table('service_map',meta,
     Column('id', Integer, Sequence('service_map_id_seq'), primary_key=True),
@@ -273,9 +263,6 @@ def populate_hli():
         s=Session()
 
         hl = HostList(name='test-host-list', comments='FAKE')
-
-        #from shell import ipshell
-        #ipshell()
 
         s.save(hl)
         s.commit()
