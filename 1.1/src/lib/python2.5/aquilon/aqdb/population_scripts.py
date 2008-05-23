@@ -255,7 +255,7 @@ def npipm1():
         print e
         s.rollback()
     #s.flush()
-    make_syslog_si('npipm1')
+    #make_syslog_si('npipm1')
 
 def get_server_for(svc,host):
     #passing it in for now, this isn't efficient in a loop
