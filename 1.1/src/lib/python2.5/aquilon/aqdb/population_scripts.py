@@ -110,7 +110,8 @@ def two_in_each():
         nodecount=0
         for node in nodes:
             try:
-                s.save_or_update(node)
+                #s.save_or_update(node)
+                s.save(node)
                 nodelist.append(node)
             except Exception, e:
                 print e
@@ -531,7 +532,8 @@ def make_host_list():
     hosts=s.query(Host).all()
     print '%s hosts is in hosts'%(len(hosts))
     if len(hosts) > 0:
-        hli=HostListItem(hostlist=hl,host=hosts[9], position=1, comments='FAKE')
+        i=random.randint(0,len(hosts) - 1)
+        hli=HostListItem(hostlist=hl,host=hosts[i], position=1, comments='FAKE')
         s.save(hli)
         s.commit()
         assert(hli)

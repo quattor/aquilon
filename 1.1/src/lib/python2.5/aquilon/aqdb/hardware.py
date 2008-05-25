@@ -63,17 +63,6 @@ DiskType = subtype('DiskType','disk_type','Disk Type: scsi, ccis, sata, etc.')
 disk_type = DiskType.__table__
 disk_type.create(checkfirst=True)
 
-#class DiskType(aqdbType):
-#    """ Disk Type: scsi, ccis, sata, etc. """
-#    pass
-#
-#class MachineType(aqdbType):
-#    """ Hardware Type is one of  blade/rackmount/workstation"""
-#    pass
-#mapper(MachineType,machine_type,properties={
-#    'creation_date':deferred(machine_type.c.creation_date),
-#    'comments':deferred(machine_type.c.comments)})
-
 model = Table('model',meta,
     Column('id', Integer, Sequence('model_id_seq'), primary_key=True),
     Column('name', String(64), unique=True, index=True),
@@ -125,9 +114,6 @@ mapper(Model,model,properties={
     'machine_type'   : relation(MachineType),
     'creation_date'  : deferred(model.c.creation_date),
     'comments'       : deferred(model.c.comments)})
-
-
-
 
 cpu=Table('cpu', meta,
     Column('id', Integer, Sequence('cpu_id_seq'), primary_key=True),
@@ -250,9 +236,6 @@ class Machine(aqdbBase):
         except Exception,e:
             raise Exception(e)
 
-#        from shell import ipshell
-#        ipshell()
-        #assert(specs)
         if specs:
             self.cpu_id       = specs['cpu_id']
             self.cpu_quantity = specs['cpu_quantity']

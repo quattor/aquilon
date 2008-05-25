@@ -23,35 +23,30 @@ from aquilon import const
 from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint, Index
 from sqlalchemy.orm.collections import attribute_mapped_collection
 
-from location import Location,Chassis
-from hardware import Machine
+from interfaceType import InterfaceType, interface_type
+from location import Location, location,Chassis, chassis
+from hardware import Machine, machine
+from configuration import CfgPath, cfg_path
 from aquilon.exceptions_ import ArgumentError
-
-
-location=Table('location', meta, autoload=True)
-chassis=Table('chassis', meta, autoload=True)
-cfg_path=Table('cfg_path', meta, autoload=True)
-machine=Table('machine', meta, autoload=True)
 
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
-interface_type=mk_type_table('interface_type',meta)
-interface_type.create(checkfirst=True)
 
-class InterfaceType(aqdbType):
-    """ AQDB will support different types of interfaces besides just the usual
-        physical type. Other kinds in the environment include zebra, service,
-        heartbeat, router, mgmt/ipmi, vlan/802.1q, build. At the moment we;re
-        only implementing physical, with zebra and 802.1Q likely to be next"""
-    pass
 
-mapper(InterfaceType, interface_type, properties={
-    'creation_date':deferred(interface_type.c.creation_date),
-    'comments': deferred(interface_type.c.comments)})
-if empty(interface_type):
-    fill_type_table(interface_type,['physical','zebra','service','802.1q',
-            'base_interface_type'])
+#class InterfaceType(aqdbType):
+#    """ AQDB will support different types of interfaces besides just the usual
+#        physical type. Other kinds in the environment include zebra, service,
+#        heartbeat, router, mgmt/ipmi, vlan/802.1q, build. At the moment we;re
+#        only implementing physical, with zebra and 802.1Q likely to be next"""
+#    pass
+
+#mapper(InterfaceType, interface_type, properties={
+#    'creation_date':deferred(interface_type.c.creation_date),
+#    'comments': deferred(interface_type.c.comments)})
+#if empty(interface_type):
+#    fill_type_table(interface_type,['physical','zebra','service','802.1q',
+#            'base_interface_type'])
 
 interface = Table('interface',meta,
     Column('id', Integer, Sequence('interface_id_seq'), primary_key=True),
@@ -89,7 +84,6 @@ physical_interface=Table('physical_interface', meta,
     Column('name',String(32), nullable=False), #like e0, hme1, etc.
     Column('mac', String(32), nullable=False),
     Column('boot', Boolean, default=False),
-    #creation/comments supplied by Super (Interface)
     UniqueConstraint('mac',name='mac_addr_uk'),
     UniqueConstraint('machine_id','name',name='phy_iface_uk'))
 Index('idx_phys_int_machine_id', physical_interface.c.machine_id)
@@ -117,20 +111,9 @@ mapper(PhysicalInterface, physical_interface,
        inherits=Interface, polymorphic_identity=engine.execute(
            "select id from interface_type where type='physical'").\
             fetchone()[0], properties={
-    'machine':      relation(Machine,backref='interfaces'),
-    'interface':    relation(Interface,lazy=False,backref='physical')})
+        #TODO: do we need delete-orphan on this as well?
+    'machine'   : relation(Machine, cascade='all', backref='interfaces' ),
+    'interface' : relation(Interface, lazy=False, backref='physical')})
     #collection_clas=attribute_mapped_collection('name'))})
-######PUT CASCADED DELETES IN FOR WES
-
-def populate_physical():
-    if empty(physical_interface):
-        m=Session.query(Machine).first()
-        try:
-            pi=PhysicalInterface('e0','00:ae:0f:11:bb:cc',m)
-        except Exception,e:
-            print e
-
-        Session.save(pi)
-        Session.commit()
 
 #if __name__ == '__main__':

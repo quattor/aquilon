@@ -19,13 +19,13 @@ time ./location.py
 echo
 time ./network.py
 echo
-time ./roles.py
-echo
 time ./auth.py
 echo
 time ./configuration.py
 echo
 time ./hardware.py
+echo
+time ./interfaceType.py
 echo
 time ./interface.py
 echo
