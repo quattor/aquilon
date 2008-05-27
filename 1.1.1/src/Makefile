@@ -109,8 +109,8 @@ thaw:
 
 .PHONY: create
 create:
-	vms create release ${META} ${PROJ} ${REL} -- -noinstall -nobuildvolume
+	vms create release ${META} ${PROJ} ${REL} -- -nobuildvolume
 	vms create install ${META} ${PROJ} ${REL} common
 
 .PHONY: upd-dist
-upd-dist: unlock update install distworld 
+upd-dist: unlock update install distworld
