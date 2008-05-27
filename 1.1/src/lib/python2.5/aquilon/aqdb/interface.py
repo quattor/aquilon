@@ -33,21 +33,6 @@ from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
 
-
-#class InterfaceType(aqdbType):
-#    """ AQDB will support different types of interfaces besides just the usual
-#        physical type. Other kinds in the environment include zebra, service,
-#        heartbeat, router, mgmt/ipmi, vlan/802.1q, build. At the moment we;re
-#        only implementing physical, with zebra and 802.1Q likely to be next"""
-#    pass
-
-#mapper(InterfaceType, interface_type, properties={
-#    'creation_date':deferred(interface_type.c.creation_date),
-#    'comments': deferred(interface_type.c.comments)})
-#if empty(interface_type):
-#    fill_type_table(interface_type,['physical','zebra','service','802.1q',
-#            'base_interface_type'])
-
 interface = Table('interface',meta,
     Column('id', Integer, Sequence('interface_id_seq'), primary_key=True),
     Column('interface_type_id', Integer,
@@ -111,8 +96,7 @@ mapper(PhysicalInterface, physical_interface,
        inherits=Interface, polymorphic_identity=engine.execute(
            "select id from interface_type where type='physical'").\
             fetchone()[0], properties={
-        #TODO: do we need delete-orphan on this as well?
-    'machine'   : relation(Machine, cascade='all', backref='interfaces' ),
+    'machine'   : relation(Machine, backref='interfaces' ),
     'interface' : relation(Interface, lazy=False, backref='physical')})
     #collection_clas=attribute_mapped_collection('name'))})
 
