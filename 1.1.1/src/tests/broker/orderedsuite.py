@@ -27,6 +27,7 @@ if __name__ == "__main__":
 
 from test_start import TestBrokerStart
 from test_status import TestStatus
+from test_permission import TestPermission
 from test_add_domain import TestAddDomain
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
@@ -71,7 +72,7 @@ class BrokerTestSuite(unittest.TestSuite):
 
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
-        for test in [TestBrokerStart, TestStatus,
+        for test in [TestBrokerStart, TestStatus, TestPermission,
                 TestAddDomain, TestAddService, TestAddRequiredService,
                 TestAddRack, TestAddChassis, TestAddMachine, TestAddDisk,
                 TestAddInterface, TestAddHost,

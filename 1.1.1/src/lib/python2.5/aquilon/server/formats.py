@@ -257,8 +257,9 @@ class Formatter(object):
     def elaborate_raw_userprincipal(self, userprincipal, indent=""):
         details = [indent + "UserPrincipal: %s [role: %s]" % 
                 (userprincipal, userprincipal.role.name)]
-        if userprincipal.comments:
-            details.append(indent + "  Comments: %s" % userprincipal.comments)
+        # FIXME: Waiting for aqdb fix.
+        #if userprincipal.comments:
+        #    details.append(indent + "  Comments: %s" % userprincipal.comments)
         return "\n".join(details)
 
     def elaborate_raw_service(self, service, indent=""):

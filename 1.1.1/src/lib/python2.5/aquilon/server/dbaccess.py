@@ -434,13 +434,13 @@ class DatabaseBroker(AccessBroker):
         if not dbrealm:
             dbrealm = Realm(name=realm)
             self.session.save(dbrealm)
-            dbuser = UserPrincipal(user, realm=dbrealm)
+            dbuser = UserPrincipal(name=user, realm=dbrealm)
             self.session.save(dbuser)
             return dbuser
         dbuser = self.session.query(UserPrincipal).filter_by(
                 name=user.strip().lower(), realm=dbrealm).first()
         if not dbuser:
-            dbuser = UserPrincipal(user, realm=dbrealm)
+            dbuser = UserPrincipal(name=user, realm=dbrealm)
             self.session.save(dbuser)
             # Since we rely on the role being set by default, this forces
             # the role information to be loaded into the new object.
@@ -1158,7 +1158,7 @@ class DatabaseBroker(AccessBroker):
             if not createuser and not createrealm:
                 raise ArgumentError("Could not find principal '%s' to permission, use --createuser to create a new record for the principal."
                         % principal)
-            dbuser = UserPrincipal(user, realm=dbrealm)
+            dbuser = UserPrincipal(name=user, realm=dbrealm)
             self.session.save(dbuser)
         # FIXME: Might want to force that at least one user retains aqd_admin
         # rights after this process.

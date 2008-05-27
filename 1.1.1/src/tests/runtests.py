@@ -67,6 +67,17 @@ for dir in dirs:
     except OSError, e:
         print >>sys.stderr, "Could not create %s: %s" % (dir, e)
 
+# The template-king also gets synced as part of the broker tests,
+# but this makes it available for the initial database build.
+p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+    "quattorsrv:/var/quattor/template-king",
+    # Minor hack... ignores config kingdir...
+    config.get("broker", "quattordir")),
+    stdout=1, stderr=2)
+rc = p.wait()
+# FIXME: check rc
+
+# The swrep/repository is currently *only* synced here at the top level.
 p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
     "quattorsrv:/var/quattor/swrep/repository",
     config.get("broker", "swrepdir")),
