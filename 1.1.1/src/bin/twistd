@@ -1,0 +1,20 @@
+#!/ms/dist/python/PROJ/core/2.5/bin/python
+
+# Twisted, the Framework of Your Internet
+# Copyright (c) 2001-2004 Twisted Matrix Laboratories.
+# See LICENSE for details.
+
+# This is an (almost) completely new version of the script under
+# /ms/dist/python/PROJ/twisted/2.5.0-py25/bin/twisted
+# hacked to understand the MS layout.
+
+import sys, os
+sys.path.append( os.path.join(
+                    os.path.dirname( os.path.realpath(sys.argv[0]) ),
+                    "..", "lib", "python2.5" ) )
+
+import aquilon.server.depends
+import aquilon.aqdb.depends
+
+from twisted.scripts.twistd import run
+run()

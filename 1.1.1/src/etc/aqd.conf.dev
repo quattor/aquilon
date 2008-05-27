@@ -1,0 +1,11 @@
+# This should work "out of the box" for development purposes.
+[DEFAULT]
+basedir = /var/tmp/%(user)s
+[database]
+dbdir = %(basedir)s/aquilondb
+dblogfile = %(dbdir)s/aqdb.log
+[broker]
+quattordir = %(basedir)s/quattor
+#knc = /ms/dev/kerberos/knc/1.4/install/exec/bin/knc
+[unittest]
+scratchdir = %(basedir)s/scratch
