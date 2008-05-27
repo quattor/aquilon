@@ -381,7 +381,7 @@ class Broker(object):
     def del_machine(self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "delete", request_path)
-        d = d.addCallback(self.dbbroker.verify_machine, session=True,
+        d = d.addCallback(self.dbbroker.verify_del_machine, session=True,
                 user=user, **arguments)
         d = d.addCallback(self.template_creator.remove_plenary, user=user,
                 plenarydir=self.plenarydir, **arguments)

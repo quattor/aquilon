@@ -108,6 +108,18 @@ class TestBrokerCommand(unittest.TestCase):
                 % (command, out))
         return
 
+    def internalerrortest(self, command, **kwargs):
+        p = self.runcommand(command, **kwargs)
+        (out, err) = p.communicate()
+        self.assertEqual(err, "",
+                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                % (command, err))
+        self.assertEqual(p.returncode, 5)
+        self.assertEqual(out.find("Internal Server Error"), 0,
+                "STDOUT for %s did not start with Internal Server Error:\n@@@\n'%s'\n@@@\n"
+                % (command, out))
+        return out
+
     def matchoutput(self, out, s, command):
         self.assert_(out.find(s) >= 0, 
                 "STDOUT for %s did not include '%s':\n@@@\n'%s'\n@@@\n"

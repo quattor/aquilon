@@ -32,6 +32,15 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: afs Instance: q.ny.ms.com", command)
 
+    def testdelextraafsinstance(self):
+        command = "del service --service afs --instance q.ln.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelextraafsinstance(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: afs Instance: q.ln.ms.com", command)
+
     def testdelbootserverinstance(self):
         command = "del service --service bootserver --instance np.test"
         self.noouttest(command.split(" "))

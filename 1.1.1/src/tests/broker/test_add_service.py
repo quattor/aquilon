@@ -32,6 +32,15 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
 
+    def testaddextraafsinstance(self):
+        command = "add service --service afs --instance q.ln.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddextraafsinstance(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
+
     def testaddbootserverinstance(self):
         command = "add service --service bootserver --instance np.test"
         self.noouttest(command.split(" "))

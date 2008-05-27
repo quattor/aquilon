@@ -40,9 +40,14 @@ from test_add_host import TestAddHost
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_make_aquilon import TestMakeAquilon
+from test_unbind_client import TestUnbindClient
+from test_rebind_client import TestRebindClient
+from test_reconfigure import TestReconfigure
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_show_hostiplist import TestShowHostIPList
+from test_pxeswitch import TestPxeswitch
+from test_manage import TestManage
 from test_get_domain import TestGetDomain
 from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
@@ -77,8 +82,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddRack, TestAddChassis, TestAddMachine, TestAddDisk,
                 TestAddInterface, TestAddHost,
                 TestMapService, TestBindClient, TestMakeAquilon,
+                TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestDomainConstraints, TestMachineConstraints,
-                TestShowHostIPList,
+                TestShowHostIPList, TestPxeswitch, TestManage,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestUnmapService,
                 TestDelHost, TestDelInterface, TestDelMachine, TestDelChassis,

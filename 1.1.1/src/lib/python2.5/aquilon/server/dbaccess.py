@@ -715,6 +715,15 @@ class DatabaseBroker(AccessBroker):
         return printprep(dbmachine)
 
     @transact
+    def verify_del_machine(self, result, machine, **kwargs):
+        dbmachine = self._get_machine(machine)
+        self.session.refresh(dbmachine)
+        if dbmachine.host:
+            raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
+                    % (dbmachine.name, dbmachine.host.fqdn))
+        return printprep(dbmachine)
+
+    @transact
     def del_machine(self, result, machine, **kwargs):
         try:
             m = self.session.query(Machine).filter_by(name=machine).one()
