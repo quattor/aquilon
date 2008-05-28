@@ -356,8 +356,9 @@ class HostIPList(FormatterList):
 
     def format_csv(self):
         return str("\n".join(
-                [str(",".join([host.fqdn, self.get_host_ip(host)]))
-                    for host in self]))
+                [str(",".join([fqdn, ip]))
+                    for (fqdn, ip) in [(host.fqdn, self.get_host_ip(host))
+                        for host in self] if ip and ip != '0.0.0.0']))
 
     def get_host_ip(self, host):
         for interface in host.machine.interfaces:
