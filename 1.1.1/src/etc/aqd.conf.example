@@ -11,3 +11,4 @@ dblogfile = %(dbdir)s/aqdb.log
 # dsn = oracle://cdb:********@%(server)s
 [broker]
 git_templates_url = http://%(servername)s/templates
+umask = 0022

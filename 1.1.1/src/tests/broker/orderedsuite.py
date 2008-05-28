@@ -52,6 +52,7 @@ from test_get_domain import TestGetDomain
 from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
 from test_sync_domain import TestSyncDomain
+from test_constraints_umask import TestUmaskConstraints
 from test_unmap_service import TestUnmapService
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
@@ -86,6 +87,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDomainConstraints, TestMachineConstraints,
                 TestShowHostIPList, TestPxeswitch, TestManage,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
+                TestUmaskConstraints,
                 TestUnmapService,
                 TestDelHost, TestDelInterface, TestDelMachine, TestDelChassis,
                 TestDelRack, TestDelRequiredService, TestDelService,

@@ -55,6 +55,7 @@ config_defaults = {
             #"quattordir": "%(basedir)s/quattor",
             "quattordir": "%(basedir)s",
             "servername": "%(hostname)s",
+            "umask": "0022",
             "kncport": "6900",
             "openport": "6901",
             "templateport": "%(openport)s",

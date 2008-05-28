@@ -63,6 +63,7 @@ class AQDMaker(object):
 
     def makeService(self, options):
         config = Config(configfile=options["config"])
+
         # Dynamic import means that we can parse config options before
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
@@ -72,6 +73,11 @@ class AQDMaker(object):
 
         restServer = RestServer(config)
         openSite = AnonSite(restServer)
+
+        # twisted is nicely changing the umask for us when the process is
+        # set to daemonize.  This sets it back.
+        restServer.set_umask()
+        reactor.addSystemEventTrigger('after', 'startup', restServer.set_umask)
 
         if options["usesock"]:
             return strports.service("unix:%s/aqdsock:mode=600"

@@ -108,13 +108,12 @@ class ResponsePage(resource.Resource):
         return self.dynamic_child
 
     def render(self, request):
-        """This is just the default implementation from resource.Resource
+        """This is mostly the default implementation from resource.Resource
         that checks for the appropriate method to delegate to.  This can
         be expanded out to do any default/incoming processing...
 
-        One possibility would be for it to simplify request.args to
-        have another value, maybe request.simple_args that decomposed
-        single-element lists back to single variables.
+        For now, the only additions are to have a default handler for 
+        arguments in a PUT request.
 
         """
         if request.method == 'PUT':
@@ -937,4 +936,7 @@ class RestServer(ResponsePage):
                 _logChildren(level+1, container.dynamic_child)
 
         #_logChildren(0, self)
+
+    def set_umask(self):
+        os.umask(int(self.broker.config.get("broker", "umask"), 8))
 
