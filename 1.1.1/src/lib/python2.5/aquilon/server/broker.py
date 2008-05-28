@@ -273,7 +273,7 @@ class Broker(object):
     def status(self, arguments, request_path, user):
         stat = []
         # FIXME: Hard coded version number.
-        stat.append("Aquilon Broker v1.1")
+        stat.append("Aquilon Broker v1.1.1")
         stat.append("Server: %s" % self.localhost)
         stat.append("Database: %s" % self.dbbroker.safe_url)
         d = defer.maybeDeferred(self.azbroker.check, None, user,
