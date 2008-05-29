@@ -179,6 +179,29 @@
       <transport method="put" path="machine/%(machine)s/interface/%(interface)s" />
    </command>
 
+   <command name="update_interface">
+      %prog update interface
+      Update information about the named interface (IP, MAC, or comments).
+
+      To rename the interface, add the new interface and delete the old.
+      If the boot flag is given, the interface will be marked bootable,
+      and any other interface attached to the machine will have the bootable
+      flag set to false.
+
+      For this change to take affect at the host level, run aq reconfigure.
+      <optgroup name="update_interface_opts" mandatory="True" fields="all">
+         <option name="interface" type="string">Interface name</option>
+         <option name="machine" type="string">Machine name</option>
+      </optgroup>
+      <optgroup name="update_interface_optional" mandatory="False" fields="none">
+         <option name="mac" type="string">MAC address</option>
+         <option name="ip" type="string">IP address</option>
+         <option name="boot" type="boolean">Mark the interface as bootable</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="machine/%(machine)s/interface/%(interface)s" />
+   </command>
+
    <command name="del_interface">
       %prog del interface
       Delete a network interface from the database

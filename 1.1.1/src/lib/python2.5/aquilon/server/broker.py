@@ -399,6 +399,19 @@ class Broker(object):
         d = d.addCallback(self.template_creator.generate_plenary, user=user,
                 plenarydir=self.plenarydir, localhost=self.localhost,
                 **arguments)
+        return d 
+# --------------------------------------------------------------------------- #
+
+    def update_interface (self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "update", request_path)
+        d = d.addCallback(self.dbbroker.update_interface, session=True,
+                user=user, **arguments)
+        # FIXME: There needs to be a call to dsdb here *if* the machine
+        # has a corresponding host object.
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
         return d
 
 # --------------------------------------------------------------------------- #

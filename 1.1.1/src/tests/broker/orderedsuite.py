@@ -46,6 +46,7 @@ from test_reconfigure import TestReconfigure
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_show_hostiplist import TestShowHostIPList
+from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_get_domain import TestGetDomain
@@ -85,7 +86,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMapService, TestBindClient, TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestDomainConstraints, TestMachineConstraints,
-                TestShowHostIPList, TestPxeswitch, TestManage,
+                TestShowHostIPList,
+                TestUpdateInterface,
+                TestPxeswitch, TestManage,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestUmaskConstraints,
                 TestUnmapService,

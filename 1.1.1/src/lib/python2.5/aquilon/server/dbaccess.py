@@ -755,6 +755,8 @@ class DatabaseBroker(AccessBroker):
         extra = {}
         if kwargs['interface'] == 'eth0':
             extra["boot"] = True
+        if kwargs.has_key("comments"):
+            extra["comments"] = kwargs["comments"]
         i = PhysicalInterface(kwargs['interface'], kwargs['mac'], m, ip=ip_addr,
                 **extra)
         self.session.save(i)
@@ -779,6 +781,30 @@ class DatabaseBroker(AccessBroker):
         except InvalidRequestError, e:
             raise ArgumentError("Could not locate the interface, make sure it has been specified uniquely: " + str(e))
         return dbinterface
+
+    @transact
+    def update_interface(self, result, interface, machine, mac, ip, boot,
+            comments, **kwargs):
+        # This command expects to locate an interface based only on name
+        # and machine - all other fields, if specified, are meant as updates.
+        dbinterface = self._find_interface(interface, machine, None, None)
+        self.session.refresh(dbinterface.machine)
+        if mac:
+            dbinterface.mac = mac
+        if ip:
+            dbinterface.ip = ip
+        if comments:
+            dbinterface.comments = comments
+        if boot:
+            for i in dbinterface.machine.interfaces:
+                if i == dbinterface:
+                    i.boot = True
+                else:
+                    i.boot = False
+        self.session.update(dbinterface)
+        # Hack to make sure machine is accessible...
+        printprep(dbinterface.machine)
+        return printprep(dbinterface)
 
     @transact
     def del_interface(self, result, interface, machine, mac, ip, **kwargs):

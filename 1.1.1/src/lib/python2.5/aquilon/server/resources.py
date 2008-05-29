@@ -787,8 +787,16 @@ class ResponsePage(resource.Resource):
 
     def command_add_interface (self, request):
         d = self.check_arguments(request, ["interface", "machine", "mac"],
-                ['ip'])
+                ["ip", "comments"])
         d = d.addCallback(self.broker.add_interface,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_update_interface (self, request):
+        d = self.check_arguments(request, ["interface", "machine"],
+                ["mac", "ip", "comments", "boot"])
+        d = d.addCallback(self.broker.update_interface,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)
