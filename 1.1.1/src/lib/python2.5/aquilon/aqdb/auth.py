@@ -113,7 +113,9 @@ if __name__ == '__main__':
     unixeng = ['cesarg','jasona', 'dankb','tonyc','goliaa','samsh','hagberg',
                'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert','af',
                'lillied']
-    operations = ['nathand','premdasr','bestc','chawlav','wbarnes']
+    operations = ['nathand', 'premdasr', 'bestc', 'chawlav', 'wbarnes',
+                  'gleasob', 'lchun', 'peteryip',
+                  'richmoj', 'tipping', 'hardyb', 'martinva']
 
     if empty(user_principal):
         r=s.query(Realm).first()
