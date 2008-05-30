@@ -29,6 +29,12 @@ class TestShowHostIPList(TestBrokerCommand):
         self.matchoutput(out, "aquilon02.one-nyp.ms.com,172.31.73.14", command)
         self.matchoutput(out, "aquilon00.one-nyp.ms.com,172.31.64.199", command)
 
+    def testshowhostiplistarchetype(self):
+        command = "show hostiplist --archetype aquilon"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "aquilon02.one-nyp.ms.com,172.31.73.14", command)
+        self.matchoutput(out, "aquilon00.one-nyp.ms.com,172.31.64.199", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowHostIPList)

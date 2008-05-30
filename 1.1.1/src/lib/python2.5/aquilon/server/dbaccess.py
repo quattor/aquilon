@@ -23,6 +23,7 @@ import exceptions
 from sasync.database import AccessBroker, transact
 from sqlalchemy.exceptions import InvalidRequestError
 from sqlalchemy import and_, or_
+from sqlalchemy.sql import text
 from twisted.internet import defer
 from twisted.python import log
 from twisted.python.failure import Failure
@@ -185,12 +186,29 @@ class DatabaseBroker(AccessBroker):
 
     @transact
     def show_hostiplist(self, result, archetype, **kwargs):
-        hosts = formats.HostIPList()
-        q = self.session.query(Host)
         if archetype:
-            q = q.join('archetype').filter_by(name=archetype)
-        hosts.extend(q.all())
-        return printprep(hosts)
+            dbarchetype = self._get_archetype(archetype)
+        hosts = formats.HostIPList()
+        conn = self.session.connection()
+        query_text = """
+                SELECT system.name || '.' || dns_domain.name as host_name,
+                    interface.ip as interface_ip
+                FROM host
+                JOIN system ON (host.id = system.id)
+                JOIN dns_domain ON (dns_domain.id = system.dns_domain_id)
+                JOIN machine ON (host.machine_id = machine.id)
+                JOIN physical_interface ON
+                    (machine.id = physical_interface.machine_id)
+                JOIN interface ON
+                        (interface.id = physical_interface.interface_id)
+                WHERE interface.ip IS NOT NULL
+                    AND NOT (interface.ip = '0.0.0.0')"""
+        if archetype:
+            query_text = query_text + """
+                    AND host.archetype_id = %d""" % dbarchetype.id
+        s = text(query_text)
+        hosts.extend(conn.execute(s).fetchall())
+        return hosts
 
     @transact
     def verify_host(self, result, hostname, **kwargs):

@@ -346,25 +346,13 @@ class FormatterList(list):
         return str("\n".join([str(item) for item in self]))
 
 
-# By convention, holds Host objects.
+# By convention, holds tuples of host_name, interface_ip
 class HostIPList(FormatterList):
     def printprep(self):
-        for host in self:
-            str(host.fqdn)
-            self.get_host_ip(host)
         return self
 
     def format_csv(self):
-        return str("\n".join(
-                [str(",".join([fqdn, ip]))
-                    for (fqdn, ip) in [(host.fqdn, self.get_host_ip(host))
-                        for host in self] if ip and ip != '0.0.0.0']))
-
-    def get_host_ip(self, host):
-        for interface in host.machine.interfaces:
-            if interface.boot:
-                return str(interface.ip)
-        return ""
+        return str("\n".join([str(",".join(entry)) for entry in self]))
 
 
 # By convention, holds Host objects.
