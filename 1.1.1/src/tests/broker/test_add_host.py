@@ -23,30 +23,30 @@ from brokertest import TestBrokerCommand
 
 class TestAddHost(TestBrokerCommand):
 
-    def testaddaquilon02(self):
-        self.noouttest(["add", "host", "--hostname", "aquilon02.one-nyp.ms.com",
-            "--machine", "np3c5n10", "--domain", "unittest",
+    def testaddunittest02(self):
+        self.noouttest(["add", "host", "--hostname", "unittest02.one-nyp.ms.com",
+            "--machine", "ut3c5n10", "--domain", "unittest",
             "--status", "prod", "--archetype", "aquilon"])
 
-    def testverifyaddaquilon02(self):
-        command = "show host --hostname aquilon02.one-nyp.ms.com"
+    def testverifyaddunittest02(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: aquilon02.one-nyp.ms.com", command)
-        self.matchoutput(out, "Machine: np3c5n10", command)
+        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Status: prod", command)
 
-    def testaddaquilon00(self):
-        self.noouttest(["add", "host", "--hostname", "aquilon00.one-nyp.ms.com",
-            "--machine", "np3c1n3", "--domain", "unittest",
+    def testaddunittest00(self):
+        self.noouttest(["add", "host", "--hostname", "unittest00.one-nyp.ms.com",
+            "--machine", "ut3c1n3", "--domain", "unittest",
             "--status", "prod", "--archetype", "aquilon"])
 
-    def testverifyaddaquilon02(self):
-        command = "show host --hostname aquilon00.one-nyp.ms.com"
+    def testverifyaddunittest02(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: aquilon00.one-nyp.ms.com", command)
-        self.matchoutput(out, "Machine: np3c1n3", command)
+        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Status: prod", command)

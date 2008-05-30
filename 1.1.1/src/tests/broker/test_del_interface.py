@@ -23,33 +23,33 @@ from brokertest import TestBrokerCommand
 
 class TestDelInterface(TestBrokerCommand):
 
-    # Not testing del interface for np3c5n10... testing that those
+    # Not testing del interface for ut3c5n10... testing that those
     # interfaces are removed automatically when the machine is removed.
 
     # FIXME: Need a test for deleting by IP.
-    def testdelnp3c1n3eth0(self):
+    def testdelut3c1n3eth0(self):
         self.noouttest(["del", "interface", "--interface", "eth0",
-            "--machine", "np3c1n3"])
+            "--machine", "ut3c1n3"])
 
-    def testdelnp3c1n3eth1(self):
-        self.noouttest(["del", "interface", "--mac", "00:11:25:4a:1a:35"])
+    def testdelut3c1n3eth1(self):
+        self.noouttest(["del", "interface", "--mac", "11:11:11:11:11:35"])
 
-    def testverifydelnp3c1n3interfaces(self):
-        command = "show machine --machine np3c1n3"
+    def testverifydelut3c1n3interfaces(self):
+        command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Interface: eth", command)
 
-    def testverifycatnp3c1n3interfaces(self):
-        command = "cat --machine np3c1n3"
+    def testverifycatut3c1n3interfaces(self):
+        command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out,
-                """"cards/nic/eth0/hwdelr" = "00:11:25:4A:1A:34";""",
+                """"cards/nic/eth0/hwdelr" = "11:11:11:11:11:34";""",
                 command)
         self.matchclean(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchclean(out,
-                """"cards/nic/eth1/hwdelr" = "00:11:25:4A:1A:35";""",
+                """"cards/nic/eth1/hwdelr" = "11:11:11:11:11:35";""",
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",

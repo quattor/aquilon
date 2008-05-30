@@ -23,31 +23,31 @@ from brokertest import TestBrokerCommand
 
 class TestUpdateInterface(TestBrokerCommand):
 
-    def testupdatenp3c5n10eth0mac(self):
+    def testupdateut3c5n10eth0mac(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
-            "--machine", "np3c5n10", "--mac", "00:00:00:00:00:4E"])
+            "--machine", "ut3c5n10", "--mac", "00:00:00:00:00:4E"])
 
-    def testupdatenp3c5n10eth0ip(self):
+    def testupdateut3c5n10eth0ip(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
-            "--machine", "np3c5n10", "--ip", "8.8.8.14"])
+            "--machine", "ut3c5n10", "--ip", "8.8.5.14"])
 
-    def testupdatenp3c5n10eth1(self):
+    def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
-            "--machine", "np3c5n10", "--mac", "00:00:00:00:00:50",
-            "--ip", "8.8.8.15", "--boot"])
+            "--machine", "ut3c5n10", "--mac", "00:00:00:00:00:50",
+            "--ip", "8.8.5.15", "--boot"])
 
-    def testupdatenp3c5n10eth2(self):
+    def testupdateut3c5n10eth2(self):
         self.badrequesttest(["update", "interface", "--interface", "eth2",
-            "--machine", "np3c5n10", "--boot"])
+            "--machine", "ut3c5n10", "--boot"])
 
-    def testverifyupdatenp3c5n10interfaces(self):
-        command = "show machine --machine np3c5n10"
+    def testverifyupdateut3c5n10interfaces(self):
+        command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 00:00:00:00:00:4E 8.8.8.14 boot=False", command)
-        self.matchoutput(out, "Interface: eth1 00:00:00:00:00:50 8.8.8.15 boot=True", command)
+        self.matchoutput(out, "Interface: eth0 00:00:00:00:00:4E 8.8.5.14 boot=False", command)
+        self.matchoutput(out, "Interface: eth1 00:00:00:00:00:50 8.8.5.15 boot=True", command)
 
-    def testverifycatnp3c5n10interfaces(self):
-        command = "cat --machine np3c5n10"
+    def testverifycatut3c5n10interfaces(self):
+        command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 """"cards/nic/eth0/hwaddr" = "00:00:00:00:00:4E";""",

@@ -24,13 +24,13 @@ from brokertest import TestBrokerCommand
 class TestMachineConstraints(TestBrokerCommand):
 
     def testdelmachinewithhost(self):
-        command = "del machine --machine np3c5n10"
+        command = "del machine --machine ut3c5n10"
         self.badrequesttest(command.split(" "))
 
     def testverifydelmachinewithhostfailed(self):
-        command = "show machine --machine np3c5n10"
+        command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: np3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
 
 
 if __name__=='__main__':

@@ -25,11 +25,11 @@ class TestUnbindClient(TestBrokerCommand):
 
     def testunbinddns(self):
         self.noouttest(["unbind", "client",
-            "--hostname", "aquilon02.one-nyp.ms.com",
+            "--hostname", "unittest02.one-nyp.ms.com",
             "--service", "dns"])
 
     def testverifyunbinddns(self):
-        command = "show host --hostname aquilon02.one-nyp.ms.com"
+        command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Template: service/dns/nyinfratest", command)
 

@@ -23,24 +23,24 @@ from brokertest import TestBrokerCommand
 
 class TestAddMachine(TestBrokerCommand):
 
-    def testaddnp3c5n10(self):
-        self.noouttest(["add", "machine", "--machine", "np3c5n10",
-            "--chassis", "np3c5", "--model", "hs21", "--cpucount", "2",
+    def testaddut3c5n10(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c5n10",
+            "--chassis", "ut3c5", "--model", "hs21", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "99C5553"])
 
-    def testverifyaddnp3c5n10(self):
-        command = "show machine --machine np3c5n10"
+    def testverifyaddut3c5n10(self):
+        command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: np3c5n10", command)
-        self.matchoutput(out, "Chassis: np3c5", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Chassis: ut3c5", command)
         self.matchoutput(out, "Model: ibm hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
 
-    def testverifycatnp3c5n10(self):
-        command = "cat --machine np3c5n10"
+    def testverifycatut3c5n10(self):
+        command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
             """"location" = "np.ny.na";""",
@@ -64,24 +64,24 @@ class TestAddMachine(TestBrokerCommand):
             command)
 
     # FIXME: Turn this into a test for model defaults...
-    def testaddnp3c1n3(self):
-        self.noouttest(["add", "machine", "--machine", "np3c1n3",
-            "--chassis", "np3c1", "--model", "hs21", "--cpucount", "2",
+    def testaddut3c1n3(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c1n3",
+            "--chassis", "ut3c1", "--model", "hs21", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "KPDZ406"])
 
-    def testverifyaddnp3c1n3(self):
-        command = "show machine --machine np3c1n3"
+    def testverifyaddut3c1n3(self):
+        command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: np3c1n3", command)
-        self.matchoutput(out, "Chassis: np3c1", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
         self.matchoutput(out, "Model: ibm hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ406", command)
 
-    def testverifycatnp3c1n3(self):
-        command = "cat --machine np3c1n3"
+    def testverifycatut3c1n3(self):
+        command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
             """"location" = "np.ny.na";""",

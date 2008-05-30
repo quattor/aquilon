@@ -27,18 +27,18 @@ class TestReconfigure(TestBrokerCommand):
     # it should now be set again.
     # The rebind test has changed the service bindings for afs,
     # it should now be set to q.ln.ms.com.
-    def testreconfigureaquilon02(self):
+    def testreconfigureunittest02(self):
         self.noouttest(["reconfigure",
-            "--hostname", "aquilon02.one-nyp.ms.com"])
+            "--hostname", "unittest02.one-nyp.ms.com"])
 
-    def testverifycataquilon02(self):
-        command = "cat --hostname aquilon02.one-nyp.ms.com"
+    def testverifycatunittest02(self):
+        command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"/hardware" = create("machine/americas/np/np3/np3c5n10");""",
+            """"/hardware" = create("machine/americas/np/ut3/ut3c5n10");""",
             command)
         self.matchoutput(out,
-            """"/system/network/interfaces/eth0" = nlist("ip", "172.31.73.14", "netmask", "255.255.255.128", "broadcast", "172.31.73.127", "gateway", "172.31.73.1", "bootproto", "dhcp");""",
+            """"/system/network/interfaces/eth0" = nlist("ip", "8.8.8.14", "netmask", "255.255.255.128", "broadcast", "8.8.8.127", "gateway", "8.8.8.1", "bootproto", "dhcp");""",
             command)
         self.matchoutput(out,
             """include { "archetype/base" };""",
@@ -66,18 +66,18 @@ class TestReconfigure(TestBrokerCommand):
             command)
 
     # These settings have not changed - the command should still succeed.
-    def testreconfigureaquilon00(self):
+    def testreconfigureunittest00(self):
         self.noouttest(["reconfigure",
-            "--hostname", "aquilon00.one-nyp.ms.com"])
+            "--hostname", "unittest00.one-nyp.ms.com"])
 
-    def testverifycataquilon00(self):
-        command = "cat --hostname aquilon00.one-nyp.ms.com"
+    def testverifycatunittest00(self):
+        command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"/hardware" = create("machine/americas/np/np3/np3c1n3");""",
+            """"/hardware" = create("machine/americas/np/ut3/ut3c1n3");""",
             command)
         self.matchoutput(out,
-            """"/system/network/interfaces/eth0" = nlist("ip", "172.31.64.199", "netmask", "255.255.255.128", "broadcast", "172.31.64.255", "gateway", "172.31.64.129", "bootproto", "dhcp");""",
+            """"/system/network/interfaces/eth0" = nlist("ip", "8.8.8.199", "netmask", "255.255.255.128", "broadcast", "8.8.8.255", "gateway", "8.8.8.129", "bootproto", "dhcp");""",
             command)
         self.matchoutput(out,
             """include { "archetype/base" };""",

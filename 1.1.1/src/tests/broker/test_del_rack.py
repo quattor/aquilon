@@ -23,12 +23,12 @@ from brokertest import TestBrokerCommand
 
 class TestDelRack(TestBrokerCommand):
 
-    def testdelnp3(self):
-        command = "del rack --name np3"
+    def testdelut3(self):
+        command = "del rack --name ut3"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp3(self):
-        command = "show rack --name np3"
+    def testverifydelut3(self):
+        command = "show rack --name ut3"
         self.notfoundtest(command.split(" "))
 
 

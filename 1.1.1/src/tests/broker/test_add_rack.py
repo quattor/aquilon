@@ -23,14 +23,14 @@ from brokertest import TestBrokerCommand
 
 class TestAddRack(TestBrokerCommand):
 
-    def testaddnp3(self):
-        command = "add rack --name np3 --building np"
+    def testaddut3(self):
+        command = "add rack --name ut3 --building np"
         self.noouttest(command.split(" "))
 
-    def testverifyaddnp3(self):
-        command = "show rack --name np3"
+    def testverifyaddut3(self):
+        command = "show rack --name ut3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rack: np3", command)
+        self.matchoutput(out, "Rack: ut3", command)
 
 
 if __name__=='__main__':

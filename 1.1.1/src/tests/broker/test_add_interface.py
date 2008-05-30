@@ -23,63 +23,63 @@ from brokertest import TestBrokerCommand
 
 class TestAddInterface(TestBrokerCommand):
 
-    def testaddnp3c5n10eth0(self):
+    def testaddut3c5n10eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
-            "--machine", "np3c5n10", "--mac", "00:14:5E:D7:7F:4E",
-            "--ip", "172.31.73.14"])
+            "--machine", "ut3c5n10", "--mac", "11:11:11:11:11:4E",
+            "--ip", "8.8.8.14"])
 
-    def testaddnp3c5n10eth1(self):
+    def testaddut3c5n10eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
-            "--machine", "np3c5n10", "--mac", "00:14:5E:D7:7F:50"])
+            "--machine", "ut3c5n10", "--mac", "11:11:11:11:11:50"])
 
-    def testverifyaddnp3c5n10interfaces(self):
-        command = "show machine --machine np3c5n10"
+    def testverifyaddut3c5n10interfaces(self):
+        command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 00:14:5e:d7:7f:4e 172.31.73.14 boot=True", command)
-        self.matchoutput(out, "Interface: eth1 00:14:5e:d7:7f:50 0.0.0.0 boot=False", command)
+        self.matchoutput(out, "Interface: eth0 11:11:11:11:11:4e 8.8.8.14 boot=True", command)
+        self.matchoutput(out, "Interface: eth1 11:11:11:11:11:50 0.0.0.0 boot=False", command)
 
-    def testverifycatnp3c5n10interfaces(self):
-        command = "cat --machine np3c5n10"
+    def testverifycatut3c5n10interfaces(self):
+        command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                """"cards/nic/eth0/hwaddr" = "00:14:5E:D7:7F:4E";""",
+                """"cards/nic/eth0/hwaddr" = "11:11:11:11:11:4E";""",
                 command)
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchoutput(out,
-                """"cards/nic/eth1/hwaddr" = "00:14:5E:D7:7F:50";""",
+                """"cards/nic/eth1/hwaddr" = "11:11:11:11:11:50";""",
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",
                 command)
 
-    def testaddnp3c1n3eth0(self):
+    def testaddut3c1n3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
-            "--machine", "np3c1n3", "--mac", "00:11:25:4a:1a:34",
-            "--ip", "172.31.64.199"])
+            "--machine", "ut3c1n3", "--mac", "11:11:11:11:11:34",
+            "--ip", "8.8.8.199"])
 
-    def testaddnp3c1n3eth1(self):
+    def testaddut3c1n3eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
-            "--machine", "np3c1n3", "--mac", "00:11:25:4a:1a:35"])
+            "--machine", "ut3c1n3", "--mac", "11:11:11:11:11:35"])
 
-    def testverifyaddnp3c1n3interfaces(self):
-        command = "show machine --machine np3c1n3"
+    def testverifyaddut3c1n3interfaces(self):
+        command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 00:11:25:4a:1a:34 172.31.64.199 boot=True", command)
-        self.matchoutput(out, "Interface: eth1 00:11:25:4a:1a:35 0.0.0.0 boot=False", command)
+        self.matchoutput(out, "Interface: eth0 11:11:11:11:11:34 8.8.8.199 boot=True", command)
+        self.matchoutput(out, "Interface: eth1 11:11:11:11:11:35 0.0.0.0 boot=False", command)
 
-    def testverifycatnp3c1n3interfaces(self):
-        command = "cat --machine np3c1n3"
+    def testverifycatut3c1n3interfaces(self):
+        command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                """"cards/nic/eth0/hwaddr" = "00:11:25:4A:1A:34";""",
+                """"cards/nic/eth0/hwaddr" = "11:11:11:11:11:34";""",
                 command)
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchoutput(out,
-                """"cards/nic/eth1/hwaddr" = "00:11:25:4A:1A:35";""",
+                """"cards/nic/eth1/hwaddr" = "11:11:11:11:11:35";""",
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",

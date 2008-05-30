@@ -23,20 +23,20 @@ from brokertest import TestBrokerCommand
 
 class TestDelMachine(TestBrokerCommand):
 
-    def testdelnp3c5n10(self):
-        command = "del machine --machine np3c5n10"
+    def testdelut3c5n10(self):
+        command = "del machine --machine ut3c5n10"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp3c5n10(self):
-        command = "show machine --machine np3c5n10"
+    def testverifydelut3c5n10(self):
+        command = "show machine --machine ut3c5n10"
         self.notfoundtest(command.split(" "))
 
-    def testdelnp3c1n3(self):
-        command = "del machine --machine np3c1n3"
+    def testdelut3c1n3(self):
+        command = "del machine --machine ut3c1n3"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp3c1n3(self):
-        command = "show machine --machine np3c1n3"
+    def testverifydelut3c1n3(self):
+        command = "show machine --machine ut3c1n3"
         self.notfoundtest(command.split(" "))
 
 

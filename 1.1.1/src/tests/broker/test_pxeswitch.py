@@ -26,13 +26,13 @@ from brokertest import TestBrokerCommand
 
 class TestPxeswitch(TestBrokerCommand):
 
-    def testbootaquilon02(self):
-        command = "pxeswitch --hostname aquilon02.one-nyp.ms.com --boot"
+    def testbootunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --boot"
         out = self.internalerrortest(command.split(" "))
         self.matchoutput(out, "aii-installfe --boot", command)
 
-    def testinstallaquilon02(self):
-        command = "pxeswitch --hostname aquilon02.one-nyp.ms.com --install"
+    def testinstallunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --install"
         out = self.internalerrortest(command.split(" "))
         self.matchoutput(out, "aii-installfe --install", command)
 

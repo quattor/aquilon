@@ -23,20 +23,20 @@ from brokertest import TestBrokerCommand
 
 class TestDelChassis(TestBrokerCommand):
 
-    def testdelnp3c5(self):
-        command = "del chassis --name np3c5"
+    def testdelut3c5(self):
+        command = "del chassis --name ut3c5"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp3c5(self):
-        command = "show chassis --name np3c5"
+    def testverifydelut3c5(self):
+        command = "show chassis --name ut3c5"
         self.notfoundtest(command.split(" "))
 
-    def testdelnp3c1(self):
-        command = "del chassis --name np3c1"
+    def testdelut3c1(self):
+        command = "del chassis --name ut3c1"
         self.noouttest(command.split(" "))
 
-    def testverifydelnp3c1(self):
-        command = "show chassis --name np3c1"
+    def testverifydelut3c1(self):
+        command = "show chassis --name ut3c1"
         self.notfoundtest(command.split(" "))
 
 

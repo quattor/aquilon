@@ -23,20 +23,20 @@ from brokertest import TestBrokerCommand
 
 class TestDelHost(TestBrokerCommand):
 
-    def testdelaquilon02(self):
-        command = "del host --hostname aquilon02.one-nyp.ms.com"
+    def testdelunittest02(self):
+        command = "del host --hostname unittest02.one-nyp.ms.com"
         self.noouttest(command.split(" "))
 
-    def testverifydelaquilon02(self):
-        command = "show host --hostname aquilon02.one-nyp.ms.com"
+    def testverifydelunittest02(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
-    def testdelaquilon00(self):
-        command = "del host --hostname aquilon00.one-nyp.ms.com"
+    def testdelunittest00(self):
+        command = "del host --hostname unittest00.one-nyp.ms.com"
         self.noouttest(command.split(" "))
 
-    def testverifydelaquilon00(self):
-        command = "show host --hostname aquilon00.one-nyp.ms.com"
+    def testverifydelunittest00(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
 

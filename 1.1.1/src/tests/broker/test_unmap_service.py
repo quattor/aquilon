@@ -40,11 +40,11 @@ class TestUnmapService(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testunmapbootserver(self):
-        self.noouttest(["unmap", "service", "--rack", "np3",
+        self.noouttest(["unmap", "service", "--rack", "ut3",
             "--service", "bootserver", "--instance", "np.test"])
 
     def testverifyunmapbootserver(self):
-        command = "show map --service bootserver --instance np.test --rack np3"
+        command = "show map --service bootserver --instance np.test --rack ut3"
         self.notfoundtest(command.split(" "))
 
     def testunmapntp(self):

@@ -23,23 +23,23 @@ from brokertest import TestBrokerCommand
 
 class TestAddChassis(TestBrokerCommand):
 
-    def testaddnp3c5(self):
-        command = "add chassis --name np3c5 --rack np3"
+    def testaddut3c5(self):
+        command = "add chassis --name ut3c5 --rack ut3"
         self.noouttest(command.split(" "))
 
-    def testverifyaddnp3c5(self):
-        command = "show chassis --name np3c5"
+    def testverifyaddut3c5(self):
+        command = "show chassis --name ut3c5"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: np3c5", command)
+        self.matchoutput(out, "Chassis: ut3c5", command)
 
-    def testaddnp3c1(self):
-        command = "add chassis --name np3c1 --rack np3"
+    def testaddut3c1(self):
+        command = "add chassis --name ut3c1 --rack ut3"
         self.noouttest(command.split(" "))
 
-    def testverifyaddnp3c1(self):
-        command = "show chassis --name np3c1"
+    def testverifyaddut3c1(self):
+        command = "show chassis --name ut3c1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: np3c1", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
 if __name__=='__main__':

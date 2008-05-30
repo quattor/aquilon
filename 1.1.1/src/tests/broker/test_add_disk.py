@@ -23,33 +23,33 @@ from brokertest import TestBrokerCommand
 
 class TestAddDisk(TestBrokerCommand):
 
-    def testaddnp3c5n10disk(self):
-        self.noouttest(["add", "disk", "--machine", "np3c5n10",
+    def testaddut3c5n10disk(self):
+        self.noouttest(["add", "disk", "--machine", "ut3c5n10",
             "--type", "scsi", "--capacity", "34"])
 
-    def testverifyaddnp3c5n10disk(self):
-        command = "show machine --machine np3c5n10"
+    def testverifyaddut3c5n10disk(self):
+        command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: 34 GB scsi", command)
 
-    def testverifycatnp3c5n10disk(self):
-        command = "cat --machine np3c5n10"
+    def testverifycatut3c5n10disk(self):
+        command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",
                 command)
 
-    def testaddnp3c1n3disk(self):
-        self.noouttest(["add", "disk", "--machine", "np3c1n3",
+    def testaddut3c1n3disk(self):
+        self.noouttest(["add", "disk", "--machine", "ut3c1n3",
             "--type", "scsi", "--capacity", "34"])
 
-    def testverifyaddnp3c1n3disk(self):
-        command = "show machine --machine np3c1n3"
+    def testverifyaddut3c1n3disk(self):
+        command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: 34 GB scsi", command)
 
-    def testverifycatnp3c1n3disk(self):
-        command = "cat --machine np3c1n3"
+    def testverifycatut3c1n3disk(self):
+        command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",

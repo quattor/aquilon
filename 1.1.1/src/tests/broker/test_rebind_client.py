@@ -25,11 +25,11 @@ class TestRebindClient(TestBrokerCommand):
 
     def testrebindafs(self):
         self.noouttest(["rebind", "client",
-            "--hostname", "aquilon02.one-nyp.ms.com",
+            "--hostname", "unittest02.one-nyp.ms.com",
             "--service", "afs", "--instance", "q.ln.ms.com"])
 
     def testverifyrebindafs(self):
-        command = "show host --hostname aquilon02.one-nyp.ms.com"
+        command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/afs/q.ln.ms.com", command)
 

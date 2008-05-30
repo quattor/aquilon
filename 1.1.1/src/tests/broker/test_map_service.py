@@ -44,14 +44,14 @@ class TestMapService(TestBrokerCommand):
                 "Service: dns Instance: nyinfratest Map: Hub ny", command)
 
     def testmapbootserver(self):
-        self.noouttest(["map", "service", "--rack", "np3",
+        self.noouttest(["map", "service", "--rack", "ut3",
             "--service", "bootserver", "--instance", "np.test"])
 
     def testverifymapbootserver(self):
-        command = "show map --service bootserver --instance np.test --rack np3"
+        command = "show map --service bootserver --instance np.test --rack ut3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                "Service: bootserver Instance: np.test Map: Rack np3", command)
+                "Service: bootserver Instance: np.test Map: Rack ut3", command)
 
     def testmapntp(self):
         self.noouttest(["map", "service", "--city", "ny",

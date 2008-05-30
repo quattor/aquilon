@@ -23,24 +23,24 @@ from brokertest import TestBrokerCommand
 
 class TestManage(TestBrokerCommand):
 
-    def testmanageaquilon02(self):
-        self.noouttest(["manage", "--hostname", "aquilon02.one-nyp.ms.com",
+    def testmanageunittest02(self):
+        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
             "--domain", "changetest1"])
 
-    def testverifymanageaquilon02(self):
-        command = "show host --hostname aquilon02.one-nyp.ms.com"
+    def testverifymanageunittest02(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: aquilon02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Domain: changetest1", command)
 
-    def testmanageaquilon00(self):
-        self.noouttest(["manage", "--hostname", "aquilon00.one-nyp.ms.com",
+    def testmanageunittest00(self):
+        self.noouttest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
             "--domain", "changetest2"])
 
-    def testverifymanageaquilon00(self):
-        command = "show host --hostname aquilon00.one-nyp.ms.com"
+    def testverifymanageunittest00(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: aquilon00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Domain: changetest2", command)
 
 
