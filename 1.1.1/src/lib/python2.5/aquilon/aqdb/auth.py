@@ -29,9 +29,11 @@ class Role(Base):
         Column('name', String(32), nullable=False),
         UniqueConstraint('name', name='role_name_uk'))
 
-    comments = get_comment_col()
-    creation_date = get_date_col()
+    #comments = get_comment_col()
+    #creation_date = get_date_col()
 #TODO: change this to full declarative, not with a table def
+Role.comments = Column('comments', String(255), nullable=True)
+Role.creation_date = Column('creation_date', DateTime, default=datetime.now)
 Role.__table__.create(checkfirst=True)
 
 class Realm(Base):
@@ -40,9 +42,11 @@ class Realm(Base):
     Column('name', String(64), nullable=False),
     UniqueConstraint('name',name='realm_uk'))
 
-    comments = deferred(Column('comments',String(255),nullable=True))
-    creation_date = deferred(
-        Column('creation_date', DateTime, default=datetime.now))
+    #comments = deferred(Column('comments',String(255),nullable=True))
+    #creation_date = deferred(
+    #    Column('creation_date', DateTime, default=datetime.now))
+Realm.comments = Column('comments', String(255), nullable=True)
+Realm.creation_date = Column('creation_date', DateTime, default=datetime.now)
 Realm.__table__.create(checkfirst=True)
 
 class UserPrincipal(Base):
@@ -60,14 +64,17 @@ class UserPrincipal(Base):
 
         UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
 
-    creation_date = deferred(Column('creation_date', DateTime,
-                                    nullable=False, default=datetime.now))
-    comments = deferred(Column('comments', String(255), nullable=True))
+    #creation_date = deferred(Column('creation_date', DateTime,
+    #                                nullable=False, default=datetime.now))
+    #comments = deferred(Column('comments', String(255), nullable=True))
     realm = relation(Realm, uselist = False)
     role  = relation(Role, uselist = False)
 
     def __str__(self):
         return '@'.join([self.name,self.realm.name])
+UserPrincipal.comments = Column('comments', String(255), nullable=True)
+UserPrincipal.creation_date = Column('creation_date', DateTime,
+                                     nullable=False, default=datetime.now)
 user_principal = UserPrincipal.__table__
 
 

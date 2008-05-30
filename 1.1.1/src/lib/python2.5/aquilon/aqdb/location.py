@@ -41,8 +41,11 @@ class LocationSearchList(Base):
         Column('name', String(32), nullable = False),
         UniqueConstraint('name', name = 'loc_srch_list_uk'))
 
-    creation_date = get_date_col()
-    comments      = get_comment_col()
+    #creation_date = get_date_col()
+    #comments      = get_comment_col()
+LocationSearchList.comments = Column('comments', String(255), nullable=True)
+LocationSearchList.creation_date = Column('creation_date', DateTime,
+                                          default=datetime.now)
 
 
 #####

@@ -257,17 +257,15 @@ class Formatter(object):
     def elaborate_raw_userprincipal(self, userprincipal, indent=""):
         details = [indent + "UserPrincipal: %s [role: %s]" % 
                 (userprincipal, userprincipal.role.name)]
-        # FIXME: Waiting for aqdb fix.
-        #if userprincipal.comments:
-        #    details.append(indent + "  Comments: %s" % userprincipal.comments)
+        if userprincipal.comments:
+            details.append(indent + "  Comments: %s" % userprincipal.comments)
         return "\n".join(details)
 
     def elaborate_raw_service(self, service, indent=""):
         details = [indent + "Service: %s" % service.name]
         details.append(self.elaborate_raw(service.cfg_path, indent+"  "))
-        # FIXME: Waiting for aqdb fix.
-        #if service.comments:
-        #    details.append(indent + "  Comments: %s" % service.comments)
+        if service.comments:
+            details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:
             details.append(self.elaborate_raw(instance, indent+"  "))
         return "\n".join(details)
@@ -283,9 +281,8 @@ class Formatter(object):
                     (map.location.type.type.capitalize(), map.location.name))
         if getattr(si, "cached_counter", None) is not None:
             details.append(indent + "  Client Count: %d" % si.cached_counter)
-        # FIXME: Waiting for aqdb fix.
-        #if si.comments:
-        #    details.append(indent + "  Comments: %s" % si.comments)
+        if si.comments:
+            details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
     def elaborate_raw_servicemap(self, sm, indent=""):

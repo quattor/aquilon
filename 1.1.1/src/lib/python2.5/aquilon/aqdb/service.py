@@ -62,10 +62,12 @@ class Service(Base):
                 UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
     cfg_path      = relation(CfgPath, uselist=False, backref='service')
-    comments  = deferred(Column('comments', String(255), nullable=True))
-    creation_date = deferred(
-        Column('creation_date', DateTime, default=datetime.now))
+    #comments  = deferred(Column('comments', String(255), nullable=True))
+    #creation_date = deferred(
+    #    Column('creation_date', DateTime, default=datetime.now))
 
+Service.comments  = Column('comments', String(255), nullable=True)
+Service.creation_date = Column('creation_date', DateTime, default=datetime.now)
 service = Service.__table__
 service.create(checkfirst=True)
 
@@ -85,8 +87,8 @@ class HostListItem(Base):
     Column('position', Integer, nullable=False),
     UniqueConstraint('host_id', name='host_list_item_uk')) #hosts only on one list?
 
-    creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
-    comments      = deferred(Column('comments', String(255), nullable=True))
+    #creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
+    #comments      = deferred(Column('comments', String(255), nullable=True))
 
     host          = relation(Host)
     hostlist      = relation(HostList)
@@ -97,6 +99,9 @@ class HostListItem(Base):
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.host.name)
 
+HostListItem.comments = Column('comments', String(255), nullable=True)
+HostListItem.creation_date = Column('creation_date', DateTime,
+                                    default=datetime.now)
 HostList.hosts = relation(HostListItem,
                           collection_class=ordering_list('position'),
                             order_by=[HostListItem.__table__.c.position])
@@ -121,9 +126,9 @@ class ServiceInstance(Base):
     service   = relation(Service, backref='instances')
     host_list = relation(HostList, uselist=False)
     cfg_path  = relation(CfgPath, backref=backref('svc_inst', uselist=False))
-    comments  = deferred(Column('comments', String(255), nullable=True))
-    creation_date = deferred(
-        Column('creation_date', DateTime, default=datetime.now))
+    #comments  = deferred(Column('comments', String(255), nullable=True))
+    #creation_date = deferred(
+    #    Column('creation_date', DateTime, default=datetime.now))
 
     def _client_count(self):
         return object_session(self).query(BuildItem).filter_by(
@@ -133,6 +138,9 @@ class ServiceInstance(Base):
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,
                            self.service.name ,self.host_list.name)
+ServiceInstance.comments = Column('comments', String(255), nullable=True)
+ServiceInstance.creation_date = Column('creation_date', DateTime,
+                                       default=datetime.now)
 service_instance = ServiceInstance.__table__
 service_instance.create(checkfirst=True)
 
