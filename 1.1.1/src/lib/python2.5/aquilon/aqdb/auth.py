@@ -47,7 +47,8 @@ class Realm(Base):
     #    Column('creation_date', DateTime, default=datetime.now))
 Realm.comments = Column('comments', String(255), nullable=True)
 Realm.creation_date = Column('creation_date', DateTime, default=datetime.now)
-Realm.__table__.create(checkfirst=True)
+realm = Realm.__table__
+realm.create(checkfirst=True)
 
 class UserPrincipal(Base):
     """ Simple class for strings representing users kerberos credential """
