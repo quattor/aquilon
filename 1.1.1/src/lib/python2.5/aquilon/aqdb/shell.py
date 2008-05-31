@@ -13,7 +13,9 @@
 
 import sys
 import os
-user = os.environ.get('USER')
+import pwd
+
+user = pwd.getpwuid(os.getuid())[0]
 
 def dummy_ipshell(msg):
     print >>sys.stderr, msg
@@ -21,10 +23,10 @@ def dummy_ipshell(msg):
 if sys.modules.has_key('twisted.scripts.twistd'):
     ipshell = dummy_ipshell("In the server, not actually calling ipshell()!")
 
-elif user == 'quattor' or user == 'cdb':
+elif user == 'cdb' and os.environ['HOME'] is not '/var/tmp/cdb':
     """ ipython likes to create rc files for you, but prod ids have read only
         home dirs, and spewage ensues """
-    ipshell = dummy_ipshell("quattor prodid can't use ipython...")
+    ipshell = dummy_ipshell("source /var/tmp/cdb/source_me to use ipython")
 
 else:
     import depends
@@ -47,7 +49,7 @@ if __name__ == '__main__':
     from interface import *
     from auth import *
     from systems import *
-    #from population_scripts import *
+    from population_scripts import *
     s=Session()
 
     ipshell()
