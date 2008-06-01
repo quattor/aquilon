@@ -12,5 +12,5 @@
 import msversion
 
 msversion.addpkg('sqlalchemy', '0.4.6', 'dist')
-msversion.addpkg('ipython', '0.7.2', 'dist')
+msversion.addpkg('ipython', '0.8.2', 'dist')
 msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')

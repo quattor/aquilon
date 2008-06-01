@@ -57,9 +57,9 @@ if dsn.startswith('oracle'):
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
     import cx_Oracle
     if not os.environ['ORACLE_HOME']:
-        os.environ['ORACLE_HOME']='/ms/dist/orcl/PROJ/product/10.2.0.1.0'
+        os.environ['ORACLE_HOME']=config.get('database','ora_home')
     if not os.environ.get('ORACLE_SID'):
-        os.environ['ORACLE_SID']=config.get("database", "server")
+        os.environ['ORACLE_SID']=config.get('database', 'server')
 
 engine = create_engine(dsn)
 
@@ -95,20 +95,20 @@ Base = declarative_base(metadata=meta)
 @monkeypatch(Base)
 def __repr__(self):
     if hasattr(self,'name'):
-        return self.__class__.__name__ + " " + str(self.name)
+        return self.__class__.__name__ + ' ' + str(self.name)
     elif hasattr(self,'type'):
-        return self.__class__.__name__ + " " + str(self.type)
+        return self.__class__.__name__ + ' ' + str(self.type)
     elif hasattr(self,'service'):
-        return self.__class__.__name__ + " " + str(self.service.name)
+        return self.__class__.__name__ + ' ' + str(self.service.name)
     elif hasattr(self,'system'):
-        return self.__class__.__name__ + " " + str(self.system.name)
+        return self.__class__.__name__ + ' ' + str(self.system.name)
     else:
        return '%s instance '%(self.__class__.__name__)
 
 
 def get_date_default():
     if dsn.startswith('oracle'):
-        return PassiveDefault(text("sysdate"))
+        return PassiveDefault(text('sysdate'))
     else:
         return datetime.now
 
@@ -147,15 +147,15 @@ class aqdbBase(object):
         if isinstance(cn,str):
             self.name = cn.strip().lower()
         else:
-            raise ArgumentError("Incorrect name argument %s" % cn)
+            raise ArgumentError('Incorrect name argument %s' % cn)
             return
     def __repr__(self):
         if hasattr(self,'name'):
-            return self.__class__.__name__ + " " + str(self.name)
+            return self.__class__.__name__ + ' ' + str(self.name)
         elif hasattr(self,'service'):
-            return self.__class__.__name__ + " " + str(self.service.name)
+            return self.__class__.__name__ + ' ' + str(self.service.name)
         elif hasattr(self,'system'):
-            return self.__class__.__name__ + " " + str(self.system.name)
+            return self.__class__.__name__ + ' ' + str(self.system.name)
         else:
             return '%s instance '%(self.__class__.__name__)
 class aqdbType(aqdbBase):
@@ -175,7 +175,7 @@ class aqdbType(aqdbBase):
     def __str__(self):
         return str(self.type)
     def __repr__(self):
-        return self.__class__.__name__+" " +str(self.type)
+        return self.__class__.__name__+' ' +str(self.type)
 
 
 def Column(*args, **kw):
@@ -239,10 +239,10 @@ def fill_type_table(table,items):
         Shorthand for filling up simple 'type' tables
     """
     if not isinstance(table,Table):
-        raise TypeError("table argument must be type Table")
+        raise TypeError('table argument must be type Table')
         return
     if not isinstance(items,list):
-        raise TypeError("items argument must be type list")
+        raise TypeError('items argument must be type list')
         return
     i = insert(table)
     for t in items:
@@ -306,7 +306,7 @@ def get_table_list_from_db():
     return a list of table names from the current
     databases public schema
     """
-    sql="select table_name from user_tables"
+    sql='select table_name from user_tables'
     execute = engine.execute
     return [name for (name, ) in execute(text(sql))]
 
@@ -314,7 +314,7 @@ def get_seq_list_from_db():
     """return a list of the sequence names from the current
        databases public schema
     """
-    sql="select sequence_name from user_sequences"
+    sql='select sequence_name from user_sequences'
     execute = engine.execute
     return [name for (name, ) in execute(text(sql))]
 
@@ -324,19 +324,19 @@ def drop_all_tables_and_sequences():
     if not dsn.startswith('ora'):
         print 'dsn is not oracle, exiting'
         return False
-    msg="You've asked to wipe out the %s database. Please confirm." % dsn
+    msg="You've asked to wipe out the %s database. Please confirm."%(dsn)
 
     if confirm(prompt=msg, resp=False):
         execute = engine.execute
         for table in get_table_list_from_db():
             try:
-                execute(text("DROP TABLE %s CASCADE CONSTRAINTS" %table))
+                execute(text('DROP TABLE %s CASCADE CONSTRAINTS' %(table)))
             except SQLError, e:
                 print >> sys.stderr, e
 
         for seq in get_seq_list_from_db():
             try:
-                execute(text("DROP SEQUENCE %s " %seq))
+                execute(text('DROP SEQUENCE %s'%(seq)))
             except SQLError, e:
                 print >> sys.stderr, e
 
