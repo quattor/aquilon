@@ -38,42 +38,54 @@ def _get_srcdir():
     return bindir
 
 global_defaults = {
-            "user": os.environ.get("USER"),
-            #"basedir": "/var/tmp/%(user)s",
-            "basedir": "/var/quattor",
-            "srcdir": _get_srcdir(),
-            "hostname": socket.gethostname(),
+            #TODO: can we make this pwd.getpwuid(os.getuid())[0]? (or euid?)
+            "user"     : os.environ.get("USER"),
+            "basedir"  : "/var/quattor",
+            "srcdir"   : _get_srcdir(),
+            "hostname" : socket.gethostname(),
         }
-        
+
 config_defaults = {
         "database": {
-            "dbdir": "%(basedir)s/aquilondb",
-            "dbfile": "%(dbdir)s/aquilon.db",
-            "dsn": "sqlite:///%(dbfile)s",
-            "dblogfile": "%(dbdir)s/aqdb.log",
-        }, "broker": {
-            #"quattordir": "%(basedir)s/quattor",
-            "quattordir": "%(basedir)s",
-            "servername": "%(hostname)s",
-            "umask": "0022",
-            "kncport": "6900",
-            "openport": "6901",
-            "templateport": "%(openport)s",
-            "git_templates_url": "http://%(servername)s:%(templateport)s/templates",
-            "kingdir": "%(quattordir)s/template-king",
-            "templatesdir": "%(quattordir)s/templates",
-            "rundir": "%(quattordir)s/run",
-            "logdir": "%(quattordir)s/logs",
-            "logfile": "%(logdir)s/aqd.log",
-            "profilesdir": "%(quattordir)s/web/htdocs/profiles",
-            "depsdir": "%(quattordir)s/deps",
-            "hostsdir": "%(quattordir)s/hosts",
-            "plenarydir": "%(quattordir)s/plenary",
-            "swrepdir": "%(quattordir)s/swrep",
-            "git_path": "/ms/dist/fsf/PROJ/git/1.5.4.2/bin",
-            "git": "%(git_path)s/git",
-            "dsdb": "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb",
-            "knc": "/ms/dist/kerberos/PROJ/knc/1.4/bin/knc",
+            "dbdir"       : "%(basedir)s/aquilondb",
+            "dbfile"      : "%(dbdir)s/aquilon.db",
+            "dsn"         : "sqlite:///%(dbfile)s",
+            "dblogfile"   : "%(dbdir)s/aqdb.log",
+
+            "ora_version" : "10.2.0.1.0",
+            "ora_home"    : "/ms/dist/orcl/PROJ/product/%(ora_version)s",
+            "export"      : "%(ora_home)s/bin/exp",
+            "exportlog"   : "/tmp/aqdb_export.log",
+            "import"      : "%(ora_home)s/bin/imp",
+
+            "user"        : "USER", #stub
+            "dsn"         : "oracle://%(user)s:PASSWORD@%(server)s",
+            "connect_str" : "%(user)s/%(user)s@%(server)s",
+            "dumpfile"    : "/tmp/%(user)s.dmp",
+        },
+        "broker": {
+            "quattordir"        : "%(basedir)s",
+            "servername"        : "%(hostname)s",
+            "umask"             : "0022",
+            "kncport"           : "6900",
+            "openport"          : "6901",
+            "templateport"      : "%(openport)s",
+            "git_templates_url" : "http://%(servername)s:%(templateport)s/templates",
+            "kingdir"           : "%(quattordir)s/template-king",
+            "templatesdir"      : "%(quattordir)s/templates",
+            "rundir"            : "%(quattordir)s/run",
+            "logdir"            : "%(quattordir)s/logs",
+            "logfile"           : "%(logdir)s/aqd.log",
+            "html_access_log"   : "%(logdir)s/aqd_access_log",
+            "profilesdir"       : "%(quattordir)s/web/htdocs/profiles",
+            "depsdir"           : "%(quattordir)s/deps",
+            "hostsdir"          : "%(quattordir)s/hosts",
+            "plenarydir"        : "%(quattordir)s/plenary",
+            "swrepdir"          : "%(quattordir)s/swrep",
+            "git_path"          : "/ms/dist/fsf/PROJ/git/1.5.4.2/bin",
+            "git"               : "%(git_path)s/git",
+            "dsdb"              : "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb",
+            "knc"               : "/ms/dist/kerberos/PROJ/knc/1.4/bin/knc",
         },
     }
 
@@ -115,4 +127,3 @@ if __name__=='__main__':
         print "[%s]" % section
         for (name, value) in config.items(section):
             print "%s=%s" % (name, value)
-
