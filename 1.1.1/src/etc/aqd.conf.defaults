@@ -1,0 +1,65 @@
+# This file is always read first when determining configuration, and
+# supplies all defaults.  If a value is missing from here *and* not 
+# supplied later, the broker might fail.
+#
+# A value should *not* be removed from this file without confirming 
+# that the source code does not reference it.
+#
+# Best practice is to only override as necessary.
+[DEFAULT]
+basedir = /var/quattor
+environment = prod
+# The broker does not rely on 'user' for anything security-related...
+# user = # config.py supplies os.environ.get("USER") as a default
+# srcdir = # config.py supplies a custom _get_srcdir() as a default
+# hostname = # config.py supplies socket.gethostname() as a default
+quattordir = %(basedir)s
+# database defaults cannot (yet) be in the general [database] section,
+# and must be here.
+logdir = %(quattordir)s/logs
+dbdir = %(basedir)s/aquilondb
+dblogfile = %(dbdir)s/aqdb.log
+[database_oracle]
+vendor = oracle
+vendor_version = 10.2.0.1.0
+vendor_home = /ms/dist/orcl/PROJ/product/%(vendor_version)s
+server = LNPO_AQUILON_NY
+dbuser = USER
+dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
+connect_str = %(dbuser)s/%(dbuser)s@%(server)s
+dumpfile = %(dbdir)s/%(dbuser)s.dmp
+export = %(vendor_home)s/bin/exp
+exportlog = %(dbdir)s/aqdb_export.log
+import = %(vendor_home)s/bin/imp
+password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
+password_file = %(password_base)s/%(environment)s/%(dbuser)s
+[database_sqlite]
+dbfile = %(dbdir)s/aquilon.db
+dsn = sqlite:///%(dbfile)s
+vendor = sqlite
+[database]
+# Unfortunately, the code hack for this means any database defaults
+# must be in the general DEFAULT section.
+database_section = database_sqlite
+[broker]
+servername = %(hostname)s
+umask = 0022
+kncport = 6900
+openport = 6901
+templateport = %(openport)s
+git_templates_url = http://%(servername)s/templates
+kingdir = %(quattordir)s/template-king
+templatesdir = %(quattordir)s/templates
+rundir = %(quattordir)s/run
+logdir = %(quattordir)s/logs
+logfile = %(logdir)s/aqd.log
+http_access_log = %(logdir)s/aqd_access.log
+profilesdir = %(quattordir)s/web/htdocs/profiles
+depsdir = %(quattordir)s/deps
+hostsdir = %(quattordir)s/hosts
+plenarydir = %(quattordir)s/plenary
+swrepdir = %(quattordir)s/swrep
+git_path = /ms/dist/fsf/PROJ/git/1.5.4.2/bin
+git = %(git_path)s/git
+dsdb = /ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb
+knc = /ms/dist/kerberos/PROJ/knc/1.4/bin/knc

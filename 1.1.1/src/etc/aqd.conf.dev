@@ -1,9 +1,19 @@
 # This should work "out of the box" for development purposes.
+# To connect to an oracle database, copy this file and adjust the
+# [database_oracle] parameters as appropriate.  Then, change
+# database_section to point to database_oracle.
 [DEFAULT]
 basedir = /var/tmp/%(user)s
-[database]
 dbdir = %(basedir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
+[database_oracle]
+# For now, also need to override dsn with a password
+dbuser = USER
+server = SERVER
+environment = ENV
+dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
+[database]
+database_section = database_sqlite
 [broker]
 quattordir = %(basedir)s/quattor
 #knc = /ms/dev/kerberos/knc/1.4/install/exec/bin/knc

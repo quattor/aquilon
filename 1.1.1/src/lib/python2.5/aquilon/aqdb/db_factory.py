@@ -13,7 +13,6 @@ from __future__ import with_statement
 import sys
 import os
 import pwd
-import ConfigParser as cp
 
 import msversion
 msversion.addpkg('sqlalchemy','0.4.6','dist')
@@ -27,7 +26,10 @@ from sqlalchemy.exceptions import DatabaseError as SaDBError
 
 from debug import debug, noisy_exit
 
-_oracle_header = 'oracle://'
+if __name__ == '__main__':
+    sys.path.append('../..')
+
+from aquilon.config import Config
 
 class Singleton(object):
     _instance = None
@@ -38,49 +40,20 @@ class Singleton(object):
 
 class db_factory(Singleton):
     def __init__(self, *args, **kw):
-        try:
-            self.dbtype = kw.pop('dbtype')
-            self.env    = kw.pop('env')
-        except KeyError:
-            msg = 'keyword args must contain a dbtype and an env'
-            noisy_exit(msg)
+        self.config = Config()
+        self.dsn = self.config.get('database', 'dsn')
 
-        debug(self.dbtype, assert_only = True)
-        debug(self.env, assert_only = True)
-
-        self.config = cp.SafeConfigParser()
-        #TODO: un-hardcode this
-        self.config.read('conf.cfg')
-
-        if self.dbtype == 'oracle':
-            try:
-                self.dsn = self.config.get(self.env, 'dsn')
-                #debug(self.dsn)
-
-            except cp.NoOptionError:
-                noisy_exit("Can't determine connect string:\n")
-            except cp.NoSectionError:
-                msg = ' '.join(["Invalid Environment supplied, check args",
-                         "(you supplied '%s')\n"%self.env])
-                noisy_exit(msg)
-
+        if self.config.get('database', 'vendor') == 'oracle':
             passwds = self._get_password_list()
-
             self.login(passwds)
             debug(self.engine, assert_only = True)
-
-        elif self.dbtype == 'sqlite':
-            #TODO: move static strings to, and pull user from aquilon.config
-            _sqlite_header = 'sqlite:///'
-            _db_file_base  = '/var/tmp'
-            user=pwd.getpwuid(os.getuid())[0]
-            return _sqlite_header + os.path.join(
-                _db_file_base,user,'aquilon.db')
+        elif self.config.get('database', 'vendor') == 'sqlite':
+            # FIXME: Create the engine...
+            pass
         else:
-            msg = 'dbtype can be either sqlite or oracle'
+            msg = 'database vendor can be either sqlite or oracle'
             noisy_exit(msg)
         assert(self.dsn)
-
 
         #if kw.has_key('mock'):
         #    self.sql_file =  kw['mock']
@@ -101,6 +74,7 @@ class db_factory(Singleton):
         return scoped_session(sessionmaker(bind=self.engine,
                                       autoflush=True,
                                       transactional=True))
+
     def login(self,passwds):
         errs = []
         import re
@@ -134,9 +108,7 @@ class db_factory(Singleton):
             (i.e. newest on top). It will try them sequentially, finally
             giving up and throwing an exception """
 
-        base = '/ms/dist/aquilon/PROJ/aqdbpasswd/incr' #TODO: from config
-        passwd_file = os.path.join(base,self.env,
-                                   self.config.get(self.env,'user'))
+        passwd_file = self.config.get("database", "password_file")
 
         passwds = []
         with open(passwd_file) as f:
@@ -146,6 +118,7 @@ class db_factory(Singleton):
             raise ValueError(msg)
         else:
             return [passwd.strip() for passwd in passwds]
+
 
 class MockEngine(object):
     def __init__(self,*args, **kw):
@@ -172,7 +145,7 @@ class MockEngine(object):
 if __name__ == '__main__':
 
     debug('Testing creation of factory...')
-    dbf = db_factory(dbtype='oracle',env='uat')
+    dbf = db_factory()
     debug(dbf.engine)
     debug(dbf.meta)
     debug(str(dbf.__dict__))

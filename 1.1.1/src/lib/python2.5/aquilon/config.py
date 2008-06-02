@@ -17,77 +17,20 @@ from ConfigParser import SafeConfigParser
 
 from exceptions_ import AquilonError
 
-# Only used by unit tests at the moment, but maybe useful for scripts that
-# want to execute stand-alone.
-def _get_srcdir():
-    """Determine the location of the binaries/source code being used."""
-    bindir = os.path.dirname(os.path.realpath(sys.argv[0]))
-    m = re.match(
-            r"(/ms(?:/.(global|local)/[^/]+)?/dist/aquilon/PROJ/aqd/[^/+]).*?",
-            bindir)
-    if m:
-        return m.group(1)
-    m = re.match(r"(.*/aquilon/aqd/[^/+]/[^/+]).*?", bindir)
-    if m:
-        return m.group(1)
-    # Hmm... shot in the dark...
-    m = re.match(r"(.*/src)(/.*?|)$", bindir)
-    if m:
-        return m.group(1)
-    # Giving up.
-    return bindir
-
+# All defaults should be in etc/aqd.conf.defaults.  This is only needed to 
+# supply defaults that are determined by code at run time.
 global_defaults = {
-            #TODO: can we make this pwd.getpwuid(os.getuid())[0]? (or euid?)
+            # The user variable, since it can be overridden by a config file,
+            # is not meant in any way, shape, or form to be used for security.
+            # Having it be something that can be overridden by an env variable
+            # is just an extra layer of convenience.
             "user"     : os.environ.get("USER"),
-            "basedir"  : "/var/quattor",
-            "srcdir"   : _get_srcdir(),
+            # Only used by unit tests at the moment, but maybe useful for
+            # scripts that want to execute stand-alone.
+            "srcdir"   : os.path.realpath(os.path.join(
+                            os.path.dirname(__file__), "..", "..", "..")),
             "hostname" : socket.gethostname(),
         }
-
-config_defaults = {
-        "database": {
-            "dbdir"       : "%(basedir)s/aquilondb",
-            "dbfile"      : "%(dbdir)s/aquilon.db",
-            "dsn"         : "sqlite:///%(dbfile)s",
-            "dblogfile"   : "%(dbdir)s/aqdb.log",
-
-            "ora_version" : "10.2.0.1.0",
-            "ora_home"    : "/ms/dist/orcl/PROJ/product/%(ora_version)s",
-            "export"      : "%(ora_home)s/bin/exp",
-            "exportlog"   : "/tmp/aqdb_export.log",
-            "import"      : "%(ora_home)s/bin/imp",
-
-            "user"        : "USER", #stub
-            "dsn"         : "oracle://%(user)s:PASSWORD@%(server)s",
-            "connect_str" : "%(user)s/%(user)s@%(server)s",
-            "dumpfile"    : "/tmp/%(user)s.dmp",
-        },
-        "broker": {
-            "quattordir"        : "%(basedir)s",
-            "servername"        : "%(hostname)s",
-            "umask"             : "0022",
-            "kncport"           : "6900",
-            "openport"          : "6901",
-            "templateport"      : "%(openport)s",
-            "git_templates_url" : "http://%(servername)s:%(templateport)s/templates",
-            "kingdir"           : "%(quattordir)s/template-king",
-            "templatesdir"      : "%(quattordir)s/templates",
-            "rundir"            : "%(quattordir)s/run",
-            "logdir"            : "%(quattordir)s/logs",
-            "logfile"           : "%(logdir)s/aqd.log",
-            "html_access_log"   : "%(logdir)s/aqd_access_log",
-            "profilesdir"       : "%(quattordir)s/web/htdocs/profiles",
-            "depsdir"           : "%(quattordir)s/deps",
-            "hostsdir"          : "%(quattordir)s/hosts",
-            "plenarydir"        : "%(quattordir)s/plenary",
-            "swrepdir"          : "%(quattordir)s/swrep",
-            "git_path"          : "/ms/dist/fsf/PROJ/git/1.5.4.2/bin",
-            "git"               : "%(git_path)s/git",
-            "dsdb"              : "/ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb",
-            "knc"               : "/ms/dist/kerberos/PROJ/knc/1.4/bin/knc",
-        },
-    }
 
 
 class Config(SafeConfigParser):
@@ -109,13 +52,20 @@ class Config(SafeConfigParser):
         else:
             self.baseconfig = os.environ.get("AQDCONF", "/etc/aqd.conf")
         SafeConfigParser.__init__(self, defaults)
-        self.read(self.baseconfig)
-        for (section, defaults) in config_defaults.items():
-            if not self.has_section(section):
-                self.add_section(section)
-            for (name, value) in defaults.items():
-                if not self.has_option(section, name):
-                    self.set(section, name, value)
+        src_defaults = os.path.join(defaults["srcdir"],
+                "etc", "aqd.conf.defaults")
+        read_files = self.read([src_defaults, self.baseconfig])
+        # FIXME: Check that read_files includes the files we asked for...
+
+        # Allow a section to "pull in" another section, as though all the
+        # values defined in the alternate were actually defined there.
+        for section in self.sections():
+            section_option = "%s_section" %section
+            if self.has_option(section, section_option):
+                alternate_section = self.get(section, section_option)
+                if self.has_section(alternate_section):
+                    for (name, value) in self.items(alternate_section):
+                        self.set(section, name, value)
 
 
 if __name__=='__main__':
