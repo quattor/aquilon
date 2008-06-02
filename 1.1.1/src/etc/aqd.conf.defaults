@@ -1,11 +1,12 @@
 # This file is always read first when determining configuration, and
-# supplies all defaults.  If a value is missing from here *and* not 
+# supplies all defaults.  If a value is missing from here *and* not
 # supplied later, the broker might fail.
 #
-# A value should *not* be removed from this file without confirming 
+# A value should *not* be removed from this file without confirming
 # that the source code does not reference it.
 #
 # Best practice is to only override as necessary.
+
 [DEFAULT]
 basedir = /var/quattor
 environment = prod
@@ -14,11 +15,13 @@ environment = prod
 # srcdir = # config.py supplies a custom _get_srcdir() as a default
 # hostname = # config.py supplies socket.gethostname() as a default
 quattordir = %(basedir)s
+
 # database defaults cannot (yet) be in the general [database] section,
 # and must be here.
 logdir = %(quattordir)s/logs
 dbdir = %(basedir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
+
 [database_oracle]
 vendor = oracle
 vendor_version = 10.2.0.1.0
@@ -33,14 +36,17 @@ exportlog = %(dbdir)s/aqdb_export.log
 import = %(vendor_home)s/bin/imp
 password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
 password_file = %(password_base)s/%(environment)s/%(dbuser)s
+
 [database_sqlite]
 dbfile = %(dbdir)s/aquilon.db
 dsn = sqlite:///%(dbfile)s
 vendor = sqlite
+
 [database]
 # Unfortunately, the code hack for this means any database defaults
 # must be in the general DEFAULT section.
 database_section = database_sqlite
+
 [broker]
 servername = %(hostname)s
 umask = 0022
