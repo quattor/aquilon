@@ -43,22 +43,18 @@ class db_factory(Singleton):
         self.config = Config()
         self.dsn = self.config.get('database', 'dsn')
 
-        if self.config.get('database', 'vendor') == 'oracle':
+        self.vendor = self.config.get('database', 'vendor')
+        if self.vendor == 'oracle':
             passwds = self._get_password_list()
             self.login(passwds)
             debug(self.engine, assert_only = True)
-        elif self.config.get('database', 'vendor') == 'sqlite':
+        elif self.vendor == 'sqlite':
             # FIXME: Create the engine...
             pass
         else:
             msg = 'database vendor can be either sqlite or oracle'
             noisy_exit(msg)
         assert(self.dsn)
-
-        #if kw.has_key('mock'):
-        #    self.sql_file =  kw['mock']
-        #    self.engine = self.mock_engine()
-
         assert(self.engine)
 
         self.meta   = MetaData(self.engine)
