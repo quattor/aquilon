@@ -24,7 +24,8 @@ def get_sys_type_id(typ_nm):
     sl=select([SystemType.c.id], SystemType.c.type=='%s'%(typ_nm))
     return engine.execute(sl).fetchone()[0]
 
-_sys_types = ['base_system_type', 'host', 'afs_cell', 'quattor_server']
+_sys_types = ['base_system_type', 'host', 'afs_cell', 'quattor_server',
+              'tor_switch']
 
 if __name__ == '__main__':
     #dbf = db_factory()
