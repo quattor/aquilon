@@ -444,6 +444,8 @@ def populate_vendor():
         #hack alert:
         b=Vendor(name = 'hp')
         Session.save(b)
+        b = Vendor(name='verari')
+        Session.save(b)
         try:
             Session.commit()
         except Exception,e:
@@ -493,6 +495,8 @@ def populate_machines():
             ['hp','dl145','rackmount'],
             ['hp','dl580','rackmount'],
             ['hp','bl45p','blade'],
+            ['hp','bl260c','blade'],
+            ['verari', 'vb1205xm', 'blade'],
             ['sun','ultra-10','workstation'],
             ['dell','poweredge_6850','rackmount'],
             ['dell','poweredge_6650', 'rackmount'],
@@ -541,6 +545,8 @@ def populate_cpu():
                                 Assert(False)
                     f.close()
 
+        cpus.append(['intel', 'xeon_2500', '2500'])
+
         for vendor,name,speed in cpus:
             kw={}
             vendor=Session.query(Vendor).filter_by(name=vendor).first()
@@ -588,7 +594,9 @@ def populate_m_configs():
                                 comments='FAKE')
         d=MachineSpecs(model='bl45p',cpu='opteron_2600',memory=32768,
                                 comments='FAKE')
-        for ms in [a,b,c,d]:
+        e=MachineSpecs(model='bl260c', cpu='xeon_2500', memory=24576)
+        f=MachineSpecs(model='vb1205xm', cpu='xeon_2500', memory=24576)
+        for ms in [a, b, c, d, e, f]:
             try:
                 Session.save(ms)
             except Exception,e:

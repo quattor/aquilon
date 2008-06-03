@@ -240,10 +240,15 @@ if __name__ == '__main__':
     if empty(dns_domain):
         ms   = DnsDomain('ms.com', comments='root node')
         onyp = DnsDomain('one-nyp.ms.com', comments='1 NYP test domain')
+        devin1 = DnsDomain('devin1.ms.com',
+                comments='43881 Devin Shafron Drive domain')
+        theha = DnsDomain('theha.ms.com', comments='HA domain')
         Session.save(ms)
         Session.save(onyp)
+        Session.save(devin1)
+        Session.save(theha)
         Session.commit()
-        print 'created ms.com and one-nyp.ms.com dns domains'
+        print 'created dns domains'
 
     if empty(network):
         from aquilon.aqdb.utils.dsdb import dump_network

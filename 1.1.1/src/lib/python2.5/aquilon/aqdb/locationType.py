@@ -19,7 +19,8 @@ LocationType  = st.subtype('LocationType','location_type')
 location_type = LocationType.__table__
 
 _loc_types = ['company', 'hub', 'continent', 'country', 'city', 'bucket',
-              'building', 'rack', 'chassis', 'desk', 'base_location_type']
+              'building', 'bunker', 'rack', 'rack_section', 'chassis',
+              'desk', 'base_location_type']
 
 if __name__ == '__main__':
     #dbf = db_factory()
