@@ -19,7 +19,7 @@ from subtypes import subtype
 from name_table import make_name_class
 from aquilon import const
 
-from sqlalchemy import Table, Integer, Sequence, String, ForeignKey
+from sqlalchemy import Table, Integer, Sequence, String, ForeignKey, Index
 from sqlalchemy.orm import mapper, relation, deferred
 
 import os
@@ -66,6 +66,7 @@ cfg_path = Table('cfg_path',meta,
     Column('last_used', DateTime, default=datetime.now),
     Column('comments',String(255),nullable=True),
     UniqueConstraint('cfg_tld_id','relative_path',name='cfg_path_uk'))
+Index('cfg_relative_path_idx', cfg_path.c.relative_path)
 cfg_path.create(checkfirst=True)
 
 class CfgPath(aqdbBase):
