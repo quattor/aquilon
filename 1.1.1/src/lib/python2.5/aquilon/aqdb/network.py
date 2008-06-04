@@ -17,10 +17,12 @@ sys.path.append('../..')
 from db import *
 from location import Location, location, Building, building
 from aquilon.aqdb.utils import ipcalc
+from name_table import make_name_class
 
-from sqlalchemy import Column, Table, Integer, Sequence, String, Index, Boolean
-from sqlalchemy import CheckConstraint, UniqueConstraint, DateTime, ForeignKey
-from sqlalchemy import insert, select
+from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
+                        Boolean, CheckConstraint, UniqueConstraint, DateTime,
+                        ForeignKey,insert, select )
+
 from sqlalchemy.orm import mapper, relation, deferred, synonym
 from sqlalchemy.exceptions import IntegrityError
 
@@ -108,25 +110,9 @@ network = Table('network', meta,
     Column('dsdb_id', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.now),
     Column('comments', String(255), nullable=True))
+Index('net_ip_idx', network.c.ip, unique=True)
+Index('net_loc_id_idx', network.c.location_id)
 network.create(checkfirst=True)
-
-ip_addr = Table('ip_addr', meta,
-    Column('id', Integer, Sequence('ip_addr_seq'), primary_key=True),
-    Column('byte1', Integer, CheckConstraint('byte1<256'), nullable=False),
-    Column('byte2', Integer, CheckConstraint('byte2<256'), nullable=False),
-    Column('byte3', Integer, CheckConstraint('byte3<256'), nullable=False),
-    Column('byte4', Integer, CheckConstraint('byte4<256'), nullable=False),
-    Column('is_network', Boolean, nullable=False, default=False),
-    Column('is_broadcast', Boolean, nullable=False, default=False),
-    Column('is_used', Boolean, nullable=False, default=False),
-    Column('network_id', Integer, ForeignKey('network.id'), nullable=False),
-    Column('creation_date', DateTime, default=datetime.now),
-    Column('comments', String(255), nullable=True),
-    UniqueConstraint('byte1','byte2','byte3','byte4','network_id'),)
-    #Index('byte1','byte2','byte3','byte4'))
-    #TODO: create ALL indexes after population
-    #TODO: unique the bcast and network ips against network_id
-ip_addr.create(checkfirst=True)
 
 
 class Network(aqdbBase):
@@ -172,21 +158,10 @@ mapper(Network,network,properties={
 })
 
 
-dns_domain = Table('dns_domain', meta,
-    Column('id', Integer, Sequence('dns_domain_id_seq'),primary_key=True),
-    Column('name',String(32), unique=True, nullable=False, index=True),
-    Column('creation_date', DateTime, default=datetime.now),
-    Column('comments', String(255), nullable=True))
+DnsDomain = make_name_class('DnsDomain','dns_domain')
+dns_domain = DnsDomain.__table__
 dns_domain.create(checkfirst=True)
 
-class DnsDomain(aqdbBase):
-    """ To store dns domains """
-    pass
-
-mapper(DnsDomain, dns_domain, properties={
-    'creation_date' : deferred(location.c.creation_date),
-    'comments'      : deferred(location.c.comments)
-})
 
 def populate_networks():
     s = Session()
@@ -238,11 +213,11 @@ if __name__ == '__main__':
     populate_profile()
 
     if empty(dns_domain):
-        ms   = DnsDomain('ms.com', comments='root node')
-        onyp = DnsDomain('one-nyp.ms.com', comments='1 NYP test domain')
-        devin1 = DnsDomain('devin1.ms.com',
+        ms   = DnsDomain(name = 'ms.com', comments = 'root node')
+        onyp = DnsDomain(name = 'one-nyp.ms.com', comments = '1 NYP test domain')
+        devin1 = DnsDomain(name = 'devin1.ms.com',
                 comments='43881 Devin Shafron Drive domain')
-        theha = DnsDomain('theha.ms.com', comments='HA domain')
+        theha = DnsDomain(name='theha.ms.com', comments='HA domain')
         Session.save(ms)
         Session.save(onyp)
         Session.save(devin1)
