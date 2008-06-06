@@ -24,4 +24,3 @@ if __name__ == '__main__':
     for t in m.table_iterator():
         t = Table(t.name, m)
         print '%s:%s\n'%(t.name,t.constraints)
-    ipshell()
