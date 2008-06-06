@@ -17,15 +17,72 @@ sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
 import unittest
 from subprocess import Popen
+import getopt
 
 from aquilon.config import Config
 
 from broker.orderedsuite import BrokerTestSuite
 from aqdb.orderedsuite import DatabaseTestSuite
 
-configfile = os.path.join(BINDIR, "unittest.conf")
-# FIXME: Allow AQDCONF environment var to override?  Allow it to be
-# passed in?  Maybe make the rm statements below opt-in if that's the case.
+default_configfile = os.path.join(BINDIR, "unittest.conf")
+
+def usage():
+    print >>sys.stderr, """
+    %s [--help] [--debug] [--config=configfile]
+
+    --help      returns this message
+    --debug     enable debug (not implemented)
+    --config    supply an alternate config file
+
+    Note that:
+    %s
+    will be used by default, and setting the AQDCONF environment variable
+    will *not* work to pass in a config.
+    """ % (sys.argv[0], default_configfile)
+
+def force_yes(msg):
+    print >>sys.stderr, msg
+    print >>sys.stderr, """
+        Please confirm by typing yes (three letters) and pressing enter.
+        """
+    answer = sys.stdin.readline()
+    if not answer.startswith("yes"):
+        print >>sys.stderr, """Aborting."""
+        sys.exit(1)
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "hdc:",
+            ["help", "debug", "config="])
+except getopt.GetoptError, e:
+    print >>sys.stderr, str(e)
+    usage()
+    sys.exit(2)
+
+configfile = default_configfile
+for o, a in opts:
+    if o in ("-h", "--help"):
+        usage()
+        sys.exit()
+    elif o in ("-d", "--debug"):
+        # ?
+        debug = True
+    elif o in ("-c", "--config"):
+        configfile = a
+    else:
+        assert False, "unhandled option"
+
+if not os.path.exists(configfile):
+    print >>sys.stderr, "configfile %s does not exist" % configfile
+    sys.exit(1)
+
+if os.environ.get("AQDCONF") and (os.path.realpath(configfile)
+        != os.path.realpath(os.environ["AQDCONF"])):
+    force_yes("""Will ignore AQDCONF variable value:
+%s
+and use
+%s
+instead.""" % (os.environ["AQDCONF"], configfile))
+
 config = Config(configfile=configfile)
 if not config.has_section("unittest"):
     config.add_section("unittest")
@@ -33,9 +90,16 @@ if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
 
 if os.environ.get("USER") != config.get("broker", "user"):
-    print >>sys.stderr, "Expected to be running as %s, instead running as %s.  Aborting" % (
-            config.get("broker", "user"), os.environ.get("USER"))
+    print >>sys.stderr, (
+            "Expected to be running as %s, instead running as %s.  Aborting" % (
+            config.get("broker", "user"), os.environ.get("USER")))
     sys.exit(os.EX_CONFIG)
+
+production_database = "LNPO_AQUILON_NY"
+if (config.get("database", "vendor") == "oracle" and
+        config.get("database", "server") == production_database):
+    force_yes("About to run against the production database %s" %
+            production_database)
 
 # Maybe just execute this every run...
 if not os.path.exists("/var/spool/keytabs/%s" % config.get("broker", "user")):
@@ -56,6 +120,12 @@ dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
 for label in ["templatesdir", "rundir", "logdir", "profilesdir",
         "depsdir", "hostsdir", "plenarydir", ]:
     dirs.append(config.get("broker", label))
+
+if configfile != default_configfile:
+    force_yes(
+        "About to remove any of the following directories that exist:\n%s\n"
+        % "\n".join(dirs))
+
 for dir in dirs:
     if os.path.exists(dir):
         print "Removing %s" % dir
@@ -85,8 +155,20 @@ p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
 rc = p.wait()
 # FIXME: check rc
 
+# XXX: Database rebuild is currently broken for oracle if trying to build a
+# user in a database where some other user has already created the table.
+# Commenting this out for now, and adding a hack below.
+#if config.get('database', 'vendor') == 'oracle':
+#    # Nuke the database first... (for sqlite, the rebuild script moves
+#    # it out of the way)
+#    # This method will prompt on stdin for confirmation.
+#    from aquilon.aqdb.db import drop_all_tables_and_sequences
+#    drop_all_tables_and_sequences()
+
 suite = unittest.TestSuite()
-suite.addTest(DatabaseTestSuite())
+# XXX: Hack - remove the conditional when oracle rebuild works consistently.
+if config.get('database', 'vendor') == 'sqlite':
+    suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
 unittest.TextTestRunner(verbosity=2).run(suite)
 
