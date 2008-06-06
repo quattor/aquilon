@@ -56,10 +56,10 @@ if dsn.startswith('oracle'):
     import msversion
     msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
     import cx_Oracle
-    if not os.environ['ORACLE_HOME']:
-        os.environ['ORACLE_HOME']=config.get('database','ora_home')
+    if not os.environ.get('ORACLE_HOME'):
+        os.environ['ORACLE_HOME'] = config.get('database', 'vendor_home')
     if not os.environ.get('ORACLE_SID'):
-        os.environ['ORACLE_SID']=config.get('database', 'server')
+        os.environ['ORACLE_SID'] = config.get('database', 'server')
 
 engine = create_engine(dsn)
 
@@ -75,6 +75,7 @@ except Exception,e:
     sys.exit(1)
 
 meta  = MetaData(engine)
+#meta.bind.echo = True
 
 Session = scoped_session(sessionmaker(bind=engine,
                                       autoflush=True,
