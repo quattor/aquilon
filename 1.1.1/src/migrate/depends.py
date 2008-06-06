@@ -20,10 +20,10 @@ msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
 
 from sqlalchemy import (MetaData, create_engine, PrimaryKeyConstraint,
                         UniqueConstraint, ForeignKey, Table, Column, Sequence,
-                        Integer, DateTime, String, PassiveDefault)
+                        Integer, Index, DateTime, String, PassiveDefault)
 
 from sqlalchemy.orm import sessionmaker, scoped_session, deferred, relation
-from sqlalchemy.sql import insert, text, func
+from sqlalchemy.sql import insert, text, func, select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exceptions import SQLError, DatabaseError
 

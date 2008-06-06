@@ -26,44 +26,71 @@ m = Base.metadata
 dns_domain = Table('dns_domain',m,autoload=True)
 col = dns_domain.c.creation_date
 
+old_idx_drop = 'DROP INDEX IX_DNS_DOMAIN_NAME'
+new_idx_drop = 'DROP INDEX DNS_DOMAIN_UK'
+
+old_idx_cr = 'CREATE UNIQUE INDEX IX_DNS_DOMAIN_NAME ON DNS_DOMAIN(NAME)'
+new_idx_cr = 'CREATE UNIQUE INDEX DNS_DOMAIN_UK ON DNS_DOMAIN(NAME)'
 
 def upgrade():
+    ## ADD NON NULL CONSTRAINT
     assert col is dns_domain.c.creation_date
     try:
         col.alter(nullable=False)
     except DatabaseError, e:
         print e
-    #dbf.safe_execute('describe dns_domain'.upper())
-    ipshell()
+
+    ##ADD UNIQUE index
+    try:
+        dbf.safe_execute(old_idx_drop)
+    except DatabaseError,e:
+        print e
+        sys.exit(9)
+
+    try:
+        idx = Index('dns_domain_uk',dns_domain.c.name, unique = True)
+        idx.create()
+    except DatabaseError, e:
+        print e
+
+    ##UPDATE MS.COM
+    print 'before update ms.com'
+    print dbf.engine.execute(select([dns_domain])).fetchall()
+
+    dbf.engine.execute(dns_domain.update(dns_domain.c.name=='ms.com'),
+                       name = '.ms.com')
+
+    print 'after update ms.com'
+    print dbf.engine.execute(select([dns_domain])).fetchall()
+
 
 def downgrade():
+    ##DROP NON NULL
     assert col is dns_domain.c.creation_date
     try:
         col.alter(nullable=True)
     except DatabaseError, e:
         print e
-    #dbf.safe_execute('describe dns_domain'.upper())
+
+    ##REMOVE UNIQUE INDEX
+    dbf.safe_execute(new_idx_drop)
+    try:
+        old_idx = Index('IX_DNS_DOMAIN_NAME',dns_domain.c.name)
+        old_idx.create()
+    except DatabaseError, e:
+        print e
+        sys.exit(9)
+
+    ##REVERT MS.COM
+    print 'before downgrade .ms.com'
+    print dbf.engine.execute(select([dns_domain])).fetchall()
+
+    dbf.engine.execute(dns_domain.update(dns_domain.c.name=='.ms.com'),
+                       name = 'ms.com')
+
+    print 'after downgrade .ms.com'
+    print dbf.engine.execute(select([dns_domain])).fetchall()
 
 if __name__ == '__main__':
     upgrade()
     downgrade()
-
-#def make_null(tbl,col):
-#    col.alter(nullable=True)
-
-#d_col = schema.get_date_col()
-#c_col = schema.get_comment_col()
-#
-#c_col.create(dns_domain)
-#d_col.create(dns_domain)
-#
-#print 'After add columns: %s'%(dns_domain.columns)
-#
-#c_col.drop(dns_domain)
-#d_col.drop(dns_domain)
-#
-#print 'After drop columns: %s'%(dns_domain.columns)
-
-#from IPython.Shell import IPShellEmbed
-#ipshell = IPShellEmbed()
-#ipshell()
