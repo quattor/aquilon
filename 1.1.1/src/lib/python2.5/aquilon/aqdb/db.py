@@ -115,7 +115,7 @@ def get_date_default():
 
 def get_date_col():
     return deferred(Column('creation_date', DateTime,
-                           default = get_date_default()))
+                           default = get_date_default(), nullable = False))
 
 def get_comment_col():
     return deferred(Column('comments', String(255), nullable = True))
