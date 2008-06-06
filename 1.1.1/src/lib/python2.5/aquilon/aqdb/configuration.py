@@ -61,7 +61,7 @@ cfg_tld.create(checkfirst=True)
 cfg_path = Table('cfg_path',meta,
     Column('id', Integer, Sequence('cfg_path_id_seq'), primary_key=True),
     Column('cfg_tld_id', Integer, ForeignKey('cfg_tld.id'), nullable=False),
-    Column('relative_path', String(255), index=True, nullable=False),
+    Column('relative_path', String(255), nullable=False),
     Column('creation_date', DateTime, default=datetime.now),
     Column('last_used', DateTime, default=datetime.now),
     Column('comments',String(255),nullable=True),
