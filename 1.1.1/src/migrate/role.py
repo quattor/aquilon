@@ -15,7 +15,8 @@ class Role(Base):
         Column('id', Integer, Sequence('role_id_seq'),
                primary_key=True),
         Column('name', String(32), nullable=False),
-        Column('creation_date', DateTime, default=datetime.now),
+        Column('creation_date', DateTime,
+               default = datetime.now, nullable = False),
         Column('comments', String(255), nullable=True),
         PrimaryKeyConstraint('id', name='role_pk'),
         UniqueConstraint('name', name='role_name_uk'))
