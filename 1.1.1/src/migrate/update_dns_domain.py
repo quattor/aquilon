@@ -22,21 +22,36 @@ if __name__ == '__main__':
     Base.metadata.bind = dbf.engine
 
     m = Base.metadata
+
     dns_domain = Table('dns_domain',m,autoload=True)
 
-    print 'Before add columns: %s'%(dns_domain.columns)
-    d_col = schema.get_date_col()
-    c_col = schema.get_comment_col()
+    #print 'Before alter columns: %s'%(dns_domain.__dict__)
 
-    c_col.create(dns_domain)
-    d_col.create(dns_domain)
+    col = dns_domain.c.creation_date
+    assert col is dns_domain.c.creation_date
 
-    print 'After add columns: %s'%(dns_domain.columns)
+    col.alter(nullable=False)
+    print 'After alter column: %s'%(dns_domain.__dict__)
 
-    c_col.drop(dns_domain)
-    d_col.drop(dns_domain)
+    col.alter(nullable=True)
+    #print 'After re-alter column: %s'%(dns_domain.__dict__)
 
-    print 'After drop columns: %s'%(dns_domain.columns)
+
+
+#def make_null(tbl,col):
+#    col.alter(nullable=True)
+    #d_col = schema.get_date_col()
+    #c_col = schema.get_comment_col()
+    #
+    #c_col.create(dns_domain)
+    #d_col.create(dns_domain)
+    #
+    #print 'After add columns: %s'%(dns_domain.columns)
+    #
+    #c_col.drop(dns_domain)
+    #d_col.drop(dns_domain)
+    #
+    #print 'After drop columns: %s'%(dns_domain.columns)
 
     #from IPython.Shell import IPShellEmbed
     #ipshell = IPShellEmbed()

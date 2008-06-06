@@ -34,5 +34,5 @@ if __name__ == '__main__':
         if dbf.schema:
             t.schema = dbf.schema
         print t
-
-    #ipshell()
+        t.create()
+        #t.drop(bind=dbf.engine)
