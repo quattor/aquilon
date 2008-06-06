@@ -110,10 +110,10 @@ class db_factory(Singleton):
         else:
             return [passwd.strip() for passwd in passwds]
 
-    def safe_execute(self,stmt):
+    def safe_execute(self, stmt, **kwargs):
         """ convenience wrapper """
         try:
-            self.engine.execute(text(stmt))
+            return self.engine.execute(text(stmt), **kwargs)
         except SQLError, e:
             print >> sys.stderr, e
 
