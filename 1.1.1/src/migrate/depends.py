@@ -28,3 +28,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exceptions import SQLError, DatabaseError
 
 Base = declarative_base()
+
+from IPython.Shell import IPShellEmbed
+ipshell = IPShellEmbed()

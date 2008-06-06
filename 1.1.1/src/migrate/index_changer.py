@@ -11,9 +11,6 @@
 
 from depends import *
 
-from IPython.Shell import IPShellEmbed
-ipshell = IPShellEmbed()
-
 import db_factory
 dbf = db_factory.db_factory()
 
@@ -27,4 +24,4 @@ if __name__ == '__main__':
     for t in m.table_iterator():
         t = Table(t.name, m)
         print '%s:%s\n'%(t.name,t.constraints)
-    #ipshell()
+    ipshell()

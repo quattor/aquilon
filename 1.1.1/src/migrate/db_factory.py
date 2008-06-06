@@ -64,9 +64,7 @@ class db_factory(Singleton):
         return self.engine
 
     def session(self):
-        return scoped_session(sessionmaker(bind=self.engine,
-                                      autoflush=True,
-                                      transactional=True))
+        return scoped_session(sessionmaker(bind=self.engine))
 
     def login(self,passwds):
         errs = []
@@ -112,6 +110,12 @@ class db_factory(Singleton):
         else:
             return [passwd.strip() for passwd in passwds]
 
+    def safe_execute(self,stmt):
+        """ convenience wrapper """
+        try:
+            self.engine.execute(text(stmt))
+        except SQLError, e:
+            print >> sys.stderr, e
 
 class MockEngine(object):
     def __init__(self,*args, **kw):
