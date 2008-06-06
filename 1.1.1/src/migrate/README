@@ -1,0 +1,8 @@
+This directory and the files herein are intended to be used during the migration from the previous version of the source (1.1) to this version (1.1.1).
+
+The contain some cut-and-paste code from libraries present in the aqdb module for the creation of new tables.
+
+
+Scott D'Aquila
+6/6/08
+daqscott@ms.com
