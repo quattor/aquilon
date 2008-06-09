@@ -11,28 +11,34 @@
 
 from depends import *
 
-from IPython.Shell import IPShellEmbed
-ipshell = IPShellEmbed()
+############   REMOVE WHEN USED AS A LIBRARY   ##
+import db_factory                               #
+dbf = db_factory.db_factory()                   #
+Base.metadata.bind = dbf.engine                 #
+#################################################
 
-import db_factory
-dbf = db_factory.db_factory()
-
-Base.metadata.bind = dbf.engine
-
-from role import Role,role
-from host_list import HostList, host_list
-from location_search_list import LocationSearchList, location_search_list
-from host_list_item import HostListItem, host_list_item
+from new_tables.role import Role,role
+from new_tables.host_list import HostList, host_list
+from new_tables.location_search_list import LocationSearchList, location_search_list
+from new_tables.host_list_item import HostListItem, host_list_item
 
 new_tables = [ role, location_search_list, host_list, host_list ]
-#def get_tables_with_schema ?
 
+def upgrade():
+    for t in new_tables:
+            if dbf.schema:
+                t.schema = dbf.schema
+                print t
+                t.create()
+
+def downgrade():
+    for t in new_tables:
+            if dbf.schema:
+                t.schema = dbf.schema
+                print t
+                t.drop(bind=dbf.engine)
 if __name__ == '__main__':
     print dbf.dsn
 
-    for t in new_tables:
-        if dbf.schema:
-            t.schema = dbf.schema
-        print t
-        t.create()
-        #t.drop(bind=dbf.engine)
+    upgrade()
+    downgrade()

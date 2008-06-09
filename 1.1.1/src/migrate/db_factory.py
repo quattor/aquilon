@@ -15,6 +15,7 @@ from depends import *
 import sys
 import os
 import pwd
+import getpass
 
 import cx_Oracle
 
@@ -41,8 +42,12 @@ class db_factory(Singleton):
         self.vendor = self.config.get('database', 'vendor')
 
         if self.vendor == 'oracle':
-            passwds = self._get_password_list()
             self.schema = self.config.get('database','dbuser')
+            passwds = self._get_password_list()
+            if len(passwds) < 1:
+                passwds.append(
+                    getpass.getpass(
+                        'Can not determine your password.\nPassword:'))
             self.login(passwds)
             debug(self.engine, assert_only = True)
         elif self.vendor == 'sqlite':

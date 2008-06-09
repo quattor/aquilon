@@ -17,24 +17,32 @@ from ConfigParser import SafeConfigParser
 
 from exceptions_ import AquilonError
 
-# All defaults should be in etc/aqd.conf.defaults.  This is only needed to
-# supply defaults that are determined by code at run time.
+
 global_defaults = {
-            # The user variable, since it can be overridden by a config file,
-            # is not meant in any way, shape, or form to be used for security.
-            # Having it be something that can be overridden by an env variable
-            # is just an extra layer of convenience.
+    """ The user variable, since it can be overridden by a config file,
+        is not meant in any way, shape, or form to be used for security.
+        Having it be something that can be overridden by an env variable
+        is just an extra layer of convenience. """
+
             "user"     : os.environ.get("USER"),
-            # Only used by unit tests at the moment, but maybe useful for
-            # scripts that want to execute stand-alone.
+
+    """ srcdir is only used by unit tests at the moment, but maybe useful for
+        scripts that want to execute stand-alone. """
+
             "srcdir"   : os.path.realpath(os.path.join(
                             os.path.dirname(__file__), "..", "..", "..")),
+
             "hostname" : socket.gethostname(),
         }
 
 
 class Config(SafeConfigParser):
-    # Any "new" config object will have all the same info as any other.
+    """ All defaults should be in etc/aqd.conf.defaults.  This is only needed to
+        supply defaults that are determined by code at run time. It is set up
+        with 'Borg' idiom semantics, i.e. instantiated if none exists yet, but
+        if there is one already, any "new" config object will have all the same
+        info as any other """
+
     __shared_state = {}
     def __init__(self, defaults=global_defaults, configfile=None):
         self.__dict__ = self.__shared_state
@@ -43,10 +51,12 @@ class Config(SafeConfigParser):
                 return
             raise AquilonError("Could not configure with %s, already configured with %s" %
                     (configfile, self.baseconfig))
-        # This is a small race condition here... baseconfig could be
-        # checked here, pre-empted, checked again elsewhere, and also
-        # get here.  If that ever happens, it is only a problem if one
-        # passed in a configfile and the other didn't.  Punting for now.
+
+        """ This is a small race condition here... baseconfig could be
+            checked here, pre-empted, checked again elsewhere, and also
+            get here.  If that ever happens, it is only a problem if one
+            passed in a configfile and the other didn't.  Punting for now. """
+
         if configfile:
             self.baseconfig = configfile
         else:
@@ -57,12 +67,13 @@ class Config(SafeConfigParser):
         read_files = self.read([src_defaults, self.baseconfig])
         # FIXME: Check that read_files includes the files we asked for...
 
-        # Allow a section to "pull in" another section, as though all the
-        # values defined in the alternate were actually defined there.
+        """ Allow a section to "pull in" another section, as though all the
+            values defined in the alternate were actually defined there. """
+
         for section in self.sections():
             section_option = "%s_section" %section
             if self.has_option(section, section_option):
-                alternate_section = self.get(section, section_option) #TODO: True, or get raw
+                alternate_section = self.get(section, section_option, raw=True) #TODO: True, or get raw
                 if self.has_section(alternate_section):
                     for (name, value) in self.items(alternate_section):
                         self.set(section, name, value)
@@ -71,8 +82,10 @@ class Config(SafeConfigParser):
 if __name__=='__main__':
     config = Config()
     print "[DEFAULT]"
+
     for (name, value) in config.defaults().items():
         print "%s=%s" % (name, value)
+
     for section in config.sections():
         print "[%s]" % section
         for (name, value) in config.items(section):
