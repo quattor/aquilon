@@ -12,7 +12,9 @@
 from depends import *
 import re
 
-def rename_non_null(dbf):
+#TODO: deal with max 32 chars. table.info.
+
+def rename_non_null_check_constraints(dbf):
     stmt = """
     SELECT C.constraint_name  con,
            C.table_name       tab,
@@ -29,6 +31,19 @@ def rename_non_null(dbf):
     for i in cons:
         if i[2].endswith('IS NOT NULL'):
             col = pat.match(i[2]).group().strip('"')
+            if col == 'CREATION_DATE':
+                col = 'CR_DATE'
             nm = '%s_%s_NN'%(i[1], col)
             rename = 'ALTER TABLE %s RENAME CONSTRAINT %s TO %s'%(i[1],i[0],nm)
             dbf.safe_execute(rename)
+
+"""
+daqscott@LNPO_AQUILON_NY> select distinct constraint_type from user_constraints;
+
+CONSTRAINT_TYPE
+---------------
+R (references AKA foreign key)
+U (unique)
+P (primary key)
+C (check constraint (like non null))
+"""
