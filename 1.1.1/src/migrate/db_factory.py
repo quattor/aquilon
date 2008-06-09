@@ -46,8 +46,10 @@ class db_factory(Singleton):
         self.dsn = self.config.get('database', 'dsn')
         self.vendor = self.config.get('database', 'vendor')
 
+
         if self.vendor == 'oracle':
             self.schema = self.config.get('database','dbuser')
+            self.server = self.config.get('database','server')
             passwds = self._get_password_list()
             if len(passwds) < 1:
                 passwds.append(

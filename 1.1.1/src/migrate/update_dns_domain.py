@@ -15,12 +15,15 @@ import migrate.changeset
 import schema
 import db_factory
 
-###############################REMOVE WHEN STRUNG INTO SINGLE UPGRADE SCRIPT
-dbf = db_factory.db_factory()
-print dbf.dsn
-Base.metadata.bind = dbf.engine
-m = Base.metadata
-###############
+###########   REMOVE WHEN USED AS A LIBRARY   ###
+import db_factory                               #
+dbf = db_factory.db_factory()                   #
+Base.metadata.bind = dbf.engine                 #
+m = Base.metadata                               #
+#################################################
+
+
+
 
 #or meta is already fully reflected???
 dns_domain = Table('dns_domain',m,autoload=True)
