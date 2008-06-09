@@ -17,7 +17,7 @@ dbf = db_factory.db_factory()                   #
 Base.metadata.bind = dbf.engine                 #
 #################################################
 
-from new_tables.role import Role,role
+from new_tables.role import Role, role, populate as populate_role
 from new_tables.host_list import HostList, host_list
 from new_tables.location_search_list import LocationSearchList, location_search_list
 from new_tables.host_list_item import HostListItem, host_list_item
@@ -36,6 +36,7 @@ def upgrade():
                 t.schema = dbf.schema
                 print t
                 t.create()
+    populate_role()
 
 def downgrade():
     for t in new_tables:
