@@ -14,7 +14,7 @@ sys.path.insert(0,'..')
 
 from depends import *
 
-network = Table('network', meta,
+network = Table('network', Base.metadata,
     Column('id', Integer, Sequence('network_id_seq'), primary_key=True),
     Column('location_id', Integer,
         ForeignKey('location.id'), nullable=False),
