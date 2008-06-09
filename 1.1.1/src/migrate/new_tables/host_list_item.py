@@ -13,7 +13,7 @@ sys.path.insert(0,'..')
 
 from depends import *
 from host_list import host_list
-host = Table('host', Base.metadata, autoload=True)
+from host import host
 
 class HostListItem(Base):
     __table__ = Table('host_list_item', Base.metadata,

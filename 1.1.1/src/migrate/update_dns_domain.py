@@ -9,24 +9,26 @@
 # This module is part of Aquilon
 """ intended to make the new tables during migration """
 
+###########   REMOVE WHEN USED AS A LIBRARY   ###
+#import db_factory                               #
+#dbf = db_factory.db_factory()                   #
+#Base.metadata.bind = dbf.engine                 #
+#m = Base.metadata                               #
+#################################################
+
 from depends import *
 import migrate.changeset
 
-import schema
-import db_factory
-
-###########   REMOVE WHEN USED AS A LIBRARY   ###
-import db_factory                               #
-dbf = db_factory.db_factory()                   #
-Base.metadata.bind = dbf.engine                 #
-m = Base.metadata                               #
-#################################################
-
-
-
 
 #or meta is already fully reflected???
-dns_domain = Table('dns_domain',m,autoload=True)
+dns_domain = Table('dns_domain', Base.metadata,
+                Column('id', Integer,
+                       Sequence('dns_domain_id_seq'), primary_key=True),
+                Column('name', String(32), nullable=False),
+                Column('creation_date', DateTime, default=datetime.now),
+                Column('comments', String(255), nullable = True),
+                PrimaryKeyConstraint('id', name = 'dns_domain_pk'))
+
 col = dns_domain.c.creation_date
 
 old_idx_drop = 'DROP INDEX IX_DNS_DOMAIN_NAME'

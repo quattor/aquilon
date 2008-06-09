@@ -33,15 +33,20 @@ from debug import debug, noisy_exit
 sys.path.append('../lib/python2.5')
 from aquilon.config import Config
 
-class Singleton(object):
-    _instance = None
-    def __new__(cls, *args, **kw):
-        if not cls._instance:
-            cls._instance = super(Singleton, cls).__new__(cls, *args, **kw)
-        return cls._instance
+#class Singleton(object):
+#    _instance = None
+#    def __new__(cls, *args, **kw):
+#        if not cls._instance:
+#            cls._instance = super(Singleton, cls).__new__(cls, *args, **kw)
+#        return cls._instance
 
-class db_factory(Singleton):
+class db_factory(object):
+    __shared_state = {}
     def __init__(self, *args, **kw):
+        self.__dict__ = self.__shared_state
+        if hasattr(self,'config'):
+            return
+
         self.config = Config()
         self.dsn = self.config.get('database', 'dsn')
         self.vendor = self.config.get('database', 'vendor')

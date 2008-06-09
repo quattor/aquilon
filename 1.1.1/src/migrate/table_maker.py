@@ -12,9 +12,9 @@
 from depends import *
 
 ############   REMOVE WHEN USED AS A LIBRARY   ##
-import db_factory                               #
-dbf = db_factory.db_factory()                   #
-Base.metadata.bind = dbf.engine                 #
+#import db_factory                              #
+#dbf = db_factory.db_factory()                  #
+#Base.metadata.bind = dbf.engine                #
 #################################################
 
 from new_tables.role import Role, role, populate as populate_role

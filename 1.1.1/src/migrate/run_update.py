@@ -7,12 +7,13 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
+import os
 
 from depends import *
+from db_factory import db_factory
+
 from debug import *
 from admin import *
-from db_factory import db_factory
-from admin import constraints
 
 import table_maker
 import update_dns_domain
@@ -55,7 +56,7 @@ table_maker.upgrade()
 
 
 #STEP 4: rename constraints, ignore errors
-constraints.rename_non_null_check_constraints(dbf)
+admin.constraints.rename_non_null_check_constraints(dbf)
 
 #Step 5:More sensitive stuff: table surgery
 
