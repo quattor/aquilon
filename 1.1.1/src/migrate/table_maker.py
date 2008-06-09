@@ -21,10 +21,16 @@ from new_tables.role import Role,role
 from new_tables.host_list import HostList, host_list
 from new_tables.location_search_list import LocationSearchList, location_search_list
 from new_tables.host_list_item import HostListItem, host_list_item
+from new_tables.network import network
+from new_tables.service_instance import service_instance
 
-new_tables = [ role, location_search_list, host_list, host_list ]
+new_tables = [ role, location_search_list, host_list, host_list_item ]
+
+# we *don't* want these dropped at the end.
+recreated  = [ network, service_instance ]
 
 def upgrade():
+    tables = recreated + new_tables
     for t in new_tables:
             if dbf.schema:
                 t.schema = dbf.schema
@@ -37,6 +43,7 @@ def downgrade():
                 t.schema = dbf.schema
                 print t
                 t.drop(bind=dbf.engine)
+
 if __name__ == '__main__':
     print dbf.dsn
 

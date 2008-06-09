@@ -33,4 +33,5 @@ network = Table('network', meta,
     PrimaryKeyConstraint('id', name = 'network_pk'),
     UniqueConstraint('dsdb_id',name='network_dsdb_id_uk'),
     UniqueConstraint('ip', name='net_ip_uk'))
+
 Index('net_loc_id_idx', network.c.location_id)
