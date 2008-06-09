@@ -54,7 +54,8 @@ class db_factory(Singleton):
             if len(passwds) < 1:
                 passwds.append(
                     getpass.getpass(
-                        'Can not determine your password.\nPassword:'))
+                        'Can not determine your password (%s).\nPassword:'%(
+                            self.dsn)))
             self.login(passwds)
             debug(self.engine, assert_only = True)
         elif self.vendor == 'sqlite':
@@ -114,13 +115,16 @@ class db_factory(Singleton):
         passwd_file = self.config.get("database", "password_file")
 
         passwds = []
-        with open(passwd_file) as f:
-            passwds = f.readlines()
-        if len(passwds) < 1:
-            msg = "No lines in %s"%(passwd_file)
-            raise ValueError(msg)
+        if os.path.isfile(passwd_file):
+           with open(passwd_file) as f:
+                passwds = f.readlines()
+                if len(passwds) < 1:
+                    msg = "No lines in %s"%(passwd_file)
+                    raise ValueError(msg)
+                else:
+                    return [passwd.strip() for passwd in passwds]
         else:
-            return [passwd.strip() for passwd in passwds]
+            return []
 
     def safe_execute(self, stmt, **kwargs):
         """ convenience wrapper """
