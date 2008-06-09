@@ -29,7 +29,8 @@ Base.metadata.bind = dbf.engine
 # Full export == safety net
 exp = 'exp %s/%s@%s FILE=EXPORT/%s.dmp OWNER=%s DIRECT=n'%(dbf.schema,
                                 dbf.schema,dbf.server, dbf.schema, dbf.schema)
-debug(exp)
+print 'running %s'%(exp)
+os.system(exp)
 
 ### STEP 2: DROP THE STUFF WE DON'T NEED, other arbitrary sql here.
 
