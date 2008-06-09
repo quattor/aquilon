@@ -8,9 +8,10 @@
 #
 # This module is part of Aquilon
 """ For Migration """
+import sys
+sys.path.insert(0,'..')
 
 from depends import *
-from column_defaults import *
 
 class ServiceInstance(Base):
     """ Service instance captures the data around assignment of a system for a

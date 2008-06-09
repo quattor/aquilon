@@ -29,5 +29,11 @@ from sqlalchemy.exceptions import SQLError, DatabaseError
 
 Base = declarative_base()
 
-from IPython.Shell import IPShellEmbed
-ipshell = IPShellEmbed()
+#FIX ME: this is really primative. Make debug.py actually control ipshell() and
+#    it's behavior in the next version of admin
+
+if '-d' not in sys.argv:
+    from IPython.Shell import IPShellEmbed
+    ipshell = IPShellEmbed()
+
+from admin.column_defaults import *

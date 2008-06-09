@@ -8,6 +8,8 @@
 #
 # This module is part of Aquilon
 """ Role for authorization, copied from auth.py for migration"""
+import sys
+sys.path.insert(0,'..')
 from depends import *
 
 class Role(Base):

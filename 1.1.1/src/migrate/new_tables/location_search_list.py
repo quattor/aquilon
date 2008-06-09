@@ -9,9 +9,10 @@
 # This module is part of Aquiloni
 """ The named parent table for lists of location types to search service
     maps later on when automatic configuration of services takes places """
+import sys
+sys.path.insert(0,'..')
 
 from depends import *
-from column_defaults import get_id_col
 
 class LocationSearchList(Base):
     __table__ = Table('location_search_list', Base.metadata,

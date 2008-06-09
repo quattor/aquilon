@@ -25,6 +25,11 @@ from sqlalchemy.exceptions import DatabaseError as SaDBError
 
 from debug import debug, noisy_exit
 
+#TODO: we really shouldn't do this. Inherit everything or nothing
+# db_factory, debug, config are copied in, then this ??? shady. But
+# we need to get this done....
+# daqscott 6/9/08
+#
 sys.path.append('../lib/python2.5')
 from aquilon.config import Config
 

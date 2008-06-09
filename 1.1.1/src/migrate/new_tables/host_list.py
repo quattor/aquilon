@@ -8,6 +8,8 @@
 #
 # This module is part of Aquilon
 """ Copied from code base 1.1.1 for migration """
+import sys
+sys.path.insert(0,'..')
 from depends import *
 
 class HostList(Base):
