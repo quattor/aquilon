@@ -30,12 +30,16 @@ import migrate.changeset
 ### STEP 1
 # Full export == safety net
 ##CHEATING here, losing patience
-DSN = 'aqd/aqd@LNPO_AQUILON_NY'
+DSN = 'aqd/aqd@LNTO_AQUILON_NY'
 exp = 'exp %s FILE=EXPORT/%s.dmp OWNER=%s DIRECT=n'%(DSN,
                                 dbf.schema, dbf.schema)
-exp += 'consistent=y statistics=none'.upper()
+exp += ' consistent=y statistics=none'.upper()
 print 'running %s'%(exp)
-#os.system(exp)
+rc = 0
+rc = os.system(exp) 
+if rc != 0:
+    print >>sys.stderr, "Command returned %d, aborting." % rc
+    sys.exit(rc)
 
 ### STEP 2: DROP THE STUFF WE DON'T NEED, other arbitrary sql here.
 

@@ -36,7 +36,7 @@ def upgrade(dbf):
                 t.schema = dbf.schema
                 print t
                 t.create(checkfirst=True)
-    populate_role()
+    populate_role(dbf)
 
 def downgrade(dbf):
     for t in new_tables:

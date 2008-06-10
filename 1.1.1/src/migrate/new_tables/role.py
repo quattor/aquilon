@@ -25,14 +25,17 @@ class Role(Base):
 
 role = Role.__table__
 
-def populate():
+def populate(dbf):
     COMMENT = 'system default roles (auto-populated)'
     ROLES=['nobody','operations','engineering', 'aqd_admin']
     ret_val = []
     ins = role.insert()
     for i in ROLES:
-        ret_val.append(role.insert({'name':i,'comments':COMMENT}))
-    return ret_val
+        try:
+            dbf.engine.execute(role.insert({'name':i,'comments':COMMENT}))
+        except SQLError, e:
+            print >>sys.stderr, e
+    return
 
 #select B.name, B.role_id from aqd.user_principal A, user_principal B
 #where B.name = A.name(+);

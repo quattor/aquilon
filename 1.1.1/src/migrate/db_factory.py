@@ -138,6 +138,17 @@ class db_factory(object):
         except SQLError, e:
             print >> sys.stderr, e
 
+    def get_id(self, table, key, value):
+        """Convenience wrapper"""
+        res = self.safe_execute("SELECT id from %s where %s = :value"
+                % (table, key), value=value)
+        if res:
+            rows = res.fetchall()
+            if rows:
+                return rows[0][0]
+        return
+
+
 class MockEngine(object):
     def __init__(self,*args, **kw):
         """ to write ddl statements to a file or stderr"""
