@@ -15,17 +15,17 @@ from new_tables.role import role
 from add_data import get_id
 
 ###########   REMOVE WHEN USED AS A LIBRARY   ###
-import db_factory                               #
-dbf = db_factory.db_factory()                   #
-Base.metadata.bind = dbf.engine                 #
-m = Base.metadata                               #
+#import db_factory                               #
+#dbf = db_factory.db_factory()                   #
+#Base.metadata.bind = dbf.engine                 #
+#m = Base.metadata                               #
 #################################################
 
-user_principal = Table('user_principal', m, autoload=True)
+user_principal = Table('user_principal', Base.metadata, autoload=True)
 col = Column('role_id', Integer,
                ForeignKey('role.id', name='usr_princ_role_fk'))
 
-def upgrade():
+def upgrade(dbf):
     ## ADD NEW ROLE COLUMN
     try:
         col.create(user_principal)

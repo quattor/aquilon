@@ -37,7 +37,7 @@ new_idx_drop = 'DROP INDEX DNS_DOMAIN_UK'
 old_idx_cr = 'CREATE UNIQUE INDEX IX_DNS_DOMAIN_NAME ON DNS_DOMAIN(NAME)'
 new_idx_cr = 'CREATE UNIQUE INDEX DNS_DOMAIN_UK ON DNS_DOMAIN(NAME)'
 
-def upgrade():
+def upgrade(dbf):
     ## ADD NON NULL CONSTRAINT
     assert col is dns_domain.c.creation_date
     try:
@@ -69,7 +69,7 @@ def upgrade():
     print dbf.engine.execute(select([dns_domain])).fetchall()
 
 
-def downgrade():
+def downgrade(dbf):
     ##DROP NON NULL
     assert col is dns_domain.c.creation_date
     try:

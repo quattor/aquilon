@@ -9,9 +9,14 @@
 # This module is part of Aquilon
 import os
 
-from depends import *
 from db_factory import db_factory
 
+dbf = db_factory()
+print dbf.dsn
+from depends import Base
+Base.metadata.bind = dbf.engine
+
+from depends import *
 from debug import *
 from admin import *
 
@@ -22,16 +27,15 @@ import update_user_princ
 import migrate.changeset
 
 
-dbf = db_factory()
-print dbf.dsn
-Base.metadata.bind = dbf.engine
-
 ### STEP 1
 # Full export == safety net
-exp = 'exp %s/%s@%s FILE=EXPORT/%s.dmp OWNER=%s DIRECT=n'%(dbf.schema,
-                                dbf.schema,dbf.server, dbf.schema, dbf.schema)
+##CHEATING here, losing patience
+DSN = 'aqd/aqd@LNPO_AQUILON_NY'
+exp = 'exp %s FILE=EXPORT/%s.dmp OWNER=%s DIRECT=n'%(DSN,
+                                dbf.schema, dbf.schema)
+exp += 'consistent=y statistics=none'.upper()
 print 'running %s'%(exp)
-os.system(exp)
+#os.system(exp)
 
 ### STEP 2: DROP THE STUFF WE DON'T NEED, other arbitrary sql here.
 
@@ -51,20 +55,20 @@ for d in drops:
     dbf.safe_execute(d)
 
 # STEP 3: make the new stuff
-table_maker.upgrade()
+table_maker.upgrade(dbf)
 
 
 
 #STEP 4: rename constraints, ignore errors
-admin.constraints.rename_non_null_check_constraints(dbf)
+constraints.rename_non_null_check_constraints(dbf)
 
 #Step 5:More sensitive stuff: table surgery
 
 #DNS DOMAIN:
-upd_dns_domain.upgrade()
+update_dns_domain.upgrade(dbf)
 
 #USER_PRINCIPAL:
-upd_user_princ.upgrade()
+update_user_princ.upgrade(dbf)
 
 
 #STEP 6: populate/repopulate tables (some 'new' tables were in the old schema)

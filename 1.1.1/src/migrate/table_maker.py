@@ -29,24 +29,24 @@ new_tables = [ role, location_search_list, host_list, host_list_item ]
 # we *don't* want these dropped at the end.
 recreated  = [ network, service_instance ]
 
-def upgrade():
+def upgrade(dbf):
     tables = recreated + new_tables
     for t in new_tables:
             if dbf.schema:
                 t.schema = dbf.schema
                 print t
-                t.create()
+                t.create(checkfirst=True)
     populate_role()
 
-def downgrade():
+def downgrade(dbf):
     for t in new_tables:
             if dbf.schema:
                 t.schema = dbf.schema
                 print t
-                t.drop(bind=dbf.engine)
+                t.drop(bind=dbf.engine,checkfirst=True)
 
-if __name__ == '__main__':
-    print dbf.dsn
-
-    upgrade()
-    downgrade()
+#if __name__ == '__main__':
+#    print dbf.dsn
+#
+#    upgrade()
+#    downgrade()
