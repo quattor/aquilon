@@ -21,7 +21,7 @@ from name_table import make_name_class
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         Boolean, CheckConstraint, UniqueConstraint, DateTime,
-                        ForeignKey,insert, select )
+                        ForeignKey, PrimaryKeyConstraint, insert, select )
 
 from sqlalchemy.orm import mapper, relation, deferred, synonym
 from sqlalchemy.exceptions import IntegrityError
@@ -109,8 +109,10 @@ network = Table('network', meta,
     Column('side', String(4), nullable=True),
     Column('dsdb_id', Integer, nullable=False),
     Column('creation_date', DateTime, default=datetime.now),
-    Column('comments', String(255), nullable=True))
-Index('net_ip_idx', network.c.ip, unique=True)
+    Column('comments', String(255), nullable=True),
+    PrimaryKeyConstraint('id', name = 'network_pk'),
+    UniqueConstraint('dsdb_id',name='network_dsdb_id_uk'),
+    UniqueConstraint('ip', name='net_ip_uk'))
 Index('net_loc_id_idx', network.c.location_id)
 network.create(checkfirst=True)
 
