@@ -11,12 +11,6 @@
 
 from depends import *
 
-############   REMOVE WHEN USED AS A LIBRARY   ##
-#import db_factory                              #
-#dbf = db_factory.db_factory()                  #
-#Base.metadata.bind = dbf.engine                #
-#################################################
-
 from new_tables.role import Role, role, populate as populate_role
 from new_tables.host_list import HostList, host_list
 from new_tables.location_search_list import LocationSearchList, location_search_list

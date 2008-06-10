@@ -9,13 +9,6 @@
 # This module is part of Aquilon
 """ intended to make the new tables during migration """
 
-###########   REMOVE WHEN USED AS A LIBRARY   ###
-#import db_factory                               #
-#dbf = db_factory.db_factory()                   #
-#Base.metadata.bind = dbf.engine                 #
-#m = Base.metadata                               #
-#################################################
-
 from depends import *
 import migrate.changeset
 
@@ -58,17 +51,6 @@ def upgrade(dbf):
     except DatabaseError, e:
         print e
 
-    ##UPDATE MS.COM
-    print 'before update ms.com'
-    print dbf.engine.execute(select([dns_domain])).fetchall()
-
-    dbf.engine.execute(dns_domain.update(dns_domain.c.name=='ms.com'),
-                       name = '.ms.com')
-
-    print 'after update ms.com'
-    print dbf.engine.execute(select([dns_domain])).fetchall()
-
-
 def downgrade(dbf):
     ##DROP NON NULL
     assert col is dns_domain.c.creation_date
@@ -85,16 +67,6 @@ def downgrade(dbf):
     except DatabaseError, e:
         print e
         sys.exit(9)
-
-    ##REVERT MS.COM
-    print 'before downgrade .ms.com'
-    print dbf.engine.execute(select([dns_domain])).fetchall()
-
-    dbf.engine.execute(dns_domain.update(dns_domain.c.name=='.ms.com'),
-                       name = 'ms.com')
-
-    print 'after downgrade .ms.com'
-    print dbf.engine.execute(select([dns_domain])).fetchall()
 
 if __name__ == '__main__':
     upgrade()

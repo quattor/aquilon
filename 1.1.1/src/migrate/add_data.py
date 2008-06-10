@@ -11,17 +11,7 @@
 
 from depends import *
 
-from IPython.Shell import IPShellEmbed
-ipshell = IPShellEmbed()
-
-import db_factory
-dbf = db_factory.db_factory()
-
-Base.metadata.bind = dbf.engine
-
-if __name__ == '__main__':
-    print dbf.dsn
-
+def upgrade(dbf):
     verari_id = dbf.get_id("vendor", "name", "verari")
     if not verari_id:
         print "Adding verari"
@@ -104,17 +94,35 @@ if __name__ == '__main__':
         print "Adding theha.ms.com"
         dbf.safe_execute("INSERT INTO dns_domain (id, name, creation_date) VALUES (dns_domain_id_seq.NEXTVAL, :dns_domain, :now)",
                 dns_domain="theha.ms.com", now=datetime.now())
-        theha_id = dbf.get_id("dns_domain", "name", "theha.ms.com")
 
-    #dbf.safe_execute("DELETE FROM dns_domain where id = :id", id=devin1_id)
-    #dbf.safe_execute("DELETE FROM dns_domain where id = :id", id=theha_id)
-    #dbf.safe_execute("DELETE FROM location_type where id = :id", id=bunker_id)
-    #dbf.safe_execute("DELETE FROM location_type where id = :id",
-    #        id=rack_section_id)
-    #dbf.safe_execute("DELETE FROM machine_specs where id = :id", id=ms1_id)
-    #dbf.safe_execute("DELETE FROM machine_specs where id = :id", id=ms2_id)
-    #dbf.safe_execute("DELETE FROM cpu where id = :id", id=xeon_id)
-    #dbf.safe_execute("DELETE FROM model where id = :id", id=m1_id)
-    #dbf.safe_execute("DELETE FROM model where id = :id", id=m2_id)
-    #dbf.safe_execute("DELETE FROM vendor where id = :id", id=verari_id)
 
+
+def downgrade(dbf):
+    rack_section_id = dbf.get_id("location_type", "type", "rack_section")
+    theha_id = dbf.get_id("dns_domain", "name", "theha.ms.com")
+    devin1_id = dbf.get_id("dns_domain", "name", "devin1.ms.com")
+    bunker_id = dbf.get_id("location_type", "type", "bunker")
+    m1_id = dbf.get_id("model", "name", "bl260c")
+    m2_id = dbf.get_id("model", "name", "vb1205xm")
+    ms1_id = dbf.get_id("machine_specs", "model_id", m1_id)
+    ms2_id = dbf.get_id("machine_specs", "model_id", m2_id)
+    xeon_id = dbf.get_id("cpu", "name", "xeon_2500")
+    scsi_id = dbf.get_id("disk_type", "type", "scsi")
+    intel_id = dbf.get_id("vendor", "name", "intel")
+    verari_id = dbf.get_id("vendor", "name", "verari")
+    hp_id = dbf.get_id("vendor", "name", "hp")
+    blade_id = dbf.get_id("machine_type", "type", "blade")
+
+
+
+    dbf.safe_execute("DELETE FROM dns_domain where id = :id", id=devin1_id)
+    dbf.safe_execute("DELETE FROM dns_domain where id = :id", id=theha_id)
+    dbf.safe_execute("DELETE FROM location_type where id = :id", id=bunker_id)
+    dbf.safe_execute("DELETE FROM location_type where id = :id",
+            id=rack_section_id)
+    dbf.safe_execute("DELETE FROM machine_specs where id = :id", id=ms1_id)
+    dbf.safe_execute("DELETE FROM machine_specs where id = :id", id=ms2_id)
+    dbf.safe_execute("DELETE FROM cpu where id = :id", id=xeon_id)
+    dbf.safe_execute("DELETE FROM model where id = :id", id=m1_id)
+    dbf.safe_execute("DELETE FROM model where id = :id", id=m2_id)
+    dbf.safe_execute("DELETE FROM vendor where id = :id", id=verari_id)
