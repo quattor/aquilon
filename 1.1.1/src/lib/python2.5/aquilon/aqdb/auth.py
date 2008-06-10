@@ -24,7 +24,7 @@ from sqlalchemy.orm import mapper, relation, deferred
 
 class Role(Base):
     __table__ = Table('role', Base.metadata,
-        Column('id', Integer, Sequence('roles_id_seq'),
+        Column('id', Integer, Sequence('role_id_seq'),
                primary_key=True),
         Column('name', String(32), nullable=False),
         UniqueConstraint('name', name='role_name_uk'))
