@@ -13,19 +13,28 @@ from depends import *
 
 from new_tables.role import Role, role, populate as populate_role
 from new_tables.host_list import HostList, host_list
-from new_tables.location_search_list import LocationSearchList, location_search_list
+from new_tables.location_search_list import (
+    LocationSearchList, location_search_list)
 from new_tables.host_list_item import HostListItem, host_list_item
 from new_tables.network import network
 from new_tables.service_instance import service_instance
+from new_tables.search_list_item import SearchListItem
 
-new_tables = [ role, location_search_list, host_list, host_list_item ]
+new_tables = [ role, location_search_list, host_list, host_list_item,
+              search_list_item ]
 
 # we *don't* want these dropped at the end.
 recreated  = [ network, service_instance ]
+location = Table('location', Base.metadata, autoload=True)
+network = Table('network', Base.metadata, autoload=True)
+network_type = Table('network_type', Base.metadata, autoload = True)
+service = Table('service', Base.metadata, autoload=True)
+cfg_path = Table('cfg_path', Base.metadata, autoload=True)
+netmask = Table('netmask', Base.metadata, autoload = True)
 
 def upgrade(dbf):
     tables = recreated + new_tables
-    for t in new_tables:
+    for t in tables:
             if dbf.schema:
                 t.schema = dbf.schema
                 print t
@@ -33,7 +42,7 @@ def upgrade(dbf):
     populate_role(dbf)
 
 def downgrade(dbf):
-    for t in new_tables:
+    for t in tables:
             if dbf.schema:
                 t.schema = dbf.schema
                 print t
