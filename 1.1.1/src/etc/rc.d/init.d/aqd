@@ -11,11 +11,12 @@
 RETVAL=0
 prog="aqd"
 pidfile="/var/quattor/run/aqd.pid"
-twistd="/ms/dist/aquilon/PROJ/aqd/1.1/bin/twistd"
+twistd="/ms/dist/aquilon/PROJ/aqd/prod/bin/twistd"
+conffile="/etc/aqd.conf"
 
 start() {
         echo -n $"Starting $prog: "
-	su cdb -c "/ms/dist/aurora/bin/krun -- $twistd --pidfile=$pidfile --logfile=/var/quattor/logs/aqd.log aqd" >/var/tmp/aqd.out 2>&1
+	su cdb -c "/ms/dist/aurora/bin/krun -- $twistd --pidfile=$pidfile --logfile=/var/quattor/logs/aqd.log aqd --config=$conffile " >/var/quattor/logs/aqd.out 2>&1
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ]; then
             touch /var/lock/subsys/$prog
