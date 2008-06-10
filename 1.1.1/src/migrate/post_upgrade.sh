@@ -24,6 +24,7 @@ $AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service afs --instance q.ny.
 $AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service bootserver --instance np.test
 $AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service dns --instance nyinfratest
 $AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service ntp --instance pa.ny.na
+$AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service lemon
 $AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service lemon --instance eng.ln
 $AQ --aqhost=$AQHOST --aqport=$AQPORT add service --service syslogng --instance nyb6.np.1
 

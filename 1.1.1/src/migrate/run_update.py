@@ -34,7 +34,7 @@ def upgrade():
     ### STEP 1
     # Full export == safety net
     ##CHEATING here, losing patience
-    DSN = 'aqd/aqd@LNTO_AQUILON_NY'
+    DSN = 'cdb/cdb@LNPO_AQUILON_NY'
     exp = 'exp %s FILE=EXPORT/%s.dmp OWNER=%s DIRECT=n'%(DSN,
                                     dbf.schema, dbf.schema)
     exp += ' consistent=y statistics=none'.upper()

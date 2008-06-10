@@ -850,7 +850,16 @@ class DatabaseBroker(AccessBroker):
     def add_service(self, result, service, instance, **kwargs):
         dbservice = self.session.query(Service).filter_by(name=service).first()
         if not dbservice:
-            dbservice = Service(name=service)
+            # FIXME: Could have better error handling
+            dbtld = self.session.query(CfgTLD).filter_by(type="service").first()
+            # Need to get or create cfgpath.
+            dbcfg_path = self.session.query(CfgPath).filter_by(
+                    tld=dbtld, relative_path=service).first()
+            if not dbcfg_path:
+                dbcfg_path = CfgPath(dbtld,
+                        "%s/%s" % (dbtld.type, service))
+                self.session.save(dbcfg_path)
+            dbservice = Service(name=service, cfg_path=dbcfg_path)
             self.session.save(dbservice)
         if not instance:
             return printprep(dbservice)
