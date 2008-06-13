@@ -219,7 +219,7 @@ if __name__ == '__main__':
         onyp = DnsDomain(name = 'one-nyp.ms.com', comments = '1 NYP test domain')
         devin1 = DnsDomain(name = 'devin1.ms.com',
                 comments='43881 Devin Shafron Drive domain')
-        theha = DnsDomain(name='theha.ms.com', comments='HA domain')
+        theha = DnsDomain(name='the-ha.ms.com', comments='HA domain')
         Session.save(ms)
         Session.save(onyp)
         Session.save(devin1)
