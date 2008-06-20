@@ -8,8 +8,6 @@
 #
 # This module is part of Aquilon
 """Classes and Tables relating to network interfaces"""
-from __future__ import with_statement
-
 import sys
 sys.path.append('../..')
 
@@ -20,18 +18,17 @@ import datetime
 from db import *
 from aquilon import const
 
-from sqlalchemy import Table, DateTime, Boolean, UniqueConstraint, Index
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
+                        Boolean, CheckConstraint, UniqueConstraint, DateTime,
+                        ForeignKey, PrimaryKeyConstraint, insert, select )
 
-from interfaceType import InterfaceType, interface_type
-from location import Location, location,Chassis, chassis
-from hardware import Machine, machine
-from configuration import CfgPath, cfg_path
-from aquilon.exceptions_ import ArgumentError
-
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, deferred
 
+from interface_type import InterfaceType, interface_type
+from location import Location, location,Chassis, chassis
+from machine import Machine, machine
+from configuration import CfgPath, cfg_path
+from aquilon.exceptions_ import ArgumentError
 
 interface = Table('interface',meta,
     Column('id', Integer, Sequence('interface_id_seq'), primary_key=True),
@@ -99,5 +96,10 @@ mapper(PhysicalInterface, physical_interface,
     'machine'   : relation(Machine, backref='interfaces' ),
     'interface' : relation(Interface, lazy=False, backref='physical')})
     #collection_clas=attribute_mapped_collection('name'))})
+
+#class NetworkLink(aqdbBase):
+#    __tablename__ = 'network_link'
+
+
 
 #if __name__ == '__main__':
