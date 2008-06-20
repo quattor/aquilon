@@ -21,7 +21,7 @@ SystemType  = st.subtype('SystemType','system_type')
 system_type = SystemType.__table__
 def get_sys_type_id(typ_nm):
     """ To keep session out of __init__ methods for systems """
-    sl=select([SystemType.c.id], SystemType.c.type=='%s'%(typ_nm))
+    sl=select([system_type.c.id], system_type.c.type=='%s'%(typ_nm))
     return engine.execute(sl).fetchone()[0]
 
 _sys_types = ['base_system_type', 'host', 'afs_cell', 'quattor_server',
