@@ -10,28 +10,15 @@
 """ Contains tables and objects for authorization in Aquilon """
 import datetime
 import sys
-import os
-sys.path.insert(0,'../')
+sys.path.insert(0,'..')
+sys.path.insert(1,'../..')
+sys.path.insert(2,'../../..')
 
-from db import *
+from db import Base
+from name_table import make_name_class
 
-from sqlalchemy import Table, Column, Integer, Sequence, String
-from sqlalchemy import DateTime, UniqueConstraint, ForeignKey
-from sqlalchemy.orm import mapper, relation, deferred
-
-class Role(Base):
-    __table__ = Table('role', Base.metadata,
-        Column('id', Integer, Sequence('role_id_seq'),
-               primary_key=True),
-        Column('name', String(32), nullable=False),
-        UniqueConstraint('name', name='role_name_uk'))
-
-    #comments = get_comment_col()
-    #creation_date = get_date_col()
-#TODO: change this to full declarative, not with a table def
-Role.comments = Column('comments', String(255), nullable=True)
-Role.creation_date = Column('creation_date', DateTime, default=datetime.now)
-Role.__table__.create(checkfirst=True)
+Role = make_name_class('Role', 'role')
+role = Role.__table__
 
 def populate_role():
     if s.query(Role).count() == 0:

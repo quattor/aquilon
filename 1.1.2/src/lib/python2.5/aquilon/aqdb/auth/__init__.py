@@ -7,4 +7,8 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-__all__ = ['realm', role', 'user_principal']
+__all__ = (
+        'realm', 
+        'role',
+        'user_principal'
+        )

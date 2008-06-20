@@ -9,46 +9,48 @@
 # This module is part of Aquilon
 """ Contains tables and objects for authorization in Aquilon """
 
-import datetime
+from datetime import datetime
 import sys
-import os
-sys.path.insert(0, '../')
+sys.path.insert(0, '..')
+sys.path.insert(1,'../..')
+sys.path.insert(2,'../../..')
+import depends
 
+from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
+                        select, ForeignKey, PassiveDefault, UniqueConstraint)
+from sqlalchemy.orm import relation, deferred
 
-from db import *
-
-from sqlalchemy import Table, Column, Integer, Sequence, String
-from sqlalchemy import DateTime, UniqueConstraint, ForeignKey
-from sqlalchemy.orm import mapper, relation, deferred
+from db import Base
+from role import Role, role
+from realm import Realm, realm
 
 class UserPrincipal(Base):
     """ Simple class for strings representing users kerberos credential """
-    __table__ = Table('user_principal', meta,
-        Column('id', Integer, Sequence('user_principal_id_seq'),
-               primary_key=True),
-        Column('name', String(32), nullable=False),
-        Column('realm_id', Integer,
-               ForeignKey('realm.id', name='usr_princ_rlm_fk'), nullable=False),
-        Column('role_id', Integer,
-               ForeignKey('role.id', name='usr_princ_role_fk'),
-           nullable=False, default = id_getter(Role.__table__,
-                                               Role.__table__.c.name,'nobody')),
+    __tablename__ = 'user_principal'
+    id = Column(Integer, Sequence('user_principal_id_seq'), primary_key=True)
+    name = Column(String(32), nullable=False)
+    realm_id = Column(Integer, ForeignKey('realm.id', name='usr_princ_rlm_fk'),
+               nullable=False)
 
-        UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
+    role_id = Column(Integer, ForeignKey('role.id', name='usr_princ_role_fk'),
+                     nullable=False,
+                     default = select(
+                        [role.c.id]).where(
+                        role.c.name=='nobody').execute().fetchone()[0])
 
-    #creation_date = deferred(Column('creation_date', DateTime,
-    #                                nullable=False, default=datetime.now))
-    #comments = deferred(Column('comments', String(255), nullable=True))
+    creation_date = deferred(Column(DateTime, nullable=False, default=datetime.now))
+    comments = deferred(Column('comments', String(255), nullable=True))
+
     realm = relation(Realm, uselist = False)
     role  = relation(Role, uselist = False)
 
     def __str__(self):
         return '@'.join([self.name,self.realm.name])
-UserPrincipal.comments = Column('comments', String(255), nullable=True)
-UserPrincipal.creation_date = Column('creation_date', DateTime,
-                                     nullable=False, default=datetime.now)
-user_principal = UserPrincipal.__table__
 
+user_principal = UserPrincipal.__table__
+user_principal.primary_key.name = 'user_principal_pk'
+user_principal.append_constraint(
+    UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
 
 def populate_user_principal():
     admin = s.query(Role).filter_by(name='aqd_admin').one()
