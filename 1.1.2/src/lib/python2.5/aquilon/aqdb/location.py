@@ -14,7 +14,7 @@ import sys
 sys.path.append('../..')
 
 from db import *
-from locationType import location_type, LocationType
+from location_type import location_type, LocationType
 from sqlalchemy import Column, Integer, Sequence, String, ForeignKey, select
 from sqlalchemy.orm import mapper, relation, deferred
 
@@ -22,7 +22,7 @@ from aquilon.exceptions_ import ArgumentError
 
 def get_loc_type_id(typ_nm):
     """ To keep session out of __init__ methods for systems """
-    sl=select([LocationType.c.id], LocationType.c.type=='%s'%(typ_nm))
+    sl=select([location_type.c.id], location_type.c.type=='%s'%(typ_nm))
     return engine.execute(sl).fetchone()[0]
 
 
@@ -37,7 +37,7 @@ class LocationSearchList(Base):
     """ The named parent table for lists of location types to search service
     maps later on when automatic configuration of services takes places """
     __table__ = Table('location_search_list', Base.metadata,
-        get_id_col('location_search_list'),
+        get_id_col('location_search_list_id'),
         Column('name', String(32), nullable = False),
         UniqueConstraint('name', name = 'loc_srch_list_uk'))
 
