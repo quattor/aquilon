@@ -46,7 +46,7 @@ class KNCHTTPChannel(http.HTTPChannel):
             return
         http.HTTPChannel.lineReceived(self, line)
 
-    def getPrinciple(self):
+    def getPrincipal(self):
         return self.kncinfo.get("CREDS")
 
     # FIXME: Generally, twisted methods would return an IPv4Address here.
@@ -75,7 +75,7 @@ class KNCSite(server.Site):
                 #request.getClientIP(),
                 request.channel.getClientIP(),
                 # request.getUser() or "-", # the remote user is almost never important
-                request.channel.getPrinciple(),
+                request.channel.getPrincipal(),
                 http._logDateTime,
                 '%s %s %s' % (self._escape(request.method),
                               self._escape(request.uri),

@@ -7,11 +7,12 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+""" Suggested versions of external libraries, and the defaults for the 
+    binaries shipped.
+    
+"""
 
 import msversion
 
 msversion.addpkg('zope.interface', '3.3.0')
 msversion.addpkg('twisted', '2.5.0')
-msversion.addpkg('asynqueue', '0.3', 'dist')
-msversion.addpkg('sasync', '0.6-ms1', 'dist')

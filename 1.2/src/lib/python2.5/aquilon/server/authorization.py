@@ -9,18 +9,25 @@
 # This module is part of Aquilon
 """Authorization stub for simple authorization checks."""
 
-from aquilon.exceptions_ import AuthorizationException
 from twisted.python import log
 
-# FIXME: How does this get instantiated?  Should it be a singleton?
+from aquilon.exceptions_ import AuthorizationException
+from aquilon.server.dbwrappers.user_principal import (
+        get_or_create_user_principal)
+
+
 class AuthorizationBroker(object):
     """Handles any behind the scenes work in figuring out entitlements."""
-    def __init__(self, dbbroker):
-        self.dbbroker = dbbroker
+
+    # Borg
+    __shared_state = {}
+
+    def __init__(self):
+        self.__dict__ = self.__shared_state
 
     # FIXME: Hard coded check for now.
-    def _check(self, dbuser, az_domain, action, resource):
-        if action == 'show':
+    def _check(self, session, dbuser, action, resource):
+        if action.startswith('show') or action == 'status':
             return True
         if dbuser is None:
             raise AuthorizationException(
@@ -37,8 +44,7 @@ class AuthorizationBroker(object):
                         "Must have the aqd_admin role to %s." % action)
         return True
 
-    def check(self, az_domain, principal, action, resource):
-        d = self.dbbroker.get_user(True, principal, session=True)
-        d = d.addCallback(self._check, az_domain, action, resource)
-        return d
+    def check(self, session, principal, action, resource):
+        dbuser = get_or_create_user_principal(session, principal)
+        return self._check(session, dbuser, action, resource)
 

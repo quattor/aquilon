@@ -10,138 +10,88 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 import os
-#from tempfile import mkdtemp, mkstemp
 from datetime import datetime
 
-from twisted.internet import utils, threads, defer
-from twisted.python import log
-
-from aquilon.exceptions_ import ProcessException, RollbackException, \
-        DetailedProcessException, ArgumentError, AquilonError
-from aquilon.aqdb.hardware import Machine, Disk
-from aquilon.aqdb.interface import PhysicalInterface
-from aquilon.aqdb.systems import Host
 from aquilon.aqdb.utils.ipcalc import Network
+from aquilon.server.processes import write_file, read_file, remove_file
 
-class TemplateCreator(object):
 
-    def _write_file(self, path, filename, content):
-        if not os.path.exists(path):
-            os.makedirs(path)
-        f = open(filename, 'w')
-        f.write(content)
-        f.close()
-
-    # No attempt to clean up empty/stale directories.
-    def _remove_file(self, filename):
-        try:
-            os.remove(filename)
-        except OSError, e:
-            # This means no error will get back to the client - is that
-            # correct?
-            log.err("Could not remove file '%s': %s" % (filename, e))
-
-    def _read_file(self, path, filename):
-        fullfile = os.path.join(path, filename)
-        try:
-            return open(fullfile).read()
-        except OSError, e:
-            raise AquilonError("Could not read contents of %s: %s"
-                    % (fullfile, e))
-
-    def get_plenary_info(self, dbmachine):
-        plenary_info = {}
-        plenary_info["hub"] = dbmachine.location.hub.fullname
-        plenary_info["building"] = dbmachine.location.building.name
-        plenary_info["rack"] = dbmachine.location.rack.name
-        plenary_info["sysloc"] = dbmachine.location.sysloc()
-        plenary_info["machine"] = dbmachine.name
-        plenary_info["model"] = dbmachine.model.name
-        plenary_info["vendor"] = dbmachine.model.vendor.name
-        plenary_info["serial"] = dbmachine.serial_no
-        plenary_info["ram"] = dbmachine.memory
-        plenary_info["num_cpus"] = dbmachine.cpu_quantity
-        plenary_info["cpu_relpath"] = "hardware/cpu/%s/%s" % (
+class PlenaryMachineInfo(object):
+    def __init__(self, dbmachine):
+        self.hub = dbmachine.location.hub.fullname
+        self.building = dbmachine.location.building.name
+        self.rack = dbmachine.location.rack.name
+        self.sysloc = dbmachine.location.sysloc()
+        self.machine = dbmachine.name
+        self.model = dbmachine.model.name
+        self.vendor = dbmachine.model.vendor.name
+        self.serial = dbmachine.serial_no
+        self.ram = dbmachine.memory
+        self.num_cpus = dbmachine.cpu_quantity
+        self.cpu_relpath = "hardware/cpu/%s/%s" % (
                 dbmachine.cpu.vendor.name, dbmachine.cpu.name)
         harddisks = []
         for harddisk in dbmachine.disks:
             relpath = "hardware/harddisk/generic/%s" % harddisk.type.type
             harddisks.append({"relpath":relpath, "capacity":harddisk.capacity})
-        plenary_info["harddisks"] = harddisks
-        plenary_info["model_relpath"] = (
-            "hardware/machine/%(vendor)s/%(model)s" % plenary_info)
-        plenary_info["plenary_core"] = (
-                "machine/%(hub)s/%(building)s/%(rack)s" % plenary_info)
-        plenary_info["plenary_struct"] = (
-                "%(plenary_core)s/%(machine)s" % plenary_info)
-        plenary_info["plenary_template"] = (
-                "%(plenary_struct)s.tpl" % plenary_info)
-        return plenary_info
+        self.harddisks = harddisks
+        self.interfaces = []
+        for interface in dbmachine.interfaces:
+            self.interfaces.append(
+                    {"name":interface.name, "mac":interface.mac,
+                        "boot":interface.boot})
+        self.model_relpath = (
+            "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
+        self.plenary_core = (
+                "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
+        self.plenary_struct = ("%(plenary_core)s/%(machine)s" % self.__dict__)
+        self.plenary_template = ("%(plenary_struct)s.tpl" % self.__dict__)
+        return
 
-    # Expects to be run after dbaccess.add_machine, dbaccess.add_interface,
-    # dbaccess.add_host, or dbaccess.del_interface
-    def generate_plenary(self, result, plenarydir, user, localhost, **kwargs):
-        """This writes out the machine file to the filesystem."""
-        if isinstance(result, Machine):
-            dbmachine = result
-        elif isinstance(result, PhysicalInterface):
-            dbmachine = result.machine
-        elif isinstance(result, Host):
-            dbmachine = result.machine
-        elif isinstance(result, Disk):
-            dbmachine = result.machine
-        else:
-            raise ValueError("generate_plenary cannot handle type %s" 
-                    % type(result))
-        # FIXME: There are hard-coded values in get_plenary_info()
-        plenary_info = self.get_plenary_info(dbmachine)
+    def write(self, plenarydir, localhost, user):
         lines = []
-        lines.append("#Generated on %s for %s at %s"
-                % (localhost, user, datetime.now().ctime()))
-        lines.append("structure template %(plenary_struct)s;\n" % plenary_info)
-        lines.append('"location" = "%(sysloc)s";' % plenary_info)
-        if plenary_info.get("serial"):
-            lines.append('"serialnumber" = "%(serial)s";\n' % plenary_info)
-        lines.append("include %(model_relpath)s;\n" % plenary_info)
+        lines.append("#Generated on %s for %s at %s UTC"
+                % (localhost, user, datetime.utcnow().ctime()))
+        lines.append("structure template %(plenary_struct)s;\n" % self.__dict__)
+        lines.append('"location" = "%(sysloc)s";' % self.__dict__)
+        if self.serial:
+            lines.append('"serialnumber" = "%(serial)s";\n' % self.__dict__)
+        lines.append("include %(model_relpath)s;\n" % self.__dict__)
         lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
-                % plenary_info)
+                % self.__dict__)
         lines.append('"cpu" = list(' + ", \n             ".join(
-                ['create("%(cpu_relpath)s")' % plenary_info
-                for cpu_num in range(plenary_info["num_cpus"])]) + ');')
-        if plenary_info["harddisks"]:
+                ['create("%(cpu_relpath)s")' % self.__dict__
+                for cpu_num in range(self.num_cpus)]) + ');')
+        if self.harddisks:
             # FIXME: Stuck at one, for now.
             lines.append('"harddisks" = nlist("sda", create("%s", "capacity", %d*GB));\n'
-                    % (plenary_info["harddisks"][0]["relpath"], 
-                    plenary_info["harddisks"][0]["capacity"]))
-        for interface in dbmachine.interfaces:
-            # FIXME: May need more information here...
+                    % (self.harddisks[0]["relpath"], 
+                    self.harddisks[0]["capacity"]))
+        for interface in self.interfaces:
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
-                    % (interface.name, interface.mac.upper()))
-            if interface.boot:
+                    % (interface['name'], interface['mac'].upper()))
+            if interface['boot']:
                 lines.append('"cards/nic/%s/boot" = %s;'
-                        % (interface.name, str(interface.boot).lower()))
+                        % (interface['name'], str(interface['boot']).lower()))
+        lines.append("")
 
-        plenary_path = os.path.join(plenarydir, plenary_info["plenary_core"])
-        plenary_file = os.path.join(plenarydir, plenary_info["plenary_template"])
-        d = threads.deferToThread(self._write_file, plenary_path,
-                plenary_file, "\n".join(lines))
-        d = d.addCallback(self._cb_inject, result)
-        return d
+        plenary_path = os.path.join(plenarydir, self.plenary_core)
+        plenary_file = os.path.join(plenarydir, self.plenary_template)
+        if not os.path.exists(plenary_path):
+            os.makedirs(plenary_path)
+        write_file(plenary_file, "\n".join(lines))
+        return
 
-    # Expects to be run after dbaccess.del_machine
-    def remove_plenary(self, result, plenarydir, **kwargs):
-        dbmachine = result
-        plenary_info = self.get_plenary_info(dbmachine)
-        plenary_file = os.path.join(plenarydir, plenary_info["plenary_template"])
-        d = threads.deferToThread(self._remove_file, plenary_file)
-        d = d.addCallback(self._cb_inject, result)
-        return d
+    def read(self, plenarydir):
+        return read_file(plenarydir, self.plenary_template)
 
-    def reconfigure(self, result, build_info, localhost, user, **kwargs):
-        tempdir = build_info["tempdir"]
-        dbhost = build_info["dbhost"]
+    def remove(self, plenarydir):
+        plenary_file = os.path.join(plenarydir, self.plenary_template)
+        remove_file(plenary_file)
+        return
+
+    def reconfigure(self, dbhost, tempdir, localhost, user):
         fqdn = dbhost.fqdn
-        plenary_info = self.get_plenary_info(dbhost.machine)
 
         # FIXME: Need at least one interface marked boot - that one first
         # FIXME: Method for obtaining broadcast / gateway, netmask hard-coded.
@@ -183,70 +133,22 @@ class TemplateCreator(object):
         templates.append("archetype/final")
 
         lines = []
-        lines.append("#Generated on %s for %s at %s"
-                % (localhost, user, datetime.now().ctime()))
+        lines.append("#Generated on %s for %s at %s UTC"
+                % (localhost, user, datetime.utcnow().ctime()))
         lines.append("object template %s;\n" % fqdn)
         lines.append("""include { "pan/units" };\n""")
         lines.append(""""/hardware" = create("%(plenary_struct)s");\n"""
-                % plenary_info)
+                % self.__dict__)
         for interface in interfaces:
             lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
         lines.append("\n")
         for template in templates:
             lines.append("""include { "%s" };""" % template)
+        lines.append("")
 
         template_file = os.path.join(tempdir, fqdn + '.tpl')
-        d = threads.deferToThread(self._write_file, tempdir,
-                template_file, "\n".join(lines))
-        d = d.addCallback(lambda _: True)
-        return d
-
-    def cat_hostname(self, result, hostname, hostsdir, **kwargs):
-        d = threads.deferToThread(self._read_file, hostsdir, hostname + '.tpl')
-        return d
-
-    def cat_machine(self, result, plenarydir, **kwargs):
-        dbmachine = result
-        plenary_info = self.get_plenary_info(dbmachine)
-        d = threads.deferToThread(self._read_file, plenarydir,
-                plenary_info["plenary_template"])
-        return d
-
-    def _cb_inject(self, result, arg):
-        return arg
-
-    def _cb_record_failure(self, failure, store, key):
-        store[key] = failure
-        return True
-
-    def _cb_record_success(self, result, store, key):
-        store[key] = None
-        return True
-
-    def regenerate_machines(self, result, plenarydir, user, localhost,
-            machine_list, **kwargs):
-        d = defer.succeed(True)
-        for dbmachine in result:
-            d = d.addCallback(self._cb_inject, dbmachine)
-            d = d.addCallback(self.generate_plenary, plenarydir, user,
-                    localhost)
-            d = d.addCallbacks(callback=self._cb_record_success,
-                    callbackArgs=[machine_list, dbmachine.name],
-                    errback=self._cb_record_failure,
-                    errbackArgs=[machine_list, dbmachine.name])
-        return d
-
-    def regenerate_hosts(self, result, hostsdir, user, localhost,
-            host_list, **kwargs):
-        d = defer.succeed(True)
-        for dbhost in result:
-            build_info = {"tempdir": hostsdir, "dbhost": dbhost}
-            d = d.addCallback(self.reconfigure, build_info, localhost, user)
-            d = d.addCallbacks(callback=self._cb_record_success,
-                    callbackArgs=[host_list, dbhost.fqdn],
-                    errback=self._cb_record_failure,
-                    errbackArgs=[host_list, dbhost.fqdn])
-        return d
+        write_file(template_file, "\n".join(lines))
+        return
 
 
 #if __name__=='__main__':

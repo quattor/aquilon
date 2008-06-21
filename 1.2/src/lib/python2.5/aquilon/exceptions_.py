@@ -46,6 +46,10 @@ class ProcessException(AquilonError):
             msg = msg + " with return code '%d'" % code
         elif signalNum:
             msg = msg + " with signal '%d'" % signalNum
+        if err:
+            msg = msg + " and stderr:\n%s" % err
+        elif out:
+            msg = msg + " and stdout:\n%s" % err
         StandardError.__init__(self, msg)
 
 

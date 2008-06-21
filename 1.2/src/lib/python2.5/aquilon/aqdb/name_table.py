@@ -23,6 +23,8 @@ from sqlalchemy     import (Table, Column, Integer, String, DateTime, Sequence,
 
 from sqlalchemy.orm import deferred
 
+from aquilon.exceptions_ import ArgumentError
+
 def make_name_class(nm,tbl):
     """ A factory object for tables that consist only of a name attr """
     class klass(Base):

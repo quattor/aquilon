@@ -10,11 +10,6 @@
 """Provide a twistd plugin for aqd to start up."""
 
 import os
-#import sys
-#
-#sys.path.append( os.path.join(
-#            os.path.dirname( os.path.realpath(sys.argv[0]) ),
-#            "..", "lib", "python2.5" ) )
 
 import aquilon.server.depends
 
@@ -27,24 +22,13 @@ from twisted.runner.procmon import ProcessMonitor
 from twisted.internet import reactor
 
 from aquilon.config import Config
-#from aquilon.server.resources import RestServer
 from aquilon.server.kncwrappers import KNCSite
 from aquilon.server.anonwrappers import AnonSite
 
-#from aquilon.aqdb.utils.Debug import ipshell
+# This gets imported dynamically to avoid loading libraries before the
+# config file has been parsed.
+#from aquilon.server.resources import RestServer
 
-#from twisted.application import service
-#from twisted.web import server
-## Define the application/service that twisted will run.  Boilerplate.
-## TODO: port (and log directory, debug verbosity, etc.) should be out
-## in a config file somewhere.
-#restServer = RestServer()
-#application = service.Application( "aqd" )
-#serviceCollection = service.IServiceCollection( application )
-##restSite = KNCSite( restServer )
-#restSite = server.Site( restServer )
-#restService = strports.service( "6900", restSite )
-#restService.setServiceParent( application )
 
 class Options(usage.Options):
     optFlags = [
@@ -54,6 +38,7 @@ class Options(usage.Options):
     optParameters = [
                 ["config", None, "Configuration file to use."],
             ]
+
 
 class AQDMaker(object):
     implements(IServiceMaker, IPlugin)
@@ -101,9 +86,8 @@ class AQDMaker(object):
         unixsocket = "unix:%s:mode=600" % sockname
         kncSite = KNCSite( restServer )
 
-        # FIXME: Not sure if we want to do this... if not, just
-        # go back to returning strports.service() for a single
-        # service.
+        # Not sure if we want to do this... if not, can just go back to
+        # returning strports.service() for a single service.
         multiService = MultiService()
         multiService.addService(strports.service(unixsocket, kncSite))
         multiService.addService(strports.service(

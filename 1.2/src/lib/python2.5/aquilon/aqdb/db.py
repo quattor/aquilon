@@ -17,6 +17,9 @@ import os
 from socket import gethostname
 from datetime import datetime
 
+# Internal libraries should generally not import their own depends.  The
+# AQDB library may end up locking itself (at least) to specific sqlalchemy
+# revisions, though, since the API is unstable.
 import depends #includes sqlalchemy for us
 
 from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
@@ -29,6 +32,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exceptions import SQLError
 
 from aquilon.config import Config
+
+# Hack until db.py goes away...
+from db_factory import db_factory
 
 # Something like this will/should be valid when the broker reads in a
 # config file first.  The config object is (essentially) a singleton
@@ -61,26 +67,29 @@ if dsn.startswith('oracle'):
     if not os.environ.get('ORACLE_SID'):
         os.environ['ORACLE_SID'] = config.get('database', 'server')
 
-engine = create_engine(dsn)
+#engine = create_engine(dsn)
+dbf = db_factory()
+engine = dbf.engine
 
-try:
-    engine.connect()
-except Exception,e:
-    print e
-    print 'DSN ',dsn
-    if dsn.startswith('oracle'):
-        print 'ENVIRONMENT VARS:'
-        print os.environ['ORACLE_HOME']
-        print os.environ['ORACLE_SID']
-    sys.exit(1)
+#try:
+#    engine.connect()
+#except Exception,e:
+#    print e
+#    print 'DSN ',dsn
+#    if dsn.startswith('oracle'):
+#        print 'ENVIRONMENT VARS:'
+#        print os.environ['ORACLE_HOME']
+#        print os.environ['ORACLE_SID']
+#    sys.exit(1)
 
-meta  = MetaData(engine)
+#meta  = MetaData(engine)
+meta = dbf.meta
 #meta.bind.echo = True
 
-Session = scoped_session(sessionmaker(bind=engine,
-                                      autoflush=True,
-                                      transactional=True))
-
+#Session = scoped_session(sessionmaker(bind=engine,
+#                                      autoflush=True,
+#                                      transactional=True))
+Session = dbf.Session
 
 #AKA 'duck punching'...this decorator will bolt new methods onto a class
 def monkeypatch(cls):

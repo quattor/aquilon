@@ -45,25 +45,26 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 
-from twisted.application import internet
-from twisted.web import server, resource, http, error, static
-from twisted.internet import defer, utils, threads
+from twisted.web import server, resource, http, static
+from twisted.internet import defer, threads
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
         NotFoundException, UnimplementedError, PartialError
-from aquilon.server.formats import Formatter
-from aquilon.server.broker import Broker
+from aquilon.server.formats.formatters import ResponseFormatter
+from aquilon.server.broker import BrokerCommand
+from aquilon.server import commands
+
 
 class ResponsePage(resource.Resource):
 
-    def __init__(self, broker, path, formatter, path_variable=None):
+    def __init__(self, path, formatter, path_variable=None):
         self.path = path
-        self.broker = broker
         self.path_variable = path_variable
         self.dynamic_child = None
         resource.Resource.__init__(self)
         self.formatter = formatter
+        self.handlers = {}
 
     def getChildWithDefault(self, path, request):
         """Overriding this method to parse formatting requests out
@@ -108,12 +109,14 @@ class ResponsePage(resource.Resource):
         return self.dynamic_child
 
     def render(self, request):
-        """This is mostly the default implementation from resource.Resource
-        that checks for the appropriate method to delegate to.  This can
-        be expanded out to do any default/incoming processing...
+        """This is based on the default implementation from
+        resource.Resource that checks for the appropriate method to
+        delegate to.
 
-        For now, the only additions are to have a default handler for 
-        arguments in a PUT request.
+        It adds a default handler for arguments in a PUT request and
+        delegation of argument parsing.
+        The processing is pushed off onto a thread and wrapped with
+        error handling.
 
         """
         if request.method == 'PUT':
@@ -123,10 +126,28 @@ class ResponsePage(resource.Resource):
             # one might want to merge the lists, instead of overwriting with
             # the new.  Not sure if that matters right now.
             request.args.update( http.parse_qs(request.content.read()) )
-        m = getattr(self, 'render_' + request.method, None)
-        if not m:
+        # FIXME: This breaks HEAD and OPTIONS handling...
+        handler = self.handlers.get(request.method, None)
+        if not handler:
+            # FIXME: This may be broken, if it is supposed to get a useful
+            # message based on available render_ methods.
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
-        return m(request)
+        # Default render would just call the method here.
+        # This is expanded to do argument checking, finish the request, 
+        # and do some error handling.
+        d = self.check_arguments(request,
+                handler.required_parameters, handler.optional_parameters)
+        style = getattr(self, "output_format", None)
+        if style is None:
+            style = getattr(request, "output_format", None)
+        if style is None:
+            style = getattr(handler, "default_style", "raw")
+        d = d.addCallback(lambda arguments: threads.deferToThread(
+                handler.render, style=style, request=request, **arguments))
+        d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.wrapNonInternalError, request)
+        d = d.addErrback(self.wrapError, request)
+        return server.NOT_DONE_YET
 
     def check_arguments(self, request, required = [], optional = []):
         """Check for the required and optional arguments.
@@ -149,6 +170,7 @@ class ResponsePage(resource.Resource):
 
         arguments = {}
         for (arg, req) in required_map.items():
+            #log.msg("Checking for arg %s with required=%s" % (arg, req))
             if not request.args.has_key(arg):
                 if req:
                     return defer.fail(ArgumentError(
@@ -181,10 +203,6 @@ class ResponsePage(resource.Resource):
         request.finish()
         return
 
-    def finishOK(self, result, request):
-        """Ignore any results - usually empty for this - and finish"""
-        return self.finishRender("", request)
-
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
         r = failure.trap(NotFoundException, AuthorizationException,
@@ -213,638 +231,13 @@ class ResponsePage(resource.Resource):
         request.setResponseCode(http.INTERNAL_SERVER_ERROR)
         return self.finishRender(msg, request)
 
-    def format_or_fail(self, d, request):
-        """Utility method for finishing a request that needs to be formatted."""
-        d = d.addCallback(self.format, request)
-        d = d.addCallback(self.finishRender, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
-
-    def finish_or_fail(self, d, request):
-        """Utility method for finishing up a request that produces no output."""
-        d = d.addCallback(self.finishOK, request)
-        d = d.addErrback(self.wrapNonInternalError, request)
-        d = d.addErrback(self.wrapError, request)
-        return server.NOT_DONE_YET
-
-    def command_show_hostiplist(self, request):
-        """aqcommand: aq show hosiplist"""
-        if not getattr(request, "output_format", None):
-            request.output_format = 'csv'
-        d = self.check_arguments(request, optional=["archetype"])
-        d = d.addCallback(self.broker.show_hostiplist,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_hostiplist_archetype(self, request):
-        """aqcommand: aq show hosiplist"""
-        if not getattr(request, "output_format", None):
-            request.output_format = 'csv'
-        d = self.check_arguments(request, ["archetype"])
-        d = d.addCallback(self.broker.show_hostiplist,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_domain_all(self, request):
-        """aqcommand: aq show domain --all"""
-        d = self.check_arguments(request)
-        d = d.addCallback(self.broker.show_domain_all,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_domain_domain(self, request):
-        """aqcommand: aq show domain --domain=<name>"""
-        d = self.check_arguments(request, ["domain"])
-        d = d.addCallback(self.broker.show_domain,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_host_all(self, request):
-        """aqcommand: aq show host --all"""
-        d = self.check_arguments(request)
-        d = d.addCallback(self.broker.show_host_all,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_host_hostname(self, request):
-        """aqcommand: aq show host --hostname=<host>"""
-        d = self.check_arguments(request, ["hostname"])
-        d = d.addCallback(self.broker.show_host,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_add_host(self, request):
-        """aqcommand: aq add host --hostname=<host>"""
-        d = self.check_arguments(request,
-                ["hostname", "machine", "domain", "status", "archetype"])
-        d = d.addCallback(self.broker.add_host,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_del_host(self, request):
-        """aqcommand: aq del host --hostname=<host>"""
-        d = self.check_arguments(request, ["hostname"])
-        d = d.addCallback(self.broker.del_host,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_reconfigure(self, request):
-        """aqcommand: aq reconfigure --hostname=<host>"""
-        d = self.check_arguments(request, ["hostname"])
-        d = d.addCallback(self.broker.reconfigure,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_cat_hostname(self, request):
-        """aqcommand: aq cat --hostname=<host>"""
-        d = self.check_arguments(request, ["hostname"])
-        d = d.addCallback(self.broker.cat_hostname,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_cat_machine(self, request):
-        """aqcommand: aq cat --machine=<machine>"""
-        d = self.check_arguments(request, ["machine"])
-        d = d.addCallback(self.broker.cat_machine,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_add_domain(self, request):
-        """aqcommand: aq add domain --domain=<domain>"""
-        d = self.check_arguments(request, ["domain"])
-        d = d.addCallback(self.broker.add_domain,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_del_domain(self, request):
-        """aqcommand: aq del domain --domain=<domain>"""
-        d = self.check_arguments(request, ["domain"])
-        d = d.addCallback(self.broker.del_domain,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_get(self, request):
-        """aqcommand: aq get --domain=<domain>"""
-        d = self.check_arguments(request, ["domain"])
-        d = d.addCallback(self.broker.get,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_put(self, request):
-        """aqcommand: aq put --domain=<domain>"""
-        d = self.check_arguments(request, ["domain", "bundle"])
-        d = d.addCallback(self.broker.put,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_deploy(self, request):
-        """aqcommand: aq deploy --domain=<domain> --to=<domain>"""
-        d = self.check_arguments(request, ["domain"], ["to"])
-        d = d.addCallback(self.broker.deploy,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_manage(self, request):
-        """aqcommand: aq manage --hostname=<name> --domain=<domain>"""
-        d = self.check_arguments(request, ["hostname", "domain"])
-        d = d.addCallback(self.broker.manage,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_sync(self, request):
-        """aqcommand: aq sync --domain=<domain>"""
-        d = self.check_arguments(request, ["domain"])
-        d = d.addCallback(self.broker.sync,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_location_types(self, request):
-        """aqcommand: aq show location"""
-        d = self.check_arguments(request)
-        d = d.addCallback(self.broker.show_location_type,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_location_type(self, request):
-        """aqcommand: aq show location --type"""
-        d = self.check_arguments(request, ["type"])
-        d = d.addCallback(self.broker.show_location,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_location_name(self, request):
-        """aqcommand: aq show location --name=<location>"""
-        d = self.check_arguments(request, ["type", "name"])
-        d = d.addCallback(self.broker.show_location,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_add_location(self, request):
-        """aqcommand: aq add location --locationname=<location>"""
-        d = self.check_arguments(request,
-                ["type", "name", "parenttype", "parentname"],
-                ["fullname", "comments"])
-        d = d.addCallback(self.broker.add_location,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_del_location(self, request):
-        """aqcommand: aq del location --type=<type> --name=<name>"""
-        d = self.check_arguments(request, ["type", "name"])
-        d = d.addCallback(self.broker.del_location,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_add_chassis(self, request):
-        request.args['type'] = ['chassis']
-        request.args['parenttype'] = ['rack']
-        request.args['parentname'] = request.args['rack']
-        return self.command_add_location(request)
-
-    def command_show_chassis(self, request):
-        request.args["type"] = ["chassis"]
-        return self.command_show_location_type(request)
-
-    def command_show_chassis_name(self, request):
-        request.args["type"] = ["chassis"]
-        return self.command_show_location_name(request)
-
-    def command_del_chassis(self, request):
-        request.args["type"] = ["chassis"]
-        return self.command_del_location(request)
-
-    def command_add_rack(self, request):
-        request.args['type'] = ['rack']
-        request.args['parenttype'] = ['building']
-        request.args['parentname'] = request.args['building']
-        return self.command_add_location(request)
-
-    def command_show_rack(self, request):
-        request.args["type"] = ["rack"]
-        return self.command_show_location_type(request)
-
-    def command_show_rack_name(self, request):
-        request.args["type"] = ["rack"]
-        return self.command_show_location_name(request)
-
-    def command_del_rack(self, request):
-        request.args["type"] = ["rack"]
-        return self.command_del_location(request)
-
-    def command_add_building(self, request):
-        request.args['type'] = ['building']
-        request.args['parenttype'] = ['city']
-        request.args['parentname'] = request.args['city']
-        return self.command_add_location(request)
-
-    def command_show_building(self, request):
-        request.args["type"] = ["building"]
-        return self.command_show_location_type(request)
-
-    def command_show_building_name(self, request):
-        request.args["type"] = ["building"]
-        return self.command_show_location_name(request)
-
-    def command_del_building(self, request):
-        request.args["type"] = ["building"]
-        return self.command_del_location(request)
-
-    def command_add_city(self, request):
-        request.args["type"] = ["city"]
-        request.args["parenttype"] = ["country"]
-        request.args["parentname"] = request.args["country"]
-        return self.command_add_location(request)
-
-    def command_show_city(self, request):
-        request.args["type"] = ["city"]
-        return self.command_show_location_type(request)
-
-    def command_show_city_name(self, request):
-        request.args["type"] = ["city"]
-        return self.command_show_location_name(request)
-
-    def command_del_city(self, request):
-        request.args["type"] = ["city"]
-        return self.command_del_location(request)
-
-    def command_add_country (self, request):
-        request.args["type"] = ["country"]
-        request.args["parenttype"] = ["continent"]
-        request.args["parentname"] = request.args["continent"]
-        return self.command_add_location(request)
-
-    def command_show_country(self, request):
-        request.args["type"] = ["country"]
-        return self.command_show_location_type(request)
-
-    def command_show_country_name(self, request):
-        request.args["type"] = ["country"]
-        return self.command_show_location_name(request)
-
-    def command_del_country(self, request):
-        request.args["type"] = ["country"]
-        return self.command_del_location(request)
-
-    def command_add_continent (self, request):
-        request.args["type"] = ["continent"]
-        request.args["parenttype"] = ["hub"]
-        request.args["parentname"] = request.args["hub"]
-        return self.command_add_location(request)
-
-    def command_show_continent(self, request):
-        request.args["type"] = ["continent"]
-        return self.command_show_location_type(request)
-
-    def command_show_continent_name(self, request):
-        request.args["type"] = ["continent"]
-        return self.command_show_location_name(request)
-
-    def command_del_continent(self, request):
-        request.args["type"] = ["continent"]
-        return self.command_del_location(request)
-
-    def command_add_hub (self, request):
-        request.args["type"] = ["hub"]
-        request.args["parenttype"] = ["company"]
-        request.args["parentname"] = "ms" 
-        return self.command_add_location(request)
-
-    def command_show_hub(self, request):
-        request.args["type"] = ["hub"]
-        return self.command_show_location_type(request)
-
-    def command_show_hub_name(self, request):
-        request.args["type"] = ["hub"]
-        return self.command_show_location_name(request)
-
-    def command_del_hub(self, request):
-        request.args["type"] = ["hub"]
-        return self.command_del_location(request)
-
-    def command_status(self, request):
-        """aqcommand: aq status"""
-        d = self.check_arguments(request)
-        d = d.addCallback(self.broker.status,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_add_cpu (self, request):
-        """aqcommand add cpu --name name --vedor vendor --speed speed"""
-        d = self.check_arguments(request, ['name', 'vendor', 'speed'])
-        d = d.addCallback(self.broker.add_cpu,
-            request_path=request.path,
-            user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-    
-    def command_add_disk (self, request):
-        """aqcommand add disk --machine machine --type type --capacity capacity"""
-        d = self.check_arguments(request, ['machine', 'type', 'capacity'])
-        d = d.addCallback(self.broker.add_disk,
-            request_path=request.path,
-            user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-    
-    def command_add_service(self, request):
-        d = self.check_arguments(request, ['service'], ['instance', 'comments'])
-        d = d.addCallback(self.broker.add_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_add_service_instance(self, request):
-        d = self.check_arguments(request, ['service', 'instance'], ['comments'])
-        d = d.addCallback(self.broker.add_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_show_service(self, request):
-        d = self.check_arguments(request, optional=['service'])
-        d = d.addCallback(self.broker.show_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_service_service(self, request):
-        d = self.check_arguments(request, ['service'])
-        d = d.addCallback(self.broker.show_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_del_service(self, request):
-        d = self.check_arguments(request, ['service'], ['instance'])
-        d = d.addCallback(self.broker.del_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_del_service_instance(self, request):
-        d = self.check_arguments(request, ['service', 'instance'])
-        d = d.addCallback(self.broker.del_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_bind_client(self, request):
-        d = self.check_arguments(request, ['hostname', 'service'], ['instance'])
-        d = d.addCallback(self.broker.bind_client,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_rebind_client(self, request):
-        d = self.check_arguments(request, ['hostname', 'service'], ['instance'])
-        d = d.addCallback(self.broker.rebind_client,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_unbind_client(self, request):
-        d = self.check_arguments(request, ['hostname', 'service'])
-        d = d.addCallback(self.broker.unbind_client,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_bind_server(self, request):
-        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
-        d = d.addCallback(self.broker.bind_server,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_rebind_server(self, request):
-        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
-        d = d.addCallback(self.broker.rebind_server,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_unbind_server(self, request):
-        d = self.check_arguments(request, ['hostname', 'service'], ['instance'])
-        d = d.addCallback(self.broker.unbind_server,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_unbind_server_instance(self, request):
-        d = self.check_arguments(request, ['hostname', 'service', 'instance'])
-        d = d.addCallback(self.broker.unbind_server,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_add_required_service(self, request):
-        d = self.check_arguments(request, ['service', 'archetype'],
-                ['comments'])
-        d = d.addCallback(self.broker.add_required_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_show_archetype(self, request):
-        d = self.check_arguments(request, optional=['archetype'])
-        d = d.addCallback(self.broker.show_archetype,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_archetype_archetype(self, request):
-        d = self.check_arguments(request, ['archetype'])
-        d = d.addCallback(self.broker.show_archetype,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_del_required_service(self, request):
-        d = self.check_arguments(request, ['service', 'archetype'])
-        d = d.addCallback(self.broker.del_required_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_map_service(self, request):
-        d = self.check_arguments(request, ['service', 'instance'],
-                ['company', 'hub', 'continent', 'country', 'city', 'building',
-                    'rack', 'chassis', 'desk'])
-        d = d.addCallback(self.broker.map_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_show_map(self, request):
-        d = self.check_arguments(request, optional=['service', 'instance',
-                'company', 'hub', 'continent', 'country', 'city', 'building',
-                    'rack', 'chassis', 'desk'])
-        d = d.addCallback(self.broker.show_map,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_unmap_service(self, request):
-        d = self.check_arguments(request, ['service', 'instance'],
-                ['company', 'hub', 'continent', 'country', 'city', 'building',
-                    'rack', 'chassis', 'desk'])
-        d = d.addCallback(self.broker.unmap_service,
-                request_path = request.path,
-                user = request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_make_aquilon(self, request):
-        """aqcommand: aq make aquilon --hostname=<name> --os=<os>
-            [--personality=<personality>]"""
-        d = self.check_arguments(request, ["hostname", "os"], ["personality"])
-        d = d.addCallback(self.broker.make_aquilon,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_add_model(self, request):
-        d = self.check_arguments(request,
-                ["name", "vendor", "type"],
-                ["cputype","cpunum","mem","disktype","disksize","nics"])
-        d = d.addCallback(self.broker.add_model,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_show_model(self, request):
-        d = self.check_arguments(request, [],
-                ["name", "vendor", "type"])
-        d = d.addCallback(self.broker.show_model,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-    
-    def command_del_model(self, request):
-        d = self.check_arguments(request,
-                ["name", "vendor", "type"])
-        d = d.addCallback(self.broker.del_model,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_pxeswitch(self, request):
-        d = self.check_arguments(request, ["hostname"], ["boot", "install"])
-        d = d.addCallback(self.broker.pxeswitch,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_add_machine(self, request):
-        d = self.check_arguments(request,
-                ["machine", "model", 
-                    "cpuname", "cpuvendor", "cpuspeed", "cpucount", "memory"],
-                ["serial", "chassis", "rack", "desk"])
-        d = d.addCallback(self.broker.add_machine,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_show_machine_machine(self, request):
-        return self.command_show_machine(request)
-
-    def command_show_machine(self, request):
-        d = self.check_arguments(request,
-                optional=["machine", "location", "type", "model"])
-        d = d.addCallback(self.broker.show_machine,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_del_machine(self, request):
-        d = self.check_arguments(request, ["machine"])
-        d = d.addCallback(self.broker.del_machine,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_add_interface (self, request):
-        d = self.check_arguments(request, ["interface", "machine", "mac"],
-                ["ip", "comments"])
-        d = d.addCallback(self.broker.add_interface,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_update_interface (self, request):
-        d = self.check_arguments(request, ["interface", "machine"],
-                ["mac", "ip", "comments", "boot"])
-        d = d.addCallback(self.broker.update_interface,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_del_interface (self, request):
-        d = self.check_arguments(request, optional=["interface", "machine", "mac", "ip"])
-        d = d.addCallback(self.broker.del_interface,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_show_principal(self, request):
-        d = self.check_arguments(request, optional=["principal"])
-        d = d.addCallback(self.broker.show_principal,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_show_principal_principal(self, request):
-        d = self.check_arguments(request, ["principal"])
-        d = d.addCallback(self.broker.show_principal,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.format_or_fail(d, request)
-
-    def command_permission(self, request):
-        d = self.check_arguments(request, ["principal", "role"],
-                ["createuser", "createrealm"])
-        d = d.addCallback(self.broker.permission,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-    def command_regenerate_templates(self, request):
-        d = self.check_arguments(request, ["all"])
-        d = d.addCallback(self.broker.regenerate_templates,
-                request_path=request.path,
-                user=request.channel.getPrinciple())
-        return self.finish_or_fail(d, request)
-
-#==============================================================================
 
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
     def __init__(self, config):
-        formatter = Formatter()
-        broker = Broker(config)
-        ResponsePage.__init__(self, broker, '', formatter)
+        formatter = ResponseFormatter()
+        ResponsePage.__init__(self, '', formatter)
+        self.config = config
 
         # Regular Expression for matching variables in a path definition.
         # Currently only supports stuffing a single variable in a path
@@ -880,7 +273,7 @@ class RestServer(ResponsePage):
                         child = container.getStaticEntity(component)
                         if child is None:
                             #log.msg("Creating new static component '" + component + "'.")
-                            child = ResponsePage(self.broker, relative,
+                            child = ResponsePage(relative,
                                     formatter)
                             container.putChild(component, child)
                         container = child
@@ -903,7 +296,7 @@ class RestServer(ResponsePage):
                                 container = container.dynamic_child
                         else:
                             #log.msg("Creating new dynamic component '" + component + "'.")
-                            child = ResponsePage(self.broker, relative,
+                            child = ResponsePage(relative,
                                     formatter, path_variable=path_variable)
                             container.dynamic_child = child
                             container = child
@@ -911,27 +304,42 @@ class RestServer(ResponsePage):
                 fullcommand = name
                 if trigger:
                     fullcommand = fullcommand + "_" + trigger
-                # If the command has not been implemented yet, the server
-                # will bail out on startup with something like:
-                # AttributeError: ResponsePage instance has no attribute
-                #  'command_xxx'
-                # Go create it, or fix the command/transport definition.
-                mycommand = getattr(container, "command_" + fullcommand)
-                rendermethod = "render_" + method.upper()
-                if getattr(container, rendermethod, None):
-                    # FIXME: Raise an Error, something has already been added
+                mymodule = getattr(commands, fullcommand, None)
+                if not mymodule:
+                    log.msg("No module available in aquilon.server.commands " +
+                            "for %s" % fullcommand)
+                # See commands/__init__.py for more info here...
+                myinstance = getattr(mymodule, "broker_command", None)
+                if not myinstance:
+                    log.msg("No class instance available for %s" % fullcommand)
+                    myinstance = BrokerCommand()
+                rendermethod = method.upper()
+                if container.handlers.get(rendermethod, None):
                     log.err("Already have a %s here at %s..." %
                             (rendermethod, container.path))
                 #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
-                setattr(container, rendermethod, mycommand)
+                container.handlers[rendermethod] = myinstance
 
+                # Since we are parsing input.xml anyway, record the possible
+                # parameters...
+                for option in command.getiterator("option"):
+                    if not option.attrib.has_key("name"):
+                        continue
+                    option_name = option.attrib["name"]
+                    if option_name not in myinstance.optional_parameters:
+                        myinstance.optional_parameters.append(option_name)
+
+        # FIXME: Only do this if needed...
         # Serve up a static templates directory for git...
         #log.msg("Checking on %s" % self.broker.templatesdir)
-        if os.path.exists(self.broker.templatesdir):
-            self.putChild("templates", static.File(self.broker.templatesdir))
+        templatesdir = config.get("broker", "templatesdir")
+        if os.path.exists(templatesdir):
+            self.putChild("templates", static.File(templatesdir))
         else:
             log.err("ERROR: templates directory '%s' not found, will not serve"
-                    % self.broker.templatesdir)
+                    % templatesdir)
+
+        self.make_required_dirs()
 
         def _logChildren(level, container):
             for (key, child) in container.listStaticEntities():
@@ -946,5 +354,17 @@ class RestServer(ResponsePage):
         #_logChildren(0, self)
 
     def set_umask(self):
-        os.umask(int(self.broker.config.get("broker", "umask"), 8))
+        os.umask(int(self.config.get("broker", "umask"), 8))
+
+    def make_required_dirs(self):
+        for d in ["basedir", "profilesdir", "depsdir", "hostsdir",
+                "plenarydir", "rundir"]:
+            dir = self.config.get("broker", d)
+            if os.path.exists(dir):
+                continue
+            try:
+                os.makedirs(dir)
+            except OSError, e:
+                log.err(e)
+
 

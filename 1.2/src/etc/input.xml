@@ -104,7 +104,7 @@
    </command>
 
    <command name="add_host">
-      %prog add host --name NAME
+      %prog add host
       Add a new host to the database.  Requires a machine with a bootable
       interface and a valid IP address.
       <optgroup name="add_host_opts" mandatory="True" fields="all">
@@ -428,7 +428,7 @@
    </command>
 
    <command name="del_host">
-      %prog del host --name HOSTNAME
+      %prog del host
       Delete a host.
       <optgroup name="del_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
@@ -446,15 +446,17 @@
          <option name="install" type="boolean" conflicts="boot">Do an install</option>
          <option name="boot" type="boolean" conflicts="install">Do a reboot</option>
       </optgroup>
-      <!-- Not sure if this is purely informational, or if there are side-
-           effects -->
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
    </command>
 
    <command name="reconfigure">
       %prog reconfigure --hostname HOSTNAME
-      <optgroup name="reconfigure options" mandatory="True" fields="all">
+      <optgroup name="reconfigure_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
+      </optgroup>
+      <optgroup name="reconfigure_optional" mandatory="False">
+         <option name="os" type="string">OS to assign to host</option>
+         <option name="personality" type="string">Personality of the host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -469,7 +471,7 @@
 
    <command name="del_domain">
       %prog del domain --domain NAME
-      <optgroup name="add domain options" mandatory="True" fields="all">
+      <optgroup name="del_domain_options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
       <transport method="delete" path="domain/%(domain)s" />
@@ -492,7 +494,7 @@
    </command>
 
    <command name="deploy">
-      %prog deploy --domain DOMAIN_NAME   -to DOMAIN_NAME]
+      %prog deploy --domain DOMAIN_NAME [--to DOMAIN_NAME]
       <optgroup name="deploy options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
@@ -545,12 +547,14 @@
    </command>
 
    <command name="show_location">
-      %prog show location   -type type [--name name]]
+      %prog show location [--type type [--name name]]
       Shows all locations of a given type
       or information about a specific location type and name.
-      <optgroup name="show_location_opts" mandatory="True" fields="any">
-         <option name="name" type="string">Host name</option>
+      <optgroup name="show_location_opts" mandatory="True" fields="all">
          <option name="type" type="string">Location type</option>
+      </optgroup>
+      <optgroup name="show_location_optional" mandatory="False" fields="all">
+         <option name="name" type="string">Host name</option>
       </optgroup>
       <transport trigger="type" method="get" path="location/%(type)s" />
       <transport trigger="name" method="get" path="location/%(type)s/%(name)s" />
@@ -704,17 +708,17 @@
    </command>
 
    <command name="add_country">
-      %prog add city --name NAME --country COUNTRY_NAME
-      Add a new city to the database
-      <optgroup name="add_city_options" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new city</option>
-         <option name="country" type="string">Name of the country that contains the city</option>
+      %prog add country --name NAME --continent CONTINENT_NAME
+      Add a new country to the database
+      <optgroup name="add_country_options" mandatory="True" fields="all">
+         <option name="name" type="string">Name of the new country</option>
+         <option name="continent" type="string">Name of the continent that contains the country</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_country/%(country)s/%(name)s" />
+      <transport method="put" path="location/add_country/%(continent)s/%(name)s" />
    </command>
 
    <command name="show_country">
@@ -771,12 +775,12 @@
 
    <command name="add_hub">
       %prog add hub --name NAME
-      Add a new hub to the database
+      Add a new hub for MS to the database
       <optgroup name="add_hub_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new hub</option>
       </optgroup>
       <optgroup name="optional_opts">
-         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="fullname" type="string">Full, descriptive (region) name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="location/add_hub/%(name)s" />
@@ -807,19 +811,24 @@
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
          <option name="os" type="string">OS to assign to host</option>
-      </optgroup>
-      <optgroup name="optional_options">
          <option name="personality" type="string">Personality of the host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
 
    <command name="add_machine">
-      %prog  add machine --machine MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
+      %prog  add machine --machine MACHINE_NAME [--chassis|--rack|--desk LOCATION] --model MODEL
+
+      If the model was created with machine specifications (values for
+      cpuname, cpuvendor, cpuspeed, cpucount, memory) they do not need
+      to be given to this command - the model info will be used as a default.
+
+      However, if the model does not have defaults, they all need to be given.
       <optgroup name="add_machine_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine name</option>
          <option name="model" type="string">machine model</option>
-	 <!-- These are required for now, but should be optional later. -->
+      </optgroup>
+      <optgroup name="add_machine_specs_opts" mandatory="False">
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
 	 <option name="cpuspeed" type="string">cpu speed</option>
@@ -838,12 +847,13 @@
    </command>
 
    <command name="show_machine">
-      %prog show machine --machine MACHINE_NAME --location LOCATION --type LOCATION_TYPE --model MODEL
+      %prog show machine [--machine MACHINE_NAME] [--chassis|--rack|--desk LOCATION] [--model MODEL]
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string">machine name</option>
-         <optgroup name="location" mandatory="False" fields="all">
-            <option name="location" type="string">location of the new machine</option>
-            <option name="type" type="string">location type (chassis|rack|desk)</option>
+         <optgroup name="show_machine_location_opts" mandatory="False">
+            <option name="chassis" type="string">Chassis name</option>
+            <option name="rack" type="string">Rack name</option>
+            <option name="desk" type="string">Desk name</option>
          </optgroup>
          <option name="model" type="string">machine model</option>
       </optgroup>
@@ -885,7 +895,7 @@
       %prog regenerate_plenary --all
       Force the server to regenerate all templates that it creates
       automatically, assuming the latest state is valid.
-      <optgroup name="regenerate_templates_opts" mandatory="True">
+      <optgroup name="regenerate_templates_opts" mandatory="True" fields="all">
          <option name="all" type="boolean">Regenerate all template files</option>
       </optgroup>
       <transport method="post" path="command/regenerate_all" />

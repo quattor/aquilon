@@ -10,13 +10,12 @@
 """To be imported by classes and modules requiring aqdb access"""
 from __future__ import with_statement
 
+#from depends import *
+
 import sys
 import os
 import pwd
-
-import msversion
-msversion.addpkg('sqlalchemy','0.4.6','dist')
-msversion.addpkg('cx-Oracle','4.3.3-10.2.0.1-py25','dist')
+import getpass
 
 import cx_Oracle
 
@@ -26,31 +25,47 @@ from sqlalchemy.exceptions import DatabaseError as SaDBError
 
 from debug import debug, noisy_exit
 
-if __name__ == '__main__':
-    sys.path.append('../..')
-
+#TODO: we really shouldn't do this. Inherit everything or nothing
+# db_factory, debug, config are copied in, then this ??? shady. But
+# we need to get this done....
+# daqscott 6/9/08
+#
+sys.path.append('../lib/python2.5')
 from aquilon.config import Config
 
-class Singleton(object):
-    _instance = None
-    def __new__(cls, *args, **kw):
-        if not cls._instance:
-            cls._instance = super(Singleton, cls).__new__(cls, *args, **kw)
-        return cls._instance
+#class Singleton(object):
+#    _instance = None
+#    def __new__(cls, *args, **kw):
+#        if not cls._instance:
+#            cls._instance = super(Singleton, cls).__new__(cls, *args, **kw)
+#        return cls._instance
 
-class db_factory(Singleton):
+class db_factory(object):
+    __shared_state = {}
     def __init__(self, *args, **kw):
+        self.__dict__ = self.__shared_state
+        if hasattr(self,'config'):
+            return
+
         self.config = Config()
         self.dsn = self.config.get('database', 'dsn')
-
         self.vendor = self.config.get('database', 'vendor')
+
+
         if self.vendor == 'oracle':
+            self.schema = self.config.get('database','dbuser')
+            self.server = self.config.get('database','server')
             passwds = self._get_password_list()
+            if len(passwds) < 1:
+                passwds.append(
+                    getpass.getpass(
+                        'Can not determine your password (%s).\nPassword:'%(
+                            self.dsn)))
             self.login(passwds)
             debug(self.engine, assert_only = True)
         elif self.vendor == 'sqlite':
-            # FIXME: Create the engine...
-            pass
+            self.engine = create_engine(self.dsn)
+            self.engine.connect()
         else:
             msg = 'database vendor can be either sqlite or oracle'
             noisy_exit(msg)
@@ -60,16 +75,20 @@ class db_factory(Singleton):
         self.meta   = MetaData(self.engine)
         assert(self.meta)
 
-    def meta(self):
-        return self.meta
-
-    def engine(self):
-        return self.engine
-
-    def session(self):
-        return scoped_session(sessionmaker(bind=self.engine,
+        self.Session = scoped_session(sessionmaker(bind=self.engine,
                                       autoflush=True,
                                       transactional=True))
+        assert(self.Session)
+
+# These don't work, since they get overridden during init.
+#    def meta(self):
+#        return self.meta
+#
+#    def engine(self):
+#        return self.engine
+
+    def session(self):
+        return self.Session()
 
     def login(self,passwds):
         errs = []
@@ -107,13 +126,33 @@ class db_factory(Singleton):
         passwd_file = self.config.get("database", "password_file")
 
         passwds = []
-        with open(passwd_file) as f:
-            passwds = f.readlines()
-        if len(passwds) < 1:
-            msg = "No lines in %s"%(passwd_file)
-            raise ValueError(msg)
+        if os.path.isfile(passwd_file):
+           with open(passwd_file) as f:
+                passwds = f.readlines()
+                if len(passwds) < 1:
+                    msg = "No lines in %s"%(passwd_file)
+                    raise ValueError(msg)
+                else:
+                    return [passwd.strip() for passwd in passwds]
         else:
-            return [passwd.strip() for passwd in passwds]
+            return []
+
+    def safe_execute(self, stmt, **kwargs):
+        """ convenience wrapper """
+        try:
+            return self.engine.execute(text(stmt), **kwargs)
+        except SQLError, e:
+            print >> sys.stderr, e
+
+    def get_id(self, table, key, value):
+        """Convenience wrapper"""
+        res = self.safe_execute("SELECT id from %s where %s = :value"
+                % (table, key), value=value)
+        if res:
+            rows = res.fetchall()
+            if rows:
+                return rows[0][0]
+        return
 
 
 class MockEngine(object):

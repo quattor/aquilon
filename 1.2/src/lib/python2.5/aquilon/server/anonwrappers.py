@@ -14,11 +14,11 @@ from twisted.python import log
 
 class AnonHTTPChannel(http.HTTPChannel):
     """
-    This adds getPrinciple() to the base channel.  Since there is no
+    This adds getPrincipal() to the base channel.  Since there is no
     knc in use here, it just returns None.
     """
 
-    def getPrinciple(self):
+    def getPrincipal(self):
         """For any anonymous channel, always returns None."""
         return None
 
@@ -26,7 +26,7 @@ class AnonHTTPChannel(http.HTTPChannel):
 class AnonSite(server.Site):
     """
     Overrides the basic HTTPChannel protocol with AnonHTTPChannel to
-    provide a getPrinciple method.  Should be kept consistent with
+    provide a getPrincipal method.  Should be kept consistent with
     any other changes from kncwrappers.
     """
     protocol = AnonHTTPChannel

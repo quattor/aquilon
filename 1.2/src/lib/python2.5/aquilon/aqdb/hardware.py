@@ -413,7 +413,8 @@ class MachineSpecs(aqdbBase):
 
 
 mapper(MachineSpecs,machine_specs, properties={
-    'model'         : relation(Model,backref='specifications'),
+    'model'         : relation(Model, backref=backref('specifications',
+                                                      uselist=False)),
     'cpu'           : relation(Cpu),
     'creation_date' : deferred(machine_specs.c.creation_date),
     'comments'      : deferred(machine_specs.c.comments)})
