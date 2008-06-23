@@ -19,14 +19,14 @@
          <option name="format" short="f" type="string" conflicts="">
             Specify output format as raw (default) or html.
          </option>
-         <option name="noknc" type="boolean" conflicts="usesock">
-            Connect to port without using knc.
+         <option name="noauth" type="boolean" conflicts="usesock">
+            Connect to port without authentication (without knc).
          </option>
          <option name="noexec" short="n" type="boolean">
             If the server sends back a command to run, echo it and exit.
          </option>
-         <option name="usesock" type="string" conflicts="noknc">
-            Connect directly (noknc) to the given unix socket.
+         <option name="usesock" type="string" conflicts="noauth">
+            Connect directly (noauth) to the given unix socket.
          </option>
          <option name="aqport" type="string" conflicts="">
             Server port to connect to

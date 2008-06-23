@@ -228,7 +228,7 @@ if __name__ == "__main__":
     else:
         default_aqhost = socket.gethostname()
 
-    if globalOptions.get('noknc'):
+    if globalOptions.get('noauth'):
         default_aqport = "6901"
     else:
         default_aqport = "6900"
@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     if globalOptions.get('usesock'):
         from aquilon.client.socketwrappers import getPage
-    elif globalOptions.get('noknc'):
+    elif globalOptions.get('noauth'):
         from aquilon.client.ncwrappers import getPage
     else:
         from aquilon.client.kncwrappers import getPage

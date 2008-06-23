@@ -32,7 +32,7 @@ from aquilon.server.anonwrappers import AnonSite
 
 class Options(usage.Options):
     optFlags = [
-                ["noknc", None, "Do not start the knc listener."],
+                ["noauth", None, "Do not start the knc listener."],
                 ["usesock", None, "use a unix socket to connect"],
             ]
     optParameters = [
@@ -68,7 +68,7 @@ class AQDMaker(object):
             return strports.service("unix:%s/aqdsock:mode=600"
                     % config.get("broker", "basedir"), openSite)
 
-        if options["noknc"]:
+        if options["noauth"]:
             return strports.service(config.get("broker", "openport"), openSite)
 
         sockname = os.path.join(config.get("broker", "rundir"), "kncsock")

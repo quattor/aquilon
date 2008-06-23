@@ -16,7 +16,7 @@ To start aqd but keep it in the foreground with logs going to stdout:
 ./twistd -no -l - aqd
 
 Ditto, but without expecting to talk to knc:
-./twistd -no -l - aqd --noknc
+./twistd -no -l - aqd --noauth
 
 If running as cdb, make sure you have a keytab set up:
 /ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
@@ -38,5 +38,5 @@ To run aq:
 ./aq.py [commands]
 
 To run aq without knc:
-./aq.py --noknc --aqport=6901 [commands]
+./aq.py --noauth --aqport=6901 [commands]
 
