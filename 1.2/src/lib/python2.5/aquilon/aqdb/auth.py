@@ -109,10 +109,10 @@ if __name__ == '__main__':
     # can add anyone else into the frey.
     #TODO: sync from some ldap group ???
 
-    admins  = ['cdb','njw', 'wesleyhe','guyroleh','daqscott',
+    admins  = ['cdb','njw', 'wesleyhe','gyuroleh','daqscott',
                'kgreen', 'benjones']
     unixeng = ['cesarg','jasona', 'dankb','tonyc','goliaa','samsh','hagberg',
-               'hookn', 'jelinker','kovasck','lookerm', 'bet','walkert','af',
+               'hookn', 'jelinker','kovacsk','lookerm', 'bet','walkert','af',
                'lillied']
     operations = ['nathand', 'premdasr', 'bestc', 'chawlav', 'wbarnes',
                   'gleasob', 'lchun', 'peteryip',
