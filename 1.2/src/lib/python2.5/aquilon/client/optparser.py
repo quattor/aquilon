@@ -11,6 +11,8 @@
 
 from optparse import OptionParser
 from xml.parsers import expat
+import os
+import sys
 import re
 import pdb
 
@@ -65,6 +67,7 @@ class Element(object):
 
     def recursiveHelp (self):
         res = self.help
+
         for child in self.children:
             res = res + child.recursiveHelp()
         return res
@@ -184,10 +187,10 @@ class command(Element):
     def recursiveHelp (self):
         res = "\n"
         lines = self.help.split("\n")
-        for line in lines:
+        for line in ["-" * 50] + lines[:1] + ["-" * 50 + "\n"] + lines[1:]:
             res = res + "    " + line + "\n"
         for og in self.optgroups:
-            res = res + og.recursiveHelp()
+            res = res + og.recursiveHelp() + "\n"
         return res
 
 # =========================================================================== #
@@ -445,11 +448,14 @@ class OptParser (object):
         asciidata = re.sub('^\s*','', asciidata)
         asciidata = re.sub('[\s\r]*$','', asciidata)
         asciidata = re.sub('^\s+$','', asciidata)
+
+        asciidata = asciidata.replace('%prog', os.path.basename(sys.argv[0]))
+
         if (self.__nodeStack):
             parent = self.__nodeStack[-1]
             parent.help = parent.help + asciidata + "\n"
         else:
-            self.__root.help = self.root.help + asciidata + "\n"
+            self.__root.help = self.__root.help + asciidata + "\n"
 
 # --------------------------------------------------------------------------- #
 
