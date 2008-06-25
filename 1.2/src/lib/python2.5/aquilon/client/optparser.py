@@ -187,7 +187,8 @@ class command(Element):
     def recursiveHelp (self):
         res = "\n"
         lines = self.help.split("\n")
-        for line in ["-" * 50] + lines[:1] + ["-" * 50 + "\n"] + lines[1:]:
+        cmdlen = len(lines[0])
+        for line in ["-" * cmdlen] + lines[:1] + ["-" * cmdlen + "\n"] + lines[1:]:
             res = res + "    " + line + "\n"
         for og in self.optgroups:
             res = res + og.recursiveHelp() + "\n"
