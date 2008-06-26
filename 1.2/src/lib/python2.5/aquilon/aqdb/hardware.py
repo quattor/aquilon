@@ -445,8 +445,6 @@ def populate_vendor():
         #hack alert:
         b=Vendor(name = 'hp')
         Session.save(b)
-        b = Vendor(name='verari')
-        Session.save(b)
         try:
             Session.commit()
         except Exception,e:
@@ -545,8 +543,6 @@ def populate_cpu():
                             else:
                                 Assert(False)
                     f.close()
-
-        cpus.append(['intel', 'xeon_2500', '2500'])
 
         for vendor,name,speed in cpus:
             kw={}
