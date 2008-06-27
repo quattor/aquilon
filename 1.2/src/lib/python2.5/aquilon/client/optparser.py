@@ -14,15 +14,11 @@ from xml.parsers import expat
 import os
 import sys
 import re
+import textwrap
 import pdb
 
-
-def joinDict (d1, d2):
-    temp = d1
-    for k,v in d2.iteritems():
-        if (not temp.has_key(k)):
-            temp[k] = v
-    return temp
+def cmdName():
+    return os.path.basename(sys.argv[0])
 
 # =========================================================================== #
 
@@ -60,16 +56,16 @@ class Element(object):
         result = {}
         for child in self.children:
             (res, found) = child.check(command, options)
-            result = joinDict(result, res)
+            result.update(res)
         return result, True
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp (self):
+    def recursiveHelp (self, indentlevel):
         res = self.help
 
         for child in self.children:
-            res = res + child.recursiveHelp()
+            res = res + child.recursiveHelp(indentlevel)
         return res
 
 # =========================================================================== #
@@ -90,59 +86,72 @@ class commandline(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def check (self, command, options):
-        result = {}
+    def commandList(self):
+        res =  self.help + "\nAvailable commands are:\n\n"
 
+        k = self.__commandlist.keys()
+        k.sort()
+        for c in k:
+            res = res + "\t" + self.__commandlist[c].name + "\n"
+
+        res += "\nYou can get more help with\n"
+        res += cmdName() + " help COMMAND\n  or\n" + cmdName() + " COMMAND --help\n"
+
+        return res
+
+# --------------------------------------------------------------------------- #
+
+    def check (self, command, options):
+
+        # check generic options
         if (command is None):
             if (self.__allcommands):
                 ##print "check generic options"
                 (res, found) = self.__allcommands.check(command, options)
-                result = joinDict(result,res)
-            return None, result
+            return None, res
 
+        # handle help pseudocommand
         if (command.find('help') != -1):
             helpfor = command[5:]
             if (self.__commandlist.has_key(helpfor)):
-                print self.__commandlist[helpfor].recursiveHelp()
-                exit(1)
+                print self.__commandlist[helpfor].recursiveHelp(0)
+                exit(0)
             else:
                 if helpfor:
                     print "The command '%s' is not known to this server." % helpfor
-                print "Available commands are:"
-                k = self.__commandlist.keys()
-                k.sort()
-                for c in k:
-                    print "\t", self.__commandlist[c].name
-                exit(1)
+                print self.commandList()
+                exit(0)
 
         if (self.__commandlist.has_key(command)):
             ##print "commandline checking command:", command
+
+            # print help if --help is on the command line
+            if options.help:
+                print self.__commandlist[command].recursiveHelp(0)
+                exit(0)
+
             commandElement = self.__commandlist[command]
             (res, found) = commandElement.check(command, options)
-            result = joinDict (result,res)
-        elif (command == 'help' or command == ''):
-            # print general help, and help for each command
-            raise ParsingError ('',self.recursiveHelp())
         else:
-            raise ParsingError('Command '+command+' is not known!',self.recursiveHelp())
+            raise ParsingError('Command '+command+' is not known!',self.recursiveHelp(0))
 
         transport = None
         for t in commandElement.transports:
             if t.trigger is None and transport is None:
                 transport = t
                 continue
-            if t.trigger is not None and result.has_key(t.trigger):
+            if t.trigger is not None and res.has_key(t.trigger):
                 transport = t
                 continue
 
-        return transport, result
+        return transport, res
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp (self):
+    def recursiveHelp(self, indentlevel):
         res = self.help + "\nValid commands are:\n"
         for k in self.__commandlist.keys():
-            res = res + self.__commandlist[k].recursiveHelp()
+            res = res + self.__commandlist[k].recursiveHelp(indentlevel)
         return res
 
 # --------------------------------------------------------------------------- #
@@ -177,21 +186,34 @@ class command(Element):
             try:
                 (res, found) = optgroup.check(command, options)
             except ParsingError, e:
-                e.help = self.recursiveHelp()
+                e.help = self.recursiveHelp(0)
                 raise e
-            result = joinDict (result, res)
+            result.update(res)
         return result, True
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp (self):
-        res = "\n"
-        lines = self.help.split("\n")
-        cmdlen = len(lines[0])
-        for line in ["-" * cmdlen] + lines[:1] + ["-" * cmdlen + "\n"] + lines[1:]:
-            res = res + "    " + line + "\n"
+    def shortHelp(self):
+        lines = textwrap.wrap(" ".join([ o.shortHelp() for o in self.optgroups ]))
+
+        if len(lines) > 0:
+            return "\n".join([lines[0]] + [ "    " + l for l in lines[1:] ])
+        else:
+            return ""
+        
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp(self, indentlevel):
+        cmd = cmdName() + " " + self.name.replace("_", " ") + " " + self.shortHelp()
+        res = cmd + "\n\n"
+
+        if (len(self.help) > 0):
+            res = res + "\n".join(["    " + l for l in textwrap.wrap(self.help)]) + "\n\n"
+
         for og in self.optgroups:
-            res = res + og.recursiveHelp() + "\n"
+            res = res + og.recursiveHelp(indentlevel + 1) + "\n"
+
         return res
 
 # =========================================================================== #
@@ -217,12 +239,12 @@ class optgroup(Element):
             self.fields = 'none'
 
         if self.mandatory:
-            self.help = "    Requires %s of these options:\n" % self.fields
+            self.help = "Requires %s of these options:\n" % self.fields
         else:
             if self.fields == 'all':
-                self.help = "    Optional, but must use all or none:\n"
+                self.help = "Optional, but must use all or none:\n"
             else:
-                self.help = "    Optional:\n"
+                self.help = "Optional:\n"
 
         if (attributes.has_key('conflicts')):
             self.conflicts = attributes['conflicts'].split(' ')
@@ -246,7 +268,7 @@ class optgroup(Element):
             (res, f) = option.check(command, options)
             found[option.name] = f
             if (f):
-                result = joinDict(result, res)
+                result.update(res)
             foundany = foundany or f
             foundall = foundall and f
 
@@ -274,10 +296,16 @@ class optgroup(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp (self):
-        res = self.help
+    def shortHelp(self):
+        return " ".join([o.shortHelp() for o in self.options])
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp(self, indentlevel):
+        whitespace = " " * (4 * (indentlevel))
+        res = whitespace + self.help
         for o in self.options:
-            res = res + o.recursiveHelp()
+            res += o.recursiveHelp(indentlevel + 1)
         return res
 
 # =========================================================================== #
@@ -353,33 +381,21 @@ class option(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp (self):
-        LLEN = 80
-        val = self.type=='string' and " VALUE" or ""
-        help = len(self.help)>1 and self.help or "\n"
-        res = "    --%-20s %s" %(self.name+val, help)
-        if (len(res) < LLEN):
-            return res
-        pos = res.rfind(" ", 0, LLEN)
-        if (pos > 0):
-            tres = res[0:res.rfind(" ", 0, LLEN)]
-            res = res[res.rfind(" ", 0, LLEN):]
-        else:
-            tres = res[0:LLEN]
-            res = res[LLEN:]
-        while (len(res) >= LLEN - 26):
-            pos = res.rfind(" ", 0, LLEN-26)
-            if (pos > 0):
-                tres = tres + "\n" + " "*26 + res[0:pos]
-                res = res[pos:]
-            else:
-                tres = tres + "\n" + " "*26 + res[0:LLEN-26]
-                res = res[LLEN-26:]
-        if (len(res) > 1):
-            tres = tres + "\n" + " "*26 + res
-        else:
-            tres = tres + "\n"
-        return tres
+    def shortHelp(self):
+        return "--" + self.name + ("" if self.type != "string" else " " + self.name.upper())
+
+# --------------------------------------------------------------------------- #
+
+    def recursiveHelp(self, indentlevel):
+        whitespace = " " * (4 * indentlevel)
+        help = self.help if len(self.help) else "\n"
+
+        helplines = textwrap.wrap(help, 45)
+        res = whitespace + "%*s %s\n" % (-36 + 4 * indentlevel, self.shortHelp(), helplines[0])
+        for line in helplines[1:]:
+            res = res + " " * 36 + line + "\n"
+
+        return res
 
 # =========================================================================== #
 
@@ -450,7 +466,7 @@ class OptParser (object):
         asciidata = re.sub('[\s\r]*$','', asciidata)
         asciidata = re.sub('^\s+$','', asciidata)
 
-        asciidata = asciidata.replace('%prog', os.path.basename(sys.argv[0]))
+        asciidata = asciidata.replace('%prog', cmdName() )
 
         if (self.__nodeStack):
             parent = self.__nodeStack[-1]
@@ -471,11 +487,14 @@ class OptParser (object):
 
     def getOptions (self):
         (opts, args) = self.parser.parse_args()
-        if (opts.help):
-            print self.__root.recursiveHelp ()
-            exit(1)
-        elif (not args):
-            self.parser.usage = self.__root.recursiveHelp ()
+
+        if (not args):
+            if opts.help:
+                # verbose help if we were given no command but have --help
+                self.parser.usage = self.__root.recursiveHelp(0)
+            else:
+                self.parser.usage = self.__root.commandList()
+
             self.parser.error('Please specify a command')
         else:
             command = '_'.join(args)
