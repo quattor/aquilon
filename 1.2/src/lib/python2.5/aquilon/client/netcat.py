@@ -59,14 +59,14 @@ class NetCatConnector(protocol.ProcessProtocol):
         log.msg("Standard out closed")
         # For now, the child's standard out is "good enough"
         # that the connection is lost.
-        msg = "Standard out closed"
-        if self.stderr_msgs:
-            msg = msg + ": " + "".join(self.stderr_msgs)
-        self.proto.connectionLost(error.ConnectionLost(msg))
+        self.transport.closeStdin()
         protocol.ProcessProtocol.outConnectionLost(self)
 
     def errConnectionLost(self):
         log.msg("Standard err closed")
+        msg = "".join(self.stderr_msgs).strip()
+        if msg:
+            self.proto.connectionLost(error.ConnectionLost(msg))
         protocol.ProcessProtocol.errConnectionLost(self)
 
     def outReceived(self, data):
