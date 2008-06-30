@@ -442,9 +442,7 @@ def populate_vendor():
                         print >> sys.stderr, e
                         continue
                     created.append(j)
-        #hack alert:
-        b=Vendor(name = 'hp')
-        Session.save(b)
+
         try:
             Session.commit()
         except Exception,e:
