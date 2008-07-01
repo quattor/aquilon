@@ -205,6 +205,9 @@ def handleFailure(failure, uri, globalOptions):
     if not globals()["return_code"]:
         globals()["return_code"] = 1
 
+def quoteOptions(options):
+    return "&".join([ urllib.quote(k) + "=" + urllib.quote(v) for k, v in options.iteritems() ])
+
 if __name__ == "__main__":
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
     try:
@@ -243,28 +246,41 @@ if __name__ == "__main__":
         print >>sys.stderr, "Unimplemented command ", command
         exit(1)
 
+    # Convert unicode options to strings
+    newOptions = {}
+    for k, v in commandOptions.iteritems():
+        newOptions[str(k)] = str(v)
+    commandOptions = newOptions
+
+    # Quote options so that they can be safely included in the URI
+    cleanOptions = {}
+    for k, v in commandOptions.iteritems():
+        cleanOptions[k] = urllib.quote(v)
+
     # Decent amount of magic here...
     # Even though the server connection might be tunneled through
     # knc, the easiest way to consistently address the server is with
     # a URL.  That's the first half.
-    # The relative URL defined by tranport.path comes from the xml
+    # The relative URL defined by transport.path comes from the xml
     # file used for options definitions.  This is a standard python
     # string formatting, with references to the options that might
     # be given on the command line.
-    uri = str('http://%s:%s/' % (host, port) + transport.path % commandOptions)
+    uri = str('http://%s:%s/' % (host, port) + transport.path % cleanOptions)
 
     # Add the formatting option into the string.  This is only tricky if
     # a query operator has been specified, otherwise it would just be
     # tacking on (for example) .html to the uri.
     # Do not apply any formatting for commands (transport.expect == 'command').
     if globalOptions.has_key('format') and not transport.expect:
+        extension = '.' + urllib.quote(globalOptions["format"])
+
         query_index = uri.find('?')
-        extension = '.' + globalOptions["format"]
         if query_index > -1:
             uri = uri[:query_index] + extension + uri[query_index:]
         else:
-            uri = uri + '.' + globalOptions["format"]
+            uri = uri + extension
 
+    # import getPage depending on the connection requirements
     if globalOptions.get('usesock'):
         from aquilon.client.socketwrappers import getPage
     elif globalOptions.get('noauth'):
@@ -272,14 +288,10 @@ if __name__ == "__main__":
     else:
         from aquilon.client.kncwrappers import getPage
 
+    # run custom command if there's one
     if transport.custom:
         action = CustomAction(transport.custom)
         action.run(commandOptions)
-
-    # Not sure why some of the options are unicode...
-    cleanOptions = {}
-    for k, v in commandOptions.iteritems():
-        cleanOptions[str(k)] = str(v)
 
     if transport.method == 'get':
         # Fun hackery here to get optional parameters into the path...
@@ -287,30 +299,36 @@ if __name__ == "__main__":
         # looking for %(var)s.
         c = re.compile(r'(?<!%)%\(([^)]*)\)s')
         exclude = c.findall(transport.path)
+
         # Now, pull each of these out of the options.  This is not
         # strictly necessary, but simplifies the url.
-        remainder = cleanOptions.copy()
+        remainder = commandOptions.copy()
         for e in exclude:
             remainder.pop(e, None)
+
         if remainder:
             # Almost done.  Just need to account for whether the uri
             # already has a query string.
             if uri.find("?") >= 0:
-                uri = uri + '&' + urllib.urlencode(remainder)
+                uri = uri + '&' + quoteOptions(remainder)
             else:
-                uri = uri + '?' + urllib.urlencode(remainder)
+                uri = uri + '?' + quoteOptions(remainder)
         d = RESTResource(uri).get()
+
     elif transport.method == 'put':
         # FIXME: This will need to be more complicated.
         # In some cases, we may even need to call code here.
-        putData = urllib.urlencode(cleanOptions)
+        putData = urllib.urlencode(commandOptions)
         mimeType = 'application/x-www-form-urlencoded'
         d = RESTResource(uri).put(putData, mimeType)
+
     elif transport.method == 'delete':
         # Again, all command line options should be in the URI already.
         d = RESTResource(uri).delete()
+
     elif transport.method == 'post':
-        d = RESTResource(uri).post(**cleanOptions)
+        d = RESTResource(uri).post(**commandOptions)
+
     else:
         print >>sys.stderr, "Unhandled transport method ", transport.method
         sys.exit(1)
