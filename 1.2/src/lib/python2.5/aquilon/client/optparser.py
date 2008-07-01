@@ -133,7 +133,7 @@ class commandline(Element):
             commandElement = self.__commandlist[command]
             (res, found) = commandElement.check(command, options)
         else:
-            raise ParsingError('Command '+command+' is not known!',self.recursiveHelp(0))
+            raise ParsingError('Command '+command+' is not known!',self.commandList())
 
         transport = None
         for t in commandElement.transports:
