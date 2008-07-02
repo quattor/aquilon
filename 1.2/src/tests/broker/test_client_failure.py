@@ -24,7 +24,7 @@ from brokertest import TestBrokerCommand
 class TestClientFailure(TestBrokerCommand):
 
     def testinvalidaqhost(self):
-        command = "--aqhost=invalidhost status"
+        command = "status --aqhost=invalidhost"
         p = self.runcommand(command.split(" "))
         (out, err) = p.communicate()
         self.assertEqual(err,
@@ -35,7 +35,7 @@ class TestClientFailure(TestBrokerCommand):
         self.assertEqual(p.returncode, 1)
 
     def testnotrunningaqhost(self):
-        command = "--aqhost=myweb status"
+        command = "status --aqhost=myweb"
         p = self.runcommand(command.split(" "))
         (out, err) = p.communicate()
         self.assertEqual(err,

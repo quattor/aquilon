@@ -86,8 +86,23 @@ class commandline(Element):
 
 # --------------------------------------------------------------------------- #
 
+    def populateParser(self, command, parser):
+        # add global options
+        self.__allcommands.genOptions(parser)
+
+        if command in self.__commandlist:
+            # add command-specific options
+            self.__commandlist[command].genOptions(parser)
+            # and set command-specific usage message
+            parser.usage = self.__commandlist[command].recursiveHelp(0)
+        else:
+            parser.usage = self.__allcommands.recursiveHelp(0)
+        
+# --------------------------------------------------------------------------- #
+
     def commandList(self):
-        res =  self.help + "\nAvailable commands are:\n\n"
+        res = self.help + "\nGlobal options:\n" + self.__allcommands.recursiveHelp(0)
+        res += "\nAvailable commands are:\n\n"
 
         k = self.__commandlist.keys()
         k.sort()
@@ -149,7 +164,9 @@ class commandline(Element):
 # --------------------------------------------------------------------------- #
 
     def recursiveHelp(self, indentlevel):
-        res = self.help + "\nValid commands are:\n"
+        res = self.help
+        res += "\nGlobal options:\n" + self.__allcommands.recursiveHelp(indentlevel)
+        res += "\nValid commands are:\n"
         for k in self.__commandlist.keys():
             res = res + self.__commandlist[k].recursiveHelp(indentlevel)
         return res
@@ -193,6 +210,12 @@ class command(Element):
 
 # --------------------------------------------------------------------------- #
 
+    def genOptions(self, parser):
+        for o in self.optgroups:
+            o.genOptions(parser)
+
+# --------------------------------------------------------------------------- #
+
     def shortHelp(self):
         lines = textwrap.wrap(" ".join([ o.shortHelp() for o in self.optgroups ]))
 
@@ -205,7 +228,10 @@ class command(Element):
 # --------------------------------------------------------------------------- #
 
     def recursiveHelp(self, indentlevel):
-        cmd = cmdName() + " " + self.name.replace("_", " ") + " " + self.shortHelp()
+        cmd = cmdName() + " "
+        if self.name != "*":
+            cmd += self.name.replace("_", " ") + " "
+        cmd += self.shortHelp()
         res = cmd + "\n\n"
 
         if (len(self.help) > 0):
@@ -296,6 +322,12 @@ class optgroup(Element):
 
 # --------------------------------------------------------------------------- #
 
+    def genOptions(self, parser):
+        for o in self.options:
+            o.genOptions(parser)
+
+# --------------------------------------------------------------------------- #
+
     def shortHelp(self):
         return " ".join([o.shortHelp() for o in self.options])
 
@@ -361,7 +393,7 @@ class option(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def genOption (self, parser):
+    def genOptions(self, parser):
         if (parser.has_option('--'+self.name)):
             return
         if (self.short):
@@ -391,7 +423,7 @@ class option(Element):
         help = self.help if len(self.help) else "\n"
 
         helplines = textwrap.wrap(help, 45)
-        res = whitespace + "%*s %s\n" % (-36 + 4 * indentlevel, self.shortHelp(), helplines[0])
+        res = whitespace + "%*s %s\n" % (-35 + 4 * indentlevel, self.shortHelp(), helplines[0])
         for line in helplines[1:]:
             res = res + " " * 36 + line + "\n"
 
@@ -433,7 +465,6 @@ class OptParser (object):
             element = optgroup(name, attributes)
         elif (name == "option"):
             element = option(name, attributes)
-            element.genOption (self.parser)
         elif (name == "transport"):
             element = transport(name, attributes)
         else:
@@ -481,11 +512,19 @@ class OptParser (object):
         Parser.StartElementHandler = self.StartElement
         Parser.EndElementHandler = self.EndElement
         Parser.CharacterDataHandler = self.CharacterData
-        ParserStatus = Parser.Parse(open(filename).read( ), 1)
+        ParserStatus = Parser.Parse(open(filename).read(), 1)
 
 # --------------------------------------------------------------------------- #
 
-    def getOptions (self):
+    def getOptions(self):
+        # get command
+        command_words = []
+        for arg in sys.argv[1:]:
+            if arg[0] == '-': break
+            command_words.append(arg)
+        command = '_'.join(command_words)
+
+        self.__root.populateParser(command, self.parser)
         (opts, args) = self.parser.parse_args()
 
         if (not args):
@@ -496,8 +535,6 @@ class OptParser (object):
                 self.parser.usage = self.__root.commandList()
 
             self.parser.error('Please specify a command')
-        else:
-            command = '_'.join(args)
 
         try:
             this_is_None, globalOptions = self.__root.check(None, opts)
