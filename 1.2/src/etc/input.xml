@@ -42,6 +42,11 @@
       <transport method="get" path="" />
    </command>
 
+   <command name="ping">
+      Simple test that the broker can respond.
+      <transport method="get" path="ping" />
+   </command>
+
    <command name="show_host">
       Shows the configuration for a given host, or for all hosts.
       <optgroup name="show_host_Input" mandatory="True" fields="any">
