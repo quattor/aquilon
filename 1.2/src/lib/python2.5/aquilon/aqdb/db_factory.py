@@ -134,6 +134,9 @@ class db_factory(object):
                     raise ValueError(msg)
                 else:
                     return [passwd.strip() for passwd in passwds]
+        # Fallback for testing when password file may not exist.
+        elif self.config.has_option("database", "dbpassword"):
+            return [self.config.get("database", "dbpassword")]
         else:
             return []
 
