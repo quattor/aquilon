@@ -15,15 +15,17 @@ import sys
 import os
 
 DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR,'..'))
+sys.path.insert(0, os.path.join(DIR, '..', '..'))
 
 import depends
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 
-from db_factory import Base
-from machine    import Machine
+# FIXME: This was pointing at db_factory for Base...
+from db         import Base
+# FIXME: This was pointing at machine for Machine...
+from hardware    import Machine
 from interface  import Interface
 
 class SwitchPort(Base):
@@ -51,6 +53,9 @@ class SwitchPort(Base):
 
 switch_port = SwitchPort.__table__
 switch_port.primary_key.name = 'switch_port_pk'
+
+# FIXME: Hack so that table gets created during rebuild...
+switch_port.create(checkfirst = True)
 
 def populate():
     from db_factory import db_factory, Base

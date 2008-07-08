@@ -32,6 +32,8 @@ from test_add_domain import TestAddDomain
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
 from test_add_rack import TestAddRack
+from test_add_model import TestAddModel
+from test_add_tor_switch import TestAddTorSwitch
 from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
@@ -45,6 +47,7 @@ from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
+from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
@@ -57,8 +60,11 @@ from test_constraints_umask import TestUmaskConstraints
 from test_unmap_service import TestUnmapService
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
+from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
+from test_del_tor_switch import TestDelTorSwitch
+from test_del_model import TestDelModel
 from test_del_rack import TestDelRack
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
@@ -81,20 +87,22 @@ class BrokerTestSuite(unittest.TestSuite):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart, TestStatus, TestPermission,
                 TestAddDomain, TestAddService, TestAddRequiredService,
-                TestAddRack, TestAddChassis, TestAddMachine, TestAddDisk,
-                TestAddInterface, TestAddHost,
+                TestAddRack, TestAddModel, TestAddTorSwitch,
+                TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
+                TestAddHost,
                 TestMapService, TestBindClient, TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestDomainConstraints, TestMachineConstraints,
+                TestTorSwitchConstraints,
                 TestShowHostIPList,
                 TestUpdateInterface,
                 TestPxeswitch, TestManage,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestUmaskConstraints,
-                TestUnmapService,
-                TestDelHost, TestDelInterface, TestDelMachine, TestDelChassis,
-                TestDelRack, TestDelRequiredService, TestDelService,
-                TestDelDomain,
+                TestUnmapService, TestDelHost,
+                TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
+                TestDelTorSwitch, TestDelModel, TestDelRack,
+                TestDelRequiredService, TestDelService, TestDelDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))

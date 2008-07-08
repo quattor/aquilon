@@ -391,6 +391,40 @@ class Broker(object):
 
 # --------------------------------------------------------------------------- #
 
+    def add_tor_switch(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "add", request_path)
+        d = d.addCallback(self.dbbroker.add_tor_switch, session=True, user=user,
+                **arguments)
+        d = d.addCallback(self.template_creator.generate_plenary, user=user,
+                plenarydir=self.plenarydir, localhost=self.localhost,
+                **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def show_tor_switch(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "show", request_path)
+        d = d.addCallback(self.dbbroker.show_tor_switch, session=True,
+                user=user, **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
+    def del_tor_switch(self, arguments, request_path, user):
+        d = defer.maybeDeferred(self.azbroker.check, None, user,
+                "delete", request_path)
+        d = d.addCallback(self.dbbroker.verify_del_tor_switch, session=True,
+                user=user, **arguments)
+        d = d.addCallback(self.template_creator.remove_plenary, user=user,
+                plenarydir=self.plenarydir, **arguments)
+        d = d.addCallback(self.dbbroker.del_tor_switch, session=True, user=user,
+                **arguments)
+        return d
+
+# --------------------------------------------------------------------------- #
+
     def add_interface (self, arguments, request_path, user):
         d = defer.maybeDeferred(self.azbroker.check, None, user,
                 "add", request_path)

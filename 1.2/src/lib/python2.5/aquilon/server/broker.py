@@ -150,4 +150,14 @@ def format_results(command):
     new_command.__doc__ = command.__doc__
     return new_command
 
+# FIXME: This utility method may be better suited elsewhere.
+def force_int(label, value):
+    if value is None:
+        return None
+    try:
+        result = int(value)
+    except Exception, e:
+        raise ArgumentError("Expected an integer for %s: %s" % (label, e))
+    return result
+
 

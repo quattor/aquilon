@@ -67,6 +67,7 @@ def printprep(dbobject):
         printprep(dbobject.interfaces)
         printprep(dbobject.cpu)
         printprep(dbobject.disks)
+        printprep(dbobject.type())
     elif isinstance(dbobject, Location):
         printprep(dbobject.type)
         printprep(dbobject.fullname)
@@ -197,7 +198,8 @@ class Formatter(object):
         return "\n".join(details)
 
     def elaborate_raw_machine(self, machine, indent=""):
-        details = [ indent + "Machine: %s" % machine.name ]
+        details = [indent + "%s: %s" %
+                   (machine.type().capitalize(), machine.name)]
         if machine.host:
             details.append(indent + "  Allocated to host: %s"
                     % machine.host.fqdn)

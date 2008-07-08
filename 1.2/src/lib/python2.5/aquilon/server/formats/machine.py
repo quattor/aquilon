@@ -16,7 +16,8 @@ from aquilon.aqdb.systems import Machine
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
-        details = [indent + "Machine: %s" % machine.name]
+        details = [indent + "%s: %s" %
+                (machine.type().capitalize(), machine.name)]
         if machine.host:
             details.append(indent + "  Allocated to host: %s"
                     % machine.host.fqdn)
@@ -33,6 +34,15 @@ class MachineFormatter(ObjectFormatter):
         for i in machine.interfaces:
             details.append(indent + "  Interface: %s %s %s boot=%s" 
                     % (i.name, i.mac, i.ip, i.boot))
+        for p in machine.switchport:
+            if p.interface:
+                details.append(indent + "  Switch Port %d: %s %s %s" %
+                        (p.port_number, p.interface.machine.type(),
+                            p.interface.machine.name, p.interface.name))
+            else:
+                details.append(indent +
+                        "  Switch Port %d: No interface recorded in aqdb" %
+                        p.port_number)
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
         return "\n".join(details)

@@ -32,7 +32,7 @@ class TestAddMachine(TestBrokerCommand):
     def testverifyaddut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Chassis: ut3c5", command)
         self.matchoutput(out, "Model: ibm hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
@@ -73,7 +73,7 @@ class TestAddMachine(TestBrokerCommand):
     def testverifyaddut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Chassis: ut3c1", command)
         self.matchoutput(out, "Model: ibm hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
@@ -103,6 +103,15 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out,
             """create("hardware/cpu/intel/xeon_2660"));""",
             command)
+
+    # Testing that add machine does not allow a tor_switch....
+    def testrejectut3gd2r01(self):
+        self.badrequesttest(["add", "machine", "--machine", "ut3gd2r01",
+            "--rack", "ut3", "--model", "uttorswitch"])
+
+    def testverifyrejectut3gd2r01(self):
+        command = "show machine --machine ut3gd2r01"
+        out = self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':

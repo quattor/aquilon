@@ -34,6 +34,8 @@ echo
 time ./systems.py
 echo
 time ./service.py
+echo
+time ./switch_port.py
 echo Run population_scripts if you need to
 #time ./population_scripts.py
 echo completed at

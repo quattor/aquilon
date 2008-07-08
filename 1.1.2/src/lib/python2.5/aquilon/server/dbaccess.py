@@ -48,7 +48,8 @@ from aquilon.aqdb.interface import PhysicalInterface
 
 # FIXME: This probably belongs in location.py
 const.location_types = ("company", "hub", "continent", "country", "city",
-        "building", "rack", "chassis", "desk")
+        "bucket", "building", "bunker", "rack", "rack_section", "chassis",
+        "desk")
 
 class DatabaseBroker(AccessBroker):
     """All database access eventually funnels through this class, to
@@ -98,6 +99,16 @@ class DatabaseBroker(AccessBroker):
             raise NotFoundException("Machine %s not found: %s"
                     % (machine, str(e)))
         return dbmachine
+
+    # expects to be run in a transact with a session...
+    def _get_tor_switch(self, tor_switch):
+        try:
+            dbtor_switch = self.session.query(Machine).filter_by(
+                    name=tor_switch).one()
+        except InvalidRequestError, e:
+            raise NotFoundException("Tor_switch %s not found: %s"
+                    % (tor_switch, str(e)))
+        return dbtor_switch
 
     # expects to be run in a transact with a session...
     def _get_service(self, service):
@@ -758,6 +769,78 @@ class DatabaseBroker(AccessBroker):
             self.session.delete(m)
         except InvalidRequestError, e:
             raise ValueError("Requested machine could not be deleted!\n"+e.__str__())
+        return "Successfull deletion"
+
+    @transact
+    def add_tor_switch(self, result, tor_switch, model, serial, **kwargs):
+        dblocation = self._get_location(**kwargs)
+
+        dbmodel = self.session.query(Model).filter_by(name=model).first()
+        if (dbmodel is None):
+            raise ArgumentError("Model name '%s' not found!" % model);
+
+        try:
+            optional = {}
+            if serial:
+                optional["serial_no"] = serial
+            m = Machine(dblocation, dbmodel, name=tor_switch, **optional)
+            self.session.save(m)
+        except InvalidRequestError, e:
+            raise ValueError("Requested tor_switch could not be created!\n"+e.__str__())
+        return printprep(m)
+
+    @transact
+    def show_tor_switch(self, result, tor_switch, rack_section, model,
+            **kwargs):
+        try:
+            q = self.session.query(Machine)
+            if tor_switch:
+                q = q.filter(Machine.name.like(tor_switch + '%'))
+            if rack_section:
+                q = q.join('location').filter(
+                        Location.name.like(rack_section + '%'))
+                q = q.filter(LocationType.type == 'rack_section')
+                q = q.reset_joinpoint()
+            q = q.join('model').filter(Model.machine_type == "tor_switch")
+            if model:
+                q = q.filter(Model.name.like(model + '%'))
+            return printprep(q.all())
+        except InvalidRequestError, e:
+            raise ValueError("Error while querying the database!\n"+e.__str__())
+
+    @transact
+    def verify_tor_switch(self, result, tor_switch, **kwargs):
+        dbtor_switch = self._get_tor_switch(tor_switch)
+        return printprep(dbtor_switch)
+
+    @transact
+    def verify_del_tor_switch(self, result, tor_switch, **kwargs):
+        dbtor_switch = self._get_tor_switch(tor_switch)
+        self.session.refresh(dbtor_switch)
+        if dbtor_switch.host:
+            raise ArgumentError("Cannot delete tor_switch %s while it is in use (host: %s)"
+                    % (dbtor_switch.name, dbtor_switch.host.fqdn))
+        return printprep(dbtor_switch)
+
+    @transact
+    def del_tor_switch(self, result, tor_switch, **kwargs):
+        try:
+            m = self.session.query(Machine).filter_by(name=tor_switch
+                    ).join(Model).filter(Model.machine_type == 'tor_switch'
+                    ).one()
+            self.session.refresh(m)
+            if m.host:
+                raise ArgumentError("Cannot delete tor_switch %s while it is in use (host: %s)"
+                        % (m.name, m.host.fqdn))
+            for iface in m.interfaces:
+                log.msg("Before deleting tor_switch '%s', removing interface '%s' [%s] [%s] boot=%s)" % (m.name, iface.name, iface.mac, iface.ip, iface.boot))
+                self.session.delete(iface)
+            for disk in m.disks:
+                log.msg("Before deleting tor_switch '%s', removing disk '%s'" % (m.name, disk))
+                self.session.delete(disk)
+            self.session.delete(m)
+        except InvalidRequestError, e:
+            raise ValueError("Requested tor_switch could not be deleted!\n"+e.__str__())
         return "Successfull deletion"
 
     @transact

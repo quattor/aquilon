@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing constraints in commands involving machine."""
+"""Module for testing the del tor_switch command."""
 
 import os
 import sys
@@ -21,19 +21,18 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestMachineConstraints(TestBrokerCommand):
+class TestDelTorSwitch(TestBrokerCommand):
 
-    def testdelmachinewithhost(self):
-        command = "del machine --machine ut3c5n10"
-        self.badrequesttest(command.split(" "))
+    def testdelut3c5n10(self):
+        command = "del tor_switch --tor_switch ut3gd1r01"
+        self.noouttest(command.split(" "))
 
-    def testverifydelmachinewithhostfailed(self):
-        command = "show machine --machine ut3c5n10"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+    def testverifydelut3c5n10(self):
+        command = "show tor_switch --tor_switch ut3gd1r01"
+        self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMachineConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelTorSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

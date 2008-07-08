@@ -340,9 +340,9 @@ class MachineSpecs(aqdbBase):
     """ Caputres the configuration hardware components for a given model """
     #TODO: single dict inside machine_type?
     #TODO: put disk capacity, type in here, make it consisitent
-    _def_cpu_cnt={ 'workstation':1, 'blade': 2, 'rackmount' : 4 }
-    _def_nic_cnt={ 'workstation':1, 'blade': 2, 'rackmount' : 2 }
-    _def_memory ={ 'workstation': 2048, 'blade': 8192, 'rackmount': 16384 }
+    _def_cpu_cnt={'workstation':1, 'blade':2, 'rackmount':4, 'tor_switch': 1}
+    _def_nic_cnt={'workstation':1, 'blade':2, 'rackmount':2, 'tor_switch': 4}
+    _def_memory ={'workstation':2048, 'blade':8192, 'rackmount':16384, 'tor_switch':8192}
 
     @optional_comments
     def __init__(self,**kw):
@@ -416,6 +416,7 @@ mapper(MachineSpecs,machine_specs, properties={
     'model'         : relation(Model, backref=backref('specifications',
                                                       uselist=False)),
     'cpu'           : relation(Cpu),
+    'disk_type'     : relation(DiskType),
     'creation_date' : deferred(machine_specs.c.creation_date),
     'comments'      : deferred(machine_specs.c.comments)})
 
@@ -453,7 +454,8 @@ def populate_vendor():
 def populate_machine_type():
     if empty(machine_type):
         print "Populating machine_type"
-        fill_type_table(machine_type,['rackmount', 'blade', 'workstation',])
+        fill_type_table(machine_type,
+                ['rackmount', 'blade', 'workstation', 'tor_switch'])
 
 def populate_disk_type():
     if empty(disk_type):

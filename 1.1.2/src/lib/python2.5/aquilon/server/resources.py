@@ -455,6 +455,24 @@ class ResponsePage(resource.Resource):
         request.args["type"] = ["rack"]
         return self.command_del_location(request)
 
+    def command_add_rack_section(self, request):
+        request.args['type'] = ['rack_section']
+        request.args['parenttype'] = ['building']
+        request.args['parentname'] = request.args['building']
+        return self.command_add_location(request)
+
+    def command_show_rack_section(self, request):
+        request.args["type"] = ["rack_section"]
+        return self.command_show_location_type(request)
+
+    def command_show_rack_section_name(self, request):
+        request.args["type"] = ["rack_section"]
+        return self.command_show_location_name(request)
+
+    def command_del_rack_section(self, request):
+        request.args["type"] = ["rack_section"]
+        return self.command_del_location(request)
+
     def command_add_building(self, request):
         request.args['type'] = ['building']
         request.args['parenttype'] = ['city']
@@ -781,6 +799,32 @@ class ResponsePage(resource.Resource):
     def command_del_machine(self, request):
         d = self.check_arguments(request, ["machine"])
         d = d.addCallback(self.broker.del_machine,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_add_tor_switch(self, request):
+        d = self.check_arguments(request,
+                ["tor_switch", "model", "rack_section"], ["serial"])
+        d = d.addCallback(self.broker.add_tor_switch,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.finish_or_fail(d, request)
+
+    def command_show_tor_switch_tor_switch(self, request):
+        return self.command_show_tor_switch(request)
+
+    def command_show_tor_switch(self, request):
+        d = self.check_arguments(request,
+                optional=["tor_switch", "rack_section", "model"])
+        d = d.addCallback(self.broker.show_tor_switch,
+                request_path=request.path,
+                user=request.channel.getPrinciple())
+        return self.format_or_fail(d, request)
+
+    def command_del_tor_switch(self, request):
+        d = self.check_arguments(request, ["tor_switch"])
+        d = d.addCallback(self.broker.del_tor_switch,
                 request_path=request.path,
                 user=request.channel.getPrinciple())
         return self.finish_or_fail(d, request)

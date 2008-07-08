@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing constraints in commands involving machine."""
+"""Module for testing the del model command."""
 
 import os
 import sys
@@ -21,19 +21,18 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestMachineConstraints(TestBrokerCommand):
+class TestDelModel(TestBrokerCommand):
 
-    def testdelmachinewithhost(self):
-        command = "del machine --machine ut3c5n10"
-        self.badrequesttest(command.split(" "))
+    def testdelut3(self):
+        command = "del model --name uttorswitch --vendor hp --type tor_switch"
+        self.noouttest(command.split(" "))
 
-    def testverifydelmachinewithhostfailed(self):
-        command = "show machine --machine ut3c5n10"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+    def testverifydelut3(self):
+        command = "show model --name uttorswitch"
+        self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMachineConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

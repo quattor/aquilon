@@ -30,7 +30,12 @@ class TestMachineConstraints(TestBrokerCommand):
     def testverifydelmachinewithhostfailed(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Blade: ut3c5n10", command)
+
+    # Expected to fail without the --all flag...
+    def testdelalldisks(self):
+        command = "del disk --machine ut3c5n10"
+        self.badrequesttest(command.split(" "))
 
 
 if __name__=='__main__':

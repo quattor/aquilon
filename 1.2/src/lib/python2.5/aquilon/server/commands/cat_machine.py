@@ -10,6 +10,7 @@
 """Contains the logic for `aq cat --machine`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (add_transaction, az_check, format_results,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
@@ -26,6 +27,9 @@ class CommandCatMachine(BrokerCommand):
     #@format_results
     def render(self, session, machine, **kwargs):
         dbmachine = get_machine(session, machine)
+        if dbmachine.type() not in ['blade', 'workstation', 'chassis']:
+            raise ArgumentError("Plenary file not available for %s machines." %
+                    dbmachine.type())
         plenary_info = PlenaryMachineInfo(dbmachine)
         return plenary_info.read(self.config.get("broker", "plenarydir"))
 

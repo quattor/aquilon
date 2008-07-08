@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq del machine`."""
+"""Contains the logic for `aq del tor_switch`."""
 
 
 from twisted.python import log
@@ -16,39 +16,43 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.templates import PlenaryMachineInfo
 
 
-class CommandDelMachine(BrokerCommand):
+class CommandDelTorSwitch(BrokerCommand):
 
-    required_parameters = ["machine"]
+    required_parameters = ["tor_switch"]
 
     @add_transaction
     @az_check
-    def render(self, session, machine, **arguments):
-        dbmachine = get_machine(session, machine)
+    def render(self, session, tor_switch, **arguments):
+        dbmachine = get_machine(session, tor_switch)
 
-        if dbmachine.type() not in ['blade', 'rackmount', 'workstation']:
-            raise ArgumentError("The del_machine command cannot delete machines of type '%(type)s'.  Try 'del %(type)s'." %
+        if dbmachine.type() not in ['tor_switch']:
+            raise ArgumentError("The del_tor_switch command cannot delete machines of type '%(type)s'.  Try 'del machine'." %
                     {"type": dbmachine.type()})
 
         session.refresh(dbmachine)
-        plenary_info = PlenaryMachineInfo(dbmachine)
 
-        if dbmachine.host:
-            raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
-                    % (dbmachine.name, dbmachine.host.fqdn))
         for iface in dbmachine.interfaces:
-            log.msg("Before deleting machine '%s', removing interface '%s' [%s] [%s] boot=%s)" %
+            log.msg("Before deleting tor_switch '%s', removing interface '%s' [%s] [%s] boot=%s)" %
                     (dbmachine.name,
                         iface.name, iface.mac, iface.ip, iface.boot))
             session.delete(iface)
         for disk in dbmachine.disks:
-            log.msg("Before deleting machine '%s', removing disk '%s'" %
+            log.msg("Before deleting tor_switch '%s', removing disk '%s'" %
                     (dbmachine.name, disk))
             session.delete(disk)
+        # FIXME: aqdb cascade delete does not seem to be kicking in.
+        for port in dbmachine.switchport:
+            log.msg("Before deleting tor_switch '%s', removing port '%d'" %
+                    (dbmachine.name, port.port_number))
+            session.delete(port)
+
         session.delete(dbmachine)
-        plenary_info.remove(self.config.get("broker", "plenarydir"))
+
+        # Any switch ports hanging off this switch should be deleted with
+        # the cascade delete of the switch.
+
         return
 
 

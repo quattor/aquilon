@@ -91,7 +91,7 @@
 
    <command name="add_disk">
       Add a new disk to a machine
-      <optgroup name="add_cpu_opts" mandatory="True" fields="all">
+      <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine ID</option>
          <option name="type" type="string">type of the disk</option>
          <option name="capacity" type="string">capacity of the disk</option>
@@ -100,6 +100,22 @@
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/disk/%(machine)s/%(type)s/%(capacity)s" />
+   </command>
+
+   <command name="del_disk">
+      Delete a disk from a machine.
+
+      If more than one disk matches, they will not be deleted.  Use the
+      --all flag to override this and delete all matching disks.
+      <optgroup name="del_disk_opts" mandatory="True" fields="all">
+         <option name="machine" type="string">machine ID</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="type" type="string">type of the disk</option>
+         <option name="capacity" type="string">capacity of the disk</option>
+         <option name="all" type="string">remove matching disks</option>
+      </optgroup>
+      <transport method="post" path="hardware/disk/%(machine)s/command/del" />
    </command>
 
    <command name="add_host">
@@ -803,6 +819,47 @@
          <option name="machine" type="string">machine name</option>
       </optgroup>
       <transport method="delete" path="machine/%(machine)s" />
+   </command>
+
+   <command name="add_tor_switch">
+      If the model was created with machine specifications (values for
+      cpuname, cpuvendor, cpuspeed, cpucount, memory) they do not need
+      to be given to this command - the model info will be used as a default.
+
+      However, if the model does not have defaults, they all need to be given.
+      <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
+         <option name="tor_switch" type="string">tor_switch name</option>
+         <option name="model" type="string">tor_switch model</option>
+         <option name="rack" type="string">Rack name</option>
+      </optgroup>
+      <optgroup name="add_tor_switch_specs_opts" mandatory="False">
+	 <option name="cpuname" type="string">cpu name</option>
+	 <option name="cpuvendor" type="string">cpu vendor</option>
+	 <option name="cpuspeed" type="string">cpu speed</option>
+	 <option name="cpucount" type="string">cpu count</option>
+	 <option name="memory" type="string">memory in MB</option>
+      </optgroup>
+      <optgroup name="add_tor_switch_optional">
+	 <option name="serial" type="string">serial number</option>
+      </optgroup>
+      <transport method="put" path="tor_switch/%(tor_switch)s" />
+   </command>
+
+   <command name="show_tor_switch">
+      <optgroup name="show_tor_switch_opts" mandatory="True" fields="any">
+         <option name="tor_switch" type="string">tor_switch name</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="model" type="string">tor_switch model</option>
+      </optgroup>
+      <transport trigger="tor_switch" method="get" path="tor_switch/%(tor_switch)s" />
+      <transport method="get" path="find/tor_switch" />
+   </command>
+
+   <command name="del_tor_switch">
+      <optgroup name="del_tor_switch_opts" mandatory="True" fields="all">
+         <option name="tor_switch" type="string">tor_switch name</option>
+      </optgroup>
+      <transport method="delete" path="tor_switch/%(tor_switch)s" />
    </command>
 
    <command name="show_principal">

@@ -14,7 +14,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+                                   BrokerCommand, force_int)
 from aquilon.server.dbwrappers.vendor import get_vendor
 from aquilon.server.dbwrappers.machine_type import get_machine_type
 from aquilon.aqdb.hardware import Model, MachineSpecs
@@ -34,6 +34,13 @@ class CommandAddModel(BrokerCommand):
             raise ArgumentError('Specified model already exists')
         dbvendor = get_vendor(session, vendor)
         dbmachine_type = get_machine_type(session, type)
+
+        if cputype:
+            mem = force_int("mem", mem)
+            cpunum = force_int("cpunum", cpunum)
+            disksize = force_int("disksize", disksize)
+            nics = force_int("nics", nics)
+
         # FIXME: Model cannot (yet) take comments in __init__
         # Should be fixed when Model moves over to declarative
         dbmodel = Model(name, dbvendor, dbmachine_type)

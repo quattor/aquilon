@@ -37,6 +37,10 @@ class CommandAddHost(BrokerCommand):
         dbmachine = get_machine(session, machine)
         dbarchetype = get_archetype(session, archetype)
 
+        if dbmachine.type() not in ('blade', 'workstation', 'rackmount'):
+            raise ArgumentError("Machine is of type %s, and must be a blade, workstation, or rackmount to add a host." %
+                    (dbmachine.type()))
+
         if not dbmachine.interfaces:
             raise ArgumentError("Machine '%s' has no interfaces." % machine)
         found_boot = False

@@ -605,7 +605,7 @@
    </command>
 
    <command name="add_rack">
-      %prog add rack --name NAME --rack RACK_NAME
+      %prog add rack --name NAME --building RACK_NAME
       Add a new rack to the database
       <optgroup name="add_rack_input" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new rack</option>
@@ -629,12 +629,45 @@
    </command>
 
    <command name="del_rack">
-      %prog del rack --name CITY
+      %prog del rack --name RACK
       Delete a rack.
       <optgroup name="del_rack_opts" mandatory="True" fields="all">
          <option name="name" type="string">rack name</option>
       </optgroup>
       <transport method="delete" path="location/rack/%(name)s" />
+   </command>
+
+   <command name="add_rack_section">
+      %prog add rack_section --name RS_NAME --rack RACK_NAME
+      Add a new rack_section to the database
+      <optgroup name="add_rack_section_input" mandatory="True" fields="all">
+         <option name="name" type="string">Name of the new rack_section</option>
+         <option name="building" type="string">Name of the rack that the rack_section is a part of</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_rack_section/%(building)s/%(name)s" />
+   </command>
+
+   <command name="show_rack_section">
+      %prog show rack_section [--name RACK_SECTION]
+      Show the rack_section list, or details about a particular rack_section.
+      <optgroup name="show_rack_section_opts">
+         <option name="name" type="string">rack_section name</option>
+      </optgroup>
+      <transport method="get" path="location/rack_section" />
+      <transport trigger="name" method="get" path="location/rack_section/%(name)s" />
+   </command>
+
+   <command name="del_rack_section">
+      %prog del rack_section --name RACK_SECTION
+      Delete a rack_section.
+      <optgroup name="del_rack_section_opts" mandatory="True" fields="all">
+         <option name="name" type="string">rack_section name</option>
+      </optgroup>
+      <transport method="delete" path="location/rack_section/%(name)s" />
    </command>
 
    <command name="add_building">
@@ -857,6 +890,38 @@
          <option name="machine" type="string">machine name</option>
       </optgroup>
       <transport method="delete" path="machine/%(machine)s" />
+   </command>
+
+   <command name="add_tor_switch">
+      %prog add tor_switch --tor_switch SWITCH_NAME --rack_section RS_NAME --model MODEL [--serial SERIALNO]
+      <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
+         <option name="tor_switch" type="string">tor_switch name</option>
+         <option name="model" type="string">tor_switch model</option>
+         <option name="rack_section" type="string">rack_section name</option>
+      </optgroup>
+      <optgroup name="add_tor_switch_optional">
+	 <option name="serial" type="string">serial number</option>
+      </optgroup>
+      <transport method="put" path="tor_switch/%(tor_switch)s" />
+   </command>
+
+   <command name="show_tor_switch">
+      %prog show tor_switch --tor_switch SWITCH_NAME --rack_section RS_NAME --model MODEL
+      <optgroup name="show_tor_switch_opts" mandatory="True" fields="any">
+         <option name="tor_switch" type="string">tor_switch name</option>
+         <option name="rack_section" type="string">rack section name</option>
+         <option name="model" type="string">tor_switch model</option>
+      </optgroup>
+      <transport trigger="tor_switch" method="get" path="tor_switch/%(tor_switch)s" />
+      <transport method="get" path="find/tor_switch" />
+   </command>
+
+   <command name="del_tor_switch">
+      %prog del tor_switch --tor_switch SWITCH_NAME
+      <optgroup name="del_tor_switch_opts" mandatory="True" fields="all">
+         <option name="tor_switch" type="string">tor_switch name</option>
+      </optgroup>
+      <transport method="delete" path="tor_switch/%(tor_switch)s" />
    </command>
 
    <command name="show_principal">

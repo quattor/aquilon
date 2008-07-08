@@ -7,7 +7,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq add machine`."""
+"""Contains the logic for `aq add tor_switch`."""
 
 
 from aquilon.exceptions_ import ArgumentError
@@ -16,32 +16,33 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.aqdb.switch_port import SwitchPort
 
 
-class CommandAddMachine(BrokerCommand):
+class CommandAddTorSwitch(BrokerCommand):
 
-    required_parameters = ["machine", "model"]
+    required_parameters = ["tor_switch", "model", "rack"]
 
     @add_transaction
     @az_check
-    # arguments will contain one of --chassis --rack or --desk
-    def render(self, session, machine, model, serial,
+    def render(self, session, tor_switch, model, rack, serial,
             cpuname, cpuvendor, cpuspeed, cpucount, memory,
             user, **arguments):
-        dblocation = get_location(session, **arguments)
+        dblocation = get_location(session, rack=rack)
         dbmodel = get_model(session, model)
 
-        if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation']:
-            raise ArgumentError("The add_machine command cannot add machines of type '%(type)s'.  Try 'add %(type)s'." %
-                    {"type": dbmodel.machine_type})
+        if dbmodel.machine_type not in ['tor_switch']:
+            raise ArgumentError("The add_tor_switch command cannot add machines of type '%s'.  Try 'add machine'." %
+                    dbmodel.machine_type)
 
-        dbmachine = create_machine(session, machine, dblocation, dbmodel,
+        dbtor_switch = create_machine(session, tor_switch, dblocation, dbmodel,
             cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        # FIXME: Hard-coded number of switch ports...
+        for i in range(48):
+            dbsp = SwitchPort(switch=dbtor_switch, port_number=i)
+            session.save(dbsp)
+
         return
 
 

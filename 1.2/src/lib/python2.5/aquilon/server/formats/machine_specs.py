@@ -22,8 +22,8 @@ class MachineSpecsFormatter(ObjectFormatter):
             machine_specs.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine_specs.memory)
         details.append(indent + "  NIC count: %d" % machine_specs.nic_count)
-        #details.append(indent + "  Disk: %d GB %s" % 
-        #       (machine_specs.disk_capacity, machine_specs.disk_type))
+        details.append(indent + "  Disk: %d GB %s" % 
+               (machine_specs.disk_capacity, machine_specs.disk_type))
         if machine_specs.comments:
             details.append(indent + "  Comments: %s" % machine_specs.comments)
         return "\n".join(details)

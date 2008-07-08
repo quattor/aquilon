@@ -90,7 +90,9 @@ class TestBrokerCommand(unittest.TestCase):
                     "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                     % (command, out))
         else:
-            self.assertEqual(p.returncode, 4)
+            self.assertEqual(p.returncode, 4,
+                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
+                % (command, p.returncode, 4, out))
             self.assertEqual(out.find("Not Found"), 0,
                     "STDOUT for %s did not start with Not Found:\n@@@\n'%s'\n@@@\n"
                     % (command, out))
@@ -102,7 +104,9 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, err))
-        self.assertEqual(p.returncode, 4)
+        self.assertEqual(p.returncode, 4,
+                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
+                % (command, p.returncode, 4, out))
         self.assertEqual(out.find("Bad Request"), 0,
                 "STDOUT for %s did not start with Bad Request:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
@@ -114,7 +118,9 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, err))
-        self.assertEqual(p.returncode, 5)
+        self.assertEqual(p.returncode, 5,
+                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
+                % (command, p.returncode, 5, out))
         self.assertEqual(out.find("Internal Server Error"), 0,
                 "STDOUT for %s did not start with Internal Server Error:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
