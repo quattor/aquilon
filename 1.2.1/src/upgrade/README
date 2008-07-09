@@ -1,0 +1,19 @@
+This directory and the files herein are intended to be used during the
+migration from the previous version of the source (1.1.1) to this
+version (1.2).
+
+The contain some cut-and-paste code from libraries present in the aqdb
+module for the creation of new tables.
+
+The 1.1 -> 1.1.1 upgrade was more sophisticated - look there for other
+examples.
+
+To run the upgrade:
+- Set up an appropriate aqd.conf, probably based off of unittest.conf but
+	pointing at the database to update.
+- Use run_update.py (with AQDCONF set) to export the database as a backup
+	and then update the schema.
+- [ If testing, run the unit tests against this database with
+	./runtests.py --config=$AQDCONF ]
+- Start up the broker.
+
