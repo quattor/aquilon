@@ -63,5 +63,14 @@ class HostIPListFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[HostIPList] = HostIPListFormatter()
 
+class HostMachineList(list):
+    """By convention, holds tuples of host_name, machine_name."""
+    pass
+
+class HostMachineListFormatter(ObjectFormatter):
+    def format_csv(self, hlist):
+        return str("\n".join([str.join(",",(host.name, host.machine.name)) for host in hlist]))
+
+ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()
 
 #if __name__=='__main__':

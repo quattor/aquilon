@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<commandline>
+<commandline xmlns:xi='http://www.w3.org/2001/XInclude'>
    %prog command [subcommand] options
    <command name="*">
       <optgroup name="all commands">
@@ -66,6 +66,28 @@
       <transport trigger="all" method="get" path="domain" />
       <transport trigger="domain" method="get" path="domain/%(domain)s" />
    </command>
+   
+   <command name="show_network">
+      %prog show network 
+      Shows the configuration for a network, or for networks selected by location
+      <optgroup name="show_network_Input" mandatory="True" fields="any">
+         <option name="network" type="string" conflicts="all">Network name</option>
+         <option name="ip" type="string" conflicts="all">IP address</option>
+         <option name="type" type="string">Network type</option>
+         <optgroup name="show_network_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="chassis" type="string">Chassis</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="get" path="show/network" />
+   </command>
 
    <command name="show_hostiplist">
       Shows a list of all hosts.  Can be narrowed by archetype.
@@ -74,6 +96,16 @@
       </optgroup>
       <transport trigger="archetype" method="get" path="archetype/%(archetype)s/hostiplist" />
       <transport method="get" path="search/hostiplist" />
+   </command>
+
+   <command name="show_hostmachinelist">
+      %prog show hostmachinelist
+      Shows a list of all hosts and the machine (aka node) they're associated with.
+      <optgroup name="show_hostmachinelist_options">
+         <option name="archetype" type="string">Archetype name</option>
+      </optgroup>
+      <transport trigger="archetype" method="get" path="archetype/%(archetype)s/hostmachinelist" />
+      <transport method="get" path="search/hostmachinelist" />
    </command>
 
    <command name="add_cpu">
@@ -237,11 +269,15 @@
 
    <command name="show_service">
       Show an existing service
-      <optgroup name="show_service_opts">
-         <option name="service" type="string">service name</option>
+      <optgroup name="show_service_opts" mandatory="True" fields="any">
+         <option name="service" type="string">Service name</option>
+	 <option name="all" type="boolean" conflicts="service">Select all services</option>
       </optgroup>
-      <transport method="get" path="service" />
+      <optgroup name="optional_opts">
+	 <option name="instances" type="boolean">Show instances of service</option>
+      </optgroup>
       <transport trigger="service" method="get" path="service/%(service)s"/>
+      <transport trigger="all" method="get" path="service" />
    </command>
 
    <command name="del_service">
@@ -367,15 +403,15 @@
          <option name="instance" type="string" mandatory="True">instance name</option>
       </optgroup>
       <optgroup name="map_service_location_opts" mandatory="True" fields="any">
-         <option name="company" type="string">Company</option>
-         <option name="hub" type="string">Hub</option>
-         <option name="continent" type="string">Continent</option>
-         <option name="country" type="string">Country</option>
-         <option name="city" type="string">City</option>
-         <option name="building" type="string">Building</option>
-         <option name="rack" type="string">Rack</option>
-         <option name="chassis" type="string">Chassis</option>
-         <option name="desk" type="string">Desk</option>
+	<option name="company" type="string">Company</option>
+	<option name="hub" type="string">Hub</option>
+	<option name="continent" type="string">Continent</option>
+	<option name="country" type="string">Country</option>
+	<option name="city" type="string">City</option>
+	<option name="building" type="string">Building</option>
+	<option name="rack" type="string">Rack</option>
+	<option name="chassis" type="string">Chassis</option>
+	<option name="desk" type="string">Desk</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/%(instance)s/command/map" />
    </command>
@@ -386,15 +422,15 @@
          <option name="service" type="string">service name</option>
          <option name="instance" type="string">instance name</option>
          <optgroup name="show_map_location_opts" fields="any">
-            <option name="company" type="string">Company</option>
-            <option name="hub" type="string">Hub</option>
-            <option name="continent" type="string">Continent</option>
-            <option name="country" type="string">Country</option>
-            <option name="city" type="string">City</option>
-            <option name="building" type="string">Building</option>
-            <option name="rack" type="string">Rack</option>
-            <option name="chassis" type="string">Chassis</option>
-            <option name="desk" type="string">Desk</option>
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="chassis" type="string">Chassis</option>
+	    <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
       <transport method="get" path="show/map" />
@@ -407,15 +443,15 @@
          <option name="instance" type="string" mandatory="True">instance name</option>
       </optgroup>
       <optgroup name="unmap_service_location_opts" mandatory="True" fields="any">
-         <option name="company" type="string">Company</option>
-         <option name="hub" type="string">Hub</option>
-         <option name="continent" type="string">Continent</option>
-         <option name="country" type="string">Country</option>
-         <option name="city" type="string">City</option>
-         <option name="building" type="string">Building</option>
-         <option name="rack" type="string">Rack</option>
-         <option name="chassis" type="string">Chassis</option>
-         <option name="desk" type="string">Desk</option>
+	<option name="company" type="string">Company</option>
+	<option name="hub" type="string">Hub</option>
+	<option name="continent" type="string">Continent</option>
+	<option name="country" type="string">Country</option>
+	<option name="city" type="string">City</option>
+	<option name="building" type="string">Building</option>
+	<option name="rack" type="string">Rack</option>
+	<option name="chassis" type="string">Chassis</option>
+	<option name="desk" type="string">Desk</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/%(instance)s/command/unmap" />
    </command>
