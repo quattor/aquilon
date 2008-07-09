@@ -64,8 +64,8 @@ class db_factory(object):
             self.login(passwds)
             debug(self.engine, assert_only = True)
         elif self.vendor == 'sqlite':
-            # FIXME: Create the engine...
-            pass
+            self.engine = create_engine(self.dsn)
+            self.engine.connect()
         else:
             msg = 'database vendor can be either sqlite or oracle'
             noisy_exit(msg)
@@ -75,14 +75,20 @@ class db_factory(object):
         self.meta   = MetaData(self.engine)
         assert(self.meta)
 
-    def meta(self):
-        return self.meta
+        self.Session = scoped_session(sessionmaker(bind=self.engine,
+                                      autoflush=True,
+                                      transactional=True))
+        assert(self.Session)
 
-    def engine(self):
-        return self.engine
+# These don't work, since they get overridden during init.
+#    def meta(self):
+#        return self.meta
+#
+#    def engine(self):
+#        return self.engine
 
     def session(self):
-        return scoped_session(sessionmaker(bind=self.engine))
+        return self.Session()
 
     def login(self,passwds):
         errs = []
@@ -128,6 +134,9 @@ class db_factory(object):
                     raise ValueError(msg)
                 else:
                     return [passwd.strip() for passwd in passwds]
+        # Fallback for testing when password file may not exist.
+        elif self.config.has_option("database", "dbpassword"):
+            return [self.config.get("database", "dbpassword")]
         else:
             return []
 

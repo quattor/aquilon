@@ -10,6 +10,7 @@
 """Contains the logic for `aq show tor_switch`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (add_transaction, az_check, format_results,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.location import get_location
@@ -33,9 +34,9 @@ class CommandShowTorSwitch(BrokerCommand):
             q = q.filter_by(location=dblocation)
         if model:
             dbmodel = get_model(session, model)
-            if dbmodel.machine_type != 'tor_switch':
-                raise ArgumentError("Requested model %s is not a tor_switch." %
-                        model)
+            if dbmodel.machine_type not in ['tor_switch']:
+                raise ArgumentError("Requested model %s is a %s, not a tor_switch." %
+                        (model, dbmodel.machine_type))
             q = q.filter_by(model=dbmodel)
         return q.all()
 

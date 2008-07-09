@@ -36,7 +36,7 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: SNgd1r01", command)
-        for port in range(48):
+        for port in range(1,49):
             self.matchoutput(out, "Switch Port %d" % port, command)
 
     def testverifycatut3gd1r01(self):

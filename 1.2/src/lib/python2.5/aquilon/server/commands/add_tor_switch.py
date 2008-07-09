@@ -39,7 +39,10 @@ class CommandAddTorSwitch(BrokerCommand):
             cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
 
         # FIXME: Hard-coded number of switch ports...
-        for i in range(48):
+        switch_port_start = 1
+        switch_port_count = 48
+        switch_port_end = switch_port_start + switch_port_count
+        for i in range(switch_port_start, switch_port_end):
             dbsp = SwitchPort(switch=dbtor_switch, port_number=i)
             session.save(dbsp)
 
