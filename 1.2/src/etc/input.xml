@@ -277,7 +277,7 @@
 	 <option name="instances" type="boolean">Show instances of service</option>
       </optgroup>
       <transport trigger="service" method="get" path="service/%(service)s"/>
-      <transport trigger="all" method="get" path="service" />
+      <transport method="get" path="service" />
    </command>
 
    <command name="del_service">
