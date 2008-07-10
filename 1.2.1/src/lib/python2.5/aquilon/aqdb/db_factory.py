@@ -10,52 +10,93 @@
 """To be imported by classes and modules requiring aqdb access"""
 from __future__ import with_statement
 
-#from depends import *
 
-import sys
-import os
 import pwd
 import getpass
+import sys
+import os
 
-import cx_Oracle
+DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0,os.path.join(DIR, '..'))
+from config import Config
 
-from sqlalchemy import MetaData, engine, create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exceptions import DatabaseError as SaDBError
+import depends
+if '--debug' in sys.argv:
+    from depends import ipshell
 
-from debug import debug, noisy_exit
+import sqlalchemy  #for version
+from   sqlalchemy import MetaData, engine, create_engine
+from   sqlalchemy.orm import scoped_session, sessionmaker
+from   sqlalchemy.ext.declarative import declarative_base
+from   sqlalchemy.exceptions import DatabaseError as SaDBError
 
-#TODO: we really shouldn't do this. Inherit everything or nothing
-# db_factory, debug, config are copied in, then this ??? shady. But
-# we need to get this done....
-# daqscott 6/9/08
-#
-sys.path.append('../lib/python2.5')
-from aquilon.config import Config
+def debug(examinee,*args,**kw):
+    if '--debug' in sys.argv:
+        if isinstance(examinee,str) and not kw.has_key('assert_only'):
+            sys.stderr.write('%s\n'%(examinee))
+        else:
+            if kw.has_key('assert_only'):
+                assert(examinee)
+            else:
+                assert(examinee, 'Object is: %s'%(examinee))
+    else:
+        pass
 
-#class Singleton(object):
-#    _instance = None
-#    def __new__(cls, *args, **kw):
-#        if not cls._instance:
-#            cls._instance = super(Singleton, cls).__new__(cls, *args, **kw)
-#        return cls._instance
+def noisy_exit(msg=None):
+    if not msg:
+        #TODO: get the traceback another way
+        msg = 'Unhandled Exception...'
+    sys.stderr.write('%s\n'%msg)
+    sys.exit(9)
+
+def monkeypatch(cls):
+    def decorator(func):
+        setattr(cls, func.__name__, func)
+        return func
+    return decorator
+
+Base = declarative_base()
+
+@monkeypatch(Base)
+def __repr__(self):
+    if hasattr(self,'name'):
+        return self.__class__.__name__ + ' ' + str(self.name)
+    elif hasattr(self,'type'):
+        return self.__class__.__name__ + ' ' + str(self.type)
+    elif hasattr(self,'service'):
+        return self.__class__.__name__ + ' ' + str(self.service.name)
+    elif hasattr(self,'system'):
+        return self.__class__.__name__ + ' ' + str(self.system.name)
+    else:
+       return '%s instance '%(self.__class__.__name__)
 
 class db_factory(object):
     __shared_state = {}
     def __init__(self, *args, **kw):
+        #TODO: accept mock as arg
         self.__dict__ = self.__shared_state
         if hasattr(self,'config'):
             return
 
-        self.config = Config()
+        try:
+            self.config = Config()
+        except Exception, e:
+            print >> sys.stderr, "failed to read configuration: %s" % e
+            sys.exit(os.EX_CONFIG)
+
         self.dsn = self.config.get('database', 'dsn')
         self.vendor = self.config.get('database', 'vendor')
 
+        self.dsn = self.config.get('database', 'dsn')
+        self.vendor = self.config.get('database', 'vendor')
 
         if self.vendor == 'oracle':
+            import cx_Oracle
             self.schema = self.config.get('database','dbuser')
             self.server = self.config.get('database','server')
+
             passwds = self._get_password_list()
+
             if len(passwds) < 1:
                 passwds.append(
                     getpass.getpass(
@@ -75,17 +116,13 @@ class db_factory(object):
         self.meta   = MetaData(self.engine)
         assert(self.meta)
 
-        self.Session = scoped_session(sessionmaker(bind=self.engine,
-                                      autoflush=True,
-                                      transactional=True))
+        if sqlalchemy.__version__.startswith('0.4'):
+            self.Session = scoped_session(sessionmaker(bind = self.engine,
+                                                       autoflush = True,
+                                                       transactional = True))
+        else:
+            self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert(self.Session)
-
-# These don't work, since they get overridden during init.
-#    def meta(self):
-#        return self.meta
-#
-#    def engine(self):
-#        return self.engine
 
     def session(self):
         return self.Session()
@@ -98,7 +135,7 @@ class db_factory(object):
 
         for p in passwds:
             self.dsn = re.sub(pswd_re,p,dsn_copy)
-            #debug(self.dsn)
+            debug('trying dsn %s'%(self.dsn))
             self.engine = create_engine(self.dsn)
             try:
                 self.engine.connect()
@@ -124,7 +161,6 @@ class db_factory(object):
             giving up and throwing an exception """
 
         passwd_file = self.config.get("database", "password_file")
-
         passwds = []
         if os.path.isfile(passwd_file):
            with open(passwd_file) as f:
@@ -134,7 +170,7 @@ class db_factory(object):
                     raise ValueError(msg)
                 else:
                     return [passwd.strip() for passwd in passwds]
-        # Fallback for testing when password file may not exist.
+                        # Fallback for testing when password file may not exist.
         elif self.config.has_option("database", "dbpassword"):
             return [self.config.get("database", "dbpassword")]
         else:
@@ -173,6 +209,7 @@ class MockEngine(object):
         self.engine = create_engine(self.dsn,strategy='mock', executor=executor)
         assert not hasattr(engine, 'mock')
         self.engine.mock = self.buffer
+
     def flush_to_file(self):
         if self.output_file:
             with open(self.output_file, 'w') as f:
@@ -215,3 +252,5 @@ if __name__ == '__main__':
     #can't use debug() here because it will *always write to stderr...
     if '-d' in sys.argv:
         mock_eng2.flush_to_file()
+
+    ipshell()

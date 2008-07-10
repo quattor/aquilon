@@ -14,15 +14,17 @@ msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
 
 import os
-if os.environ['SYS_REGION'] == 'eu':
-    DATABASE='LNP_DSDB11'
-else:
-    DATABASE='NYP_DSDB11'
+
 
 get_country = """
     select country_symbol, country_name, continent
     from country where state >= 0
 """
+
+get_campus = """
+    select campus_name, comments from campus where state >= 0
+"""
+
 get_city = """
     select A.city_symbol, A.city_name, B.country_symbol
     from city A, country B
@@ -96,32 +98,35 @@ SELECT
                        AND D.state >= 0
                        AND E.state >= 0
                        --AND G.state >= 0
-
-                       and A.host_name = 'np3c1n4'
-
+                       AND A.host_name = 'np3c1n4'
 """
 
+class dsdb_connection(object):
+    """ Wraps connections to DSDB """
 
-class aqsyb:
-    """Wraps connections and calls to sybase"""
-    def __init__(self,dsn,database):
-        if os.environ['USER'] == 'daqscott' and dsn == 'NYP_DSDB11':
+    def __init__(self,*args, **kw):
+        if os.environ['SYS_REGION'] == 'eu':
+            self.dsn = 'LNP_DSDB11'
+        else:
+            self.dsn = 'NYP_DSDB11'
+
+        if os.environ['USER'] == 'daqscott' and self.dsn == 'NYP_DSDB11':
             #print 'using kerberos authentication'
             principal = None
             for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():
                 svr, principal = line.split()
-                if svr == dsn:
+                if svr == self.dsn:
                     break
 
-            self.syb = Sybase.connect(dsn,'','',database,
+            self.syb = Sybase.connect(self.dsn,'','','dsdb',
                                       delay_connect=1, datetime='auto')
             self.syb.set_property(Sybase.CS_SEC_NETWORKAUTH, Sybase.CS_TRUE)
             self.syb.set_property(Sybase.CS_SEC_SERVERPRINCIPAL, principal)
             self.syb.connect()
         else:
             #TODO: kuu to a user, then do the above
-            self.syb = Sybase.connect(dsn,'dsdb_guest','dsdb_guest', \
-                                  database,datetime='auto',auto_commit = '0')
+            self.syb = Sybase.connect(self.dsn, 'dsdb_guest', 'dsdb_guest', \
+                                  'dsdb', datetime = 'auto', auto_commit = '0')
 
     def run_query(self,sql):
         """Runs query sql. Note use runSybaseProc to call a stored procedure.
@@ -152,7 +157,7 @@ class aqsyb:
 
 
 def test():
-    syb = aqsyb(DATABASE,'dsdb')
+    syb = dsdb_connection()
     sql    = """select boot_path from network_host A, bootparam B where
             A.host_name = \'blackcomb\'
             AND A.machine_id = B.machine_id
@@ -163,32 +168,38 @@ def test():
     assert pod == 'eng.ny'
     print pod
 
+def dump_campus():
+    db = dsdb_connection()
+    return db.run_query(get_campus).fetchall()
+
 def dump_country():
-    db = aqsyb(DATABASE,'dsdb')
+    db = dsdb_connection()
     return db.run_query(get_country).fetchall()
 
 def dump_city():
-    db = aqsyb(DATABASE,'dsdb')
+    db = dsdb_connection()
     return db.run_query(get_city).fetchall()
 
 def dump_bldg():
-    db = aqsyb(DATABASE,'dsdb')
+    db = dsdb_connection()
     return db.run_query(get_bldg).fetchall()
 
 def dump_bucket():
-    db = aqsyb(DATABASE,'dsdb')
+    db = dsdb_connection()
     return db.run_query(get_bucket).fetchall()
 
 def dump_network():
-    db = aqsyb(DATABASE,'dsdb')
+    db = dsdb_connection()
     return db.run_query(get_network).fetchall()
 
 def esp():
-    print DATABASE
-    db = aqsyb(DATABASE,'dsdb')
+    print
+    db = dsdb_connection()
     return db.run_query(host_info).fetchall()
 
 if __name__ == '__main__':
     #test()
-    a=esp()
-    print a[0]
+    #a=esp()
+    #print a[0]
+    a = dump_campus()
+    print a

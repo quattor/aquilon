@@ -12,20 +12,17 @@
     other modules load properly, we seperate them here to get them done
     before ahead of the other modules. """
 import sys
-sys.path.append('../..')
+#sys.path.append('../..')
 
 import types
 from datetime import datetime
 
-from db import (meta,engine, Session, Base, get_id_col, get_comment_col,
-                get_date_col, get_date_default)
+from db_factory import Base
 
 from sqlalchemy import (Table, Column, Sequence, Integer, String, DateTime,
                         UniqueConstraint, PrimaryKeyConstraint, select)
 
 from sqlalchemy.orm import deferred
-
-#subtype Base, make it have new __repr__, __str__, __eq__ methods.
 
 # we want class level methods on the classes returned by subtype:
 # LocationType.populate(), LocationType.id('foo')
@@ -44,7 +41,7 @@ def subtype(nm,tbl,dstr=None):
 
         __table__= Table(tbl, Base.metadata,
                 Column('id', Integer,
-                       Sequence('%s_id_seq'%tbl), primary_key=True),
+                       Sequence('%s_seq'%tbl), primary_key=True),
                 Column('type', String(32), nullable=False),
                 Column('creation_date', DateTime,
                        default=datetime.now, nullable = False),
@@ -93,9 +90,3 @@ def get_subtype_id(nm=None,engine=None,cls=None):
     assert isinstance(tbl,Table)
     sl=select([tbl.c.id], tbl.c.type=='%s'%(nm))
     return engine.execute(sl).fetchone()[0]
-
-#Hardware/Machine Type
-#Interface Type
-
-if __name__ == '__main__':
-    pass
