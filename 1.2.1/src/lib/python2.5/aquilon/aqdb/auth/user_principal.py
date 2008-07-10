@@ -82,7 +82,7 @@ def populate():
                   'gleasob', 'lchun', 'peteryip', 'richmoj', 'tipping',
                   'hardyb', 'martinva']
 
-    if empty(user_principal):
+    if len(s.query(UserPrincipal).all()) < 1:
         r = s.query(Realm).first()
         assert(r.name == 'is1.morgan')
 

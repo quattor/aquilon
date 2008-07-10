@@ -20,7 +20,13 @@ from table_types.name_table import make_name_class
 Realm = make_name_class('Realm', 'realm')
 realm = Realm.__table__
 
-def populate_realm():
+def populate():
+    from db_factory import db_factory, Base
+    dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+    Base.metadata.bind.echo = True
+    s = dbf.session()
+
     if s.query(Realm).count() == 0:
         r = Realm(name = 'is1.morgan')
         s.save(r)
