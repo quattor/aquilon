@@ -69,7 +69,7 @@ class HostMachineList(list):
 
 class HostMachineListFormatter(ObjectFormatter):
     def format_csv(self, hlist):
-        return str("\n".join([str.join(",",(host.name, host.machine.name)) for host in hlist]))
+        return str("\n".join([str.join(",",(host.fqdn, host.machine.name)) for host in hlist]))
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()
 
