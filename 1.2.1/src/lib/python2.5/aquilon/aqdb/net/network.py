@@ -82,6 +82,11 @@ Index('net_loc_id_idx', network.c.location_id)
 def populate(*args, **kw):
     from db_factory import db_factory, Base
     from utils import dsdb
+
+    import logging #do we *need* logger?
+        #TODO: when we have an error table, insert a row there, as well as
+        #    generating an exception that can be acted upon in dsdb.
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:
@@ -105,9 +110,17 @@ def populate(*args, **kw):
         try:
             kw['location_id'] = b_cache[bldg_name]
         except KeyError:
-            logging.error("Can't find building '%s'\n%s"%(bldg_name,row))
             #TODO: pull the new building in from dsdb somehow
+            #TODO: generate an exception about the row if it's got unexpected
+            #   null data in it, it means that dsdb has bad data.
+            logging.error("Can't find building '%s'\n%s"%(bldg_name, row))
             continue
+            # an alternative...
+            #sys.stderr.write("Can't find building '%s' for row %s\n"%(
+            #    bldg_name,row))
+
+
+
 
         kw['name']       = name
         kw['ip']         = ip
