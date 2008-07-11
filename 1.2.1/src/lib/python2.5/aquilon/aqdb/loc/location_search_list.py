@@ -14,6 +14,7 @@ import os
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(DIR, '..'))
+
 from db_factory import Base
 from table_types.name_table import make_name_class
 
@@ -32,3 +33,15 @@ def populate(*args, **kw):
     s = dbf.session()
 
     location_search_list.create(checkfirst = True)
+
+    l = LocationSearchList(name = 'full', comments = 'Chassis -> Company')
+    s.add(l)
+    s.commit()
+
+    m = s.query(LocationSearchList).first()
+    assert m
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
+
+#def fill():

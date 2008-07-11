@@ -15,15 +15,13 @@ from aqdb import net
 from aqdb import sy
 from aqdb import svc
 
-
-
 from depends import ipshell
 import IPython.ipapi
 ipapi = IPython.ipapi.get()
 
 pkgs         = {}
 
-pkgs['auth'] = ['role', 'realm', 'user_principal' ]
+pkgs['auth'] = ['role', 'realm', 'user_principal']
 
 pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
                 'city', 'building', 'rack', 'chassis', 'desk',
@@ -36,15 +34,15 @@ pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'cpu', 'disk_type', 'machine',
                 'disk', 'interface', 'physical_interface', 'switch_port',
-                'machine_specs' ]
+                'machine_specs']
 
 pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host',
-                'host_list', 'host_list_item', 'build_item' ]
+                'host_list', 'host_list_item', 'build_item']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_map',
-                'service_list_item' ]
+                'service_list_item']
 
-order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
+order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc']
 
 def main(*args, **kw):
     for p in order:

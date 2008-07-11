@@ -31,11 +31,37 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
 
 from sqlalchemy.orm import relation, deferred, synonym
 
-#types are ['transit', 'vip', 'management', 'grid', 'unknown'] #legacy, stretch
+""" Network Type can be one of four values which have been carried over as
+    legacy from the network table in DSDB:
+        *   management: no networks have it(@ 3/27/08), it's probably useless
+
+        *   transit: for the phyical interfaces of zebra nodes
+
+        *   vip:     for the zebra addresses themselves
+
+        *   unknown: for network rows in DSDB with NULL values for 'type'
+
+        *   tor_net: tor switches are managed in band, which means that
+                     if you know the ip/netmask of the switch, you know the
+                     network which it provides for.
+"""
 
 #TODO: enum type for network_type, cidr
 class Network(Base):
-    """ Represent subnets in aqdb """
+    """
+    Represents subnets in aqdb.
+
+    Network Type can be one of four values which have been carried over as
+    legacy from the network table in DSDB:
+        *   management: no networks have it(@ 3/27/08), it's probably useless
+        *   transit: for the phyical interfaces of zebra nodes
+        *   vip:     for the zebra addresses themselves
+        *   unknown: for network rows in DSDB with NULL values for 'type'
+
+        *   tor: tor switches are managed in band, which means that if you know
+                 the ip/netmask of the switch, you know the layer 2 network
+                 which it provides access to.
+"""
 
     __tablename__ = 'network'
 
@@ -119,9 +145,6 @@ def populate(*args, **kw):
             #sys.stderr.write("Can't find building '%s' for row %s\n"%(
             #    bldg_name,row))
 
-
-
-
         kw['name']       = name
         kw['ip']         = ip
         kw['cidr']       = cidr
@@ -140,10 +163,3 @@ def populate(*args, **kw):
 
     print 'commited %s rows'%(count)
     s.commit()
-
-#    """ Network Type can be one of four values which have been carried over as
-#        legacy from the network table in DSDB:
-#        *   management: no networks have it(@ 3/27/08), it's probably useless
-#        *   transit: for the phyical interfaces of zebra nodes
-#        *   vip:     for the zebra addresses themselves
-#        *   unknown: for network rows in DSDB with NULL values for 'type'

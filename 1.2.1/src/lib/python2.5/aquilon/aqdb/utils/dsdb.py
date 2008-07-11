@@ -7,14 +7,18 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""If you can read this, you should be Documenting"""
+""" For dsdb/sybase specific functionality and access"""
 
 import msversion
 msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
-
 import os
 
+#TODO: for fun, put these into the database. select them out before running them
+# to try on a *purely* data driven approach to programming. This could enable
+# a brand new kind of "api" to aqd: one where the power user can create their
+# own commands on the fly. (obviously we'd lock this down like CRAZY, but it
+# could help people like Sam that know sql but don't know python, for example)
 
 get_country = """
     select country_symbol, country_name, continent
@@ -41,7 +45,6 @@ get_bldg = """
     AND A.bldg_name != ' '
 """
 
-#get_bucket = "select lower(bucket_name), comments from bucket where state >= 0"
 get_bucket = """
     SELECT loc_name FROM loc_name WHERE state >= 0
     AND loc_name LIKE '%B%'
@@ -49,27 +52,11 @@ get_bucket = """
     AND loc_name NOT LIKE '%pod%'
     ORDER BY loc_name """
 
-# NOTE: the network_type tables id #'s actually match up with dsdb's
-# network_type table's id column, so we just import it directly for speed.
-old_network = """
-    SELECT  A.net_name, A.net_ip_addr, abs(A.net_ip_value), abs(A.net_mask),
-    abs(A.byte_mask), isnull(net_type_id,4),
-    SUBSTRING(A.location,CHAR_LENGTH(A.location) - 7,2) as sysloc, A.side,
-    B.campus_name, C.bucket_name
-    FROM network A, campus B, bucket C
-    WHERE A.campus_id *= B.campus_id
-    AND A.bucket_id *= C.bucket_id
-    AND A.state >=0
-    AND B.state >=0
-    AND C.state >=0
-"""
-
 get_network="""
     SELECT net_name, net_ip_addr, abs(net_mask),
     isnull(net_type_id,4), SUBSTRING(location,CHAR_LENGTH(location) - 7,2)
     as sysloc, side, net_id FROM network WHERE state >= 0
 """
-
 
 host_info  = """
 SELECT

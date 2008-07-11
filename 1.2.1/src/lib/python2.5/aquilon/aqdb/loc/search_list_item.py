@@ -44,6 +44,13 @@ class SearchListItem(Base):
     creation_date = deferred(Column(DateTime, default = datetime.now))
     comments      = deferred(Column(String(255), nullable = True))
 
+    lsl = relation(LocationSearchList)
+#TODO: add better str and repr methods:
+#In [20]: sli1
+#Out[20]: SearchListItem instance <--- should read 'chassis'
+
+
+
 search_list_item = SearchListItem.__table__
 
 search_list_item.primary_key.name = 'search_li_pk'
@@ -68,3 +75,27 @@ def populate(*args, **kw):
     s = dbf.session()
 
     search_list_item.create(checkfirst = True)
+
+    m = s.query(LocationSearchList).first()
+    assert m
+
+    sli1 = SearchListItem(location_type = 'chassis', lsl = m, position = 1)
+    sli2 = SearchListItem(location_type = 'rack', lsl = m, position = 2)
+    sli3 = SearchListItem(location_type = 'building', lsl = m, position = 3)
+    sli4 = SearchListItem(location_type = 'city', lsl = m, position = 4)
+    sli5 = SearchListItem(location_type = 'country', lsl = m, position = 5)
+    sli6 = SearchListItem(location_type = 'continent', lsl = m, position = 6)
+    sli7 = SearchListItem(location_type = 'hub', lsl = m, position = 7)
+    sli8 = SearchListItem(location_type = 'world', lsl = m, position = 8)
+
+    for i in (sli1, sli2, sli3, sli4, sli5, sli6, sli7):
+        s.add(i)
+        print i.__dict__
+        s.commit()
+        #m.location_types.append(i)
+
+    cnt = len(s.query(SearchListItem).all())
+    assert cnt > 6
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
