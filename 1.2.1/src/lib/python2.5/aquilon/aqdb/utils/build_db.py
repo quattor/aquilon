@@ -46,41 +46,6 @@ pkgs['svc']  = ['service', 'service_instance', 'service_map',
 
 order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 
-#from db_factory import *
-#dbf = db_factory()
-#Base.metadata.bind = dbf.engine
-##Base.metadata.bind.echo = True
-#s = dbf.session()
-#from utils.table_admin import *
-
-#def mk_tbl(tbl):
-#    if dbf.vendor == 'oracle':
-#        stmt = "%s.schema = '%s'"%(tbl,dbf.schema)
-#        debug(stmt)
-#        ipapi.ex(stmt)
-#        #TODO: server default for datetime
-#
-#    create_cmd = '%s.create(checkfirst = True)'%tbl
-#    try:
-#        ipapi.ex(create_cmd)
-#        print "created '%s'"%(tbl)
-#    except Exception, e:
-#        print e
-#def main(*args, **kw):
-#    for p in order:
-#        for m in pkgs[p]:
-#            ipapi.ex("import %s.%s" % (p, m))
-#
-#            #cls = m.title().replace("_", "")
-#            #tbl = '%s.%s.%s.__table__'%(p,m,cls)
-#            #mk_tbl(tbl)
-#
-#            populate_cmd = '%s.%s.populate()'%(p,m)
-#            try:
-#                ipapi.ex(populate_cmd)
-#            except Exception, e:
-#                print e
-
 def main(*args, **kw):
     for p in order:
         for m in pkgs[p]:
