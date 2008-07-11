@@ -20,13 +20,12 @@ Archetype = make_name_class('Archetype','archetype')
 archetype = Archetype.__table__
 archetype.primary_key.name = 'archetype_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
-    from debug import debug
-
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     archetype.create(checkfirst=True)
@@ -38,3 +37,6 @@ def populate():
 
         a = s.query(Archetype).first()
         assert(a)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
