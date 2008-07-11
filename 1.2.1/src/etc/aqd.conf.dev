@@ -22,6 +22,7 @@ quattordir = %(basedir)s/quattor
 #knc = /ms/dev/kerberos/knc/1.4/install/exec/bin/knc
 templateport = %(openport)s
 git_templates_url = http://%(servername)s:%(templateport)s/templates
+dsdb_use_test = True
 
 [unittest]
 scratchdir = %(basedir)s/scratch

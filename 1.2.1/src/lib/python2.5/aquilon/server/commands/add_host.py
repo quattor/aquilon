@@ -20,6 +20,7 @@ from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_domain_and_string
 from aquilon.aqdb.systems import Host
 from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandAddHost(BrokerCommand):
@@ -58,11 +59,13 @@ class CommandAddHost(BrokerCommand):
                 dns_domain=dbdns_domain, archetype=archetype)
         session.save(dbhost)
         session.flush()
+
+        #dsdb_runner = DSDBRunner()
+        #dsdb_runner.add_host(dbhost)
+
         # Working around funky archetype handling in host creation...
         # Might not be necessary if/when Host uses the declarative mapper.
         session.refresh(dbhost)
-
-        # FIXME: Call out to dsdb.  Use code in processes.py.
 
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write(self.config.get("broker", "plenarydir"),

@@ -15,6 +15,7 @@ from twisted.python import log
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandDelHost(BrokerCommand):
@@ -34,7 +35,8 @@ class CommandDelHost(BrokerCommand):
         session.delete(dbhost)
         session.flush()
 
-        # FIXME: Call out to dsdb.  Use code in processes.py.
+        #dsdb_runner = DSDBRunner()
+        #dsdb_runner.delete_host(dbhost)
 
         # FIXME: Remove plenary template and profile.
 

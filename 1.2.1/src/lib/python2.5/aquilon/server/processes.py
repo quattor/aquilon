@@ -15,15 +15,19 @@ the chain.
 
 """
 
+
 import os
 import time
 import socket
+import re
 import xml.etree.ElementTree as ET
 from subprocess import Popen, PIPE
 
 from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, AquilonError
+from aquilon.config import Config
+
 
 CCM_NOTIF = 1
 CDB_NOTIF = 2
@@ -68,7 +72,6 @@ def run_command(args, env=None, path="."):
         raise ProcessException(command=simple_command, out=out, err=err,
                 code=p.returncode)
     return out
-
 
 def remove_dir(dir):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
@@ -209,63 +212,61 @@ def send_notification(type, machines):
         except Exception, e:
             log.msg("Error notifying %s: %s", host, e)
 
-### Old code follows to deal with dsdb that needs to be reimplemented.
-###
-#    # Hack to deal with IPs already in dsdb.  In theory, we *want* dsdb to
-#    # tell us when there are conflicts, but right now it isn't helping.
-#    def eb_ignore_already_defined(self, failure):
-#        failure.trap(ProcessException)
-#        if failure.value.out and failure.value.out.find("already defined") >= 0:
-#            log.msg("DSDB check failed, continuing anyway!")
-#            return True
-#        return failure
-#
-#    # Expects to be run after dbaccess.verify_add_host.
-#    def add_host(self, (short, dbdns_domain, dbmachine), dsdb, **kwargs):
-#        """add_host only adds the primary interface (marked boot) to dsdb."""
-#        env = {"DSDB_USE_TESTDB": "true"}
-#        for interface in dbmachine.interfaces:
-#            if not interface.boot:
-#                continue
-#            d = self.run_shell_command(True,
-#                """%s add host -host_name "%s" -dns_domain "%s" -ip_address "%s" -status aq -interface_name "%s" -ethernet_address "%s" """
-#                % (dsdb, short, dbdns_domain.name, interface.ip,
-#                interface.name, interface.mac),
-#                env=env)
-#            # FIXME: This should not be used...
-#            d = d.addErrback(self.eb_ignore_already_defined)
-#            d = d.addErrback(self.eb_detailed_command)
-#            return d
-#        raise ArgumentError("No boot interface found for host to remove from dsdb.")
-#    
-#    # Hack to deal with IPs already in dsdb.  In theory, we *want* dsdb to
-#    # tell us when there are conflicts, but right now it isn't helping.
-#    def eb_ignore_node_host(self, failure):
-#        failure.trap(ProcessException)
-#        if failure.value.out and failure.value.out.find(
-#                "Run dsdb_delete_node_host") >= 0:
-#            log.msg("DSDB check failed, continuing anyway!")
-#            return True
-#        return failure
-#
-#    # Expects to be run after dbaccess.verify_del_host.
-#    def del_host(self, result, dsdb, **kwargs):
-#        """del_host only removes the primary interface (boot) from dsdb."""
-#
-#        dbmachine = result
-#        env = {"DSDB_USE_TESTDB": "true"}
-#        for interface in dbmachine.interfaces:
-#            if not interface.boot:
-#                continue
-#            d = self.run_shell_command(True,
-#                """%s delete host -ip_address "%s" """
-#                % (dsdb, interface.ip),
-#                env=env)
-#            # FIXME: This should not be used...
-#            d = d.addErrback(self.eb_ignore_node_host)
-#            d = d.addErrback(self.eb_detailed_command)
-#            return d
-#        raise ArgumentError("No boot interface found for host to add to dsdb.")
+
+class DSDBRunner(object):
+    # Any "new" object will have all the same info as any other.
+    __shared_state = {}
+
+    ip_not_defined_re = re.compile("Host with IP address [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} is not defined")
+
+    def __init__(self):
+        self.__dict__ = self.__shared_state
+        if hasattr(self, "config"):
+            return
+        self.config = Config()
+
+    def getenv(self):
+        if (self.config.has_option("broker", "dsdb_use_test") and
+                self.config.getboolean("broker", "dsdb_use_test")):
+            return {"DSDB_USE_TESTDB": "true"}
+        return None
+
+    def add_host(self, dbhost):
+        for interface in dbhost.machine.interfaces:
+            if not interface.boot:
+                continue
+            self.add_host_details(dbhost.fqdn, interface.ip,
+                    interface.name, interface.mac)
+            return
+        raise ArgumentError("No boot interface found for host to add to dsdb.")
+
+    def add_host_details(self, fqdn, ip, name, mac):
+        out = run_command([self.config.get("broker", "dsdb"),
+                "add", "host", "-host_name", fqdn, "-template", "lx",
+                "-ip_address", ip, "-status", "aq",
+                "-interface_name", name, "-ethernet_address", mac],
+                env=self.getenv())
+        return
+
+    def delete_host_details(self, ip):
+        out = run_command([self.config.get("broker", "dsdb"),
+                "delete", "host", "-ip_address", ip],
+                env=self.getenv())
+        return
+
+    def delete_host(self, dbhost):
+        for interface in dbhost.machine.interfaces:
+            if not interface.boot:
+                continue
+            try:
+                self.delete_host_details(interface.ip)
+            except ProcessException, e:
+                if e.out and self.ip_not_defined_re.search(e.out):
+                    log.msg("DSDB did not have a host with this IP address, proceeding with aqdb delete.")
+                    return
+                raise
+            return
+        raise ArgumentError("No boot interface found for host to delete from dsdb.")
 
 
 #if __name__=='__main__':
