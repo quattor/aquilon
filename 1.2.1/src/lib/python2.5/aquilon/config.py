@@ -48,9 +48,10 @@ class Config(SafeConfigParser):
         # get here.  If that ever happens, it is only a problem if one
         # passed in a configfile and the other didn't.  Punting for now.
         if configfile:
-            self.baseconfig = configfile
+            self.baseconfig = os.path.realpath(configfile)
         else:
-            self.baseconfig = os.environ.get("AQDCONF", "/etc/aqd.conf")
+            self.baseconfig = os.path.realpath(
+                    os.environ.get("AQDCONF", "/etc/aqd.conf"))
         SafeConfigParser.__init__(self, defaults)
         src_defaults = os.path.join(defaults["srcdir"],
                 "etc", "aqd.conf.defaults")
