@@ -17,7 +17,7 @@ class AqStr(types.TypeDecorator):
     impl = types.String
 
     def process_bind_param(self, value, engine):
-        return value.strip().lower()
+        return str(value).strip().lower()
 
     def process_result_value(self, value, engine):
         return value

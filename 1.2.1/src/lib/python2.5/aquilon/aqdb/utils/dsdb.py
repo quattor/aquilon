@@ -65,10 +65,9 @@ old_network = """
 """
 
 get_network="""
-    SELECT net_name, net_ip_addr, abs(net_ip_value), abs(net_mask),
-    abs(byte_mask), isnull(net_type_id,4),
-    SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
-    side, net_id FROM network WHERE state >= 0
+    SELECT net_name, net_ip_addr, abs(net_mask),
+    isnull(net_type_id,4), SUBSTRING(location,CHAR_LENGTH(location) - 7,2)
+    as sysloc, side, net_id FROM network WHERE state >= 0
 """
 
 

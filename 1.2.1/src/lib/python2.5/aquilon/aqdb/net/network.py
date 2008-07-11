@@ -20,10 +20,10 @@ import depends
 from db_factory import Base
 from column_types.aqstr import AqStr
 from column_types.IPV4  import IPV4
-
-from loc.location import Location
 import ipcalc
-from table_types.name_table import make_name_class
+from loc.location import Location, location
+from loc.building import Building, building
+from utils import dsdb
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         CheckConstraint, UniqueConstraint, DateTime,
@@ -79,18 +79,17 @@ network.append_constraint(
 Index('net_loc_id_idx', network.c.location_id)
 #TODO: snarf comments  and xx,xw sysloc nets from DSDB (asynchronously?)
 
-def populate():
-    import logging
-    logging.basicConfig()
-
+def populate(*args, **kw):
     from db_factory import db_factory, Base
+    from utils import dsdb
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     network.create(checkfirst = True)
-"""
+
     b_cache={}
     sel=select( [location.c.name, building.c.id],
         location.c.id == building.c.id )
@@ -100,7 +99,7 @@ def populate():
 
     count=0
     #TODO: forget campus, bucket. make this whole thing an insert ?
-    for (name, ip, cidr, type, bldg_name, side, dsdb_id) in dump_network():
+    for (name, ip, cidr, type, bldg_name, side, dsdb_id) in dsdb.dump_network():
 
         kw = {}
         try:
@@ -128,8 +127,7 @@ def populate():
 
     print 'commited %s rows'%(count)
     s.commit()
-    s.flush()
-"""
+
 #    """ Network Type can be one of four values which have been carried over as
 #        legacy from the network table in DSDB:
 #        *   management: no networks have it(@ 3/27/08), it's probably useless
