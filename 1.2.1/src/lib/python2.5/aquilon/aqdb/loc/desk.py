@@ -32,11 +32,12 @@ class Desk(Location):
 desk = Desk.__table__
 desk.primary_key.name = 'desk_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     desk.create(checkfirst = True)

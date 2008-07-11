@@ -33,21 +33,17 @@ class Campus(Location):
 campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     from country import Country
 
-    import sqlite3
-    conn = sqlite3.connect('/var/tmp/daqscott/aquilondb/aquilon.db')
-
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
 
     campus.create(checkfirst = True)
-
-    s=dbf.session()
 
     if len(s.query(Campus).all()) < 1:
         pass

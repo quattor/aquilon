@@ -31,15 +31,14 @@ class Company(Location):
 company = Company.__table__
 company.primary_key.name = 'company_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = False
 
-    Base.metadata.bind.echo = True
-
-    location.create(checkfirst = True)
     company.create(checkfirst = True )
 
     s=dbf.session()

@@ -32,39 +32,27 @@ class Chassis(Location):
 chassis = Chassis.__table__
 chassis.primary_key.name = 'chassis_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     from rack import Rack
 
-    import sqlite3
-    conn = sqlite3.connect('/var/tmp/daqscott/aquilondb/aquilon.db')
-
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
 
-    Base.metadata.bind.echo = True
-
-    location.create(checkfirst = True)
     chassis.create(checkfirst = True)
-
-    s=dbf.session()
 
     if len(s.query(Chassis).all()) < 1:
         rack = {}
-        for c in s.query(Rack).all():
-            rack[c.name] = c
+        for r in s.query(Rack).all():
+            rack[r.name] = r
 
-        q = """select A.name, A.fullname, C.name
-        from location A, location_type B, location C
-        where A.location_type_id = B.id
-        and A.parent_id = C.id
-        and b.type = 'chassis' """
-        c = conn.cursor()
-        c.execute(q)
-        for row in c:
-            a = Chassis(name = str(row[0]),
-                        fullname = str(row[1]),
-                        parent = rack[str(row[2])])
+        for r in rack.keys():
+            nm = '%sc1'%(r)
+            a = Chassis(name = nm, fullname = 'Chassis %s'%(nm),
+                     parent = rack[r], comments = 'AutoPopulated')
             s.add(a)
-
         s.commit()
+        print 'created %s chassis'%(len(s.query(Chassis).all()))

@@ -28,44 +28,40 @@ class City(Location):
                 ForeignKey('location.id', name = 'city_loc_fk',
                            ondelete = 'CASCADE'),
                 primary_key=True)
-    timezone = Column(AqStr(64), nullable = True, default = 'FIX ME')
+    timezone = Column(AqStr(64), nullable = True, default = 'TZ = FIX ME')
 
 city = City.__table__
 city.primary_key.name = 'city_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
-    from country import Country
-
-    import sqlite3
-    conn = sqlite3.connect('/var/tmp/daqscott/aquilondb/aquilon.db')
-
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
 
-    Base.metadata.bind.echo = True
+    from country import Country
+    from utils import dsdb
 
-    location.create(checkfirst = True)
     city.create(checkfirst = True)
-
-    s=dbf.session()
 
     if len(s.query(City).all()) < 1:
         cntry= {}
         for c in s.query(Country).all():
             cntry[c.name] = c
 
-        q = """select A.name, A.fullname, C.name
-        from location A, location_type B, location C
-        where A.location_type_id = B.id
-        and A.parent_id = C.id
-        and b.type = 'city' """
-        c = conn.cursor()
-        c.execute(q)
-        for row in c:
+        for row in dsdb.dump_city():
+            try:
+                p = cntry[str(row[2])]
+            except KeyError, e:
+                sys.stderr.write('couldnt find country %s'%(str(row[2])))
+                continue
+
             a = City(name = str(row[0]),
                         fullname = str(row[1]),
-                        parent = cntry[str(row[2])])
+                        parent = p)
             s.add(a)
 
         s.commit()
+        print 'created %s cities'%(len(s.query(City).all()))

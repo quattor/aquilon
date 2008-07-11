@@ -12,7 +12,7 @@ import sys
 import os
 
 DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+sys.path.insert(0, os.path.join(DIR, '..'))
 
 import depends
 from sqlalchemy import Column, Integer, ForeignKey
@@ -31,17 +31,16 @@ class Building(Location):
 building = Building.__table__
 building.primary_key.name = 'building_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     from city import City
-
-    import sqlite3
-    conn = sqlite3.connect('/var/tmp/daqscott/aquilondb/aquilon.db')
+    from utils import dsdb
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-
-    Base.metadata.bind.echo = True
+    #if 'debug' in args:
+    Base.metadata.bind.echo = False
+    s = dbf.session()
 
     building.create(checkfirst = True)
 
@@ -52,17 +51,16 @@ def populate():
         for c in s.query(City).all():
             city[c.name] = c
 
-        q = """select A.name, A.fullname, C.name
-        from location A, location_type B, location C
-        where A.location_type_id = B.id
-        and A.parent_id = C.id
-        and b.type = 'building' """
-        c = conn.cursor()
-        c.execute(q)
-        for row in c:
+        for row in dsdb.dump_bldg():
+            try:
+                p = city[str(row[2])]
+            except KeyError,e :
+                print >> sys.stderr, e
+                continue
+
             a = Building(name = str(row[0]),
                         fullname = str(row[1]),
                         parent = city[str(row[2])])
             s.add(a)
-
         s.commit()
+        print 'created %s buildings'%(len(s.query(Building).all()))

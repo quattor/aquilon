@@ -137,14 +137,15 @@ location.append_constraint(
     UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
 Location.sublocations = relation('Location', backref = backref(
-        'parent', remote_side=[location.c.id],
-        lazy=False, join_depth=2))
+        'parent', remote_side=[location.c.id],))
+        #lazy=False, join_depth=2))
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     location.create(checkfirst = True)

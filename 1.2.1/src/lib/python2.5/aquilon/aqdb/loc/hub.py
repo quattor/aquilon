@@ -31,15 +31,15 @@ class Hub(Location):
 hub = Hub.__table__
 hub.primary_key.name = 'hub_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
 
     hub.create(checkfirst = True)
-
-    s=dbf.session()
 
     _hubs = {
         'hk':'Non-japan Asia',
@@ -50,6 +50,8 @@ def populate():
 
     if len(s.query(Hub).all()) < len(_hubs.keys()):
         for h in _hubs:
-            a = Hub(name=h, fullname = _hubs[h], parent_id = 1)
+            a = Hub(name=h, fullname = _hubs[h], parent_id = 1) #FIX ME
             s.add(a)
-            s.commit()
+        s.commit()
+
+

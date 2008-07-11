@@ -31,20 +31,18 @@ class Country(Location):
 country = Country.__table__
 country.primary_key.name = 'country_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
-    from continent import Continent
-    from hub import Hub
-
-    import sqlite3
-    conn = sqlite3.connect('/var/tmp/daqscott/aquilondb/aquilon.db')
-
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    #if 'debug' in args:
+    Base.metadata.bind.echo = False
+    s = dbf.session()
 
-    Base.metadata.bind.echo = True
+    from continent import Continent
+    from hub import Hub
+    from utils import dsdb
 
-    location.create(checkfirst = True)
     country.create(checkfirst = True)
 
     s=dbf.session()
@@ -54,27 +52,29 @@ def populate():
         for c in s.query(Continent).all():
             cnts[c.name] = c
 
-        q = """select A.name, A.fullname, C.name
-        from location A, location_type B, location C
-        where A.location_type_id = B.id
-        and A.parent_id = C.id
-        and b.type = 'country' """
-        c = conn.cursor()
-        c.execute(q)
-        for row in c:
+        for row in dsdb.dump_country():
+
             if row[0] == 'jp':
                 continue #skip japan, it maps directly to the TK hub
+
             a = Country(name = str(row[0]),
                         fullname = str(row[1]),
                         parent = cnts[str(row[2])])
             s.add(a)
 
-        #Handle Japan as a special case
-        jp = Country(name = 'jp', fullname = 'Japan', parent =
-                     s.query(Hub).filter_by(name='tk').first())
-        s.add(jp)
-
         s.commit()
+
+        #Handle Japan as a special case
+        tk_hub = s.query(Hub).filter_by(name = 'tk').one()
+
+        jp = Country(name = 'jp', fullname = 'Japan', parent = tk_hub)
+        s.add(jp)
+        try:
+            s.commit()
+        except Exception, e:
+            sys.stderr.write(e)
+
+        print 'created %s countries'%(len(s.query(Country).all()))
 
 """ select A.id, A.name, A.fullname, B.type, A.parent_id from location A,
 location_type B where a.location_type_id = B.id """

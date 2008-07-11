@@ -31,16 +31,15 @@ class Continent(Location):
 continent = Continent.__table__
 continent.primary_key.name = 'continent_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     from hub import Hub
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
 
-    Base.metadata.bind.echo = True
-
-    location.create(checkfirst = True)
     continent.create(checkfirst = True)
 
     s=dbf.session()

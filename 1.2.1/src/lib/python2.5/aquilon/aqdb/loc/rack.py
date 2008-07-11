@@ -31,39 +31,28 @@ class Rack(Location):
 rack = Rack.__table__
 rack.primary_key.name = 'rack_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     from building import Building
 
-    import sqlite3
-    conn = sqlite3.connect('/var/tmp/daqscott/aquilondb/aquilon.db')
-
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
 
-    Base.metadata.bind.echo = True
-
-    location.create(checkfirst = True)
     rack.create(checkfirst = True)
-
-    s=dbf.session()
 
     if len(s.query(Rack).all()) < 1:
         bldg = {}
         for c in s.query(Building).all():
             bldg[c.name] = c
 
-        q = """select A.name, A.fullname, C.name
-        from location A, location_type B, location C
-        where A.location_type_id = B.id
-        and A.parent_id = C.id
-        and b.type = 'rack' """
-        c = conn.cursor()
-        c.execute(q)
-        for row in c:
-            a = Rack(name = str(row[0]),
-                        fullname = str(row[1]),
-                        parent = bldg[str(row[2])])
+        for b in bldg.keys():
+            nm = '%s1'%(b)
+            a = Rack(name = nm, fullname = 'Rack %s'%(nm),
+                     parent = bldg[b], comments = 'AutoPopulated')
             s.add(a)
 
         s.commit()
+        print 'created %s racks'%(len(s.query(Rack).all()))

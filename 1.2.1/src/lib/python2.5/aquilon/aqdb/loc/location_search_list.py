@@ -23,11 +23,12 @@ LocationSearchList = make_name_class('LocationSearchList',
 location_search_list = LocationSearchList.__table__
 location_search_list.primary_key.name = 'loc_search_list_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     location_search_list.create(checkfirst = True)
