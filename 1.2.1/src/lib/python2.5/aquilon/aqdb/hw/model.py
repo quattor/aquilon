@@ -43,19 +43,22 @@ class Model(Base):
 model = Model.__table__
 model.primary_key.name = 'model_pk'
 
-def populate():
-    #FIX ME
-    s = Session()
+def populate(*args, **kw):
+    from db_factory import db_factory, Base
+    from vendor import Vendor
+
+    dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
+
+    model.create(checkfirst = True)
+
     mlist=s.query(Model).all()
 
     if not mlist:
         print "Populating model table"
-
-        v_cache = gen_id_cache(Vendor)
-
-        hwt_cache={}
-        for c in s.query(MachineType).all():
-            hwt_cache[str(c)] = c
 
         f = [['ibm', 'hs20','blade'],
             ['ibm', 'ls20','blade'],
@@ -79,11 +82,15 @@ def populate():
             ['dell','optiplex_260','workstation']]
 
         for i in f:
-            m=Model(i[1],v_cache[i[0]],hwt_cache[i[2]])
-            s.save(m)
+            m = Model(name = i[1],
+                      vendor = s.query(Vendor).filter_by(name =i[0]).first(),
+                      machine_type = i[2])
+            s.add(m)
         try:
             s.commit()
         except Exception,e:
             print e
         finally:
             s.close()
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
