@@ -67,18 +67,21 @@ machine.append_constraint(
     UniqueConstraint('name',name = 'machine_name_uk')
 )
 
-#not needed for oracle due to UK
-#Index('machine_name_ix', machine.c.name)
 Index('machine_loc_ix',  machine.c.location_id)
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     machine.create(checkfirst = True)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
+
 #TODO:
 #   check if it exists in dbdb minfo, and get from there if it does
 #   and/or -dsdb option, and, make machine --like [other machine] + overrides
