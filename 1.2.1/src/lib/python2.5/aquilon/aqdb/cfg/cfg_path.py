@@ -49,9 +49,16 @@ cfg_path.append_constraint(
 
 Index('cfg_relative_path_idx', cfg_path.c.relative_path)
 
-def populate():
-    from db_factory import db_factory, Base
+def populate(*args, **kw):
+    from db_factory import db_factory, Base, debug
     dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
+
+    cfg_path.create(checkfirst = True)
 
     cfg_base = dbf.config.get("broker", "kingdir")
     assert(cfg_base)
@@ -60,20 +67,18 @@ def populate():
     if not cfg_base.endswith('/'):
         cfg_base += '/'
 
-    Base.metadata.bind = dbf.engine
-    #Base.metadata.bind.echo = True
-    s = dbf.session()
-
-    cfg_path.create(checkfirst = True)
 
     if len(s.query(CfgPath).all()) < 1:
         for root, dirs, files in os.walk(cfg_base):
             if ".git" in dirs:
                 dirs.remove(".git")
+
             if root == cfg_base:
                 continue
+
             tail = root.replace(cfg_base, "", 1)
-            print tail
+            debug(tail)
+
             # Treat everything under aquilon as equivalent to a tld.
             # It might be better to have an archetype attribute on
             # the cfgpath...
@@ -85,17 +90,24 @@ def populate():
             if slash < 0:
                 continue
             tld = tail[0:slash]
-            print tld, tail
+            if 'verbose' in args:
+                print tld, tail
+
             try:
                 dbtld = s.query(Tld).filter_by(type=tld).one()
                 f = CfgPath(tld=dbtld,relative_path=tail)
                 s.add(f)
             except Exception, e:
-                print e
+                sys.stderr.write(e)
                 s.rollback()
                 continue
+
         s.commit()
 
     b=s.query(CfgPath).first()
     assert(b)
     assert(b.tld)
+    print 'created %s cfg_paths'%(len(s.query(CfgPath).all()))
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
