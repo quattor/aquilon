@@ -25,15 +25,37 @@ status = Status.__table__
 @monkeypatch(Status)
 def __init__(self,name):
     e = "Status is a static table and can't be instanced, only queried."
-    raise ArgumentError(e)
+    raise ValueError(e)
 
 @monkeypatch(Status)
 def __repr__(self):
     return str(self.name)
 
-def populate():
-    #FIX ME
-    if empty(status):
+def populate(*args, **kw):
+    from db_factory import db_factory, Base
+    from sqlalchemy import insert
+
+    dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
+
+    status.create(checkfirst = True)
+
+    if len(s.query(Status).all()) < 4:
         i=status.insert()
-        for name in ['prod','dev','qa','build']:
+        for name in ['production','development','qa','build']:
             i.execute(name=name)
+        #can't do the usual since we made __init__ raise an Exception
+        #    j = Status(name = i)
+        #    s.add(j)
+        #s.commit()
+
+    i = s.query(Status).all()
+    assert len(i) == 4
+
+    print 'created %s Statuses'%(len(i))
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
