@@ -44,24 +44,25 @@ cpu.primary_key.name = 'cpu_pk'
 cpu.append_constraint(
     UniqueConstraint('vendor_id','name','speed', name='cpu_nm_speed_uk'))
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
+
 
     cpu.create(checkfirst = True)
 
-    if empty(cpu):
-        print "Populating cpus"
+    if len(s.query(Cpu).all()) < 1:
         import re
         m=re.compile('speed')
-
-        import configuration as cfg
+        cfg_base = dbf.config.get("broker", "kingdir")
         #get all dir names immediately under template-king/hardware/cpu/
-        base=os.path.join(str(const.cfg_base),'hardware/cpu')
+        base=os.path.join(str(cfg_base),'hardware/cpu')
         cpus=[]
+
         for i in os.listdir(base):
             for j in os.listdir(os.path.join(base,i)):
                 name = j.rstrip('.tpl').strip()
@@ -81,11 +82,9 @@ def populate():
                                 Assert(False)
                     f.close()
 
-        cpus.append(['intel', 'xeon_2500', '2500'])
-
         for vendor,name,speed in cpus:
             kw={}
-            vendor=Session.query(Vendor).filter_by(name=vendor).first()
+            vendor=s.query(Vendor).filter_by(name=vendor).first()
             assert(vendor)
             assert(name)
             assert(speed)
@@ -96,7 +95,7 @@ def populate():
                 a=Cpu(**kw)
                 assert(isinstance(a,Cpu))
                 try:
-                    Session.save(a)
+                    s.add(a)
                 except Exception,e:
                     Session.rollback()
                     print e
@@ -108,8 +107,11 @@ def populate():
                 else:
                     print >> sys.stderr, msg
         try:
-            Session.commit()
+            s.commit()
         except Exception,e:
-            Session.rollback()
-            print e
+            s.rollback()
+            sys.stderr.write(str(e))
         print 'Created cpus'
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
