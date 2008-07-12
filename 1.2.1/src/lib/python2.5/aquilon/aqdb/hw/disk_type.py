@@ -24,11 +24,12 @@ disk_type.primary_key.name = 'disk_type_pk'
 
 _disk_types = ['ccis', 'ide', 'sas', 'sata', 'scsi', 'flash']
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     disk_type.create(checkfirst = True)
@@ -40,3 +41,6 @@ def populate():
         s.commit()
     dt = s.query(DiskType).first()
     assert(dt)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
