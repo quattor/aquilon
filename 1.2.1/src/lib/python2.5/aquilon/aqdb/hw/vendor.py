@@ -11,31 +11,42 @@
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
 import sys
+import os
 
-sys.path.insert(0,'..')
+DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.join(DIR, '..'))
 
 from table_types.name_table import make_name_class
 
 Vendor = make_name_class('Vendor','vendor')
 vendor = Vendor.__table__
 
-def populate():
-    from db_factory import db_factory
-    from db import empty
 
+def populate(*args, **kw):
+    from db_factory import db_factory, Base
     dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
-    if empty(vendor):
-        print "Populating vendor"
-        import configuration as cfg
-        from aquilon import const
-        d=os.path.join(str(const.cfg_base),'hardware')
+    vendor.create(checkfirst = True)
+
+    if len(s.query(Vendor).all()) < 1:
+        import cfg.cfg_path as cfg
+        cfg_base = dbf.config.get("broker", "kingdir")
+        assert(cfg_base)
+
+        #in case user's config doesn't have one...
+        if not cfg_base.endswith('/'):
+            cfg_base += '/'
+        cfg_base += 'hardware'
+
         created=[]
-        for i in os.listdir(d):
+        for i in os.listdir(cfg_base):
             if i == 'ram':
                 continue
-            for j in os.listdir(os.path.join(d,i)):
+            for j in os.listdir(os.path.join(cfg_base,i)):
                 if j in created:
                     continue
                 else:
@@ -44,17 +55,17 @@ def populate():
                         s.save(a)
                     except Exception,e:
                         s.rollback()
-                        print >> sys.stderr, e
+                        sys.stderr.write(e)
                         continue
                     created.append(j)
-        #hack alert:
-        b=Vendor(name = 'hp')
-        s.save(b)
-        b = Vendor(name='verari')
-        s.save(b)
+
         try:
             s.commit()
         except Exception,e:
             print >> sys.stderr, e
         finally:
             s.close()
+
+    print 'created %s vendors'%(len(created))
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
