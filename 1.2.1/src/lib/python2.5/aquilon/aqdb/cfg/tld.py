@@ -32,16 +32,17 @@ Tld= subtype('Tld', 'tld', tl_doc)
 tld = Tld.__table__
 tld.primary_key.name = 'tld_pk'
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
 
     cfg_base = dbf.config.get("broker", "kingdir")
     assert(cfg_base)
-
-    Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
-    s = dbf.session()
 
     tld.create(checkfirst = True)
 
@@ -70,3 +71,6 @@ def populate():
 
         a=s.query(Tld).first()
         assert(a)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
