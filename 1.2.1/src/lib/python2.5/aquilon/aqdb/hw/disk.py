@@ -53,11 +53,15 @@ disk.primary_key.name = 'disk_pk'
 disk.append_constraint(UniqueConstraint(
     'machine_id', 'device_name', name ='disk_mach_dev_name_uk'))
 
-def populate():
+def populate(*args, **kw):
     from db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     disk.create(checkfirst = True)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
