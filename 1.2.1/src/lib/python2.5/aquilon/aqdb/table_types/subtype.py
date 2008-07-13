@@ -11,18 +11,24 @@
     used by the project. Since they all must be pre-seeded to make the
     other modules load properly, we seperate them here to get them done
     before ahead of the other modules. """
-import sys
-#sys.path.append('../..')
+
 
 import types
 from datetime import datetime
+import sys
+import os
 
-from db_factory import Base
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Sequence, Integer, String, DateTime,
                         UniqueConstraint, PrimaryKeyConstraint, select)
-
 from sqlalchemy.orm import deferred
+
+from aquilon.aqdb.db_factory import Base
+
 
 # we want class level methods on the classes returned by subtype:
 # LocationType.populate(), LocationType.id('foo')

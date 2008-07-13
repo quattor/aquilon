@@ -12,8 +12,11 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.service import Service, ServiceInstance, HostList
-from aquilon.aqdb.configuration import CfgPath, CfgTLD
+from aquilon.aqdb.svc.service import Service
+from aquilon.aqdb.svc.service_instance import ServiceInstance
+from aquilon.aqdb.sy.host_list import HostList
+from aquilon.aqdb.cfg.cfg_path import CfgPath
+from aquilon.aqdb.cfg.tld import Tld
 
 
 class CommandAddService(BrokerCommand):
@@ -26,7 +29,7 @@ class CommandAddService(BrokerCommand):
         dbservice = session.query(Service).filter_by(name=service).first()
         if not dbservice:
             # FIXME: Could have better error handling
-            dbtld = session.query(CfgTLD).filter_by(type="service").first()
+            dbtld = session.query(Tld).filter_by(type="service").first()
             # Need to get or create cfgpath.
             dbcfg_path = session.query(CfgPath).filter_by(
                     tld=dbtld, relative_path=service).first()

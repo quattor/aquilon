@@ -10,14 +10,19 @@
 """ Status is an overloaded term, but we use it to represent various stages of
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from db_factory import monkeypatch
-from table_types.name_table import make_name_class
+from aquilon.aqdb.db_factory import monkeypatch
+from aquilon.aqdb.table_types.name_table import make_name_class
+
 
 Status = make_name_class('Status','status')
 status = Status.__table__
@@ -32,7 +37,7 @@ def __repr__(self):
     return str(self.name)
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     from sqlalchemy import insert
 
     dbf = db_factory()

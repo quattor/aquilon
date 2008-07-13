@@ -10,22 +10,23 @@
 """ Many tables are just an id and a unique name field. This is a factory for
     the class/table/mapper trinity. THIS REALLY NEEDS A UNIT TEST """
 
+
 import types
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
-
-
-from db_factory import Base
-from column_types.aqstr import AqStr
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy     import (Table, Column, Integer, String, DateTime, Sequence,
                             UniqueConstraint, PrimaryKeyConstraint, select)
-
 from sqlalchemy.orm import deferred
+
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
 
 
 def make_name_class(nm,tbl):

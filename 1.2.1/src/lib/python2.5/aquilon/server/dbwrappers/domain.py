@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.systems import Domain
+from aquilon.aqdb.sy.domain import Domain
 from aquilon.server.dbwrappers.quattor_server import (
         get_or_create_quattor_server)
 

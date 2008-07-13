@@ -8,15 +8,19 @@
 #
 # This module is part of Aquilon
 """ The high level configuration elements in use """
-from datetime import datetime
 
+
+from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR,'..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from table_types.subtype import subtype
+from aquilon.aqdb.table_types.subtype import subtype
+
 
 DiskType = subtype('DiskType','disk_type','Disk Type: scsi, ccis, sata, etc.')
 disk_type = DiskType.__table__
@@ -25,7 +29,7 @@ disk_type.primary_key.name = 'disk_type_pk'
 _disk_types = ['ccis', 'ide', 'sas', 'sata', 'scsi', 'flash']
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:

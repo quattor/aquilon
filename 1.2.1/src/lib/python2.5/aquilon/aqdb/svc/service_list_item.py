@@ -8,23 +8,26 @@
 #
 # This module is part of Aquilon
 """  Fill in soon """
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
-
 from sqlalchemy.orm import relation, deferred, backref
 
-from db_factory         import Base
-from sy.host            import Host
-from cfg.archetype      import Archetype
-from svc.service        import Service
+from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.sy.host            import Host
+from aquilon.aqdb.cfg.archetype      import Archetype
+from aquilon.aqdb.svc.service        import Service
+
 
 #TODO: arguably this goes under cfg as its a child of archetype, but its name
 #      seems to suggest it should be found in the 'service' package...
@@ -61,7 +64,7 @@ Index('idx_srvlst_arch_id', service_list_item.c.archetype_id)
 
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

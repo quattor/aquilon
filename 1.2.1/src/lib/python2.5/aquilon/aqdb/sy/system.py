@@ -8,23 +8,25 @@
 #
 # This module is part of Aquilon
 """ Systems are higher level constructs which can provide services """
-from datetime import datetime
 
+
+from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-
-import depends
-from db_factory import Base
-from column_types.aqstr import AqStr
-from net.dns_domain import DnsDomain, dns_domain
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
-
 from sqlalchemy.orm import relation, deferred, backref
+
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.net.dns_domain import DnsDomain, dns_domain
+
 
 #TODO: enum type for system_type column
 #_sys_types = ['host', 'host_list', 'quattor_server']
@@ -78,8 +80,8 @@ system.append_constraint(
                      name = 'system_name_uk'))
 
 def populate():
-    from db_factory import db_factory, Base
-    from net.dns_domain import DnsDomain, dns_domain
+    from aquilon.aqdb.db_factory import db_factory, Base
+    from aquilon.aqdb.net.dns_domain import DnsDomain, dns_domain
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

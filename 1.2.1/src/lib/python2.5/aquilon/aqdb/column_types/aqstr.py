@@ -8,7 +8,18 @@
 #
 # This module is part of Aquilon
 """ If you can read this you should be documenting """
+
+
+import sys
+import os
+
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
+
 import sqlalchemy.types as types
+
 
 class AqStr(types.TypeDecorator):
     """a type that decorates String, normalizes case to lower and strips

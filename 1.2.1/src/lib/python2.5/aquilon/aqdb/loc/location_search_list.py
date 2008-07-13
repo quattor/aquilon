@@ -9,14 +9,20 @@
 # This module is part of Aquiloni
 """ The named parent table for lists of location types to search service
     maps later on when automatic configuration of services takes places """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from db_factory import Base
-from table_types.name_table import make_name_class
+
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.table_types.name_table import make_name_class
+
 
 LocationSearchList = make_name_class('LocationSearchList',
                                      'location_search_list')
@@ -25,7 +31,7 @@ location_search_list = LocationSearchList.__table__
 location_search_list.primary_key.name = 'loc_search_list_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:

@@ -19,8 +19,9 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import choose_service_instance
-from aquilon.aqdb.configuration import CfgPath, CfgTLD
-from aquilon.aqdb.systems import BuildItem
+from aquilon.aqdb.cfg.cfg_path import CfgPath
+from aquilon.aqdb.cfg.tld import Tld
+from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates import PlenaryMachineInfo
 from aquilon.server.processes import (run_command, remove_dir, 
         read_file, build_index)
@@ -70,7 +71,7 @@ class CommandMakeAquilon(BrokerCommand):
 
         session.flush()
         session.refresh(dbhost)
-        dbservice_tld = session.query(CfgTLD).filter_by(type='service').one()
+        dbservice_tld = session.query(Tld).filter_by(type='service').one()
         for item in dbhost.archetype.service_list:
             dbservice_bi = session.query(BuildItem).filter_by(
                     host=dbhost).join('cfg_path').filter_by(

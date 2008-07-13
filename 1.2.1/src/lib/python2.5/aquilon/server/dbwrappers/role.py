@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.auth import Role
+from aquilon.aqdb.auth.role import Role
 
 
 def get_role(session, role):

@@ -13,8 +13,8 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.network import DnsDomain
-from aquilon.aqdb.systems import Host
+from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.aqdb.sy.host import Host
 
 
 def hostname_to_domain_and_string(session, hostname):

@@ -8,16 +8,20 @@
 #
 # This module is part of Aquilon
 """ Building is a subclass of Location """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import Column, Integer, ForeignKey
 
-from location import Location, location
+from aquilon.aqdb.loc.location import Location, location
+
 
 class Building(Location):
     """ Building is a subtype of location """
@@ -32,9 +36,9 @@ building = Building.__table__
 building.primary_key.name = 'building_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
-    from city import City
-    from utils import dsdb
+    from aquilon.aqdb.db_factory import db_factory, Base
+    from aquilon.aqdb.loc.city import City
+    from aquilon.aqdb.utils import dsdb
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine

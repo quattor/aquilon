@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.service import ServiceMap
+from aquilon.aqdb.svc.service_map import ServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):

@@ -12,7 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.configuration import Archetype
+from aquilon.aqdb.cfg.archetype import Archetype
 
 
 class CommandShowArchetype(BrokerCommand):

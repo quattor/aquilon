@@ -12,7 +12,6 @@
 
 from aquilon.server.broker import (add_transaction, az_check, format_results,
                                    BrokerCommand)
-from aquilon.aqdb.location import LocationType
 
 
 class CommandShowLocationTypes(BrokerCommand):

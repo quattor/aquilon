@@ -19,36 +19,35 @@
     table scans where they're required) but increases the 'thruthiness'[1] of
     every row. (Daqscott 4/13/08)
     [1] http://en.wikipedia.org/wiki/Truthiness """
-from __future__ import with_statement
 
+
+from __future__ import with_statement
 from datetime import datetime
 import re
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
-sys.path.insert(0,os.path.join(DIR, '../..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
-
 from sqlalchemy.orm import relation, deferred, backref
-
-
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_, not_
 
-from db_factory         import Base
-from table_types.name_table import make_name_class
-from exceptions_        import ArgumentError
-from column_types.aqstr import AqStr
-from loc.location       import Location
-from cfg.cfg_path       import CfgPath
-from sy.system          import System
-from sy.build_item      import BuildItem
-from sy.host            import Host
+from aquilon.aqdb.db_factory              import Base
+from aquilon.aqdb.table_types.name_table  import make_name_class
+from aquilon.exceptions_                  import ArgumentError
+from aquilon.aqdb.column_types.aqstr      import AqStr
+from aquilon.aqdb.loc.location            import Location
+from aquilon.aqdb.cfg.cfg_path            import CfgPath
+from aquilon.aqdb.sy.system               import System
+from aquilon.aqdb.sy.build_item           import BuildItem
+from aquilon.aqdb.sy.host                 import Host
+
 
 class Service(Base):
     """ SERVICE: a central definition of service is composed of
@@ -84,7 +83,7 @@ service.append_constraint(
     UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

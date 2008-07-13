@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.hardware import Status
+from aquilon.aqdb.hw.status import Status
 
 
 def get_status(session, status):

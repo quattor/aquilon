@@ -12,7 +12,7 @@
 import os
 from datetime import datetime
 
-from aquilon.aqdb.utils.ipcalc import Network
+from aquilon.aqdb.net.ipcalc import Network
 from aquilon.server.processes import write_file, read_file, remove_file
 
 

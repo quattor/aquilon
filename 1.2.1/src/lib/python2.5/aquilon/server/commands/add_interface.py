@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.interface import PhysicalInterface
+from aquilon.aqdb.hw.physical_interface import PhysicalInterface
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine

@@ -8,18 +8,21 @@
 #
 # This module is part of Aquilon
 """ If you can read this you should be documenting """
-import sys
-import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-
-import depends
 
 import struct
 from socket import inet_aton, inet_ntoa, error as socket_error
 from exceptions import TypeError
+import sys
+import os
+
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
+
 import sqlalchemy.types as types
+
 
 class IPv4AddrTypeError(TypeError):
     def __init__(self, addr):

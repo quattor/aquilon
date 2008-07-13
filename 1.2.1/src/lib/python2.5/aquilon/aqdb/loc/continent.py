@@ -8,16 +8,20 @@
 #
 # This module is part of Aquilon
 """ Continent is a subclass of Location """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import Column, Integer, ForeignKey
 
-from location import Location, location
+from aquilon.aqdb.loc.location import Location, location
+
 
 class Continent(Location):
     """ Continent is a subtype of location """
@@ -32,8 +36,8 @@ continent = Continent.__table__
 continent.primary_key.name = 'continent_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
-    from hub import Hub
+    from aquilon.aqdb.db_factory import db_factory, Base
+    from aquilon.aqdb.loc.hub import Hub
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine

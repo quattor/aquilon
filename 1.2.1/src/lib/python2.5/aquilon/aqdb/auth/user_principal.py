@@ -9,22 +9,24 @@
 # This module is part of Aquilon
 """ Contains tables and objects for authorization in Aquilon """
 
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))#sys.path.insert(1,'../..')
-#sys.path.insert(2,'../../..')
-import depends
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 
-from db_factory import Base
-from role import Role, role
-from realm import Realm, realm
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.auth.role import Role, role
+from aquilon.aqdb.auth.realm import Realm, realm
+
 
 class UserPrincipal(Base):
     """ Simple class for strings representing users kerberos credential """
@@ -61,9 +63,6 @@ def populate():
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True
     s = dbf.session()
-
-    from role import Role
-    from realm import Realm
 
     user_principal.create(checkfirst = True)
 

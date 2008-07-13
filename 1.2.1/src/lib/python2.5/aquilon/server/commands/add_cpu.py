@@ -17,7 +17,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.formats.host import SimpleHostList
 from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.aqdb.hardware import Cpu
+from aquilon.aqdb.hw.cpu import Cpu
 
 
 class CommandAddCpu(BrokerCommand):

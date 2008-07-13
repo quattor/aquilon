@@ -12,24 +12,25 @@
     low level details of each one since this is mostly repeated data in large
     grid deployments, such as Saphire """
 
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR,'..'))
-sys.path.insert(1, os.path.join(DIR, '../..'))
-#sys.path.insert(2, os.path.join(DIR, '../../..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 
-from db_factory import Base
-from model import Model
-from vendor import Vendor
-from cpu import Cpu
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.hw.model import Model
+from aquilon.aqdb.hw.vendor import Vendor
+from aquilon.aqdb.hw.cpu import Cpu
+
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
@@ -84,6 +85,9 @@ machine_specs.append_constraint(
 
 
 def populate():
+    return
+
+def populate_needs_to_be_fixed():
     if empty(machine_specs):
         a=MachineSpecs(model='hs20',cpu='xeon_2660',comments='FAKE')
         b=MachineSpecs(model='hs21',cpu='xeon_2660',

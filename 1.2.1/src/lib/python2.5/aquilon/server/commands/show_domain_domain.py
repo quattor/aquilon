@@ -12,7 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.systems import Domain
+from aquilon.aqdb.sy.domain import Domain
 
 
 class CommandShowDomainDomain(BrokerCommand):

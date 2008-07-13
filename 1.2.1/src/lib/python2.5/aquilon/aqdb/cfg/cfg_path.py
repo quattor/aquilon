@@ -9,21 +9,24 @@
 # This module is part of Aquilon
 """ The tables/objects/mappings related to configuration in aquilon """
 
-from datetime import datetime
 
+from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-
-from tld import Tld
-from db_factory import db_factory, Base
-from column_types.aqstr import AqStr
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred
+
+from aquilon.aqdb.cfg.tld import Tld
+from aquilon.aqdb.db_factory import db_factory, Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+
 
 class CfgPath(Base):
     __tablename__ = 'cfg_path'
@@ -50,7 +53,7 @@ cfg_path.append_constraint(
 Index('cfg_relative_path_idx', cfg_path.c.relative_path)
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base, debug
+    from aquilon.aqdb.db_factory import debug
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
 

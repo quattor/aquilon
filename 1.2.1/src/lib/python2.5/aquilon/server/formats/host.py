@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.systems import Host
+from aquilon.aqdb.sy.host import Host
 
 
 class HostFormatter(ObjectFormatter):

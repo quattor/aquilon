@@ -8,17 +8,21 @@
 #
 # This module is part of Aquilon
 """ Desk is a subclass of Location """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import Column, Integer, ForeignKey
 
-from location import Location, location
-from column_types.aqstr import AqStr
+from aquilon.aqdb.loc.location import Location, location
+from aquilon.aqdb.column_types.aqstr import AqStr
+
 
 class Desk(Location):
     """ Desk is a subtype of location """
@@ -33,7 +37,7 @@ desk = Desk.__table__
 desk.primary_key.name = 'desk_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:

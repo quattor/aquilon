@@ -8,21 +8,24 @@
 #
 # This module is part of Aquilon
 """Classes and Tables relating to network interfaces"""
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-
-import depends
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         DateTime)
 from sqlalchemy.orm import mapper, relation, deferred
 
-from column_types.aqstr  import AqStr
-from db_factory          import Base
+from aquilon.aqdb.column_types.aqstr  import AqStr
+from aquilon.aqdb.db_factory          import Base
+
 
 class Interface(Base):
     __tablename__ = 'interface'
@@ -41,7 +44,7 @@ interface = Interface.__table__
 interface.primary_key.name = 'interface_pk'
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

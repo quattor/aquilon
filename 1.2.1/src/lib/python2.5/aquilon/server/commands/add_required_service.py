@@ -12,7 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.service import ServiceListItem
+from aquilon.aqdb.svc.service_list_item import ServiceListItem
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.service import get_service
 

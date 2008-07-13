@@ -8,25 +8,29 @@
 #
 # This module is part of Aquilon
 """The tables/objects/mappings related to hardware in Aquilon. """
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-import depends
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (UniqueConstraint, Table, Column, Integer, DateTime,
                         Sequence, String, select, ForeignKey, Index)
 
 from sqlalchemy.orm      import relation, deferred, backref
 
-from column_types.aqstr  import AqStr
-from db_factory          import Base
-from cpu                 import Cpu
-from model               import Model
-from cfg.cfg_path        import CfgPath
-from loc.location        import Location
+from aquilon.aqdb.column_types.aqstr  import AqStr
+from aquilon.aqdb.db_factory          import Base
+from aquilon.aqdb.hw.cpu              import Cpu
+from aquilon.aqdb.hw.model            import Model
+from aquilon.aqdb.cfg.cfg_path        import CfgPath
+from aquilon.aqdb.loc.location        import Location
+
 
 #TODO: use selection of the machine specs to dynamically populate default
 #     values for all of the attrs where its possible
@@ -70,7 +74,7 @@ machine.append_constraint(
 Index('machine_loc_ix',  machine.c.location_id)
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:

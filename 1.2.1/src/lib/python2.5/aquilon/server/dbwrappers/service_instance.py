@@ -13,7 +13,9 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.service import ServiceInstance, HostList, ServiceMap
+from aquilon.aqdb.svc.service_instance import ServiceInstance
+from aquilon.aqdb.sy.host_list import HostList
+from aquilon.aqdb.svc.service_map import ServiceMap
 
 
 def get_service_instance(session, dbservice, instance):

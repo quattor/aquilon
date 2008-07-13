@@ -11,7 +11,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.hardware import Disk
+from aquilon.aqdb.hw.disk import Disk
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand, force_int)
 from aquilon.server.dbwrappers.machine import get_machine

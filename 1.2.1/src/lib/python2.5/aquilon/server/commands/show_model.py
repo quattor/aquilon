@@ -12,7 +12,8 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.hardware import Model, Vendor, MachineType
+from aquilon.aqdb.hw.model import Model
+from aquilon.aqdb.hw.vendor import Vendor
 
 
 class CommandShowModel(BrokerCommand):

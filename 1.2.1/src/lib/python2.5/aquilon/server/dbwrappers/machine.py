@@ -13,7 +13,9 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hardware import Machine, Cpu, Disk
+from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.hw.disk import Disk
 from aquilon.server.broker import force_int
 
 

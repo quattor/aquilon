@@ -1,23 +1,21 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
+
 import re
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-sys.path.insert(1, os.path.join(DIR, '../..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from aqdb import auth
-from aqdb import cfg
-from aqdb import hw
-from aqdb import loc
-from aqdb import net
-from aqdb import sy
-from aqdb import svc
-
-from depends import ipshell
+from aquilon.aqdb.db_factory import db_factory
+from aquilon.aqdb.utils.shell import ipshell
 import IPython.ipapi
 ipapi = IPython.ipapi.get()
+
 
 pkgs         = {}
 
@@ -47,19 +45,23 @@ order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc']
 def main(*args, **kw):
     for p in order:
         for m in pkgs[p]:
-
+            import_cmd = "import aquilon.aqdb.%s.%s" % (p, m)
             try:
-                ipapi.ex("import %s.%s" % (p, m))
+                ipapi.ex(import_cmd)
             except ImportError, e:
-                sys.stderr.write('cant import %s.%s:'%(p,m),'\n\t',e)
-                continue
+                print >>sys.stderr, 'Failed to %s:\n\t%s\n' % (import_cmd, e)
+		sys.exit(1)
 
-            populate_cmd = '%s.%s.populate()'%(p,m)
-
+    for p in order:
+        for m in pkgs[p]:
+            populate_cmd = 'aquilon.aqdb.%s.%s.populate()'%(p,m)
             try:
                 ipapi.ex(populate_cmd)
             except Exception, e:
-                print e
+                print >>sys.stderr, "Failed to run %s:\n\t%s" % (
+                        populate_cmd, e)
+		sys.exit(2)
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.network import Network
+from aquilon.aqdb.net.network import Network
 
 
 def get_network_byname(session, netname):

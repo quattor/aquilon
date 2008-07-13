@@ -8,13 +8,15 @@
 #
 # This module is part of Aquilon
 """Classes and Tables relating to network interfaces"""
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-
-import depends
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         Boolean, CheckConstraint, UniqueConstraint, DateTime,
@@ -22,12 +24,13 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
 
 from sqlalchemy.orm import relation, deferred
 
-from column_types.aqstr  import AqStr
-from db_factory          import Base
-from interface           import Interface
-from loc.location        import Location
-from loc.chassis         import Chassis
-from hw.machine          import Machine
+from aquilon.aqdb.column_types.aqstr  import AqStr
+from aquilon.aqdb.db_factory          import Base
+from aquilon.aqdb.hw.interface        import Interface
+from aquilon.aqdb.loc.location        import Location
+from aquilon.aqdb.loc.chassis         import Chassis
+from aquilon.aqdb.hw.machine          import Machine
+
 
 class PhysicalInterface(Interface):
     """ Class to model up the physical nic cards/devices in machines """
@@ -70,7 +73,7 @@ Index('idx_phys_int_machine_id', physical_interface.c.machine_id)
 #            self.boot=True
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

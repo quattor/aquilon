@@ -10,20 +10,25 @@
 """ Status is an overloaded term, but we use it to represent various stages of
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from table_types.name_table import make_name_class
+from aquilon.aqdb.table_types.name_table import make_name_class
+
 
 Vendor = make_name_class('Vendor','vendor')
 vendor = Vendor.__table__
 
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:
@@ -33,7 +38,7 @@ def populate(*args, **kw):
     vendor.create(checkfirst = True)
 
     if len(s.query(Vendor).all()) < 1:
-        import cfg.cfg_path as cfg
+        import aquilon.aqdb.cfg.cfg_path as cfg
         cfg_base = dbf.config.get("broker", "kingdir")
         assert(cfg_base)
 

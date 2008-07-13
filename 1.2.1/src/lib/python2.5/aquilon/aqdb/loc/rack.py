@@ -8,16 +8,21 @@
 #
 # This module is part of Aquilon
 """ Rack is a subclass of Location """
+
+
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
+
 from sqlalchemy import Column, Integer, ForeignKey
 
-from location import Location, location
+from aquilon.aqdb.loc.location import Location, location
+
 
 class Rack(Location):
     """ Rack is a subtype of location """
@@ -32,8 +37,8 @@ rack = Rack.__table__
 rack.primary_key.name = 'rack_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
-    from building import Building
+    from aquilon.aqdb.db_factory import db_factory, Base
+    from aquilon.aqdb.loc.building import Building
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine

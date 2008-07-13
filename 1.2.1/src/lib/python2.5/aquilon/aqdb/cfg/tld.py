@@ -8,15 +8,19 @@
 #
 # This module is part of Aquilon
 """ The high level configuration elements in use """
-from datetime import datetime
 
+
+from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from table_types.subtype import subtype
+from aquilon.aqdb.table_types.subtype import subtype
+
 
 tl_doc = """ Configuration Top Level Directory or 'cfg_tld' are the high level
             namespace categories and live as the directories in template-king:
@@ -33,7 +37,7 @@ tld = Tld.__table__
 tld.primary_key.name = 'tld_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
 
@@ -47,7 +51,6 @@ def populate(*args, **kw):
     tld.create(checkfirst = True)
 
     if len(s.query(Tld).all()) < 1:
-        import os
         tlds=[]
         for i in os.listdir(cfg_base):
             p = os.path.abspath(os.path.join(cfg_base, i))

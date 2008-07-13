@@ -8,23 +8,26 @@
 #
 # This module is part of Aquilon
 """ Fill in later"""
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
-
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from db_factory         import Base
-from host            import Host
-from host_list          import HostList
+from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.sy.host            import Host
+from aquilon.aqdb.sy.host_list       import HostList
+
 
 class HostListItem(Base):
     __tablename__ = 'host_list_item'
@@ -64,7 +67,7 @@ HostList.hosts = relation(HostListItem,
                             order_by=[HostListItem.__table__.c.position])
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

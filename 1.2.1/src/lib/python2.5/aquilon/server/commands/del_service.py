@@ -16,8 +16,8 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.service import get_service
-from aquilon.aqdb.service import Service, ServiceInstance, HostList
-from aquilon.aqdb.configuration import CfgPath, CfgTLD
+from aquilon.aqdb.svc.service_instance import ServiceInstance
+from aquilon.aqdb.sy.host_list import HostList
 
 
 class CommandDelService(BrokerCommand):

@@ -15,7 +15,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.location import Location
+from aquilon.aqdb.loc.location import Location
 
 
 class CommandDelLocation(BrokerCommand):

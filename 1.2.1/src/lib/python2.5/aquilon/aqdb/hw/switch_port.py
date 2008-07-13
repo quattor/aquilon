@@ -10,21 +10,24 @@
 """ Switch Ports model the ports of switches and are they physical connections
     to other machines' physical interfaces via the foreign key to interface """
 
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 
-from db_factory import Base
-from machine    import Machine
-from interface  import Interface
+from aquilon.aqdb.db_factory    import Base
+from aquilon.aqdb.hw.machine    import Machine
+from aquilon.aqdb.hw.interface  import Interface
+
 
 class SwitchPort(Base):
     """ Tor switches are types of machines (for now at least). What they
@@ -53,7 +56,7 @@ switch_port = SwitchPort.__table__
 switch_port.primary_key.name = 'switch_port_pk'
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

@@ -12,7 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.service import Service
+from aquilon.aqdb.svc.service import Service
 
 
 class CommandShowService(BrokerCommand):

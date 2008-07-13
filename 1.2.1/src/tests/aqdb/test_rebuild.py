@@ -36,10 +36,20 @@ class TestRebuild(unittest.TestCase):
         for (key, value) in os.environ.items():
             env[key] = value
         env["AQDCONF"] = config.baseconfig
-        env["AQDBFILE"] = config.get("database", "dbfile")
+        vendor = config.get("database", "vendor")
+        if vendor == 'sqlite':
+            dbfile = config.get("database", "dbfile")
+            if os.path.exists(dbfile):
+                os.unlink(dbfile)
+        elif vendor == 'oracle':
+            # Maybe drop_all_tables_and_sequences()...
+            pass
+        # Hack for ipshell...
+        if config.get("broker", "user") == 'cdb':
+            env["HOME"] = config.get("broker", "basedir")
         aqdbdir = os.path.join(config.get("broker", "srcdir"), "lib",
                 "python2.5", "aquilon", "aqdb")
-        p = Popen("./utils/REBUILD.sh", stdout=PIPE, stderr=PIPE,
+        p = Popen("./utils/build_db.py", stdout=1, stderr=2,
                 env=env, cwd=aqdbdir)
         (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0, "Database rebuild failed:\n%s" % err)

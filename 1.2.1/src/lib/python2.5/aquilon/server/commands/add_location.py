@@ -16,8 +16,16 @@ from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.location import Location, LocationType, Company, Hub, \
-        Continent, Country, City, Building, Rack, Chassis, Desk
+from aquilon.aqdb.loc.location import Location
+from aquilon.aqdb.loc.company import Company
+from aquilon.aqdb.loc.hub import Hub
+from aquilon.aqdb.loc.continent import Continent
+from aquilon.aqdb.loc.country import Country
+from aquilon.aqdb.loc.city import City
+from aquilon.aqdb.loc.building import Building
+from aquilon.aqdb.loc.rack import Rack
+from aquilon.aqdb.loc.chassis import Chassis
+from aquilon.aqdb.loc.desk import Desk
 
 
 # FIXME: This probably belongs in location.py

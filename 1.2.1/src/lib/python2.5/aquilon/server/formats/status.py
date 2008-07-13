@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hardware import Status
+from aquilon.aqdb.hw.status import Status
 
 
 class StatusFormatter(ObjectFormatter):

@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.systems import Machine
+from aquilon.aqdb.hw.machine import Machine
 
 
 class MachineFormatter(ObjectFormatter):

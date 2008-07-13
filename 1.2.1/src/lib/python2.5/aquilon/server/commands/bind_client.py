@@ -15,7 +15,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.systems import BuildItem
+from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service

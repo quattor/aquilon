@@ -12,7 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.auth import UserPrincipal
+from aquilon.aqdb.auth.user_principal import UserPrincipal
 
 
 class CommandShowPrincipal(BrokerCommand):

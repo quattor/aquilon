@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.network import Network
+from aquilon.aqdb.net.network import Network
 
 
 class NetworkFormatter(ObjectFormatter):

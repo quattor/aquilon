@@ -12,7 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.service import ServiceMap
+from aquilon.aqdb.svc.service_map import ServiceMap
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.service_instance import get_service_instance

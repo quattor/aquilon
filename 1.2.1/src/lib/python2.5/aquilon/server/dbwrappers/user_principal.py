@@ -14,7 +14,8 @@ import re
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.auth import UserPrincipal, Realm
+from aquilon.aqdb.auth.user_principal import UserPrincipal
+from aquilon.aqdb.auth.realm import Realm
 
 
 principal_re = re.compile(r'^(.*)@([^@]+)$')

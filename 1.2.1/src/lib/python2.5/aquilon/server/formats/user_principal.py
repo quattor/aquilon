@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.systems import UserPrincipal
+from aquilon.aqdb.auth.user_principal import UserPrincipal
 
 
 class UserPrincipalFormatter(ObjectFormatter):

@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hardware import DiskType
+from aquilon.aqdb.hw.disk_type import DiskType
 
 
 def get_disk_type(session, disk_type):

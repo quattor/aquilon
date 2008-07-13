@@ -8,25 +8,28 @@
 #
 # This module is part of Aquilon
 """ For Systems and related objects """
-from datetime import datetime
 
+
+from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from db_factory           import Base
-from column_types.aqstr   import AqStr
-from domain               import Domain
-from cfg.archetype        import Archetype
-from hw.machine           import Machine
-from hw.status            import Status
+from aquilon.aqdb.db_factory           import Base
+from aquilon.aqdb.column_types.aqstr   import AqStr
+from aquilon.aqdb.sy.domain            import Domain
+from aquilon.aqdb.cfg.archetype        import Archetype
+from aquilon.aqdb.hw.machine           import Machine
+from aquilon.aqdb.hw.status            import Status
+
 
 class Host(Base):
     """ Here's our most common kind of System, the Host. Putting a physical
@@ -81,11 +84,11 @@ class Host(Base):
 host = Host.__table__
 host.primary_key.name = 'host_pk'
 host.append_constraint(
-    UniqueConstraint('name', 'domain_id', name = 'host_fqdn_uk'))
+    UniqueConstraint('machine_id', 'domain_id', name='host_machine_domain_uk'))
 
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

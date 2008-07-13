@@ -8,16 +8,19 @@
 #
 # This module is part of Aquilon
 """ A collection of table level functions for maintenance """
-from confirm import confirm
 
+
+from confirm import confirm
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import text
+
 
 def get_table_list_from_db(engine):
     """

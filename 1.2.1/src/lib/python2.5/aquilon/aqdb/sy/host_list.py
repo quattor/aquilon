@@ -8,15 +8,20 @@
 #
 # This module is part of Aquilon
 """ Lists of hosts are a system type"""
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-from db_factory         import Base
-from table_types.name_table import make_name_class
+from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.table_types.name_table import make_name_class
+
 
 #TODO: this is a polymorphic subtype of System...
 HostList = make_name_class('HostList','host_list')
@@ -24,7 +29,7 @@ host_list = HostList.__table__
 host_list.primary_key.name = 'host_list_pk'
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.service import Service
+from aquilon.aqdb.svc.service import Service
 
 
 def get_service(session, service):

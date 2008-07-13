@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.systems import QuattorServer
+from aquilon.aqdb.sy.quattor_server import QuattorServer
 
 
 def get_quattor_server(session, quattor_server):

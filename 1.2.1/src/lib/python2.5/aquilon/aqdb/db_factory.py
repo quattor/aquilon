@@ -8,27 +8,32 @@
 #
 # This module is part of Aquilon
 """To be imported by classes and modules requiring aqdb access"""
-from __future__ import with_statement
 
+
+from __future__ import with_statement
 
 import pwd
 import getpass
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
-from config import Config
-
-import depends
-if '--debug' in sys.argv:
-    from depends import ipshell
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
+    import aquilon.aqdb.depends
 
 import sqlalchemy  #for version
 from   sqlalchemy import MetaData, engine, create_engine
 from   sqlalchemy.orm import scoped_session, sessionmaker
 from   sqlalchemy.ext.declarative import declarative_base
 from   sqlalchemy.exceptions import DatabaseError as SaDBError
+
+from aquilon.config import Config
+if '--debug' in sys.argv:
+    from aquilon.aqdb.utils.shell import ipshell
+else:
+    ipshell = lambda: "No ipshell imported"
+
 
 def debug(examinee,*args,**kw):
     if '--debug' in sys.argv:

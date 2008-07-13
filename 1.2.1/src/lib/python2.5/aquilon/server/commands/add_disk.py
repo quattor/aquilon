@@ -17,7 +17,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.disk_type import get_disk_type
-from aquilon.aqdb.hardware import Disk
+from aquilon.aqdb.hw.disk import Disk
 from aquilon.server.templates import PlenaryMachineInfo
 
 

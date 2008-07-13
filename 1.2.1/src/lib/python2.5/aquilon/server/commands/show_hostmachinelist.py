@@ -16,7 +16,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.formats.host import HostMachineList
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.systems import Host
+from aquilon.aqdb.sy.host import Host
 
 class CommandShowHostMachineList(BrokerCommand):
 

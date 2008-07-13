@@ -13,7 +13,7 @@
 from aquilon.exceptions_ import UnimplementedError, PartialError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.hardware import Machine
+from aquilon.aqdb.hw.machine import Machine
 from aquilon.server.templates import PlenaryMachineInfo
 
 

@@ -9,23 +9,27 @@
 # This module is part of Aquilon
 """ Vendor and Model are representations of the various manufacturers and
     the asset inventory of the kinds of machines we use in the plant """
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
-import depends
 from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
                         Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, PassiveDefault)
 from sqlalchemy.orm import relation, deferred
 
-from column_types.aqstr import AqStr
-from db_factory import Base
-from table_types.name_table import make_name_class
-from vendor import Vendor
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.table_types.name_table import make_name_class
+from aquilon.aqdb.hw.vendor import Vendor
+
 
 class Model(Base):
     __tablename__ = 'model'
@@ -44,8 +48,7 @@ model = Model.__table__
 model.primary_key.name = 'model_pk'
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
-    from vendor import Vendor
+    from aquilon.aqdb.db_factory import db_factory, Base
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine

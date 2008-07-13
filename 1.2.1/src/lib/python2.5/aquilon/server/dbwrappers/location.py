@@ -14,7 +14,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon import const
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.location import Location
+from aquilon.aqdb.loc.location import Location
 
 
 def get_location(session, **kwargs):

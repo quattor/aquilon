@@ -18,7 +18,7 @@ from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_domain_and_string
-from aquilon.aqdb.systems import Host
+from aquilon.aqdb.sy.host import Host
 from aquilon.server.templates import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 

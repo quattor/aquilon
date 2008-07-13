@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.configuration import Archetype
+from aquilon.aqdb.cfg.archetype import Archetype
 
 
 def get_archetype(session, archetype):

@@ -9,27 +9,31 @@
 # This module is part of Aquilon
 """ The module governing tables and objects that represent IP networks in
     Aquilon."""
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-import depends
-
-from db_factory import Base
-from column_types.aqstr import AqStr
-from column_types.IPV4  import IPV4
-import ipcalc
-from loc.location import Location, location
-from loc.building import Building, building
-from utils import dsdb
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         CheckConstraint, UniqueConstraint, DateTime,
                         ForeignKey, insert, select )
 
 from sqlalchemy.orm import relation, deferred, synonym
+
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types.IPV4  import IPV4
+import aquilon.aqdb.net.ipcalc as ipcalc
+from aquilon.aqdb.loc.location import Location, location
+from aquilon.aqdb.loc.building import Building, building
+from aquilon.aqdb.utils import dsdb
+
 
 """ Network Type can be one of four values which have been carried over as
     legacy from the network table in DSDB:
@@ -106,8 +110,8 @@ Index('net_loc_id_idx', network.c.location_id)
 #TODO: snarf comments  and xx,xw sysloc nets from DSDB (asynchronously?)
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
-    from utils import dsdb
+    from aquilon.aqdb.db_factory import db_factory, Base
+    from aquilon.aqdb.utils import dsdb
 
     import logging #do we *need* logger?
         #TODO: when we have an error table, insert a row there, as well as

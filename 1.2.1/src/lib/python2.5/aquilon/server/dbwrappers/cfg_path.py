@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.configuration import CfgPath
+from aquilon.aqdb.cfg.cfg_path import CfgPath
 
 
 def get_cfg_path(session, cfg_tld, cfg_path):

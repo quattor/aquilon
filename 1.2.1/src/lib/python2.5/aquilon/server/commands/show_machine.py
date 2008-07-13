@@ -14,7 +14,7 @@ from aquilon.server.broker import (add_transaction, az_check, format_results,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.aqdb.hardware import Machine
+from aquilon.aqdb.hw.machine import Machine
 
 
 class CommandShowMachine(BrokerCommand):

@@ -8,25 +8,26 @@
 #
 # This module is part of Aquilon
 """ If you can read this you should be documenting """
+
+
 from __future__ import with_statement
 from datetime import datetime
-
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))#sys.path.insert(1,'../..')
-#sys.path.insert(2,'../../..')
-
-import depends
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import mapper, relation, deferred
 
-from column_types.aqstr import AqStr
-from db_factory import Base
-from vendor import Vendor
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.hw.vendor import Vendor
+
 
 class Cpu(Base):
     __tablename__ = 'cpu'
@@ -45,7 +46,7 @@ cpu.append_constraint(
     UniqueConstraint('vendor_id','name','speed', name='cpu_nm_speed_uk'))
 
 def populate(*args, **kw):
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     if 'debug' in args:

@@ -9,8 +9,18 @@
 # This module is part of Aquilon
 """ Enum column type for network table """
 
-import sqlalchemy.types as types
+
 from exceptions import TypeError
+import sys
+import os
+
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
+
+import sqlalchemy.types as types
+
 
 _NETWORK_TYPES = ['transit', 'vip', 'management', 'unknown', 'grid_domain',
                   'legacy', 'stretch']

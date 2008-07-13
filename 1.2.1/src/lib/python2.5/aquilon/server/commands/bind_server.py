@@ -15,7 +15,8 @@ from twisted.python import log
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.service import HostList, HostListItem
+from aquilon.aqdb.sy.host_list import HostList
+from aquilon.aqdb.sy.host_list_item import HostListItem
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service

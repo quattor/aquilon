@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.service import ServiceInstance
+from aquilon.aqdb.svc.service_instance import ServiceInstance
 
 
 class ServiceInstanceFormatter(ObjectFormatter):

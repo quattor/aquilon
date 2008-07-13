@@ -16,8 +16,8 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand, force_int)
 from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.server.dbwrappers.machine_type import get_machine_type
-from aquilon.aqdb.hardware import Model, MachineSpecs
+from aquilon.aqdb.hw.model import Model
+from aquilon.aqdb.hw.machine_specs import MachineSpecs
 
 
 class CommandAddModel(BrokerCommand):

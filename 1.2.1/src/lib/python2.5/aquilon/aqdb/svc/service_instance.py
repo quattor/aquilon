@@ -8,30 +8,31 @@
 #
 # This module is part of Aquilon
 """ Fill in soon """
+
+
 from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0,os.path.join(DIR, '..'))
-sys.path.insert(0,os.path.join(DIR, '../..'))
-
-import depends
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
-
 from sqlalchemy.orm import relation, deferred, backref, object_session
 
-from db_factory         import Base
-from table_types.name_table import make_name_class
-from column_types.aqstr import AqStr
-from service            import Service
-from cfg.cfg_path       import CfgPath
-from sy.host_list        import HostList
+from aquilon.aqdb.db_factory              import Base
+from aquilon.aqdb.table_types.name_table  import make_name_class
+from aquilon.aqdb.column_types.aqstr      import AqStr
+from aquilon.aqdb.svc.service             import Service
+from aquilon.aqdb.cfg.cfg_path            import CfgPath
+from aquilon.aqdb.sy.host_list            import HostList
 
 #For the future: it should be system_id not host_list_id...
 #from sy.system          import System
+
 
 class ServiceInstance(Base):
     """ Service instance captures the data around assignment of a system for a
@@ -81,7 +82,7 @@ service_instance.primary_key.name = 'svc_inst_pk'
 UniqueConstraint('host_list_id',name='svc_inst_host_list_uk')
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

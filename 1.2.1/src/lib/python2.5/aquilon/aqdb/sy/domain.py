@@ -8,24 +8,27 @@
 #
 # This module is part of Aquilon
 """ For Systems and related objects """
-from datetime import datetime
 
+
+from datetime import datetime
 import sys
 import os
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(DIR, '..'))
-
-from db_factory import Base
-from column_types.aqstr import AqStr
-from quattor_server import QuattorServer
-from auth.user_principal import UserPrincipal, user_principal
-from net.dns_domain import DnsDomain, dns_domain
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
-
 from sqlalchemy.orm import relation, deferred, backref
+
+from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.sy.quattor_server import QuattorServer
+from aquilon.aqdb.auth.user_principal import UserPrincipal, user_principal
+from aquilon.aqdb.net.dns_domain import DnsDomain, dns_domain
+
 
 class Domain(Base):
     """ Domain is to be used as the top most level for path traversal of the SCM
@@ -53,7 +56,7 @@ domain.append_constraint(
     UniqueConstraint('name',name='domain_uk'))
 
 def populate():
-    from db_factory import db_factory, Base
+    from aquilon.aqdb.db_factory import db_factory, Base
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
     Base.metadata.bind.echo = True

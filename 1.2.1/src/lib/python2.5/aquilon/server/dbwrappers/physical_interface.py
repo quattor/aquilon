@@ -13,7 +13,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.interface import PhysicalInterface
+from aquilon.aqdb.hw.physical_interface import PhysicalInterface
 
 
 def get_physical_interface(session, physical_interface, machine, mac, ip):

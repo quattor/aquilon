@@ -15,7 +15,7 @@ import os
 from aquilon.exceptions_ import AuthorizationException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.systems import Domain
+from aquilon.aqdb.sy.domain import Domain
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 from aquilon.server.dbwrappers.quattor_server import (

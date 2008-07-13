@@ -11,7 +11,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.systems import Archetype
+from aquilon.aqdb.cfg.archetype import Archetype
 
 
 class ArchetypeFormatter(ObjectFormatter):

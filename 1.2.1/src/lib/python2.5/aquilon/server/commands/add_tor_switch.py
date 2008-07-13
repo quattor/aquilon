@@ -16,7 +16,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.aqdb.switch_port import SwitchPort
+from aquilon.aqdb.hw.switch_port import SwitchPort
 
 
 class CommandAddTorSwitch(BrokerCommand):
