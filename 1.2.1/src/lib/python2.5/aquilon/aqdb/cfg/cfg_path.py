@@ -89,16 +89,15 @@ def populate(*args, **kw):
                 continue
             if tail.startswith("aquilon/"):
                 tail = tail.replace("aquilon/", "", 1)
-            slash = tail.find("/")
-            if slash < 0:
+            (tld, slash, relative_path) = tail.partition("/")
+            if not slash:
                 continue
-            tld = tail[0:slash]
             if 'verbose' in args:
-                print tld, tail
+                print tld, relative_path
 
             try:
                 dbtld = s.query(Tld).filter_by(type=tld).one()
-                f = CfgPath(tld=dbtld,relative_path=tail)
+                f = CfgPath(tld=dbtld,relative_path=relative_path)
                 s.add(f)
             except Exception, e:
                 sys.stderr.write(e)

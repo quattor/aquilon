@@ -29,6 +29,7 @@ from aquilon.aqdb.column_types.aqstr      import AqStr
 from aquilon.aqdb.svc.service             import Service
 from aquilon.aqdb.cfg.cfg_path            import CfgPath
 from aquilon.aqdb.sy.host_list            import HostList
+from aquilon.aqdb.sy.build_item           import BuildItem
 
 #For the future: it should be system_id not host_list_id...
 #from sy.system          import System

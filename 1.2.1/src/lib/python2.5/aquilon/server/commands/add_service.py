@@ -34,8 +34,7 @@ class CommandAddService(BrokerCommand):
             dbcfg_path = session.query(CfgPath).filter_by(
                     tld=dbtld, relative_path=service).first()
             if not dbcfg_path:
-                cfg_path = str("%s/%s" % (dbtld.type, service))
-                dbcfg_path = CfgPath(dbtld, cfg_path)
+                dbcfg_path = CfgPath(tld=dbtld, relative_path=service)
                 session.save(dbcfg_path)
             dbservice = Service(name=service, cfg_path=dbcfg_path)
             session.save(dbservice)
@@ -55,9 +54,8 @@ class CommandAddService(BrokerCommand):
         dbcfg_path = session.query(CfgPath).filter_by(
                 tld=dbservice.cfg_path.tld, relative_path=relative_path).first()
         if not dbcfg_path:
-            cfg_path = str("%s/%s" % (dbservice.cfg_path.tld.type,
-                relative_path))
-            dbcfg_path = CfgPath(dbservice.cfg_path.tld, cfg_path)
+            dbcfg_path = CfgPath(tld=dbservice.cfg_path.tld,
+                    relative_path=relative_path)
             session.save(dbcfg_path)
         dbsi = ServiceInstance(service=dbservice, host_list=dbhostlist,
                 cfg_path=dbcfg_path)
