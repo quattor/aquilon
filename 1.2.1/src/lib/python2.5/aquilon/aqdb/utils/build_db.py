@@ -1,7 +1,12 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
-
+# $Header$
+# $Change$
+# $DateTime$
+# $Author$
+# Copyright (C) 2008 Morgan Stanley
+#
+""" The way to populate an aqdb instance """
 import re
 import sys
 import os
@@ -15,7 +20,6 @@ from aquilon.aqdb.db_factory import db_factory
 from aquilon.aqdb.utils.shell import ipshell
 import IPython.ipapi
 ipapi = IPython.ipapi.get()
-
 
 pkgs         = {}
 
@@ -50,7 +54,7 @@ def main(*args, **kw):
                 ipapi.ex(import_cmd)
             except ImportError, e:
                 print >>sys.stderr, 'Failed to %s:\n\t%s\n' % (import_cmd, e)
-		sys.exit(1)
+                sys.exit(1)
 
     for p in order:
         for m in pkgs[p]:
@@ -60,7 +64,7 @@ def main(*args, **kw):
             except Exception, e:
                 print >>sys.stderr, "Failed to run %s:\n\t%s" % (
                         populate_cmd, e)
-		sys.exit(2)
+                sys.exit(2)
 
 
 if __name__ == '__main__':
