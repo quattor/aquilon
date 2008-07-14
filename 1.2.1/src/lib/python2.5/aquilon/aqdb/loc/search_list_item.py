@@ -83,20 +83,22 @@ def populate(*args, **kw):
     m = s.query(LocationSearchList).first()
     assert m
 
-    sli1 = SearchListItem(location_type = 'chassis', lsl = m, position = 1)
-    sli2 = SearchListItem(location_type = 'rack', lsl = m, position = 2)
-    sli3 = SearchListItem(location_type = 'building', lsl = m, position = 3)
-    sli4 = SearchListItem(location_type = 'city', lsl = m, position = 4)
-    sli5 = SearchListItem(location_type = 'country', lsl = m, position = 5)
-    sli6 = SearchListItem(location_type = 'continent', lsl = m, position = 6)
-    sli7 = SearchListItem(location_type = 'hub', lsl = m, position = 7)
-    sli8 = SearchListItem(location_type = 'world', lsl = m, position = 8)
+    if len(s.query(SearchListItem).all()) < 1:
 
-    for i in (sli1, sli2, sli3, sli4, sli5, sli6, sli7):
-        s.add(i)
-        print i.__dict__
-        s.commit()
-        #m.location_types.append(i)
+        sli1 = SearchListItem(location_type = 'chassis', lsl = m, position = 1)
+        sli2 = SearchListItem(location_type = 'rack', lsl = m, position = 2)
+        sli3 = SearchListItem(location_type = 'building', lsl = m, position = 3)
+        sli4 = SearchListItem(location_type = 'city', lsl = m, position = 4)
+        sli5 = SearchListItem(location_type = 'country', lsl = m, position = 5)
+        sli6 = SearchListItem(location_type = 'continent', lsl = m, position = 6)
+        sli7 = SearchListItem(location_type = 'hub', lsl = m, position = 7)
+        sli8 = SearchListItem(location_type = 'world', lsl = m, position = 8)
+
+        for i in (sli1, sli2, sli3, sli4, sli5, sli6, sli7):
+            s.add(i)
+            print i.__dict__
+            s.commit()
+            #m.location_types.append(i)
 
     cnt = len(s.query(SearchListItem).all())
     assert cnt > 6

@@ -40,9 +40,10 @@ def populate(*args, **kw):
 
     location_search_list.create(checkfirst = True)
 
-    l = LocationSearchList(name = 'full', comments = 'Chassis -> Company')
-    s.add(l)
-    s.commit()
+    if len(s.query(LocationSearchList).all()) < 1:
+        l = LocationSearchList(name = 'full', comments = 'Chassis -> Company')
+        s.add(l)
+        s.commit()
 
     m = s.query(LocationSearchList).first()
     assert m
