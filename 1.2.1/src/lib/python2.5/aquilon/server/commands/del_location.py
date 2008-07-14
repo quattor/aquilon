@@ -26,8 +26,8 @@ class CommandDelLocation(BrokerCommand):
     @az_check
     def render(self, session, name, type, **arguments):
         try:
-            dblocation = session.query(Location).filter_by(name=name
-                    ).join('type').filter_by(type=type).one()
+            dblocation = session.query(Location).filter_by(name=name,
+                    location_type=type).one()
         except InvalidRequestError, e:
             raise NotFoundException(
                     "Location type='%s' name='%s' not found: %s"

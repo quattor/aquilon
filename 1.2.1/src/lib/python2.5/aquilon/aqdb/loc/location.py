@@ -58,7 +58,7 @@ class Location(Base):
         p_node=loc.parent
         if not p_node:
             return pl
-        while p_node.parent is not None :
+        while p_node.parent is not None and p_node.parent != p_node:
             pl.append(p_node)
             p_node=p_node.parent
         pl.append(p_node)

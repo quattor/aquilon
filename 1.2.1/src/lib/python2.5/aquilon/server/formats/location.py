@@ -28,14 +28,14 @@ from aquilon.aqdb.loc.desk import Desk
 class LocationFormatter(ObjectFormatter):
     def format_raw(self, location, indent=""):
         details = [indent + "%s: %s" %
-                (location.type.type.capitalize(), location.name)]
+                (location.location_type.capitalize(), location.name)]
         if location.fullname:
             details.append(indent + "  Fullname: %s" % location.fullname)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
             details.append(indent + "  Location Parents: [%s]" %
-                    ", ".join("%s: %s" % (p.type.type.capitalize(), p.name)
+                    ", ".join("%s: %s" % (p.location_type.capitalize(), p.name)
                     for p in location.parents))
         return "\n".join(details)
 

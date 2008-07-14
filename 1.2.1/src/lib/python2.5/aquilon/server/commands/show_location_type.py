@@ -28,14 +28,16 @@ class CommandShowLocationType(BrokerCommand):
     def render(self, session, type, name, **arguments):
         query = session.query(Location)
         if type:
-            query = query.join('type').filter_by(type=type).reset_joinpoint()
+            query = query.filter_by(location_type=type)
         if name:
+            query = query.filter_by(name=name)
+        if name and type:
             try:
-                return query.filter_by(name=name).one()
-            except InvalidRequestError:
+                return query.one()
+            except InvalidRequestError, e:
                 raise NotFoundException(
-                        "Location type='%s' name='%s' not found."
-                        % (type, name))
+                        "Location type='%s' name='%s' not found: %s"
+                        % (type, name, e))
         return query.all()
 
 

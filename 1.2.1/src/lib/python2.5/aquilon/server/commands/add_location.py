@@ -42,8 +42,8 @@ class CommandAddLocation(BrokerCommand):
     @az_check
     def render(self, session, name, fullname, type, 
             parentname, parenttype, comments, **arguments):
-        newLocation = session.query(Location).filter_by(name=name
-                ).join('type').filter_by(type=type).first()
+        newLocation = session.query(Location).filter_by(name=name,
+                location_type=type).first()
         if newLocation:
             # FIXME: Technically this is coming in with an http PUT,
             # which should try to adjust state and succeed if everything
@@ -51,8 +51,8 @@ class CommandAddLocation(BrokerCommand):
             raise ArgumentError("%s '%s' already exists."
                     % (type.capitalize(), name))
         try:
-            parent = session.query(Location).filter_by(name=parentname
-                    ).join('type').filter_by(type=parenttype).one()
+            dbparent = session.query(Location).filter_by(name=parentname,
+                    location_type=parenttype).one()
         except InvalidRequestError:
             raise ArgumentError(
                     "Parent %s %s not found."
@@ -61,10 +61,6 @@ class CommandAddLocation(BrokerCommand):
         location_type = globals()[type.capitalize()]
         if not issubclass(location_type, Location):
             raise ArgumentError("%s is not a known location type" % type)
-        try:
-            dblt = session.query(LocationType).filter_by(type=type).one()
-        except InvalidRequestError:
-            raise ArgumentError("Invalid location type '%s'" % type)
 
         # Figure out if it is valid to add this type of child to the parent...
         found_parent = False
@@ -88,13 +84,15 @@ class CommandAddLocation(BrokerCommand):
             raise ArgumentError("unknown type %s" % type)
 
         optional_args = {}
-        if fullname:
-            optional_args["fullname"] = fullname
+        # XXX: The fullname used to be nullable... adding hack...
+        if not fullname:
+            fullname = name
         if comments:
             optional_args["comments"] = comments
 
-        newLocation = location_type(name=name, type_name=dblt,
-                parent=parent, **optional_args)
+        new_location = location_type(name=name, fullname=fullname,
+                parent=dbparent, **optional_args)
+        session.save(new_location)
         return
 
 
