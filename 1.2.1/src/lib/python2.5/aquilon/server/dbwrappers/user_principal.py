@@ -16,6 +16,7 @@ from twisted.python import log
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.auth.user_principal import UserPrincipal
 from aquilon.aqdb.auth.realm import Realm
+from aquilon.aqdb.auth.role import Role
 
 
 principal_re = re.compile(r'^(.*)@([^@]+)$')
@@ -31,6 +32,7 @@ def get_or_create_user_principal(session, user,
     realm = m.group(2)
     user = m.group(1)
     dbrealm = session.query(Realm).filter_by(name=realm).first()
+    dbnobody = session.query(Role).filter_by(name='nobody').first()
     if not dbrealm:
         if not createrealm:
             raise ArgumentError("Could not find realm '%s' to create principal '%s', use --createrealm to create a new record for the realm."
@@ -39,7 +41,7 @@ def get_or_create_user_principal(session, user,
         dbrealm = Realm(name=realm)
         session.save(dbrealm)
         log.msg("Creating user %s..." % principal)
-        dbuser = UserPrincipal(name=user, realm=dbrealm)
+        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
         session.save(dbuser)
         return dbuser
     dbuser = session.query(UserPrincipal).filter_by(
@@ -49,11 +51,8 @@ def get_or_create_user_principal(session, user,
             raise ArgumentError("Could not find principal '%s' to permission, use --createuser to create a new record for the principal."
                     % principal)
         log.msg("User %s did not exist in realm %s, creating..." % (user, realm))
-        dbuser = UserPrincipal(name=user, realm=dbrealm)
+        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
         session.save(dbuser)
-        # Since we rely on the role being set by default, this forces
-        # the role information to be loaded into the new object.
-        session.flush()
     return dbuser
 
 #if __name__=='__main__':
