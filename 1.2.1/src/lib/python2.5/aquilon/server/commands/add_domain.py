@@ -41,7 +41,8 @@ class CommandAddDomain(BrokerCommand):
         # FIXME: Check that the domain name is composed only of characters
         # that are valid for a directory name.
         if not dbdomain:
-            dbdomain = Domain(domain, dbquattor_server, dbuser)
+            dbdomain = Domain(name=domain, server=dbquattor_server,
+                    owner=dbuser)
             session.save_or_update(dbdomain)
         domaindir = os.path.join(self.config.get("broker", "templatesdir"),
                 dbdomain.name)

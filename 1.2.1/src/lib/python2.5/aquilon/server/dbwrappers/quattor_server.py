@@ -14,6 +14,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.sy.quattor_server import QuattorServer
+from aquilon.aqdb.net.dns_domain import DnsDomain
 
 
 def get_quattor_server(session, quattor_server):
@@ -32,7 +33,9 @@ def get_or_create_quattor_server(session, quattor_server):
         return dbquattor_server
     # FIXME: Assumes the QuattorServer is Aurora, and also that the
     # quattor_server is not defined as a System.
-    dbquattor_server = QuattorServer(name=quattor_server, dns_domain='ms.com',
+    dbdns_domain = session.query(DnsDomain).filter_by(name='ms.com').first()
+    dbquattor_server = QuattorServer(name=quattor_server,
+            dns_domain=dbdns_domain,
             comments='Automatically generated entry')
     session.save(dbquattor_server)
     return dbquattor_server
