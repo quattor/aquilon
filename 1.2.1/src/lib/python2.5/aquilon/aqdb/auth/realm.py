@@ -24,11 +24,14 @@ from aquilon.aqdb.table_types.name_table import make_name_class
 Realm = make_name_class('Realm', 'realm')
 realm = Realm.__table__
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     realm.create(checkfirst=True)
@@ -39,3 +42,6 @@ def populate():
         s.commit()
         assert(r)
         print 'created %s'%(r)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

@@ -57,12 +57,16 @@ user_principal.primary_key.name = 'user_principal_pk'
 user_principal.append_constraint(
     UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
 
-def populate():
-    from db_factory import db_factory, Base
+def populate(*args, **kw):
+    from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
+
 
     user_principal.create(checkfirst = True)
 
@@ -111,3 +115,6 @@ def populate():
 
     a = s.query(UserPrincipal).first()
     assert(a)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

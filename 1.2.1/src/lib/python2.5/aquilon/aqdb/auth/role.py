@@ -25,11 +25,14 @@ from aquilon.aqdb.table_types.name_table import make_name_class
 Role = make_name_class('Role', 'role')
 role = Role.__table__
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     role.create(checkfirst = True)
@@ -42,3 +45,6 @@ def populate():
             assert(r)
         s.commit()
         print 'created %s'%(roles)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
