@@ -1,4 +1,5 @@
 __all__ = (
           'aqstr',
-	  'IPV4'
+          'enum',
+          'IPV4',
           )
