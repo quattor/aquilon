@@ -30,8 +30,7 @@ def get_location(session, **kwargs):
         return None
     try:
         dblocation = session.query(Location).filter_by(
-                name=kwargs[location_type]).join('type').filter_by(
-                type=location_type).one()
+                name=kwargs[location_type], location_type=location_type).one()
     except InvalidRequestError, e:
         raise NotFoundException("%s '%s' not found: %s"
                 % (location_type.capitalize(), kwargs[location_type], e))
