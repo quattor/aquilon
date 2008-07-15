@@ -34,10 +34,10 @@ def create_machine(session, machine, dblocation, dbmodel,
     # Figure out a CPU...
     dbcpu = None
     if not (cpuname or cpuspeed or cpuvendor):
-        if not dbmodel.specifications:
+        if not dbmodel.machine_specs:
             ArgumentError("Model %s does not have machine specification defaults, please specify --cpuvendor, --cpuname, and --cpuspeed." %
                     dbmodel.name)
-        dbcpu = dbmodel.specifications.cpu
+        dbcpu = dbmodel.machine_specs.cpu
     else:
         # Was there enough on the command line to specify one?
         q = session.query(Cpu)
@@ -53,9 +53,9 @@ def create_machine(session, machine, dblocation, dbmodel,
         if len(cpulist) == 1:
             # Found it exactly.
             dbcpu = cpulist[0]
-        elif dbmodel.specifications:
+        elif dbmodel.machine_specs:
             # Not exact, but see if the specs match the default.
-            dbcpu = dbmodel.specifications.cpu
+            dbcpu = dbmodel.machine_specs.cpu
             if ((cpuname and not dbcpu.name.startswith(cpuname.lower))
                     or (cpuspeed and dbcpu.speed != cpuspeed)
                     or (cpuvendor and
@@ -65,8 +65,8 @@ def create_machine(session, machine, dblocation, dbmodel,
             raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
     
     if cpucount is None:
-        if dbmodel.specifications:
-            cpucount = dbmodel.specifications.cpu_quantity
+        if dbmodel.machine_specs:
+            cpucount = dbmodel.machine_specs.cpu_quantity
         else:
             ArgumentError("Model %s does not have machine specification defaults, please specify --cpucount." %
                     model)
@@ -74,8 +74,8 @@ def create_machine(session, machine, dblocation, dbmodel,
         cpucount = force_int("cpucount", cpucount)
 
     if memory is None:
-        if dbmodel.specifications:
-            memory = dbmodel.specifications.memory
+        if dbmodel.machine_specs:
+            memory = dbmodel.machine_specs.memory
         else:
             ArgumentError("Model %s does not have machine specification defaults, please specify --memory (in MB)." %
                     model)
@@ -86,9 +86,9 @@ def create_machine(session, machine, dblocation, dbmodel,
             cpu_quantity=cpucount, memory=memory, serial_no=serial)
     session.save(dbmachine)
 
-    if dbmodel.specifications:
-        dbdisk = Disk(machine=dbmachine, type=dbmodel.specifications.disk_type,
-                capacity=dbmodel.specifications.disk_capacity)
+    if dbmodel.machine_specs:
+        dbdisk = Disk(machine=dbmachine, type=dbmodel.machine_specs.disk_type,
+                capacity=dbmodel.machine_specs.disk_capacity)
         session.save(dbdisk)
 
     session.flush()

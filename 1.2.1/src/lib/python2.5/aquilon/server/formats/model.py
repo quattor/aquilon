@@ -19,8 +19,8 @@ class ModelFormatter(ObjectFormatter):
         details = [indent + "Model: %s %s" % (model.vendor.name, model.name)]
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
-        if model.specifications:
-            details.append(self.redirect_raw(model.specifications, indent+"  "))
+        if model.machine_specs:
+            details.append(self.redirect_raw(model.machine_specs, indent+"  "))
         return "\n".join(details)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()

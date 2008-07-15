@@ -24,12 +24,13 @@ if __name__ == '__main__':
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.hw.model import Model
 from aquilon.aqdb.hw.vendor import Vendor
 from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.hw.disk_type import DiskType
 
 
 class MachineSpecs(Base):
@@ -72,8 +73,10 @@ class MachineSpecs(Base):
     comments      = deferred(
         Column('comments', String(255), nullable=True))
 
-    model = relation('Model', uselist = False, backref='specs')
-    cpu   = relation('Cpu')
+    model         = relation(Model, backref=backref('machine_specs',
+                                                    uselist=False))
+    cpu           = relation(Cpu)
+    disk_type     = relation(DiskType)
 
 
 machine_specs = MachineSpecs.__table__
@@ -85,6 +88,12 @@ machine_specs.append_constraint(
 
 
 def populate():
+    from aquilon.aqdb.db_factory import db_factory, Base
+    dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+
+    machine_specs.create(checkfirst=True)
+
     return
 
 def populate_needs_to_be_fixed():

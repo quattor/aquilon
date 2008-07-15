@@ -28,17 +28,16 @@ class CommandDelModel(BrokerCommand):
     @az_check
     def render(self, session, name, vendor, type, **arguments):
         dbvendor = get_vendor(session, vendor)
-        dbmachine_type = get_machine_type(session, type)
         try:
             dbmodel = session.query(Model).filter_by(name=name,
-                    vendor=dbvendor, machine_type=dbmachine_type).one()
+                    vendor=dbvendor, machine_type=type).one()
         except InvalidRequestError, e:
             raise NotFoundException("Model '%s' with vendor %s and type %s not found: %s"
                     % (name, vendor, type, e))
-        if dbmodel.specifications:
+        if dbmodel.machine_specs:
             # FIXME: Log some details...
             log.msg("Before deleting model %s %s '%s', removing machine specifications." % (type, vendor, name))
-            session.delete(dbmodel.specifications)
+            session.delete(dbmodel.machine_specs)
         session.delete(dbmodel)
         return
 
