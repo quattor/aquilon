@@ -7,12 +7,12 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-""" If you can read this you should be documenting """
-
+""" Translates dotted quad strings into long integers """
 
 import struct
-from socket import inet_aton, inet_ntoa, error as socket_error
-from exceptions import TypeError
+from socket import inet_aton, inet_ntoa
+from exceptions import TypeError, AssertionError
+
 import sys
 import os
 
@@ -23,30 +23,60 @@ if __name__ == '__main__':
 
 import sqlalchemy.types as types
 
-
-class IPv4AddrTypeError(TypeError):
-    def __init__(self, addr):
-        self.addr = addr
-    def __str__(self):
-        return "Illegal IPv4 address '%s'" % self.addr
-
 class IPV4(types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
-    def process_bind_param(self,value,engine):
-        try:
-            return super(IPV4,self).convert_bind_param(
-                struct.unpack('!L',inet_aton(value))[0],engine)
-        except socket_error:
-            raise IPv4AddrTypeError(value)
 
-    # from the database
-    def process_result_value(self,value,engine):
-        return inet_ntoa(
-            struct.pack('!L',super(
-                IPV4,self).convert_result_value(value,engine)))
+    impl = types.Numeric
+
+    def process_bind_param(self, dq, engine):
+        if not dq:
+            raise TypeError('IPV4 can not be None')
+
+        dq = str(dq)
+        q = dq.split('.')
+
+        if len(q) != 4:
+            msg = "%r: IPv4 address invalid: should contain 4 bytes" %(dq)
+            raise TypeError(msg)
+
+        for x in q:
+            if 0 > int(x) > 255:
+                msg = (dq, " : bytes should be between 0 and 255")
+                raise TypeError(msg)
+
+        return struct.unpack('L', inet_aton(dq))[0]
+
+    def process_result_value(self, n, engine):
+        return inet_ntoa(struct.pack('L', n))
 
     def copy(self):
-        return AqStr(self.impl.length)
+        return IPV4(self.impl.length)
 
 
-#TEST ME!!!: create a tiny table, insert valid, and invalid types. delete table
+def test_ipv4():
+    if not sys.modules.has_key('sqlalchemy'):
+        raise AssertionError('sqlalchemy module not in sys.modules')
+
+    from sqlalchemy import (MetaData, Table, Column, Integer, insert)
+
+    t = Table('foo', MetaData('sqlite:///'),
+              Column('id', Integer, primary_key=True),
+              Column('e', IPV4()))
+    t.create()
+
+    t.insert().execute(e='192.168.1.1')
+    t.insert().execute(e='144.14.47.54')
+
+    print list(t.select().execute())
+
+    try:
+        t.insert().execute(e = 'lalalala')
+    except TypeError:
+        pass
+
+    try:
+        t.insert().execute(e = None)
+    except TypeError:
+        pass
+
+    print list(t.select().execute())
