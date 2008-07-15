@@ -72,11 +72,17 @@ Index('idx_phys_int_machine_id', physical_interface.c.machine_id)
 #self.name == 'e0':
 #            self.boot=True
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     physical_interface.create(checkfirst = True)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

@@ -37,6 +37,8 @@ def populate(*args, **kw):
 
     vendor.create(checkfirst = True)
 
+    created=[]
+
     if len(s.query(Vendor).all()) < 1:
         import aquilon.aqdb.cfg.cfg_path as cfg
         cfg_base = dbf.config.get("broker", "kingdir")
@@ -47,7 +49,7 @@ def populate(*args, **kw):
             cfg_base += '/'
         cfg_base += 'hardware'
 
-        created=[]
+
         for i in os.listdir(cfg_base):
             if i == 'ram':
                 continue
@@ -72,5 +74,6 @@ def populate(*args, **kw):
             s.close()
 
     print 'created %s vendors'%(len(created))
+
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False

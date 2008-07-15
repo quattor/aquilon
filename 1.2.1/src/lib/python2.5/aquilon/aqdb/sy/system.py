@@ -23,9 +23,9 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.net.dns_domain import DnsDomain, dns_domain
+from aquilon.aqdb.net.dns_domain     import DnsDomain
 
 
 #TODO: enum type for system_type column
@@ -79,12 +79,18 @@ system.append_constraint(
     UniqueConstraint('name', 'dns_domain_id', 'system_type',
                      name = 'system_name_uk'))
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
-    from aquilon.aqdb.net.dns_domain import DnsDomain, dns_domain
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     system.create(checkfirst=True)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
+

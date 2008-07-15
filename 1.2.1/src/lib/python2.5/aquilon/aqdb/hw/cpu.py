@@ -112,7 +112,9 @@ def populate(*args, **kw):
         except Exception,e:
             s.rollback()
             sys.stderr.write(str(e))
-        print 'Created cpus'
+        cnt = len(s.query(Cpu).all())
+
+        print 'Created %s cpus'%(cnt)
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False

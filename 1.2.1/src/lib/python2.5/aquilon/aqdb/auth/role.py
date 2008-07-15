@@ -38,7 +38,7 @@ def populate(*args, **kw):
     role.create(checkfirst = True)
 
     if s.query(Role).count() == 0:
-        roles=['nobody', 'operations', 'engineering', 'aqd_admin']
+        roles=['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
         for i in roles:
             r=Role(name = i, comments = 'AutoPopulated')
             s.save(r)

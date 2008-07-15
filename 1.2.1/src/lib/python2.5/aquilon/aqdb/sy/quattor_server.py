@@ -41,17 +41,20 @@ class QuattorServer(System):
 quattor_server = QuattorServer.__table__
 quattor_server.primary_key.name = 'qs_pk'
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     quattor_server.create(checkfirst = True)
-    if dbf.engine.execute(quattor_server.count()).scalar() < 1:
+
+    if len(s.query(QuattorServer).all()) < 1:
         dom = s.query(DnsDomain).filter_by(name = 'ms.com').one()
-        print dom
         qs=QuattorServer(name='oziyp2', dns_domain=dom)
         s.add(qs)
         s.commit()
@@ -59,3 +62,6 @@ def populate():
     qs=s.query(QuattorServer).filter_by(name='oziyp2').one()
     assert(qs)
     assert(qs.dns_domain)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

@@ -8,8 +8,6 @@
 #
 # This module is part of Aquilon
 """ For Systems and related objects """
-
-
 from datetime import datetime
 import sys
 import os
@@ -55,15 +53,19 @@ domain.primary_key.name = 'domain_pk'
 domain.append_constraint(
     UniqueConstraint('name',name='domain_uk'))
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     domain.create(checkfirst = True)
-    if dbf.engine.execute(domain.count()).scalar() < 1:
+
+    if len(s.query(Domain).all()) < 1:
         qs = s.query(QuattorServer).first()
         cdb = s.query(UserPrincipal).filter_by(name = 'cdb').one()
         daqscott = s.query(UserPrincipal).filter_by(name='daqscott').one()
@@ -79,3 +81,6 @@ def populate():
         s.commit()
         d=s.query(Domain).first()
         assert(d)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

@@ -96,12 +96,12 @@ def populate(*args, **kw):
 
         for i in (sli1, sli2, sli3, sli4, sli5, sli6, sli7):
             s.add(i)
-            print i.__dict__
             s.commit()
-            #m.location_types.append(i)
 
     cnt = len(s.query(SearchListItem).all())
     assert cnt > 6
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
+
+    print 'created Location Search List %s '%(m)

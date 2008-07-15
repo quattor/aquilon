@@ -17,7 +17,7 @@ if __name__ == '__main__':
     #import aquilon.aqdb.depends
     import msversion
     msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
-    msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dev')
+    msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
     msversion.addpkg('ipython','0.8.2','dist')
 
 from aquilon.aqdb.db_factory import db_factory

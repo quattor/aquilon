@@ -26,10 +26,10 @@ from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.db_factory import Base
-from aquilon.aqdb.hw.model import Model
-from aquilon.aqdb.hw.vendor import Vendor
-from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.db_factory   import Base
+from aquilon.aqdb.hw.model     import Model
+from aquilon.aqdb.hw.vendor    import Vendor
+from aquilon.aqdb.hw.cpu       import Cpu
 from aquilon.aqdb.hw.disk_type import DiskType
 
 
@@ -87,26 +87,41 @@ machine_specs.append_constraint(
     UniqueConstraint('model_id', name = 'machine_spec_model_id_uk'))
 
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+
+    s = dbf.session()
 
     machine_specs.create(checkfirst=True)
 
-    return
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
+
 
 def populate_needs_to_be_fixed():
-    if empty(machine_specs):
+    if len(s.query(MachineSpecs).all()) < 1:
+
         a=MachineSpecs(model='hs20',cpu='xeon_2660',comments='FAKE')
+
         b=MachineSpecs(model='hs21',cpu='xeon_2660',
                                 disk_capacity=68, comments='FAKE')
+
         c=MachineSpecs(model='poweredge_6650', cpu='xeon_3000',cpu_quantity=4,
                                 comments='FAKE')
+
         d=MachineSpecs(model='bl45p',cpu='opteron_2600',memory=32768,
                                 comments='FAKE')
+
         e=MachineSpecs(model='bl260c', cpu='xeon_2500', memory=24576)
+
         f=MachineSpecs(model='vb1205xm', cpu='xeon_2500', memory=24576)
+
         for ms in [a, b, c, d, e, f]:
             try:
                 Session.save(ms)

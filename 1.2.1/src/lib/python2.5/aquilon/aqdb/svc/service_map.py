@@ -67,11 +67,17 @@ service_map.append_constraint(
     UniqueConstraint('service_instance_id', 'location_id',
                      name='svc_map_loc_inst_uk'))
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     service_map.create(checkfirst = True)
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

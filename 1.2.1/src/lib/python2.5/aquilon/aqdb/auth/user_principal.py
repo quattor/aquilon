@@ -73,6 +73,7 @@ def populate(*args, **kw):
     admin = s.query(Role).filter_by(name = 'aqd_admin').one()
     eng   = s.query(Role).filter_by(name = 'engineering').one()
     ops   = s.query(Role).filter_by(name = 'operations').one()
+    telco = s.query(Role).filter_by(name = 'telco_eng').one()
 
     admins  = ['cdb', 'njw', 'wesleyhe', 'guyroleh', 'daqscott', 'kgreen',
                'benjones']
@@ -85,9 +86,12 @@ def populate(*args, **kw):
                   'gleasob', 'lchun', 'peteryip', 'richmoj', 'tipping',
                   'hardyb', 'martinva']
 
+    telco_eng = ['dalys', 'medinad', 'peikonb', 'kulawiak']
+
     if len(s.query(UserPrincipal).all()) < 1:
         r = s.query(Realm).first()
         assert(r.name == 'is1.morgan')
+
 
         for nm in admins:
             up=UserPrincipal(name = nm, realm = r,role = admin,
@@ -111,7 +115,15 @@ def populate(*args, **kw):
             s.save(up)
             s.commit()
             assert(up)
-        print 'created operationss: %s'%(operations)
+        print 'created operations: %s'%(operations)
+
+        for nm in telco_eng:
+            up = UserPrincipal(name = nm, realm = r, role = telco,
+                               comments = 'AutoPopulated')
+            s.save(up)
+            s.commit()
+            assert(up)
+        print 'created telco_eng: %s'%(telco_eng)
 
     a = s.query(UserPrincipal).first()
     assert(a)

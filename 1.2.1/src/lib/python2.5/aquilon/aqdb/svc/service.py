@@ -82,24 +82,17 @@ service.append_constraint(
 service.append_constraint(
     UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     service.create(checkfirst = True)
 
-    #if empty(service):
-    #    cfg_paths = s.query(CfgPath).filter(
-    #            not_(CfgPath.relative_path.like('%/%'))).join('tld').filter_by(
-    #            type='service').all()
-    #    assert(len(cfg_paths) > 1)
-    #
-    #    for i in cfg_paths:
-    #        srv = Service(name=str(i.relative_path),cfg_path=i)
-    #        s.save(srv)
-    #    s.commit()
-    #    print 'populated services'
-    #    s.close()
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

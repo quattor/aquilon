@@ -63,24 +63,17 @@ service_list_item.append_constraint(
 Index('idx_srvlst_arch_id', service_list_item.c.archetype_id)
 
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     service_list_item.create(checkfirst = True)
 
-    #svc = s.query(Service).filter_by(name='afs').one()
-    #assert(svc)
-    #
-    #arch = s.query(Archetype).filter_by(name='aquilon').one()
-    #assert(arch)
-    #if empty(service_list_item):
-    #    sli=ServiceListItem(arch,svc)
-    #    s.save(sli)
-    #    s.commit()
-    #    assert(sli)
-    #    print 'populated service list'
-    #s.close()
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

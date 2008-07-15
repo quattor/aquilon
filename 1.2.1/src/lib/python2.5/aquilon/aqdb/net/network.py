@@ -136,48 +136,52 @@ def populate(*args, **kw):
 
     network.create(checkfirst = True)
 
-    b_cache={}
-    sel=select( [location.c.name, building.c.id],
-        location.c.id == building.c.id )
+    if len(s.query(Network).all()) < 1:
+        print 'creating networks...go get some coffee...'
+        b_cache={}
+        sel=select( [location.c.name, building.c.id],
+            location.c.id == building.c.id )
 
-    for row in dbf.engine.execute(sel).fetchall():
-        b_cache[row[0]]=row[1]
+        for row in dbf.engine.execute(sel).fetchall():
+            b_cache[row[0]]=row[1]
 
-    count=0
-    #TODO: forget campus, bucket. make this whole thing an insert ?
-    for (name, ip, cidr, type, bldg_name, side, dsdb_id) in dsdb.dump_network():
+        count=0
+        #TODO: forget campus, bucket. make this whole thing an insert ?
+        for (name, ip, cidr, type, bldg_name,
+             side, dsdb_id) in dsdb.dump_network():
 
-        kw = {}
-        try:
-            kw['location_id'] = b_cache[bldg_name]
-        except KeyError:
-            #TODO: pull the new building in from dsdb somehow
-            #TODO: generate an exception about the row if it's got unexpected
-            #   null data in it, it means that dsdb has bad data.
-            logging.error("Can't find building '%s'\n%s"%(bldg_name, row))
-            continue
-            # an alternative...
-            #sys.stderr.write("Can't find building '%s' for row %s\n"%(
-            #    bldg_name,row))
+            kw = {}
+            try:
+                kw['location_id'] = b_cache[bldg_name]
+            except KeyError:
+                #TODO: pull the new building in from dsdb somehow
+                #TODO: generate an exception about the row: unexpected
+                #   null data means that dsdb has bad data
 
-        kw['name']       = name
-        kw['ip']         = ip
-        kw['cidr']       = cidr
-        if type:
-            kw['network_type']   = type
-        if side:
-            kw['side']   = side
-        kw['dsdb_id']    = dsdb_id
+                logging.error("Can't find building '%s'\n%s"%(bldg_name, row))
+                continue
+                # an alternative...
+                #sys.stderr.write("Can't find building '%s' for row %s\n"%(
+                #    bldg_name,row))
 
-        c=Network(**kw)
-        s.add(c)
-        count += 1
-        if count % 1000 == 0:
-            s.commit()
-            s.flush()
+            kw['name']       = name
+            kw['ip']         = ip
+            kw['cidr']       = cidr
+            if type:
+                kw['network_type']   = type
+            if side:
+                kw['side']   = side
+            kw['dsdb_id']    = dsdb_id
 
-    s.commit()
-    print 'commited %s rows'%(count)
+            c=Network(**kw)
+            s.add(c)
+            count += 1
+            if count % 1000 == 0:
+                s.commit()
+                s.flush()
+
+        s.commit()
+        print 'created %s networks'%(count)
 
 
     if Base.metadata.bind.echo == True:

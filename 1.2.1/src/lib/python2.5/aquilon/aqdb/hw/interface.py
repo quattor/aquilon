@@ -23,8 +23,9 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         DateTime)
 from sqlalchemy.orm import mapper, relation, deferred
 
-from aquilon.aqdb.column_types.aqstr  import AqStr
-from aquilon.aqdb.db_factory          import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types.IPV4  import IPV4
+from aquilon.aqdb.db_factory         import Base
 
 
 class Interface(Base):
@@ -32,7 +33,7 @@ class Interface(Base):
 
     id = Column(Integer, Sequence('interface_id_seq'), primary_key=True)
     interface_type = Column(AqStr(16), nullable=False) #TODO: index
-    ip = Column('ip', String(16), default='0.0.0.0', index=True)
+    ip = Column('ip', IPV4, default='0.0.0.0', index=True)
 
     creation_date = deferred(Column('creation_date',
                                     DateTime, default=datetime.now))
@@ -43,11 +44,21 @@ class Interface(Base):
 interface = Interface.__table__
 interface.primary_key.name = 'interface_pk'
 
-def populate():
+def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
+    from sqlalchemy import insert
+
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
-    Base.metadata.bind.echo = True
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
     s = dbf.session()
 
     interface.create(checkfirst=True)
+
+    if len(s.query(Interface).all()) < 1:
+        #print 'no interfaces yet'
+        pass
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False

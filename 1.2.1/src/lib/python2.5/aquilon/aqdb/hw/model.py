@@ -61,7 +61,7 @@ def populate(*args, **kw):
     mlist=s.query(Model).all()
 
     if not mlist:
-        print "Populating model table"
+
 
         f = [['ibm', 'hs20','blade'],
             ['ibm', 'ls20','blade'],
@@ -95,5 +95,8 @@ def populate(*args, **kw):
             print e
         finally:
             s.close()
+
+    print s.query(Model).all()
+
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
