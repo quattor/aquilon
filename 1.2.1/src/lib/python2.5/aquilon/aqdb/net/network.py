@@ -26,13 +26,14 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
 
 from sqlalchemy.orm import relation, deferred, synonym
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types.IPV4  import IPV4
+from aquilon.aqdb.loc.location       import Location, location
+from aquilon.aqdb.loc.building       import Building, building
+
 import aquilon.aqdb.net.ipcalc as ipcalc
-from aquilon.aqdb.loc.location import Location, location
-from aquilon.aqdb.loc.building import Building, building
-from aquilon.aqdb.utils import dsdb
+
 
 
 """ Network Type can be one of four values which have been carried over as
@@ -75,12 +76,13 @@ class Network(Base):
     location_id   = Column('location_id', Integer, ForeignKey('location.id'),
                            nullable=False)
 
-    network_type  = Column(AqStr(32), nullable = False, default = 'unknown')
-    cidr          = Column(Integer, nullable = False)
+    network_type  = Column(AqStr(32),  nullable = False, default = 'unknown')
+    #TODO:  constrain <= 32, >= 1
+    cidr          = Column(Integer,    nullable = False)
     name          = Column(AqStr(255), nullable = False) #TODO: default to ip
-    ip            = Column(String(15), nullable = False)
-    side          = Column(AqStr(4), nullable = True, default = 'a')
-    dsdb_id       = Column(Integer, nullable = False)
+    ip            = Column(IPV4(),       nullable = False)
+    side          = Column(AqStr(4),   nullable = True, default = 'a')
+    dsdb_id       = Column(Integer,    nullable = False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now))
     comments      = deferred(Column(String(255), nullable = True))
@@ -111,14 +113,23 @@ Index('net_loc_id_idx', network.c.location_id)
 
 def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
-    from aquilon.aqdb.utils import dsdb
+    import aquilon.aqdb.utils.dsdb as dsdb
+    from sqlalchemy import insert
 
-    import logging #do we *need* logger?
+    dbf = db_factory()
+    Base.metadata.bind = dbf.engine
+    if 'debug' in args:
+        Base.metadata.bind.echo = True
+    s = dbf.session()
+
+    import logging
+        #do we *need* logger?
         #TODO: when we have an error table, insert a row there, as well as
         #    generating an exception that can be acted upon in dsdb.
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
+
     if 'debug' in args:
         Base.metadata.bind.echo = True
     s = dbf.session()
@@ -165,5 +176,9 @@ def populate(*args, **kw):
             s.commit()
             s.flush()
 
-    print 'commited %s rows'%(count)
     s.commit()
+    print 'commited %s rows'%(count)
+
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
