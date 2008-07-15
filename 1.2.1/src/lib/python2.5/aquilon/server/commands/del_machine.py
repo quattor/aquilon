@@ -28,9 +28,10 @@ class CommandDelMachine(BrokerCommand):
     def render(self, session, machine, **arguments):
         dbmachine = get_machine(session, machine)
 
-        if dbmachine.type() not in ['blade', 'rackmount', 'workstation']:
+        if dbmachine.model.machine_type not in [
+                'blade', 'rackmount', 'workstation']:
             raise ArgumentError("The del_machine command cannot delete machines of type '%(type)s'.  Try 'del %(type)s'." %
-                    {"type": dbmachine.type()})
+                    {"type": dbmachine.model.machine_type})
 
         session.refresh(dbmachine)
         plenary_info = PlenaryMachineInfo(dbmachine)

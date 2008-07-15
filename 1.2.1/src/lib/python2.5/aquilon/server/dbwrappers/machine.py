@@ -82,12 +82,13 @@ def create_machine(session, machine, dblocation, dbmodel,
     else:
         memory = force_int("memory", memory)
 
-    dbmachine = Machine(dblocation, dbmodel, name=machine, cpu=dbcpu,
-            cpu_quantity=cpucount, memory=memory, serial_no=serial)
+    dbmachine = Machine(location=dblocation, model=dbmodel, name=machine,
+            cpu=dbcpu, cpu_quantity=cpucount, memory=memory, serial_no=serial)
     session.save(dbmachine)
 
     if dbmodel.machine_specs:
-        dbdisk = Disk(machine=dbmachine, type=dbmodel.machine_specs.disk_type,
+        dbdisk = Disk(machine=dbmachine,
+                disk_type=dbmodel.machine_specs.disk_type,
                 capacity=dbmodel.machine_specs.disk_capacity)
         session.save(dbdisk)
 

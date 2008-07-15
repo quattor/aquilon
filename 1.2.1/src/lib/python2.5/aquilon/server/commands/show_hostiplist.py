@@ -40,7 +40,7 @@ class CommandShowHostIPList(BrokerCommand):
                 JOIN physical_interface ON
                     (machine.id = physical_interface.machine_id)
                 JOIN interface ON
-                        (interface.id = physical_interface.interface_id)
+                        (interface.id = physical_interface.id)
                 WHERE interface.ip IS NOT NULL
                     AND NOT (interface.ip = '0.0.0.0')"""
         if archetype:

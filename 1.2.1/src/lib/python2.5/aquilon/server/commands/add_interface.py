@@ -34,7 +34,8 @@ class CommandAddInterface(BrokerCommand):
             extra['boot'] = True
         if comments:
             extra['comments'] = comments
-        dbpi = PhysicalInterface(interface, mac, dbmachine, ip=ip, **extra)
+        dbpi = PhysicalInterface(name=interface, mac=mac, machine=dbmachine,
+                ip=ip, **extra)
         session.save(dbpi)
         session.flush()
         session.refresh(dbmachine)

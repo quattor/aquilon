@@ -32,7 +32,7 @@ class PlenaryMachineInfo(object):
                 dbmachine.cpu.vendor.name, dbmachine.cpu.name)
         harddisks = []
         for harddisk in dbmachine.disks:
-            relpath = "hardware/harddisk/generic/%s" % harddisk.type.type
+            relpath = "hardware/harddisk/generic/%s" % harddisk.disk_type.type
             harddisks.append({"relpath":relpath, "capacity":harddisk.capacity})
         self.harddisks = harddisks
         self.interfaces = []

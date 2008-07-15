@@ -30,7 +30,7 @@ class CommandDelDisk(BrokerCommand):
         q = session.query(Disk).filter_by(machine=dbmachine)
         if type:
             dbdisk_type = get_disk_type(session, type)
-            q = q.filter_by(type=dbdisk_type)
+            q = q.filter_by(disk_type=dbdisk_type)
         if capacity:
             capacity = force_int("capacity", capacity)
             q = q.filter_by(capacity=capacity)

@@ -27,9 +27,10 @@ class CommandCatMachine(BrokerCommand):
     #@format_results
     def render(self, session, machine, **kwargs):
         dbmachine = get_machine(session, machine)
-        if dbmachine.type() not in ['blade', 'workstation', 'chassis']:
+        if dbmachine.model.machine_type not in [
+                'blade', 'workstation', 'chassis']:
             raise ArgumentError("Plenary file not available for %s machines." %
-                    dbmachine.type())
+                    dbmachine.model.machine_type)
         plenary_info = PlenaryMachineInfo(dbmachine)
         return plenary_info.read(self.config.get("broker", "plenarydir"))
 

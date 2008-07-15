@@ -25,7 +25,7 @@ class CommandShowTorSwitch(BrokerCommand):
     @format_results
     def render(self, session, tor_switch, rack, model, **arguments):
         q = session.query(Machine)
-        q = q.join(["model", "machine_type"]).filter_by(type="tor_switch")
+        q = q.join("model").filter_by(machine_type="tor_switch")
         q = q.reset_joinpoint()
         if tor_switch:
             q = q.filter(Machine.name.like(tor_switch + '%'))
@@ -35,7 +35,8 @@ class CommandShowTorSwitch(BrokerCommand):
         if model:
             dbmodel = get_model(session, model)
             if dbmodel.machine_type not in ['tor_switch']:
-                raise ArgumentError("Requested model %s is a %s, not a tor_switch." %
+                raise ArgumentError(
+                        "Requested model %s is a %s, not a tor_switch." %
                         (model, dbmodel.machine_type))
             q = q.filter_by(model=dbmodel)
         return q.all()

@@ -31,8 +31,8 @@ class CommandAddDisk(BrokerCommand):
             user, **arguments):
         dbmachine = get_machine(session, machine)
         dbdisk_type = get_disk_type(session, type)
-        dbdisk = Disk(machine=dbmachine, type=dbdisk_type, capacity=capacity,
-                comments=comments)
+        dbdisk = Disk(machine=dbmachine, disk_type=dbdisk_type,
+                capacity=capacity, comments=comments)
         try:
             session.save(dbdisk)
         except InvalidRequestError, e:

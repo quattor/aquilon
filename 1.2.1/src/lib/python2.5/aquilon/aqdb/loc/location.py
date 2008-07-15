@@ -68,7 +68,7 @@ class Location(Base):
     def get_p_dict(loc):
         d={}
         p_node=loc
-        while p_node.parent is not None:
+        while p_node.parent is not None and p_node.parent != p_node:
             d[str(p_node.location_type)]=p_node
             p_node=p_node.parent
         return d

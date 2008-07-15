@@ -27,9 +27,9 @@ class CommandDelTorSwitch(BrokerCommand):
     def render(self, session, tor_switch, **arguments):
         dbmachine = get_machine(session, tor_switch)
 
-        if dbmachine.type() not in ['tor_switch']:
+        if dbmachine.model.machine_type not in ['tor_switch']:
             raise ArgumentError("The del_tor_switch command cannot delete machines of type '%(type)s'.  Try 'del machine'." %
-                    {"type": dbmachine.type()})
+                    {"type": dbmachine.model.machine_type})
 
         session.refresh(dbmachine)
 

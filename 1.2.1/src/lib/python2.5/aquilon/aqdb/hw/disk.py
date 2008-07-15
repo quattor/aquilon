@@ -36,7 +36,7 @@ class Disk(Base):
     __tablename__ = 'disk'
 
     id            = Column(Integer, Sequence('disk_id_seq'), primary_key = True)
-    device_name   = Column(AqStr(128), nullable = False, default = '/dev/sda1')
+    device_name   = Column(AqStr(128), nullable = False, default = 'sda')
     machine_id    = Column(Integer, ForeignKey(
         'machine.id', name = 'disk_machine_fk', ondelete='CASCADE'),
                            nullable = False)
