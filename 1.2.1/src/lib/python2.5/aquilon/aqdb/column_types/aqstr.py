@@ -8,10 +8,9 @@
 #
 # This module is part of Aquilon
 """ If you can read this you should be documenting """
-
-
 import sys
 import os
+
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -35,3 +34,27 @@ class AqStr(types.TypeDecorator):
 
     def copy(self):
         return AqStr(self.impl.length)
+
+def test_aqstr():
+    if not sys.modules.has_key('sqlalchemy'):
+        raise AssertionError('sqlalchemy module not in sys.modules')
+
+    from sqlalchemy import (MetaData, Table, Column, Integer, insert)
+
+    from exceptions import TypeError
+
+    t = Table('foo', MetaData('sqlite:///'),
+              Column('id', Integer, primary_key=True),
+              Column('AqS', AqStr(16)))
+    t.create()
+
+    t.insert().execute(AqS = 'Hi there')
+    t.insert().execute(AqS = '  some extra space     ')
+
+    try:
+        t.insert().execute(AqS = None)
+        assert False
+    except AssertionError:
+        pass
+
+    print list(t.select().execute())
