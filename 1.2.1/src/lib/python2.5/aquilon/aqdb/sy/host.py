@@ -25,13 +25,14 @@ from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.db_factory           import Base
 from aquilon.aqdb.column_types.aqstr   import AqStr
+from aquilon.aqdb.sy.system            import System
 from aquilon.aqdb.sy.domain            import Domain
 from aquilon.aqdb.cfg.archetype        import Archetype
 from aquilon.aqdb.hw.machine           import Machine
 from aquilon.aqdb.hw.status            import Status
 
 
-class Host(Base):
+class Host(System):
     """ Here's our most common kind of System, the Host. Putting a physical
         machine into a chassis and powering it up leaves it in a state with a
         few more attributes not filled in: what Domain configures this host?
@@ -39,6 +40,7 @@ class Host(Base):
         place for it. """
 
     __tablename__ = 'host'
+    __mapper_args__ = {'polymorphic_identity' : 'host'}
 
     id = Column(Integer, ForeignKey(
         'system.id', ondelete = 'CASCADE', name = 'host_system_fk'),
