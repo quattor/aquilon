@@ -23,10 +23,9 @@ from brokertest import TestBrokerCommand
 
 class TestAddRequiredService(TestBrokerCommand):
 
-    # AFS is already required as part of creation...
-    #def testaddrequiredafs(self):
-    #    command = "add required service --service afs --archetype aquilon"
-    #    self.noouttest(command.split(" "))
+    def testaddrequiredafs(self):
+        command = "add required service --service afs --archetype aquilon"
+        self.noouttest(command.split(" "))
 
     def testverifyaddrequiredafs(self):
         command = "show archetype --archetype aquilon"

@@ -23,15 +23,14 @@ from brokertest import TestBrokerCommand
 
 class TestDelRequiredService(TestBrokerCommand):
 
-    # AFS is already required as part of creation...
-    #def testdelrequiredafs(self):
-    #    command = "del required service --service afs --archetype aquilon"
-    #    self.noouttest(command.split(" "))
+    def testdelrequiredafs(self):
+        command = "del required service --service afs --archetype aquilon"
+        self.noouttest(command.split(" "))
 
-    #def testverifydelrequiredafs(self):
-    #    command = "show archetype --archetype aquilon"
-    #    out = self.commandtest(command.split(" "))
-    #    self.matchclean(out, "Service: afs", command)
+    def testverifydelrequiredafs(self):
+        command = "show archetype --archetype aquilon"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: afs", command)
 
     def testdelrequireddns(self):
         command = "del required service --service dns --archetype aquilon"
