@@ -53,7 +53,7 @@ class ServiceListItem(Base):
     creation_date = deferred(Column(DateTime, default = datetime.now))
     comments      = deferred(Column(String(255), nullable=True))
 
-    archteype     = relation(Archetype, backref = 'service_list')
+    archetype     = relation(Archetype, backref = 'service_list')
     service       = relation(Service)
 
 service_list_item = ServiceListItem.__table__

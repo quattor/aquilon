@@ -26,7 +26,8 @@ class CommandAddRequiredService(BrokerCommand):
     def render(self, session, service, archetype, comments, **arguments):
         dbarchetype = get_archetype(session, archetype)
         dbservice = get_service(session, service)
-        dbsli = ServiceListItem(dbarchetype, dbservice, comments=comments)
+        dbsli = ServiceListItem(archetype=dbarchetype, service=dbservice,
+                comments=comments)
         session.save_or_update(dbsli)
         return
 
