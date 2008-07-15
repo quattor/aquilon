@@ -52,3 +52,6 @@ def populate(*args, **kw):
     if len(s.query(Campus).all()) < 1:
         pass
     s.commit()
+
+    if Base.metadata.bind.echo == True:
+        Base.metadata.bind.echo == False
