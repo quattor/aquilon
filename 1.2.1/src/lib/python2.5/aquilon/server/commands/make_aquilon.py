@@ -55,7 +55,7 @@ class CommandMakeAquilon(BrokerCommand):
                 dbos_bi.cfg_path = dbos
             else:
                 # FIXME: This could fail if there is already an item at 0
-                dbos_bi = BuildItem(dbhost, dbos, 0)
+                dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
             session.save_or_update(dbos_bi)
 
         if personality:
@@ -66,7 +66,8 @@ class CommandMakeAquilon(BrokerCommand):
                 dbpersonality_bi.cfg_path = dbpersonality
             else:
                 # FIXME: This could fail if there is already an item at 1
-                dbpersonality_bi = BuildItem(dbhost, dbpersonality, 1)
+                dbpersonality_bi = BuildItem(host=dbhost,
+                        cfg_path=dbpersonality, position=1)
             session.save_or_update(dbpersonality_bi)
 
         session.flush()
@@ -80,7 +81,8 @@ class CommandMakeAquilon(BrokerCommand):
             if dbservice_bi:
                 continue
             dbinstance = choose_service_instance(session, dbhost, item.service)
-            dbservice_bi = BuildItem(dbhost, dbinstance.cfg_path, 3)
+            dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
+                    position=3)
             dbhost.templates.append(dbservice_bi)
             dbhost.templates._reorder()
             session.save(dbservice_bi)

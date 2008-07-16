@@ -58,7 +58,7 @@ class Host(System):
     status_id    = Column(Integer, ForeignKey(
         'status.id', name = 'host_status_fk'), nullable = False)
 
-    machine   = relation(Machine,   backref = 'host', uselist = False)
+    machine   = relation(Machine,   backref=backref('host', uselist=False))
     domain    = relation(Domain,    backref = 'hosts')
     archetype = relation(Archetype, backref = 'hosts')
     status    = relation(Status,    backref = 'hosts')
@@ -69,7 +69,7 @@ class Host(System):
 
     Host.templates = relation(BuildItem,
                          collection_class = ordering_list('position'),
-                         order_by = [BuildItem.c.position]) """
+                         order_by = [BuildItem.__table__.c.position]) """
 
     def _get_location(self):
         return self.machine.location

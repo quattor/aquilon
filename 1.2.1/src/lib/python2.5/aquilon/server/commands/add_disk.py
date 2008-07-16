@@ -14,7 +14,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+                                   BrokerCommand, force_int)
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.aqdb.hw.disk import Disk
@@ -29,6 +29,7 @@ class CommandAddDisk(BrokerCommand):
     @az_check
     def render(self, session, machine, type, capacity, comments,
             user, **arguments):
+        capacity = force_int("capacity", capacity)
         dbmachine = get_machine(session, machine)
         dbdisk_type = get_disk_type(session, type)
         dbdisk = Disk(machine=dbmachine, disk_type=dbdisk_type,

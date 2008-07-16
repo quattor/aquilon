@@ -36,7 +36,8 @@ def get_service_instance(session, dbservice, instance):
 def choose_service_instance(session, dbhost, dbservice):
     # FIXME: The database will support multiple algorithms...
     locations = [dbhost.location]
-    while locations[-1].parent is not None:
+    while (locations[-1].parent is not None and
+            locations[-1].parent != locations[-1]):
         locations.append(locations[-1].parent)
     for location in locations:
         maps = session.query(ServiceMap).filter_by(

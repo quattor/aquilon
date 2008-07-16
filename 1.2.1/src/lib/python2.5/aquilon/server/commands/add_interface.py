@@ -38,6 +38,7 @@ class CommandAddInterface(BrokerCommand):
                 ip=ip, **extra)
         session.save(dbpi)
         session.flush()
+        session.refresh(dbpi)
         session.refresh(dbmachine)
 
         plenary_info = PlenaryMachineInfo(dbmachine)

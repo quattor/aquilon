@@ -31,7 +31,8 @@ class CommandMapService(BrokerCommand):
         dbmap = session.query(ServiceMap).filter_by(location=dblocation,
                 service_instance=dbinstance).first()
         if not dbmap:
-            dbmap = ServiceMap(dbinstance, dblocation)
+            dbmap = ServiceMap(service_instance=dbinstance,
+                    location=dblocation)
             session.save(dbmap)
         session.flush()
         session.refresh(dbservice)

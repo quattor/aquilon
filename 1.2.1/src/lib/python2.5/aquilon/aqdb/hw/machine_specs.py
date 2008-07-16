@@ -100,38 +100,39 @@ def populate(*args, **kw):
 
     machine_specs.create(checkfirst=True)
 
+    specs = [["hs20", "xeon_2660", 2, 8192, 'scsi', 36, 2],
+             ["hs21", "xeon_2660", 2, 8192, 'scsi', 68, 2],
+             ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
+             ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
+             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+             ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2]]
+
+    if len(s.query(MachineSpecs).all()) < 1:
+        for ms in specs:
+            try:
+                dbmodel = s.query(Model).filter_by(name=ms[0]).one()
+                dbcpu = s.query(Cpu).filter_by(name=ms[1]).one()
+                cpu_quantity = ms[2]
+                memory = ms[3]
+                dbdisk_type = s.query(DiskType).filter_by(type=ms[4]).one()
+                disk_capacity = ms[5]
+                nic_count = ms[6]
+                dbms = MachineSpecs(model=dbmodel, cpu=dbcpu,
+                        cpu_quantity=cpu_quantity, memory=memory,
+                        disk_type=dbdisk_type, disk_capacity=disk_capacity,
+                        nic_count=nic_count)
+                s.save(dbms)
+            except Exception,e:
+                s.rollback()
+                print 'Creating machine specs: %s' % e
+                continue
+            try:
+                s.commit()
+            except Exception,e:
+                s.rollback()
+                print 'Commiting ',e
+                continue
+
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
 
-
-def populate_needs_to_be_fixed():
-    if len(s.query(MachineSpecs).all()) < 1:
-
-        a=MachineSpecs(model='hs20',cpu='xeon_2660',comments='FAKE')
-
-        b=MachineSpecs(model='hs21',cpu='xeon_2660',
-                                disk_capacity=68, comments='FAKE')
-
-        c=MachineSpecs(model='poweredge_6650', cpu='xeon_3000',cpu_quantity=4,
-                                comments='FAKE')
-
-        d=MachineSpecs(model='bl45p',cpu='opteron_2600',memory=32768,
-                                comments='FAKE')
-
-        e=MachineSpecs(model='bl260c', cpu='xeon_2500', memory=24576)
-
-        f=MachineSpecs(model='vb1205xm', cpu='xeon_2500', memory=24576)
-
-        for ms in [a, b, c, d, e, f]:
-            try:
-                Session.save(ms)
-            except Exception,e:
-                Session.rollback()
-                print 'Saving:', e
-                continue
-            try:
-                Session.commit()
-            except Exception,e:
-                Session.rollback()
-                print 'Commiting ',e
-                continue

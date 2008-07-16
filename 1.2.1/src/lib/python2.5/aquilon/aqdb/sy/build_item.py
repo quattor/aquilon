@@ -67,7 +67,7 @@ build_item.append_constraint(
 
 Host.templates = relation(BuildItem,
                          collection_class = ordering_list('position'),
-                         order_by = ['BuildItem.c.position'])
+                         order_by = ['build_item.position'])
 
 def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
