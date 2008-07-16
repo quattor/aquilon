@@ -95,8 +95,7 @@ def populate(*args, **kw):
             print e
         finally:
             s.close()
-
-    print s.query(Model).all()
+        print 'created models %s'%(s.query(Model).all())
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False

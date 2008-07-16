@@ -105,11 +105,12 @@ def populate(*args, **kw):
                 continue
 
         s.commit()
+        print 'created %s cfg_paths'%(len(s.query(CfgPath).all()))
 
     b=s.query(CfgPath).first()
     assert(b)
     assert(b.tld)
-    print 'created %s cfg_paths'%(len(s.query(CfgPath).all()))
+
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False

@@ -72,8 +72,7 @@ def populate(*args, **kw):
             print >> sys.stderr, e
         finally:
             s.close()
-
-    print 'created %s vendors'%(len(created))
+        print 'created %s vendors'%(len(created))
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
