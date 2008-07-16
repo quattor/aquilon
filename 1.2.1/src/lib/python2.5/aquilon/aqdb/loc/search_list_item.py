@@ -98,10 +98,10 @@ def populate(*args, **kw):
             s.add(i)
             s.commit()
 
+        print 'created Location Search List %s '%(m)
+
     cnt = len(s.query(SearchListItem).all())
     assert cnt > 6
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
-
-    print 'created Location Search List %s '%(m)
