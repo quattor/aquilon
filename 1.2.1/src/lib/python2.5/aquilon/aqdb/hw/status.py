@@ -23,6 +23,7 @@ if __name__ == '__main__':
 from aquilon.aqdb.db_factory import monkeypatch
 from aquilon.aqdb.table_types.name_table import make_name_class
 
+_statuses = ['production','development','qa','build']
 
 Status = make_name_class('Status','status')
 status = Status.__table__
@@ -50,17 +51,17 @@ def populate(*args, **kw):
 
     if len(s.query(Status).all()) < 4:
         i=status.insert()
-        for name in ['production','development','qa','build']:
+        for name in _statuses:
             i.execute(name=name)
         #can't do the usual since we made __init__ raise an Exception
         #    j = Status(name = i)
         #    s.add(j)
         #s.commit()
 
-    i = s.query(Status).all()
-    assert len(i) == 4
+        i = s.query(Status).all()
+        print 'created %s Statuses'%(len(i))
 
-    print 'created %s Statuses'%(len(i))
+    assert len(s.query(Status).all()) == len(_statuses)
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
