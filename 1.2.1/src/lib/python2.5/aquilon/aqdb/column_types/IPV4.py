@@ -26,7 +26,8 @@ import sqlalchemy.types as types
 class IPV4(types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
 
-    impl = types.Numeric
+    impl        = types.Integer
+    impl.length = 9  # hardcoding for now, TODO: figure it out and fix
 
     def process_bind_param(self, dq, engine):
         if not dq:
