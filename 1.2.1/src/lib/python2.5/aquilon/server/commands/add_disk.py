@@ -23,17 +23,17 @@ from aquilon.server.templates import PlenaryMachineInfo
 
 class CommandAddDisk(BrokerCommand):
 
-    required_parameters = ["machine", "type", "capacity"]
+    required_parameters = ["machine", "disk", "type", "capacity"]
 
     @add_transaction
     @az_check
-    def render(self, session, machine, type, capacity, comments,
+    def render(self, session, machine, disk, type, capacity, comments,
             user, **arguments):
         capacity = force_int("capacity", capacity)
         dbmachine = get_machine(session, machine)
         dbdisk_type = get_disk_type(session, type)
-        dbdisk = Disk(machine=dbmachine, disk_type=dbdisk_type,
-                capacity=capacity, comments=comments)
+        dbdisk = Disk(machine=dbmachine, device_name=disk,
+                disk_type=dbdisk_type, capacity=capacity, comments=comments)
         try:
             session.save(dbdisk)
         except InvalidRequestError, e:

@@ -23,24 +23,31 @@ from brokertest import TestBrokerCommand
 
 class TestDelDisk(TestBrokerCommand):
 
-    def testdelut3c1n3disk(self):
+    def testdelut3c1n3sda(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
             "--type", "scsi", "--capacity", "68"])
 
+    def testdelut3c1n3sdb(self):
+        self.noouttest(["del", "disk", "--machine", "ut3c1n3",
+            "--disk", "sdb"])
+
     # ARG! The Disk info shows up exactly the same in the MachineSpecs.
     # Hard-coding the indent to get around that.
-    def testverifydelut3c1n3disk(self):
+    def testverifydelut3c1n3sda(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "\n  Disk: 68 GB scsi", command)
+        self.matchclean(out, "\n  Disk: sda 68 GB scsi", command)
+
+    def testverifydelut3c1n3sdb(self):
+        command = "show machine --machine ut3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Disk: sdb", command)
 
     # This should now list the 34 GB disk that was added previously...
     def testverifycatut3c1n3disk(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",
-                command)
+        self.matchclean(out, '"harddisks"', command)
 
 
 if __name__=='__main__':

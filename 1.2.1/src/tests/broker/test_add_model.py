@@ -35,7 +35,7 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "NIC count: 4", command)
-        self.matchoutput(out, "Disk: 36 GB scsi", command)
+        self.matchoutput(out, "Disk: sda 36 GB scsi", command)
 
 
 if __name__=='__main__':

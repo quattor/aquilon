@@ -25,9 +25,12 @@ class CommandDelDisk(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, machine, type, capacity, all, user, **arguments):
+    def render(self, session, machine, disk, type, capacity, all, user,
+            **arguments):
         dbmachine = get_machine(session, machine)
         q = session.query(Disk).filter_by(machine=dbmachine)
+        if disk:
+            q = q.filter_by(device_name=disk)
         if type:
             dbdisk_type = get_disk_type(session, type)
             q = q.filter_by(disk_type=dbdisk_type)

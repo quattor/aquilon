@@ -33,7 +33,8 @@ class PlenaryMachineInfo(object):
         harddisks = []
         for harddisk in dbmachine.disks:
             relpath = "hardware/harddisk/generic/%s" % harddisk.disk_type.type
-            harddisks.append({"relpath":relpath, "capacity":harddisk.capacity})
+            harddisks.append({"relpath":relpath, "capacity":harddisk.capacity,
+                "name":harddisk.device_name})
         self.harddisks = harddisks
         self.interfaces = []
         for interface in dbmachine.interfaces:
@@ -63,10 +64,10 @@ class PlenaryMachineInfo(object):
                 ['create("%(cpu_relpath)s")' % self.__dict__
                 for cpu_num in range(self.num_cpus)]) + ');')
         if self.harddisks:
-            # FIXME: Stuck at one, for now.
-            lines.append('"harddisks" = nlist("sda", create("%s", "capacity", %d*GB));\n'
-                    % (self.harddisks[0]["relpath"], 
-                    self.harddisks[0]["capacity"]))
+            lines.append('"harddisks" = nlist(' + 
+                    ", ".join(['"%(name)s", create("%(relpath)s", "capacity", %(capacity)d*GB)' %
+                    hd for hd in self.harddisks]) +
+                    ');\n')
         for interface in self.interfaces:
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
                     % (interface['name'], interface['mac'].upper()))

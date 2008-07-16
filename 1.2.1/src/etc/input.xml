@@ -125,13 +125,14 @@
       Add a new disk to a machine
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine ID</option>
+         <option name="disk" type="string">device name of the disk (like sda)</option>
          <option name="type" type="string">type of the disk</option>
          <option name="capacity" type="string">capacity of the disk</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/disk/%(machine)s/%(type)s/%(capacity)s" />
+      <transport method="put" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
 
    <command name="del_disk">
@@ -142,11 +143,13 @@
       <optgroup name="del_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine ID</option>
       </optgroup>
-      <optgroup name="optional_opts">
+      <optgroup name="del_disk_optional_opts" mandatory="False">
+         <option name="disk" type="string">device name of the disk (like sda)</option>
          <option name="type" type="string">type of the disk</option>
          <option name="capacity" type="string">capacity of the disk</option>
-         <option name="all" type="string">remove matching disks</option>
+         <option name="all" type="boolean">remove any matching disks</option>
       </optgroup>
+      <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />
       <transport method="post" path="hardware/disk/%(machine)s/command/del" />
    </command>
 

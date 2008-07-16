@@ -29,8 +29,8 @@ class MachineFormatter(ObjectFormatter):
         if machine.serial_no:
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in machine.disks:
-            details.append(indent + "  Disk: %d GB %s"
-                    % (d.capacity, d.disk_type.type))
+            details.append(indent + "  Disk: %s %d GB %s"
+                    % (d.device_name, d.capacity, d.disk_type.type))
         for p in machine.switchport:
             if p.interface:
                 details.append(indent + "  Switch Port %d: %s %s %s" %
