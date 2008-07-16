@@ -47,7 +47,9 @@ class IPV4(types.TypeDecorator):
         return struct.unpack('L', inet_aton(dq))[0]
 
     def process_result_value(self, n, engine):
-        return inet_ntoa(struct.pack('L', n))
+        # Force the incoming Decimal to a long to prevent odd issues when
+        # struct.pack() tries it...
+        return inet_ntoa(struct.pack('L', long(n)))
 
     def copy(self):
         return IPV4(self.impl.length)

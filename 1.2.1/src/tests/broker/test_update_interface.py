@@ -43,7 +43,7 @@ class TestUpdateInterface(TestBrokerCommand):
     def testverifyupdateut3c5n10interfaces(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 00:00:00:00:00:4E 8.8.5.14 boot=False", command)
+        self.matchoutput(out, "Interface: eth0 00:00:00:00:00:4e 8.8.5.14 boot=False", command)
         self.matchoutput(out, "Interface: eth1 00:00:00:00:00:50 8.8.5.15 boot=True", command)
 
     def testverifycatut3c5n10interfaces(self):

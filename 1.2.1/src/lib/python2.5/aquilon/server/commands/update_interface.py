@@ -43,6 +43,7 @@ class CommandUpdateInterface(BrokerCommand):
                     i.boot = False
         session.update(dbinterface)
         session.flush()
+        session.refresh(dbinterface)
         session.refresh(dbinterface.machine)
 
         # FIXME: There needs to be a call to dsdb here *if* the machine

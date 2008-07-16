@@ -18,7 +18,7 @@ from aquilon.server.processes import write_file, read_file, remove_file
 
 class PlenaryMachineInfo(object):
     def __init__(self, dbmachine):
-        self.hub = dbmachine.location.hub.fullname
+        self.hub = dbmachine.location.hub.fullname.lower()
         self.building = dbmachine.location.building.name
         self.rack = dbmachine.location.rack.name
         self.sysloc = dbmachine.location.sysloc()
