@@ -13,7 +13,7 @@ import unittest
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..", "..")
+    SRCDIR = os.path.join(BINDIR, "..", "..", "lib", "python2.5")
     sys.path.insert(0, SRCDIR)
 
 import aquilon.aqdb.depends
