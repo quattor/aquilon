@@ -35,8 +35,8 @@ class CommandDelHost(BrokerCommand):
         session.delete(dbhost)
         session.flush()
 
-        #dsdb_runner = DSDBRunner()
-        #dsdb_runner.delete_host(dbhost)
+        dsdb_runner = DSDBRunner()
+        dsdb_runner.delete_host(dbhost)
 
         # FIXME: Remove plenary template and profile.
 

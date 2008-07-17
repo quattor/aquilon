@@ -249,24 +249,54 @@ class DSDBRunner(object):
         return
 
     def delete_host_details(self, ip):
-        out = run_command([self.config.get("broker", "dsdb"),
-                "delete", "host", "-ip_address", ip],
-                env=self.getenv())
+        try:
+            out = run_command([self.config.get("broker", "dsdb"),
+                    "delete", "host", "-ip_address", ip],
+                    env=self.getenv())
+        except ProcessException, e:
+            if e.out and self.ip_not_defined_re.search(e.out):
+                log.msg("DSDB did not have a host with this IP address, proceeding with aqdb command.")
+                return
+            raise
         return
 
     def delete_host(self, dbhost):
         for interface in dbhost.machine.interfaces:
             if not interface.boot:
                 continue
-            try:
-                self.delete_host_details(interface.ip)
-            except ProcessException, e:
-                if e.out and self.ip_not_defined_re.search(e.out):
-                    log.msg("DSDB did not have a host with this IP address, proceeding with aqdb delete.")
-                    return
-                raise
+            self.delete_host_details(interface.ip)
             return
         raise ArgumentError("No boot interface found for host to delete from dsdb.")
+
+    def update_host(self, dbhost, oldinfo):
+        """This gets tricky.  On a basic level, we want to remove the
+        old information from dsdb and then re-add it.
+
+        If the removal of the old fails, check to see why.  If the
+        entry was already missing, continue.  [This check happens as
+        part of the delete_host_details() method.]  If the command
+        fails otherwise, punt back to the caller.
+
+        If both succeed, great, continue on.
+
+        If removal succeeds, but adding fails, try to re-add the old
+        info, and then pass the failure back to the user.  (Hopefully
+        just the original failure, but possibly both.)
+        """
+        self.delete_host_details(oldinfo["ip"])
+        try:
+            self.add_host(dbhost)
+        except ProcessException, pe1:
+            log.msg("Failed adding new information to dsdb, attempting to restore old info.")
+            try:
+                self.add_host_details(dbhost.fqdn, oldinfo["ip"],
+                        oldinfo["name"], oldinfo["mac"])
+            except ProcessException, pe2:
+                # FIXME: Add details.
+                raise AquilonError("DSDB is now in an inconsistent state.  Removing old information succeeded, but cannot add new information.")
+            log.msg("Restored old info, re-raising the problem with the add.")
+            raise pe1
+        return
 
 
 #if __name__=='__main__':

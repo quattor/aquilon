@@ -60,8 +60,8 @@ class CommandAddHost(BrokerCommand):
         session.save(dbhost)
         session.flush()
 
-        #dsdb_runner = DSDBRunner()
-        #dsdb_runner.add_host(dbhost)
+        dsdb_runner = DSDBRunner()
+        dsdb_runner.add_host(dbhost)
 
         # Working around funky archetype handling in host creation...
         # Might not be necessary if/when Host uses the declarative mapper.

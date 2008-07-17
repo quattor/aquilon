@@ -25,30 +25,32 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddut3c5n10eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
-            "--machine", "ut3c5n10", "--mac", "11:11:11:11:11:4E",
-            "--ip", "8.8.8.14"])
+            "--machine", "ut3c5n10", "--mac", self.hostmac0.upper(),
+            "--ip", self.hostip0])
 
     def testaddut3c5n10eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
-            "--machine", "ut3c5n10", "--mac", "11:11:11:11:11:50"])
+            "--machine", "ut3c5n10", "--mac", self.hostmac1.lower()])
 
     def testverifyaddut3c5n10interfaces(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 11:11:11:11:11:4e 8.8.8.14 boot=True", command)
-        self.matchoutput(out, "Interface: eth1 11:11:11:11:11:50 0.0.0.0 boot=False", command)
+        self.matchoutput(out, "Interface: eth0 %s %s boot=True" %
+                (self.hostmac0.lower(), self.hostip0), command)
+        self.matchoutput(out, "Interface: eth1 %s 0.0.0.0 boot=False" %
+                (self.hostmac1.lower()), command)
 
     def testverifycatut3c5n10interfaces(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                """"cards/nic/eth0/hwaddr" = "11:11:11:11:11:4E";""",
+                """"cards/nic/eth0/hwaddr" = "%s";""" % self.hostmac0.upper(),
                 command)
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchoutput(out,
-                """"cards/nic/eth1/hwaddr" = "11:11:11:11:11:50";""",
+                """"cards/nic/eth1/hwaddr" = "%s";""" % self.hostmac1.upper(),
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",
@@ -56,30 +58,32 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddut3c1n3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
-            "--machine", "ut3c1n3", "--mac", "11:11:11:11:11:34",
-            "--ip", "8.8.8.199"])
+            "--machine", "ut3c1n3", "--mac", self.hostmac2.upper(),
+            "--ip", self.hostip2])
 
     def testaddut3c1n3eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
-            "--machine", "ut3c1n3", "--mac", "11:11:11:11:11:35"])
+            "--machine", "ut3c1n3", "--mac", self.hostmac3.upper()])
 
     def testverifyaddut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 11:11:11:11:11:34 8.8.8.199 boot=True", command)
-        self.matchoutput(out, "Interface: eth1 11:11:11:11:11:35 0.0.0.0 boot=False", command)
+        self.matchoutput(out, "Interface: eth0 %s %s boot=True" %
+                (self.hostmac2.lower(), self.hostip2), command)
+        self.matchoutput(out, "Interface: eth1 %s 0.0.0.0 boot=False" %
+                (self.hostmac3.lower()), command)
 
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                """"cards/nic/eth0/hwaddr" = "11:11:11:11:11:34";""",
+                """"cards/nic/eth0/hwaddr" = "%s";""" % self.hostmac2.upper(),
                 command)
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchoutput(out,
-                """"cards/nic/eth1/hwaddr" = "11:11:11:11:11:35";""",
+                """"cards/nic/eth1/hwaddr" = "%s";""" % self.hostmac3.upper(),
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",

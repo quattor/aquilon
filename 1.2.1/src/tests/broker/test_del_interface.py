@@ -32,7 +32,7 @@ class TestDelInterface(TestBrokerCommand):
             "--machine", "ut3c1n3"])
 
     def testdelut3c1n3eth1(self):
-        self.noouttest(["del", "interface", "--mac", "11:11:11:11:11:35"])
+        self.noouttest(["del", "interface", "--mac", self.hostmac3.upper()])
 
     def testverifydelut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
@@ -43,13 +43,13 @@ class TestDelInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out,
-                """"cards/nic/eth0/hwdelr" = "11:11:11:11:11:34";""",
+                """"cards/nic/eth0/hwdelr" = "%s";""" % self.hostmac2.upper(),
                 command)
         self.matchclean(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchclean(out,
-                """"cards/nic/eth1/hwdelr" = "11:11:11:11:11:35";""",
+                """"cards/nic/eth1/hwdelr" = "%s";""" % self.hostmac3.upper(),
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",

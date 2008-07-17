@@ -25,16 +25,16 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateut3c5n10eth0mac(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
-            "--machine", "ut3c5n10", "--mac", "00:00:00:00:00:4E"])
+            "--machine", "ut3c5n10", "--mac", self.updatemac0])
 
     def testupdateut3c5n10eth0ip(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
-            "--machine", "ut3c5n10", "--ip", "8.8.5.14"])
+            "--machine", "ut3c5n10", "--ip", self.updateip0])
 
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
-            "--machine", "ut3c5n10", "--mac", "00:00:00:00:00:50",
-            "--ip", "8.8.5.15", "--boot"])
+            "--machine", "ut3c5n10", "--mac", self.updatemac1,
+            "--ip", self.updateip1, "--boot"])
 
     def testupdateut3c5n10eth2(self):
         self.badrequesttest(["update", "interface", "--interface", "eth2",
@@ -43,20 +43,22 @@ class TestUpdateInterface(TestBrokerCommand):
     def testverifyupdateut3c5n10interfaces(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Interface: eth0 00:00:00:00:00:4e 8.8.5.14 boot=False", command)
-        self.matchoutput(out, "Interface: eth1 00:00:00:00:00:50 8.8.5.15 boot=True", command)
+        self.matchoutput(out, "Interface: eth0 %s %s boot=False" %
+                (self.updatemac0.lower(), self.updateip0), command)
+        self.matchoutput(out, "Interface: eth1 %s %s boot=True" %
+                (self.updatemac1.lower(), self.updateip1), command)
 
     def testverifycatut3c5n10interfaces(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                """"cards/nic/eth0/hwaddr" = "00:00:00:00:00:4E";""",
+                """"cards/nic/eth0/hwaddr" = "%s";""" % self.updatemac0.upper(),
                 command)
         self.matchclean(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
         self.matchoutput(out,
-                """"cards/nic/eth1/hwaddr" = "00:00:00:00:00:50";""",
+                """"cards/nic/eth1/hwaddr" = "%s";""" % self.updatemac1.upper(),
                 command)
         self.matchoutput(out,
                 """"cards/nic/eth1/boot" = true;""",

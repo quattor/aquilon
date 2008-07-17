@@ -44,7 +44,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """"/hardware" = create("machine/americas/np/ut3/ut3c5n10");""",
             command)
         self.matchoutput(out,
-            """"/system/network/interfaces/eth0" = nlist("ip", "8.8.8.14", "netmask", "255.255.255.128", "broadcast", "8.8.8.127", "gateway", "8.8.8.1", "bootproto", "dhcp");""",
+            """"/system/network/interfaces/eth0" = nlist("ip", "%s", "netmask", "255.255.255.128", "broadcast", "%s", "gateway", "%s", "bootproto", "dhcp");""" % (self.hostip0, self.broadcast0, self.gateway0),
             command)
         self.matchoutput(out,
             """include { "archetype/base" };""",
@@ -102,7 +102,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """"/hardware" = create("machine/americas/np/ut3/ut3c1n3");""",
             command)
         self.matchoutput(out,
-            """"/system/network/interfaces/eth0" = nlist("ip", "8.8.8.199", "netmask", "255.255.255.128", "broadcast", "8.8.8.255", "gateway", "8.8.8.129", "bootproto", "dhcp");""",
+            """"/system/network/interfaces/eth0" = nlist("ip", "%s", "netmask", "255.255.255.128", "broadcast", "%s", "gateway", "%s", "bootproto", "dhcp");""" % (self.hostip2, self.broadcast2, self.gateway2),
             command)
         self.matchoutput(out,
             """include { "archetype/base" };""",

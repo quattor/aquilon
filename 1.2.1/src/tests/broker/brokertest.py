@@ -24,6 +24,29 @@ class TestBrokerCommand(unittest.TestCase):
             self.scratchdir = self.config.get("unittest", "scratchdir")
             if not os.path.exists(self.scratchdir):
                 os.path.makedirs(self.scratchdir)
+        # The defaults should also be listed in unittest.conf.
+        self.hostip0 = "8.8.4.250"
+        self.broadcast0 = "8.8.4.255"
+        self.gateway0 = "8.8.4.129"
+        self.hostmac0 = "02:02:08:08:04:fa"
+        self.hostip1 = "8.8.4.251"
+        self.hostmac1 = "02:02:08:08:04:fb"
+        self.hostip2 = "8.8.4.252"
+        self.broadcast2 = "8.8.4.255"
+        self.gateway2 = "8.8.4.129"
+        self.hostmac2 = "02:02:08:08:04:fc"
+        self.hostip3 = "8.8.4.253"
+        self.hostmac3 = "02:02:08:08:04:fd"
+        self.updateip0 = "8.8.5.250"
+        self.updatemac0 = "02:02:08:08:05:fa"
+        self.updateip1 = "8.8.4.251"
+        self.updatemac1 = "02:02:08:08:04:fb"
+        for n in range(4):
+            for h in ["hostip", "hostmac", "broadcast", "gateway",
+                    "updateip", "updatemac"]:
+                p = "%s%s" % (h, n)
+                if self.config.has_option("unittest", p):
+                    setattr(self, p, self.config.get("unittest", p))
 
     def tearDown(self):
         pass
