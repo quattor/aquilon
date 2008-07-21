@@ -24,24 +24,28 @@ class TestBrokerCommand(unittest.TestCase):
             self.scratchdir = self.config.get("unittest", "scratchdir")
             if not os.path.exists(self.scratchdir):
                 os.path.makedirs(self.scratchdir)
-        # The defaults should also be listed in unittest.conf.
-        self.hostip0 = "8.8.4.250"
+        # An alternate set of defaults is listed in unittest.conf.
+        self.hostip0 = "8.8.4.251"
         self.broadcast0 = "8.8.4.255"
         self.gateway0 = "8.8.4.129"
-        self.hostmac0 = "02:02:08:08:04:fa"
-        self.hostip1 = "8.8.4.251"
-        self.hostmac1 = "02:02:08:08:04:fb"
-        self.hostip2 = "8.8.4.252"
+        self.hostmac0 = "02:02:08:08:04:fb"
+        self.hostip1 = "8.8.4.252"
+        self.hostmac1 = "02:02:08:08:04:fc"
+        self.hostip2 = "8.8.4.253"
         self.broadcast2 = "8.8.4.255"
         self.gateway2 = "8.8.4.129"
-        self.hostmac2 = "02:02:08:08:04:fc"
-        self.hostip3 = "8.8.4.253"
-        self.hostmac3 = "02:02:08:08:04:fd"
-        self.updateip0 = "8.8.5.250"
-        self.updatemac0 = "02:02:08:08:05:fa"
-        self.updateip1 = "8.8.4.251"
-        self.updatemac1 = "02:02:08:08:04:fb"
-        for n in range(4):
+        self.hostmac2 = "02:02:08:08:04:fd"
+        self.hostip3 = "8.8.4.254"
+        self.hostmac3 = "02:02:08:08:04:fe"
+        self.hostip4 = "8.8.5.251"
+        self.hostmac4 = "02:02:08:08:05:fb"
+        self.hostip5 = "8.8.5.252"
+        self.hostmac5 = "02:02:08:08:05:fc"
+        self.updateip0 = "8.8.5.253"
+        self.updatemac0 = "02:02:08:08:05:fd"
+        self.updateip1 = "8.8.5.254"
+        self.updatemac1 = "02:02:08:08:05:fe"
+        for n in range(6):
             for h in ["hostip", "hostmac", "broadcast", "gateway",
                     "updateip", "updatemac"]:
                 p = "%s%s" % (h, n)
