@@ -24,7 +24,7 @@ class CommandStatus(BrokerCommand):
     def render(self, session, user, **arguments):
         stat = []
         # FIXME: Hard coded version number.
-        stat.append("Aquilon Broker v1.2")
+        stat.append("Aquilon Broker v1.2.1")
         stat.append("Server: %s" % self.config.get("broker", "servername"))
         stat.append("Database: %s" % self.config.get("database", "dsn"))
         dbuser = get_or_create_user_principal(session, user)

@@ -25,7 +25,7 @@ class TestStatus(TestBrokerCommand):
 
     def teststatus(self):
         out = self.commandtest("status")
-        self.assert_('Aquilon Broker v1.2\n' in out,
+        self.assert_('Aquilon Broker v1.2.1\n' in out,
                 "status output did not contain version")
 
 
