@@ -23,7 +23,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Server: %s" % hli.host.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: %s %s" %
-                    (map.location.type.type.capitalize(), map.location.name))
+                    (map.location.location_type.capitalize(),
+                    map.location.name))
         details.append(indent + "  Client Count: %d" % si.client_count)
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)

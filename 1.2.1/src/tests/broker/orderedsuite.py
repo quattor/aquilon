@@ -49,6 +49,7 @@ from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_show_hostiplist import TestShowHostIPList
+from test_show_service_all import TestShowServiceAll
 from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
@@ -94,7 +95,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestDomainConstraints, TestMachineConstraints,
                 TestTorSwitchConstraints,
-                TestShowHostIPList,
+                TestShowHostIPList, TestShowServiceAll,
                 TestUpdateInterface,
                 TestPxeswitch, TestManage,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
