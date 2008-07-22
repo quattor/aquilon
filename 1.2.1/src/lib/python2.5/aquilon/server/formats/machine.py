@@ -49,5 +49,13 @@ class MachineFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()
 
+class SimpleMachineList(list):
+    pass
+
+class SimpleMachineListFormatter(ObjectFormatter):
+    def format_raw(self, smlist, indent=""):
+        return str("\n".join([indent + machine.name for machine in smlist]))
+
+ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
 
 #if __name__=='__main__':

@@ -658,8 +658,9 @@
 
    <command name="show_rack">
       Show the rack list, or details about a particular rack.
-      <optgroup name="show_rack_opts">
-         <option name="name" type="string">rack name</option>
+      <optgroup name="show_rack_opts" mandatory="True" fields="any">
+         <option name="name" type="string" conflicts="all">rack name</option>
+         <option name="all" type="string" conflicts="name">all</option>
       </optgroup>
       <transport method="get" path="location/rack" />
       <transport trigger="name" method="get" path="location/rack/%(name)s" />
@@ -863,6 +864,7 @@
    <command name="show_machine">
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string">machine name</option>
+	 <option name="all" type="boolean" conflicts="machine">all</option>
          <optgroup name="show_machine_location_opts" mandatory="False">
             <option name="chassis" type="string">Chassis name</option>
             <option name="rack" type="string">Rack name</option>
@@ -870,6 +872,7 @@
          </optgroup>
          <option name="model" type="string">machine model</option>
       </optgroup>
+      <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />
       <transport method="get" path="find/machine" />
    </command>
