@@ -111,14 +111,35 @@
    <command name="add_cpu">
       Add a new CPU type to the database
       <optgroup name="add_cpu_opts" mandatory="True" fields="all">
-         <option name="name" type="string">CPU type name</option>
+         <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
          <option name="speed" type="string">CPU speed</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/cpu/%(vendor)s/%(name)s/%(speed)s" />
+      <transport method="put" path="hardware/cpu/%(vendor)s/%(cpu)s/%(speed)s" />
+   </command>
+
+   <command name="show_cpu">
+      Show the CPU types in the database
+      <optgroup name="show_cpu_opts" mandatory="True" fields="any">
+         <option name="all" type="string">Show all cpu types</option>
+         <option name="cpu" type="string">CPU type name</option>
+         <option name="vendor" type="string">name of the vendor</option>
+         <option name="speed" type="string">CPU speed</option>
+      </optgroup>
+      <transport method="get" path="find/hardware/cpu" />
+   </command>
+
+   <command name="del_cpu">
+      Delete a CPU type from the database
+      <optgroup name="del_cpu_opts" mandatory="True" fields="all">
+         <option name="cpu" type="string">CPU type name</option>
+         <option name="vendor" type="string">name of the vendor</option>
+         <option name="speed" type="string">CPU speed</option>
+      </optgroup>
+      <transport method="delete" path="hardware/cpu/%(vendor)s/%(cpu)s/%(speed)s" />
    </command>
 
    <command name="add_disk">

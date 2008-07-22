@@ -26,12 +26,14 @@ if __name__ == "__main__":
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
 from test_start import TestBrokerStart
+from test_ping import TestPing
 from test_status import TestStatus
 from test_permission import TestPermission
 from test_add_domain import TestAddDomain
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
 from test_add_rack import TestAddRack
+from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_tor_switch import TestAddTorSwitch
 from test_add_chassis import TestAddChassis
@@ -49,6 +51,7 @@ from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_show_hostiplist import TestShowHostIPList
+from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_service_all import TestShowServiceAll
 from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
@@ -66,6 +69,7 @@ from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_tor_switch import TestDelTorSwitch
 from test_del_model import TestDelModel
+from test_del_cpu import TestDelCpu
 from test_del_rack import TestDelRack
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
@@ -86,23 +90,24 @@ class BrokerTestSuite(unittest.TestSuite):
 
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
-        for test in [TestBrokerStart, TestStatus, TestPermission,
+        for test in [TestBrokerStart, TestPing, TestStatus, TestPermission,
                 TestAddDomain, TestAddService, TestAddRequiredService,
-                TestAddRack, TestAddModel, TestAddTorSwitch,
+                TestAddRack, TestAddCpu, TestAddModel, TestAddTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
                 TestMapService, TestBindClient, TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestDomainConstraints, TestMachineConstraints,
                 TestTorSwitchConstraints,
-                TestShowHostIPList, TestShowServiceAll,
+                TestShowHostIPList, TestShowHostMachineList,
+                TestShowServiceAll,
                 TestUpdateInterface,
                 TestPxeswitch, TestManage,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestUmaskConstraints,
                 TestUnmapService, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                TestDelTorSwitch, TestDelModel, TestDelRack,
+                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
                 TestDelRequiredService, TestDelService, TestDelDomain,
                 TestClientFailure,
                 TestBrokerStop]:
