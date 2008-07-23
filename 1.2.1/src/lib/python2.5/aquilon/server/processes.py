@@ -242,7 +242,7 @@ class DSDBRunner(object):
 
     def add_host_details(self, fqdn, ip, name, mac):
         out = run_command([self.config.get("broker", "dsdb"),
-                "add", "host", "-host_name", fqdn, "-template", "lx",
+                "add", "host", "-host_name", fqdn,
                 "-ip_address", ip, "-status", "aq",
                 "-interface_name", name, "-ethernet_address", mac],
                 env=self.getenv())
