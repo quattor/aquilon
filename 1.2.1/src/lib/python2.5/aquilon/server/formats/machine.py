@@ -47,7 +47,31 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % machine.comments)
         return "\n".join(details)
 
+    def get_header(self):
+        """This is just an idea... not used anywhere (yet?)."""
+        return "machine,rack,building,vendor,model,serial,interface,mac,ip"
+
+    def format_csv(self, machine):
+        """This was implemented specifically for tor_switch.  May need
+        to check and do something different for other machine types.
+        
+        """
+        results = []
+        details = [machine.name, machine.location.rack,
+                machine.location.building, machine.model.vendor.name,
+                machine.model.name, machine.serial_no]
+        if not machine.interfaces:
+            details.extend([None, None, None])
+            results.append(details)
+        for i in machine.interfaces:
+            full = details[:]
+            full.extend([i.name, i.mac, i.ip])
+            results.append(full)
+        return "\n".join([",".join([str(detail or "") for detail in result])
+            for result in results])
+
 ObjectFormatter.handlers[Machine] = MachineFormatter()
+
 
 class SimpleMachineList(list):
     pass
@@ -57,5 +81,6 @@ class SimpleMachineListFormatter(ObjectFormatter):
         return str("\n".join([indent + machine.name for machine in smlist]))
 
 ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
+
 
 #if __name__=='__main__':

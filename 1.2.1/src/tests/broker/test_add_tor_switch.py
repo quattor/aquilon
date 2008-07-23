@@ -46,6 +46,12 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifyaddut3gd1r01(self):
         self.verifyswitch("ut3gd1r01", "ut3", "SNgd1r01")
 
+    def testverifyaddut3gd1r01csv(self):
+        command = "show tor_switch --tor_switch ut3gd1r01 --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut3gd1r01,ut3,np,hp,uttorswitch,SNgd1r01,,,",
+                command)
+
     def testverifycatut3gd1r01(self):
         command = "cat --machine ut3gd1r01"
         self.badrequesttest(command.split(" "))
@@ -76,6 +82,11 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifynp997gd1r04(self):
         self.verifyswitch("np997gd1r04", "np997")
 
+    def testverifyaddnp997gd1r04csv(self):
+        command = "show tor_switch --tor_switch np997gd1r04 --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np997gd1r04,np997,np,hp,uttorswitch,,,", command)
+
     # Test adding a switch and creating a new rack
     def testaddnp998gd1r01(self):
         self.noouttest(["add", "tor_switch", "--tor_switch", "np998gd1r01",
@@ -83,6 +94,11 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testverifynp998gd1r01(self):
         self.verifyswitch("np998gd1r01", "np998")
+
+    def testverifyaddnp998gd1r01csv(self):
+        command = "show tor_switch --tor_switch np998gd1r01 --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np998gd1r01,np998,np,hp,uttorswitch,,,", command)
 
     # Test adding a switch, creating a new rack, and adding an IP.
     def testaddnp999gd1r01(self):
@@ -94,6 +110,12 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifynp999gd1r01(self):
         (out, command) = self.verifyswitch("np999gd1r01", "np999")
         self.matchoutput(out, "Interface: xge49 %s %s boot=False" %
+                (self.hostmac5, self.hostip5), command)
+
+    def testverifyaddnp999gd1r01csv(self):
+        command = "show tor_switch --tor_switch np999gd1r01 --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np999gd1r01,np999,np,hp,uttorswitch,,xge49,%s,%s" %
                 (self.hostmac5, self.hostip5), command)
 
 
