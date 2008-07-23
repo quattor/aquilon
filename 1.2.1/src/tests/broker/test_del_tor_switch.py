@@ -23,12 +23,36 @@ from brokertest import TestBrokerCommand
 
 class TestDelTorSwitch(TestBrokerCommand):
 
-    def testdelut3c5n10(self):
+    def testdelut3gd1r01(self):
         command = "del tor_switch --tor_switch ut3gd1r01"
         self.noouttest(command.split(" "))
 
-    def testverifydelut3c5n10(self):
+    def testverifydelut3gd1r01(self):
         command = "show tor_switch --tor_switch ut3gd1r01"
+        self.notfoundtest(command.split(" "))
+
+    def testdelnp997gd1r04(self):
+        command = "del tor_switch --tor_switch np997gd1r04"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp997gd1r04(self):
+        command = "show tor_switch --tor_switch np997gd1r04"
+        self.notfoundtest(command.split(" "))
+
+    def testdelnp998gd1r01(self):
+        command = "del tor_switch --tor_switch np998gd1r01"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp998gd1r01(self):
+        command = "show tor_switch --tor_switch np998gd1r01"
+        self.notfoundtest(command.split(" "))
+
+    def testdelnp999gd1r01(self):
+        command = "del tor_switch --tor_switch np999gd1r01"
+        self.noouttest(command.split(" "))
+
+    def testverifydelnp999gd1r01(self):
+        command = "show tor_switch --tor_switch np999gd1r01"
         self.notfoundtest(command.split(" "))
 
 

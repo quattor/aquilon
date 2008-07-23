@@ -893,7 +893,18 @@
       <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
          <option name="tor_switch" type="string">tor_switch name</option>
          <option name="model" type="string">tor_switch model</option>
-         <option name="rack" type="string">Rack name</option>
+      </optgroup>
+      <optgroup name="add_tor_switch_location" mandatory="True" fields="any">
+         <option name="rack" type="string" conflicts="building">Rack name</option>
+         <optgroup name="add_tor_switch_new_rack" fields="all">
+            <option name="building" type="string" conflicts="rack">Building</option>
+            <option name="rackid" type="string" conflicts="rack">Rack id/number</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">
+         <option name="interface" type="string">Interface name (like xge49)</option>
+         <option name="mac" type="string">MAC address of the interface</option>
+         <option name="ip" type="string">IP address of the interface</option>
       </optgroup>
       <optgroup name="add_tor_switch_specs_opts" mandatory="False">
 	 <option name="cpuname" type="string">cpu name</option>

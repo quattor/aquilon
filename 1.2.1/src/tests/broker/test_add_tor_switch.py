@@ -27,17 +27,24 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.noouttest(["add", "tor_switch", "--tor_switch", "ut3gd1r01",
             "--rack", "ut3", "--model", "uttorswitch", "--serial", "SNgd1r01"])
 
-    def testverifyaddut3gd1r01(self):
-        command = "show tor_switch --tor_switch ut3gd1r01"
+    def verifyswitch(self, tor_switch, rack, serial=None):
+        command = "show tor_switch --tor_switch %s" % tor_switch
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01", command)
-        self.matchoutput(out, "Rack: ut3", command)
+        self.matchoutput(out, "Tor_switch: %s" % tor_switch, command)
+        self.matchoutput(out, "Rack: %s" % rack, command)
         self.matchoutput(out, "Model: hp uttorswitch", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "Serial: SNgd1r01", command)
+        if serial:
+            self.matchoutput(out, "Serial: %s" % serial, command)
+        else:
+            self.matchclean(out, "Serial:", command)
         for port in range(1,49):
             self.matchoutput(out, "Switch Port %d" % port, command)
+        return (out, command)
+
+    def testverifyaddut3gd1r01(self):
+        self.verifyswitch("ut3gd1r01", "ut3", "SNgd1r01")
 
     def testverifycatut3gd1r01(self):
         command = "cat --machine ut3gd1r01"
@@ -60,6 +67,34 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifyrejectut3gd1r03(self):
         command = "show machine --machine ut3gd1r03"
         out = self.notfoundtest(command.split(" "))
+
+    # Test adding a switch with an existing rack using --rackid
+    def testaddnp997gd1r04(self):
+        self.noouttest(["add", "tor_switch", "--tor_switch", "np997gd1r04",
+            "--building", "np", "--rackid", "997", "--model", "uttorswitch"])
+
+    def testverifynp997gd1r04(self):
+        self.verifyswitch("np997gd1r04", "np997")
+
+    # Test adding a switch and creating a new rack
+    def testaddnp998gd1r01(self):
+        self.noouttest(["add", "tor_switch", "--tor_switch", "np998gd1r01",
+            "--building", "np", "--rackid", "998", "--model", "uttorswitch"])
+
+    def testverifynp998gd1r01(self):
+        self.verifyswitch("np998gd1r01", "np998")
+
+    # Test adding a switch, creating a new rack, and adding an IP.
+    def testaddnp999gd1r01(self):
+        self.noouttest(["add", "tor_switch", "--tor_switch", "np999gd1r01",
+            "--building", "np", "--rackid", "999", "--model", "uttorswitch",
+            "--interface", "xge49",
+            "--mac", self.hostmac5, "--ip", self.hostip5])
+
+    def testverifynp999gd1r01(self):
+        (out, command) = self.verifyswitch("np999gd1r01", "np999")
+        self.matchoutput(out, "Interface: xge49 %s %s boot=False" %
+                (self.hostmac5, self.hostip5), command)
 
 
 if __name__=='__main__':

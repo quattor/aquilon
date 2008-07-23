@@ -32,6 +32,15 @@ class TestAddRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: ut3", command)
 
+    def testaddnp997(self):
+        command = "add rack --name np997 --building np"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddnp997(self):
+        command = "show rack --name np997"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rack: np997", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRack)
