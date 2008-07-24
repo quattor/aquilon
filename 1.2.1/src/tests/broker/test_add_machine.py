@@ -113,6 +113,18 @@ class TestAddMachine(TestBrokerCommand):
         command = "show machine --machine ut3gd2r01"
         out = self.notfoundtest(command.split(" "))
 
+    # Testing that an invalid cpu returns an error (not an internal error)...
+    # (There should be no cpu with speed==2 in the database)
+    def testrejectut3c1n4(self):
+        self.badrequesttest(["add", "machine", "--machine", "ut3c1n4",
+            "--chassis", "ut3c1", "--model", "hs21", "--cpucount", "2",
+            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2",
+            "--memory", "8192", "--serial", "KPDZ406"])
+
+    def testverifyrejectut3c1n4(self):
+        command = "show machine --machine ut3c1n4"
+        out = self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

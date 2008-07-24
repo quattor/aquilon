@@ -12,7 +12,7 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.hw.cpu import Cpu
 from aquilon.aqdb.hw.disk import Disk
