@@ -43,6 +43,7 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("Machine is of type %s, and must be a blade, workstation, or rackmount to add a host." %
                     (dbmachine.model.machine_type))
 
+        session.refresh(dbmachine)
         if not dbmachine.interfaces:
             raise ArgumentError("Machine '%s' has no interfaces." % machine)
         found_boot = False
