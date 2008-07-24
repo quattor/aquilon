@@ -210,7 +210,7 @@ def send_notification(type, machines):
             ip = socket.gethostbyname(host)
             sock.sendto(packet, (ip, port))
         except Exception, e:
-            log.msg("Error notifying %s: %s", host, e)
+            log.msg("Error notifying %s: %s" % (host, e))
 
 
 class DSDBRunner(object):

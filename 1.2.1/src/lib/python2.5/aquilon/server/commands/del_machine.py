@@ -46,7 +46,7 @@ class CommandDelMachine(BrokerCommand):
             session.delete(iface)
         for disk in dbmachine.disks:
             log.msg("Before deleting machine '%s', removing disk '%s'" %
-                    (dbmachine.name, disk))
+                    (dbmachine.name, disk.device_name))
             session.delete(disk)
         session.delete(dbmachine)
         plenary_info.remove(self.config.get("broker", "plenarydir"))
