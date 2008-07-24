@@ -31,8 +31,7 @@ class CommandShowModel(BrokerCommand):
             q = q.join('vendor').filter(Vendor.name.like(vendor + '%'))
             q = q.reset_joinpoint()
         if type is not None:
-            q = q.join('machine_type').filter(MachineType.type.like(type + '%'))
-            q = q.reset_joinpoint()
+            q = q.filter(Model.machine_type.like(type + '%'))
         return q.all()
 
 

@@ -37,6 +37,26 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "NIC count: 4", command)
         self.matchoutput(out, "Disk: sda 36 GB scsi", command)
 
+    def testverifyshowtypetorswitch(self):
+        command = "show model --type tor_switch"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Model: hp uttorswitch", command)
+
+    def testverifyshowtypeblade(self):
+        command = "show model --type blade"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Model: hp uttorswitch", command)
+
+    def testverifyshowvendorhp(self):
+        command = "show model --vendor hp"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Model: hp uttorswitch", command)
+
+    def testverifyshowvendoribm(self):
+        command = "show model --vendor ibm"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Model: hp uttorswitch", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)
