@@ -124,7 +124,7 @@
    <command name="show_cpu">
       Show the CPU types in the database
       <optgroup name="show_cpu_opts" mandatory="True" fields="any">
-         <option name="all" type="string">Show all cpu types</option>
+         <option name="all" type="boolean">Show all cpu types</option>
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
          <option name="speed" type="string">CPU speed</option>
@@ -660,7 +660,7 @@
       Show the rack list, or details about a particular rack.
       <optgroup name="show_rack_opts" mandatory="True" fields="any">
          <option name="name" type="string" conflicts="all">rack name</option>
-         <option name="all" type="string" conflicts="name">all</option>
+         <option name="all" type="boolean" conflicts="name">all</option>
       </optgroup>
       <transport method="get" path="location/rack" />
       <transport trigger="name" method="get" path="location/rack/%(name)s" />
