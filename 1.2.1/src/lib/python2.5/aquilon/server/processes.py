@@ -260,13 +260,15 @@ class DSDBRunner(object):
             raise
         return
 
-    def delete_host(self, dbhost):
-        for interface in dbhost.machine.interfaces:
-            if not interface.boot:
-                continue
-            self.delete_host_details(interface.ip)
-            return
-        raise ArgumentError("No boot interface found for host to delete from dsdb.")
+    # Not generally useful, because we have already run session.delete()
+    # on the dbhost object.
+#    def delete_host(self, dbhost):
+#        for interface in dbhost.machine.interfaces:
+#            if not interface.boot:
+#                continue
+#            self.delete_host_details(interface.ip)
+#            return
+#        raise ArgumentError("No boot interface found for host to delete from dsdb.")
 
     def update_host(self, dbhost, oldinfo):
         """This gets tricky.  On a basic level, we want to remove the

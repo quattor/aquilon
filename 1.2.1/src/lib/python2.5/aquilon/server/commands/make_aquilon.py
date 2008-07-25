@@ -89,6 +89,7 @@ class CommandMakeAquilon(BrokerCommand):
 
         session.flush()
         session.refresh(dbhost)
+        session.refresh(dbhost.machine)
 
         tempdir = mkdtemp()
         plenary_info = PlenaryMachineInfo(dbhost.machine)

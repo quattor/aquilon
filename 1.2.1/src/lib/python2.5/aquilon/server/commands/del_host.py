@@ -26,8 +26,17 @@ class CommandDelHost(BrokerCommand):
     @az_check
     def render(self, session, hostname, user, **arguments):
         dbhost = hostname_to_host(session, hostname)
+        session.refresh(dbhost)
         # Hack to make sure the machine object is refreshed in future queries.
         dbmachine = dbhost.machine
+        session.refresh(dbmachine)
+        ip = None
+        for interface in dbmachine.interfaces:
+            if interface.boot:
+                ip = interface.ip
+        if not ip:
+            raise ArgumentError("No boot interface found for host to delete from dsdb.")
+
         for template in dbhost.templates:
             log.msg("Before deleting host '%s', removing template '%s'"
                     % (dbhost.fqdn, template.cfg_path))
@@ -36,7 +45,7 @@ class CommandDelHost(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner()
-        dsdb_runner.delete_host(dbhost)
+        dsdb_runner.delete_host_details(ip)
 
         # FIXME: Remove plenary template and profile.
 
