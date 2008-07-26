@@ -69,8 +69,9 @@ class Service(Base):
                             'cfg_path.id', name='svc_cfg_pth_fk'),
                             nullable = False )
 
-    creation_date = deferred(Column(DateTime, default=datetime.now))
-    comments      = deferred(Column(String(255), nullable=True))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
+    comments      = deferred(Column(String(255), nullable = True))
     cfg_path      = relation(CfgPath, uselist = False, backref = 'service')
 
 service = Service.__table__

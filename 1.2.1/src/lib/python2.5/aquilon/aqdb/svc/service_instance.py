@@ -58,7 +58,8 @@ class ServiceInstance(Base):
                                               name='svc_inst_cfg_pth_fk'),
                           nullable = False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
     comments      = deferred(Column(String(255), nullable=True))
 
     service       = relation(Service,  uselist = False, backref = 'instances')

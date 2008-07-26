@@ -46,7 +46,8 @@ class ServiceMap(Base):
                                              name='svc_map_loc_fk'),
                     nullable=False)
 
-    creation_date    = deferred(Column(DateTime, default=datetime.now))
+    creation_date    = deferred(Column(DateTime, default = datetime.now,
+                                       nullable = False))
     comments         = deferred(Column(String(255), nullable = True))
     location         = relation(Location, backref = 'service_maps')
     service_instance = relation(ServiceInstance, backref='service_map')

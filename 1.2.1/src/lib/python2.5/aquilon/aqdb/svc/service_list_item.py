@@ -50,7 +50,8 @@ class ServiceListItem(Base):
                            'archetype.id', name='sli_arctyp_fk'),
                            nullable = False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False ))
     comments      = deferred(Column(String(255), nullable=True))
 
     archetype     = relation(Archetype, backref = 'service_list')
