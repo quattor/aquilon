@@ -46,9 +46,10 @@ class Location(Base):
     #    'location_type.id', ondelete = 'CASCADE',
     #    name = 'sli_loc_typ__fk'), nullable = False)
 
-    fullname = Column(String(32), nullable = False)
+    fullname = Column(String(64), nullable = False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
     comments = deferred(Column(String(255), nullable = True))
 
     __mapper_args__ = {'polymorphic_on' : location_type}
