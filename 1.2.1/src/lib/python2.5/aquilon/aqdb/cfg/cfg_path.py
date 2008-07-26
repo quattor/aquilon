@@ -35,8 +35,9 @@ class CfgPath(Base):
     tld_id        = Column(Integer, ForeignKey('tld.id'), nullable=False)
     relative_path = Column(AqStr(255), nullable=False)
     last_used     = Column(DateTime, default=datetime.now)
-    creation_date = deferred(Column(DateTime, default=datetime.now))
-    comments      = deferred(Column(String(255), nullable=True))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable = False ))
+    comments      = deferred(Column(String(255), nullable = True))
     tld           = relation(Tld, lazy = False)
 
     def __str__(self):
