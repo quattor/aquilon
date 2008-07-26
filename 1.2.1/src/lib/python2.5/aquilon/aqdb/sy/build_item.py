@@ -44,7 +44,8 @@ class BuildItem(Base):
         'cfg_path.id', name='build_item_cfg_path_fk'), nullable = False)
 
     position      = Column(Integer, nullable = False)
-    creation_date = deferred(Column(DateTime, default = datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
     comments      = deferred(Column(String(255), nullable = True))
 
     host     = relation(Host, backref = 'build_items')

@@ -57,7 +57,8 @@ class System(Base):
     dns_domain_id = Column(Integer,
                            ForeignKey('dns_domain.id', name = 'sys_dns_fk'),
                            nullable = False ) #TODO: default
-    creation_date = deferred(Column( DateTime, default=datetime.now))
+    creation_date = deferred(Column( DateTime, default = datetime.now,
+                                    nullable = False))
     comments      = deferred(Column('comments', String(255), nullable=True))
 
     dns_domain    = relation(DnsDomain)
@@ -93,4 +94,3 @@ def populate(*args, **kw):
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
-

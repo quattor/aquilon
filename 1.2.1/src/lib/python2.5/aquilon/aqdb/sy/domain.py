@@ -42,7 +42,8 @@ class Domain(Base):
     owner_id = Column(Integer, ForeignKey(
         'user_principal.id', name = 'domain_user_princ_fk'), nullable = False)
 
-    creation_date = deferred(Column( DateTime, default=datetime.now))
+    creation_date = deferred(Column( DateTime, default=datetime.now,
+                                    nullable = False))
     comments      = deferred(Column('comments', String(255), nullable=True))
 
     server        = relation(QuattorServer, backref = 'domains')
