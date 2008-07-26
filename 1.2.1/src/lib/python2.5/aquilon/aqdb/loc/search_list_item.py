@@ -45,7 +45,8 @@ class SearchListItem(Base):
 
     position      = Column(Integer, nullable = False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
     comments      = deferred(Column(String(255), nullable = True))
 
     lsl = relation(LocationSearchList)
