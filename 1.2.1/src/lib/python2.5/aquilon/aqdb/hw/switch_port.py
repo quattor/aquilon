@@ -46,7 +46,8 @@ class SwitchPort(Base):
                           ForeignKey('interface.id', ondelete='CASCADE',
                                      name = 'switch_int_fk'), nullable = True)
     link_creation_date = deferred(
-        Column('creation_date', DateTime, default=datetime.now))
+        Column('creation_date', DateTime, default = datetime.now,
+               nullable = False))
 
     switch    = relation(Machine,   uselist = False, backref = 'switchport')
     interface = relation(Interface, uselist = False, backref = 'switchport')

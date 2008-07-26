@@ -35,7 +35,8 @@ class Cpu(Base):
     name          = Column(AqStr(64), nullable = False)
     vendor_id     = Column(Integer, ForeignKey('vendor.id'), nullable = False)
     speed         = Column(Integer, nullable = False)
-    creation_date = deferred(Column(DateTime, default = datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False ))
     comments      = deferred(Column(String(255), nullable = True))
     vendor        = relation(Vendor)
 

@@ -56,7 +56,8 @@ class Machine(Base):
 
     serial_no = Column(String(64), nullable = True)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False ))
     comments = deferred(Column(String(255), nullable = True))
 
     location = relation(Location, uselist = False)

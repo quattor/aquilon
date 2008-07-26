@@ -45,7 +45,8 @@ class Disk(Base):
         'disk_type.id', name = 'disk_disk_type_fk'), nullable = False)
 
     capacity      = Column(Integer, nullable = False, default = 36)
-    creation_date = deferred(Column(DateTime, default=datetime.now))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable = False ))
     comments      = deferred(Column(String(255)))
 
     machine   = relation(Machine, backref='disks')

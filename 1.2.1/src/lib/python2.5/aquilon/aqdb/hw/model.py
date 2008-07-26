@@ -38,8 +38,9 @@ class Model(Base):
     vendor_id = Column(Integer,
                        ForeignKey('vendor.id', name = 'model_vendor_fk'),
                        nullable = False)
-    machine_type = Column(AqStr(16), nullable=False)
-    creation_date = deferred(Column(DateTime, default=datetime.now))
+    machine_type = Column(AqStr(16), nullable = False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable = False))
     comments = deferred(Column(String(255)))
 
     vendor = relation(Vendor)
