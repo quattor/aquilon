@@ -82,7 +82,8 @@ def main(*args, **kw):
                 sys.exit(2)
 
     #run constraint renamer
-    cnst.rename_non_null_check_constraints(dbf)
+    if dbf.dsn.startswith('oracle'):
+        cnst.rename_non_null_check_constraints(dbf)
 
 if __name__ == '__main__':
     main(sys.argv)
