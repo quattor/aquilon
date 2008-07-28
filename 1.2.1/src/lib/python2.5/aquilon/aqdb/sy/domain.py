@@ -33,7 +33,7 @@ class Domain(Base):
             Represents individual config repositories """
     __tablename__ = 'domain'
     id = Column(Integer, Sequence('domain_seq'), primary_key = True)
-    name = Column(AqStr(32))
+    name = Column(AqStr(32), nullable = False)
     server_id = Column(Integer,
                        ForeignKey('quattor_server.id', name = 'domain_qs_fk'),
                        nullable = False)
