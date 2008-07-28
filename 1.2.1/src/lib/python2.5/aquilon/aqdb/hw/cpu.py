@@ -33,7 +33,8 @@ class Cpu(Base):
     __tablename__ = 'cpu'
     id            = Column(Integer, Sequence('cpu_seq'), primary_key = True)
     name          = Column(AqStr(64), nullable = False)
-    vendor_id     = Column(Integer, ForeignKey('vendor.id'), nullable = False)
+    vendor_id     = Column(Integer, ForeignKey(
+        'vendor.id', name = 'cpu_vendor_fk'), nullable = False)
     speed         = Column(Integer, nullable = False)
     creation_date = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False ))
