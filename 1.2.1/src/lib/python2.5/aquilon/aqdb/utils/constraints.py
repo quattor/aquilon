@@ -19,8 +19,9 @@ sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
 import aquilon.aqdb.db_factory as db_factory
 
 #TODO:
-        #deal with max 32 chars. table.info.
-        #refactor to rename_sys_named_constraints which does ALL constraint types
+        #decrease length of > 32 char constraint names
+        #double check we're not touching FKs... looked like we might be
+        #refactor to do ALL constraint types with name like 'SYS_C00%'
 
 def rename_non_null_check_constraints(dbf):
     stmt = """
@@ -29,7 +30,7 @@ def rename_non_null_check_constraints(dbf):
            C.search_condition cond
       FROM user_constraints C
      WHERE C.constraint_type = 'C'
-       AND C.constraint_name LIKE 'SYS%' """
+       AND C.constraint_name LIKE 'SYS_C00%' """
 
     cons = dbf.safe_execute(stmt)
 
@@ -43,8 +44,12 @@ def rename_non_null_check_constraints(dbf):
                 col = 'CR_DATE'
             nm = '%s_%s_NN'%(i[1], col)
             rename = 'ALTER TABLE %s RENAME CONSTRAINT %s TO %s'%(i[1],i[0],nm)
-            db_factory.debug(rename)
-            dbf.safe_execute(rename)
+            if len(nm) > 32:
+                print '%s\n would fail, new name longer than 32 characters'
+                continue
+            else:
+                db_factory.debug(rename)
+                dbf.safe_execute(rename)
 
 """
 LNPO_AQUILON_NY> select distinct constraint_type from user_constraints;
