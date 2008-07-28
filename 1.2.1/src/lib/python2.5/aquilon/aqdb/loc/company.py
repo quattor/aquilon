@@ -48,5 +48,6 @@ def populate(*args, **kw):
     s=dbf.session()
     if len(s.query(Company).all()) < 1:
         a = Company(name='ms.com', fullname = 'root node', parent_id = 1)
+        #FIXME: hardcoded 1 is bad. select it then update the instance
         s.add(a)
         s.commit()
