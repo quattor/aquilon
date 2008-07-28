@@ -16,12 +16,16 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     #import aquilon.aqdb.depends
     import msversion
-    msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
+    #msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
+    msversion.addpkg('sqlalchemy', '0.4.7-1', 'dev')
     msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
     msversion.addpkg('ipython','0.8.2','dist')
 
 from aquilon.aqdb.db_factory import db_factory
 from aquilon.aqdb.utils.shell import ipshell
+from aquilon.aqdb.utils import table_admin as ta
+from aquilon.aqdb.utils import constraints as cnst
+
 import IPython.ipapi
 ipapi = IPython.ipapi.get()
 
@@ -51,6 +55,11 @@ pkgs['svc']  = ['service', 'service_instance', 'service_map',
 order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc']
 
 def main(*args, **kw):
+
+    #doesn't work b/c each module has its own dbf copy?
+    dbf = db_factory()
+    ta.drop_all_tables_and_sequences(dbf)
+
     for p in order:
         for m in pkgs[p]:
             import_cmd = "import aquilon.aqdb.%s.%s" % (p, m)
@@ -62,14 +71,18 @@ def main(*args, **kw):
 
     for p in order:
         for m in pkgs[p]:
-            populate_cmd = 'aquilon.aqdb.%s.%s.populate()'%(p,m)
+            populate_cmd = "aquilon.aqdb.%s.%s.populate()"%(p,m)
             try:
                 ipapi.ex(populate_cmd)
+                #execute ANALYZE TABLE USER.TABLE_NAME
+                #        ESTIMATE STATISTICS SAMPLE 25 PERCENT
             except Exception, e:
                 print >>sys.stderr, "Failed to run %s:\n\t%s" % (
                         populate_cmd, e)
                 sys.exit(2)
 
+    #run constraint renamer
+    cnst.rename_non_null_check_constraints(dbf)
 
 if __name__ == '__main__':
     main(sys.argv)
