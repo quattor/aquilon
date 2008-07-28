@@ -23,6 +23,9 @@ quattordir = %(basedir)s/quattor
 templateport = %(openport)s
 git_templates_url = http://%(servername)s:%(templateport)s/templates
 dsdb_use_test = True
+dsdb=/bin/echo
+#server_notifications = cdb2sql bootserver
+client_notifications = no
 
 [unittest]
 scratchdir = %(basedir)s/scratch

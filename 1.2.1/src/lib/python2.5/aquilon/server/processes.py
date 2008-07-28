@@ -27,6 +27,7 @@ from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, AquilonError
 from aquilon.config import Config
+from aquilon.server.dbwrappers.service import get_service
 
 
 CCM_NOTIF = 1
@@ -114,7 +115,7 @@ def remove_file(filename):
 
 # This functionality (build_index, send_notification) may be better
 # suited in a different module.  Here for now, though.
-def build_index(profilesdir):
+def build_index(config, session, profilesdir):
     ''' compare the mtimes of everything in profiledir against
     and index file (profiles-info.xml). Produce a new index
     and send out notifications to everything that's been updated
@@ -169,25 +170,23 @@ def build_index(profilesdir):
     f.write("\n".join(content))
     f.close()
 
-    # Read cdb.conf on demand so that it can be updated while the
-    # broker is running.
-    server_modules = []
-    try:
-        f = open("/etc/cdb.conf")
-        for line in f.readlines():
-            line = line.strip()
-            if not line.startswith("server_module"):
-                continue
-            servers = line.split()
-            for server in servers[1:]:
-                if server.strip():
-                    server_modules.append(server)
-        f.close()
-    except Exception, e:
-        log.msg("Could not retrieve list of server_modules: %s" % e)
+    if config.has_option("broker", "server_notifications"):
+        service_modules = {}
+        for service in config.get("broker", "server_notifications").split():
+            if service.strip():
+                try:
+                    # service may be unknown
+                    srvinfo = get_service(session, service)
+                    for instance in srvinfo.instances:
+                        for hli in instance.host_list.hosts:
+                            service_modules[hli.host.fqdn] = 1
+                except Exception, e:
+                    log.msg("failed to lookup up server module %s: %s" % (service, e))
+        send_notification(CDB_NOTIF, service_modules.keys())
 
-    send_notification(CCM_NOTIF, modified_index.keys())
-    send_notification(CDB_NOTIF, server_modules)
+    if (config.has_option("broker", "client_notifications")
+        and config.getboolean("broker", "client_notifications")):
+        send_notification(CCM_NOTIF, modified_index.keys())
 
 def send_notification(type, machines):
     '''send CDP notification messages to a list of hosts. This

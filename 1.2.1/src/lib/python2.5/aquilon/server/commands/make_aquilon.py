@@ -112,6 +112,8 @@ class CommandMakeAquilon(BrokerCommand):
             args.append('-I')
             args.append(include)
         args.append('-y')
+        args.append('-x')
+        args.append('xmldb')
         args.append(filename)
         try:
             run_command(args, env=panc_env, path=tempdir)
@@ -127,7 +129,7 @@ class CommandMakeAquilon(BrokerCommand):
         run_command(["cp", outfile, profilesdir])
         run_command(["cp", outdep, self.config.get("broker", "depsdir")])
         run_command(["cp", filename, self.config.get("broker", "hostsdir")])
-        build_index(profilesdir)
+        build_index(self.config, session, profilesdir)
         remove_dir(tempdir)
         return
 
