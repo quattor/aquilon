@@ -16,7 +16,6 @@ import pwd
 import getpass
 import sys
 import os
-import ConfigParser as cp
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -94,35 +93,16 @@ class db_factory(object):
 
         if self.dsn.startswith('oracle'):
             import cx_Oracle
-            #Try with rfc-1738 style URI
-            try:
-                self.dsn = self.config.get('database', 'rfc-1738-dsn')
-            except cp.NoOptionError, e:
-                pass
+            self.schema = self.config.get('database','dbuser')
+            self.server = self.config.get('database','server')
+            passwds = self._get_password_list()
 
-            try:
-                self.engine = create_engine(self.dsn)
-                self.engine.connect()
-            except SaDBError, e:
-                print >> sys.stderr, e
-                sys.exit(2)
-
-            #look for the old style user/server combination
-            if not self.engine:
-                try:
-                    self.schema = self.config.get('database','dbuser')
-                    self.server = self.config.get('database','server')
-                except cp.NoOptionError, e:
-                    print e
-
-                passwds = self._get_password_list()
-
-                if len(passwds) < 1:
-                    passwds.append(
-                        getpass.getpass(
-                            'Can not determine your password (%s).\nPassword:'%(
-                                self.dsn)))
-                self.login(passwds)
+            if len(passwds) < 1:
+                passwds.append(
+                    getpass.getpass(
+                        'Can not determine your password (%s).\nPassword:'%(
+                            self.dsn)))
+            self.login(passwds)
 
             debug(self.engine, assert_only = True)
         #SQLITE
