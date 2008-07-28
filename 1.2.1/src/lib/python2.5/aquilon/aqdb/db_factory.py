@@ -16,6 +16,7 @@ import pwd
 import getpass
 import sys
 import os
+import ConfigParser as cp
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -23,17 +24,17 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 import sqlalchemy  #for version
-from   sqlalchemy import MetaData, engine, create_engine
+from   sqlalchemy import MetaData, engine, create_engine, text
 from   sqlalchemy.orm import scoped_session, sessionmaker
 from   sqlalchemy.ext.declarative import declarative_base
 from   sqlalchemy.exceptions import DatabaseError as SaDBError
+from   sqlalchemy.exceptions import SQLError
 
 from aquilon.config import Config
 if '--debug' in sys.argv:
     from aquilon.aqdb.utils.shell import ipshell
 else:
     ipshell = lambda: "No ipshell imported"
-
 
 def debug(examinee,*args,**kw):
     if '--debug' in sys.argv:
@@ -90,36 +91,56 @@ class db_factory(object):
             sys.exit(os.EX_CONFIG)
 
         self.dsn = self.config.get('database', 'dsn')
-        self.vendor = self.config.get('database', 'vendor')
 
-        self.dsn = self.config.get('database', 'dsn')
-        self.vendor = self.config.get('database', 'vendor')
-
-        if self.vendor == 'oracle':
+        if self.dsn.startswith('oracle'):
             import cx_Oracle
-            self.schema = self.config.get('database','dbuser')
-            self.server = self.config.get('database','server')
+            #Try with rfc-1738 style URI
+            try:
+                self.dsn = self.config.get('database', 'rfc-1738-dsn')
+            except cp.NoOptionError, e:
+                pass
 
-            passwds = self._get_password_list()
+            try:
+                self.engine = create_engine(self.dsn)
+                self.engine.connect()
+            except SaDBError, e:
+                print >> sys.stderr, e
+                sys.exit(2)
 
-            if len(passwds) < 1:
-                passwds.append(
-                    getpass.getpass(
-                        'Can not determine your password (%s).\nPassword:'%(
-                            self.dsn)))
-            self.login(passwds)
+            #look for the old style user/server combination
+            if not self.engine:
+                try:
+                    self.schema = self.config.get('database','dbuser')
+                    self.server = self.config.get('database','server')
+                except cp.NoOptionError, e:
+                    print e
+
+                passwds = self._get_password_list()
+
+                if len(passwds) < 1:
+                    passwds.append(
+                        getpass.getpass(
+                            'Can not determine your password (%s).\nPassword:'%(
+                                self.dsn)))
+                self.login(passwds)
+
             debug(self.engine, assert_only = True)
-        elif self.vendor == 'sqlite':
+        #SQLITE
+        elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
             self.engine.connect()
         else:
-            msg = 'database vendor can be either sqlite or oracle'
+            msg = """
+supported database datasources are sqlite and oracle, your dsn is '%s' """%(
+    self.dsn).lstrip()
+
             noisy_exit(msg)
         assert(self.dsn)
         assert(self.engine)
 
         self.meta   = MetaData(self.engine)
         assert(self.meta)
+        print self.meta
 
         if sqlalchemy.__version__.startswith('0.4'):
             self.Session = scoped_session(sessionmaker(bind = self.engine,
@@ -227,6 +248,7 @@ if __name__ == '__main__':
     debug('Testing creation of factory...')
     dbf = db_factory()
     debug(dbf.engine)
+    print dbf.engine
     debug(dbf.meta)
     debug(str(dbf.__dict__))
     del(dbf)
@@ -258,4 +280,4 @@ if __name__ == '__main__':
     if '-d' in sys.argv:
         mock_eng2.flush_to_file()
 
-    ipshell()
+    #ipshell()
