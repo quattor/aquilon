@@ -41,34 +41,34 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"/hardware" = create("machine/americas/np/ut3/ut3c5n10");""",
+            """'/hardware' = create('machine/americas/np/ut3/ut3c5n10');""",
             command)
         self.matchoutput(out,
-            """"/system/network/interfaces/eth0" = nlist("ip", "%s", "netmask", "255.255.255.128", "broadcast", "%s", "gateway", "%s", "bootproto", "dhcp");""" % (self.hostip0, self.broadcast0, self.gateway0),
+            """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '255.255.255.128', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip0, self.broadcast0, self.gateway0),
             command)
         self.matchoutput(out,
-            """include { "archetype/base" };""",
+            """include { 'archetype/base' };""",
             command)
         self.matchoutput(out,
-            """include { "os/linux/4.0.1-x86_64/config" };""",
+            """include { 'os/linux/4.0.1-x86_64/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
+            """include { 'service/afs/q.ny.ms.com/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
+            """include { 'service/bootserver/np.test/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/dns/nyinfratest/client/config" };""",
+            """include { 'service/dns/nyinfratest/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
+            """include { 'service/ntp/pa.ny.na/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "personality/ms/fid/spg/ice/config" };""",
+            """include { 'personality/ms/fid/spg/ice/config' };""",
             command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
+            """include { 'archetype/final' };""",
             command)
 
     def testmakeunittest00(self):
@@ -99,34 +99,34 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"/hardware" = create("machine/americas/np/ut3/ut3c1n3");""",
+            """'/hardware' = create('machine/americas/np/ut3/ut3c1n3');""",
             command)
         self.matchoutput(out,
-            """"/system/network/interfaces/eth0" = nlist("ip", "%s", "netmask", "255.255.255.128", "broadcast", "%s", "gateway", "%s", "bootproto", "dhcp");""" % (self.hostip2, self.broadcast2, self.gateway2),
+            """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '255.255.255.128', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip2, self.broadcast2, self.gateway2),
             command)
         self.matchoutput(out,
-            """include { "archetype/base" };""",
+            """include { 'archetype/base' };""",
             command)
         self.matchoutput(out,
-            """include { "os/linux/4.0.1-x86_64/config" };""",
+            """include { 'os/linux/4.0.1-x86_64/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/afs/q.ny.ms.com/client/config" };""",
+            """include { 'service/afs/q.ny.ms.com/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/bootserver/np.test/client/config" };""",
+            """include { 'service/bootserver/np.test/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/dns/nyinfratest/client/config" };""",
+            """include { 'service/dns/nyinfratest/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "service/ntp/pa.ny.na/client/config" };""",
+            """include { 'service/ntp/pa.ny.na/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { "personality/ms/fid/spg/ice/config" };""",
+            """include { 'personality/ms/fid/spg/ice/config' };""",
             command)
         self.matchoutput(out,
-            """include { "archetype/final" };""",
+            """include { 'archetype/final' };""",
             command)
 
 

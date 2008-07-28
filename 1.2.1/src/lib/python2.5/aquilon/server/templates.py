@@ -27,16 +27,16 @@ class Plenary(object):
         lines.append("")
         self.body(lines)
         plenary_path = os.path.join(dir, self.plenary_core)
-        plenary_file = os.path.join(dir, self.plenary_template)
+        plenary_file = os.path.join(dir, self.plenary_template) + ".tpl"
         if not os.path.exists(plenary_path):
             os.makedirs(plenary_path)
-        write_file(plenary_file+".tpl", "\n".join(lines) + "\n")
+        write_file(plenary_file, "\n".join(lines) + "\n")
 
     def read(self, plenarydir):
-        return read_file(plenarydir, self.plenary_template)
+        return read_file(plenarydir, self.plenary_template + ".tpl")
 
     def remove(self, plenarydir):
-        plenary_file = os.path.join(plenarydir, self.plenary_template)
+        plenary_file = os.path.join(plenarydir, self.plenary_template + ".tpl")
         remove_file(plenary_file)
         return
 
@@ -70,8 +70,7 @@ class PlenaryMachineInfo(Plenary):
             "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
         self.plenary_core = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
-        self.plenary_struct = ("%(plenary_core)s/%(machine)s" % self.__dict__)
-        self.plenary_template = ("%(plenary_struct)s.tpl" % self.__dict__)
+        self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
         return
 
     def body(self, lines):
@@ -144,7 +143,7 @@ class PlenaryMachineInfo(Plenary):
                 % (localhost, user, datetime.utcnow().ctime()))
         lines.append("object template %s;\n" % fqdn)
         lines.append("include { 'pan/units' };\n")
-        lines.append("'/hardware' = create('%(plenary_struct)s');\n" % self.__dict__)
+        lines.append("'/hardware' = create('%(plenary_template)s');\n" % self.__dict__)
         for interface in interfaces:
             lines.append("'/system/network/interfaces/%(name)s' = nlist('ip', '%(ip)s', 'netmask', '%(netmask)s', 'broadcast', '%(broadcast)s', 'gateway', '%(gateway)s', 'bootproto', '%(bootproto)s');" % interface)
         lines.append("\n")

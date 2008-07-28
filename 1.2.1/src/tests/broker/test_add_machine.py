@@ -49,7 +49,7 @@ class TestAddMachine(TestBrokerCommand):
             """"serialnumber" = "99C5553";""",
             command)
         self.matchoutput(out,
-            """include hardware/machine/ibm/hs21;""",
+            """include { 'hardware/machine/ibm/hs21' };""",
             command)
         self.matchoutput(out,
             """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
@@ -90,7 +90,7 @@ class TestAddMachine(TestBrokerCommand):
             """"serialnumber" = "KPDZ406";""",
             command)
         self.matchoutput(out,
-            """include hardware/machine/ibm/hs21;""",
+            """include { 'hardware/machine/ibm/hs21' };""",
             command)
         self.matchoutput(out,
             """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
