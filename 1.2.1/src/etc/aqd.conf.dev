@@ -25,6 +25,7 @@ git_templates_url = http://%(servername)s:%(templateport)s/templates
 dsdb_use_test = True
 dsdb=/bin/echo
 #server_notifications = cdb2sql bootserver
+server_notifications = 
 client_notifications = no
 
 [unittest]
