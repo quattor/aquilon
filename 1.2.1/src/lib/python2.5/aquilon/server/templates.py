@@ -51,13 +51,13 @@ class PlenaryMachineInfo(object):
 
     def write(self, plenarydir, localhost, user):
         lines = []
-        lines.append("#Generated on %s for %s at %s UTC"
+        lines.append("# Generated on %s for %s at %s UTC"
                 % (localhost, user, datetime.utcnow().ctime()))
         lines.append("structure template %(plenary_struct)s;\n" % self.__dict__)
         lines.append('"location" = "%(sysloc)s";' % self.__dict__)
         if self.serial:
             lines.append('"serialnumber" = "%(serial)s";\n' % self.__dict__)
-        lines.append("include %(model_relpath)s;\n" % self.__dict__)
+        lines.append("include { '%(model_relpath)s' };\n" % self.__dict__)
         lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
                 % self.__dict__)
         lines.append('"cpu" = list(' + ", \n             ".join(
@@ -137,14 +137,13 @@ class PlenaryMachineInfo(object):
         lines.append("#Generated on %s for %s at %s UTC"
                 % (localhost, user, datetime.utcnow().ctime()))
         lines.append("object template %s;\n" % fqdn)
-        lines.append("""include { "pan/units" };\n""")
-        lines.append(""""/hardware" = create("%(plenary_struct)s");\n"""
-                % self.__dict__)
+        lines.append("include { 'pan/units' };\n")
+        lines.append("'/hardware' = create('%(plenary_struct)s');\n" % self.__dict__)
         for interface in interfaces:
-            lines.append(""""/system/network/interfaces/%(name)s" = nlist("ip", "%(ip)s", "netmask", "%(netmask)s", "broadcast", "%(broadcast)s", "gateway", "%(gateway)s", "bootproto", "%(bootproto)s");""" % interface)
+            lines.append("'/system/network/interfaces/%(name)s' = nlist('ip', '%(ip)s', 'netmask', '%(netmask)s', 'broadcast', '%(broadcast)s', 'gateway', '%(gateway)s', 'bootproto', '%(bootproto)s');" % interface)
         lines.append("\n")
         for template in templates:
-            lines.append("""include { "%s" };""" % template)
+            lines.append("include { '%s' };" % template)
         lines.append("")
 
         template_file = os.path.join(tempdir, fqdn + '.tpl')
