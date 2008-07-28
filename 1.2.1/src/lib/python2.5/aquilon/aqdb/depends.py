@@ -2,7 +2,7 @@
 import sys
 import msversion
 
-msversion.addpkg('sqlalchemy', '0.4.7-1', 'dev')
+msversion.addpkg('sqlalchemy', '0.4.7', 'dev')
 #msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
 
 msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
