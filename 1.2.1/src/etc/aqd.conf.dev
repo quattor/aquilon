@@ -1,18 +1,21 @@
+# The config file etc/aqd.conf.defaults always gets read first, and the
+# values below override those.  To nullify a value from the defaults,
+# it must be explicitly set to an empty value here.
+#
 # This should work "out of the box" for development purposes.
 # To connect to an oracle database, copy this file and adjust the
 # [database_oracle] parameters as appropriate.  Then, change
 # database_section to point to database_oracle.
+
 [DEFAULT]
 basedir = /var/tmp/%(user)s
 dbdir = %(basedir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
-# For now, also need to override dsn with a password
 dbuser = USER
 server = SERVER
 environment = ENV
-dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
 
 [database]
 database_section = database_sqlite
@@ -25,7 +28,6 @@ git_templates_url = http://%(servername)s:%(templateport)s/templates
 dsdb_use_test = True
 dsdb=/bin/echo
 #server_notifications = cdb2sql bootserver
-server_notifications = 
 client_notifications = no
 
 [unittest]
