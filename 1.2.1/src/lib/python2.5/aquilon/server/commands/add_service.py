@@ -17,6 +17,7 @@ from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.sy.host_list import HostList
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
+from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance)
 
 
 class CommandAddService(BrokerCommand):
@@ -25,7 +26,7 @@ class CommandAddService(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, service, instance, comments, **arguments):
+    def render(self, session, service, instance, comments, user, **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
         if not dbservice:
             # FIXME: Could have better error handling
@@ -38,6 +39,13 @@ class CommandAddService(BrokerCommand):
                 session.save(dbcfg_path)
             dbservice = Service(name=service, cfg_path=dbcfg_path)
             session.save(dbservice)
+            # Write out stub plenary data
+            # By definition, we don't need to then recompile, since nothing
+            # can be using this service yet.
+            plenary_info = PlenaryService(dbservice)
+            plenary_info.write(self.config.get("broker", "plenarydir"),
+                               self.config.get("broker", "servername"), user)
+
         if not instance:
             return
 
@@ -46,10 +54,10 @@ class CommandAddService(BrokerCommand):
         if not dbhostlist:
             dbhostlist = HostList(name=instance)
             session.save(dbhostlist)
-        # FIXME: This will autocreate a service/instance CfgPath.  Does
-        # there need to be a separate/explicit create of a
-        # service/instance/client CfgPath?
-        # Update: See AQUILONAQD-82
+
+        # FIXME: This will autocreate a service/instance CfgPath.
+        # Ideally, (if we had access to local GIT repo) we'd auto-create the
+        # "user" path here (i.e. service/instance/client/config.tpl)
         relative_path = "%s/%s" % (service, instance)
         dbcfg_path = session.query(CfgPath).filter_by(
                 tld=dbservice.cfg_path.tld, relative_path=relative_path).first()
@@ -62,6 +70,10 @@ class CommandAddService(BrokerCommand):
         session.save(dbsi)
         session.flush()
         session.refresh(dbservice)
+        plenary_info = PlenaryServiceInstance(dbservice, dbsi)
+        plenary_info.write(self.config.get("broker", "plenarydir"),
+                           self.config.get("broker", "servername"), user)
+
         return
 
 

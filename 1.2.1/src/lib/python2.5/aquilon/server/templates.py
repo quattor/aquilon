@@ -15,9 +15,34 @@ from datetime import datetime
 from aquilon.aqdb.net.ipcalc import Network
 from aquilon.server.processes import write_file, read_file, remove_file
 
+class Plenary(object):
+    def __init__(self):
+        self.template_type = 'structure'
+        
+    def write(self, dir, localhost, user):
+        lines = []
+        lines.append("# Generated on %s for %s at %s UTC"
+                     % (localhost, user, datetime.utcnow().ctime()))
+        lines.append("%(template_type)s template %(plenary_template)s;" % self.__dict__)
+        lines.append("")
+        self.body(lines)
+        plenary_path = os.path.join(dir, self.plenary_core)
+        plenary_file = os.path.join(dir, self.plenary_template)
+        if not os.path.exists(plenary_path):
+            os.makedirs(plenary_path)
+        write_file(plenary_file+".tpl", "\n".join(lines) + "\n")
 
-class PlenaryMachineInfo(object):
+    def read(self, plenarydir):
+        return read_file(plenarydir, self.plenary_template)
+
+    def remove(self, plenarydir):
+        plenary_file = os.path.join(plenarydir, self.plenary_template)
+        remove_file(plenary_file)
+        return
+
+class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine):
+        Plenary.__init__(self)
         self.hub = dbmachine.location.hub.fullname.lower()
         self.building = dbmachine.location.building.name
         self.rack = dbmachine.location.rack.name
@@ -49,11 +74,7 @@ class PlenaryMachineInfo(object):
         self.plenary_template = ("%(plenary_struct)s.tpl" % self.__dict__)
         return
 
-    def write(self, plenarydir, localhost, user):
-        lines = []
-        lines.append("# Generated on %s for %s at %s UTC"
-                % (localhost, user, datetime.utcnow().ctime()))
-        lines.append("structure template %(plenary_struct)s;\n" % self.__dict__)
+    def body(self, lines):
         lines.append('"location" = "%(sysloc)s";' % self.__dict__)
         if self.serial:
             lines.append('"serialnumber" = "%(serial)s";\n' % self.__dict__)
@@ -74,22 +95,7 @@ class PlenaryMachineInfo(object):
             if interface['boot']:
                 lines.append('"cards/nic/%s/boot" = %s;'
                         % (interface['name'], str(interface['boot']).lower()))
-        lines.append("")
 
-        plenary_path = os.path.join(plenarydir, self.plenary_core)
-        plenary_file = os.path.join(plenarydir, self.plenary_template)
-        if not os.path.exists(plenary_path):
-            os.makedirs(plenary_path)
-        write_file(plenary_file, "\n".join(lines))
-        return
-
-    def read(self, plenarydir):
-        return read_file(plenarydir, self.plenary_template)
-
-    def remove(self, plenarydir):
-        plenary_file = os.path.join(plenarydir, self.plenary_template)
-        remove_file(plenary_file)
-        return
 
     def reconfigure(self, dbhost, tempdir, localhost, user):
         fqdn = dbhost.fqdn
@@ -149,6 +155,36 @@ class PlenaryMachineInfo(object):
         template_file = os.path.join(tempdir, fqdn + '.tpl')
         write_file(template_file, "\n".join(lines))
         return
+
+class PlenaryService(Plenary):
+    def __init__(self, dbservice):
+        Plenary.__init__(self)
+        self.name = dbservice.name
+        self.plenary_core = "servicedata/%(name)s" % self.__dict__
+        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+
+    def body(self, lines):
+        return
+
+
+class PlenaryServiceInstance(Plenary):
+    def __init__(self, dbservice, dbinstance):
+        Plenary.__init__(self)
+        self.servers = dbinstance.host_list.hosts
+        self.service = dbservice.name
+        self.name = dbinstance.host_list.name
+        self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
+        self.plenary_template = self.plenary_core + "/config"
+        self.template_type = 'structure'
+
+    def body(self, lines):
+        lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
+        lines.append("");
+        lines.append("'instance' = '%(name)s';" % self.__dict__)
+        lines.append("'servers' = list(" + ", ".join([("'" + hli.host.fqdn + "'") for hli in self.servers]) + ");")
+
+
+
 
 
 #if __name__=='__main__':

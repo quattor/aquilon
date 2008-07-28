@@ -21,6 +21,8 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 
+from aquilon.server.templates import PlenaryServiceInstance
+
 
 class CommandUnbindServer(BrokerCommand):
 
@@ -28,7 +30,7 @@ class CommandUnbindServer(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, service, instance, **arguments):
+    def render(self, session, hostname, service, instance, user, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = get_service(session, service)
         if instance:
@@ -47,6 +49,10 @@ class CommandUnbindServer(BrokerCommand):
                 session.delete(item)
         session.flush()
         session.refresh(dbhost_list)
+        plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
+        plenary_info.write(self.config.get("broker", "plenarydir"),
+                self.config.get("broker", "servername"), user)
+        # XXX: Need to recompile...
         return
 
 

@@ -42,6 +42,11 @@
       <transport method="get" path="" />
    </command>
 
+   <command name="flush">
+      Write out all plenary templates.
+      <transport method="put" path="flush" />
+   </command>
+
    <command name="ping">
       Simple test that the broker can respond.
       <transport method="get" path="ping" />

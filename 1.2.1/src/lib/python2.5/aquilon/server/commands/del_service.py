@@ -18,6 +18,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.sy.host_list import HostList
+from aquilon.aqdb.svc.service_map import ServiceMap
+from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance)
 
 
 class CommandDelService(BrokerCommand):
@@ -32,6 +34,8 @@ class CommandDelService(BrokerCommand):
         if not instance:
             if dbservice.instances:
                 raise ArgumentError("Cannot remove service with instances defined.")
+            plenary_info = PlenaryService(dbservice)
+            plenary_info.remove
             session.delete(dbservice)
             return
         try:
@@ -42,9 +46,21 @@ class CommandDelService(BrokerCommand):
                     % (instance, e))
         dbsi = session.query(ServiceInstance).filter_by(
                 host_list=dbhl, service=dbservice).first()
-        # FIXME: There may be dependencies...
+
         if dbsi:
+            if dbsi.client_count > 0:
+                raise ArgumentError("instance has clients and cannot be deleted.")
+
+            # Check the service map and remove any mappings
+            for dbmap in session.query(ServiceMap).filter_by(service_instance=dbsi).all():
+                session.delete(dbmap)
+
+            plenary_info = PlenaryServiceInstance(dbservice, dbsi)
+            plenary_info.remove
             session.delete(dbsi)
+            session.flush()
+            session.refresh(dbservice)
+            
         # FIXME: Cascade to relevant objects...
         return
 
