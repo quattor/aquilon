@@ -44,11 +44,12 @@ class ServiceListItem(Base):
                            primary_key=True)
 
     service_id    = Column(Integer, ForeignKey(
-                           'service.id', name='sli_svc_fk'), nullable = False)
+                           'service.id', name='sli_svc_fk',
+                           ondelete = 'CASCADE'), nullable = False)
 
     archetype_id  = Column(Integer, ForeignKey(
-                           'archetype.id', name='sli_arctyp_fk'),
-                           nullable = False)
+                           'archetype.id', name='sli_arctyp_fk',
+                           ondelete = CASCADE), nullable = False)
 
     creation_date = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False ))
