@@ -8,8 +8,6 @@
 #
 # This module is part of Aquilon
 """To be imported by classes and modules requiring aqdb access"""
-
-
 from __future__ import with_statement
 
 import pwd
@@ -94,7 +92,7 @@ class db_factory(object):
         if self.dsn.startswith('oracle'):
             import cx_Oracle
             self.schema = self.config.get('database','dbuser')
-            self.server = self.config.get('database','server')
+
             passwds = self._get_password_list()
 
             if len(passwds) < 1:
@@ -120,7 +118,6 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
 
         self.meta   = MetaData(self.engine)
         assert(self.meta)
-        print self.meta
 
         if sqlalchemy.__version__.startswith('0.4'):
             self.Session = scoped_session(sessionmaker(bind = self.engine,
@@ -149,12 +146,8 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
             except SaDBError, e:
                 errs.append(e)
                 pass
-        if len(errs) > 1:
-            for e in errs:
-                sys.stderr.write(e)
-            raise SaDBError(errs[len(errs) - 1])
-        elif len(errs) == 1:
-            raise SaDBError(errs.pop())
+        if len(errs) >= 1:
+            raise errs.pop()
         else:
             #shouldn't get here
             msg = 'unknown issue connecting to %s'%(self.dsn)
@@ -166,21 +159,25 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
             (i.e. newest on top). It will try them sequentially, finally
             giving up and throwing an exception """
 
-        passwd_file = self.config.get("database", "password_file")
-        passwds = []
-        if os.path.isfile(passwd_file):
-           with open(passwd_file) as f:
+        if self.config.has_option("database", "dbpassword"):
+            #TODO: RAISE WARNING: we'd like to get out of that buisness I think
+            return [self.config.get("database", "dbpassword")]
+        else:
+            passwd_file = self.config.get("database", "password_file")
+            passwds = []
+
+            try:
+                f = open(passwd_file)
                 passwds = f.readlines()
                 if len(passwds) < 1:
                     msg = "No lines in %s"%(passwd_file)
                     raise ValueError(msg)
                 else:
                     return [passwd.strip() for passwd in passwds]
-                        # Fallback for testing when password file may not exist.
-        elif self.config.has_option("database", "dbpassword"):
-            return [self.config.get("database", "dbpassword")]
-        else:
-            return []
+            # Fallback for testing when password file may not exist.
+            except IOError,e:
+                print e
+                return None
 
     def safe_execute(self, stmt, **kwargs):
         """ convenience wrapper """
