@@ -48,7 +48,7 @@ class ServiceListItem(Base):
                            ondelete = 'CASCADE'), nullable = False)
 
     archetype_id  = Column(Integer, ForeignKey(
-                           'archetype.id', name='sli_arctyp_fk',
+                           'archetype.id', name='sli_arctype_fk',
                            ondelete = 'CASCADE'), nullable = False)
 
     creation_date = deferred(Column(DateTime, default = datetime.now,
