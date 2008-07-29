@@ -36,7 +36,8 @@ class UserPrincipal(Base):
     realm_id = Column(Integer, ForeignKey(
         'realm.id', name = 'usr_princ_rlm_fk'), nullable = False)
 
-    role_id = Column(Integer, ForeignKey('role.id', name='usr_princ_role_fk'),
+    role_id = Column(Integer, ForeignKey(
+        'role.id', name='usr_princ_role_fk', ondelete = 'CASCADE'),
                      nullable = False)
                      #default = select(
                      #   [role.c.id]).where(
