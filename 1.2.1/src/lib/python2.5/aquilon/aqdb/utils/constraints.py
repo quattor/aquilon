@@ -23,6 +23,16 @@ import aquilon.aqdb.db_factory as db_factory
         #double check we're not touching FKs... looked like we might be
         #refactor to do ALL constraint types with name like 'SYS_C00%'
 
+_long_nms = {}
+_long_nms['LOCATION_SEARCH_LIST']    = 'LOC_SRCH_LST'
+_long_nms['LOCATION_SEARCH_LIST_ID'] = 'LOC_SRCH_LIST_ID'
+_long_nms['SEARCH_LIST_ITEM']        = 'SRCH_LI'
+_long_nms['PHYSICAL_INTERFACE']      = 'PHYS_IFACE'
+_long_nms['SERVICE_MAP']             = 'SVC_MAP'
+_long_nms['SERVICE_LIST_ITEM']       = 'SVC_LI'
+_long_nms['SERVICE_INSTANCE']        = 'SVC_INST'
+_long_nms['CREATION_DATE']           = 'CR_DATE'
+
 def rename_non_null_check_constraints(dbf):
     stmt = """
     SELECT C.constraint_name  con,
@@ -40,12 +50,19 @@ def rename_non_null_check_constraints(dbf):
     for i in cons:
         if i[2].endswith('IS NOT NULL'):
             col = pat.match(i[2]).group().strip('"')
-            if col == 'CREATION_DATE':
-                col = 'CR_DATE'
-            nm = '%s_%s_NN'%(i[1], col)
+            if col in _long_nms.keys():
+                col = _long_nms[col]
+            #TODO: replace with table_info in next version
+            if i[1] in _long_nms.keys():
+                nm = '%s_%s_NN'%(_long_nms[i[1]], col)
+            else:
+                nm = '%s_%s_NN'%(i[1], col)
+
             rename = 'ALTER TABLE %s RENAME CONSTRAINT %s TO %s'%(i[1],i[0],nm)
-            if len(nm) > 32:
-                print '%s\n would fail, new name longer than 32 characters'
+
+            if len(nm) > 30:
+                print '%s\n would fail, new name longer than 32 characters'%(
+                    rename)
                 continue
             else:
                 db_factory.debug(rename)
