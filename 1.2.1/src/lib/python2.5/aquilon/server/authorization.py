@@ -38,7 +38,7 @@ class AuthorizationBroker(object):
                     "Unauthorized access attempt to %s on %s.  Request permission from 'aqd-eng@morganstanley.com'." % 
                     (action, resource))
         # Right now, anybody in a group can do anything they want, except...
-        if action == 'permission' or action == 'regenerate_templates':
+        if action == 'permission' or action == 'flush':
             if dbuser.role.name != 'aqd_admin':
                 raise AuthorizationException(
                         "Must have the aqd_admin role to %s." % action)

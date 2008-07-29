@@ -43,8 +43,10 @@
    </command>
 
    <command name="flush">
-      Write out all plenary templates.
-      <transport method="put" path="flush" />
+      Force the server to write out all templates that it creates
+      automatically, based on the current information in AQDB.
+      Requires aqd_admin entitlement.
+      <transport method="post" path="flush" />
    </command>
 
    <command name="ping">
@@ -959,15 +961,6 @@
          <option name="createrealm" type="boolean">Create an entry for the realm if one does not exist (implies --createuser)</option>
       </optgroup>
       <transport method="put" path="principal/%(principal)s/role" />
-   </command>
-
-   <command name="regenerate_templates">
-      Force the server to regenerate all templates that it creates
-      automatically, assuming the latest state is valid.
-      <optgroup name="regenerate_templates_opts" mandatory="True" fields="all">
-         <option name="all" type="boolean">Regenerate all template files</option>
-      </optgroup>
-      <transport method="post" path="command/regenerate_all" />
    </command>
 
 </commandline>

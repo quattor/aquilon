@@ -22,24 +22,46 @@ class CommandFlush(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, user, **arguments):
+        plenarydir = self.config.get("broker", "plenarydir")
+        servername = self.config.get("broker", "servername")
+        hostsdir = self.config.get("broker", "hostsdir")
+        success = []
+        failed = []
+        total = 0
+
         log.msg("flushing services")
         # This should grab a global lock...
         for dbservice in session.query(Service).all():
-            plenary_info = PlenaryService(dbservice)
-            plenary_info.write(self.config.get("broker", "plenarydir"),
-                               self.config.get("broker", "servername"), user)
+            try:
+                total += 1
+                plenary_info = PlenaryService(dbservice)
+                plenary_info.write(plenarydir, servername, user)
+            except Exception, e:
+                failed.append("sevice %s failed: %s" % (dbservice.name, e))
+                continue
+            
             for dbinst in dbservice.instances:
-                plenary_info = PlenaryServiceInstance(dbservice, dbinst)
-                plenary_info.write(self.config.get("broker", "plenarydir"),
-                                   self.config.get("broker", "servername"), user)
+                try:
+                    total += 1
+                    plenary_info = PlenaryServiceInstance(dbservice, dbinst)
+                    plenary_info.write(plenarydir, servername, user)
+                except Exception, e:
+                    failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.host_list.name, e))
+                    continue
 
         log.msg("flushing machines")
         for machine in session.query(Machine).all():
-            plenary_info = PlenaryMachineInfo(machine)
-            plenary_info.write(self.config.get("broker", "plenarydir"),
-                               self.config.get("broker", "servername"), user)
+            try:
+                total += 1
+                plenary_info = PlenaryMachineInfo(machine)
+                plenary_info.write(plenarydir, servername, user)
+            except Exception, e:
+                failed.append("machine %s failed: %s" % (dbmachine.host.fqdn, e))
+                continue
 
-        log.msg("flush completed")
+        log.msg("flushed %d/%d templates" % (total-len(failed), total))
+        if failed:
+            raise PartialError(success, failed)
         return
 
 #if __name__=='__main__':
