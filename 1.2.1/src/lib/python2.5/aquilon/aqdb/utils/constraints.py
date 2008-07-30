@@ -19,9 +19,8 @@ sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
 import aquilon.aqdb.db_factory as db_factory
 
 #TODO:
-        #decrease length of > 32 char constraint names
-        #double check we're not touching FKs... looked like we might be
-        #refactor to do ALL constraint types with name like 'SYS_C00%'
+    #double check we're not touching FKs... looked like we might be
+    #refactor to do ALL constraint types with name like 'SYS_C00%'
 
 _long_nms = {}
 _long_nms['LOCATION_SEARCH_LIST']    = 'LOC_SRCH_LST'
@@ -32,6 +31,28 @@ _long_nms['SERVICE_MAP']             = 'SVC_MAP'
 _long_nms['SERVICE_LIST_ITEM']       = 'SVC_LI'
 _long_nms['SERVICE_INSTANCE']        = 'SVC_INST'
 _long_nms['CREATION_DATE']           = 'CR_DATE'
+
+def rename_sys_pks(dbf):
+    stmt = """
+    SELECT C.constraint_name  con,
+           C.table_name       tab,
+           C.search_condition cond
+      FROM user_constraints C
+     WHERE C.constraint_type = 'P'
+       AND C.constraint_name LIKE 'SYS_C00%' """
+
+    cons = dbf.safe_execute(stmt)
+
+    if cons:
+        for i in cons:
+            #print i
+            nm = '%s_pk'%(i[1])
+            rename = 'ALTER TABLE %s RENAME CONSTRAINT %s to %s'%(
+                i[1], i[0], nm)
+            db_factory.debug(rename)
+            dbf.safe_execute(rename)
+    else:
+        print 'PKs are all properly named'
 
 def rename_non_null_check_constraints(dbf):
     stmt = """
