@@ -18,11 +18,10 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
 
-
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, Numeric, ForeignKey
 
 from aquilon.aqdb.loc.location import Location, location
-
+from aquilon.aqdb.column_types.aqstr import AqStr
 
 class Rack(Location):
     """ Rack is a subtype of location """
@@ -30,8 +29,13 @@ class Rack(Location):
     __mapper_args__ = {'polymorphic_identity' : 'rack'}
     id = Column(Integer,
                 ForeignKey('location.id', name = 'rack_loc_fk',
-                           ondelete = 'CASCADE'),
-                primary_key=True)
+                           ondelete = 'CASCADE'), primary_key=True)
+    #TODO: POSTHASTE: constrain to alphabetic in row, and make both non-nullable
+    rack_row    = Column(AqStr(4), nullable = True)
+    rack_column = Column(Integer,  nullable = True)
+    #rack RID is a part of the name, so no column
+    #waiting to decide on how to make comp room effective
+    #comp_room   = Column(AqStr(16))
 
 rack = Rack.__table__
 rack.primary_key.name = 'rack_pk'
