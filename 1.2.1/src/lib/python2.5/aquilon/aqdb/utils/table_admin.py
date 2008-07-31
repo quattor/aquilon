@@ -60,3 +60,8 @@ def drop_all_tables_and_sequences(dbf):
                 execute(text('DROP SEQUENCE %s'%(seq)))
             except SQLError, e:
                 print >> sys.stderr, e
+
+        try:
+            execute(text('PURGE RECYCLEBIN'))
+        except SQLError, e:
+            print >> sys.stderr, e
