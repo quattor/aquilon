@@ -106,7 +106,7 @@ class db_factory(object):
         #SQLITE
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
-            self.engine.connect()
+            self.connection = self.engine.connect()
         else:
             msg = """
 supported database datasources are sqlite and oracle, your dsn is '%s' """%(
