@@ -45,12 +45,12 @@ class IPV4(types.TypeDecorator):
                 msg = (dq, " : bytes should be between 0 and 255")
                 raise TypeError(msg)
 
-        return struct.unpack('L', inet_aton(dq))[0]
+        return struct.unpack('!L', inet_aton(dq))[0]
 
     def process_result_value(self, n, engine):
         # Force the incoming Decimal to a long to prevent odd issues when
         # struct.pack() tries it...
-        return inet_ntoa(struct.pack('L', long(n)))
+        return inet_ntoa(struct.pack('!L', long(n)))
 
     def copy(self):
         return IPV4(self.impl.length)
