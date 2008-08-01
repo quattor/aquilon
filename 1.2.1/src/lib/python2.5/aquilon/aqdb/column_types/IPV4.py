@@ -9,12 +9,11 @@
 # This module is part of Aquilon
 """ Translates dotted quad strings into long integers """
 
-import struct
-from socket import inet_aton, inet_ntoa
-from exceptions import TypeError, AssertionError
-
+import aquilon.aqdb.net.ip_to_int as i2i
 import sys
 import os
+from   exceptions import TypeError, AssertionError
+
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -45,12 +44,12 @@ class IPV4(types.TypeDecorator):
                 msg = (dq, " : bytes should be between 0 and 255")
                 raise TypeError(msg)
 
-        return struct.unpack('!L', inet_aton(dq))[0]
+        return i2i.dq_to_int(dq)
 
     def process_result_value(self, n, engine):
         # Force the incoming Decimal to a long to prevent odd issues when
         # struct.pack() tries it...
-        return inet_ntoa(struct.pack('!L', long(n)))
+        return i2i.int_to_dq(n)
 
     def copy(self):
         return IPV4(self.impl.length)

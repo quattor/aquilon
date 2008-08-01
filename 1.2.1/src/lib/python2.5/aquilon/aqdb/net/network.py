@@ -33,7 +33,7 @@ from aquilon.aqdb.loc.location       import Location, location
 from aquilon.aqdb.loc.building       import Building, building
 
 import aquilon.aqdb.net.ipcalc as ipcalc
-
+import aquilon.aqdb.net.ip_to_int as i2i
 
 
 """ Network Type can be one of four values which have been carried over as
@@ -48,8 +48,87 @@ import aquilon.aqdb.net.ipcalc as ipcalc
 
         *   tor_net: tor switches are managed in band, which means that
                      if you know the ip/netmask of the switch, you know the
-                     network which it provides for.
+                     network which it provides for, and the 5th and 6th address
+                     are reserved for a dynamic pool for the switch on the net
+        *   external/external_vendor
+        *   heartbeat
+        *   wan
+        *   campus
 """
+
+#for fast lookups as opposed to a computed column approach
+#TODO: should be BORG'ed ?
+_mask_to_cidr = {
+    1          : 32,
+    2          : 31,
+    4          : 30,
+    8          : 29,
+    16         : 28,
+    32         : 27,
+    64         : 26,
+    128        : 25,
+    256        : 24,
+    512        : 23,
+    1024       : 22,
+    2048       : 21,
+    4096       : 20,
+    8192       : 19,
+    16384      : 18,
+    32768      : 17,
+    65536      : 16,
+    131072     : 15,
+    262144     : 14,
+    524288     : 13,
+    1048576    : 12,
+    2097152    : 11,
+    4194304    : 10,
+    8388608    : 9,
+    16777216   : 8,
+    33554432   : 7,
+    67108864   : 6,
+    134217728  : 5,
+    268435456  : 4,
+    536870912  : 3,
+    1073741824 : 2,
+    2147483648 : 1,
+    4294967296 : 0
+}
+
+_cidr_to_mask = {
+    32 : ['255.255.255.255',    1],
+    31 : ['255.255.255.254',    2],
+    30 : ['255.255.255.252',    4],
+    29 : ['255.255.255.248',    8],
+    28 : ['255.255.255.240',   16],
+    27 : ['255.255.255.224',   32],
+    26 : ['255.255.255.192',   64],
+    25 : ['255.255.255.128',  128],
+    24 : ['255.255.255.0',    256],   #/24 = class C
+    23 : ['255.255.254.0',    512],
+    22 : ['255.255.252.0',   1024],
+    21 : ['255.255.248.0',   2048],
+    20 : ['255.255.240.0',   4096],
+    19 : ['255.255.224.0',   8192],
+    18 : ['255.255.192.0',  16384],
+    17 : ['255.255.128.0',  32768],
+    16 : ['255.255.0.0',    65536],     #/16 = class B
+    15 : ['255.254.0.0',   131072],
+    14 : ['255.252.0.0',   262144],
+    13 : ['255.248.0.0',   524288],
+    12 : ['255.240.0.0',  1048576],
+    11 : ['255.224.0.0',  2097152],
+    10 : ['255.192.0.0',  4194304],
+    9  : ['255.128.0.0',  8388608],
+    8  : ['255.0.0.0',   16777216],       #/8 = class A
+    7  : ['254.0.0.0',   33554432],
+    6  : ['252.0.0.0',   67108864],
+    5  : ['248.0.0.0',  134217728],
+    4  : ['240.0.0.0',  268435456],
+    3  : ['224.0.0.0',  536870912],
+    2  : ['192.0.0.0', 1073741824],
+    1  : ['128.0.0.0', 2147483648],
+    0  : ['0.0.0.0',   4294967296]
+}
 
 #TODO: enum type for network_type, cidr
 class Network(Base):
@@ -73,18 +152,21 @@ class Network(Base):
     id            = Column(Integer,
                            Sequence('network_id_seq'), primary_key = True)
 
-    location_id   = Column('location_id', Integer, ForeignKey('location.id'),
-                           nullable=False)
+    location_id   = Column('location_id', Integer, ForeignKey(
+        'location.id', name = 'network_loc_fk'), nullable = False)
 
     network_type  = Column(AqStr(32),  nullable = False, default = 'unknown')
     #TODO:  constrain <= 32, >= 1
     cidr          = Column(Integer,    nullable = False)
     name          = Column(AqStr(255), nullable = False) #TODO: default to ip
-    ip            = Column(IPV4(),       nullable = False)
+    ip            = Column(IPV4,       nullable = False)
+    bcast         = Column(IPV4,       nullable = False)
+    mask          = Column(Integer,    nullable = False) #TODO: ENUM!!!
     side          = Column(AqStr(4),   nullable = True, default = 'a')
     dsdb_id       = Column(Integer,    nullable = False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
     comments      = deferred(Column(String(255), nullable = True))
 
     location      = relation(Location, backref = 'networks')
@@ -93,9 +175,9 @@ class Network(Base):
         return ipcalc.Network('%s/%s'%(self.ip,self.cidr))
     ipcalc = property(_ipcalc)
 
-    def _broadcast(self):
-        return str(self.ipcalc.broadcast())
-    broadcast = property(_broadcast)
+    #def _broadcast(self):
+    #    return str(self.ipcalc.broadcast())
+    #broadcast = property(_broadcast)
     #TODO: netmask property from ipcalc
     #TODO: custom str and repr
 
@@ -115,6 +197,8 @@ def populate(*args, **kw):
     from aquilon.aqdb.db_factory import db_factory, Base
     import aquilon.aqdb.utils.dsdb as dsdb
     from sqlalchemy import insert
+    import socket as skt
+    import time
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
@@ -122,7 +206,7 @@ def populate(*args, **kw):
         Base.metadata.bind.echo = True
     s = dbf.session()
 
-    import logging
+    import logging as l
         #do we *need* logger?
         #TODO: when we have an error table, insert a row there, as well as
         #    generating an exception that can be acted upon in dsdb.
@@ -138,6 +222,8 @@ def populate(*args, **kw):
 
     if len(s.query(Network).all()) < 1:
         print 'creating networks...go get some coffee...'
+        start = time.clock()
+
         b_cache={}
         sel=select( [location.c.name, building.c.id],
             location.c.id == building.c.id )
@@ -145,10 +231,15 @@ def populate(*args, **kw):
         for row in dbf.engine.execute(sel).fetchall():
             b_cache[row[0]]=row[1]
 
+        type_cache = {}
+        type_cache[0] = 'unknown'
+        for row in dsdb.dump_net_type():
+            type_cache[row[0]] = row[1]
+
         count=0
-        #TODO: forget campus, bucket. make this whole thing an insert ?
-        for (name, ip, cidr, type, bldg_name,
-             side, dsdb_id) in dsdb.dump_network():
+
+        for (name, ip, mask, type_id, bldg_name, side,
+             dsdb_id) in dsdb.dump_network():
 
             kw = {}
             try:
@@ -158,7 +249,7 @@ def populate(*args, **kw):
                 #TODO: generate an exception about the row: unexpected
                 #   null data means that dsdb has bad data
 
-                logging.error("Can't find building '%s'\n%s"%(bldg_name, row))
+                l.error("Can't find building '%s'\n%s"%(bldg_name, row))
                 continue
                 # an alternative...
                 #sys.stderr.write("Can't find building '%s' for row %s\n"%(
@@ -166,9 +257,13 @@ def populate(*args, **kw):
 
             kw['name']       = name
             kw['ip']         = ip
-            kw['cidr']       = cidr
-            if type:
-                kw['network_type']   = type
+            kw['mask']       = mask
+            kw['cidr']       = _mask_to_cidr[mask]
+
+            kw['bcast']      = i2i.get_bcast(ip, kw['cidr'])
+
+            if type_id:
+                kw['network_type']   = type_cache[type_id]
             if side:
                 kw['side']   = side
             kw['dsdb_id']    = dsdb_id
@@ -176,12 +271,14 @@ def populate(*args, **kw):
             c=Network(**kw)
             s.add(c)
             count += 1
-            if count % 1000 == 0:
+            if count % 3000 == 0:
                 s.commit()
                 s.flush()
 
         s.commit()
-        print 'created %s networks'%(count)
+        stend = time.clock()
+        thetime = stend - start
+        print 'created %s networks in %2f'%(count, thetime)
 
 
     if Base.metadata.bind.echo == True:
