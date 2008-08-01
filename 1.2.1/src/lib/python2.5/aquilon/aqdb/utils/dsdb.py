@@ -14,11 +14,12 @@ msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
 import os
 
-#TODO: for fun, put these into the database. select them out before running them
-# to try on a *purely* data driven approach to programming. This could enable
-# a brand new kind of "api" to aqd: one where the power user can create their
-# own commands on the fly. (obviously we'd lock this down like CRAZY, but it
-# could help people like Sam that know sql but don't know python, for example)
+#TODO: for fun, put these into the database. select them out before running
+# them to try on a *purely* data driven approach to programming. This could
+# enable a brand new kind of "api" to aqd: one where the power user can
+# create their own commands on the fly. (obviously we'd lock this down like
+# CRAZY, but it could help people like Sam that know sql but don't know python
+# for example)
 
 get_country = """
     select country_symbol, country_name, continent
@@ -27,6 +28,15 @@ get_country = """
 
 get_campus = """
     select campus_name, comments from campus where state >= 0
+"""
+
+get_campus_entries = """
+    select A.bldg_name, C.campus_name from bldg A, campus_entry B, campus C
+        where A.bldg_id = B.bldg_id
+        AND C.campus_id = B.campus_id
+        AND A.state >= 0
+        AND B.state >= 0
+        AND C.state >= 0
 """
 
 get_city = """
@@ -53,39 +63,41 @@ get_bucket = """
     ORDER BY loc_name """
 
 get_network="""
-    SELECT net_name, net_ip_addr, abs(net_mask),
-    isnull(net_type_id,4), SUBSTRING(location,CHAR_LENGTH(location) - 7,2)
-    as sysloc, side, net_id FROM network WHERE state >= 0
-"""
+    SELECT  net_name,
+            net_ip_addr,
+            abs(net_mask),
+            isnull(net_type_id,0),
+            SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
+            side, net_id FROM network
+    WHERE state >= 0 """
 
-host_info  = """
-SELECT
-        A.host_name,                                          /* network_host */
-        B.cpu, B.virt_cpu, B.cputype, B.memory, B.hostid,          /* machine */
-        C.name, C.version, C.kernel_id,                                 /* os */
-        D.maker, D.model, D.arch, D.karch,                          /* model */
-        E.sys_loc, E.afscell --,                               /* minfo*/
-        --G.iface_name, G.ip_addr, G.ether_addr            /* interface info */
+get_net_type = """
+    SELECT * FROM network_type """
 
+host_info  = """ SELECT
+    A.host_name,                                       /* network_host */
+    B.cpu, B.virt_cpu, B.cputype, B.memory, B.hostid,  /* machine */
+    C.name, C.version, C.kernel_id,                    /* os */
+    D.maker, D.model, D.arch, D.karch,                 /* model */
+    E.sys_loc, E.afscell --,                           /* minfo*/
+    --G.iface_name, G.ip_addr, G.ether_addr            /* interface info */
+    FROM   network_host A, machine B, os C, model D, machine_info E
+    --, network_iface G
 
-                FROM   network_host A, machine B, os C, model D, machine_info E
-                --, network_iface G
-
-                WHERE  A.name_type = 0
-                       AND A.machine_id = B.machine_id
-                       AND B.primary_host_id = A.host_id
-                       AND B.os_id *= C.id
-                       AND B.model_id *= D.id
-                       AND B.machine_id = E.machine_id
-                       --AND B.machine_id *= G.machine_id
-                       AND A.state >= 0
-                       AND B.state >= 0
-                       AND C.state >= 0
-                       AND D.state >= 0
-                       AND E.state >= 0
-                       --AND G.state >= 0
-                       AND A.host_name = 'np3c1n4'
-"""
+    WHERE  A.name_type = 0
+           AND A.machine_id = B.machine_id
+           AND B.primary_host_id = A.host_id
+           AND B.os_id *= C.id
+            AND B.model_id *= D.id
+           AND B.machine_id = E.machine_id
+           --AND B.machine_id *= G.machine_id
+           AND A.state >= 0
+           AND B.state >= 0
+           AND C.state >= 0
+           AND D.state >= 0
+           AND E.state >= 0
+           --AND G.state >= 0
+           AND A.host_name = 'np3c1n4' """
 
 class dsdb_connection(object):
     """ Wraps connections to DSDB """
@@ -111,8 +123,9 @@ class dsdb_connection(object):
             self.syb.connect()
         else:
             #TODO: kuu to a user, then do the above
-            self.syb = Sybase.connect(self.dsn, 'dsdb_guest', 'dsdb_guest', \
-                                  'dsdb', datetime = 'auto', auto_commit = '0')
+            self.syb = Sybase.connect(
+                self.dsn, 'dsdb_guest', 'dsdb_guest', 'dsdb',
+                datetime = 'auto', auto_commit = '0')
 
     def run_query(self,sql):
         """Runs query sql. Note use runSybaseProc to call a stored procedure.
@@ -178,6 +191,10 @@ def dump_network():
     db = dsdb_connection()
     return db.run_query(get_network).fetchall()
 
+def dump_net_type():
+    db = dsdb_connection()
+    return db.run_query(get_net_type).fetchall()
+
 def esp():
     print
     db = dsdb_connection()
@@ -187,5 +204,6 @@ if __name__ == '__main__':
     #test()
     #a=esp()
     #print a[0]
-    a = dump_campus()
+    #a = dump_campus()
+    a = dump_net_type()
     print a
