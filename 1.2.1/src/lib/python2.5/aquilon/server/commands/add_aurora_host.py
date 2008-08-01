@@ -111,7 +111,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['session'] = session
         kwargs['hostname'] = fqdn
         kwargs['archetype'] = 'aurora'
-        kwargs['domain'] = 'aurora_domain'
+        kwargs['domain'] = 'production'
         kwargs['machine'] = dbmachine.name
         kwargs['status'] = status
         # The superclass already contains the rest of the logic to handle this.

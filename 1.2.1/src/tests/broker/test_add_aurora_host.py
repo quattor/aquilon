@@ -34,7 +34,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Chassis: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
-        self.matchoutput(out, "Domain: aurora_domain", command)
+        self.matchoutput(out, "Domain: production", command)
         self.matchoutput(out, "Status: production", command)
 
     def testaddaurorawithoutnode(self):
@@ -49,7 +49,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Building: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
-        self.matchoutput(out, "Domain: aurora_domain", command)
+        self.matchoutput(out, "Domain: production", command)
         self.matchoutput(out, "Status: production", command)
 
 

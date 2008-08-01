@@ -23,7 +23,7 @@ class CommandAddWindowsHost(CommandAddHost):
     @az_check
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
-        kwargs['domain'] = 'windows_domain'
+        kwargs['domain'] = 'production'
         # The superclass already contains the logic to handle this case.
         return CommandAddHost.render(self, *args, **kwargs)
 

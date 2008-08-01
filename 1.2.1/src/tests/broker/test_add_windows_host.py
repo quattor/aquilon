@@ -34,7 +34,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Archetype: windows", command)
-        self.matchoutput(out, "Domain: windows_domain", command)
+        self.matchoutput(out, "Domain: production", command)
         self.matchoutput(out, "Status: production", command)
 
 
