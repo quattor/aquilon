@@ -20,6 +20,10 @@ class Plenary(object):
         self.template_type = 'structure'
         
     def write(self, dir, localhost, user):
+        if (hasattr(self, "machine_type") and
+                self.machine_type == 'aurora_node'):
+            # Don't bother writing plenary files for dummy aurora hardware.
+            return
         lines = []
         lines.append("# Generated on %s for %s at %s UTC"
                      % (localhost, user, datetime.utcnow().ctime()))
@@ -45,10 +49,14 @@ class PlenaryMachineInfo(Plenary):
         Plenary.__init__(self)
         self.hub = dbmachine.location.hub.fullname.lower()
         self.building = dbmachine.location.building.name
-        self.rack = dbmachine.location.rack.name
+        if dbmachine.location.rack:
+            self.rack = dbmachine.location.rack.name
+        else:
+            self.rack = None
         self.sysloc = dbmachine.location.sysloc()
         self.machine = dbmachine.name
         self.model = dbmachine.model.name
+        self.machine_type = dbmachine.model.machine_type
         self.vendor = dbmachine.model.vendor.name
         self.serial = dbmachine.serial_no
         self.ram = dbmachine.memory

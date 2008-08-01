@@ -66,6 +66,11 @@ def populate(*args, **kw):
                         continue
                     created.append(j)
 
+        aurora_vendor = Vendor(name='aurora_vendor',
+                            comments='Placeholder vendor for Aurora hardware.')
+        s.save(aurora_vendor)
+        created.append(aurora_vendor)
+
         try:
             s.commit()
         except Exception,e:

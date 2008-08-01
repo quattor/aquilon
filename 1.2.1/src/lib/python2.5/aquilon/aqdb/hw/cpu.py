@@ -109,6 +109,16 @@ def populate(*args, **kw):
                     logging.error(msg)
                 else:
                     print >> sys.stderr, msg
+
+        try:
+            av = s.query(Vendor).filter_by(name='aurora_vendor').one()
+            a = Cpu(vendor=av, name='aurora_cpu', speed=0,
+                    comments='Placeholder Aurora CPU type.')
+            s.add(a)
+        except Exception, e:
+            s.rollback()
+            print e
+
         try:
             s.commit()
         except Exception,e:

@@ -83,31 +83,31 @@ class Location(Base):
     p_dict = property(_p_dict)
 
     def _hub(self):
-        return self.p_dict['hub']
+        return self.p_dict.get('hub', None)
     hub = property(_hub)
 
     def _continent(self):
-        return self.p_dict['continent']
+        return self.p_dict.get('continent', None)
     continent=property(_continent)
 
     def _country(self):
-        return self.p_dict['country']
+        return self.p_dict.get('country', None)
     country = property(_country)
 
     def _city(self):
-        return self.p_dict['city']
+        return self.p_dict.get('city', None)
     city = property(_city)
 
     def _building(self):
-        return self.p_dict['building']
+        return self.p_dict.get('building', None)
     building = property(_building)
 
     def _rack(self):
-        return self.p_dict['rack']
+        return self.p_dict.get('rack', None)
     rack = property(_rack)
 
     def _chassis(self):
-        return self.p_dict['chassis']
+        return self.p_dict.get('chassis', None)
     chassis = property(_chassis)
 
     #def get_typed_children(self,type):

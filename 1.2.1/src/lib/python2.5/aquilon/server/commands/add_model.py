@@ -35,7 +35,11 @@ class CommandAddModel(BrokerCommand):
         if dbmodel is not None:
             raise ArgumentError('Specified model already exists')
         dbvendor = get_vendor(session, vendor)
-        machine_type = 'tor_switch'
+
+        # Specifically not allowing new models to be added that are of
+        # type aurora_node - that is only meant for the dummy aurora_model.
+        if type not in ["blade", "rackmount", "workstation", "tor_switch"]:
+            raise ArgumentError("The model's machine type must be blade, rackmount, workstation, or tor_switch")
 
         if cputype:
             mem = force_int("mem", mem)
@@ -43,7 +47,7 @@ class CommandAddModel(BrokerCommand):
             disksize = force_int("disksize", disksize)
             nics = force_int("nics", nics)
 
-        dbmodel = Model(name=name, vendor=dbvendor, machine_type=machine_type,
+        dbmodel = Model(name=name, vendor=dbvendor, machine_type=type,
                 comments=comments)
         try:
             session.save(dbmodel)

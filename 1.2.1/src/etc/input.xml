@@ -189,12 +189,52 @@
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
-         <option name="status" type="string">Status: prod, dev, qa, build</option>
+         <option name="status" type="string">Status: production, development, qa, build</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
+   </command>
+
+   <command name="add_aquilon_host">
+      Add a new host to the database with archetype aquilon.  Requires a
+      machine with a bootable interface and a valid IP address.
+      <optgroup name="add_aquilon_host_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Fully qualified Host name</option>
+         <option name="machine" type="string">Machine (Node) name</option>
+         <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <option name="status" type="string">Status: production, development, qa, build</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="aquilon_host/%(hostname)s" />
+   </command>
+
+   <command name="add_windows_host">
+      Add a new host to the database with archetype windows.  Requires a 
+      machine with a bootable interface and a valid IP address.
+      <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Fully qualified Host name</option>
+         <option name="machine" type="string">Machine (Node) name</option>
+         <option name="status" type="string">Status: production, development, qa, build</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="windows_host/%(hostname)s" />
+   </command>
+
+   <command name="add_aurora_host">
+      Add a placeholder host to the database to represent an aurora host.
+      <optgroup name="add_host_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Fully qualified Host name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="aurora_host/%(hostname)s" />
    </command>
 
    <command name="add_model">
@@ -961,6 +1001,32 @@
          <option name="createrealm" type="boolean">Create an entry for the realm if one does not exist (implies --createuser)</option>
       </optgroup>
       <transport method="put" path="principal/%(principal)s/role" />
+   </command>
+
+   <command name="add_dns_domain">
+      <optgroup name="add_dns_domain_options" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">Name of the new DNS domain</option>
+      </optgroup>
+      <optgroup name="add_dns_domain_optional_options" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="dns_domain/%(dns_domain)s" />
+   </command>
+
+   <command name="show_dns_domain">
+      <optgroup name="del_dns_domain_options" mandatory="True" fields="any">
+         <option name="dns_domain" type="string" conflicts="all">Name of the DNS domain</option>
+         <option name="all" type="boolean" conflicts="dns_domain">Show all DNS domains</option>
+      </optgroup>
+      <transport trigger="dns_domain" method="get" path="dns_domain/%(dns_domain)s" />
+      <transport method="get" path="dns_domain" />
+   </command>
+
+   <command name="del_dns_domain">
+      <optgroup name="del_dns_domain_options" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">Name of the DNS domain</option>
+      </optgroup>
+      <transport method="delete" path="dns_domain/%(dns_domain)s" />
    </command>
 
 </commandline>

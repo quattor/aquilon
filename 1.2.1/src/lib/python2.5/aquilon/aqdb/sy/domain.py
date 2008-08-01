@@ -73,12 +73,16 @@ def populate(*args, **kw):
 
         p = Domain(name = 'production', server = qs, owner = cdb,
                    comments='The master production area')
-
         q = Domain(name = 'daqscott', server = qs, owner = daqscott)
+        a = Domain(name='aurora_domain', server=qs, owner=cdb,
+                   comments='Placeholder domain for aurora hosts.')
+        w = Domain(name='windows_domain', server=qs, owner=cdb,
+                   comments='Placeholder domain for windows hosts.')
 
         s.add(p)
         s.add(q)
-        s.commit()
+        s.add(a)
+        s.add(w)
         s.commit()
         d=s.query(Domain).first()
         assert(d)

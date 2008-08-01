@@ -29,6 +29,7 @@ from test_start import TestBrokerStart
 from test_ping import TestPing
 from test_status import TestStatus
 from test_permission import TestPermission
+from test_add_dns_domain import TestAddDnsDomain
 from test_add_domain import TestAddDomain
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
@@ -41,6 +42,9 @@ from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
 from test_add_host import TestAddHost
+from test_add_aquilon_host import TestAddAquilonHost
+from test_add_windows_host import TestAddWindowsHost
+from test_add_aurora_host import TestAddAuroraHost
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_make_aquilon import TestMakeAquilon
@@ -74,6 +78,7 @@ from test_del_rack import TestDelRack
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
 from test_del_domain import TestDelDomain
+from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
 from test_stop import TestBrokerStop
 
@@ -91,10 +96,12 @@ class BrokerTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart, TestPing, TestStatus, TestPermission,
-                TestAddDomain, TestAddService, TestAddRequiredService,
+                TestAddDnsDomain, TestAddDomain,
+                TestAddService, TestAddRequiredService,
                 TestAddRack, TestAddCpu, TestAddModel, TestAddTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
+                TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestMapService, TestBindClient, TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestDomainConstraints, TestMachineConstraints,
@@ -108,7 +115,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnmapService, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
-                TestDelRequiredService, TestDelService, TestDelDomain,
+                TestDelRequiredService, TestDelService,
+                TestDelDomain, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))

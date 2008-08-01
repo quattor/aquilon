@@ -89,6 +89,27 @@ class TestAddInterface(TestBrokerCommand):
                 """"cards/nic/eth1/boot" = true;""",
                 command)
 
+    def testaddut3c1n4eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "ut3c1n4", "--mac", self.hostmac4,
+            "--ip", self.hostip4])
+
+    def testverifyaddut3c1n4interface(self):
+        command = "show machine --machine ut3c1n4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 %s %s boot=True" %
+                (self.hostmac4.lower(), self.hostip4), command)
+
+    def testverifycatut3c1n4interface(self):
+        command = "cat --machine ut3c1n4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                """"cards/nic/eth0/hwaddr" = "%s";""" % self.hostmac4.upper(),
+                command)
+        self.matchoutput(out,
+                """"cards/nic/eth0/boot" = true;""",
+                command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

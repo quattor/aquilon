@@ -86,7 +86,7 @@ def create_machine(session, machine, dblocation, dbmodel,
             cpu=dbcpu, cpu_quantity=cpucount, memory=memory, serial_no=serial)
     session.save(dbmachine)
 
-    if dbmodel.machine_specs:
+    if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node':
         dbdisk = Disk(machine=dbmachine,
                 disk_type=dbmodel.machine_specs.disk_type,
                 capacity=dbmodel.machine_specs.disk_capacity)

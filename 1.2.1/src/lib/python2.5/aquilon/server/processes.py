@@ -299,5 +299,74 @@ class DSDBRunner(object):
             raise pe1
         return
 
+    def add_dns_domain(self, dns_domain, comments):
+        try:
+            out = run_command([self.config.get("broker", "dsdb"),
+                    "show", "dns_domains", "-domain_name", dns_domain],
+                    env=self.getenv())
+        except ProcessException, e:
+            log.msg("The DNS domain %s does not exist in DSDB, adding it." %
+                    dns_domain)
+        else:
+            log.msg("The DNS domain %s already exists in DSDB, continuing." %
+                    dns_domain)
+            return
+
+        if not comments:
+            comments = ""
+        out = run_command([self.config.get("broker", "dsdb"),
+                "add", "dns_domain", "-domain_name", dns_domain,
+                "-comments", comments], env=self.getenv())
+        return
+
+    def delete_dns_domain(self, dns_domain):
+        try:
+            out = run_command([self.config.get("broker", "dsdb"),
+                    "delete", "dns_domain", "-domain_name", dns_domain],
+                    env=self.getenv())
+        except ProcessException, e:
+            log.msg("Encountered a problem removing the DNS domain %s from DSDB, continuing: %s" %
+                    (dns_domain, e))
+        else:
+            log.msg("Removed DNS domain %s from DSDB." % dns_domain)
+        return
+
+    primary_re = re.compile(r'^Primary Name:\s*\b([-\w]+)\b$', re.M)
+    node_re = re.compile(r'^Node:\s*\b([-\w]+)\b$', re.M)
+    dns_re = re.compile(r'^DNS Domain:\s*\b([-\w\.]+)\b$', re.M)
+    state_re = re.compile(r'^State:\s*\b(\d+)\b$', re.M)
+
+    def show_host(self, hostname):
+        (short, dot, dns_domain) = hostname.partition(".")
+        fields = {}
+        if not dot:
+            fields["fqdn"] = short + ".ms.com"
+            fields["dsdb_lookup"] = short
+        elif not dns_domain:
+            fields["fqdn"] = short + "ms.com"
+            fields["dsdb_lookup"] = short
+        elif dns_domain != "ms.com":
+            fields["fqdn"] = hostname
+            fields["dsdb_lookup"] = hostname
+        else:
+            fields["fqdn"] = hostname
+            fields["dsdb_lookup"] = short
+
+        out = run_command([self.config.get("broker", "dsdb"),
+                "show", "host", "-host_name", fields["dsdb_lookup"]],
+                env=self.getenv())
+        primary = self.primary_re.search(out)
+        node = self.node_re.search(out)
+        dns = self.dns_re.search(out)
+        state = self.state_re.search(out)
+        fields["primary_name"] = primary and primary.group(1) or None
+        fields["node"] = node and node.group(1) or None
+        fields["dns"] = dns and dns.group(1) or None
+        if state:
+            fields["state"] = int(state.group(1))
+        else:
+            fields["state"] = None
+        return fields
+
 
 #if __name__=='__main__':

@@ -29,7 +29,7 @@ class CommandDelMachine(BrokerCommand):
         dbmachine = get_machine(session, machine)
 
         if dbmachine.model.machine_type not in [
-                'blade', 'rackmount', 'workstation']:
+                'blade', 'rackmount', 'workstation', 'aurora_node']:
             raise ArgumentError("The del_machine command cannot delete machines of type '%(type)s'.  Try 'del %(type)s'." %
                     {"type": dbmachine.model.machine_type})
 

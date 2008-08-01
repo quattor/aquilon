@@ -32,13 +32,18 @@ class CommandAddMachine(BrokerCommand):
         dblocation = get_location(session, **arguments)
         dbmodel = get_model(session, model)
 
-        if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation']:
+        if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
+                'aurora_node']:
             raise ArgumentError("The add_machine command cannot add machines of type '%(type)s'.  Try 'add %(type)s'." %
                     {"type": dbmodel.machine_type})
 
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
             cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
 
+        # The check to make sure a plenary file is not written out for
+        # dummy aurora hardware is within the call to write().  This way
+        # it is consistent without altering (and forgetting to alter)
+        # all the calls to the method.
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write(self.config.get("broker", "plenarydir"),
                 self.config.get("broker", "servername"), user)

@@ -83,7 +83,8 @@ def populate(*args, **kw):
             ['dell','poweredge_6650', 'rackmount'],
             ['dell','poweredge_2650','rackmount'],
             ['dell','poweredge_2850','rackmount'],
-            ['dell','optiplex_260','workstation']]
+            ['dell','optiplex_260','workstation'],
+            ['aurora_vendor', 'aurora_model', 'aurora_node']]
 
         for i in f:
             m = Model(name = i[1],

@@ -20,10 +20,22 @@ class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
         self.config = Config()
+        # This method is cumbersome.  Should probably develop something
+        # like unittest.conf.defaults.
         if self.config.has_option("unittest", "scratchdir"):
             self.scratchdir = self.config.get("unittest", "scratchdir")
             if not os.path.exists(self.scratchdir):
                 os.path.makedirs(self.scratchdir)
+        if self.config.has_option("unittest", "aurora_with_node"):
+            self.aurora_with_node = self.config.get("unittest",
+                    "aurora_with_node")
+        else:
+            self.aurora_with_node = "oyidb1622"
+        if self.config.has_option("unittest", "aurora_without_node"):
+            self.aurora_without_node = self.config.get("unittest",
+                    "aurora_without_node")
+        else:
+            self.aurora_without_node = "oziyp2"
         # An alternate set of defaults is listed in unittest.conf.
         self.hostip0 = "8.8.4.251"
         self.broadcast0 = "8.8.4.255"

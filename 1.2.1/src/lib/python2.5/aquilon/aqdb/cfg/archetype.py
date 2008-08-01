@@ -36,8 +36,9 @@ def populate(*args, **kw):
     archetype.create(checkfirst=True)
 
     if len(s.query(Archetype).all()) < 1:
-        a = Archetype(name='aquilon')
-        s.add(a)
+        for a_name in ['aquilon', 'windows', 'aurora']:
+            a = Archetype(name=a_name)
+            s.add(a)
         s.commit()
 
         a = s.query(Archetype).first()

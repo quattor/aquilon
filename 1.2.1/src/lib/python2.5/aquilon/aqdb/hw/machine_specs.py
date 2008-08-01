@@ -105,7 +105,8 @@ def populate(*args, **kw):
              ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
              ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
              ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
-             ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2]]
+             ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+             ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0]]
 
     if len(s.query(MachineSpecs).all()) < 1:
         for ms in specs:

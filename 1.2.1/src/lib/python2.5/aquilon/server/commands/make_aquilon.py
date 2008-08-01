@@ -13,7 +13,8 @@
 from os import path as os_path, environ as os_environ
 from tempfile import mkdtemp
 
-from aquilon.exceptions_ import ProcessException, DetailedProcessException
+from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
+                                 ArgumentError)
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
@@ -35,6 +36,14 @@ class CommandMakeAquilon(BrokerCommand):
     @az_check
     def render(self, session, hostname, os, personality, user, **arguments):
         dbhost = hostname_to_host(session, hostname)
+
+        # This could be smarter... maybe go ahead and allow conversion to
+        # the aquilon archetype if everything below succeeds.  For now,
+        # keeping it simple.
+        if dbhost.archetype.name != 'aquilon':
+            raise ArgumentError("Host %s has archetype %s, needs to be aquilon for command to succeed." %
+                    (hostname, dbhost.archetype.name))
+
         # Currently, for the Host to be created it *must* be associated with
         # a Machine already.  If that ever changes, need to check here and
         # bail if dbhost.machine does not exist.
