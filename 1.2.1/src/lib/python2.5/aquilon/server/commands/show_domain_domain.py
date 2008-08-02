@@ -13,6 +13,7 @@
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.sy.domain import Domain
+from aquilon.exceptions_ import NotFoundException
 
 
 class CommandShowDomainDomain(BrokerCommand):
@@ -23,7 +24,10 @@ class CommandShowDomainDomain(BrokerCommand):
     @az_check
     @format_results
     def render(self, session, domain, **arguments):
-        return session.query(Domain).filter_by(name=domain).all()
+        dlist = session.query(Domain).filter_by(name=domain).all() 
+        if (len(dlist) != 1):
+            raise NotFoundException("domain '%s' is unknown"%domain)
+        return dlist
 
 
 #if __name__=='__main__':
