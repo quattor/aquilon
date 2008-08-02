@@ -34,6 +34,17 @@ class CommandAddInterface(BrokerCommand):
             extra['boot'] = True
         if comments:
             extra['comments'] = comments
+
+        prev = session.query(PhysicalInterface).filter_by(name=interface,machine=dbmachine).all()
+        if (len(prev) != 0):
+            raise ArgumentError("machine %s already has an interface named %s"%(machine,interface))
+
+        prevmac = session.query(PhysicalInterface).filter_by(mac=mac).all()
+        if (len(prev) != 0):
+            raise ArgumentError("MAC address '%s' is already used by machine %s"%(mac,prev[0].name))
+
+        # XXX: also check the ip isn't in use somewhere
+
         dbpi = PhysicalInterface(name=interface, mac=mac, machine=dbmachine,
                 ip=ip, **extra)
         session.save(dbpi)
@@ -42,8 +53,7 @@ class CommandAddInterface(BrokerCommand):
         session.refresh(dbmachine)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
         return
 
 

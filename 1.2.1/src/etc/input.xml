@@ -64,6 +64,14 @@
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
    </command>
 
+   <command name="compile">
+    Compile anything that is out-of-date within a specified domain.
+    <optgroup name="compile_input" mandatory="True" fields="all">
+      <option name="domain" type="string">Domain name</option>
+    </optgroup>
+    <transport method="post" path="compile"/>
+   </command>
+
    <command name="show_domain">
       Shows the configuration for a given domain, or for all domains
       <optgroup name="show_domain_Input" mandatory="True" fields="any">

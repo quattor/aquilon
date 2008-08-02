@@ -26,13 +26,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest02(self):
         self.noouttest(["make", "aquilon",
             "--hostname", "unittest02.one-nyp.ms.com",
-            "--personality", "ms/fid/spg/ice", "--os", "linux/4.0.1-x86_64"])
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "hostsdir"),
-            "unittest02.one-nyp.ms.com.tpl")))
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "depsdir"),
-            "unittest02.one-nyp.ms.com.xml.dep")))
+            "--personality", "compileserver", "--os", "linux/4.0.1-x86_64"])
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest02.one-nyp.ms.com.xml")))
@@ -65,7 +59,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """include { 'service/ntp/pa.ny.na/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/ms/fid/spg/ice/config' };""",
+            """include { 'personality/compileserver/config' };""",
             command)
         self.matchoutput(out,
             """include { 'archetype/final' };""",
@@ -74,13 +68,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest00(self):
         self.noouttest(["make", "aquilon",
             "--hostname", "unittest00.one-nyp.ms.com",
-            "--personality", "ms/fid/spg/ice", "--os", "linux/4.0.1-x86_64"])
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "hostsdir"),
-            "unittest00.one-nyp.ms.com.tpl")))
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "depsdir"),
-            "unittest00.one-nyp.ms.com.xml.dep")))
+            "--personality", "compileserver", "--os", "linux/4.0.1-x86_64"])
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest00.one-nyp.ms.com.xml")))
@@ -123,7 +111,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """include { 'service/ntp/pa.ny.na/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/ms/fid/spg/ice/config' };""",
+            """include { 'personality/compileserver/config' };""",
             command)
         self.matchoutput(out,
             """include { 'archetype/final' };""",

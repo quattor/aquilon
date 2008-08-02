@@ -1,0 +1,34 @@
+#!/ms/dist/perl5/bin/perl5.8
+#
+# $Header: //eai/afs/vms/4.2.4/src/vms/bin/vms#2 $
+# $Change: 628436 $
+# $DateTime: 2008/01/17 12:45:37 $
+# $Author: lillied $
+#
+
+
+use strict;
+
+my $depfile = $ARGV[0];
+die unless $depfile =~ /\.dep$/;
+
+open DEP, ">$depfile"
+  or die("could not open $depfile: $!");
+
+my $target = $depfile;
+$target =~ s/\.dep$/\.xml/;
+$target =~ s{^deps}{build/xml};
+
+while (<STDIN>) {
+
+  chomp;
+
+  my ($path, $dir) = split;
+
+  $path =~ s/"//g;
+  $dir  =~ s/"//g;
+
+  print DEP "${target} ${target}.dep: ${dir}${path}.tpl\n";
+}  
+
+close DEP;

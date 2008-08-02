@@ -23,7 +23,6 @@ from aquilon.server.dbwrappers.service_instance import get_service_instance
 
 from aquilon.server.templates import PlenaryServiceInstance
 
-
 class CommandUnbindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
@@ -50,8 +49,7 @@ class CommandUnbindServer(BrokerCommand):
         session.flush()
         session.refresh(dbhost_list)
         plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
         # XXX: Need to recompile...
         return
 

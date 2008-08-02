@@ -63,8 +63,7 @@ class CommandBindServer(BrokerCommand):
         session.refresh(dbhost_list)
 
         plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
 
         # XXX: Need to recompile...
 

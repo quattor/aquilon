@@ -43,8 +43,7 @@ class CommandAddService(BrokerCommand):
             # By definition, we don't need to then recompile, since nothing
             # can be using this service yet.
             plenary_info = PlenaryService(dbservice)
-            plenary_info.write(self.config.get("broker", "plenarydir"),
-                               self.config.get("broker", "servername"), user)
+            plenary_info.write(self.config.get("broker", "plenarydir"), user)
 
         if not instance:
             return
@@ -71,8 +70,7 @@ class CommandAddService(BrokerCommand):
         session.flush()
         session.refresh(dbservice)
         plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                           self.config.get("broker", "servername"), user)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
 
         return
 

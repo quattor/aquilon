@@ -37,11 +37,12 @@ def hostname_to_domain_and_string(session, hostname):
 def hostname_to_host(session, hostname):
     (short, dbdns_domain) = hostname_to_domain_and_string(session, hostname)
     try:
-        dbhost = session.query(Host).filter_by(
-                name=short, dns_domain=dbdns_domain).one()
+        dball = session.query(Host).filter_by(name=short, dns_domain=dbdns_domain).all()
+        if (len(dball) == 0):
+            raise NotFoundException("Host '%s' not found" % hostname)
+        return dball[0]
     except InvalidRequestError, e:
-        raise NotFoundException("Host '%s' not found: %s" % (hostname, e))
-    return dbhost
+        raise ArgumentError("Failed to find host: %s" %e)
 
 def get_host_build_item(self, dbhost, dbservice):
     for template in dbhost.templates:
@@ -49,6 +50,14 @@ def get_host_build_item(self, dbhost, dbservice):
         if si and si.service == dbservice:
             return template
     return None
+
+def get_host_dependencies(session, dbhost):
+    """ returns a list of strings describing how a host is being used.
+    If the host has no dependencies, then an empty list is returned
+    """
+    ret = []
+    # XXX: Show any service instance which has dbhost as an element in host_list.hosts
+    return ret
 
 
 #if __name__=='__main__':

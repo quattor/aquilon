@@ -11,37 +11,173 @@
 
 import os
 from datetime import datetime
-
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.net.ipcalc import Network
-from aquilon.server.processes import write_file, read_file, remove_file
+from aquilon.server.processes import write_file, read_file, remove_file, run_command, build_index
+from os import path as os_path, environ as os_environ
+from threading import Lock
+from twisted.python import log
+from aquilon.config import Config
+
+# We have a global compile lock.
+# This is used in two ways:
+# 1) to serialize compiles. The panc java compiler does a pretty
+#    good job of parallelizing, so we'll just slow things down
+#    if we end up with multiple of these running.
+# 2) to prevent changing plenary templates while a compile is
+#    in progress
+
+compile_lock = Lock()
+
+def compileLock():
+    log.msg("requesting compile lock")
+    compile_lock.acquire()
+    log.msg("aquired compile lock")
+
+def compileRelease():
+    log.msg("releasing compile lock");
+    compile_lock.release();
+
+class TemplateDomain(object):
+
+    def __init__(self):
+        pass
+
+    def compile(self, session, domain, user, only=None):
+        """flush all host templates within a domain and trigger a
+        recompile. The build directories are checked and constructed
+        if neccessary, so no prior setup is required.  The compile may
+        take some time (current rate is 10 hosts per second, with a
+        couple of seconds of constant overhead), and the possibility
+        of blocking on the compile lock.
+
+        If the 'only' parameter is provided, then it should be a
+        single host object and just that host will be compiled. The
+        domain parameter should be of Domain class, and must match the
+        domain of the host specified by the only parameter (if
+        provided).  The 'user' is the username requesting the compile
+        and is purely used as information to annotate any output
+        files.
+
+        May raise ArgumentError exception, else returns the standard
+        output (as a string) of the compile
+        """
+
+        log.msg("preparing domain %s for compile"%domain.name)
+
+        # Ensure that the compile directory is in a good state.
+        config = Config()
+        outputdir = config.get("broker", "profilesdir")
+        builddir = config.get("broker", "builddir")
+        profiledir = "%s/domains/%s/profiles"% (builddir, domain.name)
+        if not os.path.exists(profiledir):
+            try:
+                os.makedirs(profiledir, mode=0770)
+            except OSError, e:
+                raise ArgumentError("failed to mkdir %s: %s" % (builddir, e))
+
+        # Check that all host templates are up-to-date
+        # XXX: This command could take many minutes, it'd be really
+        # nice to be able to give progress messages to the user
+        try:
+            compileLock()
+
+            if (only):
+                hl = [ only ]
+            else:
+                hl = domain.hosts
+            if (len(hl) == 0):
+                return 'no hosts: nothing to do'
+
+            log.msg("flushing %d hosts"%len(hl))
+            for h in hl:
+                p = PlenaryHost(h)
+                p.write(profiledir, user, locked=True)
+
+            domaindir = os_path.join(config.get("broker", "templatesdir"), domain.name)
+            includes = [domaindir,
+                        config.get("broker", "plenarydir"),
+                        config.get("broker", "swrepdir")]
+
+            panc_env={"PATH":"%s:%s" % (config.get("broker", "javadir"),
+                                        os_environ.get("PATH", ""))}
+            
+            args = [ "/ms/dist/fsf/PROJ/make/prod/bin/gmake" ]
+            args.append("-f")
+            args.append("%s/GNUmakefile.build" % config.get("broker", "compiletooldir"))
+            args.append("MAKE=%s -f %s"%(args[0], args[2]))
+            args.append("DOMAIN=%s"%domain.name)
+            args.append("TOOLDIR=%s"%config.get("broker", "compiletooldir"))
+            args.append("QROOT=%s"%config.get("broker", "quattordir"))
+            args.append("PANC=%s"%config.get("broker", "panc"))
+            if (only):
+                args.append("only")
+                args.append("HOST=%s"%only.fqdn)
+
+            out = ''
+            log.msg("starting compile")
+            try:
+                out = run_command(args, env=panc_env, path=config.get("broker", "quattordir"))
+            except ProcessException, e:
+                raise ArgumentError("\n%s%s"%(e.out,e.err))
+
+        finally:
+            compileRelease();
+
+        build_index(config, session, outputdir)
+        return out
+                
 
 class Plenary(object):
     def __init__(self):
+        config = Config();
         self.template_type = 'structure'
+        self.servername = config.get("broker", "servername")
         
-    def write(self, dir, localhost, user):
+    def write(self, dir, user, locked=False):
         if (hasattr(self, "machine_type") and
                 self.machine_type == 'aurora_node'):
             # Don't bother writing plenary files for dummy aurora hardware.
             return
+
         lines = []
-        lines.append("# Generated on %s for %s at %s UTC"
-                     % (localhost, user, datetime.utcnow().ctime()))
+        lines.append("# Generated from %s for %s" % (self.servername, user))
         lines.append("%(template_type)s template %(plenary_template)s;" % self.__dict__)
         lines.append("")
         self.body(lines)
+        content = "\n".join(lines)+"\n"
+
         plenary_path = os.path.join(dir, self.plenary_core)
         plenary_file = os.path.join(dir, self.plenary_template) + ".tpl"
-        if not os.path.exists(plenary_path):
-            os.makedirs(plenary_path)
-        write_file(plenary_file, "\n".join(lines) + "\n")
+        # optimise out the write (leaving the mtime good for make)
+        # if nothing is actually changed
+        if os.path.exists(plenary_file):
+            old = read_file(dir, self.plenary_template+".tpl")
+            if (old == content):
+                #log.msg("template %s is unmodified"%plenary_file)
+                return
+            
+        #log.msg("writing %s"%plenary_file)
+        if (not locked):
+            compileLock()
+        try:
+            if not os.path.exists(plenary_path):
+                os.makedirs(plenary_path)
+            write_file(plenary_file, content)
+        finally:
+            if (not locked):
+                compileRelease()
 
     def read(self, plenarydir):
         return read_file(plenarydir, self.plenary_template + ".tpl")
 
     def remove(self, plenarydir):
         plenary_file = os.path.join(plenarydir, self.plenary_template + ".tpl")
-        remove_file(plenary_file)
+        try:
+            compileLock()
+            remove_file(plenary_file)
+        finally:
+            compileRelease()
         return
 
 class PlenaryMachineInfo(Plenary):
@@ -85,6 +221,8 @@ class PlenaryMachineInfo(Plenary):
         lines.append('"location" = "%(sysloc)s";' % self.__dict__)
         if self.serial:
             lines.append('"serialnumber" = "%(serial)s";\n' % self.__dict__)
+        lines.append('"nodename" = "%(machine)s";' % self.__dict__)
+        lines.append("")
         lines.append("include { '%(model_relpath)s' };\n" % self.__dict__)
         lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
                 % self.__dict__)
@@ -104,14 +242,21 @@ class PlenaryMachineInfo(Plenary):
                         % (interface['name'], str(interface['boot']).lower()))
 
 
-    def reconfigure(self, dbhost, tempdir, localhost, user):
-        fqdn = dbhost.fqdn
+class PlenaryHost(Plenary):
+    def __init__(self, dbhost):
+        Plenary.__init__(self)
+        self.name = dbhost.fqdn
+        self.plenary_core = ""
+        self.plenary_template = "%(name)s" % self.__dict__
+        self.template_type = "object"
+        self.dbhost = dbhost
 
+    def body(self, lines):
         # FIXME: Need at least one interface marked boot - that one first
         # FIXME: Method for obtaining broadcast / gateway, netmask hard-coded.
         # The IPAddress table has not yet been defined in interface.py.
         interfaces = []
-        for dbinterface in dbhost.machine.interfaces:
+        for dbinterface in self.dbhost.machine.interfaces:
             if not dbinterface.ip or dbinterface.ip == '0.0.0.0':
                 continue
             net = Network(dbinterface.ip, 25)
@@ -129,14 +274,13 @@ class PlenaryMachineInfo(Plenary):
         os_template = None
         personality_template = None
         services = []
-        for t in dbhost.templates:
+        for t in self.dbhost.templates:
             if t.cfg_path.tld.type == 'os':
                 os_template = repr(t.cfg_path) + '/config'
             elif t.cfg_path.tld.type == 'personality':
                 personality_template = repr(t.cfg_path) + '/config'
             elif t.cfg_path.tld.type == 'service':
                 services.append(repr(t.cfg_path) + '/client/config')
-            # FIXME: Features should also be here...
 
         templates = []
         templates.append("archetype/base")
@@ -146,22 +290,22 @@ class PlenaryMachineInfo(Plenary):
         templates.append(personality_template)
         templates.append("archetype/final")
 
-        lines = []
-        lines.append("#Generated on %s for %s at %s UTC"
-                % (localhost, user, datetime.utcnow().ctime()))
-        lines.append("object template %s;\n" % fqdn)
-        lines.append("include { 'pan/units' };\n")
-        lines.append("'/hardware' = create('%(plenary_template)s');\n" % self.__dict__)
+        # Okay, here's the real content
+        lines.append("# this is an %s host, so all templates should be sourced from there"%self.dbhost.archetype.name)
+        lines.append("variable loadpath = list('%s');"%self.dbhost.archetype.name)
+        lines.append("")
+        lines.append("include { 'pan/units' };")
+        pmachine = PlenaryMachineInfo(self.dbhost.machine)
+        lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
         for interface in interfaces:
             lines.append("'/system/network/interfaces/%(name)s' = nlist('ip', '%(ip)s', 'netmask', '%(netmask)s', 'broadcast', '%(broadcast)s', 'gateway', '%(gateway)s', 'bootproto', '%(bootproto)s');" % interface)
-        lines.append("\n")
+        lines.append("")
         for template in templates:
             lines.append("include { '%s' };" % template)
         lines.append("")
 
-        template_file = os.path.join(tempdir, fqdn + '.tpl')
-        write_file(template_file, "\n".join(lines))
         return
+
 
 class PlenaryService(Plenary):
     def __init__(self, dbservice):

@@ -1,0 +1,76 @@
+#!/ms/dist/perl5/bin/perl5.8
+#
+# $Header: //eai/afs/vms/4.2.4/src/vms/bin/vms#2 $
+# $Change: 628436 $
+# $DateTime: 2008/01/17 12:45:37 $
+# $Author: lillied $
+#
+
+use strict;
+use File::Spec;
+use File::Find;
+use File::Basename;
+use Getopt::Long;
+
+my @incpaths;
+my $outdir;
+my $verbose = 0;
+
+GetOptions( 
+    'I=s' => \@incpaths,
+    'O=s' => \$outdir,
+    'verbose!' => \$verbose,
+  );
+
+my $depsdir = shift @ARGV;
+die "dependency directory '$depsdir' is not a directory\n" unless -d $depsdir;
+
+# find the mtime of the most recently modified directory
+# so we can limit which .xml.dep files need fixing
+my $tpl_mtime = 0;
+
+foreach my $inc (reverse @incpaths) {
+  find( 
+    { wanted => sub {
+      return unless -d $_;
+      my $dmod = (stat $_)[9];
+      $tpl_mtime = $dmod if $dmod > $tpl_mtime;
+      },
+      follow => 1,
+    },  
+    $inc
+  );
+}  
+
+if ($verbose) {
+  print "template directories modified at ".scalar(localtime($tpl_mtime))."\n";
+}  
+
+# now find which .xml.dep files are older than
+# the most recent dir change
+# (note .tpl content changes are handled by make,
+# we only need to watch directory changes to 
+# rebuild the dependencies)
+my @depfiles;
+find (
+  sub {
+    return unless /.dep$/;
+    if ((stat $_)[9] <= $tpl_mtime) {
+      push @depfiles, $File::Find::name
+        if -f $_;
+    }  
+  },
+  $outdir,
+  $depsdir,
+);
+
+if ($verbose) {
+  print "unlinking:\n\t";
+  foreach my $dep (@depfiles) {
+    print "$dep\n\t";
+  }
+}  
+
+# now we can remove the .xml.dep file for this list
+unlink @depfiles;
+

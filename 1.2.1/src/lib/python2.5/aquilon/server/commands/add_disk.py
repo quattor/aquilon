@@ -12,7 +12,7 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand, force_int)
 from aquilon.server.dbwrappers.machine import get_machine
@@ -29,8 +29,13 @@ class CommandAddDisk(BrokerCommand):
     @az_check
     def render(self, session, machine, disk, type, capacity, comments,
             user, **arguments):
-        capacity = force_int("capacity", capacity)
+
         dbmachine = get_machine(session, machine)
+        d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
+        if (len(d) != 0):
+            raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))
+
+        capacity = force_int("capacity", capacity)
         dbdisk_type = get_disk_type(session, type)
         dbdisk = Disk(machine=dbmachine, device_name=disk,
                 disk_type=dbdisk_type, capacity=capacity, comments=comments)
@@ -40,8 +45,7 @@ class CommandAddDisk(BrokerCommand):
             raise ArgumentError("Could not add disk: %s" % e)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
         return
 
 

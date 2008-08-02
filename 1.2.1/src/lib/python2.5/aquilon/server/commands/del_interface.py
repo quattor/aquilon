@@ -34,8 +34,7 @@ class CommandDelInterface(BrokerCommand):
         session.refresh(dbmachine)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
         return
 
 

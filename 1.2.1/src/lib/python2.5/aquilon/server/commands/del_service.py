@@ -51,12 +51,13 @@ class CommandDelService(BrokerCommand):
             if dbsi.client_count > 0:
                 raise ArgumentError("instance has clients and cannot be deleted.")
 
+            plenary_info = PlenaryServiceInstance(dbservice, dbsi)
+            plenary_info.remove
+
             # Check the service map and remove any mappings
             for dbmap in session.query(ServiceMap).filter_by(service_instance=dbsi).all():
                 session.delete(dbmap)
 
-            plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-            plenary_info.remove
             session.delete(dbsi)
             session.flush()
             session.refresh(dbservice)

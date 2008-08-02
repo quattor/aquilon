@@ -26,7 +26,7 @@ class CommandCatHostname(BrokerCommand):
     def render(self, session, hostname, **kwargs):
         dbhost = hostname_to_host(session, hostname)
 
-        return read_file(self.config.get("broker", "hostsdir"),
-                hostname + '.tpl')
+        dpath = "%s/domains/%s/profiles"%(self.config.get("broker", "builddir"), dbhost.domain.name)
+        return read_file(dpath, hostname + '.tpl')
 
 #if __name__=='__main__':

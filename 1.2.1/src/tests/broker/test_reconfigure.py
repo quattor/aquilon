@@ -59,7 +59,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'service/ntp/pa.ny.na/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/ms/fid/spg/ice/config' };""",
+            """include { 'personality/compileserver/config' };""",
             command)
         self.matchoutput(out,
             """include { 'archetype/final' };""",
@@ -98,7 +98,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'service/ntp/pa.ny.na/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/ms/fid/spg/ice/config' };""",
+            """include { 'personality/compileserver/config' };""",
             command)
         self.matchoutput(out,
             """include { 'archetype/final' };""",

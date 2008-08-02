@@ -23,10 +23,7 @@ from aquilon.server.dbwrappers.service_instance import choose_service_instance
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.aqdb.sy.build_item import BuildItem
-from aquilon.server.templates import PlenaryMachineInfo
-from aquilon.server.processes import (run_command, remove_dir, 
-        read_file, build_index)
-
+from aquilon.server.templates import TemplateDomain
 
 class CommandMakeAquilon(BrokerCommand):
 
@@ -100,47 +97,8 @@ class CommandMakeAquilon(BrokerCommand):
         session.refresh(dbhost)
         session.refresh(dbhost.machine)
 
-        tempdir = mkdtemp()
-        plenary_info = PlenaryMachineInfo(dbhost.machine)
-        plenary_info.reconfigure(dbhost, tempdir,
-                self.config.get("broker", "servername"), user)
-
-        filename = os_path.join(tempdir, dbhost.fqdn) + '.tpl'
-        domaindir = os_path.join(self.config.get("broker", "templatesdir"),
-                dbhost.domain.name)
-        archetypedir = os_path.join(domaindir, dbhost.archetype.name)
-        includes = [archetypedir, domaindir,
-                self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "swrepdir")]
-        outfile = os_path.join(tempdir, dbhost.fqdn + '.xml')
-        outdep = outfile + '.dep'  # Yes, this ends with .xml.dep
-        panc_env={"PATH":"%s:%s" % (self.config.get("broker", "javadir"),
-            os_environ.get("PATH", ""))}
-        args = [self.config.get("broker", "panc")]
-        for include in includes:
-            args.append('-I')
-            args.append(include)
-        args.append('-y')
-        args.append('-x')
-        args.append('xmldb')
-        args.append(filename)
-        try:
-            run_command(args, env=panc_env, path=tempdir)
-        except ProcessException, e:
-            input = ""
-            if os_path.exists(filename):
-                input = file(filename).read()
-            output = e.out
-            if not output and os_path.exists(outfile):
-                output = file(outfile).read()
-            raise DetailedProcessException(e, input, output)
-        profilesdir = self.config.get("broker", "profilesdir")
-        run_command(["cp", outfile, profilesdir])
-        run_command(["cp", outdep, self.config.get("broker", "depsdir")])
-        run_command(["cp", filename, self.config.get("broker", "hostsdir")])
-        build_index(self.config, session, profilesdir)
-        remove_dir(tempdir)
-        return
+        td = TemplateDomain()
+        return td.compile(session, dbhost.domain, user, only=dbhost)
 
 
 #if __name__=='__main__':
