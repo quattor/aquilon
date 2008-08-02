@@ -16,6 +16,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
+from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.aqdb.hw.switch_port import SwitchPort
 from aquilon.aqdb.hw.physical_interface import PhysicalInterface
 from aquilon.aqdb.loc.rack import Rack
@@ -29,7 +30,7 @@ class CommandAddTorSwitch(BrokerCommand):
     @az_check
     def render(self, session,
             tor_switch, model,
-            rack, building, rackid,
+            rack, building, rackid, rackrow, rackcolumn,
             interface, mac, ip,
             cpuname, cpuvendor, cpuspeed, cpucount, memory,
             serial,
@@ -42,23 +43,13 @@ class CommandAddTorSwitch(BrokerCommand):
 
         if rack:
             dblocation = get_location(session, rack=rack)
-        elif building and rackid is not None:
-            dbbuilding = get_location(session, building=building)
-            # Because of http, rackid comes in as a string.  It just
-            # gets treated as such here.
-            # Check for redundancy...
-            if len(rackid) > len(dbbuilding.name) and rackid.startswith(
-                    dbbuilding.name):
-                rack = rackid
-            else:
-                rack = dbbuilding.name + rackid
-            dblocation = session.query(Rack).filter_by(name=rack).first()
-            if not dblocation:
-                dblocation = Rack(name=rack, fullname=rack, parent=dbbuilding,
-                        comments="Created for tor_switch %s" % tor_switch)
-                session.save(dblocation)
+        elif (building and rackid is not None and
+                rackrow and rackcolumn is not None):
+            dblocation = get_or_create_rack(session, rackid=rackid,
+                    building=building, rackrow=rackrow, rackcolumn=rackcolumn,
+                    comments="Created for tor_switch %s" % tor_switch)
         else:
-            raise ArgumentError("Need to specify either --building and --rackid or --rack")
+            raise ArgumentError("Need to specify an existing --rack or provide --building, --rackid, --rackrow and --rackcolumn")
 
         dbtor_switch = create_machine(session, tor_switch, dblocation, dbmodel,
             cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)

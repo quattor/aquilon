@@ -31,8 +31,13 @@ from test_status import TestStatus
 from test_permission import TestPermission
 from test_add_dns_domain import TestAddDnsDomain
 from test_add_domain import TestAddDomain
+from test_get_domain import TestGetDomain
+from test_put_domain import TestPutDomain
+from test_deploy_domain import TestDeployDomain
+from test_sync_domain import TestSyncDomain
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
+from test_add_building import TestAddBuilding
 from test_add_rack import TestAddRack
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
@@ -60,10 +65,6 @@ from test_show_service_all import TestShowServiceAll
 from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
-from test_get_domain import TestGetDomain
-from test_put_domain import TestPutDomain
-from test_deploy_domain import TestDeployDomain
-from test_sync_domain import TestSyncDomain
 from test_constraints_umask import TestUmaskConstraints
 from test_unmap_service import TestUnmapService
 from test_del_host import TestDelHost
@@ -75,6 +76,7 @@ from test_del_tor_switch import TestDelTorSwitch
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_rack import TestDelRack
+from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
 from test_del_domain import TestDelDomain
@@ -97,7 +99,8 @@ class BrokerTestSuite(unittest.TestSuite):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart, TestPing, TestStatus, TestPermission,
                 TestAddDnsDomain, TestAddDomain,
-                TestAddService, TestAddRequiredService,
+                TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
+                TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddCpu, TestAddModel, TestAddTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
@@ -110,12 +113,11 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowServiceAll,
                 TestUpdateInterface,
                 TestPxeswitch, TestManage,
-                TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestUmaskConstraints,
                 TestUnmapService, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
-                TestDelRequiredService, TestDelService,
+                TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelDomain, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:

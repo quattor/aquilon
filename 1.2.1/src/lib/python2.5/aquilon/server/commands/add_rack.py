@@ -12,20 +12,21 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.commands.add_location import CommandAddLocation
+from aquilon.server.dbwrappers.rack import get_or_create_rack
 
 
-class CommandAddRack(CommandAddLocation):
+class CommandAddRack(BrokerCommand):
 
-    required_parameters = ["name", "building"]
+    required_parameters = ["rackid", "building", "row", "column"]
 
     @add_transaction
     @az_check
-    def render(self, session, name, building, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='rack', fullname=fullname,
-                parentname=building, parenttype='building',
-                comments=comments, **arguments)
+    def render(self, session, rackid, building, row, column, fullname,
+            comments, **arguments):
+        dbrack = get_or_create_rack(session=session, rackid=rackid,
+                building=building, rackrow=row, rackcolumn=column,
+                fullname=fullname, comments=comments)
+        return
 
 
 #if __name__=='__main__':

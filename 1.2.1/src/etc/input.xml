@@ -699,16 +699,21 @@
    </command>
 
    <command name="add_rack">
-      Add a new rack to the database
+      Add a new rack to the database.  To add a rack named dd120 on tile H13,
+      use --building=dd --rackid=120 --row=H --column=13.  The rackid
+      option can also be prefixed by building name, so using
+      --building=dd --rackid=dd120 --row=H --column=13 would also work.
       <optgroup name="add_rack_input" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new rack</option>
+         <option name="rackid" type="string">Name of the new rack, or just the id number</option>
          <option name="building" type="string">Name of the building that houses the rack</option>
+         <option name="row" type="string">Row of the tile location (letters only)</option>
+         <option name="column" type="string">Column of the tile location (numbers only)</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_rack/%(building)s/%(name)s" />
+      <transport method="put" path="location/add_rack/%(building)s/%(rackid)s" />
    </command>
 
    <command name="show_rack">
@@ -945,6 +950,11 @@
       to be given to this command - the model info will be used as a default.
 
       However, if the model does not have defaults, they all need to be given.
+
+      See the help for add_rack for more information about the rack options.
+      The --rack option can only be used with a preexisting rack.  If given
+      --building, --rackid, --rackrow, and --rackcolumn, the rack will be
+      created if needed.
       <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
          <option name="tor_switch" type="string">tor_switch name</option>
          <option name="model" type="string">tor_switch model</option>
@@ -954,6 +964,8 @@
          <optgroup name="add_tor_switch_new_rack" fields="all">
             <option name="building" type="string" conflicts="rack">Building</option>
             <option name="rackid" type="string" conflicts="rack">Rack id/number</option>
+            <option name="rackrow" type="string" conflicts="rack">Rack Row (letters only)</option>
+            <option name="rackcolumn" type="string" conflicts="rack">Rack Column (numbers only)</option>
          </optgroup>
       </optgroup>
       <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">

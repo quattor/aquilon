@@ -35,7 +35,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/np/ut3/ut3c5n10');""",
+            """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
             command)
         self.matchoutput(out,
             """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '255.255.255.128', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip0, self.broadcast0, self.gateway0),
@@ -87,7 +87,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/np/ut3/ut3c1n3');""",
+            """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
             command)
         self.matchoutput(out,
             """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '255.255.255.128', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip2, self.broadcast2, self.gateway2),

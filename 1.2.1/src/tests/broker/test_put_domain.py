@@ -47,6 +47,29 @@ class TestPutDomain(TestBrokerCommand):
         self.assert_(os.path.exists(os.path.join(
             self.scratchdir, "changetest1")))
 
+    def testaddsiteut(self):
+        sitedir = os.path.join(self.scratchdir, "unittest", "aquilon",
+                "site", "americas", "ny", "ut")
+        if not os.path.exists(sitedir):
+            os.makedirs(sitedir)
+        template = os.path.join(sitedir, "config.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines("template site/americas/ny/ut/config;\n\n")
+        finally:
+            f.close()
+        self.gitcommand(["add", "config.tpl"], cwd=sitedir)
+        self.gitcommand(["commit", "-a", "-m", "added building ut"],
+                cwd=os.path.join(self.scratchdir, "unittest"))
+
+    def testputunittestdomain(self):
+        self.ignoreoutputtest(["put", "--domain", "unittest"],
+                env=self.gitenv(),
+                cwd=os.path.join(self.scratchdir, "unittest"))
+        self.assert_(os.path.exists(os.path.join(
+            self.config.get("broker", "templatesdir"), "unittest", "aquilon",
+            "site", "americas", "ny", "ut", "config.tpl")))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPutDomain)

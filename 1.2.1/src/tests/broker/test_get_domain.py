@@ -34,6 +34,11 @@ class TestGetDomain(TestBrokerCommand):
             os.path.join(self.scratchdir, "changetest2")), stdout=1, stderr=2)
         rc = p.wait()
 
+    def testclearunittestdomain(self):
+        p = Popen(("/bin/rm", "-rf",
+            os.path.join(self.scratchdir, "unittest")), stdout=1, stderr=2)
+        rc = p.wait()
+
     def testgetchangetest1domain(self):
         self.ignoreoutputtest(["get", "--domain", "changetest1"],
                 cwd=self.scratchdir)
@@ -45,6 +50,12 @@ class TestGetDomain(TestBrokerCommand):
                 cwd=self.scratchdir)
         self.assert_(os.path.exists(os.path.join(
             self.scratchdir, "changetest2")))
+
+    def testgetunittestdomain(self):
+        self.ignoreoutputtest(["get", "--domain", "unittest"],
+                cwd=self.scratchdir)
+        self.assert_(os.path.exists(os.path.join(
+            self.scratchdir, "unittest")))
 
 
 if __name__=='__main__':

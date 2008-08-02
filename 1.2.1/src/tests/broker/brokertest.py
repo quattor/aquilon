@@ -25,7 +25,7 @@ class TestBrokerCommand(unittest.TestCase):
         if self.config.has_option("unittest", "scratchdir"):
             self.scratchdir = self.config.get("unittest", "scratchdir")
             if not os.path.exists(self.scratchdir):
-                os.path.makedirs(self.scratchdir)
+                os.makedirs(self.scratchdir)
         if self.config.has_option("unittest", "aurora_with_node"):
             self.aurora_with_node = self.config.get("unittest",
                     "aurora_with_node")

@@ -24,14 +24,14 @@ from brokertest import TestBrokerCommand
 class TestMapService(TestBrokerCommand):
 
     def testmapafs(self):
-        self.noouttest(["map", "service", "--building", "np",
+        self.noouttest(["map", "service", "--building", "ut",
             "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifymapafs(self):
-        command = "show map --service afs --instance q.ny.ms.com --building np"
+        command = "show map --service afs --instance q.ny.ms.com --building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                "Service: afs Instance: q.ny.ms.com Map: Building np", command)
+                "Service: afs Instance: q.ny.ms.com Map: Building ut", command)
 
     def testmapdns(self):
         self.noouttest(["map", "service", "--hub", "ny",

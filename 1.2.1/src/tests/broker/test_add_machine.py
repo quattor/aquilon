@@ -43,7 +43,7 @@ class TestAddMachine(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"location" = "np.ny.na";""",
+            """"location" = "ut.ny.na";""",
             command)
         self.matchoutput(out,
             """"serialnumber" = "99C5553";""",
@@ -83,7 +83,7 @@ class TestAddMachine(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"location" = "np.ny.na";""",
+            """"location" = "ut.ny.na";""",
             command)
         self.matchoutput(out,
             """"serialnumber" = "KPDZ406";""",
@@ -121,7 +121,7 @@ class TestAddMachine(TestBrokerCommand):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """"location" = "np.ny.na";""",
+            """"location" = "ut.ny.na";""",
             command)
         self.matchoutput(out,
             """"serialnumber" = "KPDZ407";""",

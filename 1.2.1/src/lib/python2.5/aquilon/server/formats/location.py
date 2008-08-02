@@ -31,6 +31,11 @@ class LocationFormatter(ObjectFormatter):
                 (location.location_type.capitalize(), location.name)]
         if location.fullname:
             details.append(indent + "  Fullname: %s" % location.fullname)
+        # Rack could have been a separate formatter, but since this is
+        # the only difference...
+        if isinstance(location, Rack):
+            details.append(indent + "  Row: %s" % location.rack_row)
+            details.append(indent + "  Column: %s" % location.rack_column)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:

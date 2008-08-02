@@ -24,11 +24,11 @@ from brokertest import TestBrokerCommand
 class TestUnmapService(TestBrokerCommand):
 
     def testunmapafs(self):
-        self.noouttest(["unmap", "service", "--building", "np",
+        self.noouttest(["unmap", "service", "--building", "ut",
             "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifyunmapafs(self):
-        command = "show map --service afs --instance q.ny.ms.com --building np"
+        command = "show map --service afs --instance q.ny.ms.com --building ut"
         self.notfoundtest(command.split(" "))
 
     def testunmapdns(self):

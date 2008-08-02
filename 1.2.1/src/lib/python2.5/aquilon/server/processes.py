@@ -225,8 +225,7 @@ class DSDBRunner(object):
         self.config = Config()
 
     def getenv(self):
-        if (self.config.has_option("broker", "dsdb_use_test") and
-                self.config.getboolean("broker", "dsdb_use_test")):
+        if self.config.getboolean("broker", "dsdb_use_testdb"):
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
