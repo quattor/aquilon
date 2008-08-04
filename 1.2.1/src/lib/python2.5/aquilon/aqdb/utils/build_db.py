@@ -15,11 +15,6 @@ if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
-    #import msversion
-    #msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
-    #msversion.addpkg('sqlalchemy', '0.4.7-1', 'dist')
-    #msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
-    #msversion.addpkg('ipython','0.8.2','dist')
 
 from aquilon.aqdb.db_factory import db_factory
 from aquilon.aqdb.utils.shell import ipshell
@@ -46,8 +41,9 @@ pkgs['hw']   = ['status', 'vendor', 'model', 'cpu', 'disk_type', 'machine',
                 'disk', 'interface', 'physical_interface', 'switch_port',
                 'machine_specs']
 
-pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host',
-                'host_list', 'host_list_item', 'build_item']
+pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'host_list',
+                'host_list_item', 'build_item','system_list',
+                'system_list_item']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_map',
                 'service_list_item']
@@ -84,6 +80,9 @@ def main(*args, **kw):
     #run constraint renamer
     if dbf.dsn.startswith('oracle'):
         cnst.rename_non_null_check_constraints(dbf)
+        #TODO: get user name and run analyze
+        #analyze = """BEGIN DBMS_UTILITY.ANALYZE_SCHEMA(%s,
+        #'COMPUTE', NULL, NULL, NULL)"""%(dbf.user)
 
 if __name__ == '__main__':
     main(sys.argv)

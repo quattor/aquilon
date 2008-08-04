@@ -26,6 +26,7 @@ _long_nms = {}
 _long_nms['LOCATION_SEARCH_LIST']    = 'LOC_SRCH_LST'
 _long_nms['LOCATION_SEARCH_LIST_ID'] = 'LOC_SRCH_LIST_ID'
 _long_nms['SEARCH_LIST_ITEM']        = 'SRCH_LI'
+_long_nms['SYSTEM_LIST_ITEM']        = 'SYSTEM_LI'
 _long_nms['PHYSICAL_INTERFACE']      = 'PHYS_IFACE'
 _long_nms['SERVICE_MAP']             = 'SVC_MAP'
 _long_nms['SERVICE_LIST_ITEM']       = 'SVC_LI'
