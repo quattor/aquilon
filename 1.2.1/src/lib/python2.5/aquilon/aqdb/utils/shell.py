@@ -23,5 +23,15 @@ banner  = '***Embedded IPython, Ctrl-D to quit.'
 args    = []
 ipshell = IPShellEmbed(args,banner=banner)
 
+def load_all():
+    import aquilon.aqdb
+    for i in aquilon.aqdb.__all__:
+        print "Importing aquilon.aqdb.%s" % i
+        __import__("aquilon.aqdb.%s" % i)
+        mod = getattr(aquilon.aqdb, i)
+        if hasattr(mod, "__all__"):
+            for j in mod.__all__:
+                print "Importing aquilon.aqdb.%s.%s" % (i, j)
+                __import__("aquilon.aqdb.%s.%s" % (i, j))
 
 #if __name__=='__main__':
