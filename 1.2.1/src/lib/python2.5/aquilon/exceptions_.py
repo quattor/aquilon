@@ -80,7 +80,7 @@ class AuthorizationException(AquilonError):
 class NotFoundException(AquilonError):
     """Raised when a requested resource cannot be found."""
 
-class NameServiceException(AquilonError):
+class NameServiceError(AquilonError):
     """Raised when a host or service name cannot be found, or differs from,
     what's stored in name services such as dns."""
 
