@@ -14,7 +14,7 @@ from os import path as os_path, environ as os_environ
 from tempfile import mkdtemp
 
 from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
-                                 ArgumentError)
+                                 ArgumentError, NameServiceError)
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
@@ -24,6 +24,7 @@ from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates import TemplateDomain
+from socket import gethostbyname
 
 class CommandMakeAquilon(BrokerCommand):
 
@@ -32,6 +33,14 @@ class CommandMakeAquilon(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, hostname, os, personality, user, **arguments):
+        # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
+        # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
+        if self.config.get("DEFAULT", "environment") == "prod":
+            try:
+                gethostbyname(hostname)
+            except Exception, e:
+                raise NameServiceError, e.args[1]
+
         dbhost = hostname_to_host(session, hostname)
 
         # This could be smarter... maybe go ahead and allow conversion to

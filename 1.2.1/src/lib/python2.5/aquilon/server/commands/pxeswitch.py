@@ -12,6 +12,7 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
+from aquilon.exceptions_ import NameServiceError
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.processes import run_command
 
@@ -23,6 +24,14 @@ class CommandPxeswitch(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, hostname, boot, install, **arguments):
+        # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
+        # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
+        if self.config.get("DEFAULT", "environment") == "prod":
+            try:
+                gethostbyname(hostname)
+            except Exception, e:
+                raise NameServiceError, e.args[1]
+
         dbhost = hostname_to_host(session, hostname)
 
         command = self.config.get("broker", "installfe")

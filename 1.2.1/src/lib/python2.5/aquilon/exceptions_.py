@@ -24,6 +24,11 @@ class ArgumentError(AquilonError):
 
     """
 
+class ProtocolError(AquilonError):
+    """Raised when an import of a protocol fails
+
+    """
+
 #class NoSuchRowException(AquilonError):
 #    TODO: implement decorator for one(), first() which raise this
 #    '''thrown when a call to session.query.***.one() returns no rows'''
