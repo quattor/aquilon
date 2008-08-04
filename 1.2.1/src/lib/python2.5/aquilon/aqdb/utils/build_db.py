@@ -70,7 +70,6 @@ def main(*args, **kw):
             populate_cmd = "aquilon.aqdb.%s.%s.populate()"%(p,m)
             try:
                 ipapi.ex(populate_cmd)
-                dbf.safe_execute()
             except Exception, e:
                 print >> sys.stderr, "Failed to run %s (%s):\n\t%s" % (
                                       populate_cmd,m, e)
