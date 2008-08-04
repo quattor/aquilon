@@ -35,7 +35,7 @@ class CommandMakeAquilon(BrokerCommand):
     def render(self, session, hostname, os, personality, user, **arguments):
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
         # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
-        if self.config.get("DEFAULT", "environment") == "prod":
+        if self.config.get("broker", "environment") == "prod":
             try:
                 gethostbyname(hostname)
             except Exception, e:
