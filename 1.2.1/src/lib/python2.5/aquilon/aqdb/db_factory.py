@@ -141,7 +141,7 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
             debug('trying dsn %s'%(self.dsn))
             self.engine = create_engine(self.dsn)
             try:
-                self.engine.connect()
+                self.connection = self.engine.connect()
                 return
             except SaDBError, e:
                 errs.append(e)
