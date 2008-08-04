@@ -22,6 +22,7 @@ if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
+from sqlalchemy.sql import and_
 
 def dq_to_int(dq):
     if not dq:
@@ -72,30 +73,21 @@ def get_net_id_from_ip(ip, dbf):
     dbf.meta.bind.echo = False
 
 
-    s1 = select([func.max(network.c.ip)], network.c.ip <= ip)
-    ##network.c.bcast >= ip)
+    old = select([func.max(network.c.ip)], network.c.ip <= ip )
+    s1 = select([func.max(network.c.ip)], and_(
+        network.c.ip <= ip, ip <= network.c.bcast))
 
     s2 = select([network.c.id], network.c.ip == s1)
-    #print 'select statement = \n%s'%(str(s2))
 
     target_id = s2.execute().fetchone()[0]
-    #print 'target id is %s'%(target_id)
 
-    net = s.query(Network).get(target_id)
-    print net
-    print net.__dict__
+    return s.query(Network).get(target_id)
 
 def cidr_to_int(cidr):
     return(0xffffffffL >> (32- cidr)) << (32 - cidr)
 
 def get_bcast(ip, cidr):
     return int_to_dq( dq_to_int(ip) |  (0xffffffff - cidr_to_int(cidr)))
-
-#def make_mask(n):
-#    "return a mask of n bits as a long integer"
-#    return (1L << n) -1
-#
-
 
 if __name__ == '__main__':
     test_ip_to_int()
