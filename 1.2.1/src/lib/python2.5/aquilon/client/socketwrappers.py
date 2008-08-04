@@ -14,7 +14,7 @@ from twisted.python import log
 from netcat import NetCatController
 from twisted.internet import reactor
 
-def getPage(url, contextFactory=None, *args, **kwargs):
+def getPage(url, contextFactory=None, aquser=None, *args, **kwargs):
     """Download a web page as a string."""
     scheme, host, port, path = client._parse(url)
     factory = client.HTTPClientFactory(url, *args, **kwargs)

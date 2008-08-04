@@ -77,6 +77,8 @@ class TestBrokerCommand(unittest.TestCase):
         args.insert(0, aq)
         args.append("--aqport")
         args.append(kncport)
+        args.append("--aquser")
+        args.append(self.config.get("broker", "user"))
         if kwargs.has_key("env"):
             # Make sure that kerberos tickets are still present if the
             # environment is being overridden...

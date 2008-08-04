@@ -89,12 +89,6 @@ if not config.has_section("unittest"):
 if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
 
-if os.environ.get("USER") != config.get("broker", "user"):
-    print >>sys.stderr, (
-            "Expected to be running as %s, instead running as %s.  Aborting" % (
-            config.get("broker", "user"), os.environ.get("USER")))
-    sys.exit(os.EX_CONFIG)
-
 production_database = "LNPO_AQUILON_NY"
 if (config.get("database", "vendor") == "oracle" and
         config.get("database", "server") == production_database):

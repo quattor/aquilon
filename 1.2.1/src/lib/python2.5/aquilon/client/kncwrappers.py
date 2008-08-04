@@ -41,11 +41,11 @@ class KNCController(NetCatController):
         #print "About to call: %s" % " ".join(args)
         self.process = reactor.spawnProcess(self.connector, executable, args, env=env)
 
-def getPage(url, contextFactory=None, *args, **kwargs):
+def getPage(url, contextFactory=None, aquser="cdb", *args, **kwargs):
     """Download a web page as a string."""
     scheme, host, port, path = client._parse(url)
     factory = client.HTTPClientFactory(url, *args, **kwargs)
-    p = KNCController(factory.buildProtocol(None), host, port, "cdb")
+    p = KNCController(factory.buildProtocol(None), host, port, aquser)
     reactor.callWhenRunning(p.startProcess)
     return factory.deferred
 

@@ -38,8 +38,9 @@ return_code = 0
 # The getPage method will need to handle different response types
 # correctly, anyway.
 class RESTResource(object):
-    def __init__(self, uri):
+    def __init__(self, uri, aquser):
         self.uri = uri
+        self.aquser = aquser
     
     def get(self):
         return self._sendRequest('GET')
@@ -61,8 +62,8 @@ class RESTResource(object):
             headers['Content-Type'] = mimeType
         if data:
             headers['Content-Length'] = str(len(data))
-        return getPage(
-            self.uri, method=method, postdata=data, headers=headers)
+        return getPage(self.uri,
+                method=method, postdata=data, headers=headers, aquser=aquser)
 
 
 class CommandPassThrough(protocol.ProcessProtocol):
@@ -222,6 +223,11 @@ if __name__ == "__main__":
         log.startLogging(sys.stderr)
         globalOptions['httpinfo'] = True
 
+    # Setting this as a global default.  It might make sense to set
+    # the default to the current running user when running out of a
+    # shadow, though.
+    default_aquser = "cdb"
+
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
         default_aqhost = "quattorsrv"
@@ -238,6 +244,8 @@ if __name__ == "__main__":
 
     host = globalOptions.get('aqhost') or default_aqhost
     port = globalOptions.get('aqport') or default_aqport
+    aquser = globalOptions.get('aquser') or default_aquser
+
     # Save these in case there are errors...
     globalOptions["aqhost"] = host
     globalOptions["aqport"] = port
@@ -313,21 +321,21 @@ if __name__ == "__main__":
                 uri = uri + '&' + quoteOptions(remainder)
             else:
                 uri = uri + '?' + quoteOptions(remainder)
-        d = RESTResource(uri).get()
+        d = RESTResource(uri, aquser).get()
 
     elif transport.method == 'put':
         # FIXME: This will need to be more complicated.
         # In some cases, we may even need to call code here.
         putData = urllib.urlencode(commandOptions)
         mimeType = 'application/x-www-form-urlencoded'
-        d = RESTResource(uri).put(putData, mimeType)
+        d = RESTResource(uri, aquser).put(putData, mimeType)
 
     elif transport.method == 'delete':
         # Again, all command line options should be in the URI already.
-        d = RESTResource(uri).delete()
+        d = RESTResource(uri, aquser).delete()
 
     elif transport.method == 'post':
-        d = RESTResource(uri).post(**commandOptions)
+        d = RESTResource(uri, aquser).post(**commandOptions)
 
     else:
         print >>sys.stderr, "Unhandled transport method ", transport.method
