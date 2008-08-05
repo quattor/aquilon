@@ -20,6 +20,7 @@ from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.aqdb.hw.switch_port import SwitchPort
 from aquilon.aqdb.hw.physical_interface import PhysicalInterface
 from aquilon.aqdb.loc.rack import Rack
+from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
 
 
 class CommandAddTorSwitch(BrokerCommand):
@@ -65,8 +66,9 @@ class CommandAddTorSwitch(BrokerCommand):
         if interface or mac or ip:
             if not (interface and mac and ip):
                 raise ArgumentError("If using --interface, --mac, or --ip, all of them must be given.")
+            dbnetwork = get_net_id_from_ip(session, ip)
             dbpi = PhysicalInterface(name=interface, mac=mac, ip=ip,
-                    machine=dbtor_switch)
+                    machine=dbtor_switch, network=dbnetwork)
             session.save(dbpi)
             session.flush()
             session.refresh(dbpi)

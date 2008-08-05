@@ -22,7 +22,11 @@ if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
+
 from sqlalchemy.sql import and_
+
+from aquilon.exceptions_ import ArgumentError
+
 
 def dq_to_int(dq):
     return struct.unpack('!L', inet_aton(dq))[0]
@@ -46,7 +50,12 @@ def test_ip_to_int():
 
         assert tmp_dq == i
 
-def get_net_id_from_ip(ip, s):
+def get_net_id_from_ip(s, ip):
+    """Requires a session, and will return the Network for a given ip."""
+
+    if ip is None:
+        return None
+
     from sqlalchemy import func, select
     import aquilon.aqdb.net.network as n
     #makes things a tiny bit more readable to me (daqscott)
@@ -60,9 +69,11 @@ def get_net_id_from_ip(ip, s):
 
     s2 = select([network.c.id], network.c.ip == s1)
 
-    target_id = s2.execute().fetchone()[0]
+    target_id = s.execute(s2).fetchone()
+    if not target_id:
+        raise ArgumentError("Could not determine network for ip %s" % ip)
 
-    return s.query(Network).get(target_id)
+    return s.query(Network).get(target_id[0])
 
 def cidr_to_int(cidr):
     return(0xffffffffL >> (32- cidr)) << (32 - cidr)

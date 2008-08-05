@@ -37,7 +37,7 @@ class TestAddInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Interface: eth0 %s %s boot=True" %
                 (self.hostmac0.lower(), self.hostip0), command)
-        self.matchoutput(out, "Interface: eth1 %s 0.0.0.0 boot=False" %
+        self.matchoutput(out, "Interface: eth1 %s None boot=False" %
                 (self.hostmac1.lower()), command)
 
     def testverifycatut3c5n10interfaces(self):
@@ -70,7 +70,7 @@ class TestAddInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Interface: eth0 %s %s boot=True" %
                 (self.hostmac2.lower(), self.hostip2), command)
-        self.matchoutput(out, "Interface: eth1 %s 0.0.0.0 boot=False" %
+        self.matchoutput(out, "Interface: eth1 %s None boot=False" %
                 (self.hostmac3.lower()), command)
 
     def testverifycatut3c1n3interfaces(self):
@@ -109,6 +109,20 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
+
+    def testrejectut3c1n4eth1(self):
+        # This is an old (relatively) well known DNS server sitting out
+        # on the net that will probably never be controlled by the Firm.
+        # It should not appear in our network table, and thus should
+        # trigger a bad request here.
+        self.badrequesttest(["add", "interface", "--interface", "eth1",
+            "--machine", "ut3c1n4", "--mac", "02:02:04:02:02:04",
+            "--ip", "4.2.2.4"])
+
+    def testverifyrejectut3c1n4eth1(self):
+        command = "show machine --machine ut3c1n4"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Interface: eth1", command)
 
 
 if __name__=='__main__':
