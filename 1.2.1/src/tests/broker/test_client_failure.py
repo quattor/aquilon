@@ -35,12 +35,13 @@ class TestClientFailure(TestBrokerCommand):
         self.assertEqual(p.returncode, 1)
 
     def testnotrunningaqhost(self):
-        command = "status --aqhost=myweb"
+        command = "status --aqhost=%s" % self.host_not_running_aqd
         p = self.runcommand(command.split(" "))
         (out, err) = p.communicate()
         self.assertEqual(err,
-                "Failed to connect to myweb port %s: Connection refused.\n"
-                % self.config.get("broker", "kncport"))
+                "Failed to connect to %s port %s: Connection refused.\n"
+                % (self.host_not_running_aqd, 
+                    self.config.get("broker", "kncport")))
         self.assertEqual(out, "",
                 "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, out))

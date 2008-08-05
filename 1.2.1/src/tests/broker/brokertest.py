@@ -26,6 +26,11 @@ class TestBrokerCommand(unittest.TestCase):
             self.scratchdir = self.config.get("unittest", "scratchdir")
             if not os.path.exists(self.scratchdir):
                 os.makedirs(self.scratchdir)
+        if self.config.has_option("unittest", "host_not_running_aqd"):
+            self.host_not_running_aqd = self.config.get("unittest",
+                    "host_not_running_aqd")
+        else:
+            self.host_not_running_aqd = "nyinfra0"
         if self.config.has_option("unittest", "aurora_with_node"):
             self.aurora_with_node = self.config.get("unittest",
                     "aurora_with_node")
