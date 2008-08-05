@@ -39,7 +39,7 @@ class Interface(Base):
     id             = Column(Integer,
                             Sequence('interface_id_seq'), primary_key=True)
 
-    interface_type = Column(AqStr(16), nullable = False) #TODO: index
+    interface_type = Column(AqStr(32), nullable = False) #TODO: index
     mac            = Column(AqStr(18), nullable = False)
     ip             = Column(IPV4, default='0.0.0.0')
     network_id     = Column(Integer, ForeignKey(Network.__table__.c.id,
