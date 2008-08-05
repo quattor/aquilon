@@ -61,19 +61,15 @@ def test_ip_to_int():
 
         assert tmp_dq == i
 
-def get_net_id_from_ip(ip, dbf):
+def get_net_id_from_ip(ip, s):
     from sqlalchemy import func, select
-
     import aquilon.aqdb.net.network as n
     #makes things a tiny bit more readable to me (daqscott)
     #don't worry about runtime, this is for test only
+
     Network = n.Network
     network = n.network
-    s = dbf.session()
-    dbf.meta.bind.echo = False
 
-
-    old = select([func.max(network.c.ip)], network.c.ip <= ip )
     s1 = select([func.max(network.c.ip)], and_(
         network.c.ip <= ip, ip <= network.c.bcast))
 
