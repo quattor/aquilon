@@ -41,10 +41,10 @@ class Interface(Base):
 
     interface_type = Column(AqStr(32), nullable = False) #TODO: index
     mac            = Column(AqStr(18), nullable = False)
-    ip             = Column(IPV4, default='0.0.0.0')
+    ip             = Column(IPV4, nullable = True)
     network_id     = Column(Integer, ForeignKey(Network.__table__.c.id,
                                                 name = 'iface_net_id_fk'),
-                            nullable = False)
+                            nullable = True)
 
     creation_date  = deferred(Column('creation_date',
                                     DateTime, default = datetime.now,
@@ -59,8 +59,8 @@ class Interface(Base):
 interface = Interface.__table__
 interface.primary_key.name = 'interface_pk'
 
-interface.append_constraint(UniqueConstraint('mac', name = 'mac_addr_uk'))
-Index('iface_ip_idx', interface.c.ip)
+interface.append_constraint(UniqueConstraint('mac', name = 'iface_mac_addr_uk'))
+interface.append_constraint(UniqueConstraint('ip',  name = 'iface_ip_addr_uk'))
 Index('iface_net_id_idx', interface.c.network_id)
 
 def populate(*args, **kw):
