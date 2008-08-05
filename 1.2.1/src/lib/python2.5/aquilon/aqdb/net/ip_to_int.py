@@ -25,21 +25,6 @@ if __name__ == '__main__':
 from sqlalchemy.sql import and_
 
 def dq_to_int(dq):
-    if not dq:
-        raise TypeError('IPV4 can not be None')
-
-    dq = str(dq)
-    q = dq.split('.')
-
-    if len(q) != 4:
-        msg = "%r: IPv4 address invalid: should contain 4 bytes" %(dq)
-        raise TypeError(msg)
-
-    for x in q:
-        if 0 > int(x) > 255:
-            msg = (dq, " : bytes should be between 0 and 255")
-            raise TypeError(msg)
-
     return struct.unpack('!L', inet_aton(dq))[0]
 
 def int_to_dq(n):

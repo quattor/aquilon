@@ -30,7 +30,9 @@ class IPV4(types.TypeDecorator):
 
     def process_bind_param(self, dq, engine):
         if not dq:
-            raise TypeError('IPV4 can not be None')
+            #raise TypeError('IPV4 can not be None')
+            #FIX ME: this is a quick fix to accomodate Nullable field.
+            return None
 
         dq = str(dq)
         q = dq.split('.')
@@ -49,6 +51,8 @@ class IPV4(types.TypeDecorator):
     def process_result_value(self, n, engine):
         # Force the incoming Decimal to a long to prevent odd issues when
         # struct.pack() tries it...
+        if n is None:
+            return None
         return i2i.int_to_dq(n)
 
     def copy(self):
