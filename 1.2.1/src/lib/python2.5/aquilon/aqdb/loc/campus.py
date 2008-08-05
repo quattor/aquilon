@@ -38,8 +38,11 @@ campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
 
 def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    from aquilon.aqdb.loc.country import Country
+    from aquilon.aqdb.db_factory   import db_factory, Base
+    from aquilon.aqdb.loc.country  import Country
+    from aquilon.aqdb.loc.city     import City
+    from aquilon.aqdb.loc.building import Building
+    from aquilon.aqdb.utils        import dsdb
 
     dbf = db_factory()
     Base.metadata.bind = dbf.engine
@@ -49,9 +52,24 @@ def populate(*args, **kw):
 
     campus.create(checkfirst = True)
 
-    if len(s.query(Campus).all()) < 1:
-        pass
-    s.commit()
+    #TODO: replace pseudocode with code
+    #if len(s.query(Campus).all()) < 1:
+        #get all the campus names from dsdb and create them outside the map
+        #campuses = []
+        #for row in dsdb.dump_campus():
+        #    campuses.append(row)
+
+        #debug('dump campus yields\n',campuses)
+
+        #select all building -> campus mappings from dsdb
+
+        #take all bldg -> campus, make bldg -> city -> campus from them
+
+        #take all city -> country mappings from location, make campus to
+        #    country from them.
+
+        #print the whole thing out and see what happens
+    #s.commit()
 
     if Base.metadata.bind.echo == True:
         Base.metadata.bind.echo == False
