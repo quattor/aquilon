@@ -175,10 +175,7 @@ class Network(Base):
         return ipcalc.Network('%s/%s'%(self.ip,self.cidr))
     ipcalc = property(_ipcalc)
 
-    #def _broadcast(self):
-    #    return str(self.ipcalc.broadcast())
-    #broadcast = property(_broadcast)
-    #TODO: netmask property from ipcalc
+    #TODO: mask -> netmask as first class property
     #TODO: custom str and repr
 
 network = Network.__table__
@@ -259,7 +256,6 @@ def populate(*args, **kw):
             kw['ip']         = ip
             kw['mask']       = mask
             kw['cidr']       = _mask_to_cidr[mask]
-
             kw['bcast']      = i2i.get_bcast(ip, kw['cidr'])
 
             if type_id:
