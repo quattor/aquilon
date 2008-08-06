@@ -14,6 +14,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.hw.physical_interface import PhysicalInterface
+from aquilon.aqdb.net.ip_to_int import dq_to_int
 
 
 def get_physical_interface(session, physical_interface, machine, mac, ip):
@@ -32,6 +33,26 @@ def get_physical_interface(session, physical_interface, machine, mac, ip):
     except InvalidRequestError, e:
         raise ArgumentError("PhysicalInterface not found, make sure it has been specified uniquely: %s" % e)
     return dbphysical_interface
+
+def restrict_tor_offsets(session, dbnetwork, ip):
+    if ip is None:
+        # Simple passthrough to make calling logic easier.
+        return
+    if dbnetwork.mask < 8:
+        # This network doesn't have enough addresses, the test is irrelevant.
+        return
+    q = session.query(PhysicalInterface)
+    q = q.join(["machine", "model"]).filter_by(machine_type="tor_switch")
+    q = q.reset_joinpoint()
+    q = q.filter_by(network=dbnetwork)
+    dbinterface = q.first()
+    if not dbinterface:
+        return
+    netip = dq_to_int(dbnetwork.ip)
+    thisip = dq_to_int(ip)
+    if thisip == (netip + 6) or thisip == (netip + 7):
+        raise ArgumentError("The IP address %s is reserved for dynamic dhcp on subnet %s." %
+                (ip, dbnetwork.ip))
 
 
 #if __name__=='__main__':

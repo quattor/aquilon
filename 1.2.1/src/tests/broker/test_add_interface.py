@@ -124,6 +124,34 @@ class TestAddInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Interface: eth1", command)
 
+    def testrejectsixthip(self):
+        # This tests that the sixth ip offset on a tor_switch network
+        # gets rejected.
+        # FIXME: Hard-coded.  Assumes the 8.8.4.0 subnet, since all
+        # the tests are using 8.8.[4567].* ips.
+        self.badrequesttest(["add", "interface", "--interface", "eth2",
+            "--machine", "ut3c1n4", "--mac", "02:02:08:08:04:06",
+            "--ip", "8.8.4.6"])
+
+    def testverifyrejectsixthip(self):
+        command = "show machine --machine ut3c1n4"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Interface: eth2", command)
+
+    def testrejectseventhip(self):
+        # This tests that the seventh ip offset on a tor_switch network
+        # gets rejected.
+        # FIXME: Hard-coded.  Assumes the 8.8.4.0 subnet, since all
+        # the tests are using 8.8.[4567].* ips.
+        self.badrequesttest(["add", "interface", "--interface", "eth3",
+            "--machine", "ut3c1n4", "--mac", "02:02:08:08:04:07",
+            "--ip", "8.8.4.7"])
+
+    def testverifyrejectseventhip(self):
+        command = "show machine --machine ut3c1n4"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Interface: eth3", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

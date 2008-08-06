@@ -12,7 +12,8 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.physical_interface import get_physical_interface
+from aquilon.server.dbwrappers.physical_interface import (
+        get_physical_interface, restrict_tor_offsets)
 from aquilon.server.templates import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
@@ -48,6 +49,7 @@ class CommandUpdateInterface(BrokerCommand):
             dbinterface.mac = mac
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
+            restrict_tor_offsets(session, dbnetwork, ip)
             dbinterface.ip = ip
             dbinterface.network = dbnetwork
         if comments:

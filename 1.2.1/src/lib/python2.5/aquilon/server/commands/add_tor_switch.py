@@ -17,6 +17,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
+from aquilon.server.dbwrappers.physical_interface import restrict_tor_offsets
 from aquilon.aqdb.hw.switch_port import SwitchPort
 from aquilon.aqdb.hw.physical_interface import PhysicalInterface
 from aquilon.aqdb.loc.rack import Rack
@@ -67,6 +68,8 @@ class CommandAddTorSwitch(BrokerCommand):
             if not (interface and mac and ip):
                 raise ArgumentError("If using --interface, --mac, or --ip, all of them must be given.")
             dbnetwork = get_net_id_from_ip(session, ip)
+            # Hmm... should this check apply to the switch's own network?
+            restrict_tor_offsets(session, dbnetwork, ip)
             dbpi = PhysicalInterface(name=interface, mac=mac, ip=ip,
                     machine=dbtor_switch, network=dbnetwork)
             session.save(dbpi)

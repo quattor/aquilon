@@ -18,6 +18,7 @@ from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
+from aquilon.server.dbwrappers.physical_interface import restrict_tor_offsets
 from aquilon.server.templates import PlenaryMachineInfo
 
 
@@ -51,6 +52,7 @@ class CommandAddInterface(BrokerCommand):
         # XXX: also check the ip isn't in use somewhere
 
         dbnetwork = get_net_id_from_ip(session, ip)
+        restrict_tor_offsets(session, dbnetwork, ip)
         dbpi = PhysicalInterface(name=interface, mac=mac, machine=dbmachine,
                 ip=ip, network=dbnetwork, **extra)
         session.save(dbpi)
