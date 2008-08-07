@@ -33,7 +33,7 @@ from aquilon.aqdb.hw.machine          import Machine
 
 #maybe this is an association object as opposed to an inheritance relationship?
 # interface -> m2m -> machine
-# interface -> m3m -> network_device
+# interface -> m2m -> network_device
 
 class PhysicalInterface(Interface):
     """ Class to model up the physical nic cards/devices in machines """
