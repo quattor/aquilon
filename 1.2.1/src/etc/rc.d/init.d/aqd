@@ -13,9 +13,13 @@ prog="aqd"
 pidfile="/var/quattor/run/aqd.pid"
 twistd="/ms/dist/aquilon/PROJ/aqd/prod/bin/twistd"
 conffile="/etc/aqd.conf"
+orcl_client="orcl/10.2.0.1.0"
+MODULEPATH="/ms/dist/aurora/etc/modules"
 
 start() {
         echo -n $"Starting $prog: "
+	export MODULEPATH
+	eval `/ms/dist/aurora/bin/modulecmd bash load $orcl_client`
 	su cdb -c "/ms/dist/aurora/bin/krun -afs -- $twistd --pidfile=$pidfile --logfile=/var/quattor/logs/aqd.log aqd --config=$conffile " >/var/quattor/logs/aqd.out 2>&1
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ]; then
