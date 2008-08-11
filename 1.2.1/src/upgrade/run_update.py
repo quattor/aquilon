@@ -7,56 +7,73 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
+""" runs the update """
+
+import sys
 import os
+import export
 
-""" we'll be passing this to everything else. Do this first in case other
-    modules have imports left over from early stage development. """
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(
+                    DIR, '..', 'lib', 'python2.5')))
+    import aquilon.aqdb.depends
 
-from db_factory import db_factory
+from aquilon.aqdb.db_factory import db_factory, Base
 
 dbf = db_factory()
-print dbf.dsn
-from depends import Base
 Base.metadata.bind = dbf.engine
 
-from depends import *
-from debug import *
-from admin import *
+def upgrade(**kw):
+    should_debug = kw.pop('debug', False)
+    
+    ### STEP 1: export with export.py
+    #export.export()
 
-import table_maker
+    # STEP 2: destroy network table and rebuild
+    #
+    import update_network as n
+    n.upgrade(dbf,debug=should_debug)
 
-import migrate.changeset
+    # STEP 3: transform type_id FKs into table scalars
+    files = ['mac_type_convert.py', 'loc_convert.py', 'system_convert.py']
 
-def upgrade():
-    ### STEP 1
-    # Full export == safety net
-    ##CHEATING here, losing patience
-    DSN = 'cdb/cdb@LNPO_AQUILON_NY'
-    exp = 'exp %s FILE=EXPORT/%s.dmp OWNER=%s DIRECT=n'%(DSN,
-                                    dbf.schema, dbf.schema)
-    exp += ' consistent=y statistics=none'.upper()
+    for f in files:
+        execfile(f)
 
-    print "%s"%(exp)
-    msg = "\tis this the correct export statement? :"
-    if not utils.confirm(prompt=msg, resp=False):
-        print 'exiting.'
-        sys.exit(1)
+    # STEP 4: transform interface tables
+    import interface_convert as ic
+    ic.upgrade(dbf, debug=should_debug)
 
-    print 'running %s'%(exp)
-    rc = 0
-    rc = os.system(exp)
-    if rc != 0:
-        print >>sys.stderr, "Command returned %d, aborting." % rc
-        sys.exit(rc)
+    # STEP 5: carry out the rest in natvice sql form the stmts file
+    sqlfile = './sql_stmts'
 
-    # STEP 2: make the new stuff
-    table_maker.upgrade(dbf)
+    try:
+        f = open(sqlfile, 'r')
+    except IOError,e :
+        print e
+        sys.exit(9)
 
-#def downgrade():
+    for line in f:
+        #debug('%s'%(line))
+        if line.startswith('#') or line.isspace():
+            continue
+        else:
+            dbf.safe_execute(line.strip(), debug=should_debug)
+    
 
 """ A cheap downgrade script would be
     (1) run drop_tables_and_constraints()
     (2) run import
 """
+#def downgrade(*args, **kw):
+#imp /tmp/cdb.dmp
+
+
 if __name__ == '__main__':
-    upgrade()
+    if '--debug' in sys.argv or '-d' in sys.argv:
+        upgrade(debug=True)
+    elif '--verbose' in sys.argv or '-v' in sys.argv:
+        upgrade(verbose=True)
+    else:
+        upgrade()
