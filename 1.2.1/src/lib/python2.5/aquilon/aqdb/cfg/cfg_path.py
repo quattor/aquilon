@@ -32,7 +32,8 @@ class CfgPath(Base):
     __tablename__ = 'cfg_path'
 
     id            = Column(Integer, Sequence('cfg_path_seq'), primary_key=True)
-    tld_id        = Column(Integer, ForeignKey('tld.id'), nullable=False)
+    tld_id        = Column(Integer, ForeignKey(
+        'tld.id', name = 'cfg_path_tld_fk'), nullable=False)
     relative_path = Column(AqStr(255), nullable=False)
     last_used     = Column(DateTime, default=datetime.now)
     creation_date = deferred(Column(DateTime, default=datetime.now,

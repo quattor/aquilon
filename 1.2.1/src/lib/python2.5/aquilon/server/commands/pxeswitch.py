@@ -10,6 +10,8 @@
 """Contains the logic for `aq pxeswitch`."""
 
 
+from socket import gethostbyname
+
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.exceptions_ import NameServiceError

@@ -53,11 +53,11 @@ def populate(*args, **kw):
     campus.create(checkfirst = True)
 
     #TODO: replace pseudocode with code
-    #if len(s.query(Campus).all()) < 1:
+    if len(s.query(Campus).all()) < 1:
         #get all the campus names from dsdb and create them outside the map
-        #campuses = []
-        #for row in dsdb.dump_campus():
-        #    campuses.append(row)
+        campuses = []
+        for row in dsdb.dump_campus():
+            campuses.append(row)
 
         #debug('dump campus yields\n',campuses)
 

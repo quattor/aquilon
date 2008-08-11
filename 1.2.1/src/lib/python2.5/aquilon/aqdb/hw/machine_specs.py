@@ -43,7 +43,7 @@ class MachineSpecs(Base):
 
     __tablename__ = 'machine_specs'
     id            = Column( Integer,
-                           Sequence('machine_specs_seq'),
+                           Sequence('mach_specs_id_seq'), #MACH_SPECS_ID_SEQ
                                     primary_key=True)
 
     model_id      = Column(Integer,

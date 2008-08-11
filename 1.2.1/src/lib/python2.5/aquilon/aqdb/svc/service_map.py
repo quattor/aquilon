@@ -50,7 +50,8 @@ class ServiceMap(Base):
                                        nullable = False))
     comments         = deferred(Column(String(255), nullable = True))
     location         = relation(Location, backref = 'service_maps')
-    service_instance = relation(ServiceInstance, backref='service_map')
+    service_instance = relation(ServiceInstance, backref='service_map',
+                                passive_deletes = True)
 #    service         = synonym('_service') ???
 
     def _service(self):

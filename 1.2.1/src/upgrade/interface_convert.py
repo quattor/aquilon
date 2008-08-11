@@ -32,13 +32,14 @@ def upgrade(dbf, **kw):
     _MAC       = 'MAC VARCHAR(18)'
     _NET       = 'NETWORK_ID %s'%(num_spec)
     _IP        = 'NEWIP %s'%(num_spec)
+    _TYPE      = 'INTERFACE_TYPE VARCHAR(32)'
 
     #TODO: This doesn't work. We want to build a brand new table with the right,
     #      column order, then select all the existing data into it, then modify
     #     -or- use DBMS.DDL
 
     #Add the new columns:
-    for i in [_MAC, _IP, _NET]:
+    for i in [_MAC, _IP, _NET, _TYPE]:
         stmt  = 'ALTER TABLE %s ADD (%s)'%(tbl,i)
         dbf.safe_execute(stmt, debug=should_debug)
 
@@ -61,15 +62,20 @@ def upgrade(dbf, **kw):
             network = i2i.get_net_id_from_ip(dbf.session(),ip)
             newip = i2i.dq_to_int(ip)
 
+        # Being lazy with the interface_type field - they're all physical.
         stmt = """update %s set newip = %s,
                                 mac   = '%s',
+                                interface_type = 'physical',
                                 network_id = %s where id = %s """%(
             tbl, newip, mac, network.id , id )
 
         dbf.safe_execute(stmt,debug=should_debug)
 
-    drop = 'alter table physical_interface drop column mac'
-    dbf.safe_execute(drop, debug=should_debug)
+    d1 = 'alter table physical_interface drop column mac'
+    dbf.safe_execute(d1, debug=should_debug)
+
+    d2 = 'alter table interface drop column interface_type_id'
+    dbf.safe_execute(d2, debug=should_debug)
 
     r1 = 'alter table interface rename column ip to oldip'
     #rename newip -> ip,

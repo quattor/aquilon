@@ -38,11 +38,11 @@ class CommandShowHostIPList(BrokerCommand):
                 JOIN dns_domain ON (dns_domain.id = system.dns_domain_id)
                 JOIN machine ON (host.machine_id = machine.id)
                 JOIN physical_interface ON
-                    (machine.id = physical_interface.machine_id)
+                    (machine.id = physical_interface.machine_id AND
+                     physical_interface.boot = 1)
                 JOIN interface ON
-                        (interface.id = physical_interface.id)
-                WHERE interface.ip IS NOT NULL
-                    AND NOT (interface.ip = '0.0.0.0')"""
+                        (interface.id = physical_interface.interface_id)
+                WHERE interface.ip IS NOT NULL"""
         if archetype:
             query_text = query_text + """
                     AND host.archetype_id = %d""" % dbarchetype.id

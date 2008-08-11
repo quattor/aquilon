@@ -38,19 +38,22 @@ class SwitchPort(Base):
 
     #TODO: code level constraint on machine_type == tor_switch
     switch_id   = Column(Integer,
-                       ForeignKey('machine.id', ondelete='CASCADE',
+                       ForeignKey('machine.id', ondelete = 'CASCADE',
                                   name = 'switch_mach_fk'), primary_key = True)
 
     port_number  = Column(Integer, primary_key = True)
     interface_id = Column(Integer,
-                          ForeignKey('interface.id', ondelete='CASCADE',
+                          ForeignKey('interface.id', ondelete = 'CASCADE',
                                      name = 'switch_int_fk'), nullable = True)
     link_creation_date = deferred(
         Column('creation_date', DateTime, default = datetime.now,
                nullable = False))
 
-    switch    = relation(Machine,   uselist = False, backref = 'switchport')
-    interface = relation(Interface, uselist = False, backref = 'switchport')
+    switch    = relation(Machine, uselist = False, backref = 'switchport',
+                         passive_deletes = True)
+
+    interface = relation(Interface, uselist = False, backref = 'switchport',
+                         passive_deletes = True)
     #TODO: another relation specified by interface type?
 
 switch_port = SwitchPort.__table__

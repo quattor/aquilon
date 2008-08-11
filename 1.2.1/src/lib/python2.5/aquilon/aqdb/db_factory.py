@@ -179,10 +179,24 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
                 print e
                 return None
 
-    def safe_execute(self, stmt, **kwargs):
+    def safe_execute(self, stmt, *args, **kw):
         """ convenience wrapper """
+        #debug('in safe execute with args: %s, kw: %s'%(args, kw))
+
+        dbg = kw.pop('debug', False)
+        verbose = kw.pop('verbose', False)
+
+        if debug == True:
+            verbose = True
+
+        if dbg or verbose:
+            print '%s'%(stmt)
+
+        if dbg == True:
+            return True
+
         try:
-            return self.engine.execute(text(stmt), **kwargs)
+            return self.engine.execute(text(stmt), **kw)
         except SQLError, e:
             print >> sys.stderr, e
 

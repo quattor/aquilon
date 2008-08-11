@@ -39,8 +39,10 @@ class PhysicalInterface(Interface):
     """ Class to model up the physical nic cards/devices in machines """
     __tablename__ = 'physical_interface'
 
-    id = Column(Integer, ForeignKey('interface.id', name = 'phys_int_int_fk',
-                                    ondelete='CASCADE'), primary_key=True)
+    interface_id = Column(Integer, ForeignKey(
+        'interface.id', name = 'phys_int_int_fk', ondelete='CASCADE'),
+                          primary_key=True)
+
     machine_id = Column(Integer, ForeignKey(
         'machine.id', name = 'PHYS_IFACE_MACH_ID_FK',ondelete = 'CASCADE'),
                         nullable = False)

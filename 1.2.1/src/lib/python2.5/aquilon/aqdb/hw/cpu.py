@@ -31,7 +31,7 @@ from aquilon.aqdb.hw.vendor import Vendor
 
 class Cpu(Base):
     __tablename__ = 'cpu'
-    id            = Column(Integer, Sequence('cpu_seq'), primary_key = True)
+    id            = Column(Integer, Sequence('cpu_id_seq'), primary_key = True)
     name          = Column(AqStr(64), nullable = False)
     vendor_id     = Column(Integer, ForeignKey(
         'vendor.id', name = 'cpu_vendor_fk'), nullable = False)

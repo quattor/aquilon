@@ -31,7 +31,7 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 class Location(Base):
     __tablename__ = 'location'
 
-    id = Column(Integer, Sequence('location_seq'), primary_key=True)
+    id = Column(Integer, Sequence('location_id_seq'), primary_key=True)
 
     name = Column(AqStr(16), nullable = False)
 
@@ -46,7 +46,7 @@ class Location(Base):
     #    'location_type.id', ondelete = 'CASCADE',
     #    name = 'sli_loc_typ__fk'), nullable = False)
 
-    fullname = Column(String(64), nullable = False)
+    fullname = Column(String(255), nullable = False)
 
     creation_date = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False))

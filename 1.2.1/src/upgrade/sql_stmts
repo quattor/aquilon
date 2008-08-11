@@ -6,24 +6,32 @@ ALTER TABLE CFG_PATH ADD CONSTRAINT CFG_PATH_TLD_FK FOREIGN KEY (TLD_ID) REFEREN
 drop table afs_cell cascade constraints
 # extend full name column in location
 ALTER TABLE LOCATION MODIFY(FULLNAME VARCHAR2(255))
-# some new values for aurora types:    
-insert into model (id, name, vendor_id, machine_type, creation_date, comments) values (model_id_seq.nextval, 'aurora_model', 41, 19, NULL)
 # add the new rack columns
 alter table rack add (rack_row varchar(4))
 alter table rack add (rack_column number(4))
+# add disk device name, deal with multiple unnamed rows.
+ALTER TABLE DISK ADD (DEVICE_NAME VARCHAR(128))
+UPDATE (SELECT * FROM DISK D1 WHERE EXISTS (SELECT 1 FROM DISK D2 WHERE D1.MACHINE_ID = D2.MACHINE_ID AND D1.ID > D2.ID)) SET DEVICE_NAME = 'sdb'
+UPDATE DISK SET DEVICE_NAME = 'sda' WHERE DEVICE_NAME IS NULL
+ALTER TABLE DISK ADD CONSTRAINT DISK_DEVICE_NAME_NN CHECK (('DEVICE_NAME' IS NOT NULL))
+ALTER TABLE DISK ADD CONSTRAINT DISK_MACH_DEV_NAME_UK UNIQUE (MACHINE_ID, DEVICE_NAME)
 
 # add new values for defaults and unit tests
-#Domain aurora_domain
-insert into domain (id,name,server_id,compiler,owner_id,creation_date) values(26,'aurora_domain',1,'/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc', 1, sysdate);
 
-#Domain windows_domain
-insert into domain (id,name,server_id,compiler,owner_id,creation_date) values(27,'windows_domain',1,'/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc', 1, sysdate);
+UPDATE status SET name = 'production' WHERE name = 'prod'
+UPDATE status SET name = 'development' WHERE name = 'dev'
+
+# gh needed for Networks...
+#insert into location (id, parent_id, name, fullname, location_type_id, creation_date) values (location_id_seq.nextval, 171, 'gh', 'Grand Hyatt Plaza, Unit No E, F, G, Off Western Express Highway', 7, sysdate)
 
 #Vendor aurora_vendor
-insert into vendor (id,name,creation_date) values (11,'aurora_vendor',sysdate);
+# Already in the prod database
+#insert into vendor (id,name,creation_date,comments) values (41,'aurora_vendor',sysdate,'Placeholder vendor for Aurora hardware.')
 
 #Cpu aurora_cpu
-insert into cpu (id,name,vendor_id,speed,creation_date) values(22,'aurora_cpu',11,2000,sysdate);
+# Already in the prod database
+#insert into cpu (id,name,vendor_id,speed,creation_date,comments) values(41,'aurora_cpu',41,0,sysdate,'Placeholder Aurora CPU type.')
 
 #Model aurora_model with type aurora_node and zeroed MachineSpecs
-insert into model (id,name,vendor_id,creation_date,machine_type) values(23,'aurora_model',11,sysdate,'aurora_node');
+insert into model (id,name,vendor_id,creation_date,machine_type) values(model_id_seq.nextval,'aurora_model',41,sysdate,'aurora_node')
+insert into machine_specs (id,model_id,cpu_id,cpu_quantity,memory,disk_type_id,disk_capacity,nic_count) values (mach_specs_id_seq.nextval,model_id_seq.currval,41,0,0,5,0,0)
