@@ -44,13 +44,13 @@ class CommandBindServer(BrokerCommand):
             if existing_dbhl.id == dbhost_list.id:
                 # Server is already bound here, nothing to do.
                 return
-            if not force:
-                raise ArgumentError("Host %s is already bound to %s, use unbind to clear first or rebind to force."
-                        % (hostname, existing_dbhl.name))
-            for dbhli in existing_dbhl.hosts:
-                if dbhli.host == dbhost:
-                    session.delete(dbhli)
-                    session.flush()
+#            if not force:
+#                raise ArgumentError("Host %s is already bound to %s, use unbind to clear first or rebind to force."
+#                        % (hostname, existing_dbhl.name))
+#            for dbhli in existing_dbhl.hosts:
+#                if dbhli.host == dbhost:
+#                    session.delete(dbhli)
+#                    session.flush()
         positions = []
         for dbhli in dbhost_list.hosts:
             positions.append(dbhli.position)

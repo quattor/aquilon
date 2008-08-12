@@ -59,9 +59,6 @@ host_list_item = HostListItem.__table__
 
 host_list_item.primary_key.name = 'host_list_item_pk'
 
-host_list_item.append_constraint(
-    UniqueConstraint('host_id', name = 'host_list_item_uk')) #hosts only on one list?
-
 #TODO: would we like this mapped in host_list.py instead?
 HostList.hosts = relation(HostListItem,
                           collection_class=ordering_list('position'),

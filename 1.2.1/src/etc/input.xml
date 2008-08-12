@@ -424,18 +424,6 @@
       <transport method="post" path="host/%(hostname)s/server_of_service/%(service)s/bind" />
    </command>
 
-   <command name="rebind_server">
-      Bind a server as a provider of the service instance.
-      If the server is already bound as a provider of the service for a
-      different instance, it will be moved to the given instance.
-      <optgroup name="rebind_server_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Host name</option>
-         <option name="service" type="string">Service name</option>
-         <option name="instance" type="string">Instance name</option>
-      </optgroup>
-      <transport method="put" path="host/%(hostname)s/server_of_service/%(service)s/instance/%(instance)s" />
-   </command>
-
    <command name="unbind_server">
       Unbind a server as a provider of the service (instance).
       <optgroup name="unbind_server_opts" mandatory="True" fields="all">
