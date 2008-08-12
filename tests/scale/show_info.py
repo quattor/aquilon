@@ -1,0 +1,43 @@
+#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# $Header: //eai/aquilon/aqd/1.2.1/src/etc/default-template.py#1 $
+# $Change: 645284 $
+# $DateTime: 2008/07/09 19:56:59 $
+# $Author: wesleyhe $
+# Copyright (C) 2008 Morgan Stanley
+#
+# This module is part of Aquilon
+"""Run different show commands."""
+
+
+from common import AQRunner
+
+
+def show_info():
+    aq = AQRunner()
+    rc = aq.wait(["ping"])
+    rc = aq.wait(["show", "host", "--all"])
+    rc = aq.wait(["show", "domain", "--all"])
+    rc = aq.wait(["show", "hostiplist"])
+    rc = aq.wait(["show", "hostmachinelist"])
+    rc = aq.wait(["show", "cpu", "--all"])
+    rc = aq.wait(["show", "model", "--type", "blade"])
+    rc = aq.wait(["show", "service", "--all"])
+    rc = aq.wait(["show", "archetype"])
+    rc = aq.wait(["show", "map", "--building", "np"])
+    #rc = aq.wait(["show", "location", "types"])
+    rc = aq.wait(["show", "chassis"])
+    rc = aq.wait(["show", "rack", "--all"])
+    rc = aq.wait(["show", "building"])
+    rc = aq.wait(["show", "city"])
+    rc = aq.wait(["show", "country"])
+    rc = aq.wait(["show", "continent"])
+    rc = aq.wait(["show", "hub"])
+    rc = aq.wait(["show", "machine", "--all"])
+    rc = aq.wait(["show", "tor_switch", "--model", "rs8000"])
+    rc = aq.wait(["show", "principal"])
+
+
+if __name__=='__main__':
+    show_info()
+

@@ -1,0 +1,114 @@
+#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# $Header: //eai/aquilon/aqd/1.2/src/etc/default-template.py#1 $
+# $Change: 642391 $
+# $DateTime: 2008/06/10 15:50:37 $
+# $Author: daqscott $
+# Copyright (C) 2008 Morgan Stanley
+#
+# This module is part of Aquilon
+""" Script to take a CSV file of host info and try importing the data.
+
+    This assumes that the hardware already exists, perhaps created by
+    bulkload_machines.
+
+"""
+
+
+import os
+import sys
+from subprocess import Popen, PIPE
+from csv import DictReader
+
+
+# Get the current directory from __file__
+bindir = os.path.realpath(os.path.join(os.path.dirname(__file__)))
+aq = os.path.join(bindir, "aq")
+
+# Strip xml file out of the options, pass everything else to aq
+csvfile = "hosts.csv"
+
+# Maybe have --help give usage
+
+# Try aq status to make sure we can connect with the given options, abort
+# if that doesn't work.
+p = Popen(args=[aq, "status"], stdout=PIPE, stderr=PIPE, cwd=".")
+(out, err) = p.communicate()
+if p.returncode != 0:
+    print >>sys.stderr, "`%s status` exited with return code %d, aborting." % (
+            aq, p.returncode)
+    print >>sys.stderr, err
+    sys.exit(p.returncode)
+if err:
+    print >>sys.stderr, "`%s status` sent output to stderr, aborting.\n%s\n" % (
+            err)
+    sys.exit(1)
+
+# Parse the CSV file, abort on errors.
+# Starting somewhere:
+# hostname, machinename, ip, os, personality
+reader = DictReader(open(csvfile, "rb"))
+entries = []
+try:
+    for row in reader:
+        entries.append(row)
+except csv.Error, e:
+    sys.exit('file %s, line %d: %s' % (csvfile, reader.line_num, e))
+
+# For each host, update the machine with IP info, and then create the host.
+# FIXME: Maybe need these as parameters...
+domain = "production"
+status = "prod"
+iface0 = "eth0"
+for entry in entries:
+    hostname = entry["hostname"]
+    machine = entry["machine"]
+    ip = entry["ip"]
+    os_entry = entry["os"]
+    personality = entry["personality"]
+# aq update interface --interface iface0 --machine machine --ip ip
+    print "Updating interface %s of machine %s" % (iface0, machine)
+    p = Popen(args=[aq, "update", "interface", "--interface", iface0,
+            "--ip", ip, "--machine", machine],
+            stdout=PIPE, stderr=PIPE, cwd=".")
+    (out, err) = p.communicate()
+    if p.returncode != 0:
+        print >>sys.stderr, "Attempt to update interface %s on machine %s failed with return code %d." % (
+                iface0, machine, p.returncode)
+        print >>sys.stderr, err
+        continue
+    if err:
+        print >>sys.stderr, "Attempt to update interface %s on machine %s sent output to stderr.\n%s\n" % (
+                iface0, machine, err)
+# aq add host --hostname hostname --machine machine --archetype aquilon
+#    --domain domain --status prod
+    print "Adding host %s for machine %s" % (hostname, machine)
+    p = Popen(args=[aq, "add", "host", "--hostname", hostname,
+            "--machine", machine, "--archetype", "aquilon",
+            "--domain", domain, "--status", status],
+            stdout=PIPE, stderr=PIPE, cwd=".")
+    (out, err) = p.communicate()
+    if p.returncode != 0:
+        print >>sys.stderr, "Attempt to add host %s for machine %s failed with return code %d." % (
+                hostname, machine, p.returncode)
+        print >>sys.stderr, err
+        continue
+    if err:
+        print >>sys.stderr, "Attempt to add host %s for machine %s sent output to stderr.\n%s\n" % (
+                hostname, machine, err)
+# aq make aquilon --hostname --os --personality
+    print "Running make aquilon for host %s" % (hostname)
+    p = Popen(args=[aq, "make", "aquilon", "--hostname", hostname,
+            "--os", os_entry, "--personality", personality],
+            stdout=PIPE, stderr=PIPE, cwd=".")
+    (out, err) = p.communicate()
+    if p.returncode != 0:
+        print >>sys.stderr, "Attempt to make aquilon host %s failed with return code %d." % (
+                hostname, p.returncode)
+        print >>sys.stderr, err
+        continue
+    if err:
+        print >>sys.stderr, "Attempt to make aquilon host %s sent output to stderr.\n%s\n" % (
+                hostname, err)
+
+#if __name__=='__main__':
