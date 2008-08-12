@@ -27,6 +27,7 @@ DEPENDS  = $(QROOT)/deps/$(DOMAIN)
 FINAL    = $(QROOT)/web/htdocs/profiles
 
 TOOLDIR   = $(QROOT)/build
+PERL5     = /ms/dist/perl5/bin/perl5.8
 MKDEP     = $(TOOLDIR)/mkdep
 CLEANDEPS = $(TOOLDIR)/cleandeps
 
@@ -119,7 +120,7 @@ build: begin cleandeps build_xmldeps build_deps build_xmls end
 # 
 cleandeps: $(DEPENDS)
 	@echo $(DATE) Cleaning old XML dependencies $(REDIR)
-	@$(CLEANDEPS) $(DEPENDS) $(PANC_OPTS)
+	@$(PERL5) $(CLEANDEPS) $(DEPENDS) $(PANC_OPTS)
 
 count:
 	@$(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmls | grep .tpl | wc -l
@@ -175,7 +176,7 @@ $(OUTPUT)/%.xml $(OUTPUT)/%.xml.dep: $(PROFILES)/%.tpl
 # to make it suitable for makefile include
 #
 $(DEPENDS)/%.dep: $(OUTPUT)/%.xml.dep
-	@$(MKDEP) $@ < $<
+	@$(PERL5) $(MKDEP) $@ < $<
 
 
 #
