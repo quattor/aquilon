@@ -31,7 +31,7 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 class CfgPath(Base):
     __tablename__ = 'cfg_path'
 
-    id            = Column(Integer, Sequence('cfg_path_seq'), primary_key=True)
+    id            = Column(Integer, Sequence('cfg_path_id_seq'), primary_key=True)
     tld_id        = Column(Integer, ForeignKey(
         'tld.id', name = 'cfg_path_tld_fk'), nullable=False)
     relative_path = Column(AqStr(255), nullable=False)
