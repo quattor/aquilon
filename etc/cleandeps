@@ -36,7 +36,7 @@ foreach my $inc (reverse @incpaths) {
       my $dmod = (stat $_)[9];
       $tpl_mtime = $dmod if $dmod > $tpl_mtime;
       },
-      follow => 1,
+      follow => 0,
     },  
     $inc
   );
