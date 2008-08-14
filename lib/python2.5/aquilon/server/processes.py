@@ -74,6 +74,22 @@ def run_command(args, env=None, path="."):
                 code=p.returncode)
     return out
 
+def run_git_command(config, args, env=None, path="."):
+    if env:
+        git_env = env.copy()
+    else:
+        git_env = {}
+    env_path = git_env.get("PATH", os.environ.get("PATH", ""))
+    git_env["PATH"] = "%s:%s" % (config.get("broker", "git_path"), env_path)
+    if isinstance(args, list):
+        git_args = args[:]
+        if git_args[0] != "git":
+            git_args.insert(0, "git")
+    else:
+        git_args = ["git", args]
+
+    return run_command(git_args, env=git_env, path=path)
+
 def remove_dir(dir):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
     for root, dirs, files in os.walk(dir, topdown=False):
@@ -112,6 +128,33 @@ def remove_file(filename):
         os.remove(filename)
     except OSError, e:
         log.msg("Could not remove file '%s': %s" % (filename, e))
+
+def cache_version(config):
+    """Try to determine the broker version by examining the path
+    to this source file.  If this file path matches
+    /aquilon/PROJ/aqd/<version>/ (likely /ms/dist) or
+    /aquilon/aqd/<version>/ (likely /ms/dev) then use <version>.
+
+    Otherwise, run git describe to get the most recent tag.
+
+    """
+
+    if config.has_option("broker", "version"):
+        return
+
+    version_re = re.compile(r'/aquilon(?:/PROJ)?/aqd/([^/]+)/')
+    m = version_re.search(__file__)
+    if m and m.group(1) != "lib" and m.group(1) != "bin":
+        config.set("broker", "version", m.group(1))
+        return
+
+    try:
+        out = run_git_command(config, "describe",
+                              path=config.get("broker", "srcdir"))
+        config.set("broker", "version", out.strip())
+    except ProcessException, e:
+        log.msg("Could not run git describe to get version: %s" % e)
+        config.set("broker", "version", "Unknown")
 
 # This functionality (build_index, send_notification) may be better
 # suited in a different module.  Here for now, though.

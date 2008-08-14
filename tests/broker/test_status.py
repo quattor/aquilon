@@ -24,9 +24,12 @@ from brokertest import TestBrokerCommand
 class TestStatus(TestBrokerCommand):
 
     def teststatus(self):
-        out = self.commandtest("status")
-        self.assert_('Aquilon Broker v1.2.1\n' in out,
-                "status output did not contain version")
+        command = "status"
+        out = self.commandtest(command)
+        # This used to confirm the version, but that seems somewhat
+        # pointless since it's now dynamic (based on `git describe`).
+        # Just making sure something comes out...
+        self.matchoutput(out, "Aquilon Broker ", command)
 
 
 if __name__=='__main__':
