@@ -6,6 +6,7 @@ import os
 import inspect
 import pprint
 import fnmatch
+from aquilon.aqdb.utils.sqlalchemy_schemadisplay import create_schema_graph, create_uml_graph
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -27,6 +28,15 @@ def load_all(verbose=True):
             for j in mod.__all__:
                 print "Importing aquilon.aqdb.%s.%s" % (i, j)
                 __import__("aquilon.aqdb.%s.%s" % (i, j))
+
+def write_schema_graph(base, name = "aqdb_schema.dot"):
+    graph = create_schema_graph(metadata = base.metadata)
+    graph.write_dot(name)
+
+def write_uml_graph(base, name = "aqdb_classes.dot"):
+    from sqlalchemy.orm import class_mapper
+    graph = create_uml_graph([class_mapper(c) for c in base._decl_class_registry.itervalues()])
+    graph.write_dot(name)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

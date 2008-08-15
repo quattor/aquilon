@@ -4,6 +4,8 @@ import msversion
 #msversion.addpkg('sqlalchemy', '0.4.7-1', 'dev')
 #msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
 msversion.addpkg('ipython','0.8.2','dist')
+msversion.addpkg('pyparsing', '1.5.0', 'dev')
+msversion.addpkg('pydot', '1.0.2', 'dev')
 
 import sys
 import os
