@@ -27,6 +27,8 @@ class AqStr(types.TypeDecorator):
     impl = types.String
 
     def process_bind_param(self, value, engine):
+        if value is None:
+            return value
         return str(value).strip().lower()
 
     def process_result_value(self, value, engine):
