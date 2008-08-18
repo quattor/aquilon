@@ -32,6 +32,11 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: ut", command)
 
+    def testverifyshowcsv(self):
+        command = "show building --name ut --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "building,ut,city,ny", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)

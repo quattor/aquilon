@@ -45,6 +45,12 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Row: zz", command)
         self.matchoutput(out, "Column: 99", command)
 
+    def testverifyshowallcsv(self):
+        command = "show rack --all --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "rack,ut3,building,ut,a,3", command)
+        self.matchoutput(out, "rack,np997,building,np,zz,99", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRack)
