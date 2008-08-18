@@ -22,6 +22,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.loc.rack import Rack
 from aquilon.aqdb.loc.chassis import Chassis
+from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 from aquilon.aqdb.hw.machine import Machine
 
 
@@ -58,6 +59,7 @@ class CommandAddAuroraHost(CommandAddHost):
         # Create a machine
         dbmodel = get_model(session, "aurora_model")
         dbmachine = session.query(Machine).filter_by(name=machine).first()
+        dbslot = None
         if not dbmachine:
             m = self.nodename_re.search(machine)
             if m:
@@ -80,6 +82,14 @@ class CommandAddAuroraHost(CommandAddHost):
                             parent=dbrack)
                     session.save(dbchassis)
                 dblocation = dbchassis
+                dbslot = session.query(ChassisSlot).filter_by(
+                        chassis=dbchassis, slot_number=nodenum).first()
+                # Note: Could be even more persnickity here and check that
+                # the slot is currently empty.  Seems like overkill.
+                if not dbslot:
+                    dbslot = ChassisSlot(chassis=dbchassis,
+                                         slot_number=nodenum)
+                    session.save(dbslot)
             else:
                 try:
                     out = run_command([self.config.get("broker", "sys_loc"),
@@ -104,6 +114,9 @@ class CommandAddAuroraHost(CommandAddHost):
             dbmachine = create_machine(session, machine, dblocation, dbmodel,
                     None, None, None, None, None, None)
             # create_machine already does a save and a flush
+            if dbslot:
+                dbslot.machine = dbmachine
+                session.update(dbslot)
         # FIXME: Pull this from somewhere.
         status = 'production'
 

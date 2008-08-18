@@ -931,6 +931,7 @@
       </optgroup>
       <optgroup name="add_machine_location_opts" mandatory="True" fields="any">
          <option name="chassis" type="string">Chassis name</option>
+         <option name="slot" type="string">Chassis Slot (Requires --chassis)</option>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
       </optgroup>
@@ -946,6 +947,7 @@
 	 <option name="all" type="boolean" conflicts="machine">all</option>
          <optgroup name="show_machine_location_opts" mandatory="False">
             <option name="chassis" type="string">Chassis name</option>
+	    <option name="slot" type="string">Chassis Slot</option>
             <option name="rack" type="string">Rack name</option>
             <option name="desk" type="string">Desk name</option>
          </optgroup>

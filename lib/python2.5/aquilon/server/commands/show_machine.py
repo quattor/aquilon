@@ -11,10 +11,11 @@
 
 
 from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+                                   BrokerCommand, force_int)
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 
 
 class CommandShowMachine(BrokerCommand):
@@ -22,13 +23,17 @@ class CommandShowMachine(BrokerCommand):
     @add_transaction
     @az_check
     @format_results
-    def render(self, session, machine, model, **arguments):
+    def render(self, session, machine, model, slot, **arguments):
         q = session.query(Machine)
         if machine:
             q = q.filter(Machine.name.like(machine + '%'))
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
+        if slot:
+            slot = force_int("slot", slot)
+            q = q.filter(Machine.location_id == ChassisSlot.chassis_id)
+            q = q.filter(ChassisSlot.slot_number == slot)
         if model:
             dbmodel = get_model(session, model)
             q = q.filter_by(model=dbmodel)

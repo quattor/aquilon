@@ -33,6 +33,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Chassis: ", command)
+        self.matchoutput(out, "Slot: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Domain: production", command)
         self.matchoutput(out, "Status: production", command)

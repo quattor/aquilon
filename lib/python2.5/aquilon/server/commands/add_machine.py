@@ -12,11 +12,13 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+                                   BrokerCommand, force_int)
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.aqdb.loc.chassis import Chassis
+from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 
 
 class CommandAddMachine(BrokerCommand):
@@ -26,10 +28,15 @@ class CommandAddMachine(BrokerCommand):
     @add_transaction
     @az_check
     # arguments will contain one of --chassis --rack or --desk
-    def render(self, session, machine, model, serial,
+    def render(self, session, machine, model, serial, slot,
             cpuname, cpuvendor, cpuspeed, cpucount, memory,
             user, **arguments):
         dblocation = get_location(session, **arguments)
+        if slot is not None:
+            if not isinstance(dblocation, Chassis):
+                raise ArgumentError("The --slot option requires a --chassis.")
+            slot = force_int("slot", slot)
+
         dbmodel = get_model(session, model)
 
         if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
@@ -46,6 +53,13 @@ class CommandAddMachine(BrokerCommand):
 
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
+        if slot is not None:
+            dbslot = session.query(ChassisSlot).filter_by(chassis=dblocation,
+                    slot_number=slot).first()
+            if not dbslot:
+                dbslot = ChassisSlot(chassis=dblocation, slot_number=slot)
+            dbslot.machine = dbmachine
+            session.save_or_update(dbslot)
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

@@ -65,15 +65,27 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
-            "--chassis", "ut3c1", "--model", "hs21", "--cpucount", "2",
+            "--chassis", "ut3c1", "--slot", "3",
+            "--model", "hs21", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "KPDZ406"])
+
+    def testshowslot(self):
+        command = "show machine --slot 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut3c1n3", command)
+
+    def testshowchassisslot(self):
+        command = "show machine --chassis ut3c1 --slot 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testverifyaddut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Chassis: ut3c1", command)
+        self.matchoutput(out, "Slot: 3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)

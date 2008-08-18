@@ -10,6 +10,7 @@
 """Machine formatter."""
 
 
+from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.hw.machine import Machine
 
@@ -21,7 +22,21 @@ class MachineFormatter(ObjectFormatter):
         if machine.host:
             details.append(indent + "  Allocated to host: %s"
                     % machine.host.fqdn)
-        details.append(self.redirect_raw(machine.location, indent + "  "))
+        # This is a bit of a hack.  Delegating out to the standard location
+        # formatter now spews too much information about chassis.  Maybe
+        # that will change when chassis has a corresponding hardware type.
+        for location_type in const.location_types:
+            if getattr(machine.location, location_type, None) is not None:
+                details.append(indent + "  %s: %s" % (
+                                    location_type.capitalize(),
+                                    getattr(machine.location, location_type)))
+                if location_type == 'rack':
+                    details.append(indent + "    Row: %s" %
+                                   machine.location.rack.rack_row)
+                    details.append(indent + "    Column: %s" %
+                                   machine.location.rack.rack_column)
+        for slot in machine.chassis_slot:
+            details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(self.redirect_raw(machine.model, indent + "  "))
         details.append(indent + "  Cpu: %s x %d" %
                 (machine.cpu, machine.cpu_quantity))

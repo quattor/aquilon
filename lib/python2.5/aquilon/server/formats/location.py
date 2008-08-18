@@ -36,6 +36,14 @@ class LocationFormatter(ObjectFormatter):
         if isinstance(location, Rack):
             details.append(indent + "  Row: %s" % location.rack_row)
             details.append(indent + "  Column: %s" % location.rack_column)
+        # Ditto for Chassis...
+        elif isinstance(location, Chassis):
+            for slot in location.slots:
+                if slot.machine:
+                    details.append(indent + "  Slot #%d: %s" % (slot.slot_number, slot.machine.name))
+                else:
+                    details.append(indent + "  Slot #%d Unknown" %
+                                   slot.slot_number)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
