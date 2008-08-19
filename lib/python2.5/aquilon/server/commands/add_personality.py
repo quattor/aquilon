@@ -14,7 +14,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
-
+from aquilon.exceptions_ import ArgumentError
+import re
 
 class CommandAddPersonality(BrokerCommand):
 
@@ -23,6 +24,10 @@ class CommandAddPersonality(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, name, user, **arguments):
+        valid = re.compile('^[a-zA-Z0-9_-]+$')
+        if (not valid.match(name)):
+            raise ArgumentError("name '%s' is not valid"%name)
+
         dbtld = session.query(Tld).filter_by(type="personality").first()
 
         existing = session.query(CfgPath).filter_by(relative_path=name, tld=dbtld).all()
