@@ -8,6 +8,8 @@
 #
 # This module is part of Aquilon
 """Classes and Tables relating to network interfaces"""
+
+
 from datetime import datetime
 import sys
 import os
@@ -20,18 +22,14 @@ if __name__ == '__main__':
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         Boolean, CheckConstraint, UniqueConstraint, DateTime,
                         ForeignKey, PrimaryKeyConstraint, insert, select)
-
 from sqlalchemy.orm import mapper, relation, deferred
 
+from aquilon.aqdb.column_types.aqmac import AqMac
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types.IPV4  import IPV4
 from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.net.network        import Network
 
-#TODO: column type for MAC
-#reg = re.compile('^([a-f0-9]{2,2}:){5,5}[a-f0-9]{2,2}$')
-#if (not reg.match(self.mac)):
-#    raise ArgumentError ('Invalid MAC address: '+self.mac)
 
 class Interface(Base):
     __tablename__ = 'interface'
@@ -40,7 +38,7 @@ class Interface(Base):
                             Sequence('interface_id_seq'), primary_key=True)
 
     interface_type = Column(AqStr(32), nullable = False) #TODO: index
-    mac            = Column(AqStr(18), nullable = False)
+    mac            = Column(AqMac(18), nullable = False)
     ip             = Column(IPV4, nullable = True)
     network_id     = Column(Integer, ForeignKey(Network.__table__.c.id,
                                                 name = 'iface_net_id_fk'),
