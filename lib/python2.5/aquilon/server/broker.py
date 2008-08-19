@@ -113,6 +113,10 @@ def add_transaction(command):
             session.rollback()
             session.close()
             raise
+        finally:
+            # Obliterating the scoped_session - next call to session()
+            # will create a new one.
+            self.dbf.Session.remove()
     new_command.__name__ = command.__name__
     new_command.__dict__ = command.__dict__
     new_command.__doc__ = command.__doc__
