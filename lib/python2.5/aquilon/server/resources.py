@@ -54,6 +54,7 @@ from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
 from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.broker import BrokerCommand
 from aquilon.server import commands
+from aquilon.server.processes import cache_version
 
 
 class ResponsePage(resource.Resource):
@@ -339,6 +340,7 @@ class RestServer(ResponsePage):
             log.err("ERROR: templates directory '%s' not found, will not serve"
                     % templatesdir)
 
+        cache_version(config)
         self.make_required_dirs()
 
         def _logChildren(level, container):
