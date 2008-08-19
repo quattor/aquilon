@@ -38,6 +38,7 @@ class Interface(Base):
                             Sequence('interface_id_seq'), primary_key=True)
 
     interface_type = Column(AqStr(32), nullable = False) #TODO: index
+    # TODO: When refactoring, change this to AqMac(17)
     mac            = Column(AqMac(18), nullable = False)
     ip             = Column(IPV4, nullable = True)
     network_id     = Column(Integer, ForeignKey(Network.__table__.c.id,
