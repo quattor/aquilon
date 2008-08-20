@@ -50,19 +50,16 @@ class AQDMaker(object):
     def makeService(self, options):
         config = Config(configfile=options["config"])
 
-        # FIXME: This block can be restored when we go to twisted 8.1.0.
-        # Reverting back to 2.5.0 for now since startup logs are being
-        # lost.
         # Set this up before the aqdb libs get imported...
-        #observer = log.PythonLoggingObserver()
-        #observer.start()
-        #for logname in config.options("logging"):
-        #    logvalue = config.get("logging", logname)
-        #    if logvalue not in logging._levelNames:
-        #        log.msg("For config [logging]/%s, %s not a valid log level." %
-        #                (logname, logvalue))
-        #        continue
-        #    logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
+        observer = log.PythonLoggingObserver()
+        observer.start()
+        for logname in config.options("logging"):
+            logvalue = config.get("logging", logname)
+            if logvalue not in logging._levelNames:
+                log.msg("For config [logging]/%s, %s not a valid log level." %
+                        (logname, logvalue))
+                continue
+            logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
 
         # Dynamic import means that we can parse config options before
         # importing aqdb.  This is a hack until aqdb can be imported without
