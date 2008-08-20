@@ -341,6 +341,7 @@ class RestServer(ResponsePage):
                     % templatesdir)
 
         cache_version(config)
+        log.msg("Starting aqd version %s" % config.get("broker", "version"))
         self.make_required_dirs()
 
         def _logChildren(level, container):
