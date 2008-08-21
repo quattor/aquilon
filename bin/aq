@@ -107,7 +107,13 @@ def gotPage(pageData, uri, expect, globalOptions):
         if globalOptions.get("httpinfo"):
             print "[OK] %s" % uri
         if pageData:
-            print pageData
+            format = ""
+            if globalOptions.get("format"):
+                format = globalOptions.get("format")
+            if format == "proto":
+                    sys.stdout.write(pageData)
+            else:
+                print pageData
 
 
 class CustomAction(object):

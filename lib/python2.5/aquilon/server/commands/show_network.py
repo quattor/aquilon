@@ -13,10 +13,11 @@
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.net.network import Network
+from aquilon.aqdb.hw.interface import Interface
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.server.formats.network import SimpleNetworkList
-
+from aquilon.server.formats.network import NetworkHostList
 
 class CommandShowNetwork(BrokerCommand):
 
@@ -25,21 +26,27 @@ class CommandShowNetwork(BrokerCommand):
     @add_transaction
     @az_check
     @format_results
-    def render(self, session, network, ip, type, **arguments):
+    def render(self, session, network, ip, all, type=False, hosts=False, **arguments):
         dbnetwork = network and get_network_byname(session, network) or None
-        dbip = ip and get_network_byip(session, ip) or None
+        dbnetwork = ip and get_network_byip(session, ip) or None
+        ints = []
         q = session.query(Network)
         if dbnetwork:
-            return dbnetwork
-        if dbip:
-            return dbip
+            if hosts:
+                return NetworkHostList([dbnetwork])
+            else:
+                return dbnetwork
         if type:
-            q = q.join('type').filter_by(type=type)
-            q = q.reset_joinpoint()
+            q = q.filter_by(network_type = type)
+#            q = q.join('network_type').filter_by(network_type=type)
+#            q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
-        return SimpleNetworkList(q.all())
+        if hosts:
+            return NetworkHostList(q.all())
+        else:
+            return SimpleNetworkList(q.all())
 
 
 #if __name__=='__main__':

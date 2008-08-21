@@ -92,3 +92,6 @@ client_notifications = yes
 sqlalchemy.engine = WARNING
 sqlalchemy.pool = WARNING
 sqlalchemy.orm = WARNING
+
+[protocols]
+directory = /ms/dist/aquilon/PROJ/protocols/1.0/common/lib/python
