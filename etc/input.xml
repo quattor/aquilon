@@ -104,9 +104,13 @@
       %prog show network 
       Shows the configuration for a network, or for networks selected by location
       <optgroup name="show_network_Input" mandatory="True" fields="any">
-         <option name="network" type="string" conflicts="all">Network name</option>
-         <option name="ip" type="string" conflicts="all">IP address</option>
-         <option name="type" type="string">Network type</option>
+         <option name="network" type="string" conflicts="">Network name</option>
+         <option name="ip" type="string" conflicts="">IP address</option>
+         <option name="all" type="boolean" conflicts="">All</option>
+         <optgroup name="show_network_options" fields="any">
+            <option name="type" type="string">Network type</option>
+            <option name="hosts" type="boolean">Hosts</option>
+         </optgroup>
          <optgroup name="show_network_location_opts" fields="any">
 	    <option name="company" type="string">Company</option>
 	    <option name="hub" type="string">Hub</option>
@@ -118,7 +122,7 @@
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
-      <transport method="get" path="show/network" />
+      <transport method="get" path="network" />
    </command>
 
    <command name="show_hostiplist">
@@ -440,6 +444,7 @@
       If --all is specified, then the configuration of all services will be shown.
       <optgroup name="show_service_opts" mandatory="True" fields="any">
          <option name="service" type="string">Service name</option>
+         <option name="server" type="string">Server name</option>
 	 <option name="all" type="boolean" conflicts="service">Select all services</option>
       </optgroup>
       <optgroup name="optional_opts">
