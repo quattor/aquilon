@@ -10,24 +10,34 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.server.formats.service_instance import ServiceInstanceList
 from aquilon.server.dbwrappers.system import get_system
+from aquilon.server.dbwrappers.service_instance import get_client_service_instances
+from aquilon.server.formats.service_instance import ServiceInstanceList
+from aquilon.server.formats.service import ServiceList
 
 class CommandShowService(BrokerCommand):
 
     @add_transaction
     @az_check
     @format_results
-    def render(self, session, instance, server, **arguments):
-        if not instance and not server:
-            return session.query(Service).all()
-        q = session.query(ServiceInstance)
-        if instance:
-            q = q.filter_by(name=instance)
-        if server:
-            dbsystem = get_system(session, server)
-            q = q.join('servers').filter_by(system=dbsystem)
-        return ServiceInstanceList(q.all())
-
+    def render(self, session, server, client, **arguments):
+        instance = arguments.get("instance", None)
+        dbserver = server and get_system(session, server) or None
+        dbclient = client and get_system(session, client) or None
+        if dbserver:
+            if instance:
+                return ServiceInstanceList(
+                    session.query(ServiceInstance).filter_by(name=instance).join(
+                    'servers').filter_by(system=dbserver).all()
+            else:
+                return ServiceInstanceList(
+                    session.query(ServiceInstance).join('servers').filter_by(system=dbserver).all())
+        elif dblient:
+            service_instances = get_client_service_instances(session, dblient)
+            if instance:
+                service_instances = [si  for si in service_instances if si.name == instance]
+            return ServiceInstanceList(service_instances)
+        else:
+            return ServiceList(session.query(Service).all())
 
 #if __name__=='__main__':
