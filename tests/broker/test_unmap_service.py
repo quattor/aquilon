@@ -55,6 +55,22 @@ class TestUnmapService(TestBrokerCommand):
         command = "show map --service ntp --instance pa.ny.na --city ny"
         self.notfoundtest(command.split(" "))
 
+    def testunmaputsi1(self):
+        self.noouttest(["unmap", "service", "--building", "ut",
+            "--service", "utsvc", "--instance", "utsi1"])
+
+    def testverifyunmaputsi1(self):
+        command = "show map --service utsvc --instance utsi1 --building ut"
+        self.notfoundtest(command.split(" "))
+
+    def testunmaputsi2(self):
+        self.noouttest(["unmap", "service", "--building", "ut",
+            "--service", "utsvc", "--instance", "utsi2"])
+
+    def testverifyunmaputsi2(self):
+        command = "show map --service utsvc --instance utsi2 --building ut"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnmapService)
