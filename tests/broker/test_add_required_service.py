@@ -41,6 +41,15 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: dns", command)
 
+    def testaddrequiredutsvc(self):
+        command = "add required service --service utsvc --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddrequiredutsvc(self):
+        command = "show archetype --archetype aquilon"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: utsvc", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)

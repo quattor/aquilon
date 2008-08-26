@@ -62,6 +62,40 @@ class TestPutDomain(TestBrokerCommand):
         self.gitcommand(["commit", "-a", "-m", "added building ut"],
                 cwd=os.path.join(self.scratchdir, "unittest"))
 
+    def testaddutsi1(self):
+        """utsi1 = unit test service instance 1"""
+        sitedir = os.path.join(self.scratchdir, "unittest", "service",
+                "utsvc", "utsi1", "client")
+        if not os.path.exists(sitedir):
+            os.makedirs(sitedir)
+        template = os.path.join(sitedir, "config.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines("template service/utsvc/utsi1/client/config;\n\n")
+        finally:
+            f.close()
+        self.gitcommand(["add", "config.tpl"], cwd=sitedir)
+        self.gitcommand(["commit", "-a", "-m",
+                "added unit test service instance 1"],
+                cwd=os.path.join(self.scratchdir, "unittest"))
+
+    def testaddutsi2(self):
+        """utsi1 = unit test service instance 2"""
+        sitedir = os.path.join(self.scratchdir, "unittest", "service",
+                "utsvc", "utsi2", "client")
+        if not os.path.exists(sitedir):
+            os.makedirs(sitedir)
+        template = os.path.join(sitedir, "config.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines("template service/utsvc/utsi2/client/config;\n\n")
+        finally:
+            f.close()
+        self.gitcommand(["add", "config.tpl"], cwd=sitedir)
+        self.gitcommand(["commit", "-a", "-m",
+                "added unit test service instance 2"],
+                cwd=os.path.join(self.scratchdir, "unittest"))
+
     def testputunittestdomain(self):
         self.ignoreoutputtest(["put", "--domain", "unittest"],
                 env=self.gitenv(),

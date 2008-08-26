@@ -63,6 +63,22 @@ class TestMapService(TestBrokerCommand):
         self.matchoutput(out,
                 "Service: ntp Instance: pa.ny.na Map: City ny", command)
 
+    def testmaputsi1(self):
+        self.noouttest(["map", "service", "--building", "ut",
+            "--service", "utsvc", "--instance", "utsi1"])
+
+    def testmaputsi2(self):
+        self.noouttest(["map", "service", "--building", "ut",
+            "--service", "utsvc", "--instance", "utsi2"])
+
+    def testverifymaputsvc(self):
+        command = "show map --service utsvc"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                "Service: utsvc Instance: utsi1 Map: Building ut", command)
+        self.matchoutput(out,
+                "Service: utsvc Instance: utsi2 Map: Building ut", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)

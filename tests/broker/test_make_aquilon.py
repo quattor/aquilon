@@ -12,6 +12,7 @@
 import os
 import sys
 import unittest
+import re
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -82,6 +83,19 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/dns/nyinfratest", command)
+
+    def testverifybindautoutsvc(self):
+        command = "show service --service utsvc"
+        out = self.commandtest(command.split(" "))
+        count_re = re.compile(r'Client Count: (\d+)')
+        inst_count = 0
+        for m in count_re.finditer(out):
+            inst_count += 1
+            self.assert_(int(m.group(1)) > 0,
+                    "Service Instance of utsvc has a client count <= 0:\n@@@\n'%s'\n@@@\n" %
+                    out)
+        self.assert_(inst_count > 0,
+                "No utsvc service instances found:\n@@@\n'%s'\n@@@\n" % out)
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"

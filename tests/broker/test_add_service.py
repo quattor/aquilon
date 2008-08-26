@@ -68,6 +68,20 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
 
+    def testaddutsi1instance(self):
+        command = "add service --service utsvc --instance utsi1"
+        self.noouttest(command.split(" "))
+
+    def testaddutsi2instance(self):
+        command = "add service --service utsvc --instance utsi2"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddutsvcinstances(self):
+        command = "show service --service utsvc"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
+        self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

@@ -34,6 +34,13 @@ def get_service_instance(session, dbservice, instance):
 
 # Modeled after get_server_for in aqdb/population_scripts.py
 def choose_service_instance(session, dbhost, dbservice):
+    """ This choosed the "closest" service instance, based on the
+        known maps.  It is entirely possible that this location
+        could have been served by more lightly loaded servers at
+        a broader location in the tree - but that information is
+        currently ignored.
+
+    """
     # FIXME: The database will support multiple algorithms...
     locations = [dbhost.location]
     while (locations[-1].parent is not None and
@@ -46,7 +53,7 @@ def choose_service_instance(session, dbhost, dbservice):
         if len(maps) == 1:
             return maps[0].service_instance
         if len(maps) > 1:
-            return self._choose_least_loaded(maps)
+            return choose_least_loaded(session, maps)
     raise ArgumentError("Could not find a relevant service map for service %s on host %s" %
             (dbservice.name, dbhost.fqdn))
 

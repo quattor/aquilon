@@ -68,6 +68,20 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: ntp Instance: pa.ny.na", command)
 
+    def testdelutsi1instance(self):
+        command = "del service --service utsvc --instance utsi1"
+        self.noouttest(command.split(" "))
+
+    def testdelutsi2instance(self):
+        command = "del service --service utsvc --instance utsi2"
+        self.noouttest(command.split(" "))
+
+    def testverifydelutsvcinstance(self):
+        command = "show service --service utsvc"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: utsvc Instance: utsi1", command)
+        self.matchclean(out, "Service: utsvc Instance: utsi2", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)
