@@ -158,10 +158,6 @@ if __name__ == "__main__":
         print >>sys.stderr, '%s: Try --help for usage details.' % (sys.argv[0])
         sys.exit(1)
 
-    if globalOptions.get('debug'):
-        log.startLogging(sys.stderr)
-        globalOptions['httpinfo'] = True
-
     # Setting this as a global default.  It might make sense to set
     # the default to the current running user when running out of a
     # shadow, though.
@@ -237,6 +233,9 @@ if __name__ == "__main__":
     else:
         conn = aquilon.client.knchttp.KNCHTTPConnection(host, port, aquser)
 
+    if globalOptions.get('debug'):
+        conn.set_debuglevel(10)
+
     # run custom command if there's one
     if transport.custom:
         action = CustomAction(transport.custom)
@@ -286,7 +285,7 @@ if __name__ == "__main__":
         # handle failed requests
         res = conn.getresponse()
         if res.status != httplib.OK:
-            print "%s: %s" % (res.status, res.reason)
+            print "%s: %s" % (httplib.responses[res.status], res.read())
             sys.exit(res.status / 100)
 
         # get data otherwise
