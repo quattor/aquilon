@@ -43,7 +43,6 @@ import re
 import subprocess
 import socket
 import httplib
-import pdb
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 sys.path.append(os.path.join(BINDIR, "..", "lib", "python2.5"))
@@ -321,7 +320,5 @@ if __name__ == "__main__":
     else:
         #print pageData,
         sys.stdout.write(pageData)
-
-    #pdb.set_trace()
 
     sys.exit(exit_status)
