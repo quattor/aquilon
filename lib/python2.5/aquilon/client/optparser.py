@@ -33,10 +33,10 @@
 from optparse import OptionParser
 from xml.parsers import expat
 import os
-import sys
 import re
 import textwrap
 import pdb
+import sys
 
 
 def cmdName():
@@ -507,11 +507,11 @@ class OptParser (object):
         self.__root = None
         self.parser = OptionParser (conflict_handler='resolve')
         self.parser.add_option('--help', '-h', action='store_true', default=False)
-        self.ParseXml(xmlFileName)
+        self.parseXml(xmlFileName)
 
 # --------------------------------------------------------------------------- #
 
-    def StartElement(self, name, attributes):
+    def startElement(self, name, attributes):
         import types
         'Expat start element event handler'
         element = None
@@ -539,13 +539,13 @@ class OptParser (object):
 
 # --------------------------------------------------------------------------- #
 
-    def EndElement(self, name):
+    def endElement(self, name):
         'Expat end element event handler'
         self.__nodeStack.pop( )
 
 # --------------------------------------------------------------------------- #
 
-    def CharacterData(self, data):
+    def characterData(self, data):
         'Expat character data event handler'
         asciidata = "" 
         if data.strip():
@@ -566,25 +566,25 @@ class OptParser (object):
 
 # --------------------------------------------------------------------------- #
 
-    def ParseXml(self, filename):
-        Parser = expat.ParserCreate( )
-        Parser.StartElementHandler = self.StartElement
-        Parser.EndElementHandler = self.EndElement
-        Parser.CharacterDataHandler = self.CharacterData
-        ParserStatus = Parser.Parse(open(filename).read(), 1)
+    def parseXml(self, filename):
+        parser = expat.ParserCreate( )
+        parser.StartElementHandler = self.startElement
+        parser.EndElementHandler = self.endElement
+        parser.CharacterDataHandler = self.characterData
+        parserStatus = parser.Parse(open(filename).read(), 1)
 
 # --------------------------------------------------------------------------- #
 
-    def getOptions(self):
+    def parse(self, args):
         # get command
         command_words = []
-        for arg in sys.argv[1:]:
+        for arg in args:
             if arg[0] == '-': break
             command_words.append(arg)
         command = '_'.join(command_words)
 
         self.__root.populateParser(command, self.parser)
-        (opts, args) = self.parser.parse_args()
+        (opts, args) = self.parser.parse_args(args)
 
         if (not args):
             if opts.help:
@@ -607,7 +607,6 @@ class OptParser (object):
 
 
 if __name__ == '__main__':
-    import sys, os
     BINDIR = os.path.dirname( os.path.realpath(sys.argv[0]) )
     p = OptParser( os.path.join( BINDIR, '..', '..', '..', '..', 'etc', 'input.xml' ) )
     try:

@@ -40,32 +40,25 @@ import os
 import urllib
 import re
 # Using this for gethostname for now...
+import subprocess
 import socket
+import httplib
+import pdb
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 sys.path.append(os.path.join(BINDIR, "..", "lib", "python2.5"))
-import aquilon.client.depends
 
-from twisted.python import log
-from twisted.internet import reactor, error, utils, protocol, defer
-from twisted.web import http, error as web_error
+import aquilon.client.knchttp
 
 from aquilon.client.optparser import OptParser, ParsingError
 
-return_code = 0
-
-# FIXME: This should probably be broken out into its own file at some
-# point.  The tricky part is making sure getPage is picked up correctly.
-# The getPage method will need to handle different response types
-# correctly, anyway.
 class RESTResource(object):
-    def __init__(self, uri, aquser):
+    def __init__(self, httpconnection, uri):
+        self.httpconnection = httpconnection
         self.uri = uri
-        self.aquser = aquser
     
     def get(self):
         return self._sendRequest('GET')
-
     def post(self, **kwargs):
         postData = urllib.urlencode(kwargs)
         mimeType = 'application/x-www-form-urlencoded'
@@ -77,68 +70,14 @@ class RESTResource(object):
     def delete(self):
         return self._sendRequest('DELETE')
 
-    def _sendRequest(self, method, data="", mimeType=None):
+    def _sendRequest(self, method, data = None, mimeType = None):
         headers = {}
         if mimeType:
             headers['Content-Type'] = mimeType
-        if data:
-            headers['Content-Length'] = str(len(data))
-        return getPage(self.uri,
-                method=method, postdata=data, headers=headers, aquser=aquser)
+        self.httpconnection.request(method, self.uri, data, headers)
 
-
-class CommandPassThrough(protocol.ProcessProtocol):
-    """Simple wrapper for running commands to immediately pass stdout
-    and stderr to the console, and callback on the deferred when the
-    command has finished.
-
-    """
-
-    def __init__(self, deferred):
-        self.deferred = deferred
-        self.outReceived = sys.stdout.write
-        self.errReceived = sys.stderr.write
-
-    def processEnded(self, reason):
-        e = reason.value
-        code = e.exitCode
-        if e.signal:
-            self.deferred.errback(e.signal)
-        else:
-            self.deferred.callback(code)
-
-
-def cb_command_response(code):
-    if code:
-        print >>sys.stderr, "Return code: %d" % code
-        globals()["return_code"] = code
-
-def cb_command_error(signalNum):
-    print >>sys.stderr, "Error running command, received signal %d" % signalNum
-    globals()["return_code"] = 1
-
-def gotPage(pageData, uri, expect, globalOptions):
-    if expect == 'command':
-        if globalOptions.get("noexec"):
-            print pageData
-            return
-        d = defer.Deferred()
-        p = CommandPassThrough(d)
-        reactor.spawnProcess(p, "/bin/sh", ("/bin/sh", "-c", pageData),
-                                os.environ, '.')
-        d = d.addCallbacks(cb_command_response, cb_command_error)
-        return d
-    else:
-        if globalOptions.get("httpinfo"):
-            print >>sys.stderr, "[OK] %s" % uri
-        if pageData:
-            format = ""
-            if globalOptions.get("format"):
-                format = globalOptions.get("format")
-            if format == "proto":
-                    sys.stdout.write(pageData)
-            else:
-                print pageData
+    def getresponse(self):
+        return self.httpconnection.getresponse()
 
 
 class CustomAction(object):
@@ -205,44 +144,15 @@ class CustomAction(object):
             os.unlink(filename)
 
 
-def handleFailure(failure, uri, globalOptions):
-    """Final stop handling for all errors - this will return success
-    and let the reactor stop cleanly."""
-    if failure.check(error.ProcessTerminated):
-        print >>sys.stderr, "Communications subprocess terminated:%s" % \
-                failure.getErrorMessage()
-    elif failure.check(web_error.Error):
-        if globalOptions.get("httpinfo"):
-            print >>sys.stderr, "[%s] %s" % (failure.value.status, uri)
-        print >>sys.stderr, "%s: %s" % (
-            http.RESPONSES.get(int(failure.value.status)),
-            failure.value.response)
-        # Quick hack... failure codes will usually be 4xx or 5xx...
-        # maybe it will help to encode that in the return code.
-        try:
-            globals()["return_code"] = int(failure.value.status) / 100
-        except ValueError, e:
-            # No big deal - return_code will be set to 1 later.
-            pass
-    else:
-        msg = failure.getErrorMessage()
-        if msg.find("Connection refused") >= 0:
-            print >>sys.stderr, "Failed to connect to %(aqhost)s port %(aqport)s: Connection refused." % globalOptions
-        elif msg.find("Unknown host") >= 0:
-            print >>sys.stderr, "Failed to connect to %(aqhost)s: Unknown host." % globalOptions
-        else:
-            print >>sys.stderr, "Error: %s" % msg
-    if not globals()["return_code"]:
-        globals()["return_code"] = 1
-
 def quoteOptions(options):
     return "&".join([ urllib.quote(k) + "=" + urllib.quote(v) for k, v in options.iteritems() ])
+
 
 if __name__ == "__main__":
     parser = OptParser( os.path.join( BINDIR, '..', 'etc', 'input.xml' ) )
     try:
         (command, transport, commandOptions, globalOptions) = \
-                parser.getOptions()
+                parser.parse(sys.argv[1:])
     except ParsingError, e:
         print >>sys.stderr, '%s: Option parsing error: %s' % (sys.argv[0],
                                                               e.error)
@@ -302,12 +212,12 @@ if __name__ == "__main__":
     # Decent amount of magic here...
     # Even though the server connection might be tunneled through
     # knc, the easiest way to consistently address the server is with
-    # a URL.  That's the first half.
-    # The relative URL defined by transport.path comes from the xml
+    # a URI.  That's the first half.
+    # The relative URI defined by transport.path comes from the xml
     # file used for options definitions.  This is a standard python
     # string formatting, with references to the options that might
     # be given on the command line.
-    uri = str('http://%s:%s/' % (host, port) + transport.path % cleanOptions)
+    uri = str('/' + transport.path % cleanOptions)
 
     # Add the formatting option into the string.  This is only tricky if
     # a query operator has been specified, otherwise it would just be
@@ -322,66 +232,96 @@ if __name__ == "__main__":
         else:
             uri = uri + extension
 
-    # import getPage depending on the connection requirements
-    if globalOptions.get('usesock'):
-        from aquilon.client.socketwrappers import getPage
-    elif globalOptions.get('noauth'):
-        from aquilon.client.ncwrappers import getPage
+    # create HTTP connection object adhering to the command line request
+    if globalOptions.get('noauth'):
+        conn = httplib.HTTPConnection(host, port)
     else:
-        from aquilon.client.kncwrappers import getPage
+        conn = aquilon.client.knchttp.KNCHTTPConnection(host, port, aquser)
 
     # run custom command if there's one
     if transport.custom:
         action = CustomAction(transport.custom)
         action.run(commandOptions)
 
-    if transport.method == 'get':
-        # Fun hackery here to get optional parameters into the path...
-        # First, figure out what was already included in the path,
-        # looking for %(var)s.
-        c = re.compile(r'(?<!%)%\(([^)]*)\)s')
-        exclude = c.findall(transport.path)
+    try:
+        if transport.method == 'get':
+            # Fun hackery here to get optional parameters into the path...
+            # First, figure out what was already included in the path,
+            # looking for %(var)s.
+            c = re.compile(r'(?<!%)%\(([^)]*)\)s')
+            exclude = c.findall(transport.path)
 
-        # Now, pull each of these out of the options.  This is not
-        # strictly necessary, but simplifies the url.
-        remainder = commandOptions.copy()
-        for e in exclude:
-            remainder.pop(e, None)
+            # Now, pull each of these out of the options.  This is not
+            # strictly necessary, but simplifies the uri.
+            remainder = commandOptions.copy()
+            for e in exclude:
+                remainder.pop(e, None)
 
-        if remainder:
-            # Almost done.  Just need to account for whether the uri
-            # already has a query string.
-            if uri.find("?") >= 0:
-                uri = uri + '&' + quoteOptions(remainder)
-            else:
-                uri = uri + '?' + quoteOptions(remainder)
-        d = RESTResource(uri, aquser).get()
+            if remainder:
+                # Almost done.  Just need to account for whether the uri
+                # already has a query string.
+                if uri.find("?") >= 0:
+                    uri = uri + '&' + quoteOptions(remainder)
+                else:
+                    uri = uri + '?' + quoteOptions(remainder)
+            res = RESTResource(conn, uri).get()
 
-    elif transport.method == 'put':
-        # FIXME: This will need to be more complicated.
-        # In some cases, we may even need to call code here.
-        putData = urllib.urlencode(commandOptions)
-        mimeType = 'application/x-www-form-urlencoded'
-        d = RESTResource(uri, aquser).put(putData, mimeType)
+        elif transport.method == 'put':
+            # FIXME: This will need to be more complicated.
+            # In some cases, we may even need to call code here.
+            putData = urllib.urlencode(commandOptions)
+            mimeType = 'application/x-www-form-urlencoded'
+            RESTResource(conn, uri).put(putData, mimeType)
 
-    elif transport.method == 'delete':
-        # Again, all command line options should be in the URI already.
-        d = RESTResource(uri, aquser).delete()
+        elif transport.method == 'delete':
+            # Again, all command line options should be in the URI already.
+            RESTResource(conn, uri).delete()
 
-    elif transport.method == 'post':
-        d = RESTResource(uri, aquser).post(**commandOptions)
+        elif transport.method == 'post':
+            RESTResource(conn, uri).post(**commandOptions)
 
-    else:
-        print >>sys.stderr, "Unhandled transport method ", transport.method
+        else:
+            print >>sys.stderr, "Unhandled transport method ", transport.method
+            sys.exit(1)
+
+        # handle failed requests
+        res = conn.getresponse()
+        if res.status != httplib.OK:
+            print "%s: %s" % (res.status, res.reason)
+            sys.exit(res.status / 100)
+
+        # get data otherwise
+        pageData = res.read()
+
+
+    except socket.error, e:
+        print >>sys.stderr, "Network connection problem: %s" % repr(e)
         sys.exit(1)
 
-    d = d.addCallback(gotPage, uri, transport.expect, globalOptions)
-    d = d.addErrback(handleFailure, uri, globalOptions)
-    d = d.addCallback(lambda _: reactor.stop())
+    except httplib.HTTPException, e:
+        print >>sys.stderr, "HTTP transport problem: %s" % repr(e)
+        print >>sys.stderr, conn.getError()
+        sys.exit(1)
 
-    #import pdb
+    exit_status = 0
+
+    if transport.expect == 'command':
+        if globalOptions.get('noexec'):
+            sys.stdout.write(pageData)
+        else:
+            try:
+                proc = subprocess.Popen(pageData, shell = True, stdin = sys.stdin,
+                                        stdout = sys.stdout, stderr = sys.stderr)
+            except OSError, e:
+                print >>sys.stderr, e
+                sys.exit(1)
+
+            exit_status = proc.wait()
+
+    else:
+        #print pageData,
+        sys.stdout.write(pageData)
+
     #pdb.set_trace()
-    reactor.run()
-    # The global variable return_code gets set in the various error handlers.
-    sys.exit(return_code)
 
+    sys.exit(exit_status)

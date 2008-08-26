@@ -31,8 +31,3 @@
     
 """
 
-import ms.version
-
-ms.version.addpkg('zope.interface', '3.3.0', 'dist')
-ms.version.addpkg('twisted', '8.1.0', 'dist')
-
