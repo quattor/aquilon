@@ -291,14 +291,14 @@ if __name__ == "__main__":
         # get data otherwise
         pageData = res.read()
 
-
-    except socket.error, e:
-        print >>sys.stderr, "Network connection problem: %s" % repr(e)
-        sys.exit(1)
-
-    except httplib.HTTPException, e:
-        print >>sys.stderr, "HTTP transport problem: %s" % repr(e)
-        print >>sys.stderr, conn.getError()
+    except (httplib.HTTPException, socket.error), e:
+        msg = conn.getError()
+        if msg.find('Connection refused') >= 0:
+            print >>sys.stderr, "Failed to connect to %(aqhost)s port %(aqport)s: Connection refused." % globalOptions
+        elif msg.find('Unknown host') >= 0:
+            print >>sys.stderr, "Failed to connect to %(aqhost)s: Unknown host." % globalOptions
+        else:
+            print >>sys.stderr, "Error: %s: %s" % (repr(e), msg)
         sys.exit(1)
 
     exit_status = 0
