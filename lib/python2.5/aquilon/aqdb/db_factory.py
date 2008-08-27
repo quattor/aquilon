@@ -246,8 +246,6 @@ if __name__ == '__main__':
     #leave the obvious stuff out since everything imports this. We'll know if
     #it's broken.
 
-    #TODO: real unittests in PROJ/tests/aqdb
-
     #debug('Testing creation of factory...')
     #db = db_factory()
     #debug(db.engine)

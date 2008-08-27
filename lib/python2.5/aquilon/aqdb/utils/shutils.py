@@ -43,3 +43,4 @@ def write_uml_graph(base, name = "aqdb_classes.dot"):
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 
+#if __name__=='__main__':
