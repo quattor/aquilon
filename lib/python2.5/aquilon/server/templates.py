@@ -12,7 +12,6 @@
 import os
 from datetime import datetime
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.net.ipcalc import Network
 from aquilon.server.processes import write_file, read_file, remove_file, run_command, build_index
 from os import path as os_path, environ as os_environ
 from threading import Lock
@@ -259,20 +258,18 @@ class PlenaryHost(Plenary):
         for dbinterface in self.dbhost.machine.interfaces:
             if not dbinterface.ip or dbinterface.ip == '0.0.0.0':
                 continue
-            net = Network(dbinterface.ip, 25)
-            # Fudge the gateway as the network + 1
-            gateway_components = net.network().dq.split('.')
-            gateway_components[-1] = str(int(gateway_components[-1]) + 1)
-            gateway = ".".join(gateway_components)
+            net = dbinterface.network
+            # Fudge the gateway as the first available ip
+            gateway = net.ipcalc.host_first().dq
             bootproto = "static"
             # as of 28/Aug/08, aii-dhcp only outputs bootable
             # interfaces in dhcpd.conf, so there's no point in marking
             # non-bootable interfaces as dhcp.
             if dbinterface.boot:
                 bootproto = "dhcp"
-            interfaces.append({"ip":net.dq,
-                    "netmask":net.netmask().dq,
-                    "broadcast":net.broadcast().dq,
+            interfaces.append({"ip":dbinterface.ip,
+                    "netmask":net.ipcalc.netmask().dq,
+                    "broadcast":net.bcast,
                     "gateway":gateway,
                     "bootproto":bootproto,
                     "name":dbinterface.name})

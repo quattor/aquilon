@@ -43,18 +43,21 @@ class TestBrokerCommand(unittest.TestCase):
             self.aurora_without_node = "oziyp2"
         # An alternate set of defaults is listed in unittest.conf.
         self.hostip0 = "8.8.4.251"
-        self.broadcast0 = "8.8.4.255"
-        self.gateway0 = "8.8.4.129"
+        self.netmask0 = "255.255.252.0"
+        self.broadcast0 = "8.8.7.255"
+        self.gateway0 = "8.8.4.1"
         self.hostmac0 = "02:02:08:08:04:fb"
         self.hostip1 = "8.8.4.252"
         self.hostmac1 = "02:02:08:08:04:fc"
         self.hostip2 = "8.8.4.253"
-        self.broadcast2 = "8.8.4.255"
-        self.gateway2 = "8.8.4.129"
+        self.netmask2 = "255.255.252.0"
+        self.broadcast2 = "8.8.7.255"
+        self.gateway2 = "8.8.4.1"
         self.hostmac2 = "02:02:08:08:04:fd"
         self.hostip3 = "8.8.4.254"
-        self.broadcast3 = "8.8.4.255"
-        self.gateway3 = "8.8.4.129"
+        self.netmask3 = "255.255.252.0"
+        self.broadcast3 = "8.8.7.255"
+        self.gateway3 = "8.8.4.1"
         self.hostmac3 = "02:02:08:08:04:fe"
         self.hostip4 = "8.8.5.251"
         self.hostmac4 = "02:02:08:08:05:fb"
@@ -65,7 +68,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.updateip1 = "8.8.5.254"
         self.updatemac1 = "02:02:08:08:05:fe"
         for n in range(6):
-            for h in ["hostip", "hostmac", "broadcast", "gateway",
+            for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask",
                     "updateip", "updatemac"]:
                 p = "%s%s" % (h, n)
                 if self.config.has_option("unittest", p):
