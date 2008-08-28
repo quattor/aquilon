@@ -107,6 +107,9 @@ class TestMakeAquilon(TestBrokerCommand):
             """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '255.255.255.128', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip2, self.broadcast2, self.gateway2),
             command)
         self.matchoutput(out,
+            """'/system/network/interfaces/eth1' = nlist('ip', '%s', 'netmask', '255.255.255.128', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'static');""" % (self.hostip3, self.broadcast3, self.gateway3),
+            command)
+        self.matchoutput(out,
             """include { 'archetype/base' };""",
             command)
         self.matchoutput(out,

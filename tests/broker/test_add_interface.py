@@ -69,15 +69,16 @@ class TestAddInterface(TestBrokerCommand):
             else:
                 testmac.append(i)
         self.noouttest(["add", "interface", "--interface", "eth1",
-            "--machine", "ut3c1n3", "--mac", ":".join(testmac)])
+            "--machine", "ut3c1n3", "--mac", ":".join(testmac),
+            "--ip", self.hostip3])
 
     def testverifyaddut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Interface: eth0 %s %s boot=True" %
                 (self.hostmac2.lower(), self.hostip2), command)
-        self.matchoutput(out, "Interface: eth1 %s None boot=False" %
-                (self.hostmac3.lower()), command)
+        self.matchoutput(out, "Interface: eth1 %s %s boot=False" %
+                (self.hostmac3.lower(), self.hostip3), command)
 
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"

@@ -264,11 +264,17 @@ class PlenaryHost(Plenary):
             gateway_components = net.network().dq.split('.')
             gateway_components[-1] = str(int(gateway_components[-1]) + 1)
             gateway = ".".join(gateway_components)
+            bootproto = "static"
+            # as of 28/Aug/08, aii-dhcp only outputs bootable
+            # interfaces in dhcpd.conf, so there's no point in marking
+            # non-bootable interfaces as dhcp.
+            if dbinterface.boot:
+                bootproto = "dhcp"
             interfaces.append({"ip":net.dq,
                     "netmask":net.netmask().dq,
                     "broadcast":net.broadcast().dq,
                     "gateway":gateway,
-                    "bootproto":"dhcp",
+                    "bootproto":bootproto,
                     "name":dbinterface.name})
 
         os_template = None
