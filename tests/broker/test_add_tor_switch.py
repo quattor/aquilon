@@ -34,7 +34,7 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "Rack: %s" % rack, command)
         self.matchoutput(out, "Row: %s" % rackrow, command)
         self.matchoutput(out, "Column: %s" % rackcol, command)
-        self.matchoutput(out, "Model: hp uttorswitch", command)
+        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         if serial:

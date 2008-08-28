@@ -16,7 +16,8 @@ from aquilon.aqdb.hw.model import Model
 
 class ModelFormatter(ObjectFormatter):
     def format_raw(self, model, indent=""):
-        details = [indent + "Model: %s %s" % (model.vendor.name, model.name)]
+        details = [indent + "Vendor: %s Model: %s" %
+                            (model.vendor.name, model.name)]
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
         if model.machine_specs:

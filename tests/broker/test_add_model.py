@@ -30,7 +30,7 @@ class TestAddModel(TestBrokerCommand):
     def testverifyadduttorswitch(self):
         command = "show model --name uttorswitch"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Model: hp uttorswitch", command)
+        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
         self.matchoutput(out, "MachineSpecs for hp uttorswitch", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -40,22 +40,27 @@ class TestAddModel(TestBrokerCommand):
     def testverifyshowtypetorswitch(self):
         command = "show model --type tor_switch"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Model: hp uttorswitch", command)
+        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
     def testverifyshowtypeblade(self):
         command = "show model --type blade"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Model: hp uttorswitch", command)
+        self.matchclean(out, "Vendor: hp Model: uttorswitch", command)
 
     def testverifyshowvendorhp(self):
         command = "show model --vendor hp"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Model: hp uttorswitch", command)
+        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
     def testverifyshowvendoribm(self):
         command = "show model --vendor ibm"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Model: hp uttorswitch", command)
+        self.matchclean(out, "Vendor: hp Model: uttorswitch", command)
+
+    def testverifyshowall(self):
+        command = "show model --all"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
 
 if __name__=='__main__':

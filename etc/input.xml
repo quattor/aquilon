@@ -276,6 +276,7 @@
          <option name="name" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
          <option name="type" type="string">Machine type name</option>
+         <option name="all" type="boolean">Show all models</option>
       </optgroup>
       <transport method="get" path="find/hardware/model" />
    </command>
