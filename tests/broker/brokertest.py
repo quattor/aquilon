@@ -53,6 +53,8 @@ class TestBrokerCommand(unittest.TestCase):
         self.gateway2 = "8.8.4.129"
         self.hostmac2 = "02:02:08:08:04:fd"
         self.hostip3 = "8.8.4.254"
+        self.broadcast3 = "8.8.4.255"
+        self.gateway3 = "8.8.4.129"
         self.hostmac3 = "02:02:08:08:04:fe"
         self.hostip4 = "8.8.5.251"
         self.hostmac4 = "02:02:08:08:05:fb"
