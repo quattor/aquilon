@@ -95,18 +95,20 @@ def remove_dir(dir):
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in files:
             try:
-                os.remove(os.path.join(root, name))
+                thisfile = os.path.join(root, name)
+                os.remove(thisfile)
             except OSError, e:
-                log.err(e)
+                log.msg("Failed to remove '%s': %s" % (thisfile, e))
         for name in dirs:
             try:
-                os.rmdir(os.path.join(root, name))
+                thisdir = os.path.join(root, name)
+                os.rmdir(thisdir)
             except OSError, e:
-                log.err(e)
+                log.msg("Failed to remove '%s': %s" % (thisdir, e))
     try:
         os.rmdir(dir)
     except OSError, e:
-        log.err(e)
+        log.msg("Failed to remove '%s': %s" % (dir, e))
     return
 
 def write_file(filename, content):

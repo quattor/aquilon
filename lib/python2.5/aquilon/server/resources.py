@@ -225,9 +225,9 @@ class ResponsePage(resource.Resource):
     def wrapError(self, failure, request):
         """This is generally the final stop for errors - anything will be
         caught, logged, and a 500 error passed back to the client."""
-        log.err(failure.getBriefTraceback())
         msg = failure.getErrorMessage()
-        log.err(failure.getErrorMessage())
+        log.msg("Internal Error: %s\nTraceback:\n%s" %
+                (msg, failure.getBriefTraceback()))
         #failure.printDetailedTraceback()
         request.setResponseCode(http.INTERNAL_SERVER_ERROR)
         return self.finishRender(msg, request)
@@ -286,7 +286,7 @@ class RestServer(ResponsePage):
                             current_variable = container.dynamic_child.\
                                     path_variable
                             if current_variable != path_variable:
-                                log.err("Could not use variable '"
+                                log.msg("Warning: Could not use variable '"
                                         + path_variable + "', already have "
                                         + "dynamic variable '"
                                         + current_variable + "'.")
@@ -316,7 +316,7 @@ class RestServer(ResponsePage):
                     myinstance = BrokerCommand()
                 rendermethod = method.upper()
                 if container.handlers.get(rendermethod, None):
-                    log.err("Already have a %s here at %s..." %
+                    log.msg("Warning: Already have a %s here at %s..." %
                             (rendermethod, container.path))
                 #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
                 container.handlers[rendermethod] = myinstance
@@ -337,7 +337,7 @@ class RestServer(ResponsePage):
         if os.path.exists(templatesdir):
             self.putChild("templates", static.File(templatesdir))
         else:
-            log.err("ERROR: templates directory '%s' not found, will not serve"
+            log.msg("ERROR: templates directory '%s' not found, will not serve"
                     % templatesdir)
 
         cache_version(config)
@@ -368,6 +368,6 @@ class RestServer(ResponsePage):
             try:
                 os.makedirs(dir)
             except OSError, e:
-                log.err(e)
+                log.msg("Could not create directory '%s': %s" % (dir, e))
 
 
