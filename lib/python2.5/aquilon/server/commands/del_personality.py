@@ -38,6 +38,9 @@ class CommandDelPersonality(BrokerCommand):
             raise ArgumentError("personality '%s' is in use and cannot be deleted"%name)
 
         # All clear
+        plenary = PlenaryPersonality(existing[0])
+        plenary.remove()
+        
         session.delete(existing[0]);
         session.flush();
         return

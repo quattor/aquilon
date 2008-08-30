@@ -16,7 +16,8 @@ from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
-from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance)
+from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance,
+                                      PlenaryServiceInstanceClientDefault)
 
 
 class CommandAddService(BrokerCommand):
@@ -47,9 +48,6 @@ class CommandAddService(BrokerCommand):
         if not instance:
             return
 
-        # FIXME: This will autocreate a service/instance CfgPath.
-        # Ideally, (if we had access to local GIT repo) we'd auto-create the
-        # "user" path here (i.e. service/instance/client/config.tpl)
         relative_path = "%s/%s" % (service, instance)
         dbcfg_path = session.query(CfgPath).filter_by(
                 tld=dbservice.cfg_path.tld, relative_path=relative_path).first()
@@ -62,7 +60,13 @@ class CommandAddService(BrokerCommand):
         session.save(dbsi)
         session.flush()
         session.refresh(dbservice)
+
+        # Create the servicedata template
         plenary_info = PlenaryServiceInstance(dbservice, dbsi)
+        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+
+        # Create the default service template
+        plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
         plenary_info.write(self.config.get("broker", "plenarydir"), user)
 
         return

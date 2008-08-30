@@ -18,7 +18,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.svc.service_map import ServiceMap
-from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance)
+from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance,
+                                      PlenaryServiceInstanceClientDefault)
 
 
 class CommandDelService(BrokerCommand):
@@ -46,6 +47,9 @@ class CommandDelService(BrokerCommand):
 
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
             plenary_info.remove(self.config.get("broker", "plenarydir"))
+
+            plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
+            plenary_info.remove
 
             # Check the service map and remove any mappings
             for dbmap in session.query(ServiceMap).filter_by(service_instance=dbsi).all():

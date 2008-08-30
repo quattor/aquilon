@@ -880,26 +880,29 @@
       Create a personality.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="name" type="string">The name to create</option>
+         <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="put" path="personality/add_personality/%(name)s" />
+      <transport method="put" path="personality/add_personality/%(archetype)s/%(name)s" />
   </command>
 
   <command name="del_personality">
       Delete a personality.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="name" type="string">The name to delete</option>
+         <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="delete" path="personality/%(name)s" />
+      <transport method="delete" path="personality/%(archetype)s/%(name)s" />
   </command>
 
   <command name="show_personality">
       Show personality details.
       <optgroup name="show_personality_opts">
          <option name="name" type="string">which personality to show</option>
+         <option name="archetype" type="string">which archetype to use</option>
          <option name="all" type="boolean" conflicts="name">all</option>
       </optgroup>
       <transport method="get" path="personality" />
-      <transport trigger="name" method="get" path="personality/%(name)s" />
+      <transport trigger="name" method="get" path="personality/%(archetype)s/%(name)s" />
   </command>
 
    <command name="make_aquilon">

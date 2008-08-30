@@ -338,6 +338,29 @@ class PlenaryServiceInstance(Plenary):
         lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.servers]) + ");")
 
 
+class PlenaryServiceInstanceClientDefault(Plenary):
+    def __init__(self, dbservice, dbinstance):
+        Plenary.__init__(self)
+        self.servers = dbinstance.servers
+        self.service = dbservice.name
+        self.name = dbinstance.name
+        self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
+        self.plenary_template = self.plenary_core + "/config"
+        self.template_type = ''
+
+    def body(self, lines):
+        lines.append("'/system/services/%(service)s' = create('servicedata/%(service)s/%(name)s/config');" % self.__dict__)
+
+class PlenaryPersonality(Plenary):
+    def __init__(self, dbpersona):
+        Plenary.__init__(self)
+        self.name = dbpersona.relative_path
+        self.plenary_core = "personality/%(name)s" % self.__dict__
+        self.plenary_template = self.plenary_core + "/config"
+        self.template_type = ''
+
+    def body(self, lines):
+        return
 
 
 
