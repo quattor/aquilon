@@ -38,8 +38,6 @@ class CommandShowNetwork(BrokerCommand):
                 return dbnetwork
         if type:
             q = q.filter_by(network_type = type)
-#            q = q.join('network_type').filter_by(network_type=type)
-#            q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
