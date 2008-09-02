@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
-""" Enumerates kerberos realms """
-
+""" Contains tables and objects for authorization in Aquilon """
 
 import sys
 import os
@@ -21,27 +12,29 @@ if __name__ == '__main__':
 from aquilon.aqdb.table_types.name_table import make_name_class
 
 
-Realm = make_name_class('Realm', 'realm')
-realm = Realm.__table__
+Role = make_name_class('Role', 'role')
+role = Role.__table__
+table = role
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
+def populate(db, *args, **kw):
+    roles=['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
+
+    if db.s.query(Role).count() >= len(roles):
+        return
+
     from sqlalchemy import insert
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+    #TODO: make like archetype, select it first
 
-    realm.create(checkfirst=True)
-
-    if s.query(Realm).count() == 0:
-        r = Realm(name = 'is1.morgan')
-        s.save(r)
-        s.commit()
+    for i in roles:
+        r=Role(name = i, comments = 'AutoPopulated')
+        s.add(r)
         assert(r)
-        print 'created %s'%(r)
+    s.commit()
+    print 'created %s'%(roles)
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
