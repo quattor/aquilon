@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ For Systems and related objects """
-
 
 from datetime import datetime
 import sys
@@ -88,18 +79,10 @@ host.primary_key.name = 'host_pk'
 host.append_constraint(
     UniqueConstraint('machine_id', 'domain_id', name='host_machine_domain_uk'))
 
+table = host
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    from sqlalchemy import insert
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 
-    host.create(checkfirst = True)
-
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False

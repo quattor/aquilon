@@ -1,13 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
-""" For Systems and related objects """
+""" Configuration Domains for Systems """
+
 from datetime import datetime
 import sys
 import os
@@ -54,32 +47,31 @@ domain.primary_key.name = 'domain_pk'
 domain.append_constraint(
     UniqueConstraint('name',name='domain_uk'))
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    from sqlalchemy import insert
+table = domain
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+def populate(db, *args, **kw):
 
-    domain.create(checkfirst = True)
-
-    if len(s.query(Domain).all()) < 1:
-        qs = s.query(QuattorServer).first()
-        cdb = s.query(UserPrincipal).filter_by(name = 'cdb').one()
-        daqscott = s.query(UserPrincipal).filter_by(name='daqscott').one()
+    if len(db.s.query(Domain).all()) < 1:
+        qs = db.s.query(QuattorServer).first()
+        cdb = db.s.query(UserPrincipal).filter_by(name = 'cdb').one()
+        daqscott = db.s.query(UserPrincipal).filter_by(name='daqscott').one()
 
         p = Domain(name = 'production', server = qs, owner = cdb,
                    comments='The master production area')
         q = Domain(name = 'daqscott', server = qs, owner = daqscott)
 
-        s.add(p)
-        s.add(q)
-        s.commit()
-        d=s.query(Domain).first()
+        db.s.add(p)
+        db.s.add(q)
+        db.s.commit()
+        
+        d=db.s.query(Domain).first()
         assert(d)
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
