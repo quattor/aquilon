@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ The module governing tables and objects that represent what are known as
     Services (defined below) in Aquilon.
 
@@ -63,6 +55,7 @@ class Service(Base):
 
     id            = Column(Integer, Sequence(
                             'service_id_seq'), primary_key = True)
+
     name          = Column(AqStr(64), nullable = False)
 
     cfg_path_id   = Column(Integer,ForeignKey(
@@ -72,6 +65,7 @@ class Service(Base):
     creation_date = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False))
     comments      = deferred(Column(String(255), nullable = True))
+
     cfg_path      = relation(CfgPath, uselist = False, backref = 'service')
 
 service = Service.__table__
@@ -83,17 +77,11 @@ service.append_constraint(
 service.append_constraint(
     UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    from sqlalchemy import insert
+table = service
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
 
-    service.create(checkfirst = True)
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
