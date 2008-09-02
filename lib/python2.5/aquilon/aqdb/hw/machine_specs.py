@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Machine Specifications: the rows of this table represent the default
     values of machine "models" so that users don't need to manaully enter the
     low level details of each one since this is mostly repeated data in large
@@ -86,33 +78,25 @@ machine_specs.primary_key.name = 'machine_specs_pk'
 machine_specs.append_constraint(
     UniqueConstraint('model_id', name = 'machine_spec_model_id_uk'))
 
+table = machine_specs
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    from sqlalchemy import insert
-
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-
-    s = dbf.session()
-
-    machine_specs.create(checkfirst=True)
-
-    specs = [["hs20", "xeon_2660", 2, 8192, 'scsi', 36, 2],
+def populate(db, *args, **kw):
+    if len(db.s.query(MachineSpecs).all()) < 1:
+        from sqlalchemy import insert
+        
+        specs = [["hs20", "xeon_2660", 2, 8192, 'scsi', 36, 2],
              ["hs21", "xeon_2660", 2, 8192, 'scsi', 68, 2],
              ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
              ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
-             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],  
              ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
              ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0]]
 
-    if len(s.query(MachineSpecs).all()) < 1:
+
         for ms in specs:
             try:
-                dbmodel = s.query(Model).filter_by(name=ms[0]).one()
-                dbcpu = s.query(Cpu).filter_by(name=ms[1]).one()
+                dbmodel = db.s.query(Model).filter_by(name=ms[0]).one()
+                dbcpu   = db.s.query(Cpu).filter_by(name=ms[1]).one()
                 cpu_quantity = ms[2]
                 memory = ms[3]
                 dbdisk_type = s.query(DiskType).filter_by(type=ms[4]).one()
@@ -122,18 +106,23 @@ def populate(*args, **kw):
                         cpu_quantity=cpu_quantity, memory=memory,
                         disk_type=dbdisk_type, disk_capacity=disk_capacity,
                         nic_count=nic_count)
-                s.save(dbms)
+                db.s.save(dbms)
             except Exception,e:
-                s.rollback()
+                db.s.rollback()
                 print 'Creating machine specs: %s' % e
                 continue
             try:
-                s.commit()
+                db.s.commit()
             except Exception,e:
-                s.rollback()
+                db.s.rollback()
                 print 'Commiting ',e
                 continue
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 

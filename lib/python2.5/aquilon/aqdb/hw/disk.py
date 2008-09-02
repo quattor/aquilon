@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Individual, physical disks """
-
 
 from datetime import datetime
 import sys
@@ -37,19 +28,20 @@ class Disk(Base):
 
     id            = Column(Integer, Sequence('disk_id_seq'), primary_key = True)
     device_name   = Column(AqStr(128), nullable = False, default = 'sda')
+
     machine_id    = Column(Integer, ForeignKey(
-        'machine.id', name = 'disk_machine_fk', ondelete='CASCADE'),
+        Machine.c.id, name = 'disk_machine_fk', ondelete='CASCADE'),
                            nullable = False)
 
     disk_type_id  = Column(Integer, ForeignKey(
-        'disk_type.id', name = 'disk_disk_type_fk'), nullable = False)
+        DiskType.c.id, name = 'disk_disk_type_fk'), nullable = False)
 
     capacity      = Column(Integer, nullable = False, default = 36)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable = False ))
     comments      = deferred(Column(String(255)))
 
-    machine   = relation(Machine, backref='disks')
+    machine   = relation(Machine, backref='disks', passive_deletes = True)
     disk_type = relation(DiskType, uselist = False)
 
 disk = Disk.__table__
@@ -57,15 +49,10 @@ disk.primary_key.name = 'disk_pk'
 disk.append_constraint(UniqueConstraint(
     'machine_id', 'device_name', name ='disk_mach_dev_name_uk'))
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+table = disk
 
-    disk.create(checkfirst = True)
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

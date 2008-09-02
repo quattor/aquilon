@@ -15,7 +15,7 @@ from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.hw.iface           import Iface
+from aquilon.aqdb.hw.interface       import Interface
 
 class MacAddress(Base):
     """ mac address to interface association table: now as many to one """
@@ -24,7 +24,7 @@ class MacAddress(Base):
 
     mac             = Column(AqMac(17), primary_key=True)
 
-    iface_id        = Column(Integer, ForeignKey(Iface.c.id,
+    interface_id        = Column(Integer, ForeignKey(Interface.c.id,
                                                  name = 'iface_mac_fk'))
     #NOTE: NULLABLE! this may not be the "right" way to do this
 
@@ -33,7 +33,7 @@ class MacAddress(Base):
     #this doesn't really garner comments
     #comments      = deferred(Column(String(255)))
 
-    iface  = relation(Iface, backref = 'mac_addresses', passive_deletes = True)
+    interface  = relation(Interface, backref = 'mac_addresses', passive_deletes = True)
 
 mac_address = MacAddress.__table__
 mac_address.primary_key.name = 'mac_addr_pk'

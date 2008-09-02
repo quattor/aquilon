@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ If you can read this you should be documenting """
-
 
 from __future__ import with_statement
 from datetime import datetime
@@ -21,7 +12,7 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
-                        select, ForeignKey, PassiveDefault, UniqueConstraint)
+                        select, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import mapper, relation, deferred
 
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -47,21 +38,13 @@ cpu.primary_key.name = 'cpu_pk'
 cpu.append_constraint(
     UniqueConstraint('vendor_id','name','speed', name='cpu_nm_speed_uk'))
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+table = cpu
 
-
-    cpu.create(checkfirst = True)
-
-    if len(s.query(Cpu).all()) < 1:
+def populate(db, *args, **kw):
+    if len(db.s.query(Cpu).all()) < 1:
         import re
         m=re.compile('speed')
-        cfg_base = dbf.config.get("broker", "kingdir")
+        cfg_base = db.config.get("broker", "kingdir")
         #get all dir names immediately under template-king/hardware/cpu/
         base=os.path.join(str(cfg_base),'hardware/cpu')
         cpus=[]
@@ -87,20 +70,25 @@ def populate(*args, **kw):
 
         for vendor,name,speed in cpus:
             kw={}
-            vendor=s.query(Vendor).filter_by(name=vendor).first()
+            vendor=db.s.query(Vendor).filter_by(name=vendor).first()
+
             assert(vendor)
             assert(name)
             assert(speed)
+
             if vendor:
                 kw['vendor'] = vendor
                 kw['name']   = name
                 kw['speed']  = int(speed)
+
                 a=Cpu(**kw)
+
                 assert(isinstance(a,Cpu))
+
                 try:
-                    s.add(a)
+                    db.s.add(a)
                 except Exception,e:
-                    Session.rollback()
+                    db.s.rollback()
                     print e
                     continue
             else:
@@ -111,22 +99,25 @@ def populate(*args, **kw):
                     print >> sys.stderr, msg
 
         try:
-            av = s.query(Vendor).filter_by(name='aurora_vendor').one()
+            av = db.s.query(Vendor).filter_by(name='aurora_vendor').one()
             a = Cpu(vendor=av, name='aurora_cpu', speed=0,
                     comments='Placeholder Aurora CPU type.')
-            s.add(a)
+            db.s.add(a)
         except Exception, e:
-            s.rollback()
+            db.s.rollback()
             print e
 
         try:
-            s.commit()
+            db.s.commit()
         except Exception,e:
-            s.rollback()
+            db.s.rollback()
             sys.stderr.write(str(e))
-        cnt = len(s.query(Cpu).all())
 
+        cnt = len(s.query(Cpu).all())
         print 'Created %s cpus'%(cnt)
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

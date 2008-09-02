@@ -15,22 +15,16 @@ if __name__ == '__main__':
 
 from aquilon.aqdb.table_types.name_table import make_name_class
 
-
-Vendor = make_name_class('Vendor','vendor')
+Vendor = make_name_class('Vendor', 'vendor')
 vendor = Vendor.__table__
 
 table = vendor
 
 def populate(db, *args, **kw):
 
-    s = db.session()
-
-    vendor.create(checkfirst = True)
-
-    created=[]
-
-    if len(s.query(Vendor).all()) < 1:
+    if len(db.s.query(Vendor).all()) < 1:
         import aquilon.aqdb.cfg.cfg_path as cfg
+        created = []
         cfg_base = db.config.get("broker", "kingdir")
         assert(cfg_base)
 
@@ -38,7 +32,6 @@ def populate(db, *args, **kw):
         if not cfg_base.endswith('/'):
             cfg_base += '/'
         cfg_base += 'hardware'
-
 
         for i in os.listdir(cfg_base):
             if i == 'ram':
@@ -49,24 +42,25 @@ def populate(db, *args, **kw):
                 else:
                     a=Vendor(name=j)
                     try:
-                        s.save(a)
+                        db.s.save(a)
                     except Exception,e:
-                        s.rollback()
+                        db.s.rollback()
                         sys.stderr.write(e)
                         continue
                     created.append(j)
 
         aurora_vendor = Vendor(name='aurora_vendor',
                             comments='Placeholder vendor for Aurora hardware.')
-        s.save(aurora_vendor)
+
+        db.s.save(aurora_vendor)
         created.append(aurora_vendor)
 
         try:
-            s.commit()
+            db.s.commit()
         except Exception,e:
             print >> sys.stderr, e
         finally:
-            s.close()
+            db.s.close()
         print 'created %s vendors'%(len(created))
 
 
