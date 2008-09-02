@@ -9,9 +9,9 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
 
-from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
-                        Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, PassiveDefault)
+from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
+                        Index, ForeignKey, PassiveDefault, UniqueConstraint)
+
 from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -23,12 +23,12 @@ class AName(Base):
 
     id = Column(Integer, Sequence('a_name_seq'), primary_key=True)
 
-    name = Column(String(64), primary_key=True)
+    name = Column(String(64), nullable=False)
 
     dns_domain_id = Column(Integer,
                            ForeignKey(DnsDomain.c.id,
                                                name = 'a_name_dns_domain_fk'),
-                       primary_key = True)
+                       nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable = False))
@@ -39,5 +39,14 @@ class AName(Base):
 a_name = AName.__table__
 a_name.primary_key.name = 'a_name_pk'
 
+a_name.append_constraint(UniqueConstraint('name', name='a_name_uk'))
+
+Index('a_name_dns_domain_idx',a_name.c.dns_domain_id)
+
 table = a_name
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 
