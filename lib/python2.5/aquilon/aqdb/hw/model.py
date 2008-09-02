@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Vendor and Model are representations of the various manufacturers and
     the asset inventory of the kinds of machines we use in the plant """
 
@@ -27,7 +19,6 @@ from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.db_factory import Base
-from aquilon.aqdb.table_types.name_table import make_name_class
 from aquilon.aqdb.hw.vendor import Vendor
 
 
@@ -35,10 +26,12 @@ class Model(Base):
     __tablename__ = 'model'
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
     name = Column(String(64), unique=True, index=True)
+
     vendor_id = Column(Integer,
                        ForeignKey('vendor.id', name = 'model_vendor_fk'),
                        nullable = False)
     machine_type = Column(AqStr(16), nullable = False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable = False))
     comments = deferred(Column(String(255)))
@@ -47,22 +40,15 @@ class Model(Base):
 
 model = Model.__table__
 model.primary_key.name = 'model_pk'
+#TODO: missing a unique constraint name
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
+table = model
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
-
-    model.create(checkfirst = True)
-
+def populate(db, *args, **kw):
+    s = db.session()
     mlist=s.query(Model).all()
 
     if not mlist:
-
 
         f = [['ibm', 'hs20','blade'],
             ['ibm', 'ls20','blade'],
@@ -99,5 +85,11 @@ def populate(*args, **kw):
             s.close()
         print 'created models %s'%(s.query(Model).all())
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
