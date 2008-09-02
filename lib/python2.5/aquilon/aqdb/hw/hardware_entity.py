@@ -1,0 +1,51 @@
+#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+""" Base class of polymorphic hardware structures """
+import sys
+import os
+
+if __name__ == '__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
+
+from sqlalchemy import Column, Table, Integer, Sequence, ForeignKey, Index
+from sqlalchemy.orm import mapper, relation
+
+from aquilon.aqdb.db_factory              import Base
+from aquilon.aqdb.column_types.aqstr      import AqStr
+from aquilon.aqdb.loc.location            import Location
+from aquilon.aqdb.net.a_name              import AName
+
+class HardwareEntity(Base):
+    __tablename__ = 'hardware_entity'
+
+    #schema = CDB #use table.info['owner'] = 'CDB' ???
+
+    id  = Column(Integer, Sequence(__tablename__+'_seq'), primary_key=True)
+
+    name_id = Column(Integer, ForeignKey(AName.c.id,
+                                         name='hw_ent_name_fk',
+                                         ondelete='CASCADE'), nullable=False)
+
+    hardware_entity_type = Column(AqStr(64), nullable=False)
+
+    location_id    = Column(Integer, ForeignKey(Location.c.id,
+                                       name = 'hw_ent_loc_fk'), nullable=False)
+
+    name     = relation(AName, uselist = False, passive_deletes=True)
+    location = relation(Location, uselist = False)
+
+    __mapper_args__ = {'polymorphic_on' : hardware_entity_type_id}
+
+hardware_entity = HardwareEntity.__table__
+hardware_entity.primary_key.name = HardwareEntity.__tablename__+'_pk'
+Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
+Index('nw_ent_name_idx', hardware_entity.c.name_id)
+
+table = hardware_entity
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
