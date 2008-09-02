@@ -26,15 +26,16 @@ class CommandPxeswitch(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, hostname, boot, install, **arguments):
+        dbhost = hostname_to_host(session, hostname)
+
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
         # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
         if self.config.get("broker", "environment") == "prod":
             try:
-                gethostbyname(hostname)
+                gethostbyname(dbhost.fqdn)
             except Exception, e:
-                raise NameServiceError, e.args[1]
-
-        dbhost = hostname_to_host(session, hostname)
+                raise NameServiceError("Could not (yet) resolve the name for %s externally, so pxeswitch would fail.  Please try again later.  Exact error: %s" %
+                        (dbhost.fqdn, e))
 
         command = self.config.get("broker", "installfe")
         args = [command]
