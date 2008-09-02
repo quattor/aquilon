@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ The module governing tables and objects that represent IP networks in
     Aquilon."""
 
@@ -190,34 +182,25 @@ network.append_constraint(
 Index('net_loc_id_idx', network.c.location_id)
 #TODO: snarf comments  and xx,xw sysloc nets from DSDB (asynchronously?)
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    import aquilon.aqdb.utils.dsdb as dsdb
-    from sqlalchemy import insert
-    import socket as skt
-    import time
+table = network
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+def populate(db, *args, **kw):
+    s = db.session()
 
-    import logging as l
+    network.create(checkfirst = True)
+
+    if len(s.query(Network).limit(30).all()) < 1:
+        #only import all the crap if its needed
+
+        import aquilon.aqdb.utils.dsdb as dsdb
+        from sqlalchemy import insert
+        import socket as skt
+        import time
+        import logging as l
         #do we *need* logger?
         #TODO: when we have an error table, insert a row there, as well as
         #    generating an exception that can be acted upon in dsdb.
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
-
-    network.create(checkfirst = True)
-
-    if len(s.query(Network).all()) < 1:
         print 'creating networks...go get some coffee...'
         start = time.clock()
 
@@ -225,7 +208,7 @@ def populate(*args, **kw):
         sel=select( [location.c.name, building.c.id],
             location.c.id == building.c.id )
 
-        for row in dbf.engine.execute(sel).fetchall():
+        for row in db.engine.execute(sel).fetchall():
             b_cache[row[0]]=row[1]
 
         type_cache = {}
@@ -277,5 +260,11 @@ def populate(*args, **kw):
         print 'created %s networks in %2f'%(count, thetime)
 
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

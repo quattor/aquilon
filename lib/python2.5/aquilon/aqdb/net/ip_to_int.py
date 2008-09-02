@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ This may be only for testing, but implements the methods used by the ipv4
     column type so we can test the algorithms to search for the network from
     any ip """
@@ -76,3 +68,10 @@ def get_bcast(ip, cidr):
 if __name__ == '__main__':
     test_ip_to_int()
     #get_net_id_from_ip('144.222.203.162')
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

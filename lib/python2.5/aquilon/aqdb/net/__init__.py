@@ -1,6 +1,5 @@
 __all__ = (
+          'a_name',
           'dns_domain',
-          'ipcalc',
-          'ip_to_int',
           'network'
           )
