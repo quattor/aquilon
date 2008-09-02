@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ If you can read this you should be documenting """
-
 
 from datetime import datetime
 import sys
@@ -24,7 +15,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
 
 from sqlalchemy.orm import deferred, relation, backref
 
-from aquilon.aqdb.db_factory import db_factory, Base
+from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 
@@ -145,12 +136,10 @@ Location.sublocations = relation('Location', backref = backref(
         'parent', remote_side=[location.c.id],))
         #lazy=False, join_depth=2))
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+table = location
 
-    location.create(checkfirst = True)
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Hub is a subclass of Location """
-
 
 import sys
 import os
@@ -35,13 +26,11 @@ class Hub(Location):
 hub = Hub.__table__
 hub.primary_key.name = 'hub_pk'
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+table = hub
+
+def populate(db, *args, **kw):
+
+    s = db.session()
 
     hub.create(checkfirst = True)
 
@@ -57,5 +46,11 @@ def populate(*args, **kw):
             a = Hub(name=h, fullname = _hubs[h], parent_id = 1) #FIX ME
             s.add(a)
         s.commit()
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 
 

@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Country is a subclass of Location """
-
 
 import sys
 import os
@@ -35,13 +26,10 @@ class Country(Location):
 country = Country.__table__
 country.primary_key.name = 'country_pk'
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    #if 'debug' in args:
-    Base.metadata.bind.echo = False
-    s = dbf.session()
+table = country
+
+def populate(db, *args, **kw):
+    s = db.session()
 
     from aquilon.aqdb.loc.continent import Continent
     from aquilon.aqdb.loc.hub import Hub
@@ -49,7 +37,7 @@ def populate(*args, **kw):
 
     country.create(checkfirst = True)
 
-    s=dbf.session()
+    s=db.session()
 
     if len(s.query(Country).all()) < 1:
         cnts = {}
@@ -82,3 +70,10 @@ def populate(*args, **kw):
 
 """ select A.id, A.name, A.fullname, B.type, A.parent_id from location A,
 location_type B where a.location_type_id = B.id """
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

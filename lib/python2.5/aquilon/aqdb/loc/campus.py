@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Campus is a subclass of Location """
-
 
 import sys
 import os
@@ -37,18 +28,16 @@ class Campus(Location):
 campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
 
-def populate(*args, **kw):
+table = campus
+
+def populate(db, *args, **kw):
     from aquilon.aqdb.db_factory   import db_factory, Base
     from aquilon.aqdb.loc.country  import Country
     from aquilon.aqdb.loc.city     import City
     from aquilon.aqdb.loc.building import Building
     from aquilon.aqdb.utils        import dsdb
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+    s = db.session()
 
     campus.create(checkfirst = True)
 
@@ -71,5 +60,11 @@ def populate(*args, **kw):
         #print the whole thing out and see what happens
     #s.commit()
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
