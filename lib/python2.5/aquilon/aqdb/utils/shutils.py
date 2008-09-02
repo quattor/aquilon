@@ -1,17 +1,11 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
-"""Wrapper for ipshell."""
-
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+""" Wrapper for ipshell, and associated utility functions """
 
 import sys
 import os
+import inspect
+import pprint
+import fnmatch
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -23,7 +17,7 @@ banner  = '***Embedded IPython, Ctrl-D to quit.'
 args    = []
 ipshell = IPShellEmbed(args,banner=banner)
 
-def load_all():
+def load_all(verbose=True):
     import aquilon.aqdb
     for i in aquilon.aqdb.__all__:
         print "Importing aquilon.aqdb.%s" % i
@@ -34,4 +28,8 @@ def load_all():
                 print "Importing aquilon.aqdb.%s.%s" % (i, j)
                 __import__("aquilon.aqdb.%s.%s" % (i, j))
 
-#if __name__=='__main__':
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

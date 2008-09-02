@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """To be imported by classes and modules requiring aqdb access"""
 from __future__ import with_statement
 
@@ -14,22 +6,23 @@ import pwd
 import getpass
 import sys
 import os
+import StringIO
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
     import aquilon.aqdb.depends
 
-import sqlalchemy  #for version
-from   sqlalchemy import MetaData, engine, create_engine, text
-from   sqlalchemy.orm import scoped_session, sessionmaker
-from   sqlalchemy.ext.declarative import declarative_base
-from   sqlalchemy.exceptions import DatabaseError as SaDBError
-from   sqlalchemy.exceptions import SQLError
+from sqlalchemy                  import __version__ as SA_version
+from sqlalchemy                  import MetaData, engine, create_engine, text
+from sqlalchemy.orm              import scoped_session, sessionmaker
+from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
+from sqlalchemy.ext.declarative  import declarative_base
 
 from aquilon.config import Config
+
 if '--debug' in sys.argv:
-    from aquilon.aqdb.utils.shell import ipshell
+    from aquilon.aqdb.utils.shutils import ipshell
 else:
     ipshell = lambda: "No ipshell imported"
 
@@ -73,9 +66,20 @@ def __repr__(self):
     else:
        return '%s instance '%(self.__class__.__name__)
 
+#mk_table: could take an engine, meta, full dbf or a file
+
+@monkeypatch(Base)
+def mk_table(*args, **kw):
+    if hasattr(self,'__table__'):
+        print 'would create a table'
+        #self.__table__.create(checkfirst=True)
+    else:
+        raise TypeError('%s has no __table__ attribute'%(self.__class__))
+
 class db_factory(object):
     __shared_state = {}
-    def __init__(self, *args, **kw):
+
+    def __init__(self,*args, **kw):
         #TODO: accept mock as arg
         self.__dict__ = self.__shared_state
         if hasattr(self,'config'):
@@ -89,7 +93,16 @@ class db_factory(object):
 
         self.dsn = self.config.get('database', 'dsn')
 
-        if self.dsn.startswith('oracle'):
+        #Handle Mock Engine
+        if 'mock' in args:
+            self.mock = True
+            self.buf = StringIO.StringIO()
+            self.outfile = kw.pop('outfile','/tmp/DDL.sql')
+            self.engine = create_engine(self.dsn,
+                                        strategy='mock',
+                                        executor = self.buffer_output)
+        #ORACLE
+        elif self.dsn.startswith('oracle'):
             import cx_Oracle
             self.schema = self.config.get('database','dbuser')
 
@@ -101,8 +114,8 @@ class db_factory(object):
                         'Can not determine your password (%s).\nPassword:'%(
                             self.dsn)))
             self.login(passwds)
-
             debug(self.engine, assert_only = True)
+
         #SQLITE
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
@@ -119,13 +132,15 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
         self.meta   = MetaData(self.engine)
         assert(self.meta)
 
-        if sqlalchemy.__version__.startswith('0.4'):
+        if SA_version.startswith('0.4'):
             self.Session = scoped_session(sessionmaker(bind = self.engine,
                                                        autoflush = True,
                                                        transactional = True))
         else:
             self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert(self.Session)
+
+        self.s = self.Session()
 
     def session(self):
         return self.Session()
@@ -139,7 +154,9 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
         for p in passwds:
             self.dsn = re.sub(pswd_re,p,dsn_copy)
             debug('trying dsn %s'%(self.dsn))
+
             self.engine = create_engine(self.dsn)
+
             try:
                 self.connection = self.engine.connect()
                 return
@@ -210,65 +227,62 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
                 return rows[0][0]
         return
 
+    def buffer_output(self, s, p=""):
+        return self.buf.write(s + p)
 
-class MockEngine(object):
-    def __init__(self,*args, **kw):
-        """ to write ddl statements to a file or stderr"""
-        import StringIO
-        #TODO: get default file from aquilon.config and integrate
-        self.output_file = kw.pop('file',None)
-        #TODO: unhardcode this and decide on encapsulation
-        #      *is this the right place for an inner class?    #
-        self.dsn = kw.pop('dsn','oracle://aqd:aqd@LNPO_AQUILON_NY')
-        self.buffer = StringIO.StringIO()
-        def executor(sql, *a, **kw):
-            self.buffer.write(sql)
-        self.engine = create_engine(self.dsn,strategy='mock', executor=executor)
-        assert not hasattr(engine, 'mock')
-        self.engine.mock = self.buffer
-
-    def flush_to_file(self):
-        if self.output_file:
-            with open(self.output_file, 'w') as f:
-                f.write(self.buffer.getvalue())
+    def flush_to_file(self, outfile=None, *args, **kw):
+        if outfile:
+            with open(outfile, 'w') as f:
+                f.write(self.buf.getvalue())
         else:
-            print >> sys.stderr, self.buffer.getvalue()
+            print >> sys.stderr, self.buf.getvalue()
 
 if __name__ == '__main__':
+    if '-d' in sys.argv:
+        print 'use --debug instead of -d'
+        sys.exit(1)
 
-    debug('Testing creation of factory...')
-    dbf = db_factory()
-    debug(dbf.engine)
-    print dbf.engine
-    debug(dbf.meta)
-    debug(str(dbf.__dict__))
-    del(dbf)
-    debug('\n\n\n\nTesting MockEngine')
+    #THE BORG OBJECT MAKES THIS IMPOSSIBLE TO TEST IN A SINGLE FILE...
+    #leave the obvious stuff out since everything imports this. We'll know if
+    #it's broken.
 
-    mock_eng = MockEngine(dsn='sqlite://',file='/tmp/mock.sql')
-    mock_eng2 = MockEngine(dsn='sqlite://')
+    #TODO: real unittests in PROJ/tests/aqdb
 
-    m1 = MetaData(mock_eng.engine)
-    m2 = MetaData(mock_eng2.engine)
+    #debug('Testing creation of factory...')
+    #db = db_factory()
+    #debug(db.engine)
+    #debug(db.meta)
+    #del(db)
+
+    debug('\n\nTesting MockEngine')
+    outfile='/tmp/mock.sql'
+
+    db2 = db_factory('mock')
+    db2.dsn = 'oracle://satest:satest@nyt-aqdb.one-nyp.ms.com:1521/AQUILON'
 
     from sqlalchemy import Table, Column, Integer, String
-    for meta in [m1,m2]:
-        t1 = Table('db_factory_test_table', meta,
+    t1 = Table('db_factory_test_table', db2.meta,
                Column('c1', Integer, primary_key = True),
                Column('c2', String(20)))
-        meta.create_all()
-        debug(str(meta.tables))
 
-    debug('writing to %s'%(mock_eng.output_file))
-    mock_eng.flush_to_file()
-    debug(os.path.isfile(mock_eng.output_file))
+    db2.meta.create_all()
+    db2.flush_to_file(outfile)
+
+    debug(os.path.isfile(outfile))
+    #os.system('/bin/cat %s'%(outfile))
+
     #TODO: assert the has the right content with cached copy?
-    debug('removing %s'%(mock_eng.output_file))
-    os.remove(mock_eng.output_file)
+    debug('removing %s'%(outfile))
+    os.remove(outfile)
 
     debug('writing from buffer to stderr...')
-    #can't use debug() here because it will *always write to stderr...
-    if '-d' in sys.argv:
-        mock_eng2.flush_to_file()
 
-    #ipshell()
+    #can't use debug() here because it will *always write to stderr...
+    if '--debug' in sys.argv:
+        db2.flush_to_file()
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

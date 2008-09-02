@@ -13,8 +13,8 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
     import aquilon.aqdb.depends
 
-from aquilon.aqdb.utils.shell import ipshell, load_all
-from aquilon.aqdb.db_factory import db_factory, Base
+from aquilon.aqdb.utils.shutils import * #this IS for interactive work, right?
+from aquilon.aqdb.db_factory    import db_factory, Base
 
 
 dbf = db_factory()
