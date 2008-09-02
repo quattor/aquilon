@@ -1,12 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
+
 """ Status is an overloaded term, but we use it to represent various stages of
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
@@ -26,14 +19,11 @@ from aquilon.aqdb.table_types.name_table import make_name_class
 Vendor = make_name_class('Vendor','vendor')
 vendor = Vendor.__table__
 
+table = vendor
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+def populate(db, *args, **kw):
+
+    s = db.session()
 
     vendor.create(checkfirst = True)
 
@@ -41,7 +31,7 @@ def populate(*args, **kw):
 
     if len(s.query(Vendor).all()) < 1:
         import aquilon.aqdb.cfg.cfg_path as cfg
-        cfg_base = dbf.config.get("broker", "kingdir")
+        cfg_base = db.config.get("broker", "kingdir")
         assert(cfg_base)
 
         #in case user's config doesn't have one...
@@ -79,5 +69,10 @@ def populate(*args, **kw):
             s.close()
         print 'created %s vendors'%(len(created))
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

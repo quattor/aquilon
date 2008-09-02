@@ -1,16 +1,7 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Status is an overloaded term, but we use it to represent various stages of
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
-
 
 import sys
 import os
@@ -27,6 +18,7 @@ _statuses = ['production','development','qa','build']
 
 Status = make_name_class('Status','status')
 status = Status.__table__
+table = status
 
 @monkeypatch(Status)
 def __init__(self,name):
@@ -37,15 +29,11 @@ def __init__(self,name):
 def __repr__(self):
     return str(self.name)
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
+def populate(db, *args, **kw):
+
     from sqlalchemy import insert
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
+    s = db.session()
 
     status.create(checkfirst = True)
 
@@ -63,5 +51,11 @@ def populate(*args, **kw):
 
     assert len(s.query(Status).all()) == len(_statuses)
 
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+
+
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+
