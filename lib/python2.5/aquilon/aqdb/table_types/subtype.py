@@ -1,12 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
+
 """ The types module incorporates all the various discriminator classes
     used by the project. Since they all must be pre-seeded to make the
     other modules load properly, we seperate them here to get them done
@@ -28,17 +21,6 @@ from sqlalchemy import (Table, Column, Sequence, Integer, String, DateTime,
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.db_factory import Base
-
-
-# we want class level methods on the classes returned by subtype:
-# LocationType.populate(), LocationType.id('foo')
-
-#TODO: implement .id as a partial?
-#def id(nm):
-#    from sqlalchemy import select
-#    engine = db_factory.get_engine()
-#    sl=select([location_type.c.id], location_type.c.type=='%s'%(nm))
-#    return engine.execute(sl).fetchone()[0]
 
 def subtype(nm,tbl,dstr=None):
     """ A factory object for subtypes in Aqdb."""
@@ -96,3 +78,8 @@ def get_subtype_id(nm=None,engine=None,cls=None):
     assert isinstance(tbl,Table)
     sl=select([tbl.c.id], tbl.c.type=='%s'%(nm))
     return engine.execute(sl).fetchone()[0]
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

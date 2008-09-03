@@ -1,15 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ Many tables are just an id and a unique name field. This is a factory for
     the class/table/mapper trinity. THIS REALLY NEEDS A UNIT TEST """
-
 
 import types
 from datetime import datetime
@@ -29,7 +20,7 @@ from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 
-def make_name_class(nm,tbl):
+def make_name_class(nm, tbl ,dstr=None):
     """ A factory object for tables that consist only of a name attr """
     class klass(Base):
         """ The Object for %s rows"""%(nm)
@@ -48,8 +39,10 @@ def make_name_class(nm,tbl):
         def __repr__(self):
             return self.__class__.__name__ + " " + str(self.name)
 
-    klass.__name__ = nm
+    if dstr:
+        klass.__doc__ = dstr
 
+    klass.__name__ = nm
     return klass
 
 def populate_name_table(cls, items):
@@ -68,3 +61,8 @@ def populate_name_table(cls, items):
                     s.commit()
     else:
         raise TypeError('items arg must be a list')
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
