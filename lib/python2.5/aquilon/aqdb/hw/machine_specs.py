@@ -83,12 +83,12 @@ table = machine_specs
 def populate(db, *args, **kw):
     if len(db.s.query(MachineSpecs).all()) < 1:
         from sqlalchemy import insert
-        
+
         specs = [["hs20", "xeon_2660", 2, 8192, 'scsi', 36, 2],
              ["hs21", "xeon_2660", 2, 8192, 'scsi', 68, 2],
              ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
              ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
-             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],  
+             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
              ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
              ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0]]
 
@@ -99,7 +99,7 @@ def populate(db, *args, **kw):
                 dbcpu   = db.s.query(Cpu).filter_by(name=ms[1]).one()
                 cpu_quantity = ms[2]
                 memory = ms[3]
-                dbdisk_type = s.query(DiskType).filter_by(type=ms[4]).one()
+                dbdisk_type = db.s.query(DiskType).filter_by(type=ms[4]).one()
                 disk_capacity = ms[5]
                 nic_count = ms[6]
                 dbms = MachineSpecs(model=dbmodel, cpu=dbcpu,
@@ -125,4 +125,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

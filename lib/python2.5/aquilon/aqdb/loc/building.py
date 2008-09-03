@@ -52,11 +52,10 @@ def populate(db, *args, **kw):
                     parent = city[str(row[2])])
         db.s.add(a)
     db.s.commit()
-    print 'created %s buildings'%(len(s.query(Building).all()))
+    print 'created %s buildings'%(len(db.s.query(Building).all()))
 
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

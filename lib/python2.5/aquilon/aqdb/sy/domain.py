@@ -53,17 +53,23 @@ def populate(db, *args, **kw):
 
     if len(db.s.query(Domain).all()) < 1:
         qs = db.s.query(QuattorServer).first()
+        assert(qs)
+
         cdb = db.s.query(UserPrincipal).filter_by(name = 'cdb').one()
+        assert(cdb)
+
         daqscott = db.s.query(UserPrincipal).filter_by(name='daqscott').one()
+        assert(daqscott)
 
         p = Domain(name = 'production', server = qs, owner = cdb,
                    comments='The master production area')
+
         q = Domain(name = 'daqscott', server = qs, owner = daqscott)
 
         db.s.add(p)
         db.s.add(q)
         db.s.commit()
-        
+
         d=db.s.query(Domain).first()
         assert(d)
 
@@ -74,4 +80,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

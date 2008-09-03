@@ -29,6 +29,24 @@ class QuattorServer(System):
 quattor_server = QuattorServer.__table__
 quattor_server.primary_key.name = 'qs_pk'
 
+table = quattor_server
+
+def populate(db, *args, **kw):
+    if len(db.s.query(QuattorServer).all()) < 1:
+        from aquilon.aqdb.net.dns_domain import DnsDomain
+
+        dom = db.s.query(DnsDomain).filter_by(name = 'ms.com').one()
+        assert(dom)
+
+        qs=QuattorServer(name='oziyp2', dns_domain=dom)
+        db.s.add(qs)
+        db.s.commit()
+
+    qs=db.s.query(QuattorServer).filter_by(name='oziyp2').one()
+    assert(qs)
+    assert(qs.dns_domain)
+
+
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 

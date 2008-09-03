@@ -29,23 +29,28 @@ def get_seq_list_from_db(engine):
     execute = engine.execute
     return [name for (name, ) in execute(text(sql))]
 
-def drop_all_tables_and_sequences(dbf):
+def drop_all_tables_and_sequences(db,option=None):
     """ MetaData.drop_all() doesn't play nice with db's that have sequences.
         you're alternative is to call this"""
-    if not dbf.dsn.startswith('ora'):
-        print 'dsn is not oracle, exiting'
-        return False
-    msg="You've asked to wipe out the %s database. Please confirm."%(dbf.dsn)
+    if not db.dsn.startswith('ora'):
+        pass
+
+    if db.dsn.endswith('@LNPO_AQUILON_NY'):
+        sys.stderr.write(
+            'your DSN is on the production database, not permitted \n')
+        sys.exit(9)
+
+    msg="You've asked to wipe out the %s database. Please confirm."%(db.dsn)
 
     if confirm(prompt=msg, resp=False):
-        execute = dbf.engine.execute
-        for table in get_table_list_from_db(dbf.engine):
+        execute = db.engine.execute
+        for table in get_table_list_from_db(db.engine):
             try:
                 execute(text('DROP TABLE %s CASCADE CONSTRAINTS' %(table)))
             except SQLError, e:
                 print >> sys.stderr, e
 
-        for seq in get_seq_list_from_db(dbf.engine):
+        for seq in get_seq_list_from_db(db.engine):
             try:
                 execute(text('DROP SEQUENCE %s'%(seq)))
             except SQLError, e:

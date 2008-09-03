@@ -1,5 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-""" Enumerates kerberos realms """
+""" Lists of hosts as a host type"""
 
 import sys
 import os
@@ -9,20 +9,14 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
 
+from aquilon.aqdb.db_factory             import Base
 from aquilon.aqdb.table_types.name_table import make_name_class
 
+HostList = make_name_class('HostList','host_list')
+host_list = HostList.__table__
+host_list.primary_key.name = 'host_list_pk'
 
-Realm = make_name_class('Realm', 'realm')
-realm = Realm.__table__
-table = realm
-
-def populate(db, *args, **kw):
-    if db.s.query(Realm).count() == 0:
-        r = Realm(name = 'is1.morgan')
-        db.s.add(r)
-        db.s.commit()
-        assert(r)
-        print 'created %s'%(r)
+table = host_list
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

@@ -49,7 +49,11 @@ class TestRebuild(unittest.TestCase):
             env["HOME"] = config.get("broker", "basedir")
         aqdbdir = os.path.join(config.get("broker", "srcdir"), "lib",
                 "python2.5", "aquilon", "aqdb")
-        p = Popen("./utils/build_db.py", stdout=1, stderr=2,
+        
+        cmdlst = ['./utils/build_db.py', '--populate'] 
+        #build_db now uses 'populate' option
+        
+        p = Popen(cmdlst, stdout=1, stderr=2,
                 env=env, cwd=aqdbdir)
         (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0, "Database rebuild failed:\n%s" % err)

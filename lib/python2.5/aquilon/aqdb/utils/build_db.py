@@ -29,11 +29,11 @@ pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch', 'chassis_manager',
-                'interface', 'mac_address', 'chassis_manager', #'switch_port',
+                'interface', 'mac_address', 'chassis_manager', 'switch_port',
                 'machine_specs', 'chassis_slot'] #terminal_server, model_subtype
 
 pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
-                'system_list', 'system_list_item'] #'host_list', 'host_list_item'
+                'system_list', 'system_list_item', 'host_list', 'host_list_item']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_map','service_list_item']
 
@@ -57,38 +57,29 @@ def main(*args, **kw):
     parser.add_option('-v', '--verbose',
                       action  = 'store_true',
                       dest    = 'verbose',
-                      help    = 'lets you know more of whats happening',
-                      #metavar = 'verbose'
-                      )
+                      help    = 'makes metadata bind.echo = True')
 
     parser.add_option('-d', '--debug',
                       action  = 'store_true',
                       dest    = 'debug',
-                      help    = 'display debug info on stdout',
-                      #metavar = 'debug'
-                      )
+                      help    = 'write debug info on stdout')
 
     parser.add_option('-m', '--mock',
                       action  = 'store_true',
                       dest    = 'mock',
-                      help    = 'if selected, creates DDL sql files',
-                      #metavar = 'mock'
-                      )
-
-    parser.add_option('-y', '--yes',
-                      action  = 'store_true',
-                      dest    = 'delete_db',
-                      help    = 'empty out existing database',
-                      default = True
-                      #metavar = 'delete_existing'
-                      )
+                      help    = 'if selected, creates DDL sql files')
 
     parser.add_option('-n', '--no',
                       action  = 'store_false',
                       dest    = 'delete_db', \
                       help    = 'do not empty DB',
-                      #metavar = 'noexec'
-                      )
+                      default = True)
+
+    parser.add_option('-p', '--populate',
+                      action  = 'store_true',
+                      dest    = 'populate',
+                      help    = 'run functions to prepopulate data',
+                      default = False)
 
     (opts, args) = parser.parse_args()
 
@@ -106,43 +97,36 @@ def main(*args, **kw):
 
     assert(db)
 
-    #TODO: pass '-y' option into this...
-    if opts.delete_db == True:
-        ta.drop_all_tables_and_sequences(db)
+    if opts.delete_db == True and db.dsn.startswith('oracle'):
+        ta.drop_all_tables_and_sequences(db,opts.delete_db)
 
     for p in order:
         for module_name in pkgs[p]:
             pkg_name = 'aquilon.aqdb.%s'%(p)
 
             try:
-                #debug('importing %s'%(pkg_name+'.'+module_name))
                 mod = importName(pkg_name,module_name)
             except ImportError, e:
-                print >>sys.stderr, 'Failed to %s:\n\t%s\n' % (import_cmd, e)
+                print >> sys.stderr, 'Failed to import %s\n' % (module_name, e)
                 sys.exit(1)
 
             if hasattr(mod,'table'):
                 sqlfile = os.path.splitext(
                     os.path.basename(mod.__file__))[0] + '.sql'
-                debug('creating %s'%(mod.table.name))
+                debug('\tcreating %s'%(mod.table.name))
                 try:
                     mod.table.create(checkfirst=True)
                 except Exception,e:
                     sys.stderr.write(str(e))
                     print e, "\n"
-            #else:
-                #if debug:
-                    #print mod.__dict__
-                    #ipshell()
 
-            #TODO: make populate optional from cmd line
-            #if hasattr(mod,'populate'):
-            #    debug('populating %s'%(mod.table.name))
-            #    try:
-            #        mod.populate(db)
-            #    except Exception, e:
-            #        sys.stderr.write(str(e))
-            #        print e, "\n"
+            if hasattr(mod,'populate') and opts.populate:
+                debug('\t\t\tpopulating %s'%(mod.table.name))
+                try:
+                    mod.populate(db)
+                except Exception, e:
+                    sys.stderr.write(str(e))
+                    print e, "\n"
 
     if opts.mock:
         try:

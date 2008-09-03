@@ -20,12 +20,12 @@ table = disk_type
 _disk_types = ['ccis', 'ide', 'sas', 'sata', 'scsi', 'flash']
 
 def populate(db, *args, **kw):
-    if len(s.query(DiskType).all()) < 1:
+    if len(db.s.query(DiskType).all()) < 1:
         for t in _disk_types:
             dt = DiskType(type = t, comments = 'AutoPopulated')
             db.s.add(dt)
         db.s.commit()
-    
+
     dt = db.s.query(DiskType).first()
     assert(dt)
 
@@ -33,4 +33,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

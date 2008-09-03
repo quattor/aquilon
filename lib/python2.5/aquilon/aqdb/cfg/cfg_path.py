@@ -50,7 +50,7 @@ Index('cfg_relative_path_idx', cfg_path.c.relative_path)
 table = cfg_path
 
 def populate(db, *args, **kw):
-    if len(s.query(CfgPath).all()) > 0:
+    if len(db.s.query(CfgPath).all()) > 0:
         return
 
     cfg_base = db.config.get("broker", "kingdir")
@@ -104,4 +104,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

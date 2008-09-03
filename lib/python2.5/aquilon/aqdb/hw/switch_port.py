@@ -15,10 +15,11 @@ from sqlalchemy import Table, Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.db_factory     import Base
-from aquilon.aqdb.net.network    import Network
-from aquilon.aqdb.hw.tor_switch  import TorSwitch
-from aquilon.aqdb.hw.interface   import Interface
+from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.net.network        import Network
+from aquilon.aqdb.hw.tor_switch      import TorSwitch
+from aquilon.aqdb.hw.interface       import Interface
+from aquilon.aqdb.column_types.aqmac import AqMac
 
 
 class SwitchPort(Base):
@@ -29,17 +30,22 @@ class SwitchPort(Base):
     __tablename__ = 'switch_port'
 
     #TODO: code level constraint on machine_type == tor_switch
-    switch_id   = Column(Integer,
-                       ForeignKey(TorSwitch.id, ondelete = 'CASCADE',
+    switch_id    = Column(Integer,
+                       ForeignKey(TorSwitch.c.id, ondelete = 'CASCADE',
                                   name = 'swport_hwent_fk'), primary_key = True)
 
-    interface_id     = Column(Integer, ForeignKey('interface.id', ondelete = 'CASCADE',
-                                     name = 'switch_int_fk'), primary_key=True)
+    port_number  = Column(Integer, primary_key=True)
+
+    interface_id = Column(Integer, ForeignKey(Interface.c.id,
+                                                  ondelete = 'CASCADE',
+                                                  name = 'switch_int_fk'),
+                              nullable=True)
+
+    mac_address  = Column(AqMac(17), nullable=True) #TODO: This is a FK!
+    #this structure mangles interfaces and switches into one which 'feels' wrong
+    #at a gut level, but let's play with it for now...
 
     slot         = Column(Integer, default=None)
-    port_number  = Column(Integer, nullable=False)
-
-
 
     # network_id as an attr of the port on the switch, makes switch port
     # a more flexible linkage of switches, networks, and interfaces,
@@ -48,6 +54,7 @@ class SwitchPort(Base):
     #To implement properly, this must be tiggered to update as soon as the
     # network property is set on a tor switch.
     #TODO: handle ondelete behavior for network with 'set null' behavior
+
     network_id   = Column(Integer, ForeignKey(Network.c.id,
                                               name = 'switch_port_network_fk'))
 
@@ -55,11 +62,13 @@ class SwitchPort(Base):
                                           default = datetime.now,
                                           nullable = False))
 
-    switch = relation(TorSwitch, uselist = False, backref = 'switchport',
-                         passive_deletes = True)
+    switch = relation(TorSwitch, uselist=False, backref='switchport',
+                         passive_deletes=True)
 
-    interface  = relation(Interface, uselist = False, backref = 'switchport',
-                         passive_deletes = True)
+    interface  = relation(Interface, uselist=False, backref='switchport',
+                         passive_deletes=True)
+
+    network = relation(Network, backref = 'switch_ports')
 
 switch_port = SwitchPort.__table__
 switch_port.primary_key.name = 'switch_port_pk'
@@ -70,4 +79,3 @@ table = switch_port
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

@@ -30,8 +30,8 @@ class MacAddress(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable = False ))
-    #this doesn't really garner comments
-    #comments      = deferred(Column(String(255)))
+
+    #this table doesn't really deserve comments
 
     interface  = relation(Interface, backref = 'mac_addresses', passive_deletes = True)
 
