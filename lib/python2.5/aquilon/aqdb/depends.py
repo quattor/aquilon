@@ -5,7 +5,7 @@ import fnmatch
 import msversion
 
 if not sys.modules.has_key('sqlalchemy'):
-    msversion.addpkg('sqlalchemy', '0.4.7-1', 'dev')
+    msversion.addpkg('sqlalchemy', '0.4.7-1', 'dist')
     #msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
 
 if not sys.modules.has_key('cx_Oracle'):
