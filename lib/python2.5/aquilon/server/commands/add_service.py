@@ -16,8 +16,11 @@ from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
-from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance,
-                                      PlenaryServiceInstanceClientDefault)
+from aquilon.server.templates.domain import (compileLock, compileRelease)
+from aquilon.server.templates.service import (PlenaryService,
+                                              PlenaryServiceInstance,
+                                              PlenaryServiceClientDefault,
+                                              PlenaryServiceInstanceClientDefault)
 
 
 class CommandAddService(BrokerCommand):
@@ -28,47 +31,57 @@ class CommandAddService(BrokerCommand):
     @az_check
     def render(self, session, service, instance, comments, user, **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
-        if not dbservice:
-            # FIXME: Could have better error handling
-            dbtld = session.query(Tld).filter_by(type="service").first()
-            # Need to get or create cfgpath.
-            dbcfg_path = session.query(CfgPath).filter_by(
+        pdir = self.config.get("broker", "plenarydir")
+        compileLock();
+        try:
+            if not dbservice:
+                # FIXME: Could have better error handling
+                dbtld = session.query(Tld).filter_by(type="service").first()
+                # Need to get or create cfgpath.
+                dbcfg_path = session.query(CfgPath).filter_by(
                     tld=dbtld, relative_path=service).first()
-            if not dbcfg_path:
-                dbcfg_path = CfgPath(tld=dbtld, relative_path=service)
-                session.save(dbcfg_path)
-            dbservice = Service(name=service, cfg_path=dbcfg_path)
-            session.save(dbservice)
-            # Write out stub plenary data
-            # By definition, we don't need to then recompile, since nothing
-            # can be using this service yet.
-            plenary_info = PlenaryService(dbservice)
-            plenary_info.write(self.config.get("broker", "plenarydir"), user)
+                if not dbcfg_path:
+                    dbcfg_path = CfgPath(tld=dbtld, relative_path=service)
+                    session.save(dbcfg_path)
+                dbservice = Service(name=service, cfg_path=dbcfg_path)
+                session.save(dbservice)
+                # Write out stub plenary data
+                # By definition, we don't need to then recompile, since nothing
+                # can be using this service yet.
+                plenary_info = PlenaryService(dbservice)
+                plenary_info.write(pdir, user, locked=True)
 
-        if not instance:
-            return
+                # Create the default service client template
+                plenary_info = PlenaryServiceClientDefault(dbservice)
+                plenary_info.write(pdir, user, locked=True)
 
-        relative_path = "%s/%s" % (service, instance)
-        dbcfg_path = session.query(CfgPath).filter_by(
+            if not instance:
+                return
+
+            relative_path = "%s/%s" % (service, instance)
+            dbcfg_path = session.query(CfgPath).filter_by(
                 tld=dbservice.cfg_path.tld, relative_path=relative_path).first()
-        if not dbcfg_path:
-            dbcfg_path = CfgPath(tld=dbservice.cfg_path.tld,
-                    relative_path=relative_path)
-            session.save(dbcfg_path)
-        dbsi = ServiceInstance(service=dbservice, name=instance,
-                cfg_path=dbcfg_path)
-        session.save(dbsi)
-        session.flush()
-        session.refresh(dbservice)
+            if not dbcfg_path:
+                dbcfg_path = CfgPath(tld=dbservice.cfg_path.tld,
+                                     relative_path=relative_path)
+                session.save(dbcfg_path)
+            dbsi = ServiceInstance(service=dbservice, name=instance,
+                    cfg_path=dbcfg_path)
+            session.save(dbsi)
+            session.flush()
+            session.refresh(dbservice)
 
-        # Create the servicedata template
-        plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+            # Create the servicedata template
+            plenary_info = PlenaryServiceInstance(dbservice, dbsi)
+            plenary_info.write(pdir, user, locked=True)
+            
+            # Create the default service template
+            plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
+            plenary_info.write(pdir, user, locked=True)
 
-        # Create the default service template
-        plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
-
+        finally:
+            compileRelease()
+            
         return
 
 

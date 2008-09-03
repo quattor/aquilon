@@ -20,6 +20,17 @@ class PlenaryService(Plenary):
     def body(self, lines):
         return
 
+class PlenaryServiceClientDefault(Plenary):
+    def __init__(self, dbservice):
+        Plenary.__init__(self)
+        self.name = dbservice.name
+        self.plenary_core = "service/%(name)s/client" % self.__dict__
+        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.template_type = ''
+
+    def body(self, lines):
+        return
+
 
 class PlenaryServiceInstance(Plenary):
     def __init__(self, dbservice, dbinstance):
@@ -50,4 +61,5 @@ class PlenaryServiceInstanceClientDefault(Plenary):
 
     def body(self, lines):
         lines.append("'/system/services/%(service)s' = create('servicedata/%(service)s/%(name)s/config');" % self.__dict__)
+        lines.append("include { 'service/%(service)s/client/config' };"%self.__dict__)
 
