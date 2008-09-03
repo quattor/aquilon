@@ -15,7 +15,10 @@ from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.sy.domain import Domain
 from twisted.python import log
-from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance, PlenaryMachineInfo, PlenaryHost, compileLock, compileRelease)
+from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance)
+from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.domain import compileLock, compileRelease
 from aquilon.exceptions_ import PartialError
 
 class CommandFlush(BrokerCommand):

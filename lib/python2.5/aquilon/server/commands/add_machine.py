@@ -16,7 +16,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
-from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.aqdb.loc.chassis import Chassis
 from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 

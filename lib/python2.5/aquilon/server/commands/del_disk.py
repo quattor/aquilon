@@ -16,7 +16,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand, force_int)
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.disk_type import get_disk_type
-from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
 class CommandDelDisk(BrokerCommand):

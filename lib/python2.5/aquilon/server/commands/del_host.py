@@ -19,7 +19,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_dependencies)
 from aquilon.server.processes import (DSDBRunner, build_index)
-from aquilon.server.templates import PlenaryHost
+from aquilon.server.templates.host import PlenaryHost
 
 delhost_lock = Lock()
 

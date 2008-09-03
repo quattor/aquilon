@@ -20,7 +20,7 @@ from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.templates import PlenaryServiceInstance
+from aquilon.server.templates.service import PlenaryServiceInstance
 
 
 class CommandBindServer(BrokerCommand):

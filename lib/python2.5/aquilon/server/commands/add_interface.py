@@ -15,7 +15,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
-from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
 class CommandAddInterface(BrokerCommand):

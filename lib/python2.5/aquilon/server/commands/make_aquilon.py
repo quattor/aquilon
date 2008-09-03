@@ -23,7 +23,7 @@ from aquilon.server.dbwrappers.service_instance import choose_service_instance
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.aqdb.sy.build_item import BuildItem
-from aquilon.server.templates import TemplateDomain
+from aquilon.server.templates.domain import TemplateDomain
 from socket import gethostbyname
 
 class CommandMakeAquilon(BrokerCommand):

@@ -18,8 +18,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.svc.service_map import ServiceMap
-from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance,
-                                      PlenaryServiceInstanceClientDefault)
+from aquilon.server.templates.service import (PlenaryService,
+        PlenaryServiceInstance, PlenaryServiceInstanceClientDefault)
 
 
 class CommandDelService(BrokerCommand):

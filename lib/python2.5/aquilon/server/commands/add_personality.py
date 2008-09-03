@@ -16,7 +16,7 @@ from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.archetype import Archetype
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.templates import PlenaryPersonality
+from aquilon.server.templates.personality import PlenaryPersonality
 import re
 import os
 

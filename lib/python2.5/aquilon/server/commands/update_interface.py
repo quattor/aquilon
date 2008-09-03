@@ -10,7 +10,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_tor_offsets)
-from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
 

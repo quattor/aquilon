@@ -16,7 +16,7 @@ from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
-from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance,
+from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance,
                                       PlenaryServiceInstanceClientDefault)
 
 

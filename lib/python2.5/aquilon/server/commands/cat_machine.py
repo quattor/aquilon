@@ -15,7 +15,7 @@ from aquilon.server.broker import (add_transaction, az_check, format_results,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.processes import read_file
-from aquilon.server.templates import PlenaryMachineInfo
+from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
 class CommandCatMachine(BrokerCommand):
