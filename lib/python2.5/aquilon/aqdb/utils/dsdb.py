@@ -1,16 +1,8 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ For dsdb/sybase specific functionality and access"""
-
 import msversion
 msversion.addpkg('sybase', '0.38-py25', 'dist')
+
 import Sybase
 import os
 
@@ -207,3 +199,8 @@ if __name__ == '__main__':
     #a = dump_campus()
     a = dump_net_type()
     print a
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

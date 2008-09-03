@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ A collection of table level functions for maintenance """
-
 
 from confirm import confirm
 import sys
@@ -20,7 +11,6 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import text
-
 
 def get_table_list_from_db(engine):
     """
@@ -65,3 +55,8 @@ def drop_all_tables_and_sequences(dbf):
             execute(text('PURGE RECYCLEBIN'))
         except SQLError, e:
             print >> sys.stderr, e
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
