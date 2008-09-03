@@ -1,13 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
-""" If you can read this you should be documenting """
+
+""" Column type to squash trailing/leading whitespace and lower case """
 import sys
 import os
 
@@ -36,3 +29,8 @@ class AqStr(types.TypeDecorator):
 
     def copy(self):
         return AqStr(self.impl.length)
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

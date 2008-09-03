@@ -1,14 +1,8 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
+
 """ A starting point for discriminator columns. A future version will dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
+
 import sys
 import os
 
@@ -84,3 +78,8 @@ def test_enum():
         pass
 
     print list(t.select().execute())
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

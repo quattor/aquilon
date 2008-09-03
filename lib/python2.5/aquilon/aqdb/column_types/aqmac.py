@@ -1,14 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ This module implements the AqMac column_type. """
-
 
 import sys
 import os
@@ -26,13 +17,13 @@ from aquilon.exceptions_ import ArgumentError
 
 class AqMac(types.TypeDecorator):
     """ A type that decorates MAC address.
-    
+
         It normalizes case to lower, strips leading and trailing whitespace,
         adds colons, and adds padding zeroes.
-        
+
         It should always be initialized as AqMac(17).  This accounts for
         six groups of two characters and five colon separators.
-        
+
         """
 
     impl = types.String
@@ -61,3 +52,8 @@ class AqMac(types.TypeDecorator):
 
     def copy(self):
         return AqMac(self.impl.length)
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
