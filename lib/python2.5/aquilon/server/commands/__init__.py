@@ -21,8 +21,10 @@
    """
 
 import os
-import sys
+from traceback import format_exc
 from inspect import isclass
+
+from twisted.python import log
 
 __all__ = []
 
@@ -35,7 +37,7 @@ for f in os.listdir(_thisdir):
         try:
             mymodule = __import__(modulename, fromlist=["BrokerCommand"])
         except Exception, e:
-            print >>sys.stderr, "Error importing %s: %s" % (modulename, e)
+            log.msg("Error importing %s: %s" % (modulename, format_exc()))
             continue
         if not hasattr(mymodule, "BrokerCommand"):
             continue
