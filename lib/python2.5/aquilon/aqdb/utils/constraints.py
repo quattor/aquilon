@@ -1,39 +1,36 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """ functions for managing Oracle constraints """
 
 import re
 import sys
 import os
 
-#if __name__ == '__main__':
 DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-import aquilon.aqdb.db_factory as db_factory
+import aquilon.aqdb.db_factory as dbf
 
 #TODO:
     #double check we're not touching FKs... looked like we might be
     #refactor to do ALL constraint types with name like 'SYS_C00%'
 
 _long_nms = {}
+_long_nms['CHASSIS_MANAGER']         = 'CHAS_MGR'
+_long_nms['TOR_SWITCH']              = 'TOR_SW'
+_long_nms['HARDWARE_ENTITY_TYPE']    = 'HW_ENT_TYP'
+_long_nms['HARDWARE_ENTITY_TYPE_ID'] = 'HW_ENT_TYP_ID'
+_long_nms['HARDWARE_ENTITY']         = 'HW_ENT'
 _long_nms['LOCATION_SEARCH_LIST']    = 'LOC_SRCH_LST'
 _long_nms['LOCATION_SEARCH_LIST_ID'] = 'LOC_SRCH_LIST_ID'
 _long_nms['SEARCH_LIST_ITEM']        = 'SRCH_LI'
 _long_nms['SYSTEM_LIST_ITEM']        = 'SYSTEM_LI'
-_long_nms['PHYSICAL_INTERFACE']      = 'PHYS_IFACE'
+_long_nms['INTERFACE']               = 'IFACE'
 _long_nms['SERVICE_MAP']             = 'SVC_MAP'
 _long_nms['SERVICE_LIST_ITEM']       = 'SVC_LI'
 _long_nms['SERVICE_INSTANCE']        = 'SVC_INST'
 _long_nms['CREATION_DATE']           = 'CR_DATE'
+_long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
 
-def rename_sys_pks(dbf):
+def rename_sys_pks(db, *args, **kw):
     stmt = """
     SELECT C.constraint_name  con,
            C.table_name       tab,
@@ -42,7 +39,7 @@ def rename_sys_pks(dbf):
      WHERE C.constraint_type = 'P'
        AND C.constraint_name LIKE 'SYS_C00%' """
 
-    cons = dbf.safe_execute(stmt)
+    cons = db.safe_execute(stmt)
 
     if cons:
         for i in cons:
@@ -50,12 +47,12 @@ def rename_sys_pks(dbf):
             nm = '%s_pk'%(i[1])
             rename = 'ALTER TABLE %s RENAME CONSTRAINT %s to %s'%(
                 i[1], i[0], nm)
-            db_factory.debug(rename)
-            dbf.safe_execute(rename)
+            dbf.debug(rename)
+            db.safe_execute(rename)
     else:
         print 'PKs are all properly named'
 
-def rename_non_null_check_constraints(dbf):
+def rename_non_null_check_constraints(db, debug=False, *args, **kw):
     stmt = """
     SELECT C.constraint_name  con,
            C.table_name       tab,
@@ -64,7 +61,7 @@ def rename_non_null_check_constraints(dbf):
      WHERE C.constraint_type = 'C'
        AND C.constraint_name LIKE 'SYS_C00%' """
 
-    cons = dbf.safe_execute(stmt)
+    cons = db.safe_execute(stmt)
 
     rename =[]
     pat = re.compile('\"(.*)\"')
@@ -74,7 +71,7 @@ def rename_non_null_check_constraints(dbf):
             col = pat.match(i[2]).group().strip('"')
             if col in _long_nms.keys():
                 col = _long_nms[col]
-            #TODO: replace with table_info in next version
+            #TODO: replace with table_info in next version: look up abreviation in metadata tbl
             if i[1] in _long_nms.keys():
                 nm = '%s_%s_NN'%(_long_nms[i[1]], col)
             else:
@@ -87,8 +84,11 @@ def rename_non_null_check_constraints(dbf):
                     rename)
                 continue
             else:
-                db_factory.debug(rename)
-                dbf.safe_execute(rename)
+                #TODO: use an integer value or the logger
+                if(debug):
+                    dbf.debug(rename)
+
+                db.safe_execute(rename)
 
 """
 LNPO_AQUILON_NY> select distinct constraint_type from user_constraints;
@@ -100,3 +100,8 @@ U (unique)
 P (primary key)
 C (check constraint (like non null))
 """
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# Copyright (C) 2008 Morgan Stanley
+#
+# This module is part of Aquilon

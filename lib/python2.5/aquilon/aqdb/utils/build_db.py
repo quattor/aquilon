@@ -19,21 +19,21 @@ pkgs         = {}
 
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
-pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country', 
-                'city', 'building', 'rack', 'chassis', 'desk', 
+pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
+                'city', 'building', 'rack', 'chassis', 'desk',
                 'location_search_list', 'search_list_item']
 
 pkgs['net']  = ['dns_domain', 'a_name', 'ip_address', 'network']
 
 pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 
-pkgs['hw']   = ['status', 'cpu', 'disk_type', 'disk', 'vendor', 'model',
-                'hardware_entity', 'interface', 'mac_address',  'machine', 
-                'tor_switch', 'chassis_manager', 'tor_switch', 'switch_port', 
-                'machine_specs' ]
+pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
+                'disk_type', 'machine', 'disk', 'tor_switch', 'chassis_manager',
+                'interface', 'mac_address', 'chassis_manager', #'switch_port',
+                'machine_specs' ] #terminal_server, model_subtype
 
-pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'host_list',
-                'host_list_item', 'build_item','system_list', 'system_list_item']
+pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
+                'system_list', 'system_list_item'] #'host_list', 'host_list_item'
 
 pkgs['svc']  = ['service', 'service_instance', 'service_map','service_list_item']
 
