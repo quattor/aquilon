@@ -13,16 +13,22 @@ if __name__ == '__main__':
 from sqlalchemy import Column, Table
 
 from aquilon.aqdb.db_factory         import Base
-from aquilon.aqdb.column_types.ipv4  import IPV4
+from aquilon.aqdb.column_types.IPV4  import IPV4
 
 class IpAddress(Base):
     """ ip address table. KISS as we'll build up MANY different 
     relations into this table (a_name -> m2m <- IP, 
                                 iface -> m2m <- IP )  
     """
+    __tablename__ = 'ip_address'
 
     ip_address = Column(IPV4, primary_key=True)
     #TODO: have network as a property, but it's really just a call out to sql
+
+ip_address = IpAddress.__table__
+ip_address.primary_key.name = 'ip_address_pk'
+
+table = ip_address
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

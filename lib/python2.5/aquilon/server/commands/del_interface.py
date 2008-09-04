@@ -13,7 +13,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.physical_interface import get_physical_interface
+from aquilon.server.dbwrappers.interface import get_interface
 from aquilon.server.templates import PlenaryMachineInfo
 
 

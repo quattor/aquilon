@@ -13,26 +13,31 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.hw.physical_interface import PhysicalInterface
+from aquilon.aqdb.hw.interface import Interface
+from aquilon.aqdb.hw.mac_address import MacAddress
 from aquilon.aqdb.net.ip_to_int import dq_to_int
 
 
-def get_physical_interface(session, physical_interface, machine, mac, ip):
-    q = session.query(PhysicalInterface)
-    if physical_interface:
-        q = q.filter_by(name=physical_interface)
+# FIXME: interface type?  interfaces for hardware entities in general?
+def get_interface(session, interface, machine, mac, ip):
+    q = session.query(Interface)
+    if interface:
+        q = q.filter_by(name=interface)
     if machine:
         q = q.join('machine').filter_by(name=machine)
         q = q.reset_joinpoint()
     if mac:
-        q = q.filter_by(mac=mac)
+        q = q.filter(Interface.id==MacAddress.interface_id)
+        q = q.filter(MacAddress.mac==mac)
     if ip:
-        q = q.filter_by(ip=ip)
+        # FIXME: Does this still apply?
+        #q = q.filter_by(ip=ip)
+        pass
     try:
-        dbphysical_interface = q.one()
+        dbinterface = q.one()
     except InvalidRequestError, e:
-        raise ArgumentError("PhysicalInterface not found, make sure it has been specified uniquely: %s" % e)
-    return dbphysical_interface
+        raise ArgumentError("Interface not found, make sure it has been specified uniquely: %s" % e)
+    return dbinterface
 
 def restrict_tor_offsets(session, dbnetwork, ip):
     if ip is None:
@@ -41,10 +46,12 @@ def restrict_tor_offsets(session, dbnetwork, ip):
     if dbnetwork.mask < 8:
         # This network doesn't have enough addresses, the test is irrelevant.
         return
-    q = session.query(PhysicalInterface)
-    q = q.join(["machine", "model"]).filter_by(machine_type="tor_switch")
+    q = session.query(Interface)
+    q = q.join(["hardware_entity"])
+    q = q.filter_by(hardware_entity_type="tor_switch")
     q = q.reset_joinpoint()
-    q = q.filter_by(network=dbnetwork)
+    # FIXME: Network is no longer on interface...
+    #q = q.filter_by(network=dbnetwork)
     dbinterface = q.first()
     if not dbinterface:
         return

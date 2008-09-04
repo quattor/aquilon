@@ -26,9 +26,9 @@ class HardwareEntity(Base):
 
     id  = Column(Integer, Sequence('hardware_entity_seq'), primary_key=True)
 
-    name_id = Column(Integer, ForeignKey(AName.c.id,
-                                         name='hw_ent_name_fk',
-                                         ondelete='CASCADE'), nullable=False)
+    a_name_id = Column(Integer, ForeignKey(AName.c.id,
+                                           name='hw_ent_name_fk',
+                                           ondelete='CASCADE'), nullable=False)
 
     hardware_entity_type = Column(AqStr(64), nullable=False)
 
@@ -46,7 +46,7 @@ class HardwareEntity(Base):
                                                 nullable = False ))
     comments      = deferred(Column(String(255), nullable = True))
             
-    name     = relation(AName, uselist = False, passive_deletes=True)
+    a_name     = relation(AName, uselist = False, passive_deletes=True)
     location = relation(Location, uselist = False)
     model    = relation(Model, uselist = False)
 
@@ -55,7 +55,7 @@ class HardwareEntity(Base):
 hardware_entity = HardwareEntity.__table__
 hardware_entity.primary_key.name = 'hardware_entity_pk'
 Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
-Index('nw_ent_name_idx', hardware_entity.c.name_id)
+Index('nw_ent_a_name_idx', hardware_entity.c.a_name_id)
 
 table = hardware_entity
 

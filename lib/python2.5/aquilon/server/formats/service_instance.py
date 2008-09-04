@@ -19,7 +19,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.host_list.name)]
         details.append(self.redirect_raw(si.cfg_path, indent + "  "))
-        for hli in si.host_list.hosts:
+        for hli in si.host_list.hostlist:
             details.append(indent + "  Server: %s" % hli.host.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: %s %s" %

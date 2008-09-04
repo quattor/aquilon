@@ -36,6 +36,11 @@ class AName(Base):
 
     dns_domain = relation(DnsDomain, uselist = False)
 
+    def _fqdn(self):
+        return '.'.join([str(self.name),str(self.dns_domain.name)])
+    fqdn = property(_fqdn)
+
+
 a_name = AName.__table__
 a_name.primary_key.name = 'a_name_pk'
 

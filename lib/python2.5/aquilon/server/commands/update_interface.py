@@ -12,8 +12,8 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.physical_interface import (
-        get_physical_interface, restrict_tor_offsets)
+from aquilon.server.dbwrappers.interface import (get_interface,
+                                                 restrict_tor_offsets)
 from aquilon.server.templates import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
@@ -40,11 +40,11 @@ class CommandUpdateInterface(BrokerCommand):
 
         """
 
-        dbinterface = get_physical_interface(session,
-                interface, machine, None, None)
+        dbinterface = get_interface(session, interface, machine, None, None)
         # By default, oldinfo comes from the interface being updated.
         # If swapping the boot flag, oldinfo will be updated below.
         oldinfo = self.snapshot(dbinterface)
+        # FIXME: All broken below.
         if mac:
             dbinterface.mac = mac
         if ip:

@@ -324,7 +324,7 @@ class PlenaryService(Plenary):
 class PlenaryServiceInstance(Plenary):
     def __init__(self, dbservice, dbinstance):
         Plenary.__init__(self)
-        self.servers = dbinstance.host_list.hosts
+        self.servers = dbinstance.host_list.hostlist
         self.service = dbservice.name
         self.name = dbinstance.host_list.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
