@@ -58,7 +58,7 @@ class CommandAddHost(BrokerCommand):
                 raise ArgumentError("Machine '%s' has no interfaces." % machine)
             found_boot = False
             for interface in dbmachine.interfaces:
-                if interface.boot:
+                if interface.bootable:
                     if found_boot:
                         # FIXME: Is this actually a problem?
                         raise ArgumentError("Multiple interfaces on machine '%s' are marked bootable" % machine)

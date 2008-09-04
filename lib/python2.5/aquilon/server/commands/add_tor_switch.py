@@ -18,13 +18,11 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
-from aquilon.server.dbwrappers.ip_address import get_or_create_ip_address
 from aquilon.server.dbwrappers.a_name import get_or_create_a_name
-from aquilon.server.dbwrappers.mac_address import (
-        create_or_get_free_mac_address)
 from aquilon.aqdb.hw.tor_switch import TorSwitch
 from aquilon.aqdb.hw.switch_port import SwitchPort
 from aquilon.aqdb.hw.interface import Interface
+from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 from aquilon.aqdb.loc.rack import Rack
 from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
 
@@ -59,11 +57,11 @@ class CommandAddTorSwitch(BrokerCommand):
             raise ArgumentError("Need to specify an existing --rack or provide --building, --rackid, --rackrow and --rackcolumn")
 
         dba_name = get_or_create_a_name(session, tor_switch)
-        if session.query(HardwareEntity).filter_by(name=dba_name).first():
+        if session.query(HardwareEntity).filter_by(a_name=dba_name).first():
             raise ArgumentError("The name '%s' is already in use." %
                                 tor_switch)
 
-        dbtor_switch = TorSwitch(name=dba_name, location=dblocation,
+        dbtor_switch = TorSwitch(a_name=dba_name, location=dblocation,
                                  model=dbmodel, serial_no=serial)
 
         # FIXME: Hard-coded number of switch ports...
@@ -77,17 +75,13 @@ class CommandAddTorSwitch(BrokerCommand):
         if interface or mac or ip:
             if not (interface and mac and ip):
                 raise ArgumentError("If using --interface, --mac, or --ip, all of them must be given.")
-            dbmac = create_or_get_free_mac_address(session, mac)
-            # FIXME: Need to associate this IP with the interface
-            dbip = get_or_create_ip_address(session, ip)
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
             restrict_tor_offsets(session, dbnetwork, ip)
-            dbinterface = Interface(name=interface,
+            dbinterface = Interface(name=interface, interface_type='public',
+                                    mac=mac, ip=ip, network=dbnetwork,
                                     hardware_entity=dbtor_switch)
             session.save(dbinterface)
-            dbmac.interface = dbinterface
-            session.update(dbmac)
             session.flush()
 
             # FIXME: This information will need to go to dsdb.

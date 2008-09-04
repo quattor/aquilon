@@ -42,7 +42,7 @@ class CommandDelMachine(BrokerCommand):
         for iface in dbmachine.interfaces:
             log.msg("Before deleting machine '%s', removing interface '%s' [%s] [%s] boot=%s)" %
                     (dbmachine.name,
-                        iface.name, iface.mac, iface.ip, iface.boot))
+                        iface.name, iface.mac, iface.ip, iface.bootable))
             session.delete(iface)
         for disk in dbmachine.disks:
             log.msg("Before deleting machine '%s', removing disk '%s'" %

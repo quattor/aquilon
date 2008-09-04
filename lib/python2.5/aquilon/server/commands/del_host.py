@@ -64,7 +64,7 @@ class CommandDelHost(BrokerCommand):
             session.refresh(dbmachine)
             ip = None
             for interface in dbmachine.interfaces:
-                if interface.boot:
+                if interface.bootable:
                     ip = interface.ip
             if not ip and archetype != 'aurora':
                 raise ArgumentError("No boot interface found for host to delete from dsdb.")

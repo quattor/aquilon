@@ -274,7 +274,7 @@ class DSDBRunner(object):
 
     def add_host(self, dbhost):
         for interface in dbhost.machine.interfaces:
-            if not interface.boot:
+            if not interface.bootable:
                 continue
             self.add_host_details(dbhost.fqdn, interface.ip,
                     interface.name, interface.mac)

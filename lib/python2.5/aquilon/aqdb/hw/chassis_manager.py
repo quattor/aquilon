@@ -29,8 +29,9 @@ class ChassisManager(HardwareEntity):
 
                                            primary_key = True)
 
-    name = Column('name', AqStr(64), nullable = False)
-    #TODO: move name back to hw_entity? I *know* this isn't done yet
+    #TODO: Maybe still in flux, but hardware_entity's a_name should be
+    # good enough.
+    #name = Column('name', AqStr(64), nullable = False)
 
     #TODO: synonym in location lest we break things
     #location = relation(Location, uselist = False)
@@ -43,9 +44,9 @@ class ChassisManager(HardwareEntity):
 chassis_manager = ChassisManager.__table__
 chassis_manager.primary_key.name = 'chassis_manager_pk'
 
-chassis_manager.append_constraint(
-    UniqueConstraint('name',name = 'chassis_manager_name_uk')
-)
+#chassis_manager.append_constraint(
+#    UniqueConstraint('name',name = 'chassis_manager_name_uk')
+#)
 
 table = chassis_manager
 

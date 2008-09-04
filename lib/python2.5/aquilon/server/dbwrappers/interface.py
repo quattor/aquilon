@@ -14,7 +14,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.hw.mac_address import MacAddress
+from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.net.ip_to_int import dq_to_int
 
 
@@ -24,14 +24,12 @@ def get_interface(session, interface, machine, mac, ip):
     if interface:
         q = q.filter_by(name=interface)
     if machine:
-        q = q.join('machine').filter_by(name=machine)
-        q = q.reset_joinpoint()
+        q = q.filter(Interface.hardware_entity_id==Machine.id)
+        q = q.filter(Machine.name==machine)
     if mac:
-        q = q.filter(Interface.id==MacAddress.interface_id)
-        q = q.filter(MacAddress.mac==mac)
+        q = q.filter_by(mac=mac)
     if ip:
-        # FIXME: Does this still apply?
-        #q = q.filter_by(ip=ip)
+        q = q.filter_by(ip=ip)
         pass
     try:
         dbinterface = q.one()

@@ -17,7 +17,7 @@ from aquilon.aqdb.svc.service_map import ServiceMap
 class ServiceMapFormatter(ObjectFormatter):
     def format_raw(self, sm, indent=""):
         return indent + "Service: %s Instance: %s Map: %s %s" % (
-                sm.service.name, sm.service_instance.host_list.name,
+                sm.service.name, sm.service_instance.name,
                 sm.location.location_type.capitalize(), sm.location.name)
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()

@@ -12,7 +12,6 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.sy.host import Host
-from aquilon.aqdb.column_types.IPV4 import IPV4
 
 
 class HostFormatter(ObjectFormatter):
@@ -59,13 +58,8 @@ class HostIPList(list):
 
 
 class HostIPListFormatter(ObjectFormatter):
-
-    ipv4 = IPV4()
-
     def format_csv(self, hilist):
-        return str("\n".join(["%s,%s" %
-                (entry[0], self.ipv4.process_result_value(entry[1], None))
-                for entry in hilist]))
+        return str("\n".join([",".join(entry) for entry in hilist]))
 
 ObjectFormatter.handlers[HostIPList] = HostIPListFormatter()
 

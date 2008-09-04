@@ -17,10 +17,10 @@ from aquilon.aqdb.svc.service_instance import ServiceInstance
 class ServiceInstanceFormatter(ObjectFormatter):
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
-                % (si.service.name, si.host_list.name)]
+                % (si.service.name, si.name)]
         details.append(self.redirect_raw(si.cfg_path, indent + "  "))
-        for hli in si.host_list.hostlist:
-            details.append(indent + "  Server: %s" % hli.host.fqdn)
+        for sis in si.servers:
+            details.append(indent + "  Server: %s" % sis.system.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: %s %s" %
                     (map.location.location_type.capitalize(),

@@ -32,14 +32,16 @@ class TestTorSwitchConstraints(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
 
-    def testdeltor_switchasmachine(self):
-        command = "del machine --machine ut3gd1r01"
-        self.badrequesttest(command.split(" "))
+    # This test doesn't make sense right now.
+    #def testdeltor_switchasmachine(self):
+    #    command = "del machine --machine ut3gd1r01.aqd-unittest.ms.com"
+    #    self.badrequesttest(command.split(" "))
 
     def testverifydeltor_switchasmachinefailed(self):
-        command = "show tor_switch --tor_switch ut3gd1r01"
+        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01", command)
+        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
+                         command)
 
     # Testing that del tor_switch does not delete a blade....
     def testrejectut3c1n3(self):

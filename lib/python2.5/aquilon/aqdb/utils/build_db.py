@@ -29,13 +29,14 @@ pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch', 'chassis_manager',
-                'interface', 'mac_address', 'chassis_manager', 'switch_port',
+                'interface', 'chassis_manager', 'switch_port',
                 'machine_specs', 'chassis_slot'] #terminal_server, model_subtype
 
 pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
-                'system_list', 'system_list_item', 'host_list', 'host_list_item']
+                'system_list', 'system_list_item']
 
-pkgs['svc']  = ['service', 'service_instance', 'service_map','service_list_item']
+pkgs['svc']  = ['service', 'service_instance', 'service_instance_server',
+                'service_map', 'service_list_item']
 
 order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 

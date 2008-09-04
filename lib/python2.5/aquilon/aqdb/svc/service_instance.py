@@ -19,11 +19,7 @@ from aquilon.aqdb.table_types.name_table  import make_name_class
 from aquilon.aqdb.column_types.aqstr      import AqStr
 from aquilon.aqdb.svc.service             import Service
 from aquilon.aqdb.cfg.cfg_path            import CfgPath
-from aquilon.aqdb.sy.host_list            import HostList
 from aquilon.aqdb.sy.build_item           import BuildItem
-
-#For the future: it should be system_id not host_list_id...
-#from sy.system          import System
 
 
 class ServiceInstance(Base):
@@ -40,10 +36,7 @@ class ServiceInstance(Base):
                                               name = 'svc_inst_svc_fk'),
                           nullable = False)
 
-    #FIX ME: NEEDS TO BE SYSTEM_ID
-    host_list_id  = Column(Integer,
-                 ForeignKey('host_list.id', ondelete='CASCADE',
-                            name='svc_inst_sys_fk'), nullable = False)
+    name          = Column(AqStr(64), nullable=False)
 
     cfg_path_id   = Column(Integer, ForeignKey('cfg_path.id',
                                               name='svc_inst_cfg_pth_fk'),
@@ -55,9 +48,6 @@ class ServiceInstance(Base):
 
     service       = relation(Service,  uselist = False, backref = 'instances')
 
-    #FIX ME: Needs to be contextual, reference to system
-    host_list     = relation(HostList, uselist = False, backref = 'svc_inst')
-
     cfg_path      = relation(CfgPath, backref = backref(
                                                 'svc_inst', uselist = False))
 
@@ -68,11 +58,11 @@ class ServiceInstance(Base):
 
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,
-                           self.service.name ,self.host_list.name)
+                           self.service.name, self.name)
 
 service_instance = ServiceInstance.__table__
 service_instance.primary_key.name = 'svc_inst_pk'
-UniqueConstraint('host_list_id',name='svc_inst_host_list_uk')
+UniqueConstraint('service_id', 'name', name='svc_inst_server_uk')
 
 table = service_instance
 

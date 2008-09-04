@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -44,7 +40,6 @@ class CommandUpdateInterface(BrokerCommand):
         # By default, oldinfo comes from the interface being updated.
         # If swapping the boot flag, oldinfo will be updated below.
         oldinfo = self.snapshot(dbinterface)
-        # FIXME: All broken below.
         if mac:
             dbinterface.mac = mac
         if ip:
@@ -55,34 +50,33 @@ class CommandUpdateInterface(BrokerCommand):
         if comments:
             dbinterface.comments = comments
         if boot:
-            session.refresh(dbinterface.machine)
-            for i in dbinterface.machine.interfaces:
+            for i in dbinterface.hardware_entity.interfaces:
                 if i == dbinterface:
-                    i.boot = True
-                elif i.boot:
+                    i.bootable = True
+                elif i.bootable:
                     oldinfo = self.snapshot(i)
-                    i.boot = False
+                    i.bootable = False
                     session.update(i)
         session.update(dbinterface)
         session.flush()
         session.refresh(dbinterface)
-        session.refresh(dbinterface.machine)
+        session.refresh(dbinterface.hardware_entity)
         newinfo = self.snapshot(dbinterface)
 
-        if dbinterface.machine.host and dbinterface.boot:
+        if dbinterface.hardware_entity.host and dbinterface.bootable:
             # This relies on *not* being able to set the boot flag 
             # (directly) to false.
             dsdb_runner = DSDBRunner()
-            dsdb_runner.update_host(dbinterface.machine.host, oldinfo)
+            dsdb_runner.update_host(dbinterface.hardware_entity.host, oldinfo)
 
-        plenary_info = PlenaryMachineInfo(dbinterface.machine)
+        plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
         plenary_info.write(self.config.get("broker", "plenarydir"),
                 self.config.get("broker", "servername"), user)
         return
 
     def snapshot(self, dbinterface):
         return {"mac":dbinterface.mac, "ip":dbinterface.ip,
-                "boot":dbinterface.boot, "name":dbinterface.name}
+                "boot":dbinterface.bootable, "name":dbinterface.name}
 
 
 #if __name__=='__main__':

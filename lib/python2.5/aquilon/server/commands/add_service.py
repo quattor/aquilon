@@ -14,7 +14,6 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.sy.host_list import HostList
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.server.templates import (PlenaryService, PlenaryServiceInstance)
@@ -48,12 +47,6 @@ class CommandAddService(BrokerCommand):
         if not instance:
             return
 
-        # FIXME: Check that assuming hostlist name is unique is correct...
-        dbhostlist = session.query(HostList).filter_by(name=instance).first()
-        if not dbhostlist:
-            dbhostlist = HostList(name=instance)
-            session.save(dbhostlist)
-
         # FIXME: This will autocreate a service/instance CfgPath.
         # Ideally, (if we had access to local GIT repo) we'd auto-create the
         # "user" path here (i.e. service/instance/client/config.tpl)
@@ -64,7 +57,7 @@ class CommandAddService(BrokerCommand):
             dbcfg_path = CfgPath(tld=dbservice.cfg_path.tld,
                     relative_path=relative_path)
             session.save(dbcfg_path)
-        dbsi = ServiceInstance(service=dbservice, host_list=dbhostlist,
+        dbsi = ServiceInstance(service=dbservice, name=instance,
                 cfg_path=dbcfg_path)
         session.save(dbsi)
         session.flush()

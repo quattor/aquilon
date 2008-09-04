@@ -24,35 +24,35 @@ from brokertest import TestBrokerCommand
 class TestDelTorSwitch(TestBrokerCommand):
 
     def testdelut3gd1r01(self):
-        command = "del tor_switch --tor_switch ut3gd1r01"
+        command = "del tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut3gd1r01(self):
-        command = "show tor_switch --tor_switch ut3gd1r01"
+        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp997gd1r04(self):
-        command = "del tor_switch --tor_switch np997gd1r04"
+        command = "del tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp997gd1r04(self):
-        command = "show tor_switch --tor_switch np997gd1r04"
+        command = "show tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp998gd1r01(self):
-        command = "del tor_switch --tor_switch np998gd1r01"
+        command = "del tor_switch --tor_switch np998gd1r01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp998gd1r01(self):
-        command = "show tor_switch --tor_switch np998gd1r01"
+        command = "show tor_switch --tor_switch np998gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp999gd1r01(self):
-        command = "del tor_switch --tor_switch np999gd1r01"
+        command = "del tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp999gd1r01(self):
-        command = "show tor_switch --tor_switch np999gd1r01"
+        command = "show tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
 

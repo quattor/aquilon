@@ -46,18 +46,9 @@ class MachineFormatter(ObjectFormatter):
         for d in machine.disks:
             details.append(indent + "  Disk: %s %d GB %s"
                     % (d.device_name, d.capacity, d.disk_type.type))
-        for p in machine.switchport:
-            if p.interface:
-                details.append(indent + "  Switch Port %d: %s %s %s" %
-                        (p.port_number, p.interface.machine.model.machine_type,
-                            p.interface.machine.name, p.interface.name))
-            else:
-                details.append(indent +
-                        "  Switch Port %d: No interface recorded in aqdb" %
-                        p.port_number)
         for i in machine.interfaces:
-            details.append(indent + "  Interface: %s %s %s boot=%s" 
-                    % (i.name, i.mac, i.ip, i.boot))
+            details.append(self.redirect_raw(i, indent + "  "))
+            # FIXME: Also need to output IP somewhere.
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
         return "\n".join(details)

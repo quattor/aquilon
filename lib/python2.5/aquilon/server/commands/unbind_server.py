@@ -16,7 +16,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.sy.host_list import HostList
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
@@ -38,16 +37,16 @@ class CommandUnbindServer(BrokerCommand):
             try:
                 dbinstance = session.query(ServiceInstance).filter_by(
                         service=dbservice).join(
-                        ["host_list", "hosts"]).filter_by(host=dbhost).one()
+                        "service_instance_server").filter_by(
+                        system=dbhost).one()
             except InvalidRequestError, e:
                 raise ArgumentError("Could not identify a service instance to remove this host from: %s" % e)
-        dbhost_list = dbinstance.host_list
-        session.refresh(dbhost_list)
-        for item in dbhost_list.hosts:
-            if item.host == dbhost:
+        session.refresh(dbinstance)
+        for item in dbinstance.servers:
+            if item.system == dbhost:
                 session.delete(item)
         session.flush()
-        session.refresh(dbhost_list)
+        session.refresh(dbinstance)
         plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
         plenary_info.write(self.config.get("broker", "plenarydir"), user)
         # XXX: Need to recompile...

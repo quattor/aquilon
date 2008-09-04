@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """Classes and Tables relating to network interfaces"""
 
 
@@ -44,7 +36,7 @@ class Interface(Base):
 
     ip   = Column(IPV4, nullable = True)
 
-    boot = Column(Boolean, nullable = False, default = False)
+    bootable = Column(Boolean, nullable = False, default = False)
 
 
     a_name_id = Column(Integer, ForeignKey(AName.c.id,
@@ -79,31 +71,24 @@ class Interface(Base):
 
     network    = relation(Network, backref = 'interfaces')
 
-    #single table inheritance
-    __mapper_args__ = {'polymorphic_on' : interface_type}
+    # We'll need seperate python classes for each subtype if we want to
+    # use single table inheritance like this.
+    #__mapper_args__ = {'polymorphic_on' : interface_type}
 
 interface = Interface.__table__
 interface.primary_key.name = 'interface_pk'
 
+table = interface
+
 interface.append_constraint(UniqueConstraint('mac', name = 'iface_mac_addr_uk'))
 interface.append_constraint(UniqueConstraint('ip',  name = 'iface_ip_addr_uk'))
+interface.append_constraint(UniqueConstraint('hardware_entity_id', 'name',
+                                             name = 'iface_hw_name_uk'))
 Index('iface_net_id_idx', interface.c.network_id)
+Index('iface_mac_idx', interface.c.mac)
+Index('iface_ip_idx', interface.c.ip)
 
-def populate(*args, **kw):
-    from aquilon.aqdb.db_factory import db_factory, Base
-    from sqlalchemy import insert
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
 
-    dbf = db_factory()
-    Base.metadata.bind = dbf.engine
-    if 'debug' in args:
-        Base.metadata.bind.echo = True
-    s = dbf.session()
-
-    interface.create(checkfirst=True)
-
-    if len(s.query(Interface).all()) < 1:
-        #print 'no interfaces yet'
-        pass
-
-    if Base.metadata.bind.echo == True:
-        Base.metadata.bind.echo == False
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

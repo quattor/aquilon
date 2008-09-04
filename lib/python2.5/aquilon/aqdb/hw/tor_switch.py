@@ -32,9 +32,9 @@ class TorSwitch(HardwareEntity):
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
     
-    #TODO: this is not done: fk to a_name?
-    # also proxy attributes to parent
-    name = Column('name', AqStr(64), nullable = False)
+    #TODO: Maybe still in flux, but hardware_entity's a_name should be
+    # good enough.
+    #name = Column('name', AqStr(64), nullable = False)
 
     hardware_entity = relation(HardwareEntity, uselist = False,
                                backref = 'tor_switch', passive_deletes = True)
@@ -43,9 +43,9 @@ class TorSwitch(HardwareEntity):
 tor_switch = TorSwitch.__table__
 tor_switch.primary_key.name = 'tor_switch_pk'
 
-tor_switch.append_constraint(
-    UniqueConstraint('name',name = 'tor_switch_name_uk')
-)
+#tor_switch.append_constraint(
+#    UniqueConstraint('name',name = 'tor_switch_name_uk')
+#)
 
 table = tor_switch
 

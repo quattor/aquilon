@@ -13,15 +13,13 @@
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.svc.service_instance_server import ServiceInstanceServer
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.aqdb.sy.host_list import HostList
-from aquilon.aqdb.sy.host_list_item import HostListItem
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-
 from aquilon.server.templates import PlenaryServiceInstance
 
 
@@ -36,31 +34,22 @@ class CommandBindServer(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbservice = get_service(session, service)
         dbinstance = get_service_instance(session, dbservice, instance)
-        dbhost_list = dbinstance.host_list
-        session.refresh(dbhost_list)
-        existing_dbhl = session.query(HostList).join('hosts').filter_by(
-                host=dbhost).first()
-        if existing_dbhl:
-            if existing_dbhl.id == dbhost_list.id:
+        session.refresh(dbinstance)
+        for dbserver in dbinstance.servers:
+            if dbserver.system.id == dbhost.id:
                 # Server is already bound here, nothing to do.
                 return
-#            if not force:
-#                raise ArgumentError("Host %s is already bound to %s, use unbind to clear first or rebind to force."
-#                        % (hostname, existing_dbhl.name))
-#            for dbhli in existing_dbhl.hosts:
-#                if dbhli.host == dbhost:
-#                    session.delete(dbhli)
-#                    session.flush()
         positions = []
-        for dbhli in dbhost_list.hosts:
-            positions.append(dbhli.position)
+        for dbserver in dbinstance.servers:
+            positions.append(dbserver.position)
         position = 0
         while position in positions:
             position += 1
-        hli = HostListItem(hostlist=dbhost_list, host=dbhost, position=position)
-        session.save(hli)
+        sis = ServiceInstanceServer(service_instance=dbinstance,
+                                    system=dbhost, position=position)
+        session.save(sis)
         session.flush()
-        session.refresh(dbhost_list)
+        session.refresh(dbinstance)
 
         plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
         plenary_info.write(self.config.get("broker", "plenarydir"), user)

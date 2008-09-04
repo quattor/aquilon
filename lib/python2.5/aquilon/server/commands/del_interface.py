@@ -24,10 +24,9 @@ class CommandDelInterface(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, interface, machine, mac, ip, user, **arguments):
-        dbinterface = get_physical_interface(session,
-                interface, machine, mac, ip)
-        dbmachine = dbinterface.machine
-        if dbmachine.host and dbinterface.boot:
+        dbinterface = get_interface(session, interface, machine, mac, ip)
+        dbmachine = dbinterface.hardware_entity
+        if dbmachine.host and dbinterface.bootable:
             raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
         session.delete(dbinterface)
         session.flush()

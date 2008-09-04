@@ -41,5 +41,15 @@ def get_or_create_a_name(session, a_name):
     session.save(dba_name)
     return dba_name
 
+def get_a_name(session, a_name):
+    (short, dbdns_domain) = parse_a_name(session, a_name)
+    try:
+        q = session.query(AName).filter_by(name=short,
+                                           dns_domain=dbdns_domain)
+        dba_name = q.one()
+    except InvalidRequestError, e:
+        raise NotFoundException("FQDN %s not found: %s" % (a_name, e))
+    return dba_name
+
 
 #if __name__=='__main__':

@@ -206,9 +206,9 @@ class PlenaryMachineInfo(Plenary):
         self.harddisks = harddisks
         self.interfaces = []
         for interface in dbmachine.interfaces:
-            self.interfaces.append(
-                    {"name":interface.name, "mac":interface.mac,
-                        "boot":interface.boot})
+            self.interfaces.append({"name":interface.name,
+                                    "mac":interface.mac,
+                                    "boot":interface.bootable})
         self.model_relpath = (
             "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
         self.plenary_core = (
@@ -265,7 +265,7 @@ class PlenaryHost(Plenary):
             # as of 28/Aug/08, aii-dhcp only outputs bootable
             # interfaces in dhcpd.conf, so there's no point in marking
             # non-bootable interfaces as dhcp.
-            if dbinterface.boot:
+            if dbinterface.bootable:
                 bootproto = "dhcp"
             interfaces.append({"ip":dbinterface.ip,
                     "netmask":net.ipcalc.netmask().dq,
@@ -324,9 +324,9 @@ class PlenaryService(Plenary):
 class PlenaryServiceInstance(Plenary):
     def __init__(self, dbservice, dbinstance):
         Plenary.__init__(self)
-        self.servers = dbinstance.host_list.hostlist
+        self.servers = dbinstance.servers
         self.service = dbservice.name
-        self.name = dbinstance.host_list.name
+        self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
         self.template_type = 'structure'
@@ -335,7 +335,7 @@ class PlenaryServiceInstance(Plenary):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
         lines.append("");
         lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'servers' = list(" + ", ".join([("'" + hli.host.fqdn + "'") for hli in self.servers]) + ");")
+        lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.servers]) + ");")
 
 
 

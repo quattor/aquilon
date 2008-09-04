@@ -16,6 +16,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.formats.host import HostIPList
 from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.aqdb.hw.interface import Interface
 
 
 class CommandShowHostIPList(BrokerCommand):
@@ -26,28 +27,26 @@ class CommandShowHostIPList(BrokerCommand):
     @az_check
     @format_results
     def render(self, session, **arguments):
-        archetype = arguments.get("archetype", None)
-        if archetype:
-            dbarchetype = get_archetype(session, archetype)
-        conn = session.connection()
-        query_text = """
-                SELECT system.name || '.' || dns_domain.name as host_name,
-                    interface.ip as interface_ip
-                FROM host
-                JOIN system ON (host.id = system.id)
-                JOIN dns_domain ON (dns_domain.id = system.dns_domain_id)
-                JOIN machine ON (host.machine_id = machine.id)
-                JOIN physical_interface ON
-                    (machine.id = physical_interface.machine_id AND
-                     physical_interface.boot = 1)
-                JOIN interface ON
-                        (interface.id = physical_interface.interface_id)
-                WHERE interface.ip IS NOT NULL"""
-        if archetype:
-            query_text = query_text + """
-                    AND host.archetype_id = %d""" % dbarchetype.id
-        s = text(query_text)
-        return HostIPList(conn.execute(s).fetchall())
+        # FIXME: Currently ignores archetype and outputs regardless
+        # of whether we want hosts...
+        #archetype = arguments.get("archetype", None)
+        #if archetype:
+        #    dbarchetype = get_archetype(session, archetype)
+        iplist = HostIPList()
+        # Maybe we want to query HardwareEntity instead...
+        # Then need to choose which interface is primary.
+        q = session.query(Interface).filter(Interface.ip!=None)
+        for interface in q.all():
+            if (interface.hardware_entity.a_name is not None
+                    and interface.hardware_entity.a_name != interface.a_name):
+                # FIXME: This logic isn't right.  We want to make sure
+                # that the "primary" name is included, even if the
+                # interfaces all point to other names.
+                iplist.append([interface.hardware_entity.a_name.fqdn,
+                               interface.ip])
+            if interface.a_name is not None:
+                iplist.append([interface.a_name.fqdn, interface.ip])
+        return iplist
 
 
 #if __name__=='__main__':

@@ -14,19 +14,13 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.sy.host_list import HostList
 from aquilon.aqdb.svc.service_map import ServiceMap
 
 
 def get_service_instance(session, dbservice, instance):
     try:
-        dbhl = session.query(HostList).filter_by(name=instance).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("HostList %s not found (try `aq add service --service %s --instance %s` to add it): %s"
-                % (instance, dbservice.name, instance, e))
-    try:
         dbsi = session.query(ServiceInstance).filter_by(
-                service=dbservice, host_list=dbhl).one()
+                service=dbservice, name=instance).one()
     except InvalidRequestError, e:
         raise NotFoundException("Service %s instance %s not found (try `aq add service --service %s --instance %s` to add it)"
                 % (dbservice.name, instance, dbservice.name, instance))
