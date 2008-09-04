@@ -11,7 +11,9 @@ PROJ   = $(word 2,$(MPR))
 REL    = $(word 3,$(MPR))
 
 ifneq (aquilon,$(META))
-  $(error Unable to parse meta/proj/rel from cwd '$(PWD)')
+	META = aquilon
+	PROJ = aqd
+	REL := $(shell git describe | awk -F- '{print $$1}')
 endif
 
 # determine if we're in /ms/dev or our shadow
@@ -74,6 +76,13 @@ default:
 .PHONY: update
 update:
 	p4 sync ...
+
+# The second find needs to ignore the .git directory... just doing a
+# find on * is an easy/legit way to do that in this case.
+.PHONY: clean
+clean:
+	find . -name '*.pyc' -exec rm {} \;
+	find * -type d -empty -exec rmdir {} \;
 
 .PHONY: prodlink
 prodlink:
