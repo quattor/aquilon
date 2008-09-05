@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -12,36 +8,16 @@
 import os
 from os import path as os_path, environ as os_environ
 from datetime import datetime
-from threading import Lock
 
 from twisted.python import log
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.processes import run_command, build_index
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost
 
-# We have a global compile lock.
-# This is used in two ways:
-# 1) to serialize compiles. The panc java compiler does a pretty
-#    good job of parallelizing, so we'll just slow things down
-#    if we end up with multiple of these running.
-# 2) to prevent changing plenary templates while a compile is
-#    in progress
 
-compile_lock = Lock()
-
-def compileLock():
-    log.msg("requesting compile lock")
-    compile_lock.acquire()
-    log.msg("aquired compile lock")
-
-def compileRelease():
-    log.msg("releasing compile lock");
-    compile_lock.release();
-
-
-#if __name__=='__main__':
 class TemplateDomain(object):
 
     def __init__(self):
@@ -130,4 +106,6 @@ class TemplateDomain(object):
 
         build_index(config, session, outputdir)
         return out
-                
+
+
+#if __name__=='__main__':
