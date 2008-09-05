@@ -62,7 +62,7 @@ class SimpleHostListFormatter(ObjectFormatter):
     def format_proto(self, shlist):
         hostlist_msg = self.loaded_protocols[self.protocol].HostList()
         for h in shlist:
-            self.add_host_msg(hostlist_msg.host.add(), h)
+            self.add_host_msg(hostlist_msg.hosts.add(), h)
         return hostlist_msg.SerializeToString()
 
 ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
