@@ -15,7 +15,7 @@ from aquilon.aqdb.net.network import Network
 
 
 class NetworkFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
+    protocol = "aqdnetworks_pb2"
     def format_raw(self, network, indent=""):
         netmask = network.ipcalc.netmask()
         sysloc = network.location.sysloc()
@@ -42,7 +42,7 @@ class NetworkHostList(list):
     pass
 
 class NetworkHostListFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
+    protocol = "aqdnetworks_pb2"
     def format_raw(self, netlist, indent=""):
         details = []
         for network in netlist:
@@ -74,7 +74,7 @@ class SimpleNetworkList(list):
 
 
 class SimpleNetworkListFormatter(ObjectFormatter):
-    protocol = "aqdsystems_pb2"
+    protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Comments"]
     def format_raw(self, nlist, indent=""):
         details = [indent + "\t".join(self.fields)]
@@ -85,7 +85,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
     def format_proto(self, nlist):
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
-            self.add_net_msg(netlist_msg.network.add(), n)
+            self.add_net_msg(netlist_msg.networks.add(), n)
         return netlist_msg.SerializeToString()
 
     def add_net_msg(self, net_msg, net):
@@ -101,7 +101,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         net_msg.location.location_type = str(net.location.location_type)
         for iface in net.interfaces:
             for phys_iface in iface.physical_interface:
-                self.add_host_msg(net_msg.host.add(), phys_iface.machine.host)
+                self.add_host_msg(net_msg.hosts.add(), phys_iface.machine.host)
 
     def format_csv(self, nlist):
         details = [",".join(self.fields)]
