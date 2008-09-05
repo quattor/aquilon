@@ -40,12 +40,16 @@ def populate(db, *args, **kw):
 
         qs=QuattorServer(name='oziyp2', dns_domain=dom)
         db.s.add(qs)
-        db.s.commit()
+        try:
+            db.s.commit()
+        except Exception, e:
+            print e
+            db.s.rollback()
+            return False
 
     qs=db.s.query(QuattorServer).filter_by(name='oziyp2').one()
     assert(qs)
     assert(qs.dns_domain)
-
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

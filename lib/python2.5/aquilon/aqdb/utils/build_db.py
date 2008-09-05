@@ -20,20 +20,21 @@ pkgs         = {}
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
 pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-                'city', 'building', 'rack', 'chassis', 'desk',
-                'location_search_list', 'search_list_item']
+                'city', 'building', 'rack', 'desk', 'location_search_list', 
+                'search_list_item'] #deleted chassis
 
-pkgs['net']  = ['dns_domain', 'a_name', 'ip_address', 'network']
+pkgs['net']  = ['dns_domain', 'network']
 
 pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
-                'disk_type', 'machine', 'disk', 'tor_switch', 'chassis_manager',
-                'interface', 'chassis_manager', 'switch_port',
-                'machine_specs', 'chassis_slot'] #terminal_server, model_subtype
+                'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw', 
+                'interface', 'switch_port', 'machine_specs', 'chassis_slot'] 
+                #terminal_server, model_subtype
 
 pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
-                'system_list', 'system_list_item']
+                'chassis', 'tor_switch']
+               #'system_list', 'system_list_item']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_instance_server',
                 'service_map', 'service_list_item']
@@ -101,6 +102,9 @@ def main(*args, **kw):
     if opts.delete_db == True and db.dsn.startswith('oracle'):
         ta.drop_all_tables_and_sequences(db,opts.delete_db)
 
+    #fill this with module objects if we're populating 
+    mods_to_populate = []
+    
     for p in order:
         for module_name in pkgs[p]:
             pkg_name = 'aquilon.aqdb.%s'%(p)
@@ -112,22 +116,25 @@ def main(*args, **kw):
                 sys.exit(1)
 
             if hasattr(mod,'table'):
-                sqlfile = os.path.splitext(
-                    os.path.basename(mod.__file__))[0] + '.sql'
                 debug('\tcreating %s'%(mod.table.name))
-                try:
-                    mod.table.create(checkfirst=True)
-                except Exception,e:
-                    sys.stderr.write(str(e))
-                    print e, "\n"
+                #not in use yet
+                #    sqlfile = os.path.splitext(
+                #    os.path.basename(mod.__file__))[0] + '.sql'
+                #try:
+                #    mod.table.create(checkfirst=True)
+                #except Exception,e:
+                #    sys.stderr.write(str(e))
+                #    print e, "\n"
 
-            if hasattr(mod,'populate') and opts.populate:
-                debug('\t\t\tpopulating %s'%(mod.table.name))
-                try:
-                    mod.populate(db)
-                except Exception, e:
-                    sys.stderr.write(str(e))
-                    print e, "\n"
+            if hasattr(mod,'populate'):
+                mods_to_populate.append(mod) 
+
+    Base.metadata.create_all(checkfirst=True)
+
+    #TODO: if opts.mock: renamer dumps a DDL/SQL file
+    if db.dsn.startswith('oracle'):
+        debug('renaming constraints...')
+        cnst.rename_non_null_check_constraints(db)
 
     if opts.mock:
         try:
@@ -135,14 +142,18 @@ def main(*args, **kw):
         except Exception, e:
             if opts.debug:
                 ipshell()
-            #raise e
             print e
             sys.exit(2)
+    elif opts.populate:
+        for mod in mods_to_populate:
+            debug('populating %s'%(mod.table.name))
+            try:
+                mod.populate(db)
+            except Exception, e:
+                sys.stderr.write(str(e))
+                print e, "\n"
     else:
-        if db.dsn.startswith('oracle'):
-            debug('renaming constraints...')
-            cnst.rename_non_null_check_constraints(db)
-
+        pass
 
 if __name__ == '__main__':
     main(sys.argv)

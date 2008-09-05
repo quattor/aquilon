@@ -27,6 +27,7 @@ _long_nms['INTERFACE']               = 'IFACE'
 _long_nms['SERVICE_MAP']             = 'SVC_MAP'
 _long_nms['SERVICE_LIST_ITEM']       = 'SVC_LI'
 _long_nms['SERVICE_INSTANCE']        = 'SVC_INST'
+_long_nms['SERVICE_INSTANCE_SERVER'] = 'SIS'
 _long_nms['CREATION_DATE']           = 'CR_DATE'
 _long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
 

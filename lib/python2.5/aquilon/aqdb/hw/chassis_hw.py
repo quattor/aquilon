@@ -18,39 +18,31 @@ from sqlalchemy.orm      import relation, deferred, backref
 from aquilon.aqdb.column_types.aqstr  import AqStr
 from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
 
-class ChassisManager(HardwareEntity):
-    __tablename__ = 'chassis_manager'
-    __mapper_args__ = {'polymorphic_identity' : 'chassis_manager'}
+class ChassisHw(HardwareEntity):
+    __tablename__ = 'chassis_hw'
+    __mapper_args__ = {'polymorphic_identity' : 'chassis_hw'}
 
     hardware_entity_id = Column(Integer,
                                 ForeignKey(HardwareEntity.c.id,
-                                           name = 'chassis_manager_hw_ent_fk',
+                                           name = 'chassis_hw__fk',
                                            ondelete = 'CASCADE'),
 
                                            primary_key = True)
 
-    #TODO: Maybe still in flux, but hardware_entity's a_name should be
-    # good enough.
-    #name = Column('name', AqStr(64), nullable = False)
-
-    #TODO: synonym in location lest we break things
     #location = relation(Location, uselist = False)
     #model
     hardware_entity = relation(HardwareEntity,
                                uselist = False,
-                               backref = 'chassis_manager')
+                               backref = 'chassis_hw')
 
+chassis_hw = ChassisHw.__table__
+chassis_hw.primary_key.name = 'chassis_hw_pk'
 
-chassis_manager = ChassisManager.__table__
-chassis_manager.primary_key.name = 'chassis_manager_pk'
-
-#chassis_manager.append_constraint(
-#    UniqueConstraint('name',name = 'chassis_manager_name_uk')
+#chassis_hw.append_constraint(
+#    UniqueConstraint('name',name = 'chassis_hw_name_uk')
 #)
 
-table = chassis_manager
-
-#TODO: OA interface type or just public iface???
+table = chassis_hw
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

@@ -17,14 +17,18 @@ from sqlalchemy.orm  import relation, deferred, backref
 
 from aquilon.aqdb.db_factory          import Base
 from aquilon.aqdb.column_types.aqstr  import AqStr
+
+#TODO: figure out how to do this with properties
+#from aquilon.aqdb.net.network         import Network
+
 from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
 
-#TODO: use selection of the tor_switch specs to dynamically populate default
+#TODO: use selection of the tor_switch_hw specs to dynamically populate default
 #     values for all of the attrs where its possible
 
 class TorSwitch(HardwareEntity):
-    __tablename__ = 'tor_switch'
-    __mapper_args__ = {'polymorphic_identity' : 'tor_switch'}
+    __tablename__ = 'tor_switch_hw'
+    __mapper_args__ = {'polymorphic_identity' : 'tor_switch_hw'}
 
     hardware_entity_id = Column(Integer,
                                 ForeignKey(HardwareEntity.c.id,
@@ -32,24 +36,16 @@ class TorSwitch(HardwareEntity):
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
     
-    #TODO: Maybe still in flux, but hardware_entity's a_name should be
-    # good enough.
-    #name = Column('name', AqStr(64), nullable = False)
-
     hardware_entity = relation(HardwareEntity, uselist = False,
-                               backref = 'tor_switch', passive_deletes = True)
+                               backref = 'tor_switch_hw', passive_deletes = True)
 
 
-tor_switch = TorSwitch.__table__
-tor_switch.primary_key.name = 'tor_switch_pk'
+tor_switch_hw = TorSwitch.__table__
+tor_switch_hw.primary_key.name = 'tor_switch_hw_pk'
 
-#tor_switch.append_constraint(
-#    UniqueConstraint('name',name = 'tor_switch_name_uk')
-#)
+table = tor_switch_hw
 
-table = tor_switch
-
-#TODO: make tor_switch --like [other tor_switch] + overrides
+#TODO: make tor_switch_hw --like [other tor_switch_hw] + overrides
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

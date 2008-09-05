@@ -16,7 +16,7 @@ from sqlalchemy.orm import relation, deferred
 from aquilon.aqdb.db_factory              import Base
 from aquilon.aqdb.column_types.aqstr      import AqStr
 from aquilon.aqdb.loc.location            import Location
-from aquilon.aqdb.net.a_name              import AName
+#from aquilon.aqdb.net.a_name              import AName
 from aquilon.aqdb.hw.model                import Model
 
 class HardwareEntity(Base):
@@ -25,10 +25,6 @@ class HardwareEntity(Base):
     #schema = CDB #use table.info['owner'] = 'CDB' ???
 
     id  = Column(Integer, Sequence('hardware_entity_seq'), primary_key=True)
-
-    a_name_id = Column(Integer, ForeignKey(AName.c.id,
-                                           name='hw_ent_name_fk',
-                                           ondelete='CASCADE'), nullable=False)
 
     hardware_entity_type = Column(AqStr(64), nullable=False)
 
@@ -45,8 +41,7 @@ class HardwareEntity(Base):
     creation_date = deferred(Column(DateTime, default = datetime.now,
                                                 nullable = False ))
     comments      = deferred(Column(String(255), nullable = True))
-            
-    a_name     = relation(AName, uselist = False, passive_deletes=True)
+    
     location = relation(Location, uselist = False)
     model    = relation(Model, uselist = False)
 
@@ -55,7 +50,7 @@ class HardwareEntity(Base):
 hardware_entity = HardwareEntity.__table__
 hardware_entity.primary_key.name = 'hardware_entity_pk'
 Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
-Index('nw_ent_a_name_idx', hardware_entity.c.a_name_id)
+#Index('nw_ent_a_name_idx', hardware_entity.c.a_name_id)
 
 table = hardware_entity
 

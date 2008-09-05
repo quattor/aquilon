@@ -13,7 +13,7 @@ from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.loc.chassis import Chassis
+from aquilon.aqdb.sy.chassis import Chassis
 
 
 class ChassisSlot(Base):
@@ -51,8 +51,6 @@ table = chassis_slot
 def populate(db, *args, **kw):
 
     if len(db.s.query(ChassisSlot).all()) < 1:
-        from aquilon.aqdb.loc.chassis import Chassis
-
         for c in db.s.query(Chassis).all():
             for node in range(1, 17):
                 a = ChassisSlot(chassis=c, slot_number=node)
