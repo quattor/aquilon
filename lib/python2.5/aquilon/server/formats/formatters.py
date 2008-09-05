@@ -163,20 +163,38 @@ class ObjectFormatter(object):
         host_msg.sysloc = str(host.sysloc)
         if host.machine.disks:
             for disk in host.machine.disks:
-                disk_msg = host_msg.machine.disk.add()
+                disk_msg = host_msg.machine.disks.add()
                 disk_msg.device_name = str(disk.device_name)
                 disk_msg.capacity = disk.capacity
                 disk_msg.disk_type = str(disk.disk_type.type)
         if host.machine.interfaces:
             for i in host.machine.interfaces:
-                int_msg = host_msg.machine.interface.add()
+                int_msg = host_msg.machine.interfaces.add()
                 int_msg.device = str(i.name)
                 int_msg.mac = str(i.mac)
                 int_msg.ip = str(i.ip)
                 int_msg.bootable = i.boot
                 int_msg.network_id = i.network_id
-        
-        
+
+    def add_service_msg(self, service_msg, service, service_instance=False):
+        """Adds a service message, will either nest the given service_instance in the message,
+        or will add all the service instances which are available as a backref from a service object"""
+        service_msg.name = str(service.name)
+        service_msg.template = str(service.cfg_path)
+        if service_instance:
+            self.add_service_instance_msg(service_msg.serviceinstances.add(), service_instance)
+        else:
+            for si in service.instances:
+                self.add_service_instance_msg(service_msg.serviceinstances.add(), si)
+
+    def add_service_instance_msg(self, si_msg, service_instance):
+        si_msg.name = str(service_instance.host_list)
+        si_msg.template = str(service_instance.cfg_path)
+        for server in service_instance.host_list.hosts:
+            self.add_host_msg(si_msg.servers.add(), server.host)
+        for client in service_instance.cfg_path.build_items:
+            self.add_host_msg(si_msg.clients.add(), client.host)
+
 ObjectFormatter.default_handler = ObjectFormatter()
 
 
