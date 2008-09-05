@@ -444,7 +444,8 @@
       If --all is specified, then the configuration of all services will be shown.
       <optgroup name="show_service_opts" mandatory="True" fields="any">
          <option name="service" type="string">Service name</option>
-         <option name="server" type="string">Server name</option>
+         <option name="server" type="string" conflict="server">Server hostname</option>
+	 <option name="client" type="string" conflicts="server">Client hostname</option>
 	 <option name="all" type="boolean" conflicts="service">Select all services</option>
       </optgroup>
       <optgroup name="optional_opts">
