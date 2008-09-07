@@ -26,7 +26,7 @@ from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
 #TODO: use selection of the tor_switch_hw specs to dynamically populate default
 #     values for all of the attrs where its possible
 
-class TorSwitch(HardwareEntity):
+class TorSwitchHw(HardwareEntity):
     __tablename__ = 'tor_switch_hw'
     __mapper_args__ = {'polymorphic_identity' : 'tor_switch_hw'}
 
@@ -36,11 +36,11 @@ class TorSwitch(HardwareEntity):
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
     
-    hardware_entity = relation(HardwareEntity, uselist = False,
-                               backref = 'tor_switch_hw', passive_deletes = True)
+    #hardware_entity = relation(HardwareEntity, uselist = False,
+    #                           backref = 'tor_switch_hw', passive_deletes = True)
 
 
-tor_switch_hw = TorSwitch.__table__
+tor_switch_hw = TorSwitchHw.__table__
 tor_switch_hw.primary_key.name = 'tor_switch_hw_pk'
 
 table = tor_switch_hw

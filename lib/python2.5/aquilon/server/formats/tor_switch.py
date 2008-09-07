@@ -12,42 +12,37 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.tor_switch import TorSwitch
+from aquilon.aqdb.sy.tor_switch import TorSwitch
 
 
 class TorSwitchFormatter(ObjectFormatter):
     def format_raw(self, tor_switch, indent=""):
         details = [indent + "%s: %s" %
-                (tor_switch.model.machine_type.capitalize(),
-                 tor_switch.a_name.fqdn)]
-        # This is a bit of a hack.  Delegating out to the standard location
-        # formatter now spews too much information about chassis.  Maybe
-        # that will change when chassis has a corresponding hardware type.
-        for location_type in const.location_types:
-            if getattr(tor_switch.location, location_type, None) is not None:
-                details.append(indent + "  %s: %s" % (
-                                    location_type.capitalize(),
-                                    getattr(tor_switch.location, location_type)))
-                if location_type == 'rack':
-                    details.append(indent + "    Row: %s" %
-                                   tor_switch.location.rack.rack_row)
-                    details.append(indent + "    Column: %s" %
-                                   tor_switch.location.rack.rack_column)
-        details.append(self.redirect_raw(tor_switch.model, indent + "  "))
-        if tor_switch.serial_no:
-            details.append(indent + "  Serial: %s" % tor_switch.serial_no)
+                (tor_switch.tor_switch_hw.model.machine_type.capitalize(),
+                 tor_switch.fqdn)]
+        if tor_switch.ip:
+            details.append(indent + "  IP: %s" % tor_switch.ip)
+        details.append(self.redirect_raw(tor_switch.tor_switch_hw.location,
+                                         indent+"  "))
+        details.append(self.redirect_raw(tor_switch.tor_switch_hw.model,
+                                         indent + "  "))
+        if tor_switch.tor_switch_hw.serial_no:
+            details.append(indent + "  Serial: %s" %
+                           tor_switch.tor_switch_hw.serial_no)
         for p in tor_switch.switchport:
             if p.interface:
                 details.append(indent + "  Switch Port %d: %s %s %s" %
-                        (p.port_number, p.interface.tor_switch.model.machine_type,
-                            p.interface.tor_switch.name, p.interface.name))
+                     (p.port_number,
+                      p.interface.tor_switch.tor_switch_hw.model.machine_type,
+                      p.interface.tor_switch.fqdn,
+                      p.interface.name))
             else:
                 details.append(indent +
                         "  Switch Port %d: No interface recorded in aqdb" %
                         p.port_number)
-        for i in tor_switch.interfaces:
-            details.append(indent + "  Interface: %s %s %s boot=%s" 
-                    % (i.name, i.mac, i.ip, i.bootable))
+        for i in tor_switch.tor_switch_hw.interfaces:
+            details.append(indent + "  Interface: %s %s %s boot=%s" %
+                           (i.name, i.mac, i.bootable))
         if tor_switch.comments:
             details.append(indent + "  Comments: %s" % tor_switch.comments)
         return "\n".join(details)
@@ -62,7 +57,7 @@ class TorSwitchFormatter(ObjectFormatter):
         
         """
         results = []
-        details = [tor_switch.a_name.fqdn, tor_switch.location.rack,
+        details = [tor_switch.fqdn, tor_switch.location.rack,
                 tor_switch.location.building, tor_switch.model.vendor.name,
                 tor_switch.model.name, tor_switch.serial_no]
         if not tor_switch.interfaces:
@@ -83,7 +78,7 @@ class SimpleTorSwitchList(list):
 
 class SimpleTorSwitchListFormatter(ObjectFormatter):
     def format_raw(self, smlist, indent=""):
-        return str("\n".join([indent + tor_switch.a_name.fqdn for tor_switch in smlist]))
+        return str("\n".join([indent + tor_switch.fqdn for tor_switch in smlist]))
 
 ObjectFormatter.handlers[SimpleTorSwitchList] = SimpleTorSwitchListFormatter()
 

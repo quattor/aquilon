@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -16,7 +12,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.formats.host import HostIPList
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.hw.interface import Interface
+from aquilon.aqdb.sy.system import System
 
 
 class CommandShowHostIPList(BrokerCommand):
@@ -33,19 +29,11 @@ class CommandShowHostIPList(BrokerCommand):
         #if archetype:
         #    dbarchetype = get_archetype(session, archetype)
         iplist = HostIPList()
-        # Maybe we want to query HardwareEntity instead...
-        # Then need to choose which interface is primary.
-        q = session.query(Interface).filter(Interface.ip!=None)
-        for interface in q.all():
-            if (interface.hardware_entity.a_name is not None
-                    and interface.hardware_entity.a_name != interface.a_name):
-                # FIXME: This logic isn't right.  We want to make sure
-                # that the "primary" name is included, even if the
-                # interfaces all point to other names.
-                iplist.append([interface.hardware_entity.a_name.fqdn,
-                               interface.ip])
-            if interface.a_name is not None:
-                iplist.append([interface.a_name.fqdn, interface.ip])
+        # Maybe we want to query Host instead...
+        # Right now, this is returning everything with an ip.
+        q = session.query(System).filter(System.ip!=None)
+        for system in q.all():
+            iplist.append([system.fqdn, system.ip])
         return iplist
 
 

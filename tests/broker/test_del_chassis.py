@@ -24,19 +24,19 @@ from brokertest import TestBrokerCommand
 class TestDelChassis(TestBrokerCommand):
 
     def testdelut3c5(self):
-        command = "del chassis --name ut3c5"
+        command = "del chassis --name ut3c5.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut3c5(self):
-        command = "show chassis --name ut3c5"
+        command = "show chassis --name ut3c5.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut3c1(self):
-        command = "del chassis --name ut3c1"
+        command = "del chassis --name ut3c1.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut3c1(self):
-        command = "show chassis --name ut3c1"
+        command = "show chassis --name ut3c1.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
 

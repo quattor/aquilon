@@ -31,9 +31,9 @@ class ChassisHw(HardwareEntity):
 
     #location = relation(Location, uselist = False)
     #model
-    hardware_entity = relation(HardwareEntity,
-                               uselist = False,
-                               backref = 'chassis_hw')
+    #hardware_entity = relation(HardwareEntity,
+    #                           uselist = False,
+    #                           backref = 'chassis_hw')
 
 chassis_hw = ChassisHw.__table__
 chassis_hw.primary_key.name = 'chassis_hw_pk'

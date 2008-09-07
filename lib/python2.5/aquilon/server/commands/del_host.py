@@ -52,22 +52,14 @@ class CommandDelHost(BrokerCommand):
             ph = PlenaryHost(dbhost)
             domain = dbhost.domain.name
             fqdn   = dbhost.fqdn
-            session.refresh(dbhost)
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):
                 deptext = "\n".join(["  %s"%d for d in deps])
                 raise ArgumentError("cannot delete host '%s' due to the following dependencies:\n%s"%(hostname, deptext))
 
-            # Hack to make sure the machine object is refreshed in future queries.
             archetype = dbhost.archetype.name
             dbmachine = dbhost.machine
-            session.refresh(dbmachine)
-            ip = None
-            for interface in dbmachine.interfaces:
-                if interface.bootable:
-                    ip = interface.ip
-            if not ip and archetype != 'aurora':
-                raise ArgumentError("No boot interface found for host to delete from dsdb.")
+            ip = dbhost.ip
     
             for template in dbhost.templates:
                 log.msg("Before deleting host '%s', removing template '%s'"

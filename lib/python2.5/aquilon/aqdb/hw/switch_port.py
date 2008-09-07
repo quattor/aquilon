@@ -17,7 +17,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.net.network        import Network
-from aquilon.aqdb.hw.tor_switch      import TorSwitch
+from aquilon.aqdb.sy.tor_switch      import TorSwitch
 from aquilon.aqdb.hw.interface       import Interface
 from aquilon.aqdb.column_types.aqmac import AqMac
 

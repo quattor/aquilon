@@ -17,7 +17,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.loc.chassis import Chassis
+from aquilon.aqdb.sy.chassis import Chassis
 from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 
 
@@ -28,14 +28,20 @@ class CommandAddMachine(BrokerCommand):
     @add_transaction
     @az_check
     # arguments will contain one of --chassis --rack or --desk
-    def render(self, session, machine, model, serial, slot,
+    def render(self, session, machine, model, serial, chassis, slot,
             cpuname, cpuvendor, cpuspeed, cpucount, memory,
             user, **arguments):
         dblocation = get_location(session, **arguments)
-        if slot is not None:
-            if not isinstance(dblocation, Chassis):
-                raise ArgumentError("The --slot option requires a --chassis.")
-            slot = force_int("slot", slot)
+        if chassis:
+            dbchassis = get_system(session, chassis)
+            if not isinstance(dbchassis, Chassis):
+                raise ArgumentError("The system '%s' is not a chassis." %
+                        chassis)
+            if slot is None:
+                raise ArgumentError("The --chassis option requires a --slot.")
+            slot_force_int("slot", slot)
+        elif slot is not None:
+            raise ArgumentError("The --slot option requires a --chassis.")
 
         dbmodel = get_model(session, model)
 
@@ -53,11 +59,11 @@ class CommandAddMachine(BrokerCommand):
 
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
-        if slot is not None:
-            dbslot = session.query(ChassisSlot).filter_by(chassis=dblocation,
+        if chassis:
+            dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,
                     slot_number=slot).first()
             if not dbslot:
-                dbslot = ChassisSlot(chassis=dblocation, slot_number=slot)
+                dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
             dbslot.machine = dbmachine
             session.save_or_update(dbslot)
 

@@ -21,9 +21,11 @@ from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.loc.chassis import Chassis
+from aquilon.aqdb.sy.chassis import Chassis
+from aquilon.aqdb.hw.chassis_hw import ChassisHw
 from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.net.dns_domain import DnsDomain
 
 
 class CommandAddAuroraHost(CommandAddHost):
@@ -74,14 +76,20 @@ class CommandAddAuroraHost(CommandAddHost):
                 if not dbrack:
                     dbrack = Rack(name=rack, fullname=rack, parent=dbbuilding)
                     session.save(dbrack)
+                dblocation = dbrack
                 chassis = rack + "c" + cid
+                dbdns_domain = session.query(DnsDomain).filter_by(
+                        name="ms.com").first()
                 dbchassis = session.query(Chassis).filter_by(
-                        name=chassis).first()
+                        name=chassis, dns_domain=dbdns_domain).first()
                 if not dbchassis:
-                    dbchassis = Chassis(name=chassis, fullname=chassis,
-                            parent=dbrack)
+                    dbchassis_model = get_model(session, 'aurora_chassis_model')
+                    dbchassis_hw = ChassisHw(location=dbrack,
+                                             model=dbchassis_model)
+                    session.save(dbchassis_hw)
+                    dbchassis = Chassis(name=chassis, dns_domain=dbdns_domain,
+                                        chassis_hw=dbchassis_hw)
                     session.save(dbchassis)
-                dblocation = dbchassis
                 dbslot = session.query(ChassisSlot).filter_by(
                         chassis=dbchassis, slot_number=nodenum).first()
                 # Note: Could be even more persnickity here and check that
@@ -127,6 +135,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['domain'] = 'production'
         kwargs['machine'] = dbmachine.name
         kwargs['status'] = status
+        kwargs['ip'] = None
         # The superclass already contains the rest of the logic to handle this.
         return CommandAddHost.render(self, *args, **kwargs)
 

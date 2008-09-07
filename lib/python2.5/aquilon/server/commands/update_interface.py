@@ -13,6 +13,7 @@ from aquilon.server.dbwrappers.interface import (get_interface,
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
+from aquilon.aqdb.hw.machine import Machine
 
 
 class CommandUpdateInterface(BrokerCommand):
@@ -42,14 +43,18 @@ class CommandUpdateInterface(BrokerCommand):
         oldinfo = self.snapshot(dbinterface)
         if mac:
             dbinterface.mac = mac
+            if dbinterface.system:
+                dbinterface.system.mac = mac
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
             restrict_tor_offsets(session, dbnetwork, ip)
-            dbinterface.ip = ip
-            dbinterface.network = dbnetwork
+            dbinterface.system.ip = ip
+            dbinterface.system.network = dbnetwork
         if comments:
             dbinterface.comments = comments
         if boot:
+            # FIXME: If type == 'public', this should swing the
+            # system link!  And update system.mac.
             for i in dbinterface.hardware_entity.interfaces:
                 if i == dbinterface:
                     i.bootable = True
@@ -57,21 +62,26 @@ class CommandUpdateInterface(BrokerCommand):
                     oldinfo = self.snapshot(i)
                     i.bootable = False
                     session.update(i)
+        if dbinterface.system:
+            session.update(dbinterface.system)
         session.update(dbinterface)
         session.flush()
         session.refresh(dbinterface)
         session.refresh(dbinterface.hardware_entity)
+        if dbinterface.system:
+            session.refresh(dbinterface.system)
         newinfo = self.snapshot(dbinterface)
 
-        if dbinterface.hardware_entity.host and dbinterface.bootable:
+        if dbinterface.system:
             # This relies on *not* being able to set the boot flag 
             # (directly) to false.
             dsdb_runner = DSDBRunner()
-            dsdb_runner.update_host(dbinterface.hardware_entity.host, oldinfo)
+            dsdb_runner.update_host(dbinterface, oldinfo)
 
-        plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
-        plenary_info.write(self.config.get("broker", "plenarydir"),
-                self.config.get("broker", "servername"), user)
+        if isinstance(dbinterface.hardware_entity, Machine):
+            plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
+            plenary_info.write(self.config.get("broker", "plenarydir"),
+                    self.config.get("broker", "servername"), user)
         return
 
     def snapshot(self, dbinterface):

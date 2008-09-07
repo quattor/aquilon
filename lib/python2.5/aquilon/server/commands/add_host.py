@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -17,7 +13,9 @@ from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.server.dbwrappers.host import hostname_to_domain_and_string
+from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
 from aquilon.aqdb.sy.host import Host
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
@@ -30,13 +28,15 @@ class CommandAddHost(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, machine, archetype, domain, status,
+    def render(self, session, hostname, machine, archetype, domain, status, ip,
             user, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         dbstatus = get_status(session, status)
         dbmachine = get_machine(session, machine)
         dbarchetype = get_archetype(session, archetype)
+        dbnetwork = get_net_id_from_ip(session, ip)
+        restrict_tor_offsets(session, dbnetwork, ip)
 
         if dbmachine.model.machine_type not in [
                 'blade', 'workstation', 'rackmount', 'aurora_node']:
@@ -52,24 +52,29 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("Machine '%s' is already allocated to host '%s'." %
                     (dbmachine.name, dbmachine.host.fqdn))
 
+        dbinterface = None
         if dbarchetype.name != 'aurora':
             # Any host being added to DSDB will need a valid primary interface.
             if not dbmachine.interfaces:
                 raise ArgumentError("Machine '%s' has no interfaces." % machine)
-            found_boot = False
             for interface in dbmachine.interfaces:
+                if interface.interface_type != 'public':
+                    continue
                 if interface.bootable:
-                    if found_boot:
+                    if dbinterface:
                         # FIXME: Is this actually a problem?
-                        raise ArgumentError("Multiple interfaces on machine '%s' are marked bootable" % machine)
-                    found_boot = True
-            if not found_boot:
+                        raise ArgumentError("Multiple public interfaces on machine '%s' are marked bootable" % machine)
+                    dbinterface = interface
+            if not dbinterface:
                 raise ArgumentError("Machine '%s' requires a bootable interface." % machine)
 
-        (short, dbdns_domain) = hostname_to_domain_and_string(session, hostname)
+        (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
+                mac=dbinterface.mac, ip=ip, network=dbnetwork,
                 name=short, dns_domain=dbdns_domain, archetype=dbarchetype)
         session.save(dbhost)
+        dbinterface.system = dbhost
+        session.update(dbinterface)
         session.flush()
         session.refresh(dbhost)
 
@@ -84,7 +89,7 @@ class CommandAddHost(BrokerCommand):
         else:
             # For anything else, reserve the name and IP in DSDB.
             try:
-                dsdb_runner.add_host(dbhost)
+                dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
                 raise ArgumentError("Could not add host to dsdb: %s" % e)
 

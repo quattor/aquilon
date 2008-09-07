@@ -25,7 +25,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
-            "--chassis", "ut3c5", "--model", "hs21", "--cpucount", "2",
+            "--rack", "ut3", "--model", "hs21", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "99C5553"])
 
@@ -33,7 +33,7 @@ class TestAddMachine(TestBrokerCommand):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
-        self.matchoutput(out, "Chassis: ut3c5", command)
+        self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -65,7 +65,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
-            "--chassis", "ut3c1", "--slot", "3",
+            "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
             "--model", "hs21", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "KPDZ406"])
@@ -76,7 +76,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testshowchassisslot(self):
-        command = "show machine --chassis ut3c1 --slot 3"
+        command = "show machine --chassis ut3c1.aqd-unittest.ms.com --slot 3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
@@ -84,7 +84,7 @@ class TestAddMachine(TestBrokerCommand):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n3", command)
-        self.matchoutput(out, "Chassis: ut3c1", command)
+        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
@@ -117,13 +117,13 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
-            "--chassis", "ut3c1", "--model", "hs21", "--serial", "KPDZ407"])
+            "--rack", "ut3", "--model", "hs21", "--serial", "KPDZ407"])
 
     def testverifyaddut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n4", command)
-        self.matchoutput(out, "Chassis: ut3c1", command)
+        self.matchoutput(out, "Rack: ut3c1", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -166,7 +166,7 @@ class TestAddMachine(TestBrokerCommand):
     # (There should be no cpu with speed==2 in the database)
     def testrejectut3c1n5(self):
         self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
-            "--chassis", "ut3c1", "--model", "hs21", "--cpucount", "2",
+            "--rack", "ut3", "--model", "hs21", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2",
             "--memory", "8192", "--serial", "KPDZ406"])
 

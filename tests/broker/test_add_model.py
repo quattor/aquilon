@@ -62,6 +62,15 @@ class TestAddModel(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
+    def testaddutchassis(self):
+        command = "add model --name utchassis --vendor aurora_vendor --type chassis"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddutchassis(self):
+        command = "show model --name utchassis"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: aurora_vendor Model: chassis", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)

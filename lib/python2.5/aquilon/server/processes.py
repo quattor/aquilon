@@ -272,14 +272,13 @@ class DSDBRunner(object):
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
-    def add_host(self, dbhost):
-        for interface in dbhost.machine.interfaces:
-            if not interface.bootable:
-                continue
-            self.add_host_details(dbhost.fqdn, interface.ip,
-                    interface.name, interface.mac)
-            return
-        raise ArgumentError("No boot interface found for host to add to dsdb.")
+    def add_host(self, dbinterface):
+        if not dbinterface.system.ip:
+            raise ArgumentError("No ip address found for '%s' to add to dsdb." %
+                                dbhost)
+        return self.add_host_details(dbinterface.system.fqdn,
+                                     dbinterface.system.ip,
+                                     dbinterface.name, dbinterface.mac)
 
     def add_host_details(self, fqdn, ip, name, mac):
         out = run_command([self.config.get("broker", "dsdb"),
@@ -311,7 +310,7 @@ class DSDBRunner(object):
 #            return
 #        raise ArgumentError("No boot interface found for host to delete from dsdb.")
 
-    def update_host(self, dbhost, oldinfo):
+    def update_host(self, dbinterface, oldinfo):
         """This gets tricky.  On a basic level, we want to remove the
         old information from dsdb and then re-add it.
 
@@ -328,11 +327,11 @@ class DSDBRunner(object):
         """
         self.delete_host_details(oldinfo["ip"])
         try:
-            self.add_host(dbhost)
+            self.add_host(dbinterface)
         except ProcessException, pe1:
             log.msg("Failed adding new information to dsdb, attempting to restore old info.")
             try:
-                self.add_host_details(dbhost.fqdn, oldinfo["ip"],
+                self.add_host_details(dbinterface.system.fqdn, oldinfo["ip"],
                         oldinfo["name"], oldinfo["mac"])
             except ProcessException, pe2:
                 # FIXME: Add details.

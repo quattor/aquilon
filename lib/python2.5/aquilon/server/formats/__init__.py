@@ -9,8 +9,12 @@
 # This module is part of Aquilon
 """Initialize all the formatting handlers."""
 
+
 import os
-import sys
+from traceback import format_exc
+
+from twisted.python import log
+
 
 __all__ = []
 
@@ -23,7 +27,7 @@ for f in os.listdir(_thisdir):
         try:
             mymodule = __import__(modulename, fromlist=["BrokerCommand"])
         except Exception, e:
-            print >>sys.stderr, "Error importing %s: %s" % (modulename, e)
+            log.msg("Error importing %s: %s" % (modulename, format_exc()))
             continue
 
 

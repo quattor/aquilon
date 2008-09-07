@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -24,13 +20,12 @@ from aquilon.aqdb.loc.country import Country
 from aquilon.aqdb.loc.city import City
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.loc.chassis import Chassis
 from aquilon.aqdb.loc.desk import Desk
 
 
 # FIXME: This probably belongs in location.py
 const.location_types = ("company", "hub", "continent", "country", "city",
-        "building", "rack", "chassis", "desk")
+        "building", "rack", "desk")
 
 
 class CommandAddLocation(BrokerCommand):

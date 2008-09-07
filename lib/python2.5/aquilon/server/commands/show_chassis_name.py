@@ -12,10 +12,10 @@
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.commands.show_location_type import CommandShowLocationType
+from aquilon.server.dbwrappers.system import get_system
 
 
-class CommandShowChassisName(CommandShowLocationType):
+class CommandShowChassisName(BrokerCommand):
 
     required_parameters = ["name"]
 
@@ -23,8 +23,8 @@ class CommandShowChassisName(CommandShowLocationType):
     @az_check
     @format_results
     def render(self, session, name, **arguments):
-        return CommandShowLocationType.render(self, session=session, name=name,
-                type='chassis', **arguments)
+        # FIXME: Constrain this to be Chassis?
+        return get_system(session, name)
 
 
 #if __name__=='__main__':

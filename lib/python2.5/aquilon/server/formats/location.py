@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -21,7 +17,6 @@ from aquilon.aqdb.loc.country import Country
 from aquilon.aqdb.loc.city import City
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.loc.chassis import Chassis
 from aquilon.aqdb.loc.desk import Desk
 
 
@@ -36,14 +31,6 @@ class LocationFormatter(ObjectFormatter):
         if isinstance(location, Rack):
             details.append(indent + "  Row: %s" % location.rack_row)
             details.append(indent + "  Column: %s" % location.rack_column)
-        # Ditto for Chassis...
-        elif isinstance(location, Chassis):
-            for slot in location.slots:
-                if slot.machine:
-                    details.append(indent + "  Slot #%d: %s" % (slot.slot_number, slot.machine.name))
-                else:
-                    details.append(indent + "  Slot #%d Unknown" %
-                                   slot.slot_number)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:

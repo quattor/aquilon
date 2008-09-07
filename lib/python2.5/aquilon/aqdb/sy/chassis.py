@@ -10,7 +10,7 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy                  import Integer, Column, ForeignKey
-from sqlalchemy.orm              import relation
+from sqlalchemy.orm              import relation, backref
 
 from aquilon.aqdb.sy.system      import System
 from aquilon.aqdb.hw.chassis_hw  import ChassisHw
@@ -28,8 +28,9 @@ class Chassis(System):
                                                ondelete='CASCADE'), 
                                               nullable=False)
                 
-    system          = relation(System, uselist=False, backref='chassis')
-    chassis_hw      = relation(ChassisHw, uselist=False, backref='chassis')
+#    system          = relation(System, uselist=False, backref='chassis')
+    chassis_hw      = relation(ChassisHw, uselist=False,
+                               backref=backref('chassis_hw', cascade='delete'))
     
     __mapper_args__ = {'polymorphic_identity' : 'chassis'}
 

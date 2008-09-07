@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -24,22 +20,22 @@ from brokertest import TestBrokerCommand
 class TestAddChassis(TestBrokerCommand):
 
     def testaddut3c5(self):
-        command = "add chassis --name ut3c5 --rack ut3"
+        command = "add chassis --name ut3c5.aqd-unittest.ms.com --rack ut3 --model chassis_model"
         self.noouttest(command.split(" "))
 
     def testverifyaddut3c5(self):
-        command = "show chassis --name ut3c5"
+        command = "show chassis --name ut3c5.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c5", command)
+        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
 
     def testaddut3c1(self):
-        command = "add chassis --name ut3c1 --rack ut3"
+        command = "add chassis --name ut3c1.aqd-unittest.ms.com --rack ut3 --model chassis_model"
         self.noouttest(command.split(" "))
 
     def testverifyaddut3c1(self):
-        command = "show chassis --name ut3c1"
+        command = "show chassis --name ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c1", command)
+        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
 
 
 if __name__=='__main__':

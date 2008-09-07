@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -18,8 +14,9 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
-from aquilon.server.dbwrappers.a_name import get_or_create_a_name
-from aquilon.aqdb.hw.tor_switch import TorSwitch
+from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.aqdb.sy.tor_switch import TorSwitch
+from aquilon.aqdb.hw.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.hw.switch_port import SwitchPort
 from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.hw.hardware_entity import HardwareEntity
@@ -56,13 +53,14 @@ class CommandAddTorSwitch(BrokerCommand):
         else:
             raise ArgumentError("Need to specify an existing --rack or provide --building, --rackid, --rackrow and --rackcolumn")
 
-        dba_name = get_or_create_a_name(session, tor_switch)
-        if session.query(HardwareEntity).filter_by(a_name=dba_name).first():
-            raise ArgumentError("The name '%s' is already in use." %
-                                tor_switch)
+        (short, dbdns_domain) = parse_system_and_verify_free(session,
+                                                             tor_switch)
 
-        dbtor_switch = TorSwitch(a_name=dba_name, location=dblocation,
-                                 model=dbmodel, serial_no=serial)
+        dbtor_switch_hw = TorSwitchHw(location=dblocation, model=dbmodel,
+                                      serial_no=serial)
+        session.save(dbtor_switch_hw)
+        dbtor_switch = TorSwitch(name=short, dns_domain=dbdns_domain,
+                                 tor_switch_hw=dbtor_switch_hw)
 
         # FIXME: Hard-coded number of switch ports...
         switch_port_start = 1
@@ -78,9 +76,13 @@ class CommandAddTorSwitch(BrokerCommand):
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
             restrict_tor_offsets(session, dbnetwork, ip)
+            dbtor_switch.mac = mac
+            dbtor_switch.ip = ip
+            dbtor_switch.network = dbnetwork
+            session.update(dbtor_switch)
             dbinterface = Interface(name=interface, interface_type='public',
-                                    mac=mac, ip=ip, network=dbnetwork,
-                                    hardware_entity=dbtor_switch)
+                                    mac=mac, system=dbtor_switch,
+                                    hardware_entity=dbtor_switch_hw)
             session.save(dbinterface)
             session.flush()
 

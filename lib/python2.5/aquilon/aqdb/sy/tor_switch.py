@@ -10,7 +10,7 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation
+from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.sy.system        import System
 from aquilon.aqdb.hw.tor_switch_hw import TorSwitchHw
@@ -27,8 +27,9 @@ class TorSwitch(System):
                                                ondelete = 'CASCADE'),
                                               nullable = False)
     
-    system        = relation(System, uselist=False, backref='tor_switch')
-    tor_switch_hw = relation(TorSwitchHw, uselist=False, backref='tor_switch')
+    #system        = relation(System, uselist=False, backref='tor_switch')
+    tor_switch_hw = relation(TorSwitchHw, uselist=False,
+                             backref=backref('tor_switch',cascade='delete'))
     
     __mapper_args__ = {'polymorphic_identity' : 'tor_switch'}
 

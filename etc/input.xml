@@ -101,7 +101,6 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="rack" type="string">Rack</option>
-	    <option name="chassis" type="string">Chassis</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
@@ -202,6 +201,9 @@
          <option name="archetype" type="string">Archetype name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
          <option name="status" type="string">Status: production, development, qa, build</option>
+	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="string">IP address</option>
+	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
@@ -217,6 +219,9 @@
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
          <option name="status" type="string">Status: production, development, qa, build</option>
+	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="string">IP address</option>
+	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
@@ -231,6 +236,9 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="status" type="string">Status: production, development, qa, build</option>
+	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="string">IP address</option>
+	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
@@ -482,7 +490,6 @@
 	<option name="city" type="string">City</option>
 	<option name="building" type="string">Building</option>
 	<option name="rack" type="string">Rack</option>
-	<option name="chassis" type="string">Chassis</option>
 	<option name="desk" type="string">Desk</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/%(instance)s/command/map" />
@@ -501,7 +508,6 @@
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="rack" type="string">Rack</option>
-	    <option name="chassis" type="string">Chassis</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
@@ -522,7 +528,6 @@
 	<option name="city" type="string">City</option>
 	<option name="building" type="string">Building</option>
 	<option name="rack" type="string">Rack</option>
-	<option name="chassis" type="string">Chassis</option>
 	<option name="desk" type="string">Desk</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/%(instance)s/command/unmap" />
@@ -668,7 +673,8 @@
          <option name="rack" type="string">Name of the rack that contains the chassis</option>
       </optgroup>
       <optgroup name="optional_opts">
-         <option name="fullname" type="string">Full, descriptive name</option>
+	 <option name="serial" type="string">serial number</option>
+         <option name="model" type="string">chassis model</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="location/add_chassis/%(rack)s/%(name)s" />
@@ -933,8 +939,10 @@
 	 <option name="memory" type="string">memory in MB</option>
       </optgroup>
       <optgroup name="add_machine_location_opts" mandatory="True" fields="any">
-         <option name="chassis" type="string">Chassis name</option>
-         <option name="slot" type="string">Chassis Slot (Requires --chassis)</option>
+	 <optgroup name="add_machine_chassis_opts" fields="all">
+            <option name="chassis" type="string">Chassis name</option>
+            <option name="slot" type="string">Chassis slot</option>
+         </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
       </optgroup>

@@ -70,6 +70,7 @@ def populate(db, *args, **kw):
             ['dell','poweredge_2650','rackmount'],
             ['dell','poweredge_2850','rackmount'],
             ['dell','optiplex_260','workstation'],
+            ['aurora_vendor', 'aurora_chassis_model', 'aurora_chassis'],
             ['aurora_vendor', 'aurora_model', 'aurora_node']]
 
         for i in f:

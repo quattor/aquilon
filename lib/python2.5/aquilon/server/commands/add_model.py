@@ -38,8 +38,9 @@ class CommandAddModel(BrokerCommand):
 
         # Specifically not allowing new models to be added that are of
         # type aurora_node - that is only meant for the dummy aurora_model.
-        if type not in ["blade", "rackmount", "workstation", "tor_switch"]:
-            raise ArgumentError("The model's machine type must be blade, rackmount, workstation, or tor_switch")
+        if type not in ["blade", "rackmount", "workstation", "tor_switch",
+                        "chassis"]:
+            raise ArgumentError("The model's machine type must be blade, rackmount, workstation, tor_switch, or chassis")
 
         if cputype:
             mem = force_int("mem", mem)

@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -23,7 +19,7 @@ class CommandAddWindowsHost(CommandAddHost):
     @az_check
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
-        kwargs['domain'] = 'production'
+        kwargs['domain'] = 'ny-prod'
         # The superclass already contains the logic to handle this case.
         return CommandAddHost.render(self, *args, **kwargs)
 

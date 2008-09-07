@@ -15,8 +15,8 @@ from aquilon.server.broker import (add_transaction, az_check, format_results,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.server.dbwrappers.a_name import get_a_name
-from aquilon.aqdb.hw.tor_switch import TorSwitch
+from aquilon.server.dbwrappers.system import parse_system
+from aquilon.aqdb.sy.tor_switch import TorSwitch
 
 
 class CommandShowTorSwitch(BrokerCommand):
@@ -27,8 +27,8 @@ class CommandShowTorSwitch(BrokerCommand):
     def render(self, session, tor_switch, rack, model, **arguments):
         q = session.query(TorSwitch)
         if tor_switch:
-            dba_name = get_a_name(session, tor_switch)
-            q = q.filter_by(a_name=dba_name)
+            (short, dbdns_domain) = parse_system(session, tor_switch)
+            q = q.filter_by(name=short, dns_domain=dbdns_domain)
         if rack:
             dblocation = get_location(session, rack=rack)
             q = q.filter_by(location=dblocation)
