@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -24,7 +20,8 @@ from brokertest import TestBrokerCommand
 class TestAddHost(TestBrokerCommand):
 
     def testaddunittest02(self):
-        self.noouttest(["add", "host", "--hostname", "unittest02.one-nyp.ms.com",
+        self.noouttest(["add", "host",
+            "--hostname", "unittest02.one-nyp.ms.com", "--ip", self.hostip0,
             "--machine", "ut3c5n10", "--domain", "unittest",
             "--status", "production", "--archetype", "aquilon"])
 
@@ -32,6 +29,7 @@ class TestAddHost(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "IP: %s" % self.hostip0, command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Domain: unittest", command)

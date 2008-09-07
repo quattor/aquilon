@@ -17,6 +17,8 @@ from aquilon.aqdb.sy.host import Host
 class HostFormatter(ObjectFormatter):
     def format_raw(self, host, indent=""):
         details = [ indent + "Hostname: %s" % host.fqdn ]
+        if host.ip:
+            details.append(indent + "  IP: %s" % host.ip)
         details.append(self.redirect_raw(host.machine, indent+"  "))
         details.append(self.redirect_raw(host.archetype, indent+"  "))
         details.append(self.redirect_raw(host.domain, indent+"  "))

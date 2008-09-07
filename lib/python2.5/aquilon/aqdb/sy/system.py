@@ -73,10 +73,7 @@ class System(Base):
     __mapper_args__ = {'polymorphic_on' : system_type}
 
     def _fqdn(self):
-#        if self.dns_domain:
-#            return '.'.join([str(self.name),str(self.dns_domain.name)])
-#   not nullable
-        return str(self.name)
+        return '.'.join([str(self.name),str(self.dns_domain.name)])
     fqdn = property(_fqdn)
 
 system = System.__table__

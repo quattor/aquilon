@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -27,9 +23,11 @@ class PlenaryHost(Plenary):
         # The IPAddress table has not yet been defined in interface.py.
         interfaces = []
         for dbinterface in self.dbhost.machine.interfaces:
-            if not dbinterface.ip or dbinterface.ip == '0.0.0.0':
+            if not dbinterface.system or not dbinterface.system.ip:
                 continue
-            net = dbinterface.network
+            if dbinterface.interface_type != 'public':
+                continue
+            net = dbinterface.system.network
             # Fudge the gateway as the first available ip
             gateway = net.ipcalc.host_first().dq
             bootproto = "static"
@@ -38,7 +36,7 @@ class PlenaryHost(Plenary):
             # non-bootable interfaces as dhcp.
             if dbinterface.bootable:
                 bootproto = "dhcp"
-            interfaces.append({"ip":dbinterface.ip,
+            interfaces.append({"ip":dbinterface.system.ip,
                     "netmask":net.ipcalc.netmask().dq,
                     "broadcast":net.bcast,
                     "gateway":gateway,

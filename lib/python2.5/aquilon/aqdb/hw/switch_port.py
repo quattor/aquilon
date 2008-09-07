@@ -12,7 +12,7 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import Table, Column, Integer, DateTime, Sequence, ForeignKey
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.db_factory         import Base
@@ -62,8 +62,8 @@ class SwitchPort(Base):
                                           default = datetime.now,
                                           nullable = False))
 
-    switch = relation(TorSwitch, uselist=False, backref='switchport',
-                         passive_deletes=True)
+    switch = relation(TorSwitch, uselist=False,
+                      backref=backref('switchport', cascade='delete'))
 
     interface  = relation(Interface, uselist=False, backref='switchport',
                          passive_deletes=True)

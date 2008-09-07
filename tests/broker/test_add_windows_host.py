@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -25,16 +21,17 @@ class TestAddWindowsHost(TestBrokerCommand):
 
     def testaddunittest01(self):
         self.noouttest(["add", "windows", "host",
-            "--hostname", "unittest01.one-nyp.ms.com",
+            "--hostname", "unittest01.one-nyp.ms.com", "--ip", self.hostip4,
             "--machine", "ut3c1n4", "--status", "production"])
 
     def testverifyaddunittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "IP: %s" % self.hostip4, command)
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Archetype: windows", command)
-        self.matchoutput(out, "Domain: production", command)
+        self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Status: production", command)
 
 

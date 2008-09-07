@@ -123,7 +123,7 @@ class TestAddMachine(TestBrokerCommand):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n4", command)
-        self.matchoutput(out, "Rack: ut3c1", command)
+        self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)

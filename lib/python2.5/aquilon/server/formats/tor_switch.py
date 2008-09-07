@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -41,8 +37,7 @@ class TorSwitchFormatter(ObjectFormatter):
                         "  Switch Port %d: No interface recorded in aqdb" %
                         p.port_number)
         for i in tor_switch.tor_switch_hw.interfaces:
-            details.append(indent + "  Interface: %s %s %s boot=%s" %
-                           (i.name, i.mac, i.bootable))
+            details.append(self.redirect_raw(i, indent + "  "))
         if tor_switch.comments:
             details.append(indent + "  Comments: %s" % tor_switch.comments)
         return "\n".join(details)
@@ -57,15 +52,20 @@ class TorSwitchFormatter(ObjectFormatter):
         
         """
         results = []
-        details = [tor_switch.fqdn, tor_switch.location.rack,
-                tor_switch.location.building, tor_switch.model.vendor.name,
-                tor_switch.model.name, tor_switch.serial_no]
-        if not tor_switch.interfaces:
+        details = [tor_switch.fqdn,
+                   tor_switch.tor_switch_hw.location.rack,
+                   tor_switch.tor_switch_hw.location.building,
+                   tor_switch.tor_switch_hw.model.vendor.name,
+                   tor_switch.tor_switch_hw.model.name,
+                   tor_switch.tor_switch_hw.serial_no]
+        if not tor_switch.tor_switch_hw.interfaces:
             details.extend([None, None, None])
             results.append(details)
-        for i in tor_switch.interfaces:
+        for i in tor_switch.tor_switch_hw.interfaces:
+            if not i.system:
+                continue
             full = details[:]
-            full.extend([i.name, i.mac, i.ip])
+            full.extend([i.name, i.mac, i.system.ip])
             results.append(full)
         return "\n".join([",".join([str(detail or "") for detail in result])
             for result in results])

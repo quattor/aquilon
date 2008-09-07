@@ -48,8 +48,9 @@ class CommandUpdateInterface(BrokerCommand):
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
             restrict_tor_offsets(session, dbnetwork, ip)
-            dbinterface.system.ip = ip
-            dbinterface.system.network = dbnetwork
+            if dbinterface.system:
+                dbinterface.system.ip = ip
+                dbinterface.system.network = dbnetwork
         if comments:
             dbinterface.comments = comments
         if boot:
@@ -85,7 +86,10 @@ class CommandUpdateInterface(BrokerCommand):
         return
 
     def snapshot(self, dbinterface):
-        return {"mac":dbinterface.mac, "ip":dbinterface.ip,
+        ip = None
+        if dbinterface.system:
+            ip = dbinterface.system.ip
+        return {"mac":dbinterface.mac, "ip":ip,
                 "boot":dbinterface.bootable, "name":dbinterface.name}
 
 

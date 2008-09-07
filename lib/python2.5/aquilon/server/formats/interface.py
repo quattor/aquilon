@@ -17,8 +17,8 @@ class InterfaceFormatter(ObjectFormatter):
         #           indent + "  IP: %s" % interface.ip,
         #           indent + "  Bootable: %s" % interface.bootable]
         #return "\n".join(details)
-        return indent + "Interface: %s %s %s boot=%s" % (interface.name,
-                interface.mac, interface.ip, interface.bootable)
+        return indent + "Interface: %s %s boot=%s" % (interface.name,
+                interface.mac, interface.bootable)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 

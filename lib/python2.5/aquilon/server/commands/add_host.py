@@ -53,6 +53,7 @@ class CommandAddHost(BrokerCommand):
                     (dbmachine.name, dbmachine.host.fqdn))
 
         dbinterface = None
+        mac = None
         if dbarchetype.name != 'aurora':
             # Any host being added to DSDB will need a valid primary interface.
             if not dbmachine.interfaces:
@@ -65,16 +66,18 @@ class CommandAddHost(BrokerCommand):
                         # FIXME: Is this actually a problem?
                         raise ArgumentError("Multiple public interfaces on machine '%s' are marked bootable" % machine)
                     dbinterface = interface
+            mac = dbinterface.mac
             if not dbinterface:
                 raise ArgumentError("Machine '%s' requires a bootable interface." % machine)
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
-                mac=dbinterface.mac, ip=ip, network=dbnetwork,
+                mac=mac, ip=ip, network=dbnetwork,
                 name=short, dns_domain=dbdns_domain, archetype=dbarchetype)
         session.save(dbhost)
-        dbinterface.system = dbhost
-        session.update(dbinterface)
+        if dbinterface:
+            dbinterface.system = dbhost
+            session.update(dbinterface)
         session.flush()
         session.refresh(dbhost)
 

@@ -40,7 +40,7 @@ class TestBrokerCommand(unittest.TestCase):
             self.aurora_without_node = self.config.get("unittest",
                     "aurora_without_node")
         else:
-            self.aurora_without_node = "oziyp2"
+            self.aurora_without_node = "pissp1"
         # An alternate set of defaults is listed in unittest.conf.
         self.hostip0 = "8.8.4.251"
         self.netmask0 = "255.255.252.0"

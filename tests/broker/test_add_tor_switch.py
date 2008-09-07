@@ -125,8 +125,9 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifynp999gd1r01(self):
         (out, command) = self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
                                            "np999", "zz", "11")
-        self.matchoutput(out, "Interface: xge49 %s %s boot=False" %
-                (self.hostmac5, self.hostip5), command)
+        self.matchoutput(out, "IP: %s" % self.hostip5, command)
+        self.matchoutput(out, "Interface: xge49 %s boot=False" %
+                         self.hostmac5, command)
 
     def testverifyaddnp999gd1r01csv(self):
         command = "show tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com --format=csv"

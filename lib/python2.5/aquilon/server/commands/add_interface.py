@@ -24,7 +24,7 @@ class CommandAddInterface(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, interface, machine, mac, ip, comments,
+    def render(self, session, interface, machine, mac, comments,
             user, **arguments):
         dbmachine = get_machine(session, machine)
         extra = {}
@@ -39,13 +39,13 @@ class CommandAddInterface(BrokerCommand):
             raise ArgumentError("machine %s already has an interface named %s"
                     % (machine, interface))
 
-        # XXX: also check the mac and ip aren't in use somewhere
+        prev = session.query(Interface).filter_by(mac=mac).first()
+        if prev:
+            # FIXME: Write dbwrapper that gets a name for hardware_entity
+            raise ArgumentError("mac %s already in use." % mac)
 
-        dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
         dbinterface = Interface(name=interface, hardware_entity=dbmachine,
-                                mac=mac, ip=ip, network=dbnetwork,
-                                interface_type='public', **extra)
+                                mac=mac, interface_type='public', **extra)
         session.save(dbinterface)
         session.flush()
         session.refresh(dbinterface)

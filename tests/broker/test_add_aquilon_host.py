@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -25,13 +21,14 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest00(self):
         self.noouttest(["add", "aquilon", "host", "--status", "production",
-            "--hostname", "unittest00.one-nyp.ms.com",
+            "--hostname", "unittest00.one-nyp.ms.com", "--ip", self.hostip2,
             "--machine", "ut3c1n3", "--domain", "unittest"])
 
     def testverifyaddunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "IP: %s" % self.hostip2, command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Domain: unittest", command)

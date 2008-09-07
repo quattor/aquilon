@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -16,6 +12,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
+from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.aqdb.sy.chassis import Chassis
 from aquilon.aqdb.hw.chassis_slot import ChassisSlot
@@ -39,7 +36,14 @@ class CommandAddMachine(BrokerCommand):
                         chassis)
             if slot is None:
                 raise ArgumentError("The --chassis option requires a --slot.")
-            slot_force_int("slot", slot)
+            slot = force_int("slot", slot)
+            if dblocation and dblocation != dbchassis.chassis_hw.location:
+                raise ArgumentError("Location %s %s conflicts with chassis location %s %s" %
+                                    (dblocation.location_type,
+                                     dblocation.name,
+                                     dbchassis.chassis_hw.location.location_type,
+                                     dbchassis.chassis_hw.location.name))
+            dblocation = dbchassis.chassis_hw.location
         elif slot is not None:
             raise ArgumentError("The --slot option requires a --chassis.")
 

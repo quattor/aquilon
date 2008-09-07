@@ -40,9 +40,8 @@ class CommandDelMachine(BrokerCommand):
             raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
                     % (dbmachine.name, dbmachine.host.fqdn))
         for iface in dbmachine.interfaces:
-            log.msg("Before deleting machine '%s', removing interface '%s' [%s] [%s] boot=%s)" %
-                    (dbmachine.name,
-                        iface.name, iface.mac, iface.ip, iface.bootable))
+            log.msg("Before deleting machine '%s', removing interface '%s' [%s] boot=%s)" %
+                    (dbmachine.name, iface.name, iface.mac, iface.bootable))
             session.delete(iface)
         for disk in dbmachine.disks:
             log.msg("Before deleting machine '%s', removing disk '%s'" %

@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -36,6 +32,7 @@ class MachineFormatter(ObjectFormatter):
                     details.append(indent + "    Column: %s" %
                                    machine.location.rack.rack_column)
         for slot in machine.chassis_slot:
+            details.append(indent + "  Chassis: %s" % slot.chassis.fqdn)
             details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(self.redirect_raw(machine.model, indent + "  "))
         details.append(indent + "  Cpu: %s x %d" %
@@ -48,7 +45,6 @@ class MachineFormatter(ObjectFormatter):
                     % (d.device_name, d.capacity, d.disk_type.type))
         for i in machine.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
-            # FIXME: Also need to output IP somewhere.
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
         return "\n".join(details)

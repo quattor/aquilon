@@ -32,8 +32,7 @@ class ChassisFormatter(ObjectFormatter):
                 details.append(indent + "  Slot #%d Unknown" %
                                slot.slot_number)
         for i in chassis.chassis_hw.interfaces:
-            details.append(indent + "  Interface: %s %s boot=%s" 
-                           (i.name, i.mac, i.bootable))
+            details.append(self.redirect_raw(i, indent + "  "))
         if chassis.comments:
             details.append(indent + "  Comments: %s" % chassis.comments)
         return "\n".join(details)
