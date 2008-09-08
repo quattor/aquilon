@@ -12,7 +12,7 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import Table, Column, Integer, DateTime, Sequence, ForeignKey
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm                  import relation, deferred, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.db_factory         import Base
@@ -20,7 +20,6 @@ from aquilon.aqdb.net.network        import Network
 from aquilon.aqdb.sy.tor_switch      import TorSwitch
 from aquilon.aqdb.hw.interface       import Interface
 from aquilon.aqdb.column_types.aqmac import AqMac
-
 
 class SwitchPort(Base):
     """ Tor switches are types of machines (for now at least). What they
@@ -45,7 +44,8 @@ class SwitchPort(Base):
     #this structure mangles interfaces and switches into one which 'feels' wrong
     #at a gut level, but let's play with it for now...
 
-    slot         = Column(Integer, default=None)
+    #I've got this here in case we do modular switches, but it's not currently used.
+    slot         = Column(Integer, nullable=True, default=None)
 
     # network_id as an attr of the port on the switch, makes switch port
     # a more flexible linkage of switches, networks, and interfaces,

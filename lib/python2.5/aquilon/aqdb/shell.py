@@ -17,10 +17,10 @@ from aquilon.aqdb.utils.shutils import * #this IS for interactive work, right?
 from aquilon.aqdb.db_factory    import db_factory, Base
 
 
-dbf = db_factory()
-Base.metadata.bind = dbf.engine
+db = db_factory()
+Base.metadata.bind = db.engine
 Base.metadata.bind.echo = True
-s = dbf.session()
+s = db.session()
 
-from aquilon.aqdb.utils.table_admin import *
+#from aquilon.aqdb.utils.table_admin import *
 ipshell()

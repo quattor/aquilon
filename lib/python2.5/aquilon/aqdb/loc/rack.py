@@ -25,7 +25,10 @@ class Rack(Location):
     #TODO: POSTHASTE: constrain to alphabetic in row, and make both non-nullable
     rack_row    = Column(AqStr(4), nullable = True)
     rack_column = Column(Integer,  nullable = True)
-    #rack RID is a part of the name, so no column
+    
+    #vendor      = Column(Integer, ForeignKey(Vendor.c.id, 
+        #name = '', nullable = True
+        
     #waiting to decide on how to make comp room effective
     #comp_room   = Column(AqStr(16))
 
