@@ -195,10 +195,10 @@ class ObjectFormatter(object):
         for client in service_instance.cfg_path.build_items:
             self.add_host_msg(si_msg.clients.add(), client.host)
 
-    def add_service_map_msg(self, sm_msg, service_map_):
+    def add_service_map_msg(self, sm_msg, service_map):
         sm_msg.location.name = str(service_map.location.name)
         sm_msg.location.location_type = str(service_map.location.location_type)
-        self.add_service_msg(sm_msg.service.add(), service_map.service, service_map.service_instance)
+        self.add_service_msg(sm_msg.service, service_map.service, service_map.service_instance)
 
 ObjectFormatter.default_handler = ObjectFormatter()
 
