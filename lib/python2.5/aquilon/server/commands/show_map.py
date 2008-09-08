@@ -15,6 +15,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.aqdb.svc.service_map import ServiceMap
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.formats.service_map import ServiceMapList
 
 
 class CommandShowMap(BrokerCommand):
@@ -35,7 +36,7 @@ class CommandShowMap(BrokerCommand):
             q = q.reset_joinpoint()
         if dblocation:
             q = q.filter_by(location=dblocation)
-        return q.all()
+        return ServiceMapList(q.all())
 
 
 #if __name__=='__main__':
