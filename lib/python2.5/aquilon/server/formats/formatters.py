@@ -172,9 +172,12 @@ class ObjectFormatter(object):
                 int_msg = host_msg.machine.interfaces.add()
                 int_msg.device = str(i.name)
                 int_msg.mac = str(i.mac)
-                int_msg.ip = str(i.ip)
-                int_msg.bootable = i.boot
-                int_msg.network_id = i.network_id
+                if i.ip:
+                    int_msg.ip = str(i.ip)
+                if i.boot:
+                    int_msg.bootable = i.boot
+                if i.network_id:
+                    int_msg.network_id = i.network_id
 
     def add_service_msg(self, service_msg, service, service_instance=False):
         """Adds a service message, will either nest the given service_instance in the message,
