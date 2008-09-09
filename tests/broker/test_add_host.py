@@ -38,8 +38,12 @@ class TestAddHost(TestBrokerCommand):
     def testverifyshowfqdnhost(self):
         command = "show fqdn --fqdn unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Hostname: unittest03.one-nyp.ms.com", command)
 
+    def testverifyunittest02proto(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com --format proto"
+        out = self.commandtest(command.split(" "))
+        self.parse_hostlist_msg(out)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

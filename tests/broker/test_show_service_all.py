@@ -32,6 +32,10 @@ class TestShowServiceAll(TestBrokerCommand):
         self.matchoutput(out, "Service: dns Instance: nyinfratest", command)
         self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
 
+    def testshowserviceproto(self):
+        command = "show service --all --format proto"
+        out = self.commandtest(command.split(" "))
+        self.parse_srvlist_msg(out)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowServiceAll)

@@ -85,6 +85,11 @@ class TestMapService(TestBrokerCommand):
         self.matchoutput(out,
                 "Service: utsvc Instance: utsi2 Map: Building ut", command)
 
+    def testverifynyhubmapproto(self):
+        command = "show map --hub ny"
+        out = self.commandtest(command.split(" "))
+        self.parse_servicemap_msg(out)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)
