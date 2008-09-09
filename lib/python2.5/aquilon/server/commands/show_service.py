@@ -13,6 +13,7 @@
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.svc.service import Service
+from aquilon.aqdb.svc.service_instance import ServiceInstance
 
 
 class CommandShowService(BrokerCommand):
@@ -20,8 +21,10 @@ class CommandShowService(BrokerCommand):
     @add_transaction
     @az_check
     @format_results
-    def render(self, session, **arguments):
-        return session.query(Service).all()
+    def render(self, session, instance, **arguments):
+        if not instance:
+            return session.query(Service).all()
+        return session.query(ServiceInstance).filter_by(name=instance).all()
 
 
 #if __name__=='__main__':

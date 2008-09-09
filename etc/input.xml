@@ -355,7 +355,7 @@
          <option name="instance" type="string">Instance</option>
       </optgroup>
       <transport method="put" path="service/%(service)s" />
-      <transport trigger="instance" method="put" path="service/%(service)s/%(instance)s" />
+      <transport trigger="instance" method="put" path="service/%(service)s/instance/%(instance)s" />
    </command>
 
    <command name="show_service">
@@ -365,7 +365,7 @@
 	 <option name="all" type="boolean" conflicts="service">Select all services</option>
       </optgroup>
       <optgroup name="optional_opts">
-	 <option name="instances" type="boolean">Show instances of service</option>
+	 <option name="instance" type="string">Show service instance</option>
       </optgroup>
       <transport trigger="service" method="get" path="service/%(service)s"/>
       <transport method="get" path="service" />
@@ -380,7 +380,7 @@
          <option name="instance" type="string">instance name</option>
       </optgroup>
       <transport method="delete" path="service/%(service)s" />
-      <transport trigger="instance" method="delete" path="service/%(service)s/%(instance)s" />
+      <transport trigger="instance" method="delete" path="service/%(service)s/instance/%(instance)s" />
    </command>
 
    <command name="bind_client">
@@ -438,8 +438,9 @@
          <option name="hostname" type="string">Host name</option>
          <option name="service" type="string">Service name</option>
       </optgroup>
-      <optgroup name="unbind_server_optional_opts">
+      <optgroup name="unbind_server_optional_opts" mandatory="True" fields="any">
          <option name="instance" type="string">Instance name</option>
+         <option name="all" type="boolean">Remove server from all instances of this service</option>
       </optgroup>
       <transport method="delete" path="host/%(hostname)s/server_of_service/%(service)s" />
       <transport trigger="instance" method="delete" path="host/%(hostname)s/server_of_service/%(service)s/instance/%(instance)s" />
@@ -491,7 +492,7 @@
 	<option name="rack" type="string">Rack</option>
 	<option name="desk" type="string">Desk</option>
       </optgroup>
-      <transport method="post" path="service/%(service)s/%(instance)s/command/map" />
+      <transport method="post" path="service/%(service)s/instance/%(instance)s/command/map" />
    </command>
 
    <command name="show_map">
@@ -529,7 +530,7 @@
 	<option name="rack" type="string">Rack</option>
 	<option name="desk" type="string">Desk</option>
       </optgroup>
-      <transport method="post" path="service/%(service)s/%(instance)s/command/unmap" />
+      <transport method="post" path="service/%(service)s/instance/%(instance)s/command/unmap" />
    </command>
 
    <command name="del_host">
@@ -612,12 +613,20 @@
    </command>
 
    <command name="cat">
+      Show the automatically written templates in use for any one of the
+      given options.  All are exclusive, except --instance and/or --default
+      also require --service.
       <optgroup name="cat options" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="template">Name of the host</option>
-         <option name="machine" type="string" conflicts="template">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine service instance default">Name of the host</option>
+         <option name="machine" type="string" conflicts="hostname service instance default">Name of the machine</option>
+         <option name="service" type="string" conflicts="hostname machine">Name of the service</option>
+         <option name="instance" type="string" conflicts="hostname machine">Name of the service instance</option>
+	 <option name="default" type="boolean" conflicts="hostname machine">Get the default client config for the service/instance</option>
       </optgroup>
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
+      <transport trigger="service" method="get" path="service/%(service)s/plenary" />
+      <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
    </command>
 
    <command name="sync">

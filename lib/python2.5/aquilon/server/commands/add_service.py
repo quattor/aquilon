@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -45,6 +41,18 @@ class CommandAddService(BrokerCommand):
                     session.save(dbcfg_path)
                 dbservice = Service(name=service, cfg_path=dbcfg_path)
                 session.save(dbservice)
+
+                # Note: Technically, there should be complicated logic
+                # here to check that any service instance stuff that
+                # follows succeeds, and only then write out this plenary
+                # file (because an error there would cause a rollback).
+                # However, since the service is being created new, there
+                # really shouldn't be any problems below.  Taking the
+                # calculated risk and just writing the service templates
+                # immediately.
+                session.flush()
+                session.refresh(dbservice)
+
                 # Write out stub plenary data
                 # By definition, we don't need to then recompile, since nothing
                 # can be using this service yet.
@@ -70,6 +78,7 @@ class CommandAddService(BrokerCommand):
             session.save(dbsi)
             session.flush()
             session.refresh(dbservice)
+            session.refresh(dbsi)
 
             # Create the servicedata template
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)

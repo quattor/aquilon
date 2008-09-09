@@ -16,7 +16,8 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.aqdb.svc.service_instance_server import ServiceInstanceServer
+from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 
@@ -29,26 +30,26 @@ class CommandUnbindServer(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, hostname, service, instance, user, **arguments):
-        dbhost = hostname_to_host(session, hostname)
+        dbsystem = get_system(session, hostname)
         dbservice = get_service(session, service)
         if instance:
-            dbinstance = get_service_instance(session, dbservice, instance)
+            dbinstances = [get_service_instance(session, dbservice, instance)]
         else:
-            try:
-                dbinstance = session.query(ServiceInstance).filter_by(
-                        service=dbservice).join(
-                        "service_instance_server").filter_by(
-                        system=dbhost).one()
-            except InvalidRequestError, e:
-                raise ArgumentError("Could not identify a service instance to remove this host from: %s" % e)
-        session.refresh(dbinstance)
-        for item in dbinstance.servers:
-            if item.system == dbhost:
-                session.delete(item)
+            dbinstances = session.query(ServiceInstance).filter_by(
+                    service=dbservice).filter(
+                        ServiceInstance.id==
+                            ServiceInstanceServer.service_instance_id
+                    ).filter(ServiceInstanceServer.system==dbsystem).all()
+        for dbinstance in dbinstances:
+            for item in dbinstance.servers:
+                if item.system == dbsystem:
+                    session.delete(item)
         session.flush()
-        session.refresh(dbinstance)
-        plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+        for dbinstance in dbinstances:
+            session.refresh(dbinstance)
+            plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
+            plenary_info.write(self.config.get("broker", "plenarydir"), user)
+
         # XXX: Need to recompile...
         return
 

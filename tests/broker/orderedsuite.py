@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -56,6 +52,8 @@ from test_make_aquilon import TestMakeAquilon
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
+from test_bind_server import TestBindServer
+from test_constraints_bind_server import TestBindServerConstraints
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
@@ -66,6 +64,7 @@ from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
+from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
@@ -107,6 +106,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestMapService, TestBindClient, TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
+                TestBindServer,
+                TestBindServerConstraints,
                 TestDomainConstraints, TestMachineConstraints,
                 TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
@@ -114,7 +115,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateInterface,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
-                TestUnmapService, TestDelHost,
+                TestUnbindServer, TestUnmapService, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,

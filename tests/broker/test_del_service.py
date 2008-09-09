@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -81,6 +77,14 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: utsvc Instance: utsi1", command)
         self.matchclean(out, "Service: utsvc Instance: utsi2", command)
+
+    def testdelutsvc2(self):
+        command = "del service --service utsvc2"
+        self.noouttest(command.split(" "))
+
+    def testverifydelutsvc2(self):
+        command = "show service --service utsvc2"
+        self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':

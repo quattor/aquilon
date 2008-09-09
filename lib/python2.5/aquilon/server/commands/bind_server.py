@@ -16,8 +16,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.svc.service_instance_server import ServiceInstanceServer
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.host import (hostname_to_host,
-                                            get_host_build_item)
+from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.service import PlenaryServiceInstance
@@ -31,14 +30,20 @@ class CommandBindServer(BrokerCommand):
     @az_check
     def render(self, session, hostname, service, instance, user, force=False, 
             **arguments):
-        dbhost = hostname_to_host(session, hostname)
+        dbsystem = get_system(session, hostname)
         dbservice = get_service(session, service)
         dbinstance = get_service_instance(session, dbservice, instance)
         session.refresh(dbinstance)
         for dbserver in dbinstance.servers:
-            if dbserver.system.id == dbhost.id:
-                # Server is already bound here, nothing to do.
-                return
+            if dbserver.system.id == dbsystem.id:
+                # FIXME: This should just be a warning.  There is currently
+                # no way of returning output that would "do the right thing"
+                # on the client but still show status 200 (OK).
+                # The right thing would generally be writing to stderr for
+                # a CLI (either raw or csv), and some sort of generic error
+                # page for a web client.
+                raise ArgumentError("Server %s is already bound to service %s instance %s" %
+                                    (hostname, service, instance))
         positions = []
         for dbserver in dbinstance.servers:
             positions.append(dbserver.position)
@@ -46,7 +51,7 @@ class CommandBindServer(BrokerCommand):
         while position in positions:
             position += 1
         sis = ServiceInstanceServer(service_instance=dbinstance,
-                                    system=dbhost, position=position)
+                                    system=dbsystem, position=position)
         session.save(sis)
         session.flush()
         session.refresh(dbinstance)

@@ -13,6 +13,7 @@
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.service import get_service
+from aquilon.server.dbwrappers.service_instance import get_service_instance
 
 
 class CommandShowServiceService(BrokerCommand):
@@ -22,8 +23,11 @@ class CommandShowServiceService(BrokerCommand):
     @add_transaction
     @az_check
     @format_results
-    def render(self, session, service, **arguments):
-        return get_service(session, service)
+    def render(self, session, service, instance, **arguments):
+        dbservice = get_service(session, service)
+        if not instance:
+            return dbservice
+        return get_service_instance(session, dbservice, instance)
 
 
 #if __name__=='__main__':
