@@ -54,7 +54,7 @@ get_bucket = """
     AND loc_name NOT LIKE '%pod%'
     ORDER BY loc_name """
 
-get_network="""
+get_network_full="""
     SELECT  net_name,
             net_ip_addr,
             abs(net_mask),
@@ -62,6 +62,16 @@ get_network="""
             SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
             side, net_id FROM network
     WHERE state >= 0 """
+
+get_network_np="""
+    SELECT  net_name,
+            net_ip_addr,
+            abs(net_mask),
+            isnull(net_type_id,0),
+            SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
+            side, net_id FROM network
+    WHERE state >= 0
+    AND location like '%np.ny.na' """
 
 get_net_type = """
     SELECT * FROM network_type """
@@ -181,7 +191,11 @@ def dump_bucket():
 
 def dump_network():
     db = dsdb_connection()
-    return db.run_query(get_network).fetchall()
+    return db.run_query(get_network_full).fetchall()
+
+def dump_network_full():
+    db = dsdb_connection()
+    return db.run_query(get_network_np).fetchall()
 
 def dump_net_type():
     db = dsdb_connection()

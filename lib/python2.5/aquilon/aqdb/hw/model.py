@@ -54,6 +54,8 @@ def populate(db, *args, **kw):
             ['ibm', 'ls20','blade'],
             ['ibm','hs21','blade'],
             ['ibm','hs40','blade'],
+            ['ibm', 'bce','chassis'],
+            ['ibm', 'bch','chassis'],
             ['hp','bl35p','blade'],
             ['hp','bl465c','blade'],
             ['hp','bl480c','blade'],
@@ -63,6 +65,8 @@ def populate(db, *args, **kw):
             ['hp','dl580','rackmount'],
             ['hp','bl45p','blade'],
             ['hp','bl260c','blade'],
+            ['hp', 'c-class', 'chassis'],
+            ['hp', 'p-class', 'chassis'],
             ['verari', 'vb1205xm', 'blade'],
             ['sun','ultra-10','workstation'],
             ['dell','poweredge_6850','rackmount'],
@@ -86,11 +90,7 @@ def populate(db, *args, **kw):
             s.close()
         print 'created models %s'%(s.query(Model).all())
 
-
-
-
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

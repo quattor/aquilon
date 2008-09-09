@@ -1,12 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
 """Module for testing the add tor_switch command."""
 
 import os
@@ -19,7 +11,6 @@ if __name__ == "__main__":
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
 from brokertest import TestBrokerCommand
-
 
 class TestAddTorSwitch(TestBrokerCommand):
 
@@ -40,8 +31,8 @@ class TestAddTorSwitch(TestBrokerCommand):
             self.matchoutput(out, "Serial: %s" % serial, command)
         else:
             self.matchclean(out, "Serial:", command)
-        for port in range(1,49):
-            self.matchoutput(out, "Switch Port %d" % port, command)
+#        for port in range(1,49):
+#            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)
 
     def testverifyaddut3gd1r01(self):
@@ -140,3 +131,7 @@ if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

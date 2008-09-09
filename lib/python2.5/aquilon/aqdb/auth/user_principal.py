@@ -59,8 +59,7 @@ def populate(db, *args, **kw):
         ops   = db.s.query(Role).filter_by(name = 'operations').one()
         telco = db.s.query(Role).filter_by(name = 'telco_eng').one()
 
-        admins  = ['cdb', 'njw', 'wesleyhe', 'guyroleh', 'daqscott', 'kgreen',
-                   'benjones']
+        admins  = ['cdb', 'njw', 'wesleyhe', 'daqscott', 'kgreen', 'benjones']
 
         unixeng = ['cesarg', 'jasona', 'dankb', 'tonyc', 'goliaa', 'samsh',
                    'hagberg', 'hookn', 'jelinker', 'kovacsk','lookerm', 'bet',
@@ -114,4 +113,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

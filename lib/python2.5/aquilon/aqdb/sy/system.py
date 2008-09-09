@@ -23,7 +23,8 @@ from aquilon.aqdb.net.dns_domain     import DnsDomain
 from aquilon.aqdb.net.network        import Network
 
 #TODO: enum type for system_type column
-#_sys_types = ['host', 'tor_switch', 'console_server', 'chassis']
+#_sys_types = ['host', 'tor_switch', 'console_switch', 'chassis', 'manager',
+#              'auxiliary' ]
 
 class System(Base):
     """ System: a base class which abstracts out the details of between

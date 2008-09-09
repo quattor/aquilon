@@ -17,7 +17,6 @@ from aquilon.server.dbwrappers.interface import restrict_tor_offsets
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.aqdb.sy.tor_switch import TorSwitch
 from aquilon.aqdb.hw.tor_switch_hw import TorSwitchHw
-from aquilon.aqdb.hw.switch_port import SwitchPort
 from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 from aquilon.aqdb.loc.rack import Rack
@@ -61,14 +60,7 @@ class CommandAddTorSwitch(BrokerCommand):
         session.save(dbtor_switch_hw)
         dbtor_switch = TorSwitch(name=short, dns_domain=dbdns_domain,
                                  tor_switch_hw=dbtor_switch_hw)
-
-        # FIXME: Hard-coded number of switch ports...
-        switch_port_start = 1
-        switch_port_count = 48
-        switch_port_end = switch_port_start + switch_port_count
-        for i in range(switch_port_start, switch_port_end):
-            dbsp = SwitchPort(switch=dbtor_switch, port_number=i)
-            session.save(dbsp)
+        session.save(dbtor_switch)
 
         if interface or mac or ip:
             if not (interface and mac and ip):

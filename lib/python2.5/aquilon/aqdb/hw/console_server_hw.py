@@ -1,8 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-""" The hardware portion of a chassis. The chassis we use today are:
-    HP: C class and P class, though p class servers have no central management
-    IBM: BCE and BCH (blade center e and blade center h). There may be some
-    blade center e's in VA but they are like rackmounts as well"""
+""" The hardware portion of a console_server """
 
 from datetime import datetime
 import sys
@@ -19,19 +16,19 @@ from sqlalchemy.orm  import relation, deferred, backref
 from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
 
 class ChassisHw(HardwareEntity):
-    __tablename__ = 'chassis_hw'
-    __mapper_args__ = {'polymorphic_identity' : 'chassis_hw'}
+    __tablename__ = 'console_server_hw'
+    __mapper_args__ = {'polymorphic_identity' : 'console_server_hw'}
 
     hardware_entity_id = Column(Integer,
                                 ForeignKey(HardwareEntity.c.id,
-                                           name = 'chassis_hw_fk',
+                                           name = 'cons_svr_hw_fk',
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
 
-chassis_hw = ChassisHw.__table__
-chassis_hw.primary_key.name = 'chassis_hw_pk'
+console_server_hw = ChassisHw.__table__
+console_server_hw.primary_key.name = 'cons_svr_hw_pk'
 
-table = chassis_hw
+table = console_server_hw
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

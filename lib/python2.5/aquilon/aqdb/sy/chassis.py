@@ -28,7 +28,6 @@ class Chassis(System):
                                                ondelete='CASCADE'), 
                                               nullable=False)
                 
-#    system          = relation(System, uselist=False, backref='chassis')
     chassis_hw      = relation(ChassisHw, uselist=False,
                                backref=backref('chassis_hw', cascade='delete'))
     
