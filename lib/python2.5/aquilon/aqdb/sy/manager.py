@@ -18,16 +18,16 @@ from aquilon.aqdb.hw.machine import Machine
 class Manager(System):
     __tablename__ = 'manager'
 
-    id          = Column(Integer, ForeignKey(System.c.id, 
-                                              ondelete = 'CASCADE', 
-                                              name = 'mgr_system_fk'), 
+    id          = Column(Integer, ForeignKey(System.c.id,
+                                              ondelete = 'CASCADE',
+                                              name = 'mgr_system_fk'),
                                              primary_key = True)
 
-    machine_id  = Column(Integer, ForeignKey(Machine.c.id, 
-                                               name = 'mgr_machine_fk'), 
+    machine_id  = Column(Integer, ForeignKey(Machine.c.id,
+                                               name = 'mgr_machine_fk'),
                                               nullable = False)
 
-    machine     = relation(Machine, uselist=False, backref='machine')
+    machine     = relation(Machine, uselist=False, backref='manager')
 
     __mapper_args__ = {'polymorphic_identity' : 'manager'}
 
@@ -49,8 +49,9 @@ def populate(db, *args, **kw):
         try:
             db.s.commit()
         except Exception, e:
-            print e
-            db.s.rollback()
+            #FIX ME: need to create a machine, interface, and host to test this
+            #print e
+            db.s.close()
             return False
 
     mgr = db.s.query(Manager).filter_by(name=nm).one()

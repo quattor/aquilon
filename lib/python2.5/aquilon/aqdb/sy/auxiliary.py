@@ -24,11 +24,11 @@ class Auxiliary(System):
                                     primary_key = True)
 
     machine_id  = Column(Integer, ForeignKey(Machine.c.id,
-                                             name = 'aux_machine_fk'), 
+                                             name = 'aux_machine_fk'),
                                             nullable = False)
 
-    machine     = relation(Machine, uselist=False, backref='machine')
-        
+    machine     = relation(Machine, backref='auxilaries')
+
     __mapper_args__ = {'polymorphic_identity' : 'auxiliary'}
 
 auxiliary = Auxiliary.__table__
@@ -45,12 +45,13 @@ def populate(db, *args, **kw):
         assert(dom)
 
         as=Auxiliary(name=nm, dns_domain=dom)
-        db.s.add(qs)
+        db.s.add(as)
         try:
             db.s.commit()
         except Exception, e:
-            print e
-            db.s.rollback()
+            #FIXME: need a machine and host created to test the process
+            #print e
+            db.s.close()
             return False
 
     as=db.s.query(Auxiliary).filter_by(name=nm).one()
