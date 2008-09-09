@@ -1,10 +1,4 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-# This module is part of Aquilon
 """ tests the AqStr column_type """
 import sys
 import os
@@ -96,3 +90,7 @@ class testAqStr(unittest.TestCase):
 if __name__ == "__main__":
     ta = testAqStr()
     ta.runTest()
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+

@@ -18,12 +18,12 @@ if __name__ == "__main__":
 
 import aquilon.aqdb.depends
 import aquilon.aqdb.db_factory         as aqdbf
-import aquilon.aqdb.utils.shell        as shell
+import aquilon.aqdb.utils.shutils      as shell
 import aquilon.aqdb.hw.vendor          as v
 import aquilon.aqdb.hw.model           as m
 import aquilon.aqdb.hw.machine         as mc
 import aquilon.aqdb.hw.cpu             as cpu
-import aquilon.aqdb.loc.chassis        as ch
+import aquilon.aqdb.loc.rack           as rk
 
 class testMachine(unittest.TestCase):
     def setUp(self, vendor='hp', model='bl45p', *args, **kw):
@@ -40,10 +40,10 @@ class testMachine(unittest.TestCase):
         self.proc = self.s.query(cpu.Cpu).first()
         assert self.proc, "Can't find a cpu"
 
-        self.chas = self.s.query(ch.Chassis).first()
-        assert self.chas, "Can't find a chassis"
+        self.rack = self.s.query(rk.Rack).first()
+        assert self.rack, "Can't find a rack"
 
-        self.nm = self.chas.name + 'n3'
+        self.nm = self.rack.name + 'c1n3'
 
         t = self.s.query(mc.Machine).filter_by(name = self.nm).first()
         if t is not None:
@@ -58,7 +58,7 @@ class testMachine(unittest.TestCase):
     def testInitMachine(self, *args, **kw):
 
         mchn = mc.Machine(name = self.nm, model = self.mdl,
-                          location = self.chas, cpu = self.proc )
+                          location = self.rack, cpu = self.proc )
 
         try:
             self.s.save(mchn)
