@@ -57,9 +57,6 @@ PANC_OPTS = -I $(CONFIG) \
 XMLS      = $(subst $(PROFILES),$(OUTPUT),\
                $(subst .tpl,.xml,$(wildcard $(PROFILES)/*.tpl)))
 
-debug:
-	echo $(XMLS)
-
 XMLDEPS   = $(XMLS:.xml=.xml.dep)
 
 MKDEPS    = $(subst $(OUTPUT),$(DEPENDS),$(XMLDEPS:.xml.dep=.dep))
@@ -110,7 +107,7 @@ only: $(OUTPUT) $(DEPENDS)
 	@$(PANC) $(PANC_OPTS) -y \
 		$(addprefix $(PROFILES)/,$(addsuffix .tpl,$(NAMES)))
 	@$(MAKE) $(addprefix $(DEPENDS)/,$(addsuffix .dep,$(NAMES)))
-	@cp -p --target-directory $(HOSTDIR) $(addprefix $(OUTPUT)/,$(addsuffix .xml,$(NAMES)))
+	@cp -p --target-directory $(FINAL) $(addprefix $(OUTPUT)/,$(addsuffix .xml,$(NAMES)))
 	@cp -p $(addprefix $(PROFILES)/,$(addsuffix .tpl,$(NAMES))) $(HOSTDIR)
 
 endif
@@ -140,15 +137,20 @@ count:
 # as possible at once. So we use make to build the list of
 # profiles to compile, and xargs to stuff the command line
 # 
+# There are two passes. One to build the xmldeps (which will also
+# create new xmls) and then a second build just to build the xmls. If
+# there are no internal dependencies, then the second pass will find
+# nothing to do (since the first pass will have compiled
+# everything). If however one xml depends on another, then the second
+# pass might have to recompile.
 build_xmls: $(OUTPUT) $(FINAL)
 	@echo $(DATE) Updating host XML configs $(REDIR)
-	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmls | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR) ) ; fi
-	@$(RSYNC) -a $(OUTPUT)/ $(FINAL)/ --exclude='*.dep'
+	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmls | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR); echo $$todo |sed -e 's,$(PROFILES)/\(.*\).tpl$$,$(OUTPUT)/\1.xml,' | xargs cp -p --target-directory $(FINAL) ) ; fi
 	@echo $(DATE) Updated `find $(OUTPUT) -name '*.xml' -newer $(MARKER) | wc -l` host XML configs $(REDIR)
 
 build_xmldeps: $(OUTPUT)
 	@echo $(DATE) Updating XML dependencies $(REDIR)
-	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmldeps | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR) ) ; fi
+	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmldeps | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR); echo $$todo | sed -e 's,$(PROFILES)/\(.*\).tpl$$,$(OUTPUT)/\1.xml,' |  xargs cp -p --target-directory $(FINAL) ) ; fi
 	@echo $(DATE) Updated `find $(OUTPUT) -name '*.xml.dep' -newer $(MARKER) | wc -l` XML dependencies $(REDIR)
 
 #

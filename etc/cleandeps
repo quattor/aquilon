@@ -15,11 +15,13 @@ use Getopt::Long;
 my @incpaths;
 my $outdir;
 my $verbose = 0;
+my $xmlformat = undef;
 
 GetOptions( 
-    'I=s' => \@incpaths,
-    'O=s' => \$outdir,
-    'verbose!' => \$verbose,
+	   'I=s' => \@incpaths,
+	   'O=s' => \$outdir,
+	   'x=s' => \$xmlformat, # we don't do anything with this, but we don't want to complain if we see it
+	   'verbose!' => \$verbose,
   );
 
 my $depsdir = shift @ARGV;
