@@ -44,10 +44,11 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com,ut3,ut,hp,uttorswitch,SNgd1r01,,,",
                 command)
 
-    # FIXME: This test does not make sense right now... remove?
-    #def testverifycatut3gd1r01(self):
-    #    command = "cat --machine ut3gd1r01.aqd-unittest.ms.com"
-    #    self.badrequesttest(command.split(" "))
+    def testverifyshowfqdntorswitch(self):
+        command = "show fqdn --fqdn ut3gd1r01.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
+                         command)
 
     # Testing that add machine does not allow a tor_switch....
     def testrejectut3gd1r02(self):

@@ -46,6 +46,7 @@ from test_add_host import TestAddHost
 from test_add_aquilon_host import TestAddAquilonHost
 from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
+from test_add_auxiliary import TestAddAuxiliary
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_make_aquilon import TestMakeAquilon
@@ -60,12 +61,14 @@ from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_service_all import TestShowServiceAll
+from test_show_fqdn import TestShowFqdn
 from test_update_interface import TestUpdateInterface
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
 from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
+from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
 from test_del_disk import TestDelDisk
@@ -104,6 +107,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
+                TestAddAuxiliary,
                 TestMapService, TestBindClient, TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestBindServer,
@@ -111,11 +115,12 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDomainConstraints, TestMachineConstraints,
                 TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
-                TestShowServiceAll,
+                TestShowServiceAll, TestShowFqdn,
                 TestUpdateInterface,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
-                TestUnbindServer, TestUnmapService, TestDelHost,
+                TestUnbindServer, TestUnmapService,
+                TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,

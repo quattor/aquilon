@@ -68,6 +68,18 @@
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
    </command>
 
+   <command name="show_fqdn">
+      Shows any information available for the fqdn.  This could be a host,
+      a top of rack switch, a chassis, or any other system tracked by
+      AQDB.
+      <optgroup name="show_fqdn_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string" conflicts="all">Host name</option>
+         <option name="all" type="boolean" conflicts="fqdn">Select all hosts</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="system" />
+      <transport trigger="fqdn" method="get" path="system/%(fqdn)s" />
+   </command>
+
    <command name="compile">
     Compile anything that is out-of-date within a specified domain.
     <optgroup name="compile_input" mandatory="True" fields="all">
@@ -255,6 +267,65 @@
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="aurora_host/%(hostname)s" />
+   </command>
+
+   <command name="add_auxiliary">
+      Add an auxiliary entry for a host to the database.  Requires a
+      machine with a non-bootable public interface (generally eth1) and a
+      valid IP address.
+
+      The host can be identified by either --machine or --hostname.  The
+      new/auxiliary name must be given with --auxiliary.
+
+      If both --interface and --mac are given and there is no such
+      interface, it will be created.
+
+      For a host like igrid123.subdomain.ms.com, an example auxiliary name
+      for the eth1 interface is igrid123-e1.subdomain.ms.com.
+
+      After running this, run reconfigure on the primary host (in the
+      example above, igrid123.subdomain.ms.com).
+      <optgroup name="add_aux_opts" mandatory="True" fields="all">
+         <optgroup name="add_aux_identifier" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="machine">Fully qualified Host name</option>
+            <option name="machine" type="string" conflicts="hostname">Machine (Node) name</option>
+	 </optgroup>
+         <option name="auxiliary" type="string">Fully qualified name for the auxiliary interface</option>
+	 <optgroup name="add_aux_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="string">IP address</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="interface" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
+         <option name="mac" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="auxiliary/%(auxiliary)s" />
+   </command>
+
+   <command name="show_auxiliary">
+      Shows the information for auxiliary systems (like
+      igrid123-e1.subdomain.ms.com)
+      <optgroup name="show_auxiliary_opts" mandatory="True" fields="any">
+         <option name="auxiliary" type="string" conflicts="all">Auxiliary name</option>
+         <option name="all" type="boolean" conflicts="auxiliary">Select all auxiliaries</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="auxiliary" />
+      <transport trigger="auxiliary" method="get" path="auxiliary/%(auxiliary)s" />
+   </command>
+
+   <command name="del_auxiliary">
+      Delete an auxiliary entry for a host from the database.
+
+      For a host like igrid123.subdomain.ms.com, an example auxiliary name
+      for the eth1 interface is igrid123-e1.subdomain.ms.com.
+
+      After running this, run reconfigure on the primary host (in the
+      example above, igrid123.subdomain.ms.com).
+      <optgroup name="add_aux_opts" mandatory="True" fields="all">
+         <option name="auxiliary" type="string">Fully qualified name for the auxiliary interface</option>
+      </optgroup>
+      <transport method="delete" path="auxiliary/%(auxiliary)s" />
    </command>
 
    <command name="add_model">

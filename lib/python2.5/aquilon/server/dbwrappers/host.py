@@ -15,34 +15,11 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.net.dns_domain import DnsDomain
 from aquilon.aqdb.sy.host import Host
+from aquilon.server.dbwrappers.system import get_system
 
-
-def hostname_to_domain_and_string(session, hostname):
-    if not hostname:
-        raise ArgumentError("No hostname specified.")
-    (short, dot, dns_domain) = hostname.partition(".")
-    if not dns_domain:
-        raise ArgumentError(
-                "'%s' invalid, hostname must be fully qualified." % hostname)
-    if not short:
-        raise ArgumentError("'%s' invalid, missing host name." % hostname)
-    try:
-        dbdns_domain = session.query(DnsDomain).filter_by(
-                name=dns_domain).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("DNS domain '%s' for '%s' not found: %s"
-                % (dns_domain, hostname, e))
-    return (short, dbdns_domain)
 
 def hostname_to_host(session, hostname):
-    (short, dbdns_domain) = hostname_to_domain_and_string(session, hostname)
-    try:
-        dball = session.query(Host).filter_by(name=short, dns_domain=dbdns_domain).all()
-        if (len(dball) == 0):
-            raise NotFoundException("Host '%s' not found" % hostname)
-        return dball[0]
-    except InvalidRequestError, e:
-        raise ArgumentError("Failed to find host: %s" %e)
+    return get_system(session, hostname, Host, 'Host')
 
 def get_host_build_item(self, dbhost, dbservice):
     for template in dbhost.templates:

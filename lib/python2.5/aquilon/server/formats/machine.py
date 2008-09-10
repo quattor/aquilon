@@ -16,8 +16,11 @@ class MachineFormatter(ObjectFormatter):
         details = [indent + "%s: %s" %
                 (machine.model.machine_type.capitalize(), machine.name)]
         if machine.host:
-            details.append(indent + "  Allocated to host: %s"
-                    % machine.host.fqdn)
+            details.append(indent + "  Allocated to host: %s [%s]"
+                    % (machine.host.fqdn, machine.host.ip))
+        for dbauxiliary in machine.auxiliaries:
+            details.append(indent + "  Auxiliary: %s [%s]" % (
+                           dbauxiliary.fqdn, dbauxiliary.ip))
         # This is a bit of a hack.  Delegating out to the standard location
         # formatter now spews too much information about chassis.  Maybe
         # that will change when chassis has a corresponding hardware type.
