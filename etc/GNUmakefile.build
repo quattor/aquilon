@@ -57,6 +57,9 @@ PANC_OPTS = -I $(CONFIG) \
 XMLS      = $(subst $(PROFILES),$(OUTPUT),\
                $(subst .tpl,.xml,$(wildcard $(PROFILES)/*.tpl)))
 
+debug:
+	echo $(XMLS)
+
 XMLDEPS   = $(XMLS:.xml=.xml.dep)
 
 MKDEPS    = $(subst $(OUTPUT),$(DEPENDS),$(XMLDEPS:.xml.dep=.dep))
@@ -107,7 +110,7 @@ only: $(OUTPUT) $(DEPENDS)
 	@$(PANC) $(PANC_OPTS) -y \
 		$(addprefix $(PROFILES)/,$(addsuffix .tpl,$(NAMES)))
 	@$(MAKE) $(addprefix $(DEPENDS)/,$(addsuffix .dep,$(NAMES)))
-	@$(RSYNC) -a $(OUTPUT)/ $(FINAL)/ --exclude='*.dep'
+	@cp -p --target-directory $(HOSTDIR) $(addprefix $(OUTPUT)/,$(addsuffix .xml,$(NAMES)))
 	@cp -p $(addprefix $(PROFILES)/,$(addsuffix .tpl,$(NAMES))) $(HOSTDIR)
 
 endif
