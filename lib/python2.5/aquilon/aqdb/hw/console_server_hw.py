@@ -15,7 +15,7 @@ from sqlalchemy.orm  import relation, deferred, backref
 
 from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
 
-class ChassisHw(HardwareEntity):
+class ConsoleServerHw(HardwareEntity):
     __tablename__ = 'console_server_hw'
     __mapper_args__ = {'polymorphic_identity' : 'console_server_hw'}
 
@@ -25,7 +25,7 @@ class ChassisHw(HardwareEntity):
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
 
-console_server_hw = ChassisHw.__table__
+console_server_hw = ConsoleServerHw.__table__
 console_server_hw.primary_key.name = 'cons_svr_hw_pk'
 
 table = console_server_hw
