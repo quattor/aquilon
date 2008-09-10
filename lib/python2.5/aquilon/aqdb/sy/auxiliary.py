@@ -27,7 +27,7 @@ class Auxiliary(System):
                                              name = 'aux_machine_fk'),
                                             nullable = False)
 
-    machine     = relation(Machine, backref='auxilaries')
+    machine     = relation(Machine, backref='auxiliaries')
 
     __mapper_args__ = {'polymorphic_identity' : 'auxiliary'}
 
