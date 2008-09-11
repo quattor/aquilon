@@ -25,8 +25,7 @@ class TestClientFailure(TestBrokerCommand):
 
     def testinvalidaqhost(self):
         command = "status --aqhost=invalidhost"
-        p = self.runcommand(command.split(" "))
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command.split(" "))
         self.assertEqual(err,
                 "Failed to connect to invalidhost: Unknown host.\n")
         self.assertEqual(out, "",
@@ -36,8 +35,7 @@ class TestClientFailure(TestBrokerCommand):
 
     def testnotrunningaqhost(self):
         command = "status --aqhost=%s" % self.host_not_running_aqd
-        p = self.runcommand(command.split(" "))
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command.split(" "))
         self.assertEqual(err,
                 "Failed to connect to %s port %s: Connection refused.\n"
                 % (self.host_not_running_aqd, 

@@ -32,3 +32,11 @@ client_notifications = no
 
 [unittest]
 scratchdir = %(basedir)s/scratch
+
+# This can be used for any components that use python logging
+# Valid values are INFO, DEBUG, and WARNING
+# For sqlalchemy, only INFO and DEBUG produce log messages.
+[logging]
+#sqlalchemy.engine = INFO
+#sqlalchemy.pool = INFO
+#sqlalchemy.orm = INFO

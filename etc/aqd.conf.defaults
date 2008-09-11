@@ -84,3 +84,11 @@ sys_loc = /ms/dist/aurora/bin/sys_loc
 dsdb_use_testdb = False
 server_notifications =
 client_notifications = yes
+
+# This can be used for any components that use python logging
+# Valid values are INFO, DEBUG, and WARNING
+# For sqlalchemy, only INFO and DEBUG produce log messages.
+[logging]
+sqlalchemy.engine = WARNING
+sqlalchemy.pool = WARNING
+sqlalchemy.orm = WARNING

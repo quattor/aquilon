@@ -10,11 +10,12 @@
 """Provide a twistd plugin for aqd to start up."""
 
 import os
+import logging
 
-import aquilon.server.depends
+#import aquilon.server.depends
 
 from zope.interface import implements
-from twisted.python import usage
+from twisted.python import usage, log
 from twisted.plugin import IPlugin
 from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
@@ -48,6 +49,17 @@ class AQDMaker(object):
 
     def makeService(self, options):
         config = Config(configfile=options["config"])
+
+        # Set this up before the aqdb libs get imported...
+        observer = log.PythonLoggingObserver()
+        observer.start()
+        for logname in config.options("logging"):
+            logvalue = config.get("logging", logname)
+            if logvalue not in logging._levelNames:
+                log.msg("For config [logging]/%s, %s not a valid log level." %
+                        (logname, logvalue))
+                continue
+            logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
 
         # Dynamic import means that we can parse config options before
         # importing aqdb.  This is a hack until aqdb can be imported without

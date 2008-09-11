@@ -9,6 +9,7 @@ import os
 import sys
 import unittest
 from subprocess import Popen, PIPE
+import re
 
 from aquilon.config import Config
 
@@ -73,6 +74,8 @@ class TestBrokerCommand(unittest.TestCase):
     def tearDown(self):
         pass
 
+    msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
+
     def runcommand(self, command, **kwargs):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq")
         kncport = self.config.get("broker", "kncport")
@@ -96,11 +99,13 @@ class TestBrokerCommand(unittest.TestCase):
                     env[key] = value
             kwargs["env"] = env
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
-        return p
+        (out, err) = p.communicate()
+        # Strip any msversion dev warnings out of STDERR
+        err = self.msversion_dev_re.sub('', err)
+        return (p, out, err)
 
     def commandtest(self, command, **kwargs):
-        p = self.runcommand(command, **kwargs)
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, err))
@@ -116,8 +121,7 @@ class TestBrokerCommand(unittest.TestCase):
                 % (command, out))
 
     def ignoreoutputtest(self, command, **kwargs):
-        p = self.runcommand(command, **kwargs)
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command, **kwargs)
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,
                 "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
@@ -127,8 +131,7 @@ class TestBrokerCommand(unittest.TestCase):
     # Right now, commands are not implemented consistently.  When that is
     # addressed, this unit test should be updated.
     def notfoundtest(self, command, **kwargs):
-        p = self.runcommand(command, **kwargs)
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, err))
@@ -146,8 +149,7 @@ class TestBrokerCommand(unittest.TestCase):
         return
 
     def badrequesttest(self, command, **kwargs):
-        p = self.runcommand(command, **kwargs)
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, err))
@@ -160,8 +162,7 @@ class TestBrokerCommand(unittest.TestCase):
         return out
 
     def internalerrortest(self, command, **kwargs):
-        p = self.runcommand(command, **kwargs)
-        (out, err) = p.communicate()
+        (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(err, "",
                 "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, err))
