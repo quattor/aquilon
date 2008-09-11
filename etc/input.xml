@@ -59,7 +59,8 @@
    </command>
 
    <command name="show_host">
-      Shows the configuration for a given host, or for all hosts.
+      Shows the complete configuration for a given host. If the '--all' option
+      is provided, then the command simply outputs a listing of all known hostnames.
       <optgroup name="show_host_Input" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="all">Host name</option>
          <option name="all" type="boolean" conflicts="hostname">Select all hosts</option>
@@ -89,7 +90,8 @@
    </command>
 
    <command name="show_domain">
-      Shows the configuration for a given domain, or for all domains
+      Shows the configuration for a given domain. With the '--all' option,
+      every domain will be listed, with its configuration.
       <optgroup name="show_domain_Input" mandatory="True" fields="any">
          <option name="domain" type="string" conflicts="all">Domain name</option>
          <option name="all" type="boolean" conflicts="hostname">Select all domains</option>
@@ -102,9 +104,13 @@
       %prog show network 
       Shows the configuration for a network, or for networks selected by location
       <optgroup name="show_network_Input" mandatory="True" fields="any">
-         <option name="network" type="string" conflicts="all">Network name</option>
-         <option name="ip" type="string" conflicts="all">IP address</option>
-         <option name="type" type="string">Network type</option>
+         <option name="network" type="string" conflicts="">Network name</option>
+         <option name="ip" type="string" conflicts="">IP address</option>
+         <option name="all" type="boolean" conflicts="">All</option>
+         <optgroup name="show_network_options" fields="any">
+            <option name="type" type="string">Network type</option>
+            <option name="hosts" type="boolean">Hosts</option>
+         </optgroup>
          <optgroup name="show_network_location_opts" fields="any">
 	    <option name="company" type="string">Company</option>
 	    <option name="hub" type="string">Hub</option>
@@ -116,7 +122,7 @@
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
-      <transport method="get" path="show/network" />
+      <transport method="get" path="network" />
    </command>
 
    <command name="show_hostiplist">
@@ -139,7 +145,7 @@
    </command>
 
    <command name="add_cpu">
-      Add a new CPU type to the database
+      Add a new CPU type to the database.
       <optgroup name="add_cpu_opts" mandatory="True" fields="all">
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
@@ -417,7 +423,10 @@
    </command>
 
    <command name="add_service">
-      Add new service
+      Add a new service. If --instance is also specified, then also
+      create a named instance for this service at the same time. Default templates
+      describing the service will be created so that any service instances can be 
+      immediately used (bound and configured) by clients.
       <optgroup name="add_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
       </optgroup>
@@ -430,9 +439,12 @@
    </command>
 
    <command name="show_service">
-      Show an existing service
+      Show the configuration of a service. All instances of the service will
+      be listed, the number of clients bound to that service and any service mappings.
+      If --all is specified, then the configuration of all services will be shown.
       <optgroup name="show_service_opts" mandatory="True" fields="any">
          <option name="service" type="string">Service name</option>
+         <option name="server" type="string">Server name</option>
 	 <option name="all" type="boolean" conflicts="service">Select all services</option>
       </optgroup>
       <optgroup name="optional_opts">
@@ -443,7 +455,8 @@
    </command>
 
    <command name="del_service">
-      Delete a service
+      Delete a service. The command will fail if any servers or clients are marked
+      as being bound to any of the instances of the service.
       <optgroup name="del_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
       </optgroup>
@@ -457,7 +470,8 @@
    <command name="bind_client">
       Bind a service to a client.  If no instance is given and a relevant
       service map has been defined, an instance will be picked automatically.
-      If the client already has the service bound, this will fail.
+      If the client already has the service bound, this will fail: use rebind
+      client instead.
       <optgroup name="bind_client_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
          <option name="service" type="string">Service name</option>
@@ -471,7 +485,7 @@
    <command name="rebind_client">
       Bind a service to a client.  If no instance is given and a relevant
       service map has been defined, an instance will be picked automatically.
-      If the client already has the service bound, this will override the old.
+      If the client already has the service bound, this will override the old value.
       <optgroup name="rebind_client_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
          <option name="service" type="string">Service name</option>
@@ -518,7 +532,12 @@
    </command>
 
    <command name="add_required_service">
-      Add a required service for an archetype.
+      Add a required service for an archetype. Once a service is required, then
+      any time a host of that archetype is built, it will cause an implicit bind_server
+      to occur for any unbound required services. If an instance cannot be automatically
+      bound, then hosts will fail to build, therefore you should ensure that any
+      required services have appropriate service mappings to declare which instances
+      to use by default.
       <optgroup name="add_required_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="archetype" type="string" mandatory="True">archetype name</option>
@@ -539,7 +558,9 @@
    </command>
 
    <command name="del_required_service">
-      Delete a service from the list of required services for an archetype.
+      Delete a service from the list of required services for an archetype. Hosts which
+      are already bound to a service because it used to be required will be unmodified. If 
+      you wish to unbind those clients, you must do so manually.
       <optgroup name="del_required_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="archetype" type="string" mandatory="True">archetype name</option>
@@ -548,7 +569,10 @@
    </command>
 
    <command name="map_service">
-      Map a service instance to a location.
+      Map a service instance to a location. This declares that the specified service
+      instance is default within a specific location, and will be a candidate for
+      automatic selection during any bind_server (or rebuilds that invoke bind_server)
+      commands.
       <optgroup name="map_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="instance" type="string" mandatory="True">instance name</option>
@@ -586,7 +610,8 @@
    </command>
 
    <command name="unmap_service">
-      Remove the map from a service instance to a location.
+      Remove the map from a service instance to a location. Existing bindings of
+      clients will remain unmodified.
       <optgroup name="unmap_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="instance" type="string" mandatory="True">instance name</option>
@@ -605,7 +630,9 @@
    </command>
 
    <command name="del_host">
-      Delete a host.
+      Delete a host. This will fail if the host is being used to provide
+      any services. Once the host has been deleted, all configuration data will
+      be discarded and the host will be unable to rebuild.
       <optgroup name="del_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
@@ -613,7 +640,11 @@
    </command>
 
    <command name="pxeswitch">
-      pxe
+      change the way the host boots. At boot, the host may either reboot
+      from local disk (--boot), or it can reinstall (--install). The pxeswitch
+      switches the default by changing the configuration on the host's bootserver.
+      After a successful installation, the host will automatically pxeswitch
+      itself back to local disk booting.
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
@@ -625,6 +656,13 @@
    </command>
 
    <command name="reconfigure">
+      re-build the configuration settings for the specified host, using all
+      of the current service bindings and definitions. This "flushes" any configuration
+      settings, by: regenerating the host profile; forcing the bootservers to rebuild 
+      their state for this host; notifying all datawarehouse tools that the host has been
+      updated; notifying the host that it's configuration has been updated. These tasks
+      are done even if there is no real change in configuration. It's the same as just
+      running "make_aquilon" again, with the original arguments.
       <optgroup name="reconfigure_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
@@ -636,6 +674,10 @@
    </command>
 
    <command name="add_domain">
+      Add a new template domain. This is for testing changes to the templates. The
+      new domain will have no hosts when it is freshly created and you should use
+      the "manage" command in order to assign some hosts to the domain in order to
+      run complete tests.
       <optgroup name="add domain options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
@@ -643,13 +685,18 @@
    </command>
 
    <command name="del_domain">
+      Removes the specified template domain. This will fail if there are hosts still being
+      managed by the domain: you must use the "manage" command to reassign those
+      hosts to other domains.
       <optgroup name="del_domain_options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the new domain</option>
+         <option name="domain" type="string">Name of the domain to be deleted</option>
       </optgroup>
       <transport method="delete" path="domain/%(domain)s" />
    </command>
 
    <command name="get">
+      Download a copy of the templates from the specified template domain. The
+      templates will be placed in the current directory.
       <optgroup name="get options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
@@ -657,6 +704,9 @@
    </command>
 
    <command name="put">
+      Upload the templates (and all their changes) in the current directory to the 
+      specified template domain. You should run "compile" on the domain afterwards to
+      confirm any changes.
       <optgroup name="put options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
       </optgroup>
@@ -664,6 +714,7 @@
    </command>
 
    <command name="deploy">
+      Take a template domain and deploy it to production.
       <optgroup name="deploy options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
@@ -676,6 +727,10 @@
    </command>
 
    <command name="manage">
+      Take a host and make it build its configuration using the specified
+      template domain. This allows you to test building hosts using alternate
+      templates, or to move a host back to a default production domain once
+      testing has completed.
       <optgroup name="manage options" mandatory="True" fields="all">
          <option name="hostname" type="string">Name of the host</option>
          <option name="domain" type="string">Name of the domain</option>
@@ -684,7 +739,7 @@
    </command>
 
    <command name="cat">
-      Show the automatically written templates in use for any one of the
+      Prints the content of the plenary template in use for any one of the
       given options.  All are exclusive, except --instance and/or --default
       also require --service.
       <optgroup name="cat options" mandatory="True" fields="any">
@@ -701,6 +756,9 @@
    </command>
 
    <command name="sync">
+      Flush all plenary templates within the specified domain. This is only required
+      if the broker has somehow become out-of-sync between the templates that live
+      on the local disk, and the state within the database.
       <optgroup name="sync options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
@@ -708,6 +766,9 @@
    </command>
 
    <command name="add_location">
+      Create a new location within the database, which can then be used to place
+      hosts and within service maps. Names of all locations are globally unique.
+      For example, you can only have one city 'ln' anywhere, and only one chassis called "np3c5".
       <optgroup name="add_location_opts" mandatory="True" fields="all">
          <option name="name" type="string">Short name of new location</option>
          <option name="fullname" type="string">Full/descriptive name of new location</option>
@@ -738,6 +799,8 @@
    </command>
 
    <command name="del_location">
+      Remove a location from the database. The command will fail if there
+      are any hosts at that location, or if the location is used within any service maps.
       <optgroup name="del_location_opts" mandatory="True" fields="all">
          <option name="name" type="string">Short name of new location</option>
          <option name="type" type="string">Location type</option>
@@ -746,17 +809,17 @@
    </command>
 
    <command name="add_chassis">
-      Add a new chassis to the database
+      Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS. 
       <optgroup name="add_chassis_input" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new chassis</option>
-         <option name="rack" type="string">Name of the rack that contains the chassis</option>
+         <option name="name" type="string">FQDN name of the new chassis</option>
+         <option name="rack" type="string">Name of the rack location for this chassis</option>
+	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
       <optgroup name="optional_opts">
 	 <option name="serial" type="string">serial number</option>
-         <option name="model" type="string">chassis model</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_chassis/%(rack)s/%(name)s" />
+      <transport method="put" path="chassis/%(name)s" />
    </command>
 
    <command name="show_chassis">
@@ -765,15 +828,15 @@
          <option name="name" type="string">chassis name</option>
       </optgroup>
       <transport method="get" path="location/chassis" />
-      <transport trigger="name" method="get" path="location/chassis/%(name)s" />
+      <transport trigger="name" method="get" path="chassis/%(name)s" />
    </command>
 
    <command name="del_chassis">
-      Delete a chassis.
+      Delete a chassis. See also del_location.
       <optgroup name="del_chassis_opts" mandatory="True" fields="all">
          <option name="name" type="string">chassis name</option>
       </optgroup>
-      <transport method="delete" path="location/chassis/%(name)s" />
+      <transport method="delete" path="chassis/%(name)s" />
    </command>
 
    <command name="add_rack">
@@ -781,6 +844,7 @@
       use --building=dd --rackid=120 --row=H --column=13.  The rackid
       option can also be prefixed by building name, so using
       --building=dd --rackid=dd120 --row=H --column=13 would also work.
+      See also add_location.
       <optgroup name="add_rack_input" mandatory="True" fields="all">
          <option name="rackid" type="string">Name of the new rack, or just the id number</option>
          <option name="building" type="string">Name of the building that houses the rack</option>
@@ -805,7 +869,7 @@
    </command>
 
    <command name="del_rack">
-      Delete a rack.
+      Delete a rack. See also del_location.
       <optgroup name="del_rack_opts" mandatory="True" fields="all">
          <option name="name" type="string">rack name</option>
       </optgroup>
@@ -813,7 +877,7 @@
    </command>
 
    <command name="add_building">
-      Add a new building to the database
+      Add a new building to the database. See also add_location.
       <optgroup name="add_building_input" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new building</option>
          <option name="city" type="string">Name of the city that contains the building</option>
@@ -835,7 +899,7 @@
    </command>
 
    <command name="del_building">
-      Delete a building.
+      Delete a building. See also del_location.
       <optgroup name="del_building_opts" mandatory="True" fields="all">
          <option name="name" type="string">building name</option>
       </optgroup>
@@ -843,7 +907,7 @@
    </command>
 
    <command name="add_city">
-      Add a new city to the database
+      Add a new city to the database. See also add_location.
       <optgroup name="add_city_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new city</option>
          <option name="country" type="string">Name of the country that contains the city</option>
@@ -865,7 +929,7 @@
    </command>
 
    <command name="del_city">
-      Delete a city.
+      Delete a city. See also del_location.
       <optgroup name="del_city_opts" mandatory="True" fields="all">
          <option name="name" type="string">city name</option>
       </optgroup>
@@ -873,7 +937,7 @@
    </command>
 
    <command name="add_country">
-      Add a new country to the database
+      Add a new country to the database. See also add_location.
       <optgroup name="add_country_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new country</option>
          <option name="continent" type="string">Name of the continent that contains the country</option>
@@ -895,7 +959,7 @@
    </command>
 
    <command name="del_country">
-      Delete a country.
+      Delete a country. See also del_location.
       <optgroup name="del_country_opts" mandatory="True" fields="all">
          <option name="name" type="string">country name</option>
       </optgroup>
@@ -903,7 +967,7 @@
    </command>
 
    <command name="add_continent">
-      Add a new continent to the database
+      Add a new continent to the database. See also add_location.
       <optgroup name="add_continent_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new continent</option>
          <option name="hub" type="string">Name of the hub, which the continent belongs to</option>
@@ -925,7 +989,7 @@
    </command>
 
    <command name="del_continent">
-      Delete a continent.
+      Delete a continent. See also del_location.
       <optgroup name="del_continent_opts" mandatory="True" fields="all">
          <option name="name" type="string">continent name</option>
       </optgroup>
@@ -933,7 +997,7 @@
    </command>
 
    <command name="add_hub">
-      Add a new hub for MS to the database
+      Add a new hub for MS to the database. See also add_location.
       <optgroup name="add_hub_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new hub</option>
       </optgroup>
@@ -954,7 +1018,7 @@
    </command>
 
    <command name="del_hub">
-      Delete a hub.
+      Delete a hub. See also del_location.
       <optgroup name="del_hub_opts" mandatory="True" fields="all">
          <option name="name" type="string">hub name</option>
       </optgroup>
@@ -962,7 +1026,10 @@
    </command>
 
   <command name="add_personality">
-      Create a personality.
+      Create a personality. A default template will be created, however
+      this default will be insufficient for real usage and will need to
+      be edited in order to provide realistic information for such things as
+      cost allocations, usage, etc.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="name" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
@@ -971,7 +1038,8 @@
   </command>
 
   <command name="del_personality">
-      Delete a personality.
+      Delete a personality. This command will fail if any hosts are currently
+      using the personality.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="name" type="string">The name to delete</option>
          <option name="archetype" type="string">Which archetype to use</option>
@@ -991,7 +1059,14 @@
   </command>
 
    <command name="make_aquilon">
-      Create an aquilon host.
+      Create an aquilon host. Any required services which are not bound will cause
+      an implicit bind_client to occur. The host information will be compiled into
+      a working configuration. Any errors in creating the configuration will be
+      printed to the screen and cause the command to fail. If the configuration is
+      successfully created, then the new configuration will be "advertised" to the
+      host itself, to the data warehouse and to the bootservers, making the host
+      ready to build. The bootservers will put the host into "install" mode of
+      pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
          <option name="os" type="string">OS to assign to host</option>
@@ -1001,6 +1076,8 @@
    </command>
 
    <command name="add_machine">
+      Create a new machine at a given location.
+
       If the model was created with machine specifications (values for
       cpuname, cpuvendor, cpuspeed, cpucount, memory) they do not need
       to be given to this command - the model info will be used as a default.
@@ -1032,6 +1109,7 @@
    </command>
 
    <command name="show_machine">
+      Show the hardware configuration of the named machine.
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string">machine name</option>
 	 <option name="all" type="boolean" conflicts="machine">all</option>
@@ -1049,6 +1127,8 @@
    </command>
 
    <command name="del_machine">
+      Delete the specified machine. This command will fail if the machine
+      is being used: you must del_host before you can del_machine.
       <optgroup name="del_machine_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine name</option>
       </optgroup>
@@ -1056,6 +1136,8 @@
    </command>
 
    <command name="add_tor_switch">
+      Create a new Top-Of-Rack (TOR) network switch.
+
       If the model was created with machine specifications (values for
       cpuname, cpuvendor, cpuspeed, cpucount, memory) they do not need
       to be given to this command - the model info will be used as a default.
@@ -1098,6 +1180,7 @@
    </command>
 
    <command name="show_tor_switch">
+      Show the configuration information for the specified switch.
       <optgroup name="show_tor_switch_opts" mandatory="True" fields="any">
          <option name="tor_switch" type="string">tor_switch name</option>
          <option name="rack" type="string">Rack name</option>
@@ -1108,6 +1191,7 @@
    </command>
 
    <command name="del_tor_switch">
+      Delete the specified TOR switch.
       <optgroup name="del_tor_switch_opts" mandatory="True" fields="all">
          <option name="tor_switch" type="string">tor_switch name</option>
       </optgroup>
@@ -1115,6 +1199,7 @@
    </command>
 
    <command name="show_principal">
+      Show the entitlements for a given username.
       <optgroup name="show_role_opts" mandatory="False">
          <option name="principal" type="string">User Principal to check</option>
       </optgroup>
@@ -1123,8 +1208,9 @@
    </command>
 
    <command name="permission">
+      Modify the entitlements for a user.
       <optgroup name="permission_opts" mandatory="True">
-         <option name="principal" type="string">User Principal to change</option>
+         <option name="principal" type="string">User Principal (e.g. njw@is1.morgan) to change</option>
          <option name="role" type="string">Role to use</option>
       </optgroup>
       <optgroup name="permission_optional_opts">
@@ -1135,6 +1221,7 @@
    </command>
 
    <command name="add_dns_domain">
+      Add a new DNS subdomain.
       <optgroup name="add_dns_domain_options" mandatory="True" fields="all">
          <option name="dns_domain" type="string">Name of the new DNS domain</option>
       </optgroup>
@@ -1145,6 +1232,8 @@
    </command>
 
    <command name="show_dns_domain">
+      Show the configuration of the specified DNS domain. If --all is specified, then
+      the configuration of all DNS domains will be output.
       <optgroup name="del_dns_domain_options" mandatory="True" fields="any">
          <option name="dns_domain" type="string" conflicts="all">Name of the DNS domain</option>
          <option name="all" type="boolean" conflicts="dns_domain">Show all DNS domains</option>
@@ -1154,6 +1243,7 @@
    </command>
 
    <command name="del_dns_domain">
+      Delete the named DNS subdomain.
       <optgroup name="del_dns_domain_options" mandatory="True" fields="all">
          <option name="dns_domain" type="string">Name of the DNS domain</option>
       </optgroup>

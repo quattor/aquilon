@@ -69,6 +69,19 @@ class TestBindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
 
+    def testverifyshowserviceserver(self):
+        command = "show service --server unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
+        self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
+
+    def testverifyshowserviceserviceserver(self):
+        command = "show service --service utsvc --server unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)

@@ -41,7 +41,7 @@ class BuildItem(Base):
 
     host     = relation(Host, backref = 'build_items')
     #TODO: auto-updated "last_used" column?
-    cfg_path = relation(CfgPath, uselist = False) #TODO: backref?
+    cfg_path = relation(CfgPath, uselist = False, backref = 'build_items') #TODO: backref?
 
 
     def __repr__(self):
