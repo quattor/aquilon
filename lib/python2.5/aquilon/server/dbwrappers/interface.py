@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -16,6 +12,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.net.ip_to_int import dq_to_int
+from aquilon.aqdb.sy.tor_switch import TorSwitch
 
 
 # FIXME: interface type?  interfaces for hardware entities in general?
@@ -44,20 +41,14 @@ def restrict_tor_offsets(session, dbnetwork, ip):
     if dbnetwork.mask < 8:
         # This network doesn't have enough addresses, the test is irrelevant.
         return
-    q = session.query(Interface)
-    q = q.join(["hardware_entity"])
-    q = q.filter_by(hardware_entity_type="tor_switch")
-    q = q.reset_joinpoint()
-    # FIXME: Network is no longer on interface...
-    #q = q.filter_by(network=dbnetwork)
-    dbinterface = q.first()
-    if not dbinterface:
+    dbtor_switch = session.query(TorSwitch).filter_by(network=dbnetwork).first()
+    if not dbtor_switch:
         return
     netip = dq_to_int(dbnetwork.ip)
     thisip = dq_to_int(ip)
     if thisip == (netip + 6) or thisip == (netip + 7):
-        raise ArgumentError("The IP address %s is reserved for dynamic dhcp on subnet %s." %
-                (ip, dbnetwork.ip))
+        raise ArgumentError("The IP address %s is reserved for dynamic dhcp on subnet %s by tor_switch %s." %
+                (ip, dbnetwork.ip, dbtor_switch.fqdn))
 
 
 #if __name__=='__main__':

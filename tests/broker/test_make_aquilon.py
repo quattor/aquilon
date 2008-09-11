@@ -102,10 +102,9 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip2, self.netmask2, self.broadcast2, self.gateway2),
             command)
-        # FIXME: Still working this out...
-        #self.matchoutput(out,
-        #    """'/system/network/interfaces/eth1' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'static');""" % (self.hostip3, self.netmask3, self.broadcast3, self.gateway3),
-        #    command)
+        self.matchoutput(out,
+            """'/system/network/interfaces/eth1' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'static');""" % (self.hostip3, self.netmask3, self.broadcast3, self.gateway3),
+            command)
         self.matchoutput(out,
             """include { 'archetype/base' };""",
             command)

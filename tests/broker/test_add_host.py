@@ -35,6 +35,11 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Status: production", command)
 
+    def testverifyshowfqdnhost(self):
+        command = "show fqdn --fqdn unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

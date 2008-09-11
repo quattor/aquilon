@@ -37,6 +37,11 @@ class TestAddChassis(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
 
+    def testverifyshowfqdnchassis(self):
+        command = "show fqdn --fqdn ut3c1.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)

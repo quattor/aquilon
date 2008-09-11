@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -39,6 +35,10 @@ class CommandDelMachine(BrokerCommand):
         if dbmachine.host:
             raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
                     % (dbmachine.name, dbmachine.host.fqdn))
+        if dbmachine.auxiliaries:
+            raise ArgumentError("Cannot delete machine %s while it is in use (auxiliaries: %s)"
+                                % (dbmachine, ",".join(
+                                    [a.fqdn for a in dbmachine.auxiliaries])))
         for iface in dbmachine.interfaces:
             log.msg("Before deleting machine '%s', removing interface '%s' [%s] boot=%s)" %
                     (dbmachine.name, iface.name, iface.mac, iface.bootable))

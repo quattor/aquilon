@@ -56,7 +56,6 @@ class TestAddInterface(TestBrokerCommand):
             "--machine", "ut3c1n3", "--mac", self.hostmac2.upper()])
 
     def testaddut3c1n3eth1(self):
-        # FIXME: This used to add self.hostip3
         testmac = []
         for i in self.hostmac3.split(":"):
             if i.startswith("0"):
@@ -110,51 +109,6 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
-
-    # FIXME: This test might need to move elsewhere...
-    #def testrejectut3c1n4eth1(self):
-        # This is an old (relatively) well known DNS server sitting out
-        # on the net that will probably never be controlled by the Firm.
-        # It should not appear in our network table, and thus should
-        # trigger a bad request here.
-    #    self.badrequesttest(["add", "interface", "--interface", "eth1",
-    #        "--machine", "ut3c1n4", "--mac", "02:02:04:02:02:04",
-    #        "--ip", "4.2.2.4"])
-
-    #def testverifyrejectut3c1n4eth1(self):
-    #    command = "show machine --machine ut3c1n4"
-    #    out = self.commandtest(command.split(" "))
-    #    self.matchclean(out, "Interface: eth1", command)
-
-    # FIXME: This test might need to move elsewhere...
-    #def testrejectsixthip(self):
-        # This tests that the sixth ip offset on a tor_switch network
-        # gets rejected.
-        # FIXME: Hard-coded.  Assumes the 8.8.4.0 subnet, since all
-        # the tests are using 8.8.[4567].* ips.
-    #    self.badrequesttest(["add", "interface", "--interface", "eth2",
-    #        "--machine", "ut3c1n4", "--mac", "02:02:08:08:04:06",
-    #        "--ip", "8.8.4.6"])
-
-    #def testverifyrejectsixthip(self):
-    #    command = "show machine --machine ut3c1n4"
-    #    out = self.commandtest(command.split(" "))
-    #    self.matchclean(out, "Interface: eth2", command)
-
-    # FIXME: This test might need to move elsewhere...
-    #def testrejectseventhip(self):
-        # This tests that the seventh ip offset on a tor_switch network
-        # gets rejected.
-        # FIXME: Hard-coded.  Assumes the 8.8.4.0 subnet, since all
-        # the tests are using 8.8.[4567].* ips.
-    #    self.badrequesttest(["add", "interface", "--interface", "eth3",
-    #        "--machine", "ut3c1n4", "--mac", "02:02:08:08:04:07",
-    #        "--ip", "8.8.4.7"])
-
-    #def testverifyrejectseventhip(self):
-    #    command = "show machine --machine ut3c1n4"
-    #    out = self.commandtest(command.split(" "))
-    #    self.matchclean(out, "Interface: eth3", command)
 
 
 if __name__=='__main__':
