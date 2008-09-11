@@ -55,6 +55,17 @@ def populate(db, *args, **kw):
         db.s.save(aurora_vendor)
         created.append(aurora_vendor)
 
+        for v in ['bnt', 'cisco']:
+            if not v in created:
+                dbv = Vendor(name=v)
+                try:
+                    db.s.save(dbv)
+                except Exception, e:
+                    db.s.rollback()
+                    print >> sys.stderr, e
+                    continue
+                created.append(v)
+
         try:
             db.s.commit()
         except Exception,e:

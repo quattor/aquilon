@@ -74,6 +74,8 @@ def populate(db, *args, **kw):
             ['dell','poweredge_2650','rackmount'],
             ['dell','poweredge_2850','rackmount'],
             ['dell','optiplex_260','workstation'],
+            ['bnt','rs g8000','tor_switch'],
+            ['cisco','ws-c2960-48tt-l','tor_switch'],
             ['aurora_vendor', 'aurora_chassis_model', 'aurora_chassis'],
             ['aurora_vendor', 'aurora_model', 'aurora_node']]
 
