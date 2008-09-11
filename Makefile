@@ -73,10 +73,6 @@ install: $(INSTALLFILES)
 default:
 	@echo "Use 'gmake install' to install ${META}/${PROJ}/${REL}"
 
-.PHONY: update
-update:
-	p4 sync ...
-
 # The second find needs to ignore the .git directory... just doing a
 # find on * is an easy/legit way to do that in this case.
 .PHONY: clean
@@ -96,12 +92,20 @@ betalink:
 to:
 	vms turnover release ${META} ${PROJ} ${REL}
 
+.PHONY: to_nolock
+to_nolock:
+	vms turnover release ${META} ${PROJ} ${REL} -- -nolock
+
 .PHONY: distqa
-distqa: to
+distqa: to_nolock
 	vms dist ${META} ${PROJ} ${REL} -- -cells ${QCELLS} ${QACOMMENT}
 
 .PHONY: distworld
-distworld: to
+distworld: to_nolock
+	vms dist ${META} ${PROJ} ${REL} -- -gl ${QACOMMENT}
+
+.PHONY: distfinal
+distfinal: to
 	vms dist ${META} ${PROJ} ${REL} -- -gl ${QACOMMENT}
 
 .PHONY: unlock
@@ -116,10 +120,9 @@ freeze:
 thaw:
 	vms thawdist ${META} ${PROJ}
 
+# Handled by SCM/GNUmakefile
 .PHONY: create
 create:
 	vms create release ${META} ${PROJ} ${REL} -- -nobuildvolume
 	vms create install ${META} ${PROJ} ${REL} common
 
-.PHONY: upd-dist
-upd-dist: unlock update install distworld
