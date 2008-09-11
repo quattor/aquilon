@@ -66,8 +66,13 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 	@mkdir -p `dirname $@`
 	install -m 0555 $< $@
 
+# Running twistd after all the files have been installed generates a
+# dropin.cache file that would otherwise be missing (and that missing
+# file causes the server to complain loudly on startup).
+# The file will only be generated as needed.
 .PHONY: install
 install: $(INSTALLFILES)
+	$(COMMON)bin/twistd --help >/dev/null
 
 .PHONY: default
 default:
