@@ -34,8 +34,9 @@ def populate(db, *args, **kw):
     company.create(checkfirst = True)
 
     if len(s.query(Company).all()) < 1:
-        a = Company(name='ms.com', fullname = 'root node', parent_id = 1)
-        #FIXME: hardcoded 1 is bad. select it then update the instance
+        #NO PARENT ID: breaks 'connect by'
+        #TODO: make non-null with exception (I think theres a way to do it)
+        a = Company(name='ms.com', fullname = 'root node')
         s.add(a)
         s.commit()
 
@@ -44,4 +45,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
