@@ -172,12 +172,14 @@ class ObjectFormatter(object):
                 int_msg = host_msg.machine.interfaces.add()
                 int_msg.device = str(i.name)
                 int_msg.mac = str(i.mac)
-                if i.ip:
-                    int_msg.ip = str(i.ip)
-                if i.boot:
-                    int_msg.bootable = i.boot
-                if i.network_id:
+                if hasattr(i.system, "ip"):
+                    int_msg.ip = str(i.system.ip)
+                if hasattr(i, "bootable"):
+                    int_msg.bootable = i.bootable
+                if hasattr(i, "network_id"):
                     int_msg.network_id = i.network_id
+                if hasattr(i.system, "fqdn"):
+                    int_msg.fqdn = i.system.fqdn
 
     def add_service_msg(self, service_msg, service, service_instance=False):
         """Adds a service message, will either nest the given service_instance in the message,
@@ -191,10 +193,10 @@ class ObjectFormatter(object):
                 self.add_service_instance_msg(service_msg.serviceinstances.add(), si)
 
     def add_service_instance_msg(self, si_msg, service_instance):
-        si_msg.name = str(service_instance.host_list)
+        si_msg.name = str(service_instance.name)
         si_msg.template = str(service_instance.cfg_path)
-        for server in service_instance.host_list.hosts:
-            self.add_host_msg(si_msg.servers.add(), server.host)
+        for server in service_instance.servers:
+            self.add_host_msg(si_msg.servers.add(), server.system)
         for client in service_instance.cfg_path.build_items:
             self.add_host_msg(si_msg.clients.add(), client.host)
 

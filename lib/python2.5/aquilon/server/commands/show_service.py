@@ -35,7 +35,7 @@ class CommandShowService(BrokerCommand):
         elif dblient:
             service_instances = get_client_service_instances(session, dblient)
             if instance:
-                service_instances = [si  for si in service_instances if si.name == instance]
+                service_instances = [si for si in service_instances if si.name == instance]
             return ServiceInstanceList(service_instances)
         else:
             return ServiceList(session.query(Service).all())

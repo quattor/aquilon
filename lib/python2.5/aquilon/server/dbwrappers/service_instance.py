@@ -15,6 +15,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.svc.service_map import ServiceMap
+from aquilon.aqdb.sy.build_item import BuildItem
 
 
 def get_service_instance(session, dbservice, instance):
@@ -25,6 +26,12 @@ def get_service_instance(session, dbservice, instance):
         raise NotFoundException("Service %s instance %s not found (try `aq add service --service %s --instance %s` to add it)"
                 % (dbservice.name, instance, dbservice.name, instance))
     return dbsi
+
+def get_client_service_instances(session, dbclient):
+    service_instances = []
+    builditems = session.query(BuildItem).filter_by(host=dbclient).all()
+    service_instances = [bi.cfg_path.svc_inst for bi in builditems]
+    return service_instances
 
 # Modeled after get_server_for in aqdb/population_scripts.py
 def choose_service_instance(session, dbhost, dbservice):
