@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -16,6 +12,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.processes import remove_file
 
 
 class CommandManage(BrokerCommand):
@@ -36,14 +33,18 @@ class CommandManage(BrokerCommand):
         # We don't create a new plenary host in the new domain - that'll
         # be done lazily when someone next tries to compile the new domain.
         try:
-            builddir = os.path.join(self.config.get("broker", "builddir"), "domains", dbhost.domain.name, "profiles")
+            builddir = os.path.join(self.config.get("broker", "builddir"),
+                                    "domains", dbhost.domain.name, "profiles")
             plenary = PlenaryHost(dbhost)
             plenary.remove(builddir)
             plenary = None
-            file = os.path.join(qdir, "build", "xml", domain, fqdn+".xml")
-            os.remove(file)
-            file = os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
-            os.remove(file)
+            qdir = self.config.get("broker", "quattordir")
+            domain = dbhost.domain.name
+            fqdn = dbhost.fqdn
+            f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml")
+            remove_file(f)
+            f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
+            remove_file(f)
         finally:
             pass
 
