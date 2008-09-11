@@ -37,17 +37,15 @@ def populate(db, *args, **kw):
 
     country.create(checkfirst = True)
 
-    s=db.session()
-
     if len(s.query(Country).all()) < 1:
         cnts = {}
         for c in s.query(Continent).all():
             cnts[c.name] = c
 
         for row in dsdb.dump_country():
-
-            if row[0] == 'jp':
-                continue #skip japan, it maps directly to the TK hub
+            #NO MORE SPECIAL CASE
+            #if row[0] == 'jp':
+            #    continue #skip japan, it maps directly to the TK hub
 
             a = Country(name = str(row[0]),
                         fullname = str(row[1]),
@@ -56,11 +54,12 @@ def populate(db, *args, **kw):
 
         s.commit()
 
-        #Handle Japan as a special case
-        tk_hub = s.query(Hub).filter_by(name = 'tk').one()
+        #DON'T handle Japan as a special case
+        #tk_hub = s.query(Hub).filter_by(name = 'tk').one()
+        #
+        #jp = Country(name = 'jp', fullname = 'Japan', parent = tk_hub)
+        #s.add(jp)
 
-        jp = Country(name = 'jp', fullname = 'Japan', parent = tk_hub)
-        s.add(jp)
         try:
             s.commit()
         except Exception, e:
@@ -76,4 +75,3 @@ location_type B where a.location_type_id = B.id """
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
