@@ -1108,6 +1108,29 @@
       <transport method="put" path="machine/%(machine)s" />
    </command>
 
+   <command name="update_machine">
+      Update a machine by hardware name or hostname.
+      <optgroup name="update_machine_opts" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="hostname">machine name</option>
+         <option name="hostname" type="string" conflicts="machine">fully qualified host name</option>
+      </optgroup>
+      <optgroup name="update_machine_opts" mandatory="False" fields="any">
+         <option name="model" type="string">machine model</option>
+	 <option name="cpuname" type="string">cpu name</option>
+	 <option name="cpuvendor" type="string">cpu vendor</option>
+	 <option name="cpuspeed" type="string">cpu speed</option>
+	 <option name="cpucount" type="string">cpu count</option>
+	 <option name="memory" type="string">memory in MB</option>
+         <option name="chassis" type="string">chassis name</option>
+         <option name="slot" type="string">chassis slot</option>
+         <option name="rack" type="string">rack name</option>
+         <option name="desk" type="string">desk name</option>
+	 <option name="serial" type="string">serial number</option>
+      </optgroup>
+      <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
+      <transport method="post" path="machine/%(machine)s/command/update" />
+   </command>
+
    <command name="show_machine">
       Show the hardware configuration of the named machine.
       <optgroup name="show_machine_opts" mandatory="True" fields="any">

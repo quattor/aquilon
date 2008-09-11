@@ -63,6 +63,7 @@ from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_service_all import TestShowServiceAll
 from test_show_fqdn import TestShowFqdn
 from test_update_interface import TestUpdateInterface
+from test_update_machine import TestUpdateMachine
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
@@ -116,7 +117,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowFqdn,
-                TestUpdateInterface,
+                TestUpdateInterface, TestUpdateMachine,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
