@@ -811,7 +811,7 @@
    <command name="add_chassis">
       Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS. 
       <optgroup name="add_chassis_input" mandatory="True" fields="all">
-         <option name="name" type="string">FQDN name of the new chassis</option>
+         <option name="chassis" type="string">FQDN name of the new chassis</option>
          <option name="rack" type="string">Name of the rack location for this chassis</option>
 	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
@@ -819,24 +819,24 @@
 	 <option name="serial" type="string">serial number</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="chassis/%(name)s" />
+      <transport method="put" path="chassis/%(chassis)s" />
    </command>
 
    <command name="show_chassis">
       Show the chassis list, or details about a particular chassis.
       <optgroup name="show_chassis_opts">
-         <option name="name" type="string">chassis name</option>
+         <option name="chassis" type="string">chassis name</option>
       </optgroup>
       <transport method="get" path="location/chassis" />
-      <transport trigger="name" method="get" path="chassis/%(name)s" />
+      <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
    </command>
 
    <command name="del_chassis">
       Delete a chassis. See also del_location.
       <optgroup name="del_chassis_opts" mandatory="True" fields="all">
-         <option name="name" type="string">chassis name</option>
+         <option name="chassis" type="string">chassis name</option>
       </optgroup>
-      <transport method="delete" path="chassis/%(name)s" />
+      <transport method="delete" path="chassis/%(chassis)s" />
    </command>
 
    <command name="add_rack">

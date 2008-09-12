@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -24,19 +20,19 @@ from brokertest import TestBrokerCommand
 class TestDelChassis(TestBrokerCommand):
 
     def testdelut3c5(self):
-        command = "del chassis --name ut3c5.aqd-unittest.ms.com"
+        command = "del chassis --chassis ut3c5.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut3c5(self):
-        command = "show chassis --name ut3c5.aqd-unittest.ms.com"
+        command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut3c1(self):
-        command = "del chassis --name ut3c1.aqd-unittest.ms.com"
+        command = "del chassis --chassis ut3c1.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut3c1(self):
-        command = "show chassis --name ut3c1.aqd-unittest.ms.com"
+        command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
 
