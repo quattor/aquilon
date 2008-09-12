@@ -38,6 +38,8 @@ class PlenaryMachineInfo(Plenary):
         self.harddisks = harddisks
         self.interfaces = []
         for interface in dbmachine.interfaces:
+            if interface.interface_type != 'public':
+                continue
             self.interfaces.append({"name":interface.name,
                                     "mac":interface.mac,
                                     "boot":interface.bootable})

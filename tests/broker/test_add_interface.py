@@ -65,6 +65,10 @@ class TestAddInterface(TestBrokerCommand):
         self.noouttest(["add", "interface", "--interface", "eth1",
             "--machine", "ut3c1n3", "--mac", ":".join(testmac)])
 
+    def testaddut3c1n3bmc(self):
+        self.noouttest(["add", "interface", "--interface", "bmc",
+            "--machine", "ut3c1n3", "--mac", self.hostmac10.lower()])
+
     def testverifyaddut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
@@ -72,6 +76,8 @@ class TestAddInterface(TestBrokerCommand):
                          self.hostmac2.lower(), command)
         self.matchoutput(out, "Interface: eth1 %s boot=False" %
                          self.hostmac3.lower(), command)
+        self.matchoutput(out, "Interface: bmc %s boot=False" %
+                         self.hostmac10.lower(), command)
 
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
@@ -87,6 +93,9 @@ class TestAddInterface(TestBrokerCommand):
                 command)
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",
+                command)
+        self.matchclean(out,
+                """cards/nic/bmc/hwaddr""",
                 command)
 
     def testaddut3c1n4eth0(self):
@@ -109,6 +118,34 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out,
                 """"cards/nic/eth0/boot" = true;""",
                 command)
+
+    def testaddinterfaceut3c5(self):
+        command = ["add", "interface", "--interface", "oa",
+                   "--mac", self.hostmac8, "--ip", self.hostip8,
+                   "--chassis", "ut3c5.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testverifyaddinterfaceut3c5(self):
+        command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "IP: %s" % self.hostip8, command)
+        self.matchoutput(out, "Interface: oa %s boot=False" %
+                         self.hostmac8, command)
+
+    def testaddinterfacenp997gd1r04(self):
+        command = ["add", "interface", "--interface", "xge49",
+                   "--mac", self.hostmac9, "--ip", self.hostip9,
+                   "--tor_switch", "np997gd1r04.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testverifyaddinterfacenp997gd1r04(self):
+        command = "show tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Tor_switch: np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "IP: %s" % self.hostip9, command)
+        self.matchoutput(out, "Interface: xge49 %s boot=False" %
+                         self.hostmac9, command)
 
 
 if __name__=='__main__':

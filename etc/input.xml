@@ -377,16 +377,29 @@
    </command>
 
    <command name="add_interface">
-      Add a new network interface to the database
+      Add a new network interface to the database.
+
+      To give an IP address to a host, provide it when using add_host.
+      For chassis and tor_switches, the IP address is provided with this
+      command.
       <optgroup name="add_interface_opts" mandatory="True" fields="all">
-         <option name="interface" type="string">Interface name</option>
-         <option name="machine" type="string">Machine name</option>
          <option name="mac" type="string">MAC address</option>
+         <option name="interface" type="string">Interface name</option>
+      </optgroup>
+      <optgroup name="add_interface_hw" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="hostname chassis tor_switch">Machine (node) name</option>
+         <option name="hostname" type="string" conflicts="machine chassis tor_switch">Hostname</option>
+         <option name="chassis" type="string" conflicts="machine hostname tor_switch">Chassis name</option>
+         <option name="tor_switch" type="string" conflicts="machine hostname chassis">TOR Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="comments" type="string">Comments</option>
+         <option name="ip" type="string" conflicts="hostname machine">IP address (required for tor_switch and chassis)</option>
       </optgroup>
-      <transport method="put" path="machine/%(machine)s/interface/%(interface)s" />
+      <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
+      <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
+      <transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s" />
+      <transport trigger="tor_switch" method="put" path="tor_switch/%(tor_switch)s/interface/%(interface)s" />
    </command>
 
    <command name="update_interface">
