@@ -49,6 +49,7 @@ from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
+from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
@@ -109,7 +110,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary,
-                TestMapService, TestBindClient, TestMakeAquilon,
+                TestMapService, TestBindClient, TestPrebindServer,
+                TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestBindServer,
                 TestBindServerConstraints,

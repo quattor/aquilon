@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -67,6 +63,15 @@ class TestAddService(TestBrokerCommand):
         command = "show service --service ntp"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
+
+    def testaddaqdinstance(self):
+        command = "add service --service aqd --instance ny-prod"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddntpinstance(self):
+        command = "show service --service aqd"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: aqd Instance: ny-prod", command)
 
     def testaddutsi1instance(self):
         command = "add service --service utsvc --instance utsi1"

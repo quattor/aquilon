@@ -71,6 +71,15 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchclean(out, "Server: unittest02.one-nyp.ms.com", command)
         self.matchclean(out, "Server: unittest00.one-nyp.ms.com", command)
 
+    def testunbindaqd(self):
+        self.noouttest(["unbind", "server",
+            "--hostname", "nyaqd1.ms.com", "--service", "aqd", "--all"])
+
+    def testverifyunbindaqd(self):
+        command = "show service --service aqd"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindServer)

@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -42,6 +38,16 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: dns Instance: nyinfratest Map: Hub ny", command)
+
+    def testmapaqd(self):
+        self.noouttest(["map", "service", "--hub", "ny",
+            "--service", "aqd", "--instance", "ny-prod"])
+
+    def testverifymapdns(self):
+        command = "show map --service aqd --instance ny-prod --hub ny"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                "Service: aqd Instance: ny-prod Map: Hub ny", command)
 
     def testmapbootserver(self):
         self.noouttest(["map", "service", "--rack", "ut3",

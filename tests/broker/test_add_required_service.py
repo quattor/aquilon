@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -40,6 +36,15 @@ class TestAddRequiredService(TestBrokerCommand):
         command = "show archetype --archetype aquilon"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: dns", command)
+
+    def testaddrequiredaqd(self):
+        command = "add required service --service aqd --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddrequiredaqd(self):
+        command = "show archetype --archetype aquilon"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: aqd", command)
 
     def testaddrequiredutsvc(self):
         command = "add required service --service utsvc --archetype aquilon"

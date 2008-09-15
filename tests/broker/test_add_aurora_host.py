@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -52,6 +48,13 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Domain: production", command)
         self.matchoutput(out, "Status: production", command)
+
+    def testaddnyaqd1(self):
+        self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1"])
+
+    def testverifyaddnyaqd1(self):
+        command = "show host --hostname nyaqd1.ms.com"
+        out = self.commandtest(command.split(" "))
 
 
 if __name__=='__main__':
