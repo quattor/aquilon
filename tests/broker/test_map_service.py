@@ -85,8 +85,8 @@ class TestMapService(TestBrokerCommand):
         self.matchoutput(out,
                 "Service: utsvc Instance: utsi2 Map: Building ut", command)
 
-    def testverifynyhubmapproto(self):
-        command = "show map --hub ny"
+    def testverifyutmapproto(self):
+        command = "show map --building ut --format proto"
         out = self.commandtest(command.split(" "))
         self.parse_servicemap_msg(out)
 
