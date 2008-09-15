@@ -145,41 +145,52 @@ class ObjectFormatter(object):
 
     def add_host_msg(self, host_msg, host):
         host_msg.hostname = str(host.name)
-        host_msg.fqdn = host.fqdn
-        host_msg.archetype.name = str(host.archetype.name)
-        # FIXME we haven't imported ServiceListItem, so there's no backref to the sl in host.archetype
-        #        if host.archetype.service_list:
-        #            host_msg.archetype.service_list = host.archetype.service_list
-        host_msg.domain.name = str(host.domain.name)
-        host_msg.domain.owner = str(host.domain.owner.name)
-        host_msg.status = str(host.status.name)
-        host_msg.machine.name = str(host.machine.name)
-        host_msg.machine.location.name = str(host.machine.location.name)
-        host_msg.machine.location.location_type = str(host.machine.location.location_type)
-        host_msg.machine.model.name = str(host.machine.model.name)
-        host_msg.machine.model.vendor = str(host.machine.model.vendor.name)
-        host_msg.machine.cpu = str(host.machine.cpu.name)
-        host_msg.machine.memory = host.machine.memory
-        host_msg.sysloc = str(host.sysloc)
-        if host.machine.disks:
-            for disk in host.machine.disks:
-                disk_msg = host_msg.machine.disks.add()
-                disk_msg.device_name = str(disk.device_name)
-                disk_msg.capacity = disk.capacity
-                disk_msg.disk_type = str(disk.disk_type.type)
-        if host.machine.interfaces:
-            for i in host.machine.interfaces:
-                int_msg = host_msg.machine.interfaces.add()
-                int_msg.device = str(i.name)
-                int_msg.mac = str(i.mac)
-                if hasattr(i.system, "ip"):
-                    int_msg.ip = str(i.system.ip)
-                if hasattr(i, "bootable"):
-                    int_msg.bootable = i.bootable
-                if hasattr(i, "network_id"):
-                    int_msg.network_id = i.network_id
-                if hasattr(i.system, "fqdn"):
-                    int_msg.fqdn = i.system.fqdn
+        if hasattr(host, "fqdn"):
+            host_msg.fqdn = host.fqdn
+        if hasattr(host, "archtype"):
+            host_msg.archetype.name = str(host.archetype.name)
+        if hasattr(host, "domain"):
+            host_msg.domain.name = str(host.domain.name)
+            host_msg.domain.owner = str(host.domain.owner.name)
+        if hasattr(host, "status"):
+            host_msg.status = str(host.status.name)
+        if hasattr(host, "sysloc"):
+            host_msg.sysloc = str(host.sysloc)
+        if hasattr(host, "ip"):
+            host_msg.ip = str(host.ip)
+        if hasattr(host, "mac"):
+            host_msg.mac = str(host.mac)
+        if hasattr(host, "system_type"):
+            host_msg.type = str(host.system_type)
+        if hasattr(host, "machine"):
+            host_msg.machine.name = str(host.machine.name)
+            if hasattr(host.machine, "location"):
+                host_msg.machine.location.name = str(host.machine.location.name)
+                host_msg.machine.location.location_type = str(host.machine.location.location_type)
+            host_msg.machine.model.name = str(host.machine.model.name)
+            host_msg.machine.model.vendor = str(host.machine.model.vendor.name)
+            host_msg.machine.cpu = str(host.machine.cpu.name)
+            host_msg.machine.memory = host.machine.memory
+
+            if hasattr(host.machine, "disks"):
+                for disk in host.machine.disks:
+                    disk_msg = host_msg.machine.disks.add()
+                    disk_msg.device_name = str(disk.device_name)
+                    disk_msg.capacity = disk.capacity
+                    disk_msg.disk_type = str(disk.disk_type.type)
+            if hasattr(host.machine, "interfaces"):
+                for i in host.machine.interfaces:
+                    int_msg = host_msg.machine.interfaces.add()
+                    int_msg.device = str(i.name)
+                    int_msg.mac = str(i.mac)
+                    if hasattr(i.system, "ip"):
+                        int_msg.ip = str(i.system.ip)
+                    if hasattr(i, "bootable"):
+                        int_msg.bootable = i.bootable
+                    if hasattr(i, "network_id"):
+                        int_msg.network_id = i.network_id
+                    if hasattr(i.system, "fqdn"):
+                        int_msg.fqdn = i.system.fqdn
 
     def add_service_msg(self, service_msg, service, service_instance=False):
         """Adds a service message, will either nest the given service_instance in the message,

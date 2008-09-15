@@ -50,15 +50,16 @@ class NetworkHostListFormatter(ObjectFormatter):
             nfm = NetworkFormatter()
             details.append(indent + nfm.format_raw(network))
             # XXX should sort on either host or ip, output is ugly
-            for iface in network.interfaces:
-                for phys_iface in iface.physical_interface:
-                    if phys_iface.machine.host.fqdn:
-                        device_name = phys_iface.machine.host.fqdn
-                    elif phys_iface.machine.host.name:
-                        device_name = phys_iface.machine.host.name
-                    else:
-                        device_name = phys_iface.machine.name
-                    details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, iface.ip, iface.mac))
+            for system in network.interfaces:
+                if hasattr(system, "fqdn"):
+                    device_name = system.fqdn
+                elif hasattr(system, "name"):
+                    device_name = system.name
+                elif hasattr(system, "machine"):
+                    device_name = int.machine.name
+                else:
+                    device_name =  system.ip
+                details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, system.mac))
         return "\n".join(details)
 
     def format_proto(self, netlist):
@@ -99,9 +100,8 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         net_msg.sysloc = str(net.location.sysloc())
         net_msg.location.name = str(net.location.name)
         net_msg.location.location_type = str(net.location.location_type)
-        for iface in net.interfaces:
-            for phys_iface in iface.physical_interface:
-                self.add_host_msg(net_msg.hosts.add(), phys_iface.machine.host)
+        for system in net.interfaces:
+            self.add_host_msg(net_msg.hosts.add(), system)
 
     def format_csv(self, nlist):
         details = [",".join(self.fields)]
