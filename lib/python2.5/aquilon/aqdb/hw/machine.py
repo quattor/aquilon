@@ -10,8 +10,8 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
 
-from sqlalchemy      import (UniqueConstraint, Table, Column, Integer, 
-                            DateTime, Sequence, String, select, ForeignKey, 
+from sqlalchemy      import (UniqueConstraint, Table, Column, Integer,
+                            DateTime, Sequence, String, select, ForeignKey,
                             Index)
 
 from sqlalchemy.orm  import relation, deferred, backref
@@ -33,13 +33,6 @@ class Machine(HardwareEntity):
                                            name = 'machine_hw_ent_fk'),
                                            primary_key = True)
 
-    # We'll need to construct the table newly, then fill in these 2 columns in
-    # the hardware_entity table:
-
-    #id = Column(Integer, Sequence('machine_id_seq'), primary_key=True)
-    #location_id = Column(Integer, ForeignKey(
-    #    'location.id', name ='machine_loc_fk'), nullable = False)
-
     name = Column('name', AqStr(64), nullable = False)
 
     cpu_id = Column(Integer, ForeignKey(
@@ -47,18 +40,15 @@ class Machine(HardwareEntity):
 
     cpu_quantity = Column(Integer, nullable = False, default = 2) #constrain/smallint
 
-    memory = Column(Integer, nullable = False, default = 512) 
-
-    serial_no = Column(String(64), nullable = True)
+    memory = Column(Integer, nullable = False, default = 512)
 
     hardware_entity = relation(HardwareEntity, uselist = False,
                                backref = 'machine', passive_deletes = True)
 
     cpu      = relation(Cpu, uselist = False)
-    
-    #TODO: synonym in location lest we break things
-    #location = relation(Location, uselist = False)    
-    #TODO: proxy model property from parent like location
+
+    #TODO: synonym in location/model?
+    #location = relation(Location, uselist = False)
 
 machine = Machine.__table__
 
@@ -78,4 +68,3 @@ table = machine
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

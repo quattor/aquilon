@@ -22,7 +22,7 @@ from aquilon.aqdb.sy.system          import System
 from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 
 class Interface(Base):
-    """ In this design, interface is really just a name/type pair, AND the 
+    """ In this design, interface is really just a name/type pair, AND the
         primary source for MAC address. Name/Mac/IP, the primary tuple, is
         in system, where mac is duplicated, but code to update MAC addresses
         must come through here """
@@ -44,12 +44,12 @@ class Interface(Base):
                                                     ondelete = 'CASCADE'),
                                                    nullable = False)
 
-    system_id          = Column(Integer, ForeignKey(System.c.id, 
+    system_id          = Column(Integer, ForeignKey(System.c.id,
                                                  name = 'IFACE_SYSTEM_FK',
                                                  ondelete = 'CASCADE'),
                                                 nullable = True)
 
-    creation_date      = deferred(Column('creation_date', DateTime, 
+    creation_date      = deferred(Column('creation_date', DateTime,
                                        default = datetime.now,
                                      nullable = False))
 
@@ -68,13 +68,13 @@ class Interface(Base):
 interface = Interface.__table__
 interface.primary_key.name = 'interface_pk'
 
-table = interface
-
 interface.append_constraint(
         UniqueConstraint('mac', name = 'iface_mac_addr_uk'))
 
 interface.append_constraint(
         UniqueConstraint('hardware_entity_id', 'name', name = 'iface_hw_name_uk'))
+
+table = interface
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
