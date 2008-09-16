@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq del host`."""
+"""Contains the logic for `aq del auxiliary`."""
 
 
 import os
@@ -12,7 +12,6 @@ from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.host import get_host_dependencies
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.commands.del_host import delhost_lock

@@ -9,10 +9,7 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.domain import verify_domain
-from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
