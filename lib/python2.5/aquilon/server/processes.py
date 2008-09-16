@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -223,8 +219,8 @@ def build_index(config, session, profilesdir):
                     # service may be unknown
                     srvinfo = get_service(session, service)
                     for instance in srvinfo.instances:
-                        for hli in instance.host_list.hosts:
-                            service_modules[hli.host.fqdn] = 1
+                        for sis in instance.servers:
+                            service_modules[sis.system.fqdn] = 1
                 except Exception, e:
                     log.msg("failed to lookup up server module %s: %s" % (service, e))
         send_notification(CDB_NOTIF, service_modules.keys())
