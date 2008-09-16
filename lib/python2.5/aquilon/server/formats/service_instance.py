@@ -37,8 +37,6 @@ class ServiceInstanceList(list):
     """holds a list of service instances to be formatted"""
     pass
     
-ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
-
 class ServiceInstanceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
     def format_proto(self, sil):
@@ -46,5 +44,7 @@ class ServiceInstanceListFormatter(ListFormatter):
         for si in sil:
             self.add_service_msg(servicelist_msg.services.add(), si.service, si)
         return servicelist_msg.SerializeToString()
+
+ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
 #if __name__=='__main__':

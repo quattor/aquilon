@@ -29,7 +29,7 @@ class CommandShowServiceService(BrokerCommand):
         if dbserver:
             return ServiceInstanceList(
                 session.query(ServiceInstance).filter_by(service=dbservice).join(
-                'servers').filter_by(server=dbserver).all())
+                'servers').filter_by(system=dbserver).all())
         elif dbclient:
             service_instances = get_client_service_instances(session, dbclient)
             service_instances = [si for si in service_instances if si.service == dbservice]
