@@ -334,6 +334,61 @@
       <transport method="delete" path="auxiliary/%(auxiliary)s" />
    </command>
 
+   <command name="add_manager">
+      Add a manager entry for a host to the database.  Requires a
+      host with a management interface and a valid IP address.
+
+      The manager name can be overridden with --manager.  The default
+      is to add an 'r' to the first component of the hostname.  For a
+      host like igrid123.subdomain.ms.com, the default manager name
+      is igrid123r.subdomain.ms.com.
+
+      If both --interface and --mac are given and there is no such
+      interface, it will be created.
+
+      After running this, run reconfigure on the primary host (in the
+      example above, igrid123.subdomain.ms.com).
+      <optgroup name="add_manager_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string" conflicts="machine">Fully qualified Host name</option>
+	 <optgroup name="add_manager_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="string">IP address</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="manager" type="string">Fully qualified name for the manager interface</option>
+         <option name="interface" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="mac" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport trigger="manager" method="put" path="manager/%(manager)s" />
+      <transport method="post" path="host/%(hostname)s/command/add_manager" />
+   </command>
+
+   <command name="show_manager">
+      Shows the information for manager systems (like
+      igrid123r.subdomain.ms.com)
+      <optgroup name="show_manager_opts" mandatory="True" fields="any">
+         <option name="manager" type="string" conflicts="all">Manger name</option>
+         <option name="all" type="boolean" conflicts="manager">Select all managers</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="manager" />
+      <transport trigger="manager" method="get" path="manager/%(manager)s" />
+   </command>
+
+   <command name="del_manager">
+      Delete a manager entry for a host from the database.
+
+      For a host like igrid123.subdomain.ms.com, the manager name
+      is igrid123r.subdomain.ms.com.
+
+      After running this, run reconfigure on the primary host (in the
+      example above, igrid123.subdomain.ms.com).
+      <optgroup name="del_manager_opts" mandatory="True" fields="all">
+         <option name="manager" type="string">Fully qualified name for the manager interface</option>
+      </optgroup>
+      <transport method="delete" path="manager/%(manager)s" />
+   </command>
+
    <command name="add_model">
       Add a new model
       <optgroup name="add_model_opts" mandatory="True" fields="all">

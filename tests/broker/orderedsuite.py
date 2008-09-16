@@ -48,6 +48,7 @@ from test_add_aquilon_host import TestAddAquilonHost
 from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
+from test_add_manager import TestAddManager
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
@@ -71,6 +72,7 @@ from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
 from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
+from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
 from test_del_interface import TestDelInterface
@@ -112,7 +114,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
-                TestAddAuxiliary,
+                TestAddAuxiliary, TestAddManager,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
@@ -126,7 +128,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
-                TestDelAuxiliary, TestDelHost,
+                TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
