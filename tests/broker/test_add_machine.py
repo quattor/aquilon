@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -172,6 +168,31 @@ class TestAddMachine(TestBrokerCommand):
 
     def testverifyrejectut3c1n5(self):
         command = "show machine --machine ut3c1n5"
+        out = self.notfoundtest(command.split(" "))
+
+    def testrejectmissingmemory(self):
+        command = ["add", "machine", "--machine", "ut3c1n6",
+            "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
+            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
+            "--serial", "AAAAAAA"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "does not have machine specification defaults, please specify --memory",
+                         command)
+
+    def testverifyrejectmissingmemory(self):
+        command = "show machine --machine ut3c1n6"
+        out = self.notfoundtest(command.split(" "))
+
+    def testrejectmissingmodel(self):
+        command = ["add", "machine", "--machine", "ut3c1n7",
+            "--rack", "ut3", "--model", "utblade", "--serial", "BBBBBBB"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "does not have machine specification defaults",
+                         command)
+
+    def testverifyrejectmissingmodel(self):
+        command = "show machine --machine ut3c1n7"
         out = self.notfoundtest(command.split(" "))
 
 

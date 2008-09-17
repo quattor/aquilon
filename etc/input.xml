@@ -1049,9 +1049,11 @@
 
   <command name="show_personality">
       Show personality details.
-      <optgroup name="show_personality_opts">
-         <option name="name" type="string">which personality to show</option>
-         <option name="archetype" type="string">which archetype to use</option>
+      <optgroup name="show_personality_opts" mandatory="True" fields="any">
+         <optgroup name="show_personality_name_opts" fields="all">
+            <option name="name" type="string" conflicts="all">which personality to show</option>
+            <option name="archetype" type="string">which archetype to use</option>
+         </optgroup>
          <option name="all" type="boolean" conflicts="name">all</option>
       </optgroup>
       <transport method="get" path="personality" />

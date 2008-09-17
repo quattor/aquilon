@@ -67,6 +67,15 @@ class TestAddModel(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
 
+    def testaddutblade(self):
+        command = "add model --name utblade --vendor aurora_vendor --type blade"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddutblade(self):
+        command = "show model --name utblade"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)

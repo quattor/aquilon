@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing the del model command."""
+"""Module for testing the del personality command."""
 
 import os
 import sys
@@ -17,26 +17,18 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelModel(TestBrokerCommand):
+class TestDelPersonality(TestBrokerCommand):
 
-    def testdeluttorswitch(self):
-        command = "del model --name uttorswitch --vendor hp --type tor_switch"
+    def testdelutpersonality(self):
+        command = "del personality --name utpersonality --archetype aquilon"
         self.noouttest(command.split(" "))
 
-    def testverifydeluttorswitch(self):
-        command = "show model --name uttorswitch"
-        self.notfoundtest(command.split(" "))
-
-    def testdelutblade(self):
-        command = "del model --name utblade --vendor aurora_vendor --type blade"
-        self.noouttest(command.split(" "))
-
-    def testverifydelutblade(self):
-        command = "show model --name utblade"
+    def testverifydelutpersonality(self):
+        command = "show personality --name utpersonality --archetype aquilon"
         self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

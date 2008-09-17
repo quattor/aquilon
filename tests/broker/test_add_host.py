@@ -40,6 +40,13 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
 
+    def testshowhostbaddomain(self):
+        command = "show host --hostname aquilon00.one-nyp"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out,
+                "DNS domain 'one-nyp' for 'aquilon00.one-nyp' not found",
+                command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

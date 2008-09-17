@@ -35,7 +35,7 @@ def create_machine(session, machine, dblocation, dbmodel,
     dbcpu = None
     if not (cpuname or cpuspeed or cpuvendor):
         if not dbmodel.machine_specs:
-            ArgumentError("Model %s does not have machine specification defaults, please specify --cpuvendor, --cpuname, and --cpuspeed." %
+            raise ArgumentError("Model %s does not have machine specification defaults, please specify --cpuvendor, --cpuname, and --cpuspeed." %
                     dbmodel.name)
         dbcpu = dbmodel.machine_specs.cpu
     else:
@@ -68,8 +68,8 @@ def create_machine(session, machine, dblocation, dbmodel,
         if dbmodel.machine_specs:
             cpucount = dbmodel.machine_specs.cpu_quantity
         else:
-            ArgumentError("Model %s does not have machine specification defaults, please specify --cpucount." %
-                    model)
+            raise ArgumentError("Model %s does not have machine specification defaults, please specify --cpucount." %
+                    dbmodel.name)
     else:
         cpucount = force_int("cpucount", cpucount)
 
@@ -77,8 +77,8 @@ def create_machine(session, machine, dblocation, dbmodel,
         if dbmodel.machine_specs:
             memory = dbmodel.machine_specs.memory
         else:
-            ArgumentError("Model %s does not have machine specification defaults, please specify --memory (in MB)." %
-                    model)
+            raise ArgumentError("Model %s does not have machine specification defaults, please specify --memory (in MB)." %
+                    dbmodel.name)
     else:
         memory = force_int("memory", memory)
 

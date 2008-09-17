@@ -31,6 +31,7 @@ from test_get_domain import TestGetDomain
 from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
 from test_sync_domain import TestSyncDomain
+from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
 from test_add_building import TestAddBuilding
@@ -83,6 +84,7 @@ from test_del_rack import TestDelRack
 from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
+from test_del_personality import TestDelPersonality
 from test_del_domain import TestDelDomain
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
@@ -104,6 +106,7 @@ class BrokerTestSuite(unittest.TestSuite):
         for test in [TestBrokerStart, TestPing, TestStatus, TestPermission,
                 TestAddDnsDomain, TestAddDomain,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
+                TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddCpu, TestAddModel, TestAddTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
@@ -127,6 +130,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
+                TestDelPersonality,
                 TestDelDomain, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:

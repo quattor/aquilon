@@ -33,8 +33,8 @@ def parse_system(session, system):
         q = session.query(DnsDomain)
         dbdns_domain = q.filter_by(name=dns_domain).first()
         if not dbdns_domain:
-            raise NotFoundException("DNS domain '%s' for '%s' not found: %s"
-                    % (dns_domain, system, e))
+            raise NotFoundException("DNS domain '%s' for '%s' not found"
+                    % (dns_domain, system))
     except InvalidRequestError, e:
         raise AquilonError("DNS domain '%s' for '%s' not found: %s" %
                            (dns_domain, system, e))
