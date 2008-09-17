@@ -16,7 +16,7 @@ from aquilon.aqdb.net.network import Network
 
 class NetworkFormatter(ObjectFormatter):
     def format_raw(self, network, indent=""):
-        netmask = network.ipcalc.netmask()
+        netmask = network.netmask()
         sysloc = network.location.sysloc()
         network_type = network.type.name()
         details = [ indent + "Network: %s" % network.name ]
@@ -44,13 +44,13 @@ class SimpleNetworkListFormatter(ObjectFormatter):
     def format_raw(self, nlist, indent=""):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:
-            details.append(indent + str("\t".join([network.name, network.ip, str(network.ipcalc.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.type.name(), str(network.comments)])))
+            details.append(indent + str("\t".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.type.name(), str(network.comments)])))
         return "\n".join(details)
 
     def format_csv(self, nlist):
         details = [",".join(self.fields)]
         for network in nlist:
-            details.append(str(",".join([network.name, network.ip, str(network.ipcalc.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.type.name(), str(network.comments)])))
+            details.append(str(",".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.type.name(), str(network.comments)])))
         return "\n".join(details)
 
     def format_html(self, nlist):

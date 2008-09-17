@@ -20,27 +20,26 @@ pkgs         = {}
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
 pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-                'city', 'building', 'rack', 'desk', 'location_search_list', 
-                'search_list_item'] #deleted chassis
+                'city', 'building', 'rack', 'desk', 'location_search_list',
+                'search_list_item']
 
 pkgs['net']  = ['dns_domain', 'network']
 
 pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
-                'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw', 
+                'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
                 'interface', 'observed_mac', 'machine_specs', 'chassis_slot',
-                'console_server_hw'] 
-                #model_subtype
+                'console_server_hw', 'serial_cnxn'] #model_subtype
 
 pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
-                'chassis', 'tor_switch', 'auxiliary', 'manager', 
+                'chassis', 'tor_switch', 'auxiliary', 'manager',
                 'console_server']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_instance_server',
                 'service_map', 'service_list_item']
 
-order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
+order        = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 
 def importName(modulename, name):
     """ Import a named object from a module in the context of this function.
@@ -88,6 +87,7 @@ def main(*args, **kw):
 
     if opts.mock:
         db = db_factory('mock')
+        opts.delete_db = False
     else:
         db = db_factory()
 
@@ -103,9 +103,9 @@ def main(*args, **kw):
     if opts.delete_db == True and db.dsn.startswith('oracle'):
         ta.drop_all_tables_and_sequences(db,opts.delete_db)
 
-    #fill this with module objects if we're populating 
+    #fill this with module objects if we're populating
     mods_to_populate = []
-    
+
     for p in order:
         for module_name in pkgs[p]:
             pkg_name = 'aquilon.aqdb.%s'%(p)
@@ -128,12 +128,12 @@ def main(*args, **kw):
                 #    print e, "\n"
 
             if hasattr(mod,'populate'):
-                mods_to_populate.append(mod) 
+                mods_to_populate.append(mod)
 
     Base.metadata.create_all(checkfirst=True)
 
     #TODO: if opts.mock: renamer dumps a DDL/SQL file
-    if db.dsn.startswith('oracle'):
+    if db.dsn.startswith('oracle') and not opts.mock:
         debug('renaming constraints...')
         cnst.rename_non_null_check_constraints(db)
 

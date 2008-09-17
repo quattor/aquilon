@@ -31,21 +31,19 @@ table = country
 def populate(db, *args, **kw):
     s = db.session()
 
-    from aquilon.aqdb.loc.continent import Continent
-    from aquilon.aqdb.loc.hub import Hub
-    from aquilon.aqdb.utils import dsdb
-
-    country.create(checkfirst = True)
-
     if len(s.query(Country).all()) < 1:
+        from aquilon.aqdb.loc.continent import Continent
+        from aquilon.aqdb.loc.hub import Hub
+        import aquilon.aqdb.utils.dsdb
+
+        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
+
         cnts = {}
+
         for c in s.query(Continent).all():
             cnts[c.name] = c
 
         for row in dsdb.dump_country():
-            #NO MORE SPECIAL CASE
-            #if row[0] == 'jp':
-            #    continue #skip japan, it maps directly to the TK hub
 
             a = Country(name = str(row[0]),
                         fullname = str(row[1]),
@@ -54,22 +52,12 @@ def populate(db, *args, **kw):
 
         s.commit()
 
-        #DON'T handle Japan as a special case
-        #tk_hub = s.query(Hub).filter_by(name = 'tk').one()
-        #
-        #jp = Country(name = 'jp', fullname = 'Japan', parent = tk_hub)
-        #s.add(jp)
-
         try:
             s.commit()
         except Exception, e:
             sys.stderr.write(e)
 
         print 'created %s countries'%(len(s.query(Country).all()))
-
-""" select A.id, A.name, A.fullname, B.type, A.parent_id from location A,
-location_type B where a.location_type_id = B.id """
-
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

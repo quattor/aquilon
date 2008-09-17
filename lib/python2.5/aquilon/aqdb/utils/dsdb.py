@@ -6,23 +6,16 @@ msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
 import os
 
-#TODO: for fun, put these into the database. select them out before running
-# them to try on a *purely* data driven approach to programming. This could
-# enable a brand new kind of "api" to aqd: one where the power user can
-# create their own commands on the fly. (obviously we'd lock this down like
-# CRAZY, but it could help people like Sam that know sql but don't know python
-# for example)
-
-get_country = """
+_get_country = """
     select country_symbol, country_name, continent
     from country where state >= 0
 """
 
-get_campus = """
+_get_campus = """
     select campus_name, comments from campus where state >= 0
 """
 
-get_campus_entries = """
+_get_campus_entries = """
     select A.bldg_name, C.campus_name from bldg A, campus_entry B, campus C
         where A.bldg_id = B.bldg_id
         AND C.campus_id = B.campus_id
@@ -31,7 +24,7 @@ get_campus_entries = """
         AND C.state >= 0
 """
 
-get_city = """
+_get_city = """
     select A.city_symbol, A.city_name, B.country_symbol
     from city A, country B
     where A.country_id = B.country_id
@@ -39,7 +32,7 @@ get_city = """
     AND B.state >= 0
 """
 
-get_bldg = """
+_get_bldg = """
     select A.bldg_name, A.bldg_addr, B.city_symbol from bldg A, city B
     where A.city_id = B.city_id
     AND A.state >= 0
@@ -47,23 +40,25 @@ get_bldg = """
     AND A.bldg_name != ' '
 """
 
-get_bucket = """
+_get_bucket = """
     SELECT loc_name FROM loc_name WHERE state >= 0
     AND loc_name LIKE '%B%'
     AND loc_name NOT LIKE '%GLOBAL%'
     AND loc_name NOT LIKE '%pod%'
     ORDER BY loc_name """
 
-get_network_full="""
+_get_network_full="""
     SELECT  net_name,
             net_ip_addr,
             abs(net_mask),
             isnull(net_type_id,0),
             SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
             side, net_id FROM network
-    WHERE state >= 0 """
+    WHERE
+    net_ip_addr != '127.0.0.0'
+    AND state >= 0  """
 
-get_network_np="""
+_get_network_np="""
     SELECT  net_name,
             net_ip_addr,
             abs(net_mask),
@@ -71,12 +66,17 @@ get_network_np="""
             SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
             side, net_id FROM network
     WHERE state >= 0
+    AND net_ip_addr != '127.0.0.0'
     AND location like '%np.ny.na' """
 
-get_net_type = """
+_get_net_ids = """
+    select net_id from network where net_ip_addr != '127.0.0.0'
+    AND state >= 0 """
+
+_get_net_type = """
     SELECT * FROM network_type """
 
-host_info  = """ SELECT
+_host_info  = """ SELECT
     A.host_name,                                       /* network_host */
     B.cpu, B.virt_cpu, B.cputype, B.memory, B.hostid,  /* machine */
     C.name, C.version, C.kernel_id,                    /* os */
@@ -156,6 +156,58 @@ class dsdb_connection(object):
             #to import Sybase everywhere...
             #raise Sybase.DatabaseError(inst)
 
+    def dump_net_type(self):
+        return self.run_query(_get_net_type).fetchall()
+
+    def dump_campus(self):
+        return self.run_query(_get_campus).fetchall()
+
+    def dump_country(self):
+        return self.run_query(_get_country).fetchall()
+
+    def dump_city(self):
+        return self.run_query(_get_city).fetchall()
+
+    def dump_bldg(self):
+        return self.run_query(_get_bldg).fetchall()
+
+    def dump_bucket(self):
+        return self.run_query(get_bucket).fetchall()
+
+    def dump_network(self):
+        return self.run_query(_get_network_full).fetchall()
+
+    def dump_network_full(self):
+        return self.run_query(_get_network_np).fetchall()
+
+    def dump_net_type(self):
+        return self.run_query(_get_net_type).fetchall()
+
+    def get_net_ids(self):
+        return self.run_query(_get_net_ids).fetchall()
+
+    def get_nets_by_id(self,ids):
+        query = """
+    SELECT  net_name,
+            net_ip_addr,
+            abs(net_mask),
+            isnull(net_type_id,0),
+            SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
+            side, net_id FROM network
+    WHERE net_id in %s"""%(ids.__str__())
+        return self.run_query(query).fetchall()
+
+    def get_sapphire_bldgs(self):
+        return self.run_query("""
+select bldg_name from bldg where bldg_id in (
+select bldg_id from campus_entry A, campus B where
+A.campus_id = B.campus_id
+AND B.campus_name = 'vi'
+AND A.state >=0
+AND B.state >=0)""".lstrip()).fetchall()
+
+#    def esp():
+#        return self.run_query(_host_info).fetchall()
 
 def test():
     syb = dsdb_connection()
@@ -169,50 +221,12 @@ def test():
     assert pod == 'eng.ny'
     print pod
 
-def dump_campus():
-    db = dsdb_connection()
-    return db.run_query(get_campus).fetchall()
 
-def dump_country():
-    db = dsdb_connection()
-    return db.run_query(get_country).fetchall()
-
-def dump_city():
-    db = dsdb_connection()
-    return db.run_query(get_city).fetchall()
-
-def dump_bldg():
-    db = dsdb_connection()
-    return db.run_query(get_bldg).fetchall()
-
-def dump_bucket():
-    db = dsdb_connection()
-    return db.run_query(get_bucket).fetchall()
-
-def dump_network():
-    db = dsdb_connection()
-    return db.run_query(get_network_full).fetchall()
-
-def dump_network_full():
-    db = dsdb_connection()
-    return db.run_query(get_network_np).fetchall()
-
-def dump_net_type():
-    db = dsdb_connection()
-    return db.run_query(get_net_type).fetchall()
-
-def esp():
-    print
-    db = dsdb_connection()
-    return db.run_query(host_info).fetchall()
 
 if __name__ == '__main__':
-    #test()
-    #a=esp()
-    #print a[0]
-    #a = dump_campus()
-    a = dump_net_type()
-    print a
+    db = dsdb_connection()
+
+    print db.dump_net_type()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
