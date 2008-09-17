@@ -25,17 +25,11 @@ class TorSwitchFormatter(ObjectFormatter):
         if tor_switch.tor_switch_hw.serial_no:
             details.append(indent + "  Serial: %s" %
                            tor_switch.tor_switch_hw.serial_no)
-        #for p in tor_switch.switchport:
-        #    if p.interface:
-        #        details.append(indent + "  Switch Port %d: %s %s %s" %
-        #             (p.port_number,
-        #              p.interface.tor_switch.tor_switch_hw.model.machine_type,
-        #              p.interface.tor_switch.fqdn,
-        #              p.interface.name))
-        #    else:
-        #        details.append(indent +
-        #                "  Switch Port %d: No interface recorded in aqdb" %
-        #                p.port_number)
+        for om in tor_switch.observed_macs:
+            details.append(indent + "  Port %d: %s" %
+                           (om.port_number, om.mac_address))
+            details.append(indent + "    Created: %s Last Seen: %s" %
+                           (om.creation_date, om.last_seen))
         for i in tor_switch.tor_switch_hw.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if tor_switch.comments:

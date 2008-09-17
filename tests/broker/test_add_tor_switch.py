@@ -160,6 +160,16 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "Tor_switch: np999gd1r01.aqd-unittest.ms.com",
                          command)
 
+    # Test adding a switch for the poll command.
+    def testaddnp06bals03(self):
+        self.noouttest(["add", "tor_switch",
+            "--tor_switch", "np06bals03.ms.com",
+            "--building", "np", "--rackid", "7",
+            "--rackrow", "g", "--rackcol", "1",
+            "--model", "rs g8000",
+            "--interface", "xge49",
+            "--mac", "001a6c9ee31e", "--ip", "172.31.64.69"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)

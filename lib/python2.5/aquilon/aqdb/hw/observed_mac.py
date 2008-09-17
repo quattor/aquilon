@@ -15,6 +15,7 @@ if __name__ == '__main__':
 from sqlalchemy import Table, Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm                  import relation, deferred, backref
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.sql.expression       import asc
 
 from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.net.network        import Network
@@ -43,8 +44,10 @@ class ObservedMac(Base):
     last_seen     = deferred(Column('last_seen', DateTime,
                             default = datetime.now, nullable = False))
 
-    switch = relation(TorSwitch, uselist=False,
-                      backref=backref('ObservedMac', cascade='delete'))
+    switch = relation(TorSwitch,
+                      backref=backref('observed_macs', cascade='delete',
+                                      order_by=[asc('slot'),
+                                                asc('port_number')]))
 
     #TODO: selectable relation to interface/machine/system?
 
