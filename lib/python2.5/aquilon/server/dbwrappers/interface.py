@@ -8,11 +8,11 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.net.ip_to_int import dq_to_int
-from aquilon.aqdb.sy.tor_switch import TorSwitch
+from aquilon.exceptions_            import ArgumentError
+from aquilon.aqdb.hw.interface      import Interface
+from aquilon.aqdb.hw.machine        import Machine
+from aquilon.aqdb.column_types.IPV4 import dq_to_int
+from aquilon.aqdb.sy.tor_switch     import TorSwitch
 
 
 # FIXME: interface type?  interfaces for hardware entities in general?

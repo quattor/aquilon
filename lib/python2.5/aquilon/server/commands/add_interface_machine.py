@@ -10,7 +10,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
+from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine

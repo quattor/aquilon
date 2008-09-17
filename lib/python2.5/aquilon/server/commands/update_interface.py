@@ -12,7 +12,7 @@ from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_tor_offsets)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
+from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.hw.machine import Machine
 
 

@@ -1,11 +1,17 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ The module governing tables and objects that represent IP networks in
-    Aquilon."""
+    Aquilon. """
 
-
-from datetime import datetime
 import sys
 import os
+import logging
+from datetime import datetime
+from struct   import pack, unpack
+from socket   import inet_aton, inet_ntoa
+
+
+#log everything and send to stderr
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -14,19 +20,16 @@ if __name__ == '__main__':
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         CheckConstraint, UniqueConstraint, DateTime,
-                        ForeignKey, insert, select )
+                        ForeignKey, insert, select, func )
 
+from sqlalchemy.sql import and_
 from sqlalchemy.orm import relation, deferred, synonym
 
 from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.IPV4  import IPV4
 from aquilon.aqdb.loc.location       import Location, location
-from aquilon.aqdb.loc.building       import Building, building
-
-import aquilon.aqdb.net.ipcalc as ipcalc
-import aquilon.aqdb.net.ip_to_int as i2i
-
+from aquilon.aqdb.column_types.IPV4  import (IPV4, dq_to_int, get_bcast,
+                                             int_to_dq)
 
 """ Network Type can be one of four values which have been carried over as
     legacy from the network table in DSDB:
@@ -49,7 +52,6 @@ import aquilon.aqdb.net.ip_to_int as i2i
 """
 
 #for fast lookups as opposed to a computed column approach
-#TODO: should be BORG'ed ?
 _mask_to_cidr = {
     1          : 32,
     2          : 31,
@@ -163,11 +165,16 @@ class Network(Base):
 
     location      = relation(Location, backref = 'networks')
 
-    def _ipcalc(self):
-        return ipcalc.Network('%s/%s'%(self.ip,self.cidr))
-    ipcalc = property(_ipcalc)
+    def netmask(self):
+        bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
+        return inet_ntoa(pack('>I', bits))
 
-    #TODO: mask -> netmask as first class property
+    def first_host(self):
+        return int_to_dq(dq_to_int(self.ip)+1)
+
+    def last_host(self):
+        return int_to_dq(dq_to_int(self.bcast)-1)
+
     #TODO: custom str and repr
 
 network = Network.__table__
@@ -180,28 +187,41 @@ network.append_constraint(
     UniqueConstraint('ip', name = 'net_ip_uk'))
 
 Index('net_loc_id_idx', network.c.location_id)
-#TODO: snarf comments  and xx,xw sysloc nets from DSDB (asynchronously?)
 
 table = network
 
+def get_net_id_from_ip(s, ip):
+    """Requires a session, and will return the Network for a given ip."""
+    if ip is None:
+        return None
+
+    s1 = select([func.max(network.c.ip)], and_(
+        network.c.ip <= ip, ip <= network.c.bcast))
+
+    s2 = select([network.c.id], network.c.ip == s1)
+
+    row = s.execute(s2).fetchone()
+    if not row:
+        raise ArgumentError("Could not determine network for ip %s" % ip)
+
+    return s.query(Network).get(row[0])
+
+
 def populate(db, *args, **kw):
+    #TODO:
+        #populate comments
+        #populate all non np/dd networks asynchronously/optionally
+
     s = db.session()
 
-    network.create(checkfirst = True)
-
     if len(s.query(Network).limit(30).all()) < 1:
-        #only import all the crap if its needed
+        import aquilon.aqdb.utils.dsdb
 
-        import aquilon.aqdb.utils.dsdb as dsdb
+        from aquilon.aqdb.loc.building import Building, building
         from sqlalchemy import insert
-        import socket as skt
         import time
-        import logging as l
-        #do we *need* logger?
-        #TODO: when we have an error table, insert a row there, as well as
-        #    generating an exception that can be acted upon in dsdb.
 
-        print 'creating networks...go get some coffee...'
+        logging.debug('creating networks...go get some coffee...')
         start = time.clock()
 
         b_cache={}
@@ -210,6 +230,8 @@ def populate(db, *args, **kw):
 
         for row in db.engine.execute(sel).fetchall():
             b_cache[row[0]]=row[1]
+
+        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
 
         type_cache = {}
         type_cache[0] = 'unknown'
@@ -225,21 +247,16 @@ def populate(db, *args, **kw):
             try:
                 kw['location_id'] = b_cache[bldg_name]
             except KeyError:
-                #TODO: pull the new building in from dsdb somehow
-                #TODO: generate an exception about the row: unexpected
-                #   null data means that dsdb has bad data
 
-                l.error("Can't find building '%s'\n%s"%(bldg_name, row))
+                logging.error("Can't find building '%s'\n%s"%(bldg_name, row))
                 continue
-                # an alternative...
-                #sys.stderr.write("Can't find building '%s' for row %s\n"%(
-                #    bldg_name,row))
+
 
             kw['name']       = name
             kw['ip']         = ip
             kw['mask']       = mask
             kw['cidr']       = _mask_to_cidr[mask]
-            kw['bcast']      = i2i.get_bcast(ip, kw['cidr'])
+            kw['bcast']      = get_bcast(ip, kw['cidr'])
 
             if type_id:
                 kw['network_type']   = type_cache[type_id]
@@ -257,14 +274,9 @@ def populate(db, *args, **kw):
         s.commit()
         stend = time.clock()
         thetime = stend - start
-        print 'created %s networks in %2f'%(count, thetime)
-
-
-
-
+        logging.debug('created %s networks in %2f'%(count, thetime))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

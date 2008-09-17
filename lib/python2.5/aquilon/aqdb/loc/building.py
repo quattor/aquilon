@@ -34,7 +34,8 @@ def populate(db, *args, **kw):
         return
 
     from aquilon.aqdb.loc.city import City
-    from aquilon.aqdb.utils import dsdb
+    import aquilon.aqdb.utils.dsdb
+    dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
 
     city = {}
     for c in db.s.query(City).all():

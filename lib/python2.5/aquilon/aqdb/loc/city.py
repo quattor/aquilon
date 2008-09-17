@@ -33,11 +33,10 @@ table = city
 def populate(db, *args, **kw):
     s = db.session()
 
-    city.create(checkfirst = True)
-
     if len(s.query(City).all()) < 1:
         from aquilon.aqdb.loc.country import Country
-        from aquilon.aqdb.utils import dsdb
+        import aquilon.aqdb.utils.dsdb
+        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
 
         cntry= {}
         for c in s.query(Country).all():
@@ -63,4 +62,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
