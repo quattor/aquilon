@@ -19,6 +19,8 @@ from brokertest import TestBrokerCommand
 
 class TestAddManager(TestBrokerCommand):
 
+    # Note: If changing this, also change testverifyshowmissingmanager
+    # in test_add_aquilon_host.py.
     def testaddunittest00r(self):
         self.noouttest(["add", "manager", "--ip", self.hostip10,
             "--hostname", "unittest00.one-nyp.ms.com"])

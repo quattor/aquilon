@@ -367,12 +367,20 @@
    <command name="show_manager">
       Shows the information for manager systems (like
       igrid123r.subdomain.ms.com)
+
+      The --missing option will list aq commands to create entries for
+      any hosts that have management interfaces but do not have managers.
+
+      These commands need to be run separately in order to create the
+      necessary entries.
       <optgroup name="show_manager_opts" mandatory="True" fields="any">
-         <option name="manager" type="string" conflicts="all">Manger name</option>
-         <option name="all" type="boolean" conflicts="manager">Select all managers</option>
+         <option name="manager" type="string" conflicts="all missing">Manger name</option>
+         <option name="all" type="boolean" conflicts="manager missing">Select all managers</option>
+         <option name="missing" type="boolean" conflicts="manager all">Generate commands to create missing managers</option>
       </optgroup>
       <transport trigger="all" method="get" path="manager" />
       <transport trigger="manager" method="get" path="manager/%(manager)s" />
+      <transport trigger="missing" method="get" path="find/missing_managers" />
    </command>
 
    <command name="del_manager">
