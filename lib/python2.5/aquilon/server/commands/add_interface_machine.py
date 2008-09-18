@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq add interface`."""
+"""Contains the logic for `aq add interface --machine`."""
 
 
 from sqlalchemy.exceptions import InvalidRequestError
@@ -24,13 +24,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, interface, machine, mac, type, comments,
+    def render(self, session, interface, machine, mac, comments,
             user, **arguments):
-        # FIXME: We need new constructs.
-        # add_interface can add an ip to a hostname/interface
-        # add_host can add an ip to an interface
-        # update_host can associate an ip with an interface
-        # We can no longer have an ip on a bare interface.
         dbmachine = get_machine(session, machine)
         extra = {}
         if interface == 'eth0':
@@ -46,18 +41,17 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:
-            # Getting a name for HardwareEntity is a pain.  Need a dbwrapper.
-            raise ArgumentError("mac address already in use")
+            # FIXME: Write dbwrapper that gets a name for hardware_entity
+            raise ArgumentError("mac %s already in use." % mac)
 
-        if type:
-            # FIXME: Should be an enum
-            if type not in ['public', 'oa', 'ilo', 'bmc']:
-                raise ArgumentError("Unknown interface type '%s'.")
-        else:
-            type = 'public'
-
+        itype = 'public'
+        management_types = ['bmc', 'ilo', 'ipmi']
+        for mtype in management_types:
+            if interface.startswith(mtype):
+                itype = 'management'
+                break
         dbinterface = Interface(name=interface, hardware_entity=dbmachine,
-                                mac=mac, interface_type=type, **extra)
+                                mac=mac, interface_type=itype, **extra)
         session.save(dbinterface)
         session.flush()
         session.refresh(dbinterface)
@@ -65,6 +59,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write(self.config.get("broker", "plenarydir"), user)
+
+        if dbmachine.host:
+            # FIXME: reconfigure host
+            pass
+
         return
 
 

@@ -34,6 +34,18 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Status: production", command)
 
+    def testverifyshowmanagermissing(self):
+        command = "show manager --missing"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+            "aq add manager --hostname 'unittest00.one-nyp.ms.com' --ip 'IP'",
+            command)
+
+    def testverifyshowmanagermissingcsv(self):
+        command = "show manager --missing --format=csv"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)

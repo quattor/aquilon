@@ -16,15 +16,12 @@ from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 
 class CommandDelChassis(BrokerCommand):
 
-    required_parameters = ["name"]
+    required_parameters = ["chassis"]
 
     @add_transaction
     @az_check
-    def render(self, session, name, **arguments):
-        dbchassis = get_system(session, name)
-        if not isinstance(dbchassis, Chassis):
-            raise ArgumentError("%s '%s' is not a chassis." %
-                                (dbchassis.system_type, dbchassis.fqdn))
+    def render(self, session, chassis, **arguments):
+        dbchassis = get_system(session, chassis, Chassis, 'Chassis')
         q = session.query(ChassisSlot).filter_by(chassis=dbchassis)
         machine_count = q.count(ChassisSlot.machine_id != None)
         if machine_count:

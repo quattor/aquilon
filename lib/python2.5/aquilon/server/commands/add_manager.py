@@ -3,44 +3,39 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq add auxiliary`."""
+"""Contains the logic for `aq add manager`."""
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
 from aquilon.aqdb.net.network import get_net_id_from_ip
-from aquilon.aqdb.sy.host import Host
 from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.sy.auxiliary import Auxiliary
+from aquilon.aqdb.sy.manager import Manager
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 
 
-class CommandAddAuxiliary(BrokerCommand):
+class CommandAddManager(BrokerCommand):
 
-    required_parameters = ["auxiliary", "ip"]
+    required_parameters = ["hostname", "ip"]
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, machine, auxiliary, ip, interface,
-            mac, comments, user, **arguments):
-        if machine:
-            dbmachine = get_machine(session, machine)
-        if hostname:
-            dbhost = hostname_to_host(session, hostname)
-            if machine and dbhost.machine != dbmachine:
-                raise ArgumentError("Use either --hostname or --machine to uniquely identify a system.")
-            dbmachine = dbhost.machine
+    def render(self, session, hostname, manager, ip, interface, mac, comments,
+               user, **arguments):
+        dbhost = hostname_to_host(session, hostname)
+        dbmachine = dbhost.machine
 
-        (short, dbdns_domain) = parse_system_and_verify_free(session, auxiliary)
+        if not manager:
+            manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
+        (short, dbdns_domain) = parse_system_and_verify_free(session, manager)
 
         q = session.query(Interface)
-        q = q.filter_by(hardware_entity=dbmachine, interface_type='public',
+        q = q.filter_by(hardware_entity=dbmachine, interface_type='management',
                         bootable=False)
         if interface:
             q = q.filter_by(name=interface)
@@ -66,10 +61,12 @@ class CommandAddAuxiliary(BrokerCommand):
                                     (dbmachine.name, dbinterface.name,
                                      dbinterface.bootable,
                                      dbinterface.interface_type))
-            dbinterface = Interface(name=interface, interface_type='public',
-                                    mac=mac,
+            dbinterface = Interface(name=interface,
+                                    interface_type='management', mac=mac,
                                     bootable=False, hardware_entity=dbmachine)
             session.save(dbinterface)
+        else:
+            raise ArgumentError("No management interface found.")
 
         if dbinterface.system:
             raise ArgumentError("Interface '%s' of machine '%s' already provides '%s'" %
@@ -79,17 +76,16 @@ class CommandAddAuxiliary(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(session, dbnetwork, ip)
 
-        dbauxiliary = Auxiliary(name=short, dns_domain=dbdns_domain,
-                                machine=dbmachine,
-                                ip=ip, network=dbnetwork, mac=dbinterface.mac, 
-                                comments=comments)
-        session.save(dbauxiliary)
-        dbinterface.system = dbauxiliary
+        dbmanager = Manager(name=short, dns_domain=dbdns_domain,
+                            machine=dbmachine, ip=ip, network=dbnetwork,
+                            mac=dbinterface.mac, comments=comments)
+        session.save(dbmanager)
+        dbinterface.system = dbmanager
 
         session.flush()
         session.refresh(dbinterface)
         session.refresh(dbmachine)
-        session.refresh(dbauxiliary)
+        session.refresh(dbmanager)
 
         dsdb_runner = DSDBRunner()
         try:

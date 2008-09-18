@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq del auxiliary`."""
+"""Contains the logic for `aq del manager`."""
 
 
 import os
@@ -15,37 +15,34 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.commands.del_host import delhost_lock
-from aquilon.aqdb.sy.auxiliary import Auxiliary
+from aquilon.aqdb.sy.manager import Manager
 
 
-class CommandDelAuxiliary(BrokerCommand):
+class CommandDelManager(BrokerCommand):
 
-    required_parameters = ["auxiliary"]
+    required_parameters = ["manager"]
 
     @add_transaction
     @az_check
-    def render(self, session, auxiliary, user, **arguments):
-        log.msg("Aquiring lock to attempt to delete %s" % auxiliary)
+    def render(self, session, manager, user, **arguments):
+        log.msg("Aquiring lock to attempt to delete %s" % manager)
         delhost_lock.acquire()
         try:
-            log.msg("Aquired lock, attempting to delete %s" % auxiliary)
+            log.msg("Aquired lock, attempting to delete %s" % manager)
             # Check dependencies, translate into user-friendly message
-            dbauxiliary = get_system(session, auxiliary)
-            if not isinstance(dbauxiliary, Auxiliary):
-                raise ArgumentError("%s '%s' is not Auxiliary." % (
-                                    dbauxiliary.system_type, dbauxiliary.fqdn))
+            dbmanager = get_system(session, manager, Manager, 'Manager')
 
             # FIXME: Look for System dependencies...
 
-            ip = dbauxiliary.ip
-            dbmachine = dbauxiliary.machine
+            ip = dbmanager.ip
+            dbmachine = dbmanager.machine
             # FIXME: Check to see if this is handled auto-magically by
             # sqlalchemy.
-            for dbinterface in dbauxiliary.interfaces:
+            for dbinterface in dbmanager.interfaces:
                 dbinterface.system = None
                 session.update(dbinterface)
 
-            session.delete(dbauxiliary)
+            session.delete(dbmanager)
             session.flush()
     
             try:
@@ -53,9 +50,9 @@ class CommandDelAuxiliary(BrokerCommand):
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
                 raise ArgumentError("Could not remove host %s from dsdb: %s" %
-                            (auxiliary, e))
+                            (manager, e))
         finally:
-            log.msg("Released lock from attempt to delete %s" % auxiliary)
+            log.msg("Released lock from attempt to delete %s" % manager)
             delhost_lock.release()
 
         if dbmachine.host:

@@ -18,12 +18,12 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 
 class CommandAddChassis(BrokerCommand):
 
-    required_parameters = ["name", "rack", "model"]
+    required_parameters = ["chassis", "rack", "model"]
 
     @add_transaction
     @az_check
-    def render(self, session, name, rack, serial, model, comments, **arguments):
-        (short, dbdns_domain) = parse_system_and_verify_free(session, name)
+    def render(self, session, chassis, rack, serial, model, comments, **arguments):
+        (short, dbdns_domain) = parse_system_and_verify_free(session, chassis)
         dblocation = get_location(session, rack=rack)
         dbmodel = get_model(session, model)
         if dbmodel.machine_type not in ['chassis']:

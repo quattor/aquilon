@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing the del chassis command."""
+"""Module for testing the del manager command."""
 
 import os
 import sys
@@ -17,26 +17,26 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelChassis(TestBrokerCommand):
+class TestDelManager(TestBrokerCommand):
 
-    def testdelut3c5(self):
-        command = "del chassis --chassis ut3c5.aqd-unittest.ms.com"
+    def testdelunittest00r(self):
+        command = "del manager --manager unittest00r.one-nyp.ms.com"
         self.noouttest(command.split(" "))
 
-    def testverifydelut3c5(self):
-        command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
+    def testverifydelunittest00r(self):
+        command = "show manager --manager unittest00r.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
-    def testdelut3c1(self):
-        command = "del chassis --chassis ut3c1.aqd-unittest.ms.com"
+    def testdelunittest02rsa(self):
+        command = "del manager --manager unittest02rsa.one-nyp.ms.com"
         self.noouttest(command.split(" "))
 
-    def testverifydelut3c1(self):
-        command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
+    def testverifydelunittest02rsa(self):
+        command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelChassis)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelManager)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

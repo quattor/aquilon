@@ -20,20 +20,20 @@ from brokertest import TestBrokerCommand
 class TestAddChassis(TestBrokerCommand):
 
     def testaddut3c5(self):
-        command = "add chassis --name ut3c5.aqd-unittest.ms.com --rack ut3 --model utchassis"
+        command = "add chassis --chassis ut3c5.aqd-unittest.ms.com --rack ut3 --model utchassis"
         self.noouttest(command.split(" "))
 
     def testverifyaddut3c5(self):
-        command = "show chassis --name ut3c5.aqd-unittest.ms.com"
+        command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
 
     def testaddut3c1(self):
-        command = "add chassis --name ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"
+        command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"
         self.noouttest(command.split(" "))
 
     def testverifyaddut3c1(self):
-        command = "show chassis --name ut3c1.aqd-unittest.ms.com"
+        command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
 

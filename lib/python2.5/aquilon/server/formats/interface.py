@@ -23,4 +23,33 @@ class InterfaceFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 
 
+class MissingManagersList(list):
+    pass
+
+class MissingManagersFormatter(ObjectFormatter):
+    def format_raw(self, mmlist, indent=""):
+        commands = []
+        for interface in mmlist:
+            host = interface.hardware_entity.host
+            if host:
+                # FIXME: Deal with multiple management interfaces?
+                commands.append("aq add manager --hostname '%s' --ip 'IP'" %
+                                host.fqdn)
+            else:
+                commands.append("# No host found for machine %s with management interface" %
+                                interface.hardware_entity.name)
+        return "\n".join(commands)
+
+    def format_csv(self, mmlist):
+        hosts = []
+        for interface in mmlist:
+            host = interface.hardware_entity.host
+            if host:
+                # FIXME: Deal with multiple management interfaces?
+                hosts.append(host.fqdn)
+        return "\n".join(hosts)
+
+ObjectFormatter.handlers[MissingManagersList] = MissingManagersFormatter()
+
+
 #if __name__=='__main__':

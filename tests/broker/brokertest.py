@@ -49,7 +49,6 @@ class TestBrokerCommand(unittest.TestCase):
                     "aurora_without_node")
         else:
             self.aurora_without_node = "pissp1"
-        # An alternate set of defaults is listed in unittest.conf.
         self.hostip0 = "8.8.4.251"
         self.netmask0 = "255.255.252.0"
         self.broadcast0 = "8.8.7.255"
@@ -71,13 +70,20 @@ class TestBrokerCommand(unittest.TestCase):
         self.hostmac4 = "02:02:08:08:05:fb"
         self.hostip5 = "8.8.5.252"
         self.hostmac5 = "02:02:08:08:05:fc"
-        self.updateip0 = "8.8.5.253"
-        self.updatemac0 = "02:02:08:08:05:fd"
-        self.updateip1 = "8.8.5.254"
-        self.updatemac1 = "02:02:08:08:05:fe"
-        for n in range(6):
-            for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask",
-                    "updateip", "updatemac"]:
+        self.hostip6 = "8.8.5.253"
+        self.hostmac6 = "02:02:08:08:05:fd"
+        self.hostip7 = "8.8.5.254"
+        self.hostmac7 = "02:02:08:08:05:fe"
+        self.hostip8 = "8.8.6.251"
+        self.hostmac8 = "02:02:08:08:06:fb"
+        self.hostip9 = "8.8.6.252"
+        self.hostmac9 = "02:02:08:08:06:fc"
+        self.hostip10 = "8.8.6.253"
+        self.hostmac10 = "02:02:08:08:06:fd"
+        self.hostip11 = "8.8.6.254"
+        self.hostmac11 = "02:02:08:08:06:ff"
+        for n in range(12):
+            for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask"]:
                 p = "%s%s" % (h, n)
                 if self.config.has_option("unittest", p):
                     setattr(self, p, self.config.get("unittest", p))

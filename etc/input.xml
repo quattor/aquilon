@@ -334,6 +334,69 @@
       <transport method="delete" path="auxiliary/%(auxiliary)s" />
    </command>
 
+   <command name="add_manager">
+      Add a manager entry for a host to the database.  Requires a
+      host with a management interface and a valid IP address.
+
+      The manager name can be overridden with --manager.  The default
+      is to add an 'r' to the first component of the hostname.  For a
+      host like igrid123.subdomain.ms.com, the default manager name
+      is igrid123r.subdomain.ms.com.
+
+      If both --interface and --mac are given and there is no such
+      interface, it will be created.
+
+      After running this, run reconfigure on the primary host (in the
+      example above, igrid123.subdomain.ms.com).
+      <optgroup name="add_manager_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string" conflicts="machine">Fully qualified Host name</option>
+	 <optgroup name="add_manager_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="string">IP address</option>
+	 </optgroup>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="manager" type="string">Fully qualified name for the manager interface</option>
+         <option name="interface" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="mac" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport trigger="manager" method="put" path="manager/%(manager)s" />
+      <transport method="post" path="host/%(hostname)s/command/add_manager" />
+   </command>
+
+   <command name="show_manager">
+      Shows the information for manager systems (like
+      igrid123r.subdomain.ms.com)
+
+      The --missing option will list aq commands to create entries for
+      any hosts that have management interfaces but do not have managers.
+
+      These commands need to be run separately in order to create the
+      necessary entries.
+      <optgroup name="show_manager_opts" mandatory="True" fields="any">
+         <option name="manager" type="string" conflicts="all missing">Manger name</option>
+         <option name="all" type="boolean" conflicts="manager missing">Select all managers</option>
+         <option name="missing" type="boolean" conflicts="manager all">Generate commands to create missing managers</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="manager" />
+      <transport trigger="manager" method="get" path="manager/%(manager)s" />
+      <transport trigger="missing" method="get" path="find/missing_managers" />
+   </command>
+
+   <command name="del_manager">
+      Delete a manager entry for a host from the database.
+
+      For a host like igrid123.subdomain.ms.com, the manager name
+      is igrid123r.subdomain.ms.com.
+
+      After running this, run reconfigure on the primary host (in the
+      example above, igrid123.subdomain.ms.com).
+      <optgroup name="del_manager_opts" mandatory="True" fields="all">
+         <option name="manager" type="string">Fully qualified name for the manager interface</option>
+      </optgroup>
+      <transport method="delete" path="manager/%(manager)s" />
+   </command>
+
    <command name="add_model">
       Add a new model
       <optgroup name="add_model_opts" mandatory="True" fields="all">
@@ -377,16 +440,29 @@
    </command>
 
    <command name="add_interface">
-      Add a new network interface to the database
+      Add a new network interface to the database.
+
+      To give an IP address to a host, provide it when using add_host.
+      For chassis and tor_switches, the IP address is provided with this
+      command.
       <optgroup name="add_interface_opts" mandatory="True" fields="all">
-         <option name="interface" type="string">Interface name</option>
-         <option name="machine" type="string">Machine name</option>
          <option name="mac" type="string">MAC address</option>
+         <option name="interface" type="string">Interface name</option>
+      </optgroup>
+      <optgroup name="add_interface_hw" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="hostname chassis tor_switch">Machine (node) name</option>
+         <option name="hostname" type="string" conflicts="machine chassis tor_switch">Hostname</option>
+         <option name="chassis" type="string" conflicts="machine hostname tor_switch">Chassis name</option>
+         <option name="tor_switch" type="string" conflicts="machine hostname chassis">TOR Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="comments" type="string">Comments</option>
+         <option name="ip" type="string" conflicts="hostname machine">IP address (required for tor_switch and chassis)</option>
       </optgroup>
-      <transport method="put" path="machine/%(machine)s/interface/%(interface)s" />
+      <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
+      <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
+      <transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s" />
+      <transport trigger="tor_switch" method="put" path="tor_switch/%(tor_switch)s/interface/%(interface)s" />
    </command>
 
    <command name="update_interface">
@@ -400,7 +476,10 @@
       For this change to take affect at the host level, run aq reconfigure.
       <optgroup name="update_interface_opts" mandatory="True" fields="all">
          <option name="interface" type="string">Interface name</option>
-         <option name="machine" type="string">Machine name</option>
+      </optgroup>
+      <optgroup name="update_interface_hw_opts" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="hostname">Machine name</option>
+         <option name="hostname" type="string" conflicts="machine">Host name</option>
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="string">MAC address</option>
@@ -408,7 +487,8 @@
          <option name="boot" type="boolean">Mark the interface as bootable</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="post" path="machine/%(machine)s/interface/%(interface)s" />
+      <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
+      <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
    </command>
 
    <command name="del_interface">
@@ -812,7 +892,7 @@
    <command name="add_chassis">
       Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS. 
       <optgroup name="add_chassis_input" mandatory="True" fields="all">
-         <option name="name" type="string">FQDN name of the new chassis</option>
+         <option name="chassis" type="string">FQDN name of the new chassis</option>
          <option name="rack" type="string">Name of the rack location for this chassis</option>
 	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
@@ -820,24 +900,24 @@
 	 <option name="serial" type="string">serial number</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="chassis/%(name)s" />
+      <transport method="put" path="chassis/%(chassis)s" />
    </command>
 
    <command name="show_chassis">
       Show the chassis list, or details about a particular chassis.
       <optgroup name="show_chassis_opts">
-         <option name="name" type="string">chassis name</option>
+         <option name="chassis" type="string">chassis name</option>
       </optgroup>
       <transport method="get" path="location/chassis" />
-      <transport trigger="name" method="get" path="chassis/%(name)s" />
+      <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
    </command>
 
    <command name="del_chassis">
       Delete a chassis. See also del_location.
       <optgroup name="del_chassis_opts" mandatory="True" fields="all">
-         <option name="name" type="string">chassis name</option>
+         <option name="chassis" type="string">chassis name</option>
       </optgroup>
-      <transport method="delete" path="chassis/%(name)s" />
+      <transport method="delete" path="chassis/%(chassis)s" />
    </command>
 
    <command name="add_rack">
