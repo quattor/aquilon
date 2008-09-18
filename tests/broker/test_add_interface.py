@@ -101,8 +101,9 @@ class TestAddInterface(TestBrokerCommand):
         self.matchclean(out,
                 """"cards/nic/eth1/boot" = true;""",
                 command)
-        self.matchclean(out,
-                """cards/nic/bmc/hwaddr""",
+        self.matchoutput(out,
+                """"console/bmc" = nlist("mac", "%s");""" %
+                self.hostmac10.lower(),
                 command)
 
     def testaddut3c1n4eth0(self):

@@ -65,6 +65,8 @@ class CommandAddManager(BrokerCommand):
                                     interface_type='management', mac=mac,
                                     bootable=False, hardware_entity=dbmachine)
             session.save(dbinterface)
+        else:
+            raise ArgumentError("No management interface found.")
 
         if dbinterface.system:
             raise ArgumentError("Interface '%s' of machine '%s' already provides '%s'" %

@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -36,13 +32,22 @@ class PlenaryMachineInfo(Plenary):
             harddisks.append({"relpath":relpath, "capacity":harddisk.capacity,
                 "name":harddisk.device_name})
         self.harddisks = harddisks
+        self.managers = []
         self.interfaces = []
         for interface in dbmachine.interfaces:
-            if interface.interface_type != 'public':
+            if interface.interface_type == 'public':
+                self.interfaces.append({"name":interface.name,
+                                        "mac":interface.mac,
+                                        "boot":interface.bootable})
                 continue
-            self.interfaces.append({"name":interface.name,
-                                    "mac":interface.mac,
-                                    "boot":interface.bootable})
+            if interface.interface_type == 'management':
+                manager = {"type":interface.name, "mac":interface.mac,
+                           "ip":None, "fqdn":None}
+                if interface.system:
+                    manager["ip"] = interface.system.ip
+                    manager["fqdn"] = interface.system.fqdn
+                self.managers.append(manager)
+                continue
         self.model_relpath = (
             "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
         self.plenary_core = (
@@ -73,4 +78,16 @@ class PlenaryMachineInfo(Plenary):
             if interface['boot']:
                 lines.append('"cards/nic/%s/boot" = %s;'
                         % (interface['name'], str(interface['boot']).lower()))
+        for manager in self.managers:
+            if manager["fqdn"]:
+                if manager["ip"]:
+                    lines.append('"console/%(type)s" = nlist("mac", "%(mac)s", "address", "%(ip)s", "fqdn", "%(fqdn)s");' %
+                                 manager)
+                else:
+                    lines.append('"console/%(type)s" = nlist("mac", "%(mac)s", "fqdn", "%(fqdn)s");' %
+                                 manager)
+            else:
+                lines.append('"console/%(type)s" = nlist("mac", "%(mac)s");' %
+                             manager)
+
 
