@@ -47,6 +47,10 @@ class TestAddHost(TestBrokerCommand):
                 "DNS domain 'one-nyp' for 'aquilon00.one-nyp' not found",
                 command)
 
+    def testverifyunittest02proto(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com --format proto"
+        out = self.commandtest(command.split(" "))
+        self.parse_hostlist_msg(out)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

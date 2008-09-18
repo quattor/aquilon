@@ -21,23 +21,23 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestShowServiceAll(TestBrokerCommand):
+class TestShowNetwork(TestBrokerCommand):
 
-    def testshowserviceall(self):
-        command = "show service --all"
+    def testshownetwork(self):
+        # We're only showing the networks for a building because for global the test would fail!
+        command = "show network --building np"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
-        self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
-        self.matchoutput(out, "Service: bootserver Instance: np.test", command)
-        self.matchoutput(out, "Service: dns Instance: nyinfratest", command)
-        self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
+        self.matchoutput(out, "Network", command)
+        self.matchoutput(out, "np06ba6s45_netapp", command)
+        self.matchoutput(out, "10.184.78.224", command)
+        self.matchoutput(out, "np.ny.na", command)
 
-    def testshowserviceproto(self):
-        command = "show service --all --format proto"
+    def testshownetworkproto(self):
+        command = "show network --building np --format proto"
         out = self.commandtest(command.split(" "))
-        self.parse_srvlist_msg(out)
+        self.parse_netlist_msg(out)
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowServiceAll)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

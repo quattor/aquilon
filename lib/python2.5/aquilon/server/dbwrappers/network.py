@@ -27,7 +27,7 @@ def get_network_byip(session, ipaddr):
     try:
         dbnetwork = session.query(Network).filter_by(ip=ipaddr).one()
     except InvalidRequestError, e:
-        raise NotFoundException("Network %s not found: %s" % (dbnetwork, e))
+        raise NotFoundException("Network with address %s not found: %s" % (ipaddr, e))
     return dbnetwork
         
 

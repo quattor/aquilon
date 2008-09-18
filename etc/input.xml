@@ -444,11 +444,12 @@
       If --all is specified, then the configuration of all services will be shown.
       <optgroup name="show_service_opts" mandatory="True" fields="any">
          <option name="service" type="string">Service name</option>
-         <option name="server" type="string">Server name</option>
+         <option name="server" type="string" conflict="client">Server hostname</option>
+	 <option name="client" type="string" conflicts="server">Client hostname</option>
 	 <option name="all" type="boolean" conflicts="service">Select all services</option>
       </optgroup>
-      <optgroup name="optional_opts">
-	 <option name="instance" type="string">Show service instance</option>
+      <optgroup name="show_service_optional_opts">
+	 <option name="instance" type="string">Service Instance</option>
       </optgroup>
       <transport trigger="service" method="get" path="service/%(service)s"/>
       <transport method="get" path="service" />

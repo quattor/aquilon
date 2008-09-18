@@ -12,6 +12,7 @@ from aquilon.aqdb.svc.service_instance import ServiceInstance
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
+    protocol = "aqdservices_pb2"
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.name)]
@@ -26,6 +27,9 @@ class ServiceInstanceFormatter(ObjectFormatter):
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
+    def format_proto(self, si):
+        silf = ServiceInstanceListFormatter()
+        return silf.format_proto([si])
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
 
@@ -34,10 +38,13 @@ class ServiceInstanceList(list):
     pass
     
 class ServiceInstanceListFormatter(ListFormatter):
-    """stub for protobufs"""
-    pass
+    protocol = "aqdservices_pb2"
+    def format_proto(self, sil):
+        servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
+        for si in sil:
+            self.add_service_msg(servicelist_msg.services.add(), si.service, si)
+        return servicelist_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
-
 
 #if __name__=='__main__':

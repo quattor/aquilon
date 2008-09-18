@@ -13,6 +13,17 @@ import re
 
 from aquilon.config import Config
 
+sys.path.append("//ms/dist/python/PROJ/ms.version/prod-2.5/common/lib/")
+import ms.version
+ms.version.addpkg('setuptools', '0.6c8-py25')
+ms.version.addpkg('protoc', 'prod', meta='aquilon')
+
+# XXX Should get protocol path from config.  TestBrokerCommand.__init__ ?
+sys.path.append("/ms/dist/aquilon/PROJ/protocols/1.0/lib/python")
+import aqdsystems_pb2
+import aqdnetworks_pb2
+import aqdservices_pb2
+
 class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
@@ -183,6 +194,30 @@ class TestBrokerCommand(unittest.TestCase):
         self.assert_(out.find(s) < 0, 
                 "STDOUT for %s includes '%s':\n@@@\n'%s'\n@@@\n"
                 % (command, s, out))
+
+    def parse_netlist_msg(self, msg):
+        netlist = aqdnetworks_pb2.NetworkList()
+        netlist.ParseFromString(msg)
+        self.assert_(len(netlist.networks) > 0,
+                     "No networks listed in NetworkList protobuf message\n")
+
+    def parse_srvlist_msg(self, msg):
+        srvlist = aqdservices_pb2.ServiceList()
+        srvlist.ParseFromString(msg)
+        self.assert_(len(srvlist.services) > 0,
+                     "No services listed in ServiceList protobuf message\n")
+
+    def parse_hostlist_msg(self, msg):
+        hostlist = aqdsystems_pb2.HostList()
+        hostlist.ParseFromString(msg)
+        self.assert_(len(hostlist.hosts) > 0,
+                     "No hosts listed in HostList protobuf message\n")
+
+    def parse_servicemap_msg(self, msg):
+        servicemaplist = aqdservices_pb2.ServiceMapList()
+        servicemaplist.ParseFromString(msg)
+        self.assert_(len(servicemaplist.servicemaps) > 0,
+                     "No service maps listed in ServiceMapList protobuf message\n")
 
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")
