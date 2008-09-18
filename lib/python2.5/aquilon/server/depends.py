@@ -13,4 +13,4 @@ import ms.version
 ms.version.addpkg('setuptools', '0.6c8-py25')
 ms.version.addpkg('protoc', 'prod', meta='aquilon')
 ms.version.addpkg('zope.interface', '3.3.0', 'dist')
-ms.version.addpkg('twisted', '8.1.0', 'dist')
+ms.version.addpkg('twisted', '2.5.0', 'dist')

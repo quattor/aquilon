@@ -11,5 +11,5 @@
 import msversion
 
 msversion.addpkg('zope.interface', '3.3.0', 'dist')
-msversion.addpkg('twisted', '8.1.0', 'dist')
+msversion.addpkg('twisted', '2.5.0', 'dist')
 
