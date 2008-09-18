@@ -75,7 +75,7 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "cannot add machines of type 'blade'", command)
 
     def testverifyrejectut3gd1r03(self):
-        command = "show machine --machine ut3gd1r03.aqd-unittest.ms.com"
+        command = "show tor_switch --tor_switch ut3gd1r03.aqd-unittest.ms.com"
         out = self.notfoundtest(command.split(" "))
 
     # Test adding a switch with an existing rack using --rackid
@@ -135,6 +135,30 @@ class TestAddTorSwitch(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com,np999,np,bnt,rs g8000,,xge49,%s,%s" %
                 (self.hostmac5, self.hostip5), command)
+
+    def testverifyshowtorswitchrack(self):
+        command = "show tor_switch --rack np999"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Tor_switch: np999gd1r01.aqd-unittest.ms.com",
+                         command)
+
+    def testverifyshowtorswitchmodel(self):
+        command = "show tor_switch --model uttorswitch"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
+                         command)
+
+    def testverifyshowtorswitchall(self):
+        command = "show tor_switch --all"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Tor_switch: np997gd1r04.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Tor_switch: np998gd1r01.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Tor_switch: np999gd1r01.aqd-unittest.ms.com",
+                         command)
 
 
 if __name__=='__main__':

@@ -1210,6 +1210,7 @@
          <option name="tor_switch" type="string">tor_switch name</option>
          <option name="rack" type="string">Rack name</option>
          <option name="model" type="string">tor_switch model</option>
+         <option name="all" type="boolean">show all</option>
       </optgroup>
       <transport trigger="tor_switch" method="get" path="tor_switch/%(tor_switch)s" />
       <transport method="get" path="find/tor_switch" />
