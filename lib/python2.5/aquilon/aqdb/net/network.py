@@ -4,14 +4,9 @@
 
 import sys
 import os
-import logging
 from datetime import datetime
 from struct   import pack, unpack
 from socket   import inet_aton, inet_ntoa
-
-
-#log everything and send to stderr
-logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -25,6 +20,7 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
 from sqlalchemy.sql import and_
 from sqlalchemy.orm import relation, deferred, synonym
 
+from aquilon.exceptions_             import ArgumentError
 from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.loc.location       import Location, location
@@ -221,7 +217,7 @@ def populate(db, *args, **kw):
         from sqlalchemy import insert
         import time
 
-        logging.debug('creating networks...go get some coffee...')
+        print 'starting to import networks...'
         start = time.clock()
 
         b_cache={}
@@ -247,8 +243,7 @@ def populate(db, *args, **kw):
             try:
                 kw['location_id'] = b_cache[bldg_name]
             except KeyError:
-
-                logging.error("Can't find building '%s'\n%s"%(bldg_name, row))
+                print "Can't find building '%s'\n%s"%(bldg_name, row)
                 continue
 
 
@@ -274,7 +269,7 @@ def populate(db, *args, **kw):
         s.commit()
         stend = time.clock()
         thetime = stend - start
-        logging.debug('created %s networks in %2f'%(count, thetime))
+        print 'created %s networks in %2f'%(count, thetime)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
