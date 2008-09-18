@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq update interface`."""
+"""Contains the logic for `aq update interface --machine`."""
 
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
@@ -16,7 +16,7 @@ from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
 from aquilon.aqdb.hw.machine import Machine
 
 
-class CommandUpdateInterface(BrokerCommand):
+class CommandUpdateInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine"]
 

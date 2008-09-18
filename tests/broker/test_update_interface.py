@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -33,7 +29,7 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
-            "--machine", "ut3c5n10", "--mac", self.hostmac7,
+            "--hostname", "unittest02.one-nyp.ms.com", "--mac", self.hostmac7,
             "--ip", self.hostip7, "--boot"])
 
     def testupdateut3c5n10eth2(self):
