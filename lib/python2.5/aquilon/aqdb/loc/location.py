@@ -105,6 +105,12 @@ class Location(Base):
     #    """ return all child location objects of a given location type """
     #    return Session.query(Location).with_polymorphic('*').\
     #        filter(location_type==type).all()
+    
+    #select lpad(name, length(name) + level) name,
+    #location_type from location connect by parent_id = prior id start with
+    # name = 'ny' and location_type = 'city'
+    #select location_id from location connect by parent_id = prior id
+    #start with name = self.name, location_type = self.location_type
 
     def append(self,node):
         if isinstance(node, Location):
@@ -142,4 +148,3 @@ table = location
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
