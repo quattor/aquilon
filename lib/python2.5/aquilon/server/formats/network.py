@@ -17,7 +17,7 @@ from aquilon.aqdb.net.network import Network
 class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
     def format_raw(self, network, indent=""):
-        netmask = network.ipcalc.netmask()
+        netmask = network.netmask()
         sysloc = network.location.sysloc()
         details = [ indent + "Network: %s" % network.name ]
         details.append(indent + "IP: %s" % network.ip )
@@ -80,7 +80,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
     def format_raw(self, nlist, indent=""):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:
-            details.append(indent + str("\t".join([network.name, network.ip, str(network.ipcalc.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.comments)])))
+            details.append(indent + str("\t".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.comments)])))
         return "\n".join(details)
 
     def format_proto(self, nlist):
@@ -94,7 +94,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
         net_msg.cidr = net.cidr
-        net_msg.bcast = str(net.ipcalc.netmask())
+        net_msg.bcast = str(net.netmask())
         net_msg.mask = str(net.mask)
         net_msg.side = str(net.side)
         net_msg.sysloc = str(net.location.sysloc())
@@ -106,7 +106,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
     def format_csv(self, nlist):
         details = [",".join(self.fields)]
         for network in nlist:
-            details.append(str(",".join([network.name, network.ip, str(network.ipcalc.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.comments)])))
+            details.append(str(",".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.comments)])))
         return "\n".join(details)
 
     def format_html(self, nlist):

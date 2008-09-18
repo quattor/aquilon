@@ -1,11 +1,10 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Translates dotted quad strings into long integers """
-
-import aquilon.aqdb.net.ip_to_int as i2i
 import sys
 import os
 from   exceptions import TypeError, AssertionError
-
+from struct import pack, unpack
+from socket import inet_aton, inet_ntoa
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -13,6 +12,19 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 import sqlalchemy.types as types
+
+def dq_to_int(dq):
+        return unpack('!L', inet_aton(dq))[0]
+
+def int_to_dq(n):
+#Force incoming Decimal to a long to prevent odd issues from struct.pack()
+    return inet_ntoa(pack('!L', long(n)))
+
+def cidr_to_int(cidr):
+    return(0xffffffffL >> (32- cidr)) << (32 - cidr)
+
+def get_bcast(ip, cidr):
+    return int_to_dq( dq_to_int(ip) |  (0xffffffff - cidr_to_int(cidr)))
 
 class IPV4(types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
@@ -38,14 +50,14 @@ class IPV4(types.TypeDecorator):
                 msg = (dq, " : bytes should be between 0 and 255")
                 raise TypeError(msg)
 
-        return i2i.dq_to_int(dq)
+        return dq_to_int(dq)
 
     def process_result_value(self, n, engine):
         # Force the incoming Decimal to a long to prevent odd issues when
         # struct.pack() tries it...
         if n is None:
             return None
-        return i2i.int_to_dq(n)
+        return int_to_dq(n)
 
     def copy(self):
         return IPV4(self.impl.length)

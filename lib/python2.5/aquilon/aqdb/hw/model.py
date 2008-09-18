@@ -25,7 +25,7 @@ from aquilon.aqdb.hw.vendor import Vendor
 class Model(Base):
     __tablename__ = 'model'
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
-    name = Column(String(64), unique=True, index=True)
+    name = Column(String(64))
 
     vendor_id = Column(Integer,
                        ForeignKey('vendor.id', name = 'model_vendor_fk'),
@@ -40,7 +40,9 @@ class Model(Base):
 
 model = Model.__table__
 model.primary_key.name = 'model_pk'
-#TODO: missing a unique constraint name
+
+model.append_constraint(UniqueConstraint('name','vendor_id',
+                                   name = 'model_name_vendor_uk'))
 
 table = model
 

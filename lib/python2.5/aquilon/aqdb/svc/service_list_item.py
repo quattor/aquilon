@@ -53,7 +53,8 @@ service_list_item = ServiceListItem.__table__
 service_list_item.primary_key.name = 'svc_list_item_pk'
 service_list_item.append_constraint(
     UniqueConstraint('archetype_id', 'service_id', name='svc_list_svc_uk'))
-Index('idx_srvlst_arch_id', service_list_item.c.archetype_id)
+
+Index('srvlst_archtyp_idx', service_list_item.c.archetype_id)
 
 table = service_list_item
 
@@ -72,4 +73,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

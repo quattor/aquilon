@@ -29,15 +29,13 @@ continent.primary_key.name = 'continent_pk'
 table = continent
 
 def populate(db, *args, **kw):
-    from aquilon.aqdb.loc.hub import Hub
-
-    continent.create(checkfirst = True)
-
     s=db.session()
 
     _continents = ('af', 'as', 'au', 'eu', 'na', 'sa')
 
     if len(s.query(Continent).all()) < len(_continents):
+        from aquilon.aqdb.loc.hub import Hub
+
         hubs ={}
         for hub in s.query(Hub).all():
             hubs[hub.name] = hub

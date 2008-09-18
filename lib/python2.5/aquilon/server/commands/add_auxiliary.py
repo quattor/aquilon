@@ -16,7 +16,7 @@ from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
-from aquilon.aqdb.net.ip_to_int import get_net_id_from_ip
+from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.sy.host import Host
 from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.sy.auxiliary import Auxiliary

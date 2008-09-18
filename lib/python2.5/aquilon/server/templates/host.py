@@ -29,7 +29,7 @@ class PlenaryHost(Plenary):
                 continue
             net = dbinterface.system.network
             # Fudge the gateway as the first available ip
-            gateway = net.ipcalc.host_first().dq
+            gateway = net.first_host()
             bootproto = "static"
             # as of 28/Aug/08, aii-dhcp only outputs bootable
             # interfaces in dhcpd.conf, so there's no point in marking
@@ -37,7 +37,7 @@ class PlenaryHost(Plenary):
             if dbinterface.bootable:
                 bootproto = "dhcp"
             interfaces.append({"ip":dbinterface.system.ip,
-                    "netmask":net.ipcalc.netmask().dq,
+                    "netmask":net.netmask(),
                     "broadcast":net.bcast,
                     "gateway":gateway,
                     "bootproto":bootproto,

@@ -31,18 +31,21 @@ campus.primary_key.name = 'campus_pk'
 table = campus
 
 def populate(db, *args, **kw):
-    from aquilon.aqdb.db_factory   import db_factory, Base
-    from aquilon.aqdb.loc.country  import Country
-    from aquilon.aqdb.loc.city     import City
-    from aquilon.aqdb.loc.building import Building
-    from aquilon.aqdb.utils        import dsdb
+
 
     s = db.session()
 
-    campus.create(checkfirst = True)
 
     #TODO: replace pseudocode with code
     if len(s.query(Campus).all()) < 1:
+        from aquilon.aqdb.db_factory   import db_factory
+        from aquilon.aqdb.loc.country  import Country
+        from aquilon.aqdb.loc.city     import City
+        from aquilon.aqdb.loc.building import Building
+
+        import aquilon.aqdb.utils.dsdb
+        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
+
         #get all the campus names from dsdb and create them outside the map
         campuses = []
         for row in dsdb.dump_campus():
@@ -67,4 +70,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

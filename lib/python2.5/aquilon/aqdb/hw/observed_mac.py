@@ -26,23 +26,27 @@ class ObservedMac(Base):
     __tablename__ = 'observed_mac'
 
     #TODO: code level constraint on machine_type == tor_switch
-    switch_id    = Column(Integer,
-                       ForeignKey(TorSwitch.c.id, ondelete = 'CASCADE',
-                                  name = 'obs_mac_hw_fk'), primary_key = True)
+    switch_id    = Column(Integer, ForeignKey(TorSwitch.c.id,
+                                              ondelete = 'CASCADE',
+                                              name = 'obs_mac_hw_fk'),
+                                             primary_key = True)
 
     port_number  = Column(Integer, primary_key=True)
 
-    mac_address  = Column(AqMac(17), nullable=False)
+    mac_address  = Column(AqMac(17), nullable=False, primary_key=True)
 
-    #in case we do modular switches (not currently used)
-    slot         = Column(Integer, nullable=True, default=None)
+    slot          = Column(Integer, nullable=True, default=1, primary_key=True)
 
-    creation_date = deferred( Column('creation_date', DateTime,
-                                          default = datetime.now,
-                                          nullable = False))
+    creation_date = deferred(Column('creation_date', DateTime,
+                            default = datetime.now, nullable = False))
+
+    last_seen     = deferred(Column('last_seen', DateTime,
+                            default = datetime.now, nullable = False))
 
     switch = relation(TorSwitch, uselist=False,
                       backref=backref('ObservedMac', cascade='delete'))
+
+    #TODO: selectable relation to interface/machine/system?
 
 observed_mac = ObservedMac.__table__
 observed_mac.primary_key.name = 'observed_mac_pk'
