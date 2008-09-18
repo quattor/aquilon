@@ -174,11 +174,11 @@ class dsdb_connection(object):
     def dump_bucket(self):
         return self.run_query(get_bucket).fetchall()
 
-    def dump_network(self):
-        return self.run_query(_get_network_full).fetchall()
-
-    def dump_network_full(self):
-        return self.run_query(_get_network_np).fetchall()
+    def dump_network(self,full=False):
+        if full:
+            return self.run_query(_get_network_full).fetchall()
+        else:
+            return self.run_query(_get_network_np).fetchall()
 
     def dump_net_type(self):
         return self.run_query(_get_net_type).fetchall()

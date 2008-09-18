@@ -83,6 +83,12 @@ def main(*args, **kw):
                       help    = 'run functions to prepopulate data',
                       default = False)
 
+    parser.add_option('-f', '--full',
+                      action  = 'store_true',
+                      dest    = 'full',
+                      help    = 'perform full network table population',
+                      default = False)
+
     (opts, args) = parser.parse_args()
 
     if opts.mock:
@@ -149,7 +155,7 @@ def main(*args, **kw):
         for mod in mods_to_populate:
             debug('populating %s'%(mod.table.name))
             try:
-                mod.populate(db)
+                mod.populate(db, opts.full)
             except Exception, e:
                 sys.stderr.write(str(e))
                 print e, "\n"
