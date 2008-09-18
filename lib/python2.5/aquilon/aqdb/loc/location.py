@@ -11,9 +11,9 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint)
+                        Column, ForeignKey, UniqueConstraint, text)
 
-from sqlalchemy.orm import deferred, relation, backref
+from sqlalchemy.orm import deferred, relation, backref, object_session
 
 from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -101,29 +101,33 @@ class Location(Base):
         return self.p_dict.get('chassis', None)
     chassis = property(_chassis)
 
-    #def get_typed_children(self,type):
-    #    """ return all child location objects of a given location type """
-    #    return Session.query(Location).with_polymorphic('*').\
-    #        filter(location_type==type).all()
-    
-    #select lpad(name, length(name) + level) name,
-    #location_type from location connect by parent_id = prior id start with
-    # name = 'ny' and location_type = 'city'
-    #select location_id from location connect by parent_id = prior id
-    #start with name = self.name, location_type = self.location_type
-
     def append(self,node):
         if isinstance(node, Location):
             node.parent = self
             self.sublocations[node] = node
 
-    def children(self):
-        return list(self.sublocations)
-
     def sysloc(self):
         if str(self.location_type) in ['building','rack','chassis','desk']:
             return str('.'.join([str(self.p_dict[item]) for item in
                 ['building', 'city', 'continent']]))
+
+    def _children(self):
+        s = text("""select * from location
+                    where id != %d
+                    connect by parent_id = prior id
+                    start with id = %d"""%(self.id,self.id))
+
+        return object_session(self).query(Location).from_statement(s).all()
+
+    children = property(_children)
+
+    def typed_children(self,typ):
+        s = text("""select * from location
+                    where location_type = '%s'
+                    connect by parent_id = prior id
+                    start with id = %d"""%(typ, self.id))
+
+        return object_session(self).query(Location).from_statement(s).all()
 
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.name)
@@ -140,7 +144,6 @@ location.append_constraint(
 
 Location.sublocations = relation('Location', backref = backref(
         'parent', remote_side=[location.c.id],))
-        #lazy=False, join_depth=2))
 
 table = location
 
