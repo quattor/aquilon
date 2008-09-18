@@ -51,7 +51,6 @@ PANC_OPTS = -I $(CONFIG) \
             -I $(QROOT)/swrep \
 	    -I $(PROFILES) \
 	    -I $(HOSTDIR) \
-	    -x xmldb \
             -O $(OUTPUT)
 
 XMLS      = $(subst $(PROFILES),$(OUTPUT),\
