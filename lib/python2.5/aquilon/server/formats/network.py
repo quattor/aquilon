@@ -94,8 +94,8 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
         net_msg.cidr = net.cidr
-        net_msg.bcast = str(net.netmask())
-        net_msg.mask = str(net.mask)
+        net_msg.bcast = str(net.broadcast)
+        net_msg.netmask = str(net.netmask())
         net_msg.side = str(net.side)
         net_msg.sysloc = str(net.location.sysloc())
         net_msg.location.name = str(net.location.name)
