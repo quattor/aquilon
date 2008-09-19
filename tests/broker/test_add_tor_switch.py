@@ -160,7 +160,6 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "Tor_switch: np999gd1r01.aqd-unittest.ms.com",
                          command)
 
-    # Test adding a switch for the poll command.
     def testaddnp06bals03(self):
         self.noouttest(["add", "tor_switch",
             "--tor_switch", "np06bals03.ms.com",
@@ -168,7 +167,24 @@ class TestAddTorSwitch(TestBrokerCommand):
             "--rackrow", "g", "--rackcol", "1",
             "--model", "rs g8000",
             "--interface", "xge49",
-            "--mac", "001a6c9ee31e", "--ip", "172.31.64.69"])
+            "--mac", "0018b1898600", "--ip", "172.31.64.69"])
+
+    def testverifynp06bals03(self):
+        self.verifyswitch("np06bals03.ms.com",
+                          "bnt", "rs g8000", "np7", "g", "1")
+
+    def testaddnp06fals01(self):
+        self.noouttest(["add", "tor_switch",
+            "--tor_switch", "np06fals01.ms.com",
+            "--building", "np", "--rackid", "7",
+            "--rackrow", "g", "--rackcol", "1",
+            "--model", "ws-c2960-48tt-l",
+            "--interface", "xge49",
+            "--mac", "001cf699e5c1", "--ip", "172.31.88.5"])
+
+    def testverifynp06fals01(self):
+        self.verifyswitch("np06fals01.ms.com",
+                          "cisco", "ws-c2960-48tt-l", "np7", "g", "1")
 
 
 if __name__=='__main__':

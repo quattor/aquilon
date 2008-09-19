@@ -23,6 +23,7 @@ class TestPollTorSwitch(TestBrokerCommand):
         self.noouttest(["poll", "tor_switch",
                         "--tor_switch", "np06bals03.ms.com"])
 
+    # Tests re-polling np06bals03 and polls np06fals01
     def testpollnp7(self):
         self.noouttest(["poll", "tor_switch", "--rack", "np7"])
 
@@ -71,6 +72,11 @@ class TestPollTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "Port 30: 00:30:48:98:4d:c6", command)
         self.matchoutput(out, "Port 6: 00:1f:29:68:63:ec", command)
         self.matchoutput(out, "Port 23: 00:30:48:66:3a:60", command)
+
+    def testverifypollnp06fals01(self):
+        command = "show tor_switch --tor_switch np06fals01.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
 
 
 if __name__=='__main__':
