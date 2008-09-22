@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -12,6 +8,7 @@
 import os
 import logging
 
+# This is done by the wrapper script.
 #import aquilon.server.depends
 
 from zope.interface import implements
@@ -51,15 +48,19 @@ class AQDMaker(object):
         config = Config(configfile=options["config"])
 
         # Set this up before the aqdb libs get imported...
-        #observer = log.PythonLoggingObserver()
-        #observer.start()
-        #for logname in config.options("logging"):
-        #    logvalue = config.get("logging", logname)
-        #    if logvalue not in logging._levelNames:
-        #        log.msg("For config [logging]/%s, %s not a valid log level." %
-        #                (logname, logvalue))
-        #        continue
-        #    logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
+        observer = log.PythonLoggingObserver()
+        observer.start()
+        for logname in config.options("logging"):
+            logvalue = config.get("logging", logname)
+            # Complain if a config value is out of whack...
+            if logvalue not in logging._levelNames:
+                # ...but ignore it if it is a default (accidently
+                # polluting the section).
+                if not config.defaults().has_key(logname):
+                    log.msg("For config [logging]/%s, "
+                            "%s not a valid log level." % (logname, logvalue))
+                continue
+            logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
 
         # Dynamic import means that we can parse config options before
         # importing aqdb.  This is a hack until aqdb can be imported without
