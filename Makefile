@@ -67,7 +67,11 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 	install -m 0555 $< $@
 
 .PHONY: install
-install: $(INSTALLFILES)
+install: remove_stale $(INSTALLFILES)
+
+.PHONY: remove_stale
+remove_stale:
+	./remove_stale.py "$(COMMON)"
 
 .PHONY: default
 default:
