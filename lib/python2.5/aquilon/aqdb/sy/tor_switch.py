@@ -21,16 +21,16 @@ class TorSwitch(System):
     id = Column(Integer,
                 ForeignKey('system.id', ondelete = 'CASCADE',
                            name = 'tor_sw_sys_fk'), primary_key = True)
-    
-    tor_switch_id = Column(Integer, ForeignKey(TorSwitchHw.c.id,
+
+    tor_switch_id = Column(Integer, ForeignKey('tor_switch_hw.hardware_entity_id',
                                                name = 'tor_sw_sy_hw.fk',
                                                ondelete = 'CASCADE'),
                                               nullable = False)
-    
+
     #system        = relation(System, uselist=False, backref='tor_switch')
     tor_switch_hw = relation(TorSwitchHw, uselist=False,
                              backref=backref('tor_switch',cascade='delete'))
-    
+
     __mapper_args__ = {'polymorphic_identity' : 'tor_switch'}
 
 tor_switch = TorSwitch.__table__

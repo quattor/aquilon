@@ -18,12 +18,12 @@ from aquilon.aqdb.hw.machine import Machine
 class Manager(System):
     __tablename__ = 'manager'
 
-    id          = Column(Integer, ForeignKey(System.c.id,
+    id          = Column(Integer, ForeignKey('system.id',
                                               ondelete = 'CASCADE',
                                               name = 'mgr_system_fk'),
                                              primary_key = True)
 
-    machine_id  = Column(Integer, ForeignKey(Machine.c.id,
+    machine_id  = Column(Integer, ForeignKey('machine.id',
                                                name = 'mgr_machine_fk'),
                                               nullable = False)
 

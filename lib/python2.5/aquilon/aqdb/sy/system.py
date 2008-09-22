@@ -58,7 +58,7 @@ class System(Base):
 
     mac             = Column(AqMac(17), nullable = True)
     ip              = Column(IPV4, nullable = True)
-    network_id      = Column(Integer, ForeignKey(Network.c.id,
+    network_id      = Column(Integer, ForeignKey('network.id',
                                                  name = 'iface_net_id_fk'),
                                                 nullable = True)
 

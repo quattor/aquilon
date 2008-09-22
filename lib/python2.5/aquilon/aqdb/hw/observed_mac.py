@@ -27,7 +27,7 @@ class ObservedMac(Base):
     __tablename__ = 'observed_mac'
 
     #TODO: code level constraint on machine_type == tor_switch
-    switch_id    = Column(Integer, ForeignKey(TorSwitch.c.id,
+    switch_id    = Column(Integer, ForeignKey('tor_switch.id',
                                               ondelete = 'CASCADE',
                                               name = 'obs_mac_hw_fk'),
                                              primary_key = True)

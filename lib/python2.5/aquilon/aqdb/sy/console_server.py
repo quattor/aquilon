@@ -1,5 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
-""" At the moment, quattor servers are exposed as a very dull
+""" At the moment,
     sublass of System """
 
 import sys
@@ -24,10 +24,9 @@ class ConsoleServer(System):
                 ForeignKey('system.id', ondelete = 'CASCADE',
                            name = 'cons_srv_system_fk'), primary_key = True)
 
-    console_server_id = Column(Integer, ForeignKey(ConsoleServerHw.c.id,
-                                                   name = 'cons_srv_sy_hw.fk',
-                                                   ondelete = 'CASCADE'),
-                                                   nullable = False)
+    console_server_id = Column(Integer, ForeignKey(
+        'console_server_hw.hardware_entity_id', name = 'cons_srv_sy_hw.fk',
+        ondelete = 'CASCADE'), nullable = False)
 
     console_server_hw = relation(ConsoleServerHw, uselist=False,
                                  backref=backref('console_server',

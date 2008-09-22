@@ -18,19 +18,19 @@ from aquilon.aqdb.hw.chassis_hw  import ChassisHw
 class Chassis(System):
     __tablename__ = 'chassis'
 
-    id              = Column(Integer, ForeignKey(System.c.id, 
+    id              = Column(Integer, ForeignKey('system.id',
                                     name = 'chassis_sys_fk',
                                     ondelete = 'CASCADE'),
                                    primary_key = True)
 
-    chassis_hw_id   = Column(Integer, ForeignKey(ChassisHw.c.id, 
-                                               name = 'chassis_sys_hw_fk', 
-                                               ondelete='CASCADE'), 
+    chassis_hw_id   = Column(Integer, ForeignKey('chassis_hw.id',
+                                               name = 'chassis_sys_hw_fk',
+                                               ondelete='CASCADE'),
                                               nullable=False)
-                
+
     chassis_hw      = relation(ChassisHw, uselist=False,
                                backref=backref('chassis_hw', cascade='delete'))
-    
+
     __mapper_args__ = {'polymorphic_identity' : 'chassis'}
 
 chassis = Chassis.__table__
