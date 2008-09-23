@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -26,18 +22,36 @@ class TestShowHostIPList(TestBrokerCommand):
     def testshowhostiplist(self):
         command = "show hostiplist"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest02.one-nyp.ms.com,%s" % self.hostip0,
-                command)
-        self.matchoutput(out, "unittest00.one-nyp.ms.com,%s" % self.hostip2,
-                command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com,%s,\n" % self.hostip0,
+                         command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com,%s,\n" % self.hostip2,
+                         command)
+        self.matchoutput(out,
+                         "unittest00-e1.one-nyp.ms.com,%s,unittest00.one-nyp.ms.com" %
+                         self.hostip3, command)
+        self.matchclean(out, self.aurora_with_node, command)
+        self.matchclean(out, self.aurora_without_node, command)
+        self.matchclean(out, "nyaqd1", command)
 
     def testshowhostiplistarchetype(self):
         command = "show hostiplist --archetype aquilon"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest02.one-nyp.ms.com,%s" % self.hostip0,
-                command)
-        self.matchoutput(out, "unittest00.one-nyp.ms.com,%s" % self.hostip2,
-                command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com,%s,\n" % self.hostip0,
+                         command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com,%s,\n" % self.hostip2,
+                         command)
+        # FIXME: Arguably, this shouldn't be included.  Right now,
+        # archetype is a noop.
+        self.matchoutput(out,
+                         "unittest00-e1.one-nyp.ms.com,%s,unittest00.one-nyp.ms.com" %
+                         self.hostip3, command)
+        self.matchclean(out, self.aurora_with_node, command)
+        self.matchclean(out, self.aurora_without_node, command)
+        self.matchclean(out, "nyaqd1", command)
 
 
 if __name__=='__main__':
