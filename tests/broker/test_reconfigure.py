@@ -34,7 +34,7 @@ class TestReconfigure(TestBrokerCommand):
             """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
             command)
         self.matchoutput(out,
-            """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip0, self.netmask0, self.broadcast0, self.gateway0),
+            """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'static');""" % (self.hostip0, self.netmask0, self.broadcast0, self.gateway0),
             command)
         self.matchoutput(out,
             """include { 'archetype/base' };""",
@@ -73,7 +73,7 @@ class TestReconfigure(TestBrokerCommand):
             """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
             command)
         self.matchoutput(out,
-            """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'dhcp');""" % (self.hostip2, self.netmask2, self.broadcast2, self.gateway2),
+            """'/system/network/interfaces/eth0' = nlist('ip', '%s', 'netmask', '%s', 'broadcast', '%s', 'gateway', '%s', 'bootproto', 'static');""" % (self.hostip2, self.netmask2, self.broadcast2, self.gateway2),
             command)
         # FIXME: Still working this out...
         #self.matchoutput(out,
