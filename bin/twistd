@@ -7,6 +7,7 @@
 # This is an (almost) completely new version of the script under
 # /ms/dist/python/PROJ/twisted/2.5.0-py25/bin/twisted
 # hacked to understand the MS layout.
+# It was then enhanced (marked with comments below) to handle 8.1.0.
 
 import sys, os
 sys.path.append( os.path.join(
@@ -16,5 +17,24 @@ sys.path.append( os.path.join(
 import aquilon.server.depends
 import aquilon.aqdb.depends
 
-from twisted.scripts.twistd import run
-run()
+from twisted.scripts import twistd
+
+# This bit is taken from the twisted.application.app... we
+# really want logging to start up before the app does.  This may need
+# to be revisited on future twisted upgrades.  The below is a clone
+# of 8.1.0, except that startLogging has been moved one line earlier.
+def updated_application_run(self):
+    """
+    Run the application.
+    """
+    self.preApplication()
+    self.startLogging(self.getLogObserver())
+    self.application = self.createOrGetApplication()
+    self.postApplication()
+
+# Install the updated method.  Again, may be 8.1.0 specific, and relies
+# on the internals of twisted.scripts.twistd.
+twistd._SomeApplicationRunner.run = updated_application_run
+
+# Back to the original 2.5.0-based code.
+twistd.run()
