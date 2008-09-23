@@ -203,7 +203,7 @@ def get_net_id_from_ip(s, ip):
     return s.query(Network).get(row[0])
 
 
-def populate(db, *args, **kw):
+def populate(db, full, *args, **kw):
     #TODO:
         #populate comments
         #populate all non np/dd networks asynchronously/optionally
@@ -237,7 +237,7 @@ def populate(db, *args, **kw):
         count=0
 
         for (name, ip, mask, type_id, bldg_name, side,
-             dsdb_id) in dsdb.dump_network():
+             dsdb_id) in dsdb.dump_network(full):
 
             kw = {}
             try:
