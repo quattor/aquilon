@@ -1305,6 +1305,15 @@
       <transport method="delete" path="tor_switch/%(tor_switch)s" />
    </command>
 
+   <command name="poll_tor_switch">
+      <optgroup name="poll_tor_switch_opts" mandatory="True" fields="any">
+         <option name="tor_switch" type="string" conflicts="rack">tor_switch name</option>
+         <option name="rack" type="string" conflicts="tor_switch">Rack name</option>
+      </optgroup>
+      <transport trigger="tor_switch" method="post" path="tor_switch/%(tor_switch)s/command/poll" />
+      <transport method="post" path="poll/rack/%(rack)s" />
+   </command>
+
    <command name="show_principal">
       Show the entitlements for a given username.
       <optgroup name="show_role_opts" mandatory="False">

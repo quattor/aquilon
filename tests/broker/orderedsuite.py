@@ -39,6 +39,7 @@ from test_add_rack import TestAddRack
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_tor_switch import TestAddTorSwitch
+from test_poll_tor_switch import TestPollTorSwitch
 from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
@@ -111,7 +112,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
-                TestAddRack, TestAddCpu, TestAddModel, TestAddTorSwitch,
+                TestAddRack, TestAddCpu, TestAddModel,
+                TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,

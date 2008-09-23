@@ -84,6 +84,7 @@ sys_loc = /ms/dist/aurora/bin/sys_loc
 dsdb_use_testdb = False
 server_notifications =
 client_notifications = yes
+CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
