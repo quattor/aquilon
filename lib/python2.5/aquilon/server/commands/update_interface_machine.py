@@ -10,6 +10,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_tor_offsets)
+from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.net.network import get_net_id_from_ip
@@ -41,6 +42,12 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         # By default, oldinfo comes from the interface being updated.
         # If swapping the boot flag, oldinfo will be updated below.
         oldinfo = self.snapshot(dbinterface)
+        if arguments.get('hostname', None):
+            # Hack to set an intial interface for an aurora host...
+            dbhost = hostname_to_host(session, arguments['hostname'])
+            if dbhost.archetype.name == 'aurora' and not dbhost.interfaces:
+                dbinterface.system = dbhost
+                dbhost.mac = dbinterface.mac
         if mac:
             dbinterface.mac = mac
             if dbinterface.system:
@@ -73,7 +80,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             session.refresh(dbinterface.system)
         newinfo = self.snapshot(dbinterface)
 
-        if dbinterface.system:
+        if (dbinterface.system and not
+                (dbinterface.system.system_type == 'host' and
+                 dbinterface.system.archetype.name == 'aurora')):
             # This relies on *not* being able to set the boot flag 
             # (directly) to false.
             dsdb_runner = DSDBRunner()
