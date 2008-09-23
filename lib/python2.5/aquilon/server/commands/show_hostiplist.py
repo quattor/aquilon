@@ -33,7 +33,15 @@ class CommandShowHostIPList(BrokerCommand):
         # Right now, this is returning everything with an ip.
         q = session.query(System).filter(System.ip!=None)
         for system in q.all():
-            iplist.append([system.fqdn, system.ip])
+            entry = [system.fqdn, system.ip]
+            # For names on alternate interfaces, also provide the
+            # name for the bootable (primary) interface.  This allows
+            # the reverse IP address to be set to the primary.
+            if system.system_type == 'auxiliary' and system.machine.host:
+                entry.append(system.machine.host.fqdn)
+            else:
+                entry.append("")
+            iplist.append(entry)
         return iplist
 
 

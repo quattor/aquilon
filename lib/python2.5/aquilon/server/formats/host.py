@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header: //eai/aquilon/aqd/1.2.1/src/lib/python2.5/aquilon/server/formats/host.py#4 $
-# $Change: 646111 $
-# $DateTime: 2008/07/16 16:00:21 $
-# $Author: wesleyhe $
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -69,7 +65,10 @@ ObjectFormatter.handlers[SimpleHostList] = SimpleHostListFormatter()
 
 
 class HostIPList(list):
-    """By convention, holds tuples of host_name, interface_ip."""
+    """ By convention, holds tuples of host_name, interface_ip, primary.
+        The third field is only used for auxiliary systems, and
+        supplies the primary host name.  This allows reverse lookups
+        to resolve back to the primary name."""
     pass
 
 
