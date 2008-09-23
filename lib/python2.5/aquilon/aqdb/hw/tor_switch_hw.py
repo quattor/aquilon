@@ -3,13 +3,14 @@
 
 import sys
 import os
+from datetime import datetime
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
     import aquilon.aqdb.depends
 
-from sqlalchemy      import Table, Column, Integer, ForeignKey
+from sqlalchemy      import Table, Column, Integer, ForeignKey, DateTime
 from sqlalchemy.orm  import relation, deferred, backref
 
 from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
@@ -26,6 +27,8 @@ class TorSwitchHw(HardwareEntity):
                                            name = 'tor_switch_hw_ent_fk',
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
+
+    last_poll = Column(DateTime, nullable=False, default=datetime.now)
 
 tor_switch_hw = TorSwitchHw.__table__
 tor_switch_hw.primary_key.name = 'tor_switch_hw_pk'
