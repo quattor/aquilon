@@ -31,6 +31,9 @@ class TestShowHostIPList(TestBrokerCommand):
         self.matchoutput(out,
                          "unittest00-e1.one-nyp.ms.com,%s,unittest00.one-nyp.ms.com" %
                          self.hostip3, command)
+        self.matchclean(out, self.aurora_with_node, command)
+        self.matchclean(out, self.aurora_without_node, command)
+        self.matchclean(out, "nyaqd1", command)
 
     def testshowhostiplistarchetype(self):
         command = "show hostiplist --archetype aquilon"
@@ -41,9 +44,14 @@ class TestShowHostIPList(TestBrokerCommand):
         self.matchoutput(out,
                          "unittest00.one-nyp.ms.com,%s,\n" % self.hostip2,
                          command)
+        # FIXME: Arguably, this shouldn't be included.  Right now,
+        # archetype is a noop.
         self.matchoutput(out,
                          "unittest00-e1.one-nyp.ms.com,%s,unittest00.one-nyp.ms.com" %
                          self.hostip3, command)
+        self.matchclean(out, self.aurora_with_node, command)
+        self.matchclean(out, self.aurora_without_node, command)
+        self.matchclean(out, "nyaqd1", command)
 
 
 if __name__=='__main__':

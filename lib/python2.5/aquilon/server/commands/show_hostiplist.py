@@ -33,6 +33,11 @@ class CommandShowHostIPList(BrokerCommand):
         # Right now, this is returning everything with an ip.
         q = session.query(System).filter(System.ip!=None)
         for system in q.all():
+            # Do not include aurora hosts.  We are not canonical for
+            # this information.  At least, not yet.
+            if (system.system_type == 'host' and
+                    system.archetype.name == 'aurora'):
+                continue
             entry = [system.fqdn, system.ip]
             # For names on alternate interfaces, also provide the
             # name for the bootable (primary) interface.  This allows
