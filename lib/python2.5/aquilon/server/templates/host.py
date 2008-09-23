@@ -18,10 +18,9 @@ class PlenaryHost(Plenary):
         self.dbhost = dbhost
 
     def body(self, lines):
-        # FIXME: Need at least one interface marked boot - that one first
-        # FIXME: Method for obtaining broadcast / gateway, netmask hard-coded.
-        # The IPAddress table has not yet been defined in interface.py.
+        # FIXME: Enforce that one of the interfaces is marked boot?
         interfaces = []
+        default_gateway = None
         for dbinterface in self.dbhost.machine.interfaces:
             if not dbinterface.system or not dbinterface.system.ip:
                 continue
@@ -30,12 +29,14 @@ class PlenaryHost(Plenary):
             net = dbinterface.system.network
             # Fudge the gateway as the first available ip
             gateway = net.first_host()
+            # We used to do this...
+            #if dbinterface.bootable:
+            #bootproto = "dhcp"
+            # But now all interfaces are just configured as static once past
+            # the initial boot.
             bootproto = "static"
-            # as of 28/Aug/08, aii-dhcp only outputs bootable
-            # interfaces in dhcpd.conf, so there's no point in marking
-            # non-bootable interfaces as dhcp.
-            if dbinterface.bootable:
-                bootproto = "dhcp"
+            if dbinterface.bootable or not default_gateway:
+                default_gateway = gateway
             interfaces.append({"ip":dbinterface.system.ip,
                     "netmask":net.netmask(),
                     "broadcast":net.bcast,
@@ -71,6 +72,9 @@ class PlenaryHost(Plenary):
         lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
         for interface in interfaces:
             lines.append("'/system/network/interfaces/%(name)s' = nlist('ip', '%(ip)s', 'netmask', '%(netmask)s', 'broadcast', '%(broadcast)s', 'gateway', '%(gateway)s', 'bootproto', '%(bootproto)s');" % interface)
+        if default_gateway:
+            lines.append("'/system/network/default_gateway' = '%s';" %
+                         default_gateway)
         lines.append("")
         for template in templates:
             lines.append("include { '%s' };" % template)
