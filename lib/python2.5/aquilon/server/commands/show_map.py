@@ -27,12 +27,14 @@ class CommandShowMap(BrokerCommand):
     @format_results
     def render(self, session, service, instance, **arguments):
         dbservice = service and get_service(session, service) or None
-        # FIXME: Instance is ignored for now.
         dblocation = get_location(session, **arguments)
         # Nothing fancy for now - just show any relevant explicit bindings.
         q = session.query(ServiceMap)
         if dbservice:
             q = q.join('service_instance').filter_by(service=dbservice)
+            q = q.reset_joinpoint()
+        if instance:
+            q = q.join('service_instance').filter_by(name=instance)
             q = q.reset_joinpoint()
         if dblocation:
             q = q.filter_by(location=dblocation)
