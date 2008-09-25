@@ -74,11 +74,30 @@
       a top of rack switch, a chassis, or any other system tracked by
       AQDB.
       <optgroup name="show_fqdn_opts" mandatory="True" fields="any">
-         <option name="fqdn" type="string" conflicts="all">Host name</option>
-         <option name="all" type="boolean" conflicts="fqdn">Select all hosts</option>
+         <option name="fqdn" type="string" conflicts="all">full qualified domain name</option>
+         <option name="all" type="boolean" conflicts="fqdn">select all systems</option>
       </optgroup>
       <transport trigger="all" method="get" path="system" />
       <transport trigger="fqdn" method="get" path="system/%(fqdn)s" />
+   </command>
+
+   <command name="search_system">
+      Shows any information available for the matching systems.  These
+      could be hosts, top of rack switches, chassis, or any other system
+      tracked by AQDB.
+      <optgroup name="search_system_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string">fully qualified domain name</option>
+         <option name="dnsdomain" type="string">DNS domain</option>
+         <option name="shortname" type="string">First segment of the fqdn</option>
+         <option name="ip" type="string">IP address</option>
+         <option name="networkip" type="string">Network IP address</option>
+         <option name="mac" type="string">primary mac address</option>
+         <option name="all" type="boolean">list all systems</option>
+      </optgroup>
+      <optgroup name="search_system_prefs" mandatory="False">
+         <option name="fullinfo" type="boolean">show full information for the matching systems</option>
+      </optgroup>
+      <transport method="get" path="find/system" />
    </command>
 
    <command name="compile">
