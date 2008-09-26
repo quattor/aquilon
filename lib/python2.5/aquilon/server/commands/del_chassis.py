@@ -6,6 +6,8 @@
 """Contains the logic for `aq del chassis`."""
 
 
+from twisted.python import log
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
@@ -27,6 +29,18 @@ class CommandDelChassis(BrokerCommand):
         if machine_count:
             raise ArgumentError("Cannot remove chassis '%s': still in use by %d machines" %
                                 (dbchassis.fqdn, machine_count))
+
+        for iface in dbchassis.interfaces:
+            log.msg("Before deleting chassis '%s', removing interface '%s' [%s] boot=%s)" %
+                    (dbchassis.fqdn, iface.name, iface.mac, iface.bootable))
+            session.delete(iface)
+
+        for iface in dbchassis.chassis_hw.interfaces:
+            log.msg("Before deleting chassis '%s', removing hardware interface '%s' [%s] boot=%s)" %
+                    (dbchassis.fqdn, iface.name, iface.mac, iface.bootable))
+            session.delete(iface)
+
+        session.delete(dbchassis.chassis_hw)
         session.delete(dbchassis)
         return
 

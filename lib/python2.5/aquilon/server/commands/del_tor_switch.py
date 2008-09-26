@@ -27,12 +27,13 @@ class CommandDelTorSwitch(BrokerCommand):
             log.msg("Before deleting tor_switch '%s', removing interface '%s' [%s] boot=%s)" %
                     (dbtor_switch.fqdn, iface.name, iface.mac, iface.bootable))
             session.delete(iface)
-        # FIXME: aqdb cascade delete does not seem to be kicking in.
-        #for port in dbtor_switch.switchport:
-        #    log.msg("Before deleting tor_switch '%s', removing port '%d'" %
-        #            (dbtor_switch.fqdn, port.port_number))
-        #    session.delete(port)
 
+        for iface in dbtor_switch.tor_switch_hw.interfaces:
+            log.msg("Before deleting tor_switch '%s', removing hardware interface '%s' [%s] boot=%s)" %
+                    (dbtor_switch.fqdn, iface.name, iface.mac, iface.bootable))
+            session.delete(iface)
+
+        session.delete(dbtor_switch.tor_switch_hw)
         session.delete(dbtor_switch)
 
         # Any switch ports hanging off this switch should be deleted with
