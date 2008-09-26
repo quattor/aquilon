@@ -35,12 +35,13 @@ def drop_all_tables_and_sequences(db,option=None):
     if not db.dsn.startswith('ora'):
         pass
 
-    if db.dsn.endswith('@LNPO_AQUILON_NY'):
+    if db.dsn.find('NYPO_AQUILON') >= 0:
         sys.stderr.write(
             'your DSN is on the production database, not permitted \n')
         sys.exit(9)
 
-    msg="You've asked to wipe out the %s database. Please confirm."%(db.dsn)
+    msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
+           % db.dsn)
 
     if confirm(prompt=msg, resp=False):
         execute = db.engine.execute
