@@ -23,7 +23,8 @@ class AuthorizationBroker(object):
 
     # FIXME: Hard coded check for now.
     def _check(self, session, dbuser, action, resource, principal):
-        if action.startswith('show') or action == 'status':
+        if action.startswith('show') or action.startswith('search') \
+           or action == 'status':
             return True
         if dbuser is None:
             raise AuthorizationException(
