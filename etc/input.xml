@@ -740,9 +740,10 @@
    </command>
 
    <command name="pxeswitch">
-      change the way the host boots. At boot, the host may either reboot
-      from local disk (--boot), or it can reinstall (--install). The pxeswitch
-      switches the default by changing the configuration on the host's bootserver.
+      Change the way the host boots.  At boot, the host may either reboot
+      from local disk (--localboot), or it can reinstall (--install). The
+      pxeswitch switches the default by changing the configuration on the
+      host's bootserver.
       After a successful installation, the host will automatically pxeswitch
       itself back to local disk booting.
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
@@ -750,7 +751,7 @@
       </optgroup>
       <optgroup name="bootinstall" mandatory="True" fields="any">
          <option name="install" type="boolean" conflicts="boot">Do an install</option>
-         <option name="boot" type="boolean" conflicts="install">Do a reboot</option>
+         <option name="localboot" type="boolean" conflicts="install">set the host to boot from local disc</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
    </command>
