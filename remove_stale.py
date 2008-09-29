@@ -14,7 +14,14 @@ def clean_old(installdir):
     for (dirpath, dirnames, filenames) in os.walk(installdir):
         relative_dirpath = dirpath.replace(installdir, '', 1)
         for f in filenames:
+            # Can't compare with src, since we only have .py files there.
+            # Assume that the .pyc will either be removed because its
+            # corresponding .py is removed, or rebuilt as necessary.
             if f.endswith('.pyc'):
+                continue
+            # This will be updated as needed, and has no corresponding
+            # file in src.
+            if f == 'dropin.cache':
                 continue
             if not os.path.exists(os.path.join(src, relative_dirpath, f)):
                 old_file = os.path.join(dirpath, f)
