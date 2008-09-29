@@ -100,6 +100,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         net_msg.sysloc = str(net.location.sysloc())
         net_msg.location.name = str(net.location.name)
         net_msg.location.location_type = str(net.location.location_type)
+        net_msg.type = str(net.network_type)
         for system in net.interfaces:
             self.add_host_msg(net_msg.hosts.add(), system)
 
