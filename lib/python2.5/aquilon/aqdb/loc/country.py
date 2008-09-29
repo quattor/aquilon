@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Country is a subclass of Location """
 
 import sys
@@ -34,16 +34,16 @@ def populate(db, *args, **kw):
     if len(s.query(Country).all()) < 1:
         from aquilon.aqdb.loc.continent import Continent
         from aquilon.aqdb.loc.hub import Hub
-        import aquilon.aqdb.utils.dsdb
+        import aquilon.aqdb.dsdb as dsdb_
 
-        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
+        dsdb = dsdb_.DsdbConnection()
 
         cnts = {}
 
         for c in s.query(Continent).all():
             cnts[c.name] = c
 
-        for row in dsdb.dump_country():
+        for row in dsdb.dump('country'):
 
             a = Country(name = str(row[0]),
                         fullname = str(row[1]),

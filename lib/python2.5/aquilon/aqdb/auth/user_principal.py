@@ -1,14 +1,9 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Contains tables and objects for authorization in Aquilon """
 
 from datetime import datetime
 import sys
 import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
@@ -29,9 +24,6 @@ class UserPrincipal(Base):
     role_id = Column(Integer, ForeignKey(
         'role.id', name='usr_princ_role_fk', ondelete = 'CASCADE'),
                      nullable = False)
-                     #default = select(
-                     #   [role.c.id]).where(
-                     #   role.c.name=='nobody').execute().fetchone()[0])
 
     creation_date = deferred(Column(DateTime,
                                     nullable=False, default=datetime.now))
@@ -80,7 +72,7 @@ def populate(db, *args, **kw):
             db.s.save(up)
             db.s.commit()
             assert(up)
-        print 'created admins: %s'%(admins)
+        #print 'created admins: %s'%(admins)
 
         for nm in unixeng:
             up=UserPrincipal(name = nm, realm = r,role = eng,
@@ -88,7 +80,7 @@ def populate(db, *args, **kw):
             db.s.save(up)
             db.s.commit()
             assert(up)
-        print 'created eng: %s'%(unixeng)
+        #print 'created eng: %s'%(unixeng)
 
         for nm in operations:
             up=UserPrincipal(name = nm, realm = r, role = ops,
@@ -96,7 +88,7 @@ def populate(db, *args, **kw):
             db.s.save(up)
             db.s.commit()
             assert(up)
-        print 'created operations: %s'%(operations)
+        #print 'created operations: %s'%(operations)
 
         for nm in telco_eng:
             up = UserPrincipal(name = nm, realm = r, role = telco,
@@ -104,10 +96,13 @@ def populate(db, *args, **kw):
             db.s.save(up)
             db.s.commit()
             assert(up)
-        print 'created telco_eng: %s'%(telco_eng)
+        #print 'created telco_eng: %s'%(telco_eng)
 
     a = db.s.query(UserPrincipal).first()
     assert(a)
+
+    a = db.s.query(UserPrincipal).all()
+    print 'created %s users'%(len(a))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

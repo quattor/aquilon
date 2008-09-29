@@ -45,7 +45,7 @@ class System(Base):
     __tablename__ = 'system'
 
     id              = Column(Integer,
-                           Sequence('system_seq'), primary_key=True)
+                           Sequence('SYSTEM_SEQ'), primary_key=True)
 
     name            = Column(AqStr(64), nullable = False)
 
@@ -53,13 +53,13 @@ class System(Base):
     system_type     = Column(AqStr(32), nullable = False)
 
     dns_domain_id   = Column(Integer,
-                           ForeignKey('dns_domain.id', name = 'sys_dns_fk'),
+                           ForeignKey('dns_domain.id', name = 'SYSTEM_DNS_FK'),
                            nullable = False ) #TODO: default
 
     mac             = Column(AqMac(17), nullable = True)
     ip              = Column(IPV4, nullable = True)
-    network_id      = Column(Integer, ForeignKey('network.id',
-                                                 name = 'iface_net_id_fk'),
+    network_id      = Column(Integer, ForeignKey(Network.c.id,
+                                                 name = 'SYSTEM_NET_ID_FK'),
                                                 nullable = True)
 
     creation_date   = deferred(Column( DateTime, default = datetime.now,
@@ -78,15 +78,15 @@ class System(Base):
     fqdn = property(_fqdn)
 
 system = System.__table__
-system.primary_key.name = 'system_pk'
+system.primary_key.name = 'SYSTEM_PK'
 
 system.append_constraint(
     # Removing type. Unsure it's needed
     #    UniqueConstraint('name', 'dns_domain_id', 'system_type',
-    UniqueConstraint('name','dns_domain_id', name = 'system_dns_name_uk'))
+    UniqueConstraint('name','dns_domain_id', name = 'SYSTEM_DNS_NAME_UK'))
 
 system.append_constraint(                    #systm_pt_uk means 'primary tuple'
-    UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='system_PT_uk'))
+    UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='SYSTEM_PT_UK'))
 
 table = system
 

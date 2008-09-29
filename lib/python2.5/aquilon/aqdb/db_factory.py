@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """To be imported by classes and modules requiring aqdb access"""
 from __future__ import with_statement
 
@@ -20,6 +20,7 @@ from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
 from sqlalchemy.ext.declarative  import declarative_base
 
 from aquilon.config import Config
+from aquilon.aqdb.utils.confirm import confirm
 
 if '--debug' in sys.argv:
     from aquilon.aqdb.utils.shutils import ipshell
@@ -67,14 +68,14 @@ def __repr__(self):
        return '%s instance '%(self.__class__.__name__)
 
 #mk_table: could take an engine, meta, full dbf or a file
-
-@monkeypatch(Base)
-def mk_table(*args, **kw):
-    if hasattr(self,'__table__'):
-        print 'would create a table'
-        #self.__table__.create(checkfirst=True)
-    else:
-        raise TypeError('%s has no __table__ attribute'%(self.__class__))
+#
+#@monkeypatch(Base)
+#def mk_table(*args, **kw):
+#    if hasattr(self,'__table__'):
+#        print 'would create a table'
+#        #self.__table__.create(checkfirst=True)
+#    else:
+#        raise TypeError('%s has no __table__ attribute'%(self.__class__))
 
 class db_factory(object):
     __shared_state = {}
@@ -92,6 +93,15 @@ class db_factory(object):
             sys.exit(os.EX_CONFIG)
 
         self.dsn = self.config.get('database', 'dsn')
+        
+        #Let's be extra careful with prod when we're not CDB
+        if (self.dsn.endswith('@NYPO_AQUILON') and 
+                    os.environ['USER'] != 'cdb'):
+            
+            msg='your DSN is on the production database, are you SURE? '
+            if not confirm(prompt=msg, resp=False):
+                print 'Thanks for playing, come again.'
+                sys.exit(9)
 
         #Handle Mock Engine
         if 'mock' in args:

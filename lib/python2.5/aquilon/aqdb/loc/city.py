@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ City is a subclass of Location """
 
 import sys
@@ -35,14 +35,14 @@ def populate(db, *args, **kw):
 
     if len(s.query(City).all()) < 1:
         from aquilon.aqdb.loc.country import Country
-        import aquilon.aqdb.utils.dsdb
-        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
+        import aquilon.aqdb.dsdb as dsdb_
+        dsdb = dsdb_.DsdbConnection()
 
         cntry= {}
         for c in s.query(Country).all():
             cntry[c.name] = c
 
-        for row in dsdb.dump_city():
+        for row in dsdb.dump('city'):
             try:
                 p = cntry[str(row[2])]
             except KeyError, e:

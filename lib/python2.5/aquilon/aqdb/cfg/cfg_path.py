@@ -1,21 +1,17 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ The tables/objects/mappings related to configuration in aquilon """
 
 from datetime import datetime
 import sys
 import os
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint, Index)
+
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.cfg.tld import Tld
-from aquilon.aqdb.db_factory import Base, debug
+from aquilon.aqdb.cfg.tld            import Tld
+from aquilon.aqdb.db_factory         import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 class CfgPath(Base):
@@ -68,7 +64,6 @@ def populate(db, *args, **kw):
             continue
 
         tail = root.replace(cfg_base, "", 1)
-        debug(tail)
 
         # Treat everything under aquilon as equivalent to a tld.
         # It might be better to have an archetype attribute on
@@ -80,9 +75,6 @@ def populate(db, *args, **kw):
         (tld, slash, relative_path) = tail.partition("/")
         if not slash:
             continue
-        if 'verbose' in args:
-            print tld, relative_path
-
         try:
             dbtld = db.s.query(Tld).filter_by(type=tld).one()
             f = CfgPath(tld=dbtld,relative_path=relative_path)

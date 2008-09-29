@@ -1,16 +1,10 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Contains tables and objects for authorization in Aquilon """
 
 import sys
 import os
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from aquilon.aqdb.table_types.name_table import make_name_class
-
 
 Role = make_name_class('Role', 'role')
 role = Role.__table__
@@ -31,7 +25,7 @@ def populate(db, *args, **kw):
         db.s.add(r)
         assert(r)
     db.s.commit()
-    print 'created %s'%(roles)
+    print '\ncreated %s roles'%(len(roles))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

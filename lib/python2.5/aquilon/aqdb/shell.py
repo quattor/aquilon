@@ -1,26 +1,23 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-import msversion
-
-#msversion.addpkg('sqlalchemy', '0.4.7-1', 'dev')
-#msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
-msversion.addpkg('ipython','0.8.2','dist')
-
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 import sys
 import os
+import depends
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
-    import aquilon.aqdb.depends
+DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
 
-from aquilon.aqdb.utils.shutils import * #this IS for interactive work, right?
-from aquilon.aqdb.db_factory    import db_factory, Base
+import aquilon
 
+#from utils.table_admin import *
+from utils.shutils import *              #this IS for interactive work, right?
+from dsdb          import *
+from db_factory    import db_factory, Base
 
 db = db_factory()
 Base.metadata.bind = db.engine
-Base.metadata.bind.echo = True
 s = db.session()
+#Base.metadata.bind.echo = True
 
-#from aquilon.aqdb.utils.table_admin import *
+#load_all()
+
 ipshell()

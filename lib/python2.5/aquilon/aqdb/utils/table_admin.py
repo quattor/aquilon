@@ -35,7 +35,7 @@ def drop_all_tables_and_sequences(db,option=None):
     if not db.dsn.startswith('ora'):
         pass
 
-    if db.dsn.find('NYPO_AQUILON') >= 0:
+    if db.dsn.endswith('@NYPO_AQUILON'):
         sys.stderr.write(
             'your DSN is on the production database, not permitted \n')
         sys.exit(9)

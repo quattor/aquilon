@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Campus is a subclass of Location """
 
 import sys
@@ -43,12 +43,12 @@ def populate(db, *args, **kw):
         from aquilon.aqdb.loc.city     import City
         from aquilon.aqdb.loc.building import Building
 
-        import aquilon.aqdb.utils.dsdb
-        dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
+        import aquilon.aqdb.dsdb as dsdb_
+        dsdb = dsdb_.DsdbConnection()
 
         #get all the campus names from dsdb and create them outside the map
         campuses = []
-        for row in dsdb.dump_campus():
+        for row in dsdb.dump('campus'):
             campuses.append(row)
 
         #debug('dump campus yields\n',campuses)
