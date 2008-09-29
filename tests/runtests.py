@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This script is part of Aquilon
@@ -89,7 +85,7 @@ if not config.has_section("unittest"):
 if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
 
-production_database = "LNPO_AQUILON_NY"
+production_database = "NYPO_AQUILON"
 if (config.get("database", "vendor") == "oracle" and
         config.get("database", "server") == production_database):
     force_yes("About to run against the production database %s" %
@@ -149,20 +145,9 @@ p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
 rc = p.wait()
 # FIXME: check rc
 
-# XXX: Database rebuild is currently broken for oracle if trying to build a
-# user in a database where some other user has already created the table.
-# Commenting this out for now, and adding a hack below.
-#if config.get('database', 'vendor') == 'oracle':
-#    # Nuke the database first... (for sqlite, the rebuild script moves
-#    # it out of the way)
-#    # This method will prompt on stdin for confirmation.
-#    from aquilon.aqdb.db import drop_all_tables_and_sequences
-#    drop_all_tables_and_sequences()
-
 suite = unittest.TestSuite()
-# XXX: Hack - remove the conditional when oracle rebuild works consistently.
-if config.get('database', 'vendor') == 'sqlite':
-    suite.addTest(DatabaseTestSuite())
+# Relies on the oracle rebuild doing a nuke first.
+suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
 unittest.TextTestRunner(verbosity=2).run(suite)
 
