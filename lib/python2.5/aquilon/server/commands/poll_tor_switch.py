@@ -64,9 +64,7 @@ class CommandPollTorSwitch(BrokerCommand):
         return
 
     def run_checknet(self, switch):
-        if switch.ip:
-            hostname = switch.ip
-        elif switch.dns_domain.name == 'ms.com':
+        if switch.dns_domain.name == 'ms.com':
             hostname = switch.name
         else:
             hostname = switch.fqdn
