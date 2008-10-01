@@ -23,10 +23,11 @@ class Chassis(System):
                                     ondelete = 'CASCADE'),
                                    primary_key = True)
 
-    chassis_hw_id   = Column(Integer, ForeignKey('chassis_hw.id',
-                                               name = 'chassis_sys_hw_fk',
-                                               ondelete='CASCADE'),
-                                              nullable=False)
+    chassis_hw_id   = Column(Integer, ForeignKey(
+                                            'chassis_hw.hardware_entity_id',
+                                            name = 'chassis_sys_hw_fk',
+                                            ondelete='CASCADE'),
+                                        nullable=False)
 
     chassis_hw      = relation(ChassisHw, uselist=False,
                                backref=backref('chassis_hw', cascade='delete'))

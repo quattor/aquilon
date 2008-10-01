@@ -24,7 +24,7 @@ class ChassisHw(HardwareEntity):
 
     #TODO: this could be a bitch later, a column rename
     #hardware_entity_id = Column(Integer,
-    id = Column(Integer, ForeignKey('hardware_entity.id',
+    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                            name = 'chassis_hw_fk',
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
