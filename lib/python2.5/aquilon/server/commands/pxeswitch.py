@@ -23,6 +23,13 @@ class CommandPxeswitch(BrokerCommand):
     @az_check
     def render(self, session, hostname, localboot, install, **arguments):
         dbhost = hostname_to_host(session, hostname)
+        # Find what "bootserver" instance we're bound to
+        dbservice = get_service(session, "bootserver")
+        bootbi = get_host_build_item(session, dbhost, dbservice)
+        if not bootbi:
+            raise ArgumentError("host has no bootserver")
+        # for that instance, find what servers are bound to it.
+        servers = [s.system.fqdn for s in bootbi.cfg_path.svc_inst.servers]
 
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
         # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
@@ -43,6 +50,17 @@ class CommandPxeswitch(BrokerCommand):
             raise ArgumentError("Missing required boot or install parameter.")
 
         args.append(dbhost.fqdn)
+
+        # possibly make "cdb" and "sshdir" from config?
+        args.append("--cfgfile")
+        args.append("/dev/null")
+        args.append("--servers")
+        args.append(" ".join(["cdb@%s"%s for s in servers]))
+        args.append("--sshdir")
+        args.append("/ms/dist/sec/PROJ/openssh/prod/bin")
+        args.append("--logfile")
+        logdir = self.config.get("broker", "logdir")
+        args.append("%s/aii-installfe.log"%logdir)
         run_command(args)
         return
 
