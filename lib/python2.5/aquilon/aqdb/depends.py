@@ -14,9 +14,6 @@ if not sys.modules.has_key('cx_Oracle'):
 if not sys.modules.has_key('ipython'):
     msversion.addpkg('ipython','0.8.2','dist')
 
-if not sys.modules.has_key('pyparsing'):
-    msversion.addpkg('pyparsing', '1.5.0', 'dev')
-
 if not sys.modules.has_key('pydot'): 
     msversion.addpkg('pydot', '1.0.2', 'dist')
 
