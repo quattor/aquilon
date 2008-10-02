@@ -14,7 +14,7 @@ if __name__ == '__main__':
 from aquilon.aqdb.db_factory import monkeypatch
 from aquilon.aqdb.table_types.name_table import make_name_class
 
-_statuses = ['production','development','qa','build']
+_statuses = ['blind', 'build', 'ready']
 
 Status = make_name_class('Status','status')
 status = Status.__table__

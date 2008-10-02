@@ -23,16 +23,18 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddHost(BrokerCommand):
 
-    required_parameters = ["hostname", "machine", "archetype", "domain",
-            "status"]
+    required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, machine, archetype, domain, status, ip,
-            user, skip_dsdb_check=False, **arguments):
+    def render(self, session, hostname, machine, archetype, domain,
+               buildstatus, ip, user, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
-        dbstatus = get_status(session, status)
+        if buildstatus:
+            dbstatus = get_status(session, buildstatus)
+        else:
+            dbstatus = get_status(session, "build")
         dbmachine = get_machine(session, machine)
         dbarchetype = get_archetype(session, archetype)
         dbnetwork = get_net_id_from_ip(session, ip)

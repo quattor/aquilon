@@ -122,7 +122,7 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbslot.machine = dbmachine
                 session.update(dbslot)
         # FIXME: Pull this from somewhere.
-        status = 'production'
+        buildstatus = 'ready'
 
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session
@@ -130,7 +130,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['archetype'] = 'aurora'
         kwargs['domain'] = 'production'
         kwargs['machine'] = dbmachine.name
-        kwargs['status'] = status
+        kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
         # The superclass already contains the rest of the logic to handle this.
         return CommandAddHost.render(self, *args, **kwargs)
