@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -12,6 +8,7 @@
 
 from os import path as os_path, environ as os_environ
 from tempfile import mkdtemp
+from socket import gethostbyname
 
 from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
                                  ArgumentError, NameServiceError)
@@ -20,11 +17,12 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import choose_service_instance
+from aquilon.server.dbwrappers.status import get_status
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates.domain import TemplateDomain
-from socket import gethostbyname
+
 
 class CommandMakeAquilon(BrokerCommand):
 
@@ -32,7 +30,8 @@ class CommandMakeAquilon(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, os, personality, user, **arguments):
+    def render(self, session, hostname, os, personality, buildstatus,
+               user, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
@@ -85,6 +84,11 @@ class CommandMakeAquilon(BrokerCommand):
                 dbpersonality_bi = BuildItem(host=dbhost,
                         cfg_path=dbpersonality, position=1)
             session.save_or_update(dbpersonality_bi)
+
+        if buildstatus:
+            dbstatus = get_status(session, buildstatus)
+            dbhost.status = dbstatus
+            session.update(dbhost)
 
         session.flush()
         session.refresh(dbhost)

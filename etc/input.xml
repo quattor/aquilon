@@ -769,6 +769,7 @@
       <optgroup name="reconfigure_optional" mandatory="False">
          <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
+         <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -1173,6 +1174,9 @@
          <option name="hostname" type="string">Host name to make</option>
          <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
