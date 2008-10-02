@@ -35,6 +35,11 @@ notification_types = {
 }
 
 def run_command(args, env=None, path="."):
+    '''
+    run the specified command (args should be a list corresponding to ARGV
+    returns any output (stdout only). If the command fails, then ProcessException
+    will be raised
+    '''
     if env:
         shell_env = env.copy()
     else:
@@ -50,11 +55,12 @@ def run_command(args, env=None, path="."):
     # the database.
     command_args = [str(arg) for arg in args]
 
+    simple_command = " ".join(command_args)
+    log.msg("run_command: %s"%simple_command)
     p = Popen(args=command_args, stdout=PIPE, stderr=PIPE, cwd=path,
             env=shell_env)
     (out, err) = p.communicate()
 
-    simple_command = " ".join(command_args)
     if p.returncode >= 0:
         log.msg("command `%s` exited with return code %d" %
                 (simple_command, p.returncode))
