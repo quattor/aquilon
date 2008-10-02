@@ -237,12 +237,12 @@
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
-         <option name="status" type="string">Status: production, development, qa, build</option>
 	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string">IP address</option>
 	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
@@ -255,12 +255,12 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
-         <option name="status" type="string">Status: production, development, qa, build</option>
 	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string">IP address</option>
 	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
@@ -272,12 +272,12 @@
       <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
-         <option name="status" type="string">Status: production, development, qa, build</option>
 	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string">IP address</option>
 	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
@@ -769,6 +769,7 @@
       <optgroup name="reconfigure_optional" mandatory="False">
          <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
+         <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -1173,6 +1174,9 @@
          <option name="hostname" type="string">Host name to make</option>
          <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>

@@ -22,7 +22,7 @@ class TestAddWindowsHost(TestBrokerCommand):
     def testaddunittest01(self):
         self.noouttest(["add", "windows", "host",
             "--hostname", "unittest01.one-nyp.ms.com", "--ip", self.hostip4,
-            "--machine", "ut3c1n4", "--status", "production"])
+            "--machine", "ut3c1n4"])
 
     def testverifyaddunittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
@@ -32,7 +32,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Domain: ny-prod", command)
-        self.matchoutput(out, "Status: production", command)
+        self.matchoutput(out, "Build Status: build", command)
 
 
 if __name__=='__main__':

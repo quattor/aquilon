@@ -20,7 +20,7 @@ from brokertest import TestBrokerCommand
 class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest00(self):
-        self.noouttest(["add", "aquilon", "host", "--status", "production",
+        self.noouttest(["add", "aquilon", "host",
             "--hostname", "unittest00.one-nyp.ms.com", "--ip", self.hostip2,
             "--machine", "ut3c1n3", "--domain", "unittest"])
 
@@ -32,7 +32,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Status: production", command)
+        self.matchoutput(out, "Build Status: build", command)
 
     def testverifyshowmanagermissing(self):
         command = "show manager --missing"

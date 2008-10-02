@@ -25,7 +25,13 @@ class TestReconfigure(TestBrokerCommand):
     # it should now be set to q.ln.ms.com.
     def testreconfigureunittest02(self):
         self.noouttest(["reconfigure",
-            "--hostname", "unittest02.one-nyp.ms.com"])
+            "--hostname", "unittest02.one-nyp.ms.com",
+            "--buildstatus", "ready"])
+
+    def testverifybuildstatus(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Build Status: ready", command)
 
     def testverifycatunittest02(self):
         command = "cat --hostname unittest02.one-nyp.ms.com"

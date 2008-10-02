@@ -23,7 +23,7 @@ class TestAddHost(TestBrokerCommand):
         self.noouttest(["add", "host",
             "--hostname", "unittest02.one-nyp.ms.com", "--ip", self.hostip0,
             "--machine", "ut3c5n10", "--domain", "unittest",
-            "--status", "production", "--archetype", "aquilon"])
+            "--buildstatus", "build", "--archetype", "aquilon"])
 
     def testverifyaddunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -33,7 +33,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Status: production", command)
+        self.matchoutput(out, "Build Status: build", command)
 
     def testverifyshowfqdnhost(self):
         command = "show fqdn --fqdn unittest02.one-nyp.ms.com"

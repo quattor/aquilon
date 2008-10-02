@@ -65,10 +65,16 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest00(self):
         self.noouttest(["make", "aquilon",
             "--hostname", "unittest00.one-nyp.ms.com",
+            "--buildstatus", "blind",
             "--personality", "compileserver", "--os", "linux/4.0.1-x86_64"])
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest00.one-nyp.ms.com.xml")))
+
+    def testverifybuildstatus(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Build Status: blind", command)
 
     def testverifybindautoafs(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"

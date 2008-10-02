@@ -17,13 +17,15 @@ from aquilon.server.commands.add_host import CommandAddHost
 
 class CommandAddAquilonHost(CommandAddHost):
 
-    required_parameters = ["hostname", "machine", "domain", "status"]
+    required_parameters = ["hostname", "machine", "domain"]
 
     @add_transaction
     @az_check
     def render(self, *args, **kwargs):
         # The superclass already contains the logic to handle this case.
         kwargs['archetype'] = 'aquilon'
+        if 'buildstatus' not in kwargs:
+            kwargs['buildstatus'] = 'build'
         return CommandAddHost.render(self, *args, **kwargs)
 
 

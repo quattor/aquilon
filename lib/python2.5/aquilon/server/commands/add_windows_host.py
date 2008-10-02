@@ -13,13 +13,15 @@ from aquilon.server.commands.add_host import CommandAddHost
 
 class CommandAddWindowsHost(CommandAddHost):
 
-    required_parameters = ["hostname", "machine", "status"]
+    required_parameters = ["hostname", "machine"]
 
     @add_transaction
     @az_check
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
         kwargs['domain'] = 'ny-prod'
+        if 'buildstatus' not in kwargs:
+            kwargs['buildstatus'] = 'build'
         # The superclass already contains the logic to handle this case.
         return CommandAddHost.render(self, *args, **kwargs)
 
