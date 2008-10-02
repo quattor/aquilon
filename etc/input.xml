@@ -895,11 +895,6 @@
       <transport trigger="name" method="get" path="location/%(type)s/%(name)s" />
    </command>
 
-   <command name="show_location_types">
-      Shows all location types.
-      <transport method="get" path="location" />
-   </command>
-
    <command name="del_location">
       Remove a location from the database. The command will fail if there
       are any hosts at that location, or if the location is used within any service maps.
