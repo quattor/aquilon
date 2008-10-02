@@ -85,6 +85,14 @@ class AQDMaker(object):
             return strports.service(config.get("broker", "openport"), openSite)
 
         sockname = os.path.join(config.get("broker", "rundir"), "kncsock")
+        if os.path.exists(sockname):
+            try:
+                log.msg("Attempting to remove old socket '%s'" % sockname)
+                os.remove(sockname)
+                log.msg("Succeeded removing old socket.")
+            except OSError, e:
+                log.msg("Could not remove old socket '%s': %s" % (sockname, e))
+
         mon = ProcessMonitor()
         # FIXME: Should probably run krb5_keytab here as well.
         # and/or verify that the keytab file exists.
