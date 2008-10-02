@@ -29,7 +29,7 @@ class Machine(HardwareEntity):
     __mapper_args__ = {'polymorphic_identity' : 'machine'}
 
     #hardware_entity_
-    id = Column(Integer, ForeignKey(HardwareEntity.c.id,
+    id = Column(Integer, ForeignKey('hardware_entity.id',
                                            name = 'machine_hw_ent_fk'),
                                            primary_key = True)
 

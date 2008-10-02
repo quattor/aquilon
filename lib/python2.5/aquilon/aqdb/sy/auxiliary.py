@@ -23,7 +23,7 @@ class Auxiliary(System):
                                      ondelete = 'CASCADE'),
                                     primary_key = True)
 
-    machine_id  = Column(Integer, ForeignKey(Machine.c.id,
+    machine_id  = Column(Integer, ForeignKey('machine.id',
                                              name = 'aux_machine_fk'),
                                             nullable = False)
 

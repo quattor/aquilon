@@ -39,12 +39,12 @@ class Interface(Base):
 
     interface_type     = Column(AqStr(32), nullable=False) #TODO: index
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.c.id,
+    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                                     name = 'IFACE_HW_ENT_FK',
                                                     ondelete = 'CASCADE'),
                                                    nullable = False)
 
-    system_id          = Column(Integer, ForeignKey(System.c.id,
+    system_id          = Column(Integer, ForeignKey('system.id',
                                                  name = 'IFACE_SYSTEM_FK',
                                                  ondelete = 'CASCADE'),
                                                 nullable = True)

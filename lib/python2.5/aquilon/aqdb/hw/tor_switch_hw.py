@@ -22,8 +22,9 @@ class TorSwitchHw(HardwareEntity):
     __tablename__ = 'tor_switch_hw'
     __mapper_args__ = {'polymorphic_identity' : 'tor_switch_hw'}
 
+    #TODO: rename to id?
     hardware_entity_id = Column(Integer,
-                                ForeignKey(HardwareEntity.c.id,
+                                ForeignKey('hardware_entity.id',
                                            name = 'tor_switch_hw_ent_fk',
                                            ondelete = 'CASCADE'),
                                            primary_key = True)

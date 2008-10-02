@@ -23,7 +23,7 @@ class ChassisSlot(Base):
     __tablename__ = 'chassis_slot'
 
     chassis_id = Column(Integer,
-                        ForeignKey(Chassis.c.id,
+                        ForeignKey('chassis.id',
                                    name='chassis_slot_chassis_fk',
                                    ondelete='CASCADE'),
                         primary_key=True)
@@ -32,7 +32,7 @@ class ChassisSlot(Base):
 
     # TODO: Code constraint that these are Blades...
     machine_id = Column(Integer,
-                        ForeignKey(Machine.c.id,
+                        ForeignKey('machine.id',
                                    name='chassis_slot_machine_fk'),
                         nullable=True)
 

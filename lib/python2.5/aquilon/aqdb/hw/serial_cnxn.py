@@ -28,14 +28,14 @@ class SerialCnxn(Base):
     id = Column(Integer, Sequence(name='serial_cnxn_seq'), primary_key = True)
 
     console_server_id = Column(Integer,
-                               ForeignKey(ConsoleServer.c.id,
+                               ForeignKey('console_server.id',
                                            name='serial_cnxn_cons_svr_fk',
                                            ondelete='CASCADE'),
                                nullable = False)
 
     port_number = Column(Integer, nullable=False )
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.c.id,
+    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                            name='serial_cnxn_hw_ent_fk',
                                            ondelete='CASCADE'),
                                 nullable=False)

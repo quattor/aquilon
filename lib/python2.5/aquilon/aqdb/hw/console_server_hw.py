@@ -20,7 +20,7 @@ class ConsoleServerHw(HardwareEntity):
     __mapper_args__ = {'polymorphic_identity' : 'console_server_hw'}
 
     hardware_entity_id = Column(Integer,
-                                ForeignKey(HardwareEntity.c.id,
+                                ForeignKey('hardware_entity.id',
                                            name = 'cons_svr_hw_fk',
                                            ondelete = 'CASCADE'),
                                            primary_key = True)

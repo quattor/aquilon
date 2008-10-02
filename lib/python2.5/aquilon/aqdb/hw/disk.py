@@ -29,12 +29,14 @@ class Disk(Base):
     id            = Column(Integer, Sequence('disk_id_seq'), primary_key = True)
     device_name   = Column(AqStr(128), nullable = False, default = 'sda')
 
-    machine_id    = Column(Integer, ForeignKey(
-        Machine.c.id, name = 'disk_machine_fk', ondelete='CASCADE'),
-                           nullable = False)
+    machine_id    = Column(Integer, ForeignKey('machine.id',
+                                               name = 'disk_machine_fk',
+                                               ondelete='CASCADE'),
+                                              nullable = False)
 
-    disk_type_id  = Column(Integer, ForeignKey(
-        DiskType.c.id, name = 'disk_disk_type_fk'), nullable = False)
+    disk_type_id  = Column(Integer, ForeignKey('disk_type.id',
+                                               name = 'disk_disk_type_fk'),
+                                              nullable = False)
 
     capacity      = Column(Integer, nullable = False, default = 36)
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -55,4 +57,3 @@ table = disk
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

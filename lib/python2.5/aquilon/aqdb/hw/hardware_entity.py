@@ -26,11 +26,11 @@ class HardwareEntity(Base):
 
     hardware_entity_type = Column(AqStr(64), nullable=False)
 
-    location_id          = Column(Integer, ForeignKey(Location.c.id,
+    location_id          = Column(Integer, ForeignKey('location.id',
                                             name='hw_ent_loc_fk'),
                                             nullable=False)
 
-    model_id             = Column(Integer, ForeignKey(Model.c.id,
+    model_id             = Column(Integer, ForeignKey('model.id',
                                             name='hw_ent_model_fk'),
                                             nullable=False)
 

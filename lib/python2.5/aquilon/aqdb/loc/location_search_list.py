@@ -25,10 +25,7 @@ location_search_list.primary_key.name = 'loc_search_list_pk'
 table = location_search_list
 
 def populate(db, *args, **kw):
-
     s = db.session()
-
-    location_search_list.create(checkfirst = True)
 
     if len(s.query(LocationSearchList).all()) < 1:
         l = LocationSearchList(name = 'full', comments = 'Chassis -> Company')
@@ -47,4 +44,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
