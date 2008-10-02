@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -49,8 +45,9 @@ class TestBrokerStart(unittest.TestCase):
 
     def testrsynctemplateking(self):
         config = Config()
+        template_king_host = config.get("unittest", "template_king_host")
         p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-            "quattorsrv:/var/quattor/template-king",
+            "%s:/var/quattor/template-king" % template_king_host,
             # Minor hack... ignores config kingdir...
             config.get("broker", "quattordir")),
             stdout=PIPE, stderr=PIPE)
