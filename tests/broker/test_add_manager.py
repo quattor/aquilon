@@ -38,11 +38,11 @@ class TestAddManager(TestBrokerCommand):
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                """"console/bmc" = nlist("mac", "%s", "address", "%s", "fqdn", "%s");""" %
-                (self.hostmac10.lower(), self.hostip10,
-                 "unittest00r.one-nyp.ms.com"),
-                command)
+        self.matchoutput(out, """"console/bmc" = nlist(""", command)
+        self.matchoutput(out, '"hwaddr", "%s"' % self.hostmac10.lower(),
+                         command)
+        self.matchoutput(out, '"fqdn", "%s"' % "unittest00r.one-nyp.ms.com",
+                         command)
 
     def testaddunittest02rsa(self):
         self.noouttest(["add", "manager", "--ip", self.hostip11,

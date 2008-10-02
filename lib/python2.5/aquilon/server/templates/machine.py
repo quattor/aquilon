@@ -104,10 +104,12 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('"cards/nic/%s/boot" = %s;'
                         % (interface['name'], str(interface['boot']).lower()))
         for manager in self.managers:
-            lines.append('"console/%(type)s" = nlist(')
-            lines.append('                           "hwaddr", "%(mac)s"'%manager)
+            lines.append('"console/%(type)s" = nlist(' % manager)
+            lines.append('                           "hwaddr", "%(mac)s"' %
+                         manager)
             if (manager["fqdn"]):
-                lines.append('                           "fqdn", "%(fqdn)s");'%manager)
-            lines.append('"                    );'%manager)
+                lines.append('                           , "fqdn", "%(fqdn)s"' %
+                             manager)
+            lines.append('                     );')
 
 
