@@ -11,13 +11,13 @@ if __name__ == '__main__':
 
 from aquilon.aqdb.table_types.subtype import subtype
 
-DiskType = subtype('DiskType','disk_type','Disk Type: scsi, ccis, sata, etc.')
+DiskType = subtype('DiskType','disk_type','Disk Type: scsi, cciss, sata, etc.')
 disk_type = DiskType.__table__
 disk_type.primary_key.name = 'disk_type_pk'
 
 table = disk_type
 
-_disk_types = ['ccis', 'ide', 'sas', 'sata', 'scsi', 'flash']
+_disk_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash']
 
 def populate(db, *args, **kw):
     if len(db.s.query(DiskType).all()) < 1:
