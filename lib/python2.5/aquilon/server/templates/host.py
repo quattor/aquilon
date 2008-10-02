@@ -76,6 +76,16 @@ class PlenaryHost(Plenary):
             lines.append("'/system/network/default_gateway' = '%s';" %
                          default_gateway)
         lines.append("")
+        # XXX: The function should be the business function.
+        # XXX: maybe "function" could use "state" instead (since the QWG state is pretty
+        # XXX: close to what we want). Whatever. Anyhow, that needs a new column
+        # XXX: in the database. For now, we're just going to assume grid.
+        # XXX: Note that the personality template can override this anyhow. In fact,
+        # XXX: Maybe it should *only* be in the personality template. There's a thought....
+        #lines.append("'/system/function' = '%s';"%self.dbhost.business_function)
+        lines.append("'/system/function' = 'grid';");
+        lines.append("'/system/build' = '%s';"%self.dbhost.status)
+        lines.append("")
         for template in templates:
             lines.append("include { '%s' };" % template)
         lines.append("")

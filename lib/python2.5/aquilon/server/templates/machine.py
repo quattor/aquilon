@@ -14,8 +14,19 @@ class PlenaryMachineInfo(Plenary):
         self.building = dbmachine.location.building.name
         if dbmachine.location.rack:
             self.rack = dbmachine.location.rack.name
+            self.rackrow = dbmachine.location.rack.rack_row
+            self.rackcol = dbmachine.location.rack.rack_column
         else:
             self.rack = None
+        
+        # And a chassis location?
+        if dbmachine.chassis_slot:
+            slot = dbmachine.chassis_slot[0]
+            self.chassis = slot.chassis.fqdn
+            self.slot = slot.slot_number
+        else:
+            self.chassis = None
+
         self.sysloc = dbmachine.location.sysloc()
         self.machine = dbmachine.name
         self.model = dbmachine.model.name
@@ -56,11 +67,25 @@ class PlenaryMachineInfo(Plenary):
         return
 
     def body(self, lines):
+        # Firstly, location
         lines.append('"location" = "%(sysloc)s";' % self.__dict__)
+        if self.rack:
+            lines.append('"rack/name" = "%(rack)s";' % self.__dict__)
+            if self.rackrow:
+                lines.append('"rack/row" = "%(rackrow)s";' % self.__dict__)
+            if self.rackcol:
+                lines.append('"rack/column" = "%(rackcol)s";' % self.__dict__)
+
+        # And a chassis location?
+        if self.chassis:
+            lines.append('"chassis" = "%s";'%self.chassis)
+            lines.append('"slot" = %d;'%self.slot)
+
+        # Now describe the hardware
+        lines.append("")
         if self.serial:
             lines.append('"serialnumber" = "%(serial)s";\n' % self.__dict__)
         lines.append('"nodename" = "%(machine)s";' % self.__dict__)
-        lines.append("")
         lines.append("include { '%(model_relpath)s' };\n" % self.__dict__)
         lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
                 % self.__dict__)
@@ -79,15 +104,10 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('"cards/nic/%s/boot" = %s;'
                         % (interface['name'], str(interface['boot']).lower()))
         for manager in self.managers:
-            if manager["fqdn"]:
-                if manager["ip"]:
-                    lines.append('"console/%(type)s" = nlist("mac", "%(mac)s", "address", "%(ip)s", "fqdn", "%(fqdn)s");' %
-                                 manager)
-                else:
-                    lines.append('"console/%(type)s" = nlist("mac", "%(mac)s", "fqdn", "%(fqdn)s");' %
-                                 manager)
-            else:
-                lines.append('"console/%(type)s" = nlist("mac", "%(mac)s");' %
-                             manager)
+            lines.append('"console/%(type)s" = nlist(')
+            lines.append('                           "hwaddr", "%(mac)s"'%manager)
+            if (manager["fqdn"]):
+                lines.append('                           "fqdn", "%(fqdn)s");'%manager)
+            lines.append('"                    );'%manager)
 
 
