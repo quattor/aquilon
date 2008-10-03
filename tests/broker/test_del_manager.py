@@ -35,6 +35,14 @@ class TestDelManager(TestBrokerCommand):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelunittest12r(self):
+        command = "del manager --manager unittest12r.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelunittest12r(self):
+        command = "show manager --manager unittest12r.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelManager)

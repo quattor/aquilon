@@ -76,6 +76,51 @@ class TestAddManager(TestBrokerCommand):
                          self.hostip11,
                          command)
 
+    def testaddbadunittest12bmc(self):
+        command = ["add", "interface", "--interface", "bmc",
+                        "--hostname", "unittest12.aqd-unittest.ms.com",
+                        "--mac", self.hostmac12]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "already has an interface with mac", command)
+
+    # Taking advantage of the fact that this runs after add_machine
+    # and add_host, and that this *should* create a manager
+    # Lots of verifications steps for this single test...
+    def testaddunittest12bmc(self):
+        self.noouttest(["add", "interface", "--interface", "bmc",
+                        "--hostname", "unittest12.aqd-unittest.ms.com",
+                        "--mac", self.hostmac13])
+
+    def testverifyunittest13removed(self):
+        command = "show host --hostname unittest13.one-nyp.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testverifyut3s01p1bremoved(self):
+        command = "show machine --machine ut3s01p1b"
+        self.notfoundtest(command.split(" "))
+
+    def testverifyut3s01p1arenamed(self):
+        command = "show machine --machine ut3s01p1a"
+        self.notfoundtest(command.split(" "))
+        command = "show machine --machine ut3s01p1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rackmount: ut3s01p1", command)
+
+    def testverifyunittest12(self):
+        command = "show host --hostname unittest12.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "IP: %s" % self.hostip12, command)
+        self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out,
+                         "Manager: unittest12r.aqd-unittest.ms.com [%s]" %
+                         self.hostip13,
+                         command)
+        self.matchoutput(out, "Interface: eth0 %s boot=True" %
+                         self.hostmac12.lower(), command)
+        self.matchoutput(out, "Interface: bmc %s boot=False" %
+                         self.hostmac13.lower(), command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddManager)

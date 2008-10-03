@@ -46,6 +46,40 @@ class TestAddAquilonHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
+    def testaddunittest12(self):
+        self.noouttest(["add", "aquilon", "host",
+            "--hostname", "unittest12.aqd-unittest.ms.com",
+            "--ip", self.hostip12, "--buildstatus", "blind",
+            "--machine", "ut3s01p1a", "--domain", "unittest"])
+
+    def testverifyaddunittest12(self):
+        command = "show host --hostname unittest12.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.hostip12, command)
+        self.matchoutput(out, "Rackmount: ut3s01p1a", command)
+        self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Build Status: blind", command)
+
+    def testaddunittest13(self):
+        self.noouttest(["add", "aquilon", "host",
+            "--hostname", "unittest13.aqd-unittest.ms.com",
+            "--ip", self.hostip13, "--buildstatus", "blind",
+            "--machine", "ut3s01p1b", "--domain", "unittest"])
+
+    def testverifyaddunittest13(self):
+        command = "show host --hostname unittest13.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest13.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.hostip13, command)
+        self.matchoutput(out, "Rackmount: ut3s01p1b", command)
+        self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Build Status: blind", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)
