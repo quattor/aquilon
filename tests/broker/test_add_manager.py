@@ -35,6 +35,14 @@ class TestAddManager(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
+    def testverifyunittest00(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Manager: unittest00r.one-nyp.ms.com [%s]" %
+                         self.hostip10,
+                         command)
+
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
@@ -60,6 +68,13 @@ class TestAddManager(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
 
+    def testverifyunittest02(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
+                         self.hostip11,
+                         command)
 
 
 if __name__=='__main__':

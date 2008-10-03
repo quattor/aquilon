@@ -18,6 +18,9 @@ class MachineFormatter(ObjectFormatter):
         if machine.host:
             details.append(indent + "  Allocated to host: %s [%s]"
                     % (machine.host.fqdn, machine.host.ip))
+        for manager in machine.manager:
+            details.append(indent + "  Manager: %s [%s]" % (manager.fqdn,
+                                                            manager.ip))
         for dbauxiliary in machine.auxiliaries:
             details.append(indent + "  Auxiliary: %s [%s]" % (
                            dbauxiliary.fqdn, dbauxiliary.ip))
