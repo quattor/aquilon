@@ -84,8 +84,8 @@ def populate(db, *args, **kw):
     if len(db.s.query(MachineSpecs).all()) < 1:
         from sqlalchemy import insert
 
-        specs = [["hs20", "xeon_2660", 2, 8192, 'scsi', 36, 2],
-             ["hs21", "xeon_2660", 2, 8192, 'scsi', 68, 2],
+        specs = [["hs20-884345u", "xeon_2660", 2, 8192, 'scsi', 36, 2],
+             ["hs21-8853l5u", "xeon_2660", 2, 8192, 'scsi', 68, 2],
              ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
              ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
              ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],

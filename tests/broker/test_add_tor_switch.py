@@ -70,7 +70,7 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testrejectut3gd1r03(self):
         command = ["add", "tor_switch",
             "--tor_switch", "ut3gd1r03.aqd-unittest.ms.com",
-            "--rack", "ut3", "--model", "hs21"]
+            "--rack", "ut3", "--model", "hs21-8853l5u"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot add machines of type 'blade'", command)
 

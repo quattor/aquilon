@@ -21,7 +21,7 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
-            "--rack", "ut3", "--model", "hs21", "--cpucount", "2",
+            "--rack", "ut3", "--model", "hs21-8853l5u", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "99C5553"])
 
@@ -30,7 +30,7 @@ class TestAddMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Rack: ut3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
@@ -45,7 +45,7 @@ class TestAddMachine(TestBrokerCommand):
             """"serialnumber" = "99C5553";""",
             command)
         self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21' };""",
+            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
         self.matchoutput(out,
             """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
@@ -62,7 +62,7 @@ class TestAddMachine(TestBrokerCommand):
     def testaddut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
             "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
-            "--model", "hs21", "--cpucount", "2",
+            "--model", "hs21-8853l5u", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
             "--memory", "8192", "--serial", "KPDZ406"])
 
@@ -82,7 +82,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ406", command)
@@ -97,7 +97,7 @@ class TestAddMachine(TestBrokerCommand):
             """"serialnumber" = "KPDZ406";""",
             command)
         self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21' };""",
+            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
         self.matchoutput(out,
             """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
@@ -113,14 +113,14 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
-            "--rack", "ut3", "--model", "hs21", "--serial", "KPDZ407"])
+            "--rack", "ut3", "--model", "hs21-8853l5u", "--serial", "KPDZ407"])
 
     def testverifyaddut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Rack: ut3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ407", command)
@@ -135,7 +135,7 @@ class TestAddMachine(TestBrokerCommand):
             """"serialnumber" = "KPDZ407";""",
             command)
         self.matchoutput(out,
-            """include { 'hardware/machine/ibm/hs21' };""",
+            """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
         self.matchoutput(out,
             """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
@@ -162,7 +162,7 @@ class TestAddMachine(TestBrokerCommand):
     # (There should be no cpu with speed==2 in the database)
     def testrejectut3c1n5(self):
         self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
-            "--rack", "ut3", "--model", "hs21", "--cpucount", "2",
+            "--rack", "ut3", "--model", "hs21-8853l5u", "--cpucount", "2",
             "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2",
             "--memory", "8192", "--serial", "KPDZ406"])
 

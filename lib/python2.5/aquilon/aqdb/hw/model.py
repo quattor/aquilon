@@ -52,9 +52,9 @@ def populate(db, *args, **kw):
 
     if not mlist:
 
-        f = [['ibm', 'hs20','blade'],
-            ['ibm', 'ls20','blade'],
-            ['ibm','hs21','blade'],
+        f = [['ibm', 'hs20-884345u','blade'],
+            ['ibm', 'ls20-8850pap','blade'],
+            ['ibm','hs21-8853l5u','blade'],
             ['ibm','hs40','blade'],
             ['ibm', 'bce','chassis'],
             ['ibm', 'bch','chassis'],
