@@ -12,7 +12,8 @@ from datetime import datetime
 from twisted.python import log
 
 from aquilon.config import Config
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import (ArgumentError, ProcessException,
+                                 IncompleteError)
 from aquilon.server.processes import run_command, build_index
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost
@@ -72,7 +73,11 @@ class TemplateDomain(object):
             log.msg("flushing %d hosts"%len(hl))
             for h in hl:
                 p = PlenaryHost(h)
-                p.write(profiledir, user, locked=True)
+                try:
+                    p.write(profiledir, user, locked=True)
+                except IncompleteError, e:
+                    pass
+                    #log.msg("Encountered incomplete host: %s" % e)
 
             domaindir = os_path.join(config.get("broker", "templatesdir"), domain.name)
             includes = [domaindir,

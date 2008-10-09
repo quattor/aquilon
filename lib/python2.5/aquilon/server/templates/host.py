@@ -5,8 +5,11 @@
 # This module is part of Aquilon
 """Any work by the broker to write out (or read in?) templates lives here."""
 
+
+from aquilon.exceptions_ import IncompleteError
 from aquilon.server.templates.base import Plenary
 from aquilon.server.templates.machine import PlenaryMachineInfo
+
 
 class PlenaryHost(Plenary):
     def __init__(self, dbhost):
@@ -57,9 +60,14 @@ class PlenaryHost(Plenary):
 
         templates = []
         templates.append("archetype/base")
+        if not os_template:
+            raise IncompleteError("Host %s is missing OS." % self.name)
         templates.append(os_template)
         for service in services:
             templates.append(service)
+        if not personality_template:
+            raise IncompleteError("Host %s is missing personality." %
+                                  self.name)
         templates.append(personality_template)
         templates.append("archetype/final")
 

@@ -15,7 +15,8 @@ from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInst
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.domain import compileLock, compileRelease
-from aquilon.exceptions_ import PartialError
+from aquilon.exceptions_ import PartialError, IncompleteError
+
 
 class CommandFlush(BrokerCommand):
 
@@ -69,6 +70,9 @@ class CommandFlush(BrokerCommand):
                         total += 1
                         plenary_host = PlenaryHost(h)
                         plenary_host.write(domdir, user, locked=True)
+                    except IncompleteError, e:
+                        pass
+                        #log.msg("Not flushing host: %s" % e)
                     except Exception, e:
                         failed.append("host %s in domain %s failed: %s" %(h.fqdn,d.name,e))
 
