@@ -154,6 +154,28 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface: xge49 %s boot=False" %
                          self.hostmac9, command)
 
+    # These two will eventually be created when testing the addition
+    # of a whole rack of machines based on a CheckNet sweep.
+    def testaddut3s01p1aeth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "ut3s01p1a", "--mac", self.hostmac12])
+
+    def testverifyaddut3s01p1aeth0(self):
+        command = "show machine --machine ut3s01p1a"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 %s boot=True" %
+                         self.hostmac12.lower(), command)
+
+    def testaddut3s01p1beth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "ut3s01p1b", "--mac", self.hostmac13])
+
+    def testverifyaddut3s01p1beth0(self):
+        command = "show machine --machine ut3s01p1b"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 %s boot=True" %
+                         self.hostmac13.lower(), command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

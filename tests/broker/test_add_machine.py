@@ -195,6 +195,28 @@ class TestAddMachine(TestBrokerCommand):
         command = "show machine --machine ut3c1n7"
         out = self.notfoundtest(command.split(" "))
 
+    # When doing an end-to-end test, these two entries should be
+    # created as part of a sweep of a Dell rack.  They represent
+    # two mac addresses seen on the same port, only one of which
+    # is actually a host.  The other is a management interface.
+    def testaddut3s01p1a(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p1a",
+            "--rack", "ut3", "--model", "poweredge_6650"])
+
+    def testverifyaddut3s01p1a(self):
+        command = "show machine --machine ut3s01p1a"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rackmount: ut3s01p1a", command)
+
+    def testaddut3s01p1b(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p1b",
+            "--rack", "ut3", "--model", "poweredge_6650"])
+
+    def testverifyaddut3s01p1b(self):
+        command = "show machine --machine ut3s01p1b"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rackmount: ut3s01p1b", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

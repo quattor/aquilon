@@ -43,6 +43,14 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname unittest01.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelunittest12(self):
+        command = "del host --hostname unittest12.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelunittest12(self):
+        command = "show host --hostname unittest12.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
     def testdelaurorawithnode(self):
         command = "del host --hostname %s.ms.com" % self.aurora_with_node
         self.noouttest(command.split(" "))

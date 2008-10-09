@@ -82,6 +82,10 @@ class TestBrokerCommand(unittest.TestCase):
         self.hostmac10 = "02:02:08:08:06:fd"
         self.hostip11 = "8.8.6.254"
         self.hostmac11 = "02:02:08:08:06:ff"
+        self.hostip12 = "8.8.7.251"
+        self.hostmac12 = "02:02:08:08:07:fb"
+        self.hostip13 = "8.8.7.252"
+        self.hostmac13 = "02:02:08:08:07:fc"
         for n in range(12):
             for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask"]:
                 p = "%s%s" % (h, n)
