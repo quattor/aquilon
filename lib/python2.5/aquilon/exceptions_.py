@@ -1,21 +1,19 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Exceptions to be used by Aquilon"""
 """The base exception class is AquilonError."""
 
-class AquilonError(StandardError):
-    '''Generic error class.'''
-
 def deprecated(message):
     import warnings
     warnings.warn(message, DeprecationWarning, stacklevel=2)
+
+
+class AquilonError(StandardError):
+    '''Generic error class.'''
+
 
 class ArgumentError(AquilonError):
     """Raised for all those conditions where invalid arguments are
@@ -24,15 +22,12 @@ class ArgumentError(AquilonError):
 
     """
 
+
 class ProtocolError(AquilonError):
     """Raised when an import of a protocol fails
 
     """
 
-#class NoSuchRowException(AquilonError):
-#    TODO: implement decorator for one(), first() which raise this
-#    '''thrown when a call to session.query.***.one() returns no rows'''
-#
 
 class ProcessException(AquilonError):
     """Raised when a process being executed fails."""
@@ -80,12 +75,18 @@ class AuthorizationException(AquilonError):
 class NotFoundException(AquilonError):
     """Raised when a requested resource cannot be found."""
 
+
 class NameServiceError(AquilonError):
     """Raised when a host or service name cannot be found, or differs from,
     what's stored in name services such as dns."""
 
+
 class UnimplementedError(AquilonError):
     """Raised when a command has not been implemented."""
+
+
+class IncompleteError(AquilonError):
+    """Raised when an incomplete/unusable template would be generated."""
 
 
 class DetailedProcessException(AquilonError):
@@ -107,6 +108,7 @@ class DetailedProcessException(AquilonError):
         if pe.err:
             msg = msg + "\nstderr:\n" + pe.err + "\n"
         AquilonError.__init__(self, msg)
+
 
 class PartialError(AquilonError):
     """Raised when a batch job has some failures."""
