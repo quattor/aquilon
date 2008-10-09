@@ -69,6 +69,7 @@ from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_service_all import TestShowServiceAll
 from test_show_fqdn import TestShowFqdn
 from test_search_system import TestSearchSystem
+from test_search_host import TestSearchHost
 from test_show_network import TestShowNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
@@ -130,7 +131,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDomainConstraints, TestMachineConstraints,
                 TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
-                TestShowServiceAll, TestShowFqdn, TestSearchSystem,
+                TestShowServiceAll, TestShowFqdn,
+                TestSearchSystem, TestSearchHost,
                 TestUpdateInterface, TestUpdateMachine,
                 TestShowNetwork,
                 TestPxeswitch, TestManage,

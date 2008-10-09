@@ -10,9 +10,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.sy.system import System
-from aquilon.server.dbwrappers.system import parse_system
-from aquilon.server.dbwrappers.dns_domain import get_dns_domain
-from aquilon.server.dbwrappers.network import get_network_byip
+from aquilon.server.dbwrappers.system import search_system_query
 
 
 class CommandSearchSystem(BrokerCommand):
@@ -22,24 +20,8 @@ class CommandSearchSystem(BrokerCommand):
     @add_transaction
     @az_check
     @format_results
-    def render(self, session, fqdn, dnsdomain, shortname, ip, networkip,
-               mac, fullinfo, **arguments):
-        q = session.query(System)
-        if fqdn:
-            (short, dbdns_domain) = parse_system(session, fqdn)
-            q = q.filter_by(name=short, dns_domain=dbdns_domain)
-        if dnsdomain:
-            dbdns_domain = get_dns_domain(session, dnsdomain)
-            q = q.filter_by(dns_domain=dbdns_domain)
-        if shortname:
-            q = q.filter_by(name=shortname)
-        if ip:
-            q = q.filter_by(ip=ip)
-        if networkip:
-            dbnetwork = get_network_byip(session, networkip)
-            q = q.filter_by(network=dbnetwork)
-        if mac:
-            q = q.filter_by(mac=mac)
+    def render(self, session, fullinfo, **arguments):
+        q = search_system_query(session, System, **arguments)
         if fullinfo:
             return q.all()
         return SimpleSystemList(q.all())
