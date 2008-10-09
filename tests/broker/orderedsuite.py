@@ -57,6 +57,8 @@ from test_make_aquilon import TestMakeAquilon
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
+from test_flush import TestFlush
+from test_compile import TestCompile
 from test_bind_server import TestBindServer
 from test_constraints_bind_server import TestBindServerConstraints
 from test_constraints_domain import TestDomainConstraints
@@ -122,6 +124,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
+                TestFlush, TestCompile,
                 TestBindServer,
                 TestBindServerConstraints,
                 TestDomainConstraints, TestMachineConstraints,

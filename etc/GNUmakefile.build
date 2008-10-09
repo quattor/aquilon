@@ -142,14 +142,16 @@ count:
 # nothing to do (since the first pass will have compiled
 # everything). If however one xml depends on another, then the second
 # pass might have to recompile.
+#
+# The quotes around the $todo before sed preserves the newlines.
 build_xmls: $(OUTPUT) $(FINAL)
 	@echo $(DATE) Updating host XML configs $(REDIR)
-	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmls | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR); echo $$todo |sed -e 's,$(PROFILES)/\(.*\).tpl$$,$(OUTPUT)/\1.xml,' | xargs cp -p --target-directory $(FINAL) ) ; fi
+	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmls | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR); echo "$$todo" |sed -e 's,$(PROFILES)/\(.*\).tpl$$,$(OUTPUT)/\1.xml,' | xargs cp -p --target-directory $(FINAL) ) ; fi
 	@echo $(DATE) Updated `find $(OUTPUT) -name '*.xml' -newer $(MARKER) | wc -l` host XML configs $(REDIR)
 
 build_xmldeps: $(OUTPUT)
 	@echo $(DATE) Updating XML dependencies $(REDIR)
-	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmldeps | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR); echo $$todo | sed -e 's,$(PROFILES)/\(.*\).tpl$$,$(OUTPUT)/\1.xml,' |  xargs cp -p --target-directory $(FINAL) ) ; fi
+	@todo=$$($(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmldeps | grep .tpl) ; if [ "$$todo" != "" ]; then (echo $$todo | xargs $(PANC) $(PANC_OPTS) -y ) && ( echo $$todo | xargs cp -p --target-directory $(HOSTDIR); echo "$$todo" | sed -e 's,$(PROFILES)/\(.*\).tpl$$,$(OUTPUT)/\1.xml,' |  xargs cp -p --target-directory $(FINAL) ) ; fi
 	@echo $(DATE) Updated `find $(OUTPUT) -name '*.xml.dep' -newer $(MARKER) | wc -l` XML dependencies $(REDIR)
 
 #
