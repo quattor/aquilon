@@ -52,7 +52,9 @@ class TestSearchHost(TestBrokerCommand):
 
     def testdnsdomainavailable(self):
         command = "search host --dnsdomain aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testdnsdomainunavailable(self):
         command = "search host --dnsdomain does-not-exist.ms.com"
@@ -158,13 +160,11 @@ class TestSearchHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
         self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
-        # Will work after a merge...
-        #self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
         self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
-        # Will work after a merge...
-        #self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
         self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
                          command)
