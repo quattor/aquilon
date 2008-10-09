@@ -63,6 +63,18 @@ class TestSearchSystem(TestBrokerCommand):
         command = "search system --shortname does-not-exist"
         self.noouttest(command.split(" "))
 
+    def testtypechassis(self):
+        command = "search system --type chassis"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+
+    def testtypetorswitch(self):
+        command = "search system --type tor_switch"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+
     def testipavailable(self):
         command = "search system --ip %s" % self.hostip2
         out = self.commandtest(command.split(" "))

@@ -11,6 +11,8 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.net.dns_domain import DnsDomain
 from aquilon.aqdb.sy.system import System
+from aquilon.server.dbwrappers.dns_domain import get_dns_domain
+from aquilon.server.dbwrappers.network import get_network_byip
 
 
 def get_system(session, system, system_type=System, system_label='FQDN'):
@@ -62,6 +64,27 @@ def parse_system_and_verify_free(session, system):
         # FIXME: This should be more descriptive.
         raise ArgumentError("System '%s' already exists." % system)
     return (short, dbdns_domain)
+
+def search_system_query(session, system_type=System, **kwargs):
+    q = session.query(system_type)
+    if kwargs.get('fqdn', None):
+        (short, dbdns_domain) = parse_system(session, kwargs['fqdn'])
+        q = q.filter_by(name=short, dns_domain=dbdns_domain)
+    if kwargs.get('dnsdomain', None):
+        dbdns_domain = get_dns_domain(session, kwargs['dnsdomain'])
+        q = q.filter_by(dns_domain=dbdns_domain)
+    if kwargs.get('shortname', None):
+        q = q.filter_by(name=kwargs['shortname'])
+    if kwargs.get('ip', None):
+        q = q.filter_by(ip=kwargs['ip'])
+    if kwargs.get('networkip', None):
+        dbnetwork = get_network_byip(session, kwargs['networkip'])
+        q = q.filter_by(network=dbnetwork)
+    if kwargs.get('mac', None):
+        q = q.filter_by(mac=kwargs['mac'])
+    if kwargs.get('type', None):
+        q = q.filter_by(system_type=kwargs['type'])
+    return q
 
 
 #if __name__=='__main__':
