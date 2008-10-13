@@ -217,6 +217,36 @@ class TestAddMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rackmount: ut3s01p1b", command)
 
+    # When doing an end-to-end test, these entries should be
+    # created as part of a sweep of a Verari rack
+    # (ut01ga1s02.aqd-unittest.ms.com).
+    def testaddut8s02p1(self):
+        self.noouttest(["add", "machine", "--machine", "ut8s02p1",
+            "--rack", "ut8", "--model", "vb1205xm"])
+
+    def testverifyaddut8s02p1(self):
+        command = "show machine --machine ut8s02p1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut8s02p1", command)
+
+    def testaddut8s02p2(self):
+        self.noouttest(["add", "machine", "--machine", "ut8s02p2",
+            "--rack", "ut8", "--model", "vb1205xm"])
+
+    def testverifyaddut8s02p2(self):
+        command = "show machine --machine ut8s02p2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut8s02p2", command)
+
+    def testaddut8s02p3(self):
+        self.noouttest(["add", "machine", "--machine", "ut8s02p3",
+            "--rack", "ut8", "--model", "vb1205xm"])
+
+    def testverifyaddut8s02p3(self):
+        command = "show machine --machine ut8s02p3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut8s02p3", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

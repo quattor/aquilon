@@ -176,6 +176,36 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface: eth0 %s boot=True" %
                          self.hostmac13.lower(), command)
 
+    def testaddut8s02p1eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "ut8s02p1", "--mac", self.hostmac15])
+
+    def testverifyaddut8s02p1eth0(self):
+        command = "show machine --machine ut8s02p1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 %s boot=True" %
+                         self.hostmac15.lower(), command)
+
+    def testaddut8s02p2eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "ut8s02p2", "--mac", self.hostmac16])
+
+    def testverifyaddut8s02p2eth0(self):
+        command = "show machine --machine ut8s02p2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 %s boot=True" %
+                         self.hostmac16.lower(), command)
+
+    def testaddut8s02p3eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+            "--machine", "ut8s02p3", "--mac", self.hostmac17])
+
+    def testverifyaddut8s02p3eth0(self):
+        command = "show machine --machine ut8s02p3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Interface: eth0 %s boot=True" %
+                         self.hostmac17.lower(), command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

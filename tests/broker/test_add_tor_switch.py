@@ -186,6 +186,19 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.verifyswitch("np06fals01.ms.com",
                           "cisco", "ws-c2960-48tt-l", "np7", "g", "1")
 
+    def testaddut01ga1s02(self):
+        self.noouttest(["add", "tor_switch",
+            "--tor_switch", "ut01ga1s02.aqd-unittest.ms.com",
+            "--building", "ut", "--rackid", "8",
+            "--rackrow", "g", "--rackcol", "2",
+            "--model", "rs g8000",
+            "--interface", "xge49",
+            "--mac", self.hostmac14, "--ip", self.hostip14])
+
+    def testverifyut01ga1s02(self):
+        self.verifyswitch("ut01ga1s02.aqd-unittest.ms.com",
+                          "bnt", "rs g8000", "ut8", "g", "2")
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)

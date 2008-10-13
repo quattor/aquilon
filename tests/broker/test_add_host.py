@@ -52,6 +52,61 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.parse_hostlist_msg(out)
 
+    def testaddunittest15(self):
+        self.noouttest(["add", "host",
+            "--hostname", "unittest15.aqd-unittest.ms.com",
+            "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
+            "--ipalgorithm", "max",
+            "--machine", "ut8s02p1", "--domain", "unittest",
+            "--buildstatus", "build", "--archetype", "aquilon"])
+
+    def testverifyunittest15(self):
+        command = "show host --hostname unittest15.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest15.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.hostip15, command)
+
+    def testaddunittest16bad(self):
+        command = ["add", "host",
+                   "--hostname", "unittest16.aqd-unittest.ms.com",
+                   "--ipfromip", self.hostip14,
+                   "--ipalgorithm", "max",
+                   "--machine", "ut8s02p2", "--domain", "unittest",
+                   "--buildstatus", "build", "--archetype", "aquilon"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "No remaining IPs found on network", command)
+
+    def testaddunittest16good(self):
+        self.noouttest(["add", "host",
+            "--hostname", "unittest16.aqd-unittest.ms.com",
+            "--ipfromip", self.hostip14,
+            "--ipalgorithm", "lowest",
+            "--machine", "ut8s02p2", "--domain", "unittest",
+            "--buildstatus", "build", "--archetype", "aquilon"])
+
+    def testverifyunittest16(self):
+        command = "show host --hostname unittest16.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest16.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.hostip16, command)
+
+    def testaddunittest17(self):
+        self.noouttest(["add", "host",
+            "--hostname", "unittest17.aqd-unittest.ms.com",
+            "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
+            "--machine", "ut8s02p3", "--domain", "unittest",
+            "--buildstatus", "build", "--archetype", "aquilon"])
+
+    def testverifyunittest17(self):
+        command = "show host --hostname unittest17.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.hostip17, command)
+
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

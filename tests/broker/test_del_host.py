@@ -75,6 +75,30 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname nyaqd1.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelunittest15(self):
+        command = "del host --hostname unittest15.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelunittest15(self):
+        command = "show host --hostname unittest15.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testdelunittest16(self):
+        command = "del host --hostname unittest16.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelunittest16(self):
+        command = "show host --hostname unittest16.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testdelunittest17(self):
+        command = "del host --hostname unittest17.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelunittest17(self):
+        command = "show host --hostname unittest17.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

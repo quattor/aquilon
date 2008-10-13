@@ -171,6 +171,13 @@ class Network(Base):
     def last_host(self):
         return int_to_dq(dq_to_int(self.bcast)-1)
 
+    def addresses(self):
+        # Since range will stop one before the endpoint, passing it
+        # self.bcast effectively means that the addresses run from
+        # the network start to last_host.
+        return [int_to_dq(i) for i in range(dq_to_int(self.ip),
+                                            dq_to_int(self.bcast))]
+
     #TODO: custom str and repr
 
 network = Network.__table__

@@ -86,6 +86,17 @@ class TestBrokerCommand(unittest.TestCase):
         self.hostmac12 = "02:02:08:08:07:fb"
         self.hostip13 = "8.8.7.252"
         self.hostmac13 = "02:02:08:08:07:fc"
+        # This one is special, needs to be second-to-last on the subnet
+        self.hostip14 = "8.8.7.253"
+        self.hostmac14 = "02:02:08:08:07:fd"
+        # This one is special, needs to be last on the subnet before broadcast
+        self.hostip15 = "8.8.7.254"
+        self.hostmac15 = "02:02:08:08:07:fe"
+        # This one may be special... first 'available' on the subnet
+        self.hostip16 = "8.8.4.8"
+        self.hostmac16 = "02:02:08:08:04:08"
+        self.hostip17 = "8.8.4.9"
+        self.hostmac17 = "02:02:08:08:04:09"
         for n in range(12):
             for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask"]:
                 p = "%s%s" % (h, n)

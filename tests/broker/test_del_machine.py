@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -45,6 +41,38 @@ class TestDelMachine(TestBrokerCommand):
 
     def testverifydelut3c1n4(self):
         command = "show machine --machine ut3c1n4"
+        self.notfoundtest(command.split(" "))
+
+    def testdelut3s01p1(self):
+        command = "del machine --machine ut3s01p1"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut3s01p1(self):
+        command = "show machine --machine ut3s01p1"
+        self.notfoundtest(command.split(" "))
+
+    def testdelut8s02p1(self):
+        command = "del machine --machine ut8s02p1"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut8s02p1(self):
+        command = "show machine --machine ut8s02p1"
+        self.notfoundtest(command.split(" "))
+
+    def testdelut8s02p2(self):
+        command = "del machine --machine ut8s02p2"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut8s02p2(self):
+        command = "show machine --machine ut8s02p2"
+        self.notfoundtest(command.split(" "))
+
+    def testdelut8s02p3(self):
+        command = "del machine --machine ut8s02p3"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut8s02p3(self):
+        command = "show machine --machine ut8s02p3"
         self.notfoundtest(command.split(" "))
 
 

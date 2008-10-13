@@ -14,7 +14,8 @@ from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 restrict_tor_offsets)
 from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.sy.host import Host
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -28,7 +29,7 @@ class CommandAddHost(BrokerCommand):
     @add_transaction
     @az_check
     def render(self, session, hostname, machine, archetype, domain,
-               buildstatus, ip, user, skip_dsdb_check=False, **arguments):
+               buildstatus, user, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:
@@ -37,8 +38,6 @@ class CommandAddHost(BrokerCommand):
             dbstatus = get_status(session, "build")
         dbmachine = get_machine(session, machine)
         dbarchetype = get_archetype(session, archetype)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
 
         if dbmachine.model.machine_type not in [
                 'blade', 'workstation', 'rackmount', 'aurora_node']:
@@ -71,6 +70,12 @@ class CommandAddHost(BrokerCommand):
             mac = dbinterface.mac
             if not dbinterface:
                 raise ArgumentError("Machine '%s' requires a bootable interface." % machine)
+
+        # This method is allowed to return None, which will pass through
+        # the next two.
+        ip = generate_ip(session, dbinterface, **arguments)
+        dbnetwork = get_net_id_from_ip(session, ip)
+        restrict_tor_offsets(session, dbnetwork, ip)
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,

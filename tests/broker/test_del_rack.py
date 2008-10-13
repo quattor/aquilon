@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -55,6 +51,16 @@ class TestDelRack(TestBrokerCommand):
 
     def testverifydelnp999(self):
         command = "show rack --name np999"
+        self.notfoundtest(command.split(" "))
+
+    # FIXME: Maybe del_tor_switch should remove the rack if it is
+    # otherwise empty.
+    def testdelut8(self):
+        command = "del rack --name ut8"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut8(self):
+        command = "show rack --name ut8"
         self.notfoundtest(command.split(" "))
 
 

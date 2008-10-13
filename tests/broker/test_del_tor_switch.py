@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -69,6 +65,14 @@ class TestDelTorSwitch(TestBrokerCommand):
 
     def testverifydelnp06bals03(self):
         command = "show tor_switch --tor_switch np06fals01.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testdelut01ga1s02(self):
+        command = "del tor_switch --tor_switch ut01ga1s02.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut01ga1s02(self):
+        command = "show tor_switch --tor_switch ut01ga1s02.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
 
