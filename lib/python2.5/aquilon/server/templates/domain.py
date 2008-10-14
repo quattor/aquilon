@@ -94,7 +94,7 @@ class TemplateDomain(object):
             args.append("DOMAIN=%s"%domain.name)
             args.append("TOOLDIR=%s"%config.get("broker", "compiletooldir"))
             args.append("QROOT=%s"%config.get("broker", "quattordir"))
-            args.append("PANC=%s"%config.get("broker", "panc"))
+            args.append("PANC=%s" % domain.compiler)
             if (only):
                 args.append("only")
                 args.append("HOST=%s"%only.fqdn)

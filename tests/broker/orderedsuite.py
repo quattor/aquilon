@@ -27,6 +27,7 @@ from test_status import TestStatus
 from test_permission import TestPermission
 from test_add_dns_domain import TestAddDnsDomain
 from test_add_domain import TestAddDomain
+from test_update_domain import TestUpdateDomain
 from test_get_domain import TestGetDomain
 from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
@@ -112,7 +113,7 @@ class BrokerTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart, TestPing, TestStatus, TestPermission,
-                TestAddDnsDomain, TestAddDomain,
+                TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
