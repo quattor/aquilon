@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -41,8 +37,9 @@ class CommandAddDomain(BrokerCommand):
         # FIXME: Check that the domain name is composed only of characters
         # that are valid for a directory name.
         if not dbdomain:
+            compiler = self.config.get("broker", "domain_default_panc")
             dbdomain = Domain(name=domain, server=dbquattor_server,
-                    owner=dbuser)
+                              owner=dbuser, compiler=compiler)
             session.save_or_update(dbdomain)
         domaindir = os.path.join(self.config.get("broker", "templatesdir"),
                 dbdomain.name)
