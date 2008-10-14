@@ -11,7 +11,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 restrict_tor_offsets)
 from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.sy.manager import Manager
@@ -21,11 +22,11 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddManager(BrokerCommand):
 
-    required_parameters = ["hostname", "ip"]
+    required_parameters = ["hostname"]
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, manager, ip, interface, mac, comments,
+    def render(self, session, hostname, manager, interface, mac, comments,
                user, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.machine
@@ -73,6 +74,11 @@ class CommandAddManager(BrokerCommand):
                                 (dbinterface.name, dbmachine.name,
                                  dbinterface.system.fqdn))
 
+        ip = generate_ip(session, dbinterface, **arguments)
+        if not ip:
+            raise ArgumentError("add_manager requires any of the --ip, "
+                                "--ipfromip, --ipfromsystem, --autoip "
+                                "parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(session, dbnetwork, ip)
 

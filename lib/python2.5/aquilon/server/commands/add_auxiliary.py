@@ -12,7 +12,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 restrict_tor_offsets)
 from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.sy.host import Host
 from aquilon.aqdb.hw.interface import Interface
@@ -23,11 +24,11 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddAuxiliary(BrokerCommand):
 
-    required_parameters = ["auxiliary", "ip"]
+    required_parameters = ["auxiliary"]
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, machine, auxiliary, ip, interface,
+    def render(self, session, hostname, machine, auxiliary, interface,
             mac, comments, user, **arguments):
         if machine:
             dbmachine = get_machine(session, machine)
@@ -76,6 +77,11 @@ class CommandAddAuxiliary(BrokerCommand):
                                 (dbinterface.name, dbmachine.name,
                                  dbinterface.system.fqdn))
 
+        ip = generate_ip(session, dbinterface, **arguments)
+        if not ip:
+            raise ArgumentError("add_auxiliary requires any of the --ip, "
+                                "--ipfromip, --ipfromsystem, --autoip "
+                                "parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(session, dbnetwork, ip)
 

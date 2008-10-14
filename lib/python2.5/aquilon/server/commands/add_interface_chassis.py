@@ -15,19 +15,20 @@ from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 restrict_tor_offsets)
 from aquilon.aqdb.sy.chassis import Chassis
 from aquilon.server.processes import DSDBRunner
 
 
 class CommandAddInterfaceChassis(BrokerCommand):
 
-    required_parameters = ["interface", "chassis", "mac", "ip"]
+    required_parameters = ["interface", "chassis", "mac"]
 
     @add_transaction
     @az_check
-    def render(self, session, interface, chassis, mac, ip, comments,
-            user, **arguments):
+    def render(self, session, interface, chassis, mac, comments, user,
+               **arguments):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')
 
         if dbchassis.ip:
@@ -55,6 +56,11 @@ class CommandAddInterfaceChassis(BrokerCommand):
                                 mac=mac, interface_type='oa', **extra)
         session.save(dbinterface)
 
+        ip = generate_ip(session, dbinterface, **arguments)
+        if not ip:
+            raise ArgumentError("add_interface --chassis requires any of "
+                                "the --ip, --ipfromip, --ipfromsystem, "
+                                "--autoip parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(session, dbnetwork, ip)
         dbchassis.ip = ip

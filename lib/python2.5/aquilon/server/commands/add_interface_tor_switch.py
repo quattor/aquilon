@@ -15,19 +15,20 @@ from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 restrict_tor_offsets)
 from aquilon.aqdb.sy.tor_switch import TorSwitch
 from aquilon.server.processes import DSDBRunner
 
 
 class CommandAddInterfaceTorSwitch(BrokerCommand):
 
-    required_parameters = ["interface", "tor_switch", "mac", "ip"]
+    required_parameters = ["interface", "tor_switch", "mac"]
 
     @add_transaction
     @az_check
-    def render(self, session, interface, tor_switch, mac, ip, comments,
-            user, **arguments):
+    def render(self, session, interface, tor_switch, mac, comments, user,
+               **arguments):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
 
         if dbtor_switch.ip:
@@ -55,6 +56,11 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
                                 mac=mac, interface_type='oa', **extra)
         session.save(dbinterface)
 
+        ip = generate_ip(session, dbinterface, **arguments)
+        if not ip:
+            raise ArgumentError("add_interface --tor_switch requires any of "
+                                "the --ip, --ipfromip, --ipfromsystem, "
+                                "--autoip parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(session, dbnetwork, ip)
         dbtor_switch.ip = ip
