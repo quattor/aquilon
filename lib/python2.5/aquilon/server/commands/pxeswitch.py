@@ -8,9 +8,9 @@
 
 from socket import gethostbyname
 
+from aquilon.exceptions_ import NameServiceError, ArgumentError
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
-from aquilon.exceptions_ import NameServiceError
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import run_command
