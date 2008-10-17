@@ -21,16 +21,34 @@ from brokertest import TestBrokerCommand
 
 
 class TestPxeswitch(TestBrokerCommand):
+    """Simplified tests for the pxeswitch command.
 
-    def testbootunittest02(self):
-        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
-        out = self.internalerrortest(command.split(" "))
-        self.matchoutput(out, "aii-installfe --boot", command)
+    Since we can't actually run aii-installfe against imaginary hosts, the
+    unittest.conf file specifies /bin/echo as the command to use.  These
+    tests just check that the available parameters are passed through
+    correctly.
+
+    """
 
     def testinstallunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --install"
-        out = self.internalerrortest(command.split(" "))
-        self.matchoutput(out, "aii-installfe --install", command)
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "--install", command)
+
+    def testlocalbootunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "--boot", command)
+
+    def teststatusunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --status"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "--status", command)
+
+    def testinstallunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "--firmware", command)
 
 
 if __name__=='__main__':
