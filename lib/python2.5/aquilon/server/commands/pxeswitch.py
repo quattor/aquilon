@@ -22,7 +22,8 @@ class CommandPxeswitch(BrokerCommand):
 
     @add_transaction
     @az_check
-    def render(self, session, hostname, status, localboot, install, **arguments):
+    def render(self, session, hostname, install, localboot, status, firmware,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = get_service(session, "bootserver")
@@ -49,6 +50,8 @@ class CommandPxeswitch(BrokerCommand):
             args.append('--install')
         elif status:
             args.append('--status')
+        elif firmware:
+            args.append('--firmware')
         else:
             raise ArgumentError("Missing required boot or install parameter.")
 

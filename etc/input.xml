@@ -851,10 +851,11 @@
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
-      <optgroup name="bootinstall" mandatory="True" fields="any">
-         <option name="install" type="boolean" conflicts="boot status">Do an install</option>
-         <option name="localboot" type="boolean" conflicts="install status">set the host to boot from local disc</option>
-         <option name="status" type="boolean" conflicts="install localboot">set the host to boot from local disc</option>
+      <optgroup name="pxeswitch_action" mandatory="True" fields="any">
+         <option name="install" type="boolean" conflicts="localboot status firmware">Do an install</option>
+         <option name="localboot" type="boolean" conflicts="install status firmware">set the host to boot from local disc</option>
+         <option name="status" type="boolean" conflicts="install localboot firmware">set the host to boot from local disc</option>
+         <option name="firmware" type="boolean" conflicts="install localboot status">set the host to boot its firmware image</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
    </command>
