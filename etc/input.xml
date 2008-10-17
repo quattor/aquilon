@@ -114,6 +114,10 @@
          <option name="ip" type="string">IP address</option>
          <option name="networkip" type="string">Network IP address</option>
          <option name="mac" type="string">primary mac address</option>
+         <option name="personality" type="string">personality</option>
+         <option name="os" type="string">os</option>
+         <option name="service" type="string">client of service (single service only)</option>
+         <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="all" type="boolean">list all systems</option>
       </optgroup>
       <optgroup name="search_host_prefs" mandatory="False">
