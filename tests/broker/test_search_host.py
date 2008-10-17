@@ -169,6 +169,67 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
                          command)
 
+    def testpersonalityavailable(self):
+        command = "search host --personality compileserver"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+
+    def testpersonalityunavailable(self):
+        command = "search host --personality personality-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "personality template "
+                              "personality-does-not-exist not found",
+                         command)
+
+    def testosavailable(self):
+        command = "search host --os linux/4.0.1-x86_64"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+
+    def testosunavailable(self):
+        command = "search host --os os-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "os template os-does-not-exist not found",
+                         command)
+
+    def testserviceavailable(self):
+        command = "search host --service utsvc"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+
+    def testserviceunavailable(self):
+        command = "search host --service service-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Service service-does-not-exist not found",
+                         command)
+
+    def testserviceinstanceavailable(self):
+        command = "search host --service utsvc --instance utsi1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+
+    def testserviceinstanceunavailable(self):
+        command = "search host --service utsvc " \
+                  "--instance service-instance-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Service utsvc instance "
+                              "service-instance-does-not-exist not found",
+                         command)
+
+    def testinstanceavailable(self):
+        command = "search host --instance utsi1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+
+    def testinstanceunavailable(self):
+        command = "search host --instance service-instance-does-not-exist"
+        self.noouttest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
