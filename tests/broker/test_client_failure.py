@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -44,6 +40,19 @@ class TestClientFailure(TestBrokerCommand):
                 "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
         self.assertEqual(p.returncode, 1)
+
+    def testconflictingoptions(self):
+        command = "add interface --mac 02:02:02:02:02:02 --interface eth0 " \
+                  "--machine does-not-exist --ip 2.2.2.2"
+        (p, out, err) = self.runcommand(command.split(" "))
+        s = "error: Option or option group machine conflicts with ip"
+        self.assert_(err.find(s) >= 0,
+                "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                % (command, s, err))
+        self.assertEqual(out, "",
+                "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                % (command, out))
+        self.assertEqual(p.returncode, 2)
 
 
 if __name__=='__main__':

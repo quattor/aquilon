@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -206,6 +202,13 @@ class command(Element):
                 e.help = self.recursiveHelp(0)
                 raise e
             result.update(res)
+        # check for conflicts
+        conflicts = self.getAllConflicts(result)
+        for (conflict, option) in conflicts.items():
+            if result.has_key(conflict):
+                raise ParsingError("Option or option group %s "
+                                   "conflicts with %s" %
+                                   (option, conflict))
         return result, True
 
 # --------------------------------------------------------------------------- #
@@ -213,6 +216,15 @@ class command(Element):
     def genOptions(self, parser):
         for o in self.optgroups:
             o.genOptions(parser)
+
+# --------------------------------------------------------------------------- #
+
+    def getAllConflicts(self, found):
+        conflicts = {}
+        for g in self.optgroups:
+            c = g.getAllConflicts(found)
+            conflicts.update(c)
+        return conflicts
 
 # --------------------------------------------------------------------------- #
 
@@ -310,13 +322,6 @@ class optgroup(Element):
             if (self.fields == 'all' and foundany and not foundall):
                 raise ParsingError('Not all mandatory options specified!')
 
-        # check for conflicts
-        for option in self.options:
-            if not found[option.name]:
-                continue
-            for conflict in option.conflicts:
-                if (found.has_key(conflict) and found[conflict] == True):
-                    raise ParsingError('Option or option group '+option.name+' conflicts with '+conflict)
         # return result
         return result, foundany
 
@@ -325,6 +330,17 @@ class optgroup(Element):
     def genOptions(self, parser):
         for o in self.options:
             o.genOptions(parser)
+
+# --------------------------------------------------------------------------- #
+
+    def getAllConflicts(self, found):
+        conflicts = {}
+        for o in self.options:
+            c = o.getAllConflicts(found)
+            conflicts.update(c)
+        for conflict in self.conflicts:
+            conflicts[conflict] = self.name
+        return conflicts
 
 # --------------------------------------------------------------------------- #
 
@@ -410,6 +426,16 @@ class option(Element):
             raise ParsingError('Invalid option type: '+self.type);
         str = str+')'
         eval (str)
+
+# --------------------------------------------------------------------------- #
+
+    def getAllConflicts(self, found):
+        """Return any conflicts (keys) and the original option (values)."""
+        conflicts = {}
+        if self.name in found:
+            for conflict in self.conflicts:
+                conflicts[conflict] = self.name
+        return conflicts
 
 # --------------------------------------------------------------------------- #
 
