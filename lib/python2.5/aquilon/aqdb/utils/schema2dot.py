@@ -1,9 +1,15 @@
+import os
 import sys
 import types
 import msversion
+
 if not sys.modules.has_key('pyparsing'):
-    msversion.addpkg('pyparsing', '1.5.0', 'dev')
-import pydot
+    msversion.addpkg('pyparsing', '1.5.0', 'dist')
+    import pyparsing
+
+if not sys.modules.has_key('pydot'):
+    msversion.addpkg('pydot', '1.0.2', 'dist')
+    import pydot
 
 from sqlalchemy.orm.properties import PropertyLoader
 from sqlalchemy.orm import sync
@@ -25,16 +31,23 @@ def _mk_label(mapper, show_operations, show_attributes,
         return colstr
 
     if show_attributes:
-        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(format_col(col) for col in sorted(mapper.columns, key=lambda col:not col.primary_key))
+        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(
+                    format_col(col) for col in sorted(
+                        mapper.columns, key=lambda col:not col.primary_key))
     else:
         [format_col(col) for col in sorted(mapper.columns, key=lambda col:not col.primary_key)]
     if show_operations:
         html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(
-            '%s(%s)' % (name,", ".join(default is _mk_label and ("%s") % arg or ("%s=%s" % (arg,repr(default))) for default,arg in
-                zip((func.func_defaults and len(func.func_code.co_varnames)-1-(len(func.func_defaults) or 0) or func.func_code.co_argcount-1)*[_mk_label]+list(func.func_defaults or []), func.func_code.co_varnames[1:])
-            ))
-            for name,func in mapper.class_.__dict__.items() if isinstance(func, types.FunctionType) and func.__module__ == mapper.class_.__module__
-        )
+            '%s(%s)' % (name,", ".join(default is _mk_label and 
+                                       ("%s") % arg 
+                                       or ("%s=%s" % (arg,repr(default))) 
+                                       for default,arg in zip((func.func_defaults and 
+                                                               len(func.func_code.co_varnames)-1-(len(func.func_defaults) or 0) 
+                                                               or func.func_code.co_argcount-1)*[_mk_label]+list(func.func_defaults 
+                                                               or []), func.func_code.co_varnames[1:])
+            )) for name,func in mapper.class_.__dict__.items() if isinstance(
+                                    func, types.FunctionType) and 
+                                    func.__module__ == mapper.class_.__module__)
     html+= '</TABLE>>'
     return html
 
@@ -42,22 +55,31 @@ def _mk_label(mapper, show_operations, show_attributes,
 def create_uml_graph(mappers, show_operations=True, show_attributes=True, show_multiplicity_one=False, show_datatypes=True, linewidth="1.0", font="Sans-Serif"):
     graph = pydot.Dot(prog='neato',mode="major",overlap="0",sep="0.01",pack="True",dim="3")
     relations = set()
+
     for mapper in mappers:
-        graph.add_node(pydot.Node(mapper.class_.__name__,
-            shape="plaintext", label=_mk_label(mapper, show_operations, show_attributes, show_datatypes, linewidth),
-            fontname=font, fontsize="8.0"))
+        graph.add_node(
+            pydot.Node(mapper.class_.__name__, shape="plaintext", 
+                       label=_mk_label(mapper, show_operations, 
+                                       show_attributes, show_datatypes, 
+                                       linewidth), fontname=font, 
+                                       fontsize="8.0"))
         if mapper.inherits:
-            graph.add_edge(pydot.Edge(mapper.inherits.class_.__name__,mapper.class_.__name__,
-                arrowhead='none',arrowtail='empty', style="setlinewidth(%s)" % linewidth, arrowsize=linewidth))
+            graph.add_edge(
+                pydot.Edge(mapper.inherits.class_.__name__,
+                           mapper.class_.__name__,
+                           arrowhead='none',
+                           arrowtail='empty', 
+                           style="setlinewidth(%s)" % linewidth,
+                           arrowsize=linewidth))
+
         for loader in mapper.iterate_properties:
             if isinstance(loader, PropertyLoader) and loader.mapper in mappers:
                 if hasattr(loader, 'reverse_property'):
                     relations.add(frozenset([loader, loader.reverse_property]))
                 else:
                     relations.add(frozenset([loader]))
+
     for relation in relations:
-        #if len(loaders) > 2:
-        #    raise Exception("Warning: too many loaders for join %s" % join)
         args = {}
         def multiplicity_indicator(prop):
             if prop.uselist:
@@ -115,7 +137,9 @@ def _render_table_html(table, metadata, show_indexes, show_datatypes):
     html += ''.join('<TR><TD ALIGN="LEFT" PORT="%s">%s</TD></TR>' % (col.name, format_col_str(col)) for col in table.columns)
     if isinstance(metadata.bind.dialect, PGDialect):
         # postgres engine doesn't reflect indexes
-        indexes = dict((name,defin) for name,defin in metadata.bind.execute(text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s'" % table.name)))
+        indexes = dict(
+                       (name,defin) for name,defin in metadata.bind.execute(
+                        text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s'" % table.name)))
         if indexes and show_indexes:
             html += '<TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
             for index, defin in indexes.items():
@@ -125,11 +149,15 @@ def _render_table_html(table, metadata, show_indexes, show_datatypes):
     html += '</TABLE>>'
     return html
 
-def create_schema_graph(tables=None, metadata=None, show_indexes=True, show_datatypes=True, font="Sans-Serif",
-    concentrate="True", relation_options={}, rankdir='TB'):
-    relation_kwargs = {
-        'fontsize':"7.0"
-    }
+def create_schema_graph(tables=None,
+                        metadata=None,
+                        show_indexes=True,
+                        show_datatypes=True,
+                        font="Sans-Serif",
+                        concentrate="True",
+                        relation_options={},
+                        rankdir='TB'):
+    relation_kwargs = {'fontsize':"7.0"}
     relation_kwargs.update(relation_options)
 
     if not metadata and len(tables):
@@ -141,13 +169,14 @@ def create_schema_graph(tables=None, metadata=None, show_indexes=True, show_data
     else:
         raise Exception("You need to specify at least tables or metadata")
 
-    graph = pydot.Dot(prog="dot",mode="ipsep",overlap="ipsep",sep="0.01",concentrate=concentrate, rankdir=rankdir)
+    graph = pydot.Dot(prog="dot", mode="ipsep", overlap="ipsep", sep="0.01",
+                      concentrate=concentrate, rankdir=rankdir)
     for table in tables:
         graph.add_node(pydot.Node(str(table.name),
             shape="plaintext",
-            label=_render_table_html(table, metadata, show_indexes, show_datatypes),
-            fontname=font, fontsize="7.0"
-        ))
+            label=_render_table_html(table, metadata, 
+                                     show_indexes, show_datatypes),
+            fontname=font, fontsize="7.0"))
 
     for table in tables:
         for fk in table.foreign_keys:
@@ -158,11 +187,10 @@ def create_schema_graph(tables=None, metadata=None, show_indexes=True, show_data
             graph_edge = pydot.Edge(
                 headlabel="+ %s"%fk.column.name, taillabel='+ %s'%fk.parent.name,
                 arrowhead=is_inheritance and 'none' or 'odot' ,
-                arrowtail=(fk.parent.primary_key or fk.parent.unique) and 'empty' or 'crow' ,
-                fontname=font,
-                #samehead=fk.column.name, sametail=fk.parent.name,
-                *edge, **relation_kwargs
-            )
+                arrowtail=(fk.parent.primary_key or 
+                           fk.parent.unique) and 'empty' or 'crow' ,
+                fontname=font, *edge, **relation_kwargs)
+
             graph_edge.set_parent_graph(graph.get_parent_graph)
             graph.add_edge(graph_edge)
     return graph
@@ -173,8 +201,9 @@ def show_uml_graph(*args, **kwargs):
     iostream = StringIO(create_uml_graph(*args, **kwargs).create_png())
     Image.open(iostream).show(command=kwargs.get('command','gwenview'))
 
-def show_schema_graph(*args, **kwargs):
+def show_schema_graph(db, name, *args, **kwargs):
     from cStringIO import StringIO
     from PIL import Image
-    iostream = StringIO(create_schema_graph(*args, **kwargs).create_png())
-    Image.open(iostream).show(command=kwargs.get('command','gwenview'))
+    iostream = StringIO(create_schema_graph(db, name).create_png())
+    #Image.open(iostream).show(command=kwargs.get('command','gwenview'))
+    Image.open(iostream).save(name)

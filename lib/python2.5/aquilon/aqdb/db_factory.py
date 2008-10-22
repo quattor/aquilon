@@ -82,8 +82,6 @@ class db_factory(object):
     def __init__(self,*args, **kw):
         #TODO: accept mock as arg
         self.__dict__ = self.__shared_state
-        if hasattr(self,'config'):
-            return
 
         try:
             self.config = Config()
