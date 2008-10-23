@@ -1,0 +1,43 @@
+# This file provides the default for the scale tests.  Please verify
+# that no one else is using the database instance here before 
+# proceeding.
+#
+# The config file etc/aqd.conf.defaults always gets read first, and the
+# values below override those.  To nullify a value from the defaults,
+# it must be explicitly set to an empty value here.
+
+[DEFAULT]
+basedir = /var/tmp/%(user)s/scale
+environment = dev
+dbdir = %(basedir)s/aquilondb
+dblogfile = %(dbdir)s/aqdb.log
+
+[database_oracle]
+dbuser = scale
+server = nyt-aqdb.one-nyp.ms.com
+dsn = oracle://%(dbuser)s:PASSWORD@%(server)s:1521/AQUILON
+
+[database]
+database_section = database_oracle
+
+[broker]
+quattordir = %(basedir)s/quattor
+#knc = /ms/dev/kerberos/knc/1.4/install/exec/bin/knc
+templateport = %(openport)s
+git_templates_url = http://%(servername)s:%(templateport)s/templates
+dsdb_use_testdb = True
+dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
+installfe = /bin/echo
+server_notifications = 
+client_notifications = no
+
+[unittest]
+scratchdir = %(basedir)s/scratch
+
+# This can be used for any components that use python logging
+# Valid values are INFO, DEBUG, and WARNING
+# For sqlalchemy, only INFO and DEBUG produce log messages.
+[logging]
+#sqlalchemy.engine = INFO
+#sqlalchemy.pool = INFO
+#sqlalchemy.orm = INFO

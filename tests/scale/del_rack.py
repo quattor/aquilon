@@ -1,20 +1,24 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header: //eai/aquilon/aqd/1.2.1/src/etc/default-template.py#1 $
-# $Change: 645284 $
-# $DateTime: 2008/07/09 19:56:59 $
-# $Author: wesleyhe $
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Remove dummy information for a rack of machines on a /26."""
 
 
+import os
+import sys
+
+if __name__=='__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..',
+                                                     "lib", "python2.5")))
+
 from common import AQRunner, TestNetwork, TestRack
 
 
-def del_rack(building, rackid):
-    aq = AQRunner()
+def del_rack(building, rackid, aqservice):
+    aq = AQRunner(aqservice=aqservice)
     rack = TestRack(building, rackid)
     rc = aq.wait(["ping"])
     for half in [0, 1]:
@@ -38,9 +42,11 @@ if __name__=='__main__':
 
     parser = OptionParser()
     parser.add_option("-b", "--building", dest="building", type="string",
-            help="The building name to use")
+                      help="The building name to use")
     parser.add_option("-r", "--rack", dest="rack", type="int",
-            help="The rack id to remove, 0-7")
+                      help="The rack id to remove, 0-7")
+    parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
+                      help="The service name to use when connecting to aqd")
     (options, args) = parser.parse_args()
     if not options.building:
         parser.error("Missing option --building")
@@ -49,5 +55,5 @@ if __name__=='__main__':
     if options.rack not in range(8):
         parser.error("--rack must be 0-7")
 
-    del_rack(options.building, options.rack)
+    del_rack(options.building, options.rack, options.aqservice)
 

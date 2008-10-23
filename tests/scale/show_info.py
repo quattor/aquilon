@@ -1,20 +1,24 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header: //eai/aquilon/aqd/1.2.1/src/etc/default-template.py#1 $
-# $Change: 645284 $
-# $DateTime: 2008/07/09 19:56:59 $
-# $Author: wesleyhe $
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Run different show commands."""
 
 
+import os
+import sys
+
+if __name__=='__main__':
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..',
+                                                     "lib", "python2.5")))
+
 from common import AQRunner
 
 
-def show_info():
-    aq = AQRunner()
+def show_info(aqservice):
+    aq = AQRunner(aqservice=aqservice)
     rc = aq.wait(["ping"])
     rc = aq.wait(["show", "host", "--all"])
     rc = aq.wait(["show", "domain", "--all"])
@@ -25,7 +29,6 @@ def show_info():
     rc = aq.wait(["show", "service", "--all"])
     rc = aq.wait(["show", "archetype"])
     rc = aq.wait(["show", "map", "--building", "np"])
-    #rc = aq.wait(["show", "location", "types"])
     rc = aq.wait(["show", "chassis"])
     rc = aq.wait(["show", "rack", "--all"])
     rc = aq.wait(["show", "building"])
@@ -39,5 +42,12 @@ def show_info():
 
 
 if __name__=='__main__':
-    show_info()
+    from optparse import OptionParser
+
+    parser = OptionParser()
+    parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
+                      help="The service name to use when connecting to aqd")
+    (options, args) = parser.parse_args()
+
+    show_info(options.aqservice)
 

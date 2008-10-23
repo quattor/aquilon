@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header: //eai/aquilon/aqd/1.2.1/src/etc/default-template.py#1 $
-# $Change: 645284 $
-# $DateTime: 2008/07/09 19:56:59 $
-# $Author: wesleyhe $
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -11,11 +7,21 @@
 
 
 import os
+import time
 from subprocess import Popen
 from datetime import datetime
-import time
 from random import choice
+from optparse import OptionParser
 
+
+parser = OptionParser()
+parser.add_option("-q", "--queuesize", dest="queuesize", type="int", default=4,
+                  help="Length of the parallel queue.")
+parser.add_option("-t", "--target", dest="target", type="int", default=4,
+                  help="Stop adding work when this many updates scheduled.")
+parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
+                  help="The service name to use when connecting to aqd")
+(options, args) = parser.parse_args()
 
 DIR=os.path.realpath(os.path.dirname(__file__))
 # Dictionary of rack -> subnet
@@ -24,7 +30,6 @@ free_racks = range(8)
 free_subnets = range(8)
 building = "np"
 queue = []
-queuesize = 4
 
 results = {"add":[], "update":[], "show":[], "delete":[]}
 
@@ -49,20 +54,22 @@ class WorkUnit(object):
     def start(self):
         self.start = datetime.now()
         if self.action == "add":
-            self.process = Popen([os.path.join(DIR, "add_rack.py"),
-                "--building", self.building, "--rack", str(self.rackid),
-                "--subnet", str(self.subnet)], stdout=1, stderr=2)
+            cmd = [os.path.join(DIR, "add_rack.py"),
+                   "--building", self.building, "--rack", str(self.rackid),
+                   "--subnet", str(self.subnet)]
         elif self.action == "update":
-            self.process = Popen([os.path.join(DIR, "update_rack.py"),
-                "--building", self.building, "--rack", str(self.rackid),
-                "--subnet", str(self.subnet)], stdout=1, stderr=2)
+            cmd = [os.path.join(DIR, "update_rack.py"),
+                   "--building", self.building, "--rack", str(self.rackid),
+                   "--subnet", str(self.subnet)]
         elif self.action == "show":
-            self.process = Popen([os.path.join(DIR, "show_info.py")],
-                stdout=1, stderr=2)
+            cmd = [os.path.join(DIR, "show_info.py")]
         elif self.action == "delete":
-            self.process = Popen([os.path.join(DIR, "del_rack.py"),
-                "--building", self.building, "--rack", str(self.rackid)],
-                stdout=1, stderr=2)
+            cmd = [os.path.join(DIR, "del_rack.py"),
+                   "--building", self.building, "--rack", str(self.rackid)]
+        if options.aqservice:
+            cmd.append("--aqservice")
+            cmd.append(options.aqservice)
+        self.process = Popen(cmd, stdout=1, stderr=2)
         return
 
     def update_globals_end(self):
@@ -99,9 +106,9 @@ while True:
     for workunit in queue:
         if workunit.poll() is not None:
             queue.remove(workunit)
-    if len(results["update"]) >= 4:
+    if len(results["update"]) >= options.target:
         break
-    while len(queue) < queuesize:
+    while len(queue) < options.queuesize:
         queue.append(WorkUnit.create())
     # log current queue?
     time.sleep(1)
@@ -111,7 +118,7 @@ while queue or allocated:
     for workunit in queue:
         if workunit.poll() is not None:
             queue.remove(workunit)
-    while allocated and len(queue) < queuesize:
+    while allocated and len(queue) < options.queuesize:
         queue.append(WorkUnit("delete"))
     time.sleep(1)
 
