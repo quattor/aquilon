@@ -14,7 +14,8 @@ if __name__=='__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..',
                                                      "lib", "python2.5")))
 
-from common import AQBroker, AQRunner
+from common import AQRunner
+from broker import AQBroker
 
 
 def setup():

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-#sleep `expr \( $RANDOM % 60 \) + 30`
+sleep `expr \( $RANDOM % 60 \) + 30`
 echo "$@"
 

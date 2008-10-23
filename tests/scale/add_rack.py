@@ -9,11 +9,6 @@
 import os
 import sys
 
-if __name__=='__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..',
-                                                     "lib", "python2.5")))
-
 from common import AQRunner, TestNetwork, TestRack
 
 
