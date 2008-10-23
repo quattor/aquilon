@@ -14,5 +14,6 @@ __all__ = ( 'depends',
             'net',
             'sy',
             'svc',
+            'data_sync',
             'utils'
           )

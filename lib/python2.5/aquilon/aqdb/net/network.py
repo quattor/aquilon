@@ -45,8 +45,7 @@ from aquilon.aqdb.column_types.IPV4  import (IPV4, dq_to_int, get_bcast,
 
 #TODO: enum type for network_type, cidr
 class Network(Base):
-    """
-    Represents subnets in aqdb.
+    """ Represents subnets in aqdb.
 
     Network Type can be one of four values which have been carried over as
     legacy from the network table in DSDB:
@@ -69,23 +68,23 @@ class Network(Base):
         'location.id', name = 'network_loc_fk'), nullable = False)
 
     network_type  = Column(AqStr(32),  nullable = False, default = 'unknown')
-#TODO:  constrain <= 32, >= 1
-cidr          = Column(Integer,    nullable = False)
-name          = Column(AqStr(255), nullable = False) #TODO: default to ip
-ip            = Column(IPV4,       nullable = False)
-bcast         = Column(IPV4,       nullable = False)
-mask          = Column(Integer,    nullable = False) #TODO: ENUM!!!
-side          = Column(AqStr(4),   nullable = True, default = 'a')
-dsdb_id       = Column(Integer,    nullable = False)
+    #TODO:  constrain <= 32, >= 1
+    cidr          = Column(Integer,    nullable = False)
+    name          = Column(AqStr(255), nullable = False) #TODO: default to ip
+    ip            = Column(IPV4,       nullable = False)
+    bcast         = Column(IPV4,       nullable = False)
+    mask          = Column(Integer,    nullable = False) #TODO: ENUM!!!
+    side          = Column(AqStr(4),   nullable = True, default = 'a')
+    dsdb_id       = Column(Integer,    nullable = False)
 
-creation_date = deferred(Column(DateTime, default = datetime.now,
-                                nullable = False))
-comments      = deferred(Column(String(255), nullable = True))
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
+    comments      = deferred(Column(String(255), nullable = True))
 
-location      = relation(Location, backref = 'networks')
+    location      = relation(Location, backref = 'networks')
 
-def netmask(self):
-    bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
+    def netmask(self):
+        bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
         return inet_ntoa(pack('>I', bits))
 
     def first_host(self):

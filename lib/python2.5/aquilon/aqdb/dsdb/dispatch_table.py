@@ -116,3 +116,8 @@ dispatch_tbl['host_info']  = """ SELECT
            AND E.state >= 0
            --AND G.state >= 0
            AND A.host_name = 'HOST' """
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

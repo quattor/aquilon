@@ -34,22 +34,22 @@ def populate(db, *args, **kw):
 
 
     s = db.session()
-
-
-    #TODO: replace pseudocode with code
-    if len(s.query(Campus).all()) < 1:
-        from aquilon.aqdb.db_factory   import db_factory
-        from aquilon.aqdb.loc.country  import Country
-        from aquilon.aqdb.loc.city     import City
-        from aquilon.aqdb.loc.building import Building
-
-        import aquilon.aqdb.dsdb as dsdb_
-        dsdb = dsdb_.DsdbConnection()
-
-        #get all the campus names from dsdb and create them outside the map
-        campuses = []
-        for row in dsdb.dump('campus'):
-            campuses.append(row)
+    return True
+#
+#    #TODO: replace pseudocode with code
+#    if len(s.query(Campus).all()) < 1:
+#        from aquilon.aqdb.db_factory   import db_factory
+#        from aquilon.aqdb.loc.country  import Country
+#        from aquilon.aqdb.loc.city     import City
+#        from aquilon.aqdb.loc.building import Building
+#
+#        import aquilon.aqdb.dsdb as dsdb_
+#        dsdb = dsdb_.DsdbConnection()
+#
+#        #get all the campus names from dsdb and create them outside the map
+#        campuses = []
+#        for row in dsdb.dump('campus'):
+#            campuses.append(row)
 
         #debug('dump campus yields\n',campuses)
 

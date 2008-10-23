@@ -22,24 +22,37 @@ class DsdbConnection(object):
         self.__dict__ = self.__shared_state
         
         #TODO: Place in dsdb source tree (4.4.3)
-        cfg_file = kw.pop('cfg', os.path.expanduser('~daqscott/.pydsdbcfg'))
-        assert cfg_file
-
-        self.cfg = SafeConfigParser()
-        try:
-           self.cfg.readfp(open(cfg_file))
-        except (IOError, OSError), e:
-            print >> sys.stderr, "failed to read configuration: %s" % e
-            sys.exit(os.EX_CONFIG)
-
-        #TODO: failover support for db replicas
-        self.region = (os.environ.get('SYS_REGION') or 'DEFAULT')
-        assert self.region
         
-        self.dsn = self.cfg.get(self.region,'primary')
+#10/23/08 Heavy turonover blackouts mean its impossible to put this
+# in aurora/dsdb/4.4.3
+#        cfg_file = kw.pop('cfg', os.path.expanduser('~daqscott/.pydsdbcfg'))
+#        assert cfg_file
+#
+#        self.cfg = SafeConfigParser()
+#        try:
+#           self.cfg.readfp(open(cfg_file))
+#        except (IOError, OSError), e:
+#            print >> sys.stderr, "failed to read configuration: %s" % e
+#            sys.exit(os.EX_CONFIG)
+        #TODO: failover support for db replicas
+        self.region = (os.environ.get('SYS_REGION') or None)
+        if self.region == 'eu':
+            self.dsn = 'LNP_DSDB11'
+        elif self.region == 'hk':
+            self.dsn = 'HKP_DSDB11'
+        elif self.region == 'tk':
+            self.dsn = 'TKP_DSDB11'
+        else:
+            self.dsn = 'NYP_DSDB11'
+#        else:
+#            self.dsn = self.cfg.get(self.region,'dsdb')
+        
         assert self.dsn
         
-        krbusrs = self.cfg.get('DEFAULT','krbusers').split(',')
+        #FIXME: same as above: T/O restrictions
+        krbusrs = 'cdb,daqscott,samsh'
+        #krbusrs = self.cfg.get('dsdb','krbusers').split(',')
+        krbusrs = krbusrs.split(',')
         assert krbusrs
         
         self.fake = fake
@@ -56,7 +69,9 @@ class DsdbConnection(object):
         ###Impostor attrs only used in unit tests for data refresh
         if self.fake:
             self._fake_data = {}     
-            self.fake_types   = self.cfg.get('DEFAULT','fake_types')
+            #self.fake_types = self.cfg.get('DEFAULT','fake_types')
+            #TODO: cfg file in DSDB (T/O restrictions)
+            self.fake_types = 'country, campus, city, building, network'
             assert self.fake_types
 
     def run_query(self,sql):

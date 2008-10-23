@@ -6,7 +6,7 @@ class RefreshReport(object):
         self.dels = []
         self.upds = []
         self.errs = []
-    
+
     def display(self):
         if self.adds:
             print 'Additions:'
@@ -20,11 +20,11 @@ class RefreshReport(object):
         if self.errs:
             print 'Errors:'
             pprint(self.errs, indent=4)
-        
+
     def __repr__(self):
 #        if (not self.adds and not self.dels and not self.upds):
 #            return ''
-        msg = '' 
+        msg = ''
         if self.adds:
             msg += 'Additions: %s\n\n'%(self.adds)
         if self.dels:

@@ -26,121 +26,37 @@ from aquilon.aqdb.sy.system     import System
 from aquilon.aqdb.sy.tor_switch import TorSwitch
 
 from aquilon.aqdb.db_factory    import db_factory
-from aquilon.aqdb.utils.report  import RefreshReport
 from aquilon.aqdb.dsdb          import DsdbConnection
 from aquilon.aqdb.net.network   import Network, _mask_to_cidr, get_bcast
-
+from aquilon.aqdb.data_sync     import NetRecord
+from aquilon.aqdb.data_sync     import RefreshReport
 from aquilon.aqdb.utils.shutils import ipshell
-
-class NetRecord(object):
-    """ might be a handy gizmo for comparing networks """
-    #TODO: USE KW FOR > 3 arguments, buddy
-    def __init__(self, ip, name, net_type, mask, bldg, side, dsdb_id, comments=None,
-                 *args, **kw):
-        #TODO: add comment updating in later, too much noise for now
-        self.ip       = ip
-        self.name     = name
-        self.net_type = net_type
-        self.mask     = mask
-        self.bldg     = bldg
-        self.side     = side
-        self.dsdb_id  = dsdb_id
-        if comments:
-            self.comments = comments
-
-    def __eq__(self, other):
-        if type(other) != Network:
-            raise TypeError(
-                         'type of %s is %s, should be Network'%(aq,type(aq)))
-
-        if (self.name.lower() == other.name and
-            self.net_type     == other.network_type and
-            self.mask         == other.mask and
-            self.bldg         == other.location.name and
-            self.side         == other.side): #and
-            #self.comments == other.comments):
-            return True
-        else:
-            return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def update_aq_net(self, aq, log, report):
-        if type(aq) != Network:
-            #TODO: make sure you're caught
-            raise TypeError(
-                         'diff_aq_net%s is %s, should be Network'%(aq,type(aq)))
-        if self.ip != aq.ip:
-            m = 'update_aq_net: network ip mismatch (dsdb)%s != %s(aqdb)'%(
-                                                                self.ip, aq.ip)
-            raise ValueError(m)
-
-        if self.bldg != aq.location.name:
-            m = 'update_aq_net: location name mismatch (dsdb)%s != %s(aqdb)'%s(
-                                                    self.bldg, aq.location.name)
-            raise ValueError(m)
-        msg = ''
-        if self.bldg != aq.location.name:
-            msg += 'updating network %s to name %s\n'%(aq, self.name)
-            report.upds.append(msg)
-            log.debug(msg)
-
-        if self.name.lower() != aq.name:
-            msg += 'updating network %s to name %s'%(aq, self.name)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.name = self.name
-
-        if self.net_type != aq.network_type:
-            msg = 'updating network %s to type %s'%(aq, self.net_type)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.network_type = self.net_type
-
-        if self.mask != aq.mask:
-            #BUG: you must update bcast here!
-            msg = 'updating network %s with mask %s'%(aq, self.mask)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.mask = self.mask
-
-        if self.side != aq.side:
-            msg = 'updating network %s to name %s'%(aq, self.name)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.side = self.side
-
-        return aq
-
-    def __repr__(self):
-        return '<Network %s ip=%s, type=%s, mask=%s, bldg=%s, side=%s>'%(
-                self.name, self.ip, self.net_type, self.mask,
-                self.bldg, self.side)
 
 class NetRefresher(object):
     """ guess what I do?"""
-    #do Borg later on?
+    __shared_state = {}
 
     #Dependency injection: allows us to supply our own *fake* dsdb connection
-    def __init__(self, dsdb_cnxn, *args, **kw):
-        #TODO: singleton, accept args for logger level
+    def __init__(self, dsdb_cnxn, aqdb, *args, **kw):
+        self.__dict__ = self.__shared_state
+        #TODO: accept args for log level, etc
 
-        #if not getattr(self, 'dsdb', None):
-        self.dsdb = dsdb_cnxn
-        assert self.dsdb
+        if not getattr(self, 'dsdb', None):
+            self.dsdb = dsdb_cnxn
+            assert self.dsdb
 
-        #if not getattr(self, 'aqdb', None):
-        self.aqdb = db_factory()
-        assert self.aqdb
+        if not getattr(self, 'aqdb', None):
+            self.aqdb = aqdb
+            assert self.aqdb
 
-        q = self.aqdb.s.query(Building)
-        self.location = q.filter_by(name=opts.building_name).one()
-        assert type(self.location) is Building
+        if not getattr(self, 'location', None):
+            q = self.aqdb.s.query(Building)
+            self.location = q.filter_by(name=opts.building_name).one()
+            assert type(self.location) is Building
 
-        #if not getattr(self, 'report', None):
-        self.report = RefreshReport()
-        assert self.report
+        if not getattr(self, 'report', None):
+            self.report = RefreshReport()
+            assert self.report
 
         if not getattr(self, 'log', None):
             self.log = logging.getLogger('net_refresh')
@@ -162,9 +78,11 @@ class NetRefresher(object):
         """ loc argument is a sysloc string (DSDB stores this instead) """
         d = {}
         #query returns in order name, ip, mask, type_id, bldg, side
-        for (name, ip, mask, type, bldg, side, dsdb_id) in \
-                        self.dsdb.get_network_by_sysloc(self.location.sysloc()):
-            d[ip] = NetRecord(ip, name, type, mask, bldg, side, dsdb_id)
+        for (name, ip, mask, type,
+             bldg, side, dsdb_id) in self.dsdb.get_network_by_sysloc(
+                                                    self.location.sysloc()):
+            d[ip] = NetRecord(ip=ip, name=name, net_type=type, 
+                              mask=mask, bldg=bldg, side=side, dsdb_id=dsdb_id)
         return d
 
     def _pull_aqdb_data(self, *args, **kw):
@@ -229,8 +147,7 @@ class NetRefresher(object):
 #                            do something about it: delete it, or send message.
 #                            enhancement: start marking objects for deletion and
 #                            delete them after a week or two of no activity """
-                    print e
-                    ipshell()
+                    self._rollback(e)
                 except Exception, e:
                     self._rollback(e)
                     continue
@@ -288,8 +205,6 @@ class NetRefresher(object):
         for i in k:
             if ds[i] != aq[i]:
                 #get an updated version of the aqdb network
-                print ds[i]
-                print '    %s'%(aq[i])
                 try:
                     aq[i] = ds[i].update_aq_net(aq[i], self.log, self.report)
                 except ValueError, e:
@@ -334,8 +249,9 @@ def main(*args, **kw):
     opts, args = p.parse_args()
 
     dsdb = DsdbConnection()
+    aqdb = db_factory()
 
-    nr = NetRefresher(dsdb)
+    nr = NetRefresher(dsdb, aqdb)
     nr.refresh()
 
     if opts.verbose < 2:
@@ -345,3 +261,8 @@ def main(*args, **kw):
 
 if __name__ == '__main__':
     main(sys.argv)
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

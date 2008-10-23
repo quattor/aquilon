@@ -37,6 +37,7 @@ def populate(db, *args, **kw):
         import aquilon.aqdb.dsdb as dsdb_
 
         dsdb = dsdb_.DsdbConnection()
+        assert dsdb
 
         cnts = {}
 
