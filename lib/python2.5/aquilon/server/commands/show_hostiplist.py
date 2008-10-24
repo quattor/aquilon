@@ -23,6 +23,11 @@ class CommandShowHostIPList(BrokerCommand):
     @az_check
     @format_results
     def render(self, session, **arguments):
+        # Quick fix to make sure that the whole query is consistent.
+        # TODO: Make this more generally available.
+        if self.config.get("database", "dsn").startswith("oracle"):
+            session.execute(text("set transaction read only"))
+
         # FIXME: Currently ignores archetype and outputs regardless
         # of whether we want hosts...
         #archetype = arguments.get("archetype", None)

@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ The way to populate an aqdb instance """
 
 import re
@@ -6,13 +6,14 @@ import sys
 import os
 import optparse
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
+DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+
+import aquilon.aqdb.depends
+
 
 from aquilon.aqdb.db_factory    import db_factory, Base, debug
-from aquilon.aqdb.utils.shutils import ipshell
+from aquilon.aqdb.utils.shutils import ipshell, load_all
 from aquilon.aqdb.utils         import table_admin as ta, constraints as cnst
 
 pkgs         = {}

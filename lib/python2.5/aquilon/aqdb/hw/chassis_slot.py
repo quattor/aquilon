@@ -1,12 +1,7 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ ChassisSlot sets up a structure for tracking position within a chassis. """
 import sys
 import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relation, backref
@@ -48,15 +43,18 @@ chassis_slot.primary_key.name = 'chassis_slot_pk'
 
 table = chassis_slot
 
-def populate(db, *args, **kw):
 
-    if len(db.s.query(ChassisSlot).all()) < 1:
-        for c in db.s.query(Chassis).all():
-            for node in range(1, 17):
-                a = ChassisSlot(chassis=c, slot_number=node)
-                db.s.add(a)
-        db.s.commit()
-        print 'created %d chassis slots' % db.s.query(ChassisSlot).count()
+# We don't create any chassis anymore, so there's no point in this...
+
+#def populate(db, *args, **kw):
+#
+#    if len(db.s.query(ChassisSlot).all()) < 1:
+#        for c in db.s.query(Chassis).all():
+#            for node in range(1, 17):
+#                a = ChassisSlot(chassis=c, slot_number=node)
+#                db.s.add(a)
+#        db.s.commit()
+#        print 'created %d chassis slots' % db.s.query(ChassisSlot).count()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

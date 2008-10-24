@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Continent is a subclass of Location """
 
 import sys

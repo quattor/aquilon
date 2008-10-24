@@ -72,6 +72,7 @@ from test_show_fqdn import TestShowFqdn
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
 from test_show_network import TestShowNetwork
+from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
 from test_pxeswitch import TestPxeswitch
@@ -135,7 +136,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowServiceAll, TestShowFqdn,
                 TestSearchSystem, TestSearchHost,
                 TestUpdateInterface, TestUpdateMachine,
-                TestShowNetwork,
+                TestShowNetwork, TestRefreshNetwork,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,

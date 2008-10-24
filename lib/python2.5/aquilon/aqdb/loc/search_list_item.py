@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 
 from datetime import datetime
 import sys
@@ -46,7 +46,6 @@ class SearchListItem(Base):
 #Out[20]: SearchListItem instance <--- should read 'chassis'
 
 
-
 search_list_item = SearchListItem.__table__
 
 search_list_item.primary_key.name = 'search_li_pk'
@@ -65,10 +64,7 @@ LocationSearchList.location_types = relation(SearchListItem,
 table = search_list_item
 
 def populate(db, *args, **kw):
-
     s = db.session()
-
-    search_list_item.create(checkfirst = True)
 
     m = s.query(LocationSearchList).first()
     assert m
@@ -88,7 +84,7 @@ def populate(db, *args, **kw):
             s.add(i)
             s.commit()
 
-        print 'created Location Search List %s '%(m)
+        #print 'created Location Search List %s '%(m)
 
     cnt = len(s.query(SearchListItem).all())
     assert cnt > 6

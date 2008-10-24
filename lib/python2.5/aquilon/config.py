@@ -1,12 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
-#
-# This module is part of Aquilon
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """Basic config module for aqdb and the broker."""
 
 import os
@@ -34,7 +26,9 @@ global_defaults = {
 
 
 class Config(SafeConfigParser):
-    # Any "new" config object will have all the same info as any other.
+    """ Supplies configuration to the broker and database engines
+        Set up as a borg/singleton class (can only be instanced once) """
+
     __shared_state = {}
     def __init__(self, defaults=global_defaults, configfile=None):
         self.__dict__ = self.__shared_state
@@ -78,3 +72,8 @@ if __name__=='__main__':
         print "[%s]" % section
         for (name, value) in config.items(section):
             print "%s=%s" % (name, value)
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

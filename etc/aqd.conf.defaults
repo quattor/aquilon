@@ -91,8 +91,33 @@ CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
 # For sqlalchemy, only INFO and DEBUG produce log messages.
 [logging]
 sqlalchemy.engine = WARNING
-sqlalchemy.pool = WARNING
-sqlalchemy.orm = WARNING
+sqlalchemy.pool   = WARNING
+sqlalchemy.orm    = WARNING
 
 [protocols]
 directory = /ms/dist/aquilon/PROJ/protocols/1.0/common/lib/python
+
+[graphviz]
+version = 2.6
+path    = /ms/dist/fsf/PROJ/graphviz/%(version)s/bin
+
+#
+# Regional Configuration
+#
+[eu]
+dsdb   = LNP_DSDB11
+
+[hk]
+dsdb   = HKP_DSDB11
+
+[na]
+dsdb   = NYP_DSDB11
+
+[tk]
+dsdb   = TKP_DSDB11
+
+# Copyright (C) 2008 Morgan Stanley
+# This module is part of Aquilon
+
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+

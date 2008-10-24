@@ -10,6 +10,9 @@ from aquilon.aqdb.depends import get_files
 
 __all__ = get_files(DIR)
 
+from network import Network
+from dns_domain import DnsDomain
+
 del os
 del sys
 

@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Building is a subclass of Location """
 
 import sys
@@ -34,14 +34,14 @@ def populate(db, *args, **kw):
         return
 
     from aquilon.aqdb.loc.city import City
-    import aquilon.aqdb.utils.dsdb
-    dsdb = aquilon.aqdb.utils.dsdb.dsdb_connection()
+    import aquilon.aqdb.dsdb as dsdb_
+    dsdb = dsdb_.DsdbConnection()
 
     city = {}
     for c in db.s.query(City).all():
         city[c.name] = c
 
-    for row in dsdb.dump_bldg():
+    for row in dsdb.dump('building'):
         try:
             p = city[str(row[2])]
         except KeyError,e :

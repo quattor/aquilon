@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Rack is a subclass of Location """
 
 
@@ -37,26 +37,31 @@ rack.primary_key.name = 'rack_pk'
 table = rack
 
 def populate(db, *args, **kw):
-
-    from aquilon.aqdb.loc.building import Building
-
     s = db.session()
 
-    rack.create(checkfirst = True)
-
     if len(s.query(Rack).all()) < 1:
+        from aquilon.aqdb.loc.building import Building
+
         bldg = {}
-        for c in s.query(Building).all():
-            bldg[c.name] = c
 
-        for b in bldg.keys():
-            nm = '%s1'%(b)
-            a = Rack(name = nm, fullname = 'Rack %s'%(nm),
-                     parent = bldg[b], comments = 'AutoPopulated')
-            s.add(a)
+        try:
+            np = s.query(Building).filter_by(name='np').one()
+        except Exception, e:
+            print e
+            sys.exit(9)
+            #return False
 
-        s.commit()
-        print 'created %s racks'%(len(s.query(Rack).all()))
+        rack_name = 'np3'
+        a = Rack(name = rack_name, fullname = 'Rack %s'%(rack_name),
+                     parent = np, comments = 'AutoPopulated')
+        s.add(a)
+        try:
+            s.commit()
+        except Exception, e:
+            print e
+
+        print 'created a rack (%s)'%(rack_name)
+        return True
 
 
 # Copyright (C) 2008 Morgan Stanley
