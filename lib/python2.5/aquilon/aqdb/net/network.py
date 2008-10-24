@@ -101,16 +101,16 @@ class Network(Base):
                                             dq_to_int(self.bcast))]
     def __repr__(self):
         s = '<Network '
-        
+
         if self.name != self.ip:
             s += '%s ip='%(self.name)
-        
-        s += '%s/%s (netmask=%s), type=%s, side=%s, located in %s>'%(self.ip, 
-              self.cidr, _cidr_to_mask[self.cidr][0], self.network_type, 
-              self.side, self.location.__repr__())
-        return s 
 
-    #TODO: custom str 
+        s += '%s/%s (netmask=%s), type=%s, side=%s, located in %s>'%(self.ip,
+              self.cidr, _cidr_to_mask[self.cidr][0], self.network_type,
+              self.side, self.location.__repr__())
+        return s
+
+    #TODO: custom str
 
 network = Network.__table__
 network.primary_key.name = 'network_pk'
@@ -178,7 +178,7 @@ def populate(db, full, *args, **kw):
         dsdb = dsdb_.DsdbConnection()
 
         #type_cache = get_type_cache(dsdb)
-                
+
         count=0
 
         for (name, ip, mask, network_type, bldg_name, side,
@@ -199,7 +199,7 @@ def populate(db, full, *args, **kw):
             kw['bcast']          = get_bcast(ip, kw['cidr'])
 
             kw['network_type']   = network_type
-            
+
             if side:
                 kw['side']       = side
             kw['dsdb_id']        = dsdb_id
@@ -215,8 +215,8 @@ def populate(db, full, *args, **kw):
         stend = time.clock()
         thetime = stend - start
         print 'created %s networks in %2f'%(count, thetime)
-        
-        
+
+
 #for fast lookups as opposed to a computed column approach
 _mask_to_cidr = {
     1          : 32,

@@ -2,8 +2,8 @@ dispatch_tbl={}
 
 dispatch_tbl['country'] = """
     SELECT country_symbol, country_name, continent
-        FROM country 
-        WHERE state >= 0 
+        FROM country
+        WHERE state >= 0
         ORDER BY country_symbol ASC"""
 
 dispatch_tbl['campus'] = """
@@ -70,7 +70,7 @@ dispatch_tbl['network_full'] = dispatch_tbl['net_base']
 #    net_ip_addr != '127.0.0.0'
 #    AND state >= 0  """
 
-dispatch_tbl['np_network'] = ' '.join([dispatch_tbl['net_base'], 
+dispatch_tbl['np_network'] = ' '.join([dispatch_tbl['net_base'],
                                        "AND A.location like '%np.ny.na'"])
 #"""
 #    SELECT  net_name,
@@ -83,7 +83,7 @@ dispatch_tbl['np_network'] = ' '.join([dispatch_tbl['net_base'],
 #    AND net_ip_addr != '127.0.0.0'
 #    AND location like '%np.ny.na' """
 
-dispatch_tbl['net_ids'] = """ 
+dispatch_tbl['net_ids'] = """
 SELECT net_id FROM network WHERE net_ip_addr != '127.0.0.0' AND state >= 0 """
 
 dispatch_tbl['net_type'] = """

@@ -41,16 +41,16 @@ def populate(db, *args, **kw):
 
     if len(s.query(Rack).all()) < 1:
         from aquilon.aqdb.loc.building import Building
-        
+
         bldg = {}
-        
+
         try:
             np = s.query(Building).filter_by(name='np').one()
         except Exception, e:
             print e
             sys.exit(9)
             #return False
-        
+
         rack_name = 'np3'
         a = Rack(name = rack_name, fullname = 'Rack %s'%(rack_name),
                      parent = np, comments = 'AutoPopulated')
@@ -59,7 +59,7 @@ def populate(db, *args, **kw):
             s.commit()
         except Exception, e:
             print e
-        
+
         print 'created a rack (%s)'%(rack_name)
         return True
 

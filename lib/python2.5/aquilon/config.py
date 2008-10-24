@@ -26,9 +26,9 @@ global_defaults = {
 
 
 class Config(SafeConfigParser):
-    """ Supplies configuration to the broker and database engines 
+    """ Supplies configuration to the broker and database engines
         Set up as a borg/singleton class (can only be instanced once) """
-        
+
     __shared_state = {}
     def __init__(self, defaults=global_defaults, configfile=None):
         self.__dict__ = self.__shared_state

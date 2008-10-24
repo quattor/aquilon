@@ -93,11 +93,11 @@ class db_factory(object):
             sys.exit(os.EX_CONFIG)
 
         self.dsn = self.config.get('database', 'dsn')
-        
+
         #Let's be extra careful with prod when we're not CDB
-        if (self.dsn.endswith('@NYPO_AQUILON') and 
+        if (self.dsn.endswith('@NYPO_AQUILON') and
                     os.environ['USER'] != 'cdb'):
-            
+
             msg='your DSN is on the production database, are you SURE? '
             if not confirm(prompt=msg, resp=False):
                 print 'Thanks for playing, come again.'

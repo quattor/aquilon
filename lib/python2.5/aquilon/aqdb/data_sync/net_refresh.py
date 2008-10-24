@@ -65,7 +65,7 @@ class NetRefresher(object):
         for (name, ip, mask, type,
              bldg, side, dsdb_id) in self.dsdb.get_network_by_sysloc(
                                                     self.location.sysloc()):
-            d[ip] = NetRecord(ip=ip, name=name, net_type=type, 
+            d[ip] = NetRecord(ip=ip, name=name, net_type=type,
                               mask=mask, bldg=bldg, side=side, dsdb_id=dsdb_id)
         return d
 
