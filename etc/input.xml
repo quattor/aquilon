@@ -170,6 +170,22 @@
       <transport method="get" path="network" />
    </command>
 
+   <command name="refresh_network">
+      Refresh aqdb network information from dsdb for a given building.
+
+      The loglevel option can be used to increase logging on the server
+      for debugging.  The default is warnings only (0), and can be
+      increased to more info (1) and debug level (2).
+      <optgroup name="refresh_network_mandatory" mandatory="True" fields="all">
+         <option name="building" type="string" conflicts="">Building name</option>
+      </optgroup>
+      <optgroup name="refresh_network_mandatory" mandatory="False">
+         <option name="dryrun" type="boolean" conflicts="">Report what will change</option>
+         <option name="loglevel" type="string" conflicts="">Increase the logging level in the server logs</option>
+      </optgroup>
+      <transport method="post" path="command/net_refresh" />
+   </command>
+
    <command name="show_hostiplist">
       Shows a list of all hosts.  Can be narrowed by archetype.
       <optgroup name="show_hostiplist_options">
