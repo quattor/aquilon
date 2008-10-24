@@ -30,7 +30,6 @@ from aquilon.aqdb.dsdb          import DsdbConnection
 from aquilon.aqdb.net.network   import Network, _mask_to_cidr, get_bcast
 from aquilon.aqdb.data_sync     import NetRecord
 from aquilon.aqdb.data_sync     import RefreshReport
-from aquilon.aqdb.utils.shutils import ipshell
 
 class NetRefresher(object):
     """ Class to encapsulate what's needed to replicate networks from AQDB
