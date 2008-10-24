@@ -7,6 +7,7 @@
 
 import os
 import logging
+from logging import Handler
 
 # This is done by the wrapper script.
 #import aquilon.server.depends
@@ -38,6 +39,12 @@ class Options(usage.Options):
             ]
 
 
+class BridgeLogHandler(Handler):
+    """Allow python logging messages to be funneled into the twisted log."""
+    def emit(self, record):
+        log.msg(record.getMessage())
+
+
 class AQDMaker(object):
     implements(IServiceMaker, IPlugin)
     tapname = "aqd"
@@ -48,8 +55,9 @@ class AQDMaker(object):
         config = Config(configfile=options["config"])
 
         # Set this up before the aqdb libs get imported...
-        observer = log.PythonLoggingObserver()
-        observer.start()
+        rootlog = logging.getLogger()
+        rootlog.addHandler(BridgeLogHandler())
+        rootlog.setLevel(logging.NOTSET)
         for logname in config.options("logging"):
             logvalue = config.get("logging", logname)
             # Complain if a config value is out of whack...
