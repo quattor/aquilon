@@ -150,6 +150,11 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
             self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert(self.Session)
 
+        # This is an incredibly bad idea.  Don't use this variable, just
+        # create a session as necessary.  The scoped_session will ensure
+        # that you leverage a session in a local thread.  Mixing use of
+        # this variable with use of a scoped_session will result in
+        # inconsistencies and general confusion.
         self.s = self.Session()
 
     def session(self):
