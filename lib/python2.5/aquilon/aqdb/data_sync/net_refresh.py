@@ -33,7 +33,8 @@ from aquilon.aqdb.data_sync     import RefreshReport
 from aquilon.aqdb.utils.shutils import ipshell
 
 class NetRefresher(object):
-    """ guess what I do?"""
+    """ Class to encapsulate what's needed to replicate networks from AQDB
+        to AQDB"""
     __shared_state = {}
 
     #Dependency injection: allows us to supply our own *fake* dsdb connection
@@ -51,7 +52,7 @@ class NetRefresher(object):
 
         if not getattr(self, 'location', None):
             q = self.aqdb.s.query(Building)
-            self.location = q.filter_by(name=opts.building_name).one()
+            self.location = q.filter_by(name=kw['bldg']).one()
             assert type(self.location) is Building
 
         if not getattr(self, 'report', None):
@@ -59,20 +60,10 @@ class NetRefresher(object):
             assert self.report
 
         if not getattr(self, 'log', None):
-            self.log = logging.getLogger('net_refresh')
+            self.log = kw['log']
             assert self.log
 
-            if opts.verbose > 1:
-                log_level = logging.DEBUG
-            elif opts.verbose > 0:
-                log_level = logging.INFO
-            else:
-                log_level = logging.WARN
-
-            #TODO: call this in main
-            logging.basicConfig(level=log_level,
-                            format='%(asctime)s %(levelname)-6s %(message)s',
-                            datefmt='%a, %d %b %Y %H:%M:%S')
+        self.commit    = kw['commit']
 
     def _pull_dsdb_data(self, *args, **kw):
         """ loc argument is a sysloc string (DSDB stores this instead) """
@@ -137,7 +128,7 @@ class NetRefresher(object):
             self.log.debug('deleting %s'%(aq[i]))
             self.report.dels.append(aq[i])
 
-            if opts.commit:
+            if self.commit:
                 try:
                     self.aqdb.s.delete(aq[i])
                     self.aqdb.s.commit()
@@ -184,7 +175,7 @@ class NetRefresher(object):
             self.log.debug('adding %s'%(net))
             self.report.adds.append(net)
 
-            if opts.commit:
+            if self.commit:
                 self.report.adds.append(net)
                 try:
                     self.aqdb.s.add(net)
@@ -211,7 +202,7 @@ class NetRefresher(object):
                     self.report.errs.append(e)
                     self.log.error(e)
 
-                if opts.commit:
+                if self.commit:
                     try:
                         self.log.debug('trying to commit the update\n')
                         self.aqdb.s.update(aq[i])
@@ -233,25 +224,44 @@ def main(*args, **kw):
     p.add_option('-v',
                  action = 'count',
                  dest   = 'verbose',
+                 default = 0,
                  help   = 'increase verbosity by adding more (vv), etc.')
 
     p.add_option('-b', '--building',
                  action = 'store',
-                 dest   = 'building_name',
+                 dest   = 'building',
                  default = 'dd' )
 
-    p.add_option('-e', '--exec',
+    p.add_option('-n', '--dry-run',
                       action  = 'store_true',
-                      dest    = 'commit',
+                      dest    = 'dry_run',
                       default = False,
-                      help    = 'commit changes (default = False for tests)')
-    global opts
+                      help    = "no commit (for testing, default=False)")
     opts, args = p.parse_args()
 
     dsdb = DsdbConnection()
     aqdb = db_factory()
 
-    nr = NetRefresher(dsdb, aqdb)
+    log = logging.getLogger('net_refresh')
+
+    if opts.verbose > 1:
+        log_level = logging.DEBUG
+    elif opts.verbose > 0:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARN
+
+    #TODO: call this in main
+    logging.basicConfig(level=log_level,
+                    format='%(asctime)s %(levelname)-6s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+    assert log
+
+    nr = NetRefresher(dsdb, aqdb,
+                      log=log,
+                      bldg=opts.building,
+                      #keep logic stated in postive language (readability)
+                      commit = not(opts.dry_run))
     nr.refresh()
 
     if opts.verbose < 2:

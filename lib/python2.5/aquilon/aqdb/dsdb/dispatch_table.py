@@ -53,7 +53,13 @@ dispatch_tbl['net_base'] = """
 
 dispatch_tbl['network_full'] = dispatch_tbl['net_base']
 
-#"""
+#dispatch_tbl['city_by_bldg'] = """
+#select A.city_symbol from city A, bldg B
+#where A.city_id = B.city_id
+#AND A.state >= 0
+#AND B.state >= 0
+#AND B.bldg_name = """
+
 #    SELECT  net_name,
 #            net_ip_addr,
 #            abs(net_mask),
