@@ -13,28 +13,13 @@ import Sybase
 from dispatch_table import dispatch_tbl as dt
 
 class DsdbConnection(object):
-    """ Wraps connections to DSDB. This is a singleton/Borg object 
-        (there can only be one instantiated by an application in order
-         to keep connections at a minimum, and one should only be needed) """
-
-    __shared_state = {}
+    """ Wraps connections to DSDB """
     def __init__(self, fake=False, *args, **kw):
-        self.__dict__ = self.__shared_state
-        
-        #TODO: Place in dsdb source tree (4.4.3)
-        
-#10/23/08 Heavy turonover blackouts mean its impossible to put this
-# in aurora/dsdb/4.4.3
-#        cfg_file = kw.pop('cfg', os.path.expanduser('~daqscott/.pydsdbcfg'))
-#        assert cfg_file
-#
-#        self.cfg = SafeConfigParser()
-#        try:
-#           self.cfg.readfp(open(cfg_file))
-#        except (IOError, OSError), e:
-#            print >> sys.stderr, "failed to read configuration: %s" % e
-#            sys.exit(os.EX_CONFIG)
-        #TODO: failover support for db replicas
+
+#10/23/08 Heavy turonover blackout: at present it's impossible 
+#         to put this in aurora/dsdb/4.4.3 as we'd like to.
+
+#TODO: failover support
         self.region = (os.environ.get('SYS_REGION') or None)
         if self.region == 'eu':
             self.dsn = 'LNP_DSDB11'
@@ -44,31 +29,28 @@ class DsdbConnection(object):
             self.dsn = 'TKP_DSDB11'
         else:
             self.dsn = 'NYP_DSDB11'
-#        else:
-#            self.dsn = self.cfg.get(self.region,'dsdb')
-        
         assert self.dsn
-        
+
         #FIXME: same as above: T/O restrictions
-        krbusrs = 'cdb,daqscott,samsh'
+        krbusrs = 'daqscott, samsh'
         #krbusrs = self.cfg.get('dsdb','krbusers').split(',')
         krbusrs = krbusrs.split(',')
         assert krbusrs
-        
+
         self.fake = fake
-        
+
         if os.environ.get('USER') in krbusrs:
             self._get_krb_cnxn()
         else:
             #TODO: pull password from afs
             self.syb = Sybase.connect(self.dsn, 'dsdb_guest', 'dsdb_guest', 
-                                      'dsdb', datetime = 'auto', 
-                                      auto_commit = '0')
-        assert self.syb
-        
+                                  'dsdb', datetime = 'auto', 
+                                  auto_commit = '0')
+        assert self.syb._is_connected
+
         ###Impostor attrs only used in unit tests for data refresh
         if self.fake:
-            self._fake_data = {}     
+            self._fake_data = {}
             #self.fake_types = self.cfg.get('DEFAULT','fake_types')
             #TODO: cfg file in DSDB (T/O restrictions)
             self.fake_types = 'country, campus, city, building, network'
@@ -82,8 +64,8 @@ class DsdbConnection(object):
                 Sybase cursor object"""
         rs = self.syb.cursor()
         try:
-            rs.execute(sql)
-            return rs
+           rs.execute(sql)
+           return rs
         except Sybase.DatabaseError, e:
             print e
 
@@ -134,12 +116,11 @@ class DsdbConnection(object):
 
     def _dump(self, data_type, *args, **kw):
         try:
-            data = self.run_query(dt[data_type]).fetchall()
+            return self.run_query(dt[data_type]).fetchall()
         except Exception,e:
             print e
-        return data
 
-    #TODO: MEMOIZE
+    #TODO: when Borg, MEMOIZE
     def _get_principal(self):
         for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():
             svr, principal = line.split()
@@ -158,24 +139,18 @@ class DsdbConnection(object):
         self.syb.set_property(Sybase.CS_SEC_SERVERPRINCIPAL, 
                               self._get_principal())
         self.syb.connect()
-    
+
     def get_network_by_sysloc(self,loc):
         """ append a sysloc to the base query, get networks"""
         #TODO: make it general case somehow
         s = "    AND location = '%s' \n    ORDER BY A.net_ip_addr"%(loc)
         sql = '\n'.join([dt['net_base'], s])
-        return self.run_query(sql).fetchall()
-    
-#    def nets_by_id(self,ids):
-#        query = """
-#    SELECT  net_name,
-#            net_ip_addr,
-#            abs(net_mask),
-#            isnull(net_type_id,0),
-#            SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
-#            side, net_id FROM network
-#    WHERE net_id in %s"""%(ids.__str__())
-#        return self.run_query(query).fetchall()
+
+        data = self.run_query(sql)
+        if data is not None:
+            return data.fetchall()
+        else:
+            return None
 
     def get_host_pod(self,host):
         sql    = """
@@ -186,6 +161,9 @@ class DsdbConnection(object):
           AND B.state       >= 0"""%(host)
 
         return self.run_query(sql).fetchall()[0][0]    
+
+    def close(self):
+        self.syb.close()
 
 class FakeData(object):
     """ holds a set of data and a few handy manipulations for testing
@@ -214,25 +192,26 @@ if __name__ == '__main__':
     db = DsdbConnection()
     assert db
 
-    print db.get_network_by_sysloc('dd.ab.na')
+    print db.get_network_by_sysloc('np.ny.na')
     
-    #ops = ('net_type','campus','campus_entries','country','city','building',
-    #       'np_network')  #omitting 'bucket','network_full','net_ids'
+    ops = ('net_type','campus','campus_entries','country','city','building',
+           'np_network')  #omitting 'bucket','network_full','net_ids'
 
-    #for i in ops:
-    #    print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
+    for i in ops:
+        print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
 
-    #host = 'blackcomb'
-    #print "getting host data for '%s'"%(host)    
-    #print 'host %s is in the "%s" pod'%(host,db.get_host_pod(host))
+    host = 'blackcomb'
+    print "getting host data for '%s'"%(host)    
+    print 'host %s is in the "%s" pod'%(host,db.get_host_pod(host))
 
-    #del(db)
+    del(db)
     
-#    db = DsdbConnection(fake=True)
-#    for m in ('removed', 'added', 'updated'):
-#        pprint(db.dump('country', method=m), indent=4)
-#        print 
+    db = DsdbConnection(fake=True)
+    for m in ('removed', 'added', 'updated'):
+        pprint(db.dump('country', method=m), indent=4)
+        print 
 
+    db.close()
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
