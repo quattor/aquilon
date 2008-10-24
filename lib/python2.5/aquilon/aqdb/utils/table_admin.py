@@ -11,6 +11,7 @@ if __name__ == '__main__':
     import aquilon.aqdb.depends
 
 from sqlalchemy import text
+from sqlalchemy.exceptions import SQLError
 
 def get_table_list_from_db(engine):
     """

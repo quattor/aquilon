@@ -1,0 +1,35 @@
+For any work using these scripts:
+
+Check aqd.conf.scale.  It uses a NY-based oracle database and a stock user.
+  Either of those might change in the future.  If they both exist, check
+  that they are not in use before proceeding.  (The database probably will
+  be in light use, the user may be in use for some other purpose.)
+  Change as needed.
+Alternately, verify or fix that the relevant scripts (anything that relies
+  on broker.py) can take a configfile option, and just use something
+  completely different.
+
+
+For scale testing:
+
+Use setup.py to create an environment, initialize the db, and start a broker.
+Use serial.py or parallel.py for timing tests.  Pass in --aqservice $USER
+  if running the server as yourself, and other options as desired.
+  These will use add_rack.py, del_rack.py, show_info.py, and update_rack.py
+  (which internally rely on common.py) to perform these tests.
+Use clearall.py to remove all hosts.
+Use broker.py --stop to stop the broker.
+
+
+For reproducing concurrency issues:
+
+Use setup.py to create an environment, initialize the db, and start a broker.
+Use fill_db.sh to add the max number of machines from the scale tests, if
+  desired.  Edit as necessary for alternate levels of full.  Temporarily
+  editting fake_dsdb.sh and commenting out the sleep is recommended.
+The snapshot.py and restore.py scripts are just rough algorithms, follow
+  or create as desired.
+Edit repro.sh and leverage any of the existing scripts or straight aq
+  commands to try reproducing problems.
+Use broker.py --stop --start to restart the broker if making changes.
+
