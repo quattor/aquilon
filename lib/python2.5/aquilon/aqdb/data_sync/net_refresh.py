@@ -38,30 +38,23 @@ class NetRefresher(object):
     __shared_state = {}
 
     #Dependency injection: allows us to supply our own *fake* dsdb connection
-    def __init__(self, dsdb_cnxn, aqdb, *args, **kw):
-        self.__dict__ = self.__shared_state
-        #TODO: accept args for log level, etc
+    def __init__(self, dsdb_cnxn, session, *args, **kw):
 
-        if not getattr(self, 'dsdb', None):
-            self.dsdb = dsdb_cnxn
-            assert self.dsdb
+        self.dsdb = dsdb_cnxn
+        assert self.dsdb
 
-        if not getattr(self, 'aqdb', None):
-            self.aqdb = aqdb
-            assert self.aqdb
+        self.session = session
+        assert self.session
 
-        if not getattr(self, 'location', None):
-            q = self.aqdb.s.query(Building)
-            self.location = q.filter_by(name=kw['bldg']).one()
-            assert type(self.location) is Building
+        q = self.session.query(Building)
+        self.location = q.filter_by(name=kw['bldg']).one()
+        assert type(self.location) is Building
 
-        if not getattr(self, 'report', None):
-            self.report = RefreshReport()
-            assert self.report
+        self.report = RefreshReport()
+        assert self.report
 
-        if not getattr(self, 'log', None):
-            self.log = kw['log']
-            assert self.log
+        self.log = logging.getLogger('net_refresh')
+        assert self.log
 
         self.commit    = kw['commit']
 
@@ -80,7 +73,7 @@ class NetRefresher(object):
         """ loc argument is a BUILDING CODE, different from dsdb """
         d = {}
 
-        q = self.aqdb.s.query(Network)
+        q = self.session.query(Network)
         for n in q.filter_by(location=self.location).all():
             d[n.ip] = n
         return d
@@ -89,11 +82,13 @@ class NetRefresher(object):
         """ a DRY method for error handling """
         self.log.error(msg)
         self.report.errs.append(msg)
-        self.aqdb.s.rollback()
+        self.session.rollback()
 
     def refresh(self, *args, **kw):
         """ compares and refreshes the network table from dsdb to aqdb using
             sets makes computing union and delta of keys simple and succinct """
+
+        self.log.debug('Starting network refresh')
 
         ds = self._pull_dsdb_data(*args, **kw)
         dset = set(ds.keys())
@@ -117,6 +112,8 @@ class NetRefresher(object):
         if compares:
             self._do_updates(aset & dset , aq, ds, *args, **kw)
 
+        self.log.debug('Finished network refresh logic')
+
     def _do_deletes(self, k, aq, *args, **kw):
         """ Deletes networks in aqdb and not in dsdb. It logs and handles
             associated reporting messages.
@@ -130,9 +127,8 @@ class NetRefresher(object):
 
             if self.commit:
                 try:
-                    self.aqdb.s.delete(aq[i])
-                    self.aqdb.s.commit()
-                    self.aqdb.s.flush()
+                    self.session.delete(aq[i])
+                    self.session.commit()
                 except IntegrityError,e:
 #                    """ TODO: get records that connects back to the network and
 #                            do something about it: delete it, or send message.
@@ -165,7 +161,7 @@ class NetRefresher(object):
                               dsdb_id      = ds[i].dsdb_id)
                 net.comments = getattr(ds[i], 'comments', None)
     #TODO: use a memoized query:
-    #self.aqdb.s.query(Building).filter_by(name=ds[i].bldg).one()
+    #self.session.query(Building).filter_by(name=ds[i].bldg).one()
             except Exception, e:
                 self.report.errs.append(e)
                 self.log.error(e)
@@ -178,9 +174,8 @@ class NetRefresher(object):
             if self.commit:
                 self.report.adds.append(net)
                 try:
-                    self.aqdb.s.add(net)
-                    self.aqdb.s.commit()
-                    self.aqdb.s.flush()
+                    self.session.add(net)
+                    self.session.commit()
                 except Exception, e:
                     self._rollback(e)
 
@@ -205,9 +200,8 @@ class NetRefresher(object):
                 if self.commit:
                     try:
                         self.log.debug('trying to commit the update\n')
-                        self.aqdb.s.update(aq[i])
-                        self.aqdb.s.commit()
-                        self.aqdb.s.flush()
+                        self.session.update(aq[i])
+                        self.session.commit()
                         self.report.upds.append(ds[i].name)
                     except Exception, e:
                         self._rollback(e)
@@ -242,8 +236,6 @@ def main(*args, **kw):
     dsdb = DsdbConnection()
     aqdb = db_factory()
 
-    log = logging.getLogger('net_refresh')
-
     if opts.verbose > 1:
         log_level = logging.DEBUG
     elif opts.verbose > 0:
@@ -251,14 +243,11 @@ def main(*args, **kw):
     else:
         log_level = logging.WARN
 
-    #TODO: call this in main
     logging.basicConfig(level=log_level,
                     format='%(asctime)s %(levelname)-6s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
-    assert log
 
-    nr = NetRefresher(dsdb, aqdb,
-                      log=log,
+    nr = NetRefresher(dsdb, aqdb.session(),
                       bldg=opts.building,
                       #keep logic stated in postive language (readability)
                       commit = not(opts.dry_run))
