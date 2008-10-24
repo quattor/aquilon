@@ -4,8 +4,9 @@ import sys
 DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
 #import aquilon.aqdb.depends
-from aquilon.aqdb.net.network import Network
-from aquilon.aqdb.utils.shutils import ipshell
+
+#TODO: rename _mask_to_cidr, it's not really hidden
+from aquilon.aqdb.net.network import Network, get_bcast, _mask_to_cidr
 
 class NetRecord(object):
     """ To make comparing dsdb and aqdb network structures easier """
@@ -15,7 +16,11 @@ class NetRecord(object):
         _required = ['name', 'ip', 'mask', 'bldg', 'side', 'net_type']
         for k,v in kw.iteritems():
             setattr(self,k, v)
-        #ipshell()
+
+        #default to side 'a'
+        if not getattr(self, 'side', None):
+            self.side = 'a'
+
         for r in _required:
             if not getattr(self, r, None):
                 msg="no required '%s' attr."%(r)
@@ -76,11 +81,16 @@ class NetRecord(object):
             aq.network_type = self.net_type
 
         if self.mask != aq.mask:
-            #BUG: you must update bcast here!
-            msg = 'updating network %s with mask %s'%(aq, self.mask)
+            #calculate new cidr and new bcast
+            aq.mask = self.mask
+            aq.cidr = _mask_to_cidr[aq.mask]
+            aq.bcast = get_bcast(aq.ip, aq.cidr)
+
+            msg = 'updating network %s with mask %s, cidr %s, bcast %s'%(
+                aq, self.mask, aq.cidr, aq.bcast)
+
             log.debug(msg)
             report.upds.append(msg)
-            aq.mask = self.mask
 
         if self.side != aq.side:
             msg = 'updating network %s to name %s'%(aq, self.name)
