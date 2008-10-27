@@ -67,6 +67,10 @@ def parse_system_and_verify_free(session, system):
 
 def search_system_query(session, system_type=System, **kwargs):
     q = session.query(system_type)
+    # Outer-join in all the subclasses so that each access of
+    # system doesn't (necessarily) issue another query.
+    if system_type is System:
+        q = q.with_polymorphic(System.__mapper__.polymorphic_map.values())
     if kwargs.get('fqdn', None):
         (short, dbdns_domain) = parse_system(session, kwargs['fqdn'])
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
