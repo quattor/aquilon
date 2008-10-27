@@ -61,6 +61,7 @@ class AuthorizationBroker(object):
         return False
 
     def check(self, session, principal, action, resource):
-        dbuser = get_or_create_user_principal(session, principal)
+        dbuser = get_or_create_user_principal(session, principal,
+                                              commitoncreate=True)
         return self._check(session, dbuser, action, resource, principal)
 
