@@ -1366,6 +1366,8 @@
 	 <option name="memory" type="string">memory in MB</option>
          <option name="chassis" type="string">chassis name</option>
          <option name="slot" type="string">chassis slot</option>
+         <option name="clearchassis" type="boolean">remove chassis and slot information</option>
+         <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
          <option name="rack" type="string">rack name</option>
          <option name="desk" type="string">desk name</option>
 	 <option name="serial" type="string">serial number</option>

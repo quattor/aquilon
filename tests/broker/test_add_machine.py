@@ -247,6 +247,22 @@ class TestAddMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut8s02p3", command)
 
+    # This test should look very different, but these were needed for
+    # testing chassis updates...
+    def testaddhprack(self):
+        # number 50 is in use by the tor_switch.
+        for i in range(51, 100):
+            port = i - 50
+            self.noouttest(["add", "machine", "--machine", "ut9s03p%d" % port,
+                            "--rack", "ut9", "--model", "bl260c"])
+
+    def testverifyaddhprack(self):
+        for i in range(51, 100):
+            port = i - 50
+            command = "show machine --machine ut9s03p%d" % port
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Blade: ut9s03p%d" % port, command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

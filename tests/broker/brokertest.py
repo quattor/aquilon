@@ -97,7 +97,12 @@ class TestBrokerCommand(unittest.TestCase):
         self.hostmac16 = "02:02:08:08:04:08"
         self.hostip17 = "8.8.4.9"
         self.hostmac17 = "02:02:08:08:04:09"
-        for n in range(12):
+        # Just define a bunch of generic ones at once...
+        for n in range(50, 100):
+            setattr(self, "hostip%d" % n, "8.8.5.%d" % (n-50))
+            setattr(self, "hostmac%d" % n, "02:02:08:08:05:%02x" % (n-50))
+        # Let config settings override any of the above.
+        for n in range(100):
             for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask"]:
                 p = "%s%s" % (h, n)
                 if self.config.has_option("unittest", p):
