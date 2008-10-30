@@ -18,6 +18,7 @@ class ModelFormatter(ObjectFormatter):
     def format_raw(self, model, indent=""):
         details = [indent + "Vendor: %s Model: %s" %
                             (model.vendor.name, model.name)]
+        details.append(indent + "  Type: %s" % model.machine_type)
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
         if model.machine_specs:

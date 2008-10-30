@@ -27,6 +27,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --name uttorswitch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
+        self.matchoutput(out, "Type: tor_switch", command)
         self.matchoutput(out, "MachineSpecs for hp uttorswitch", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -66,6 +67,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --name utchassis"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
+        self.matchoutput(out, "Type: chassis", command)
 
     def testaddutblade(self):
         command = "add model --name utblade --vendor aurora_vendor --type blade"
@@ -75,6 +77,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --name utblade"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
+        self.matchoutput(out, "Type: blade", command)
 
 
 if __name__=='__main__':
