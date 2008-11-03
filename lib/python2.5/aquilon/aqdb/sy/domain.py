@@ -61,15 +61,11 @@ def populate(db, *args, **kw):
         daqscott = db.s.query(UserPrincipal).filter_by(name='daqscott').one()
         assert(daqscott)
 
-        p = Domain(name = 'production', server = qs, owner = cdb,
-                   comments='The master production area')
-
         q = Domain(name = 'daqscott', server = qs, owner = daqscott)
 
         r = Domain(name = 'ny-prod', server = qs, owner = cdb,
                    comments='The NY regional production domain')
 
-        db.s.add(p)
         db.s.add(q)
         db.s.add(r)
         db.s.commit()

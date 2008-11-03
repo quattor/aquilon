@@ -19,7 +19,7 @@ class CommandAddWindowsHost(CommandAddHost):
     @az_check
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
-        kwargs['domain'] = 'ny-prod'
+        kwargs['domain'] = self.config.get("broker", "windows_host_domain")
         if 'buildstatus' not in kwargs:
             kwargs['buildstatus'] = 'build'
         # The superclass already contains the logic to handle this case.
