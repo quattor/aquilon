@@ -139,5 +139,37 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         return pool[i + 1]
     raise ArgumentError("Unknown algorithm '%s'" % ipalgorithm)
 
+def describe_interface(session, interface):
+    description = ["%s interface %s has mac %s and boot=%s" %
+                   (interface.interface_type, interface.name, interface.mac,
+                    interface.bootable)]
+    hw = interface.hardware_entity
+    hw_type = hw.hardware_entity_type
+    if hw_type == 'machine':
+        description.append("is attached to machine %s" % hw.name)
+    elif hw_type == 'tor_switch_hw':
+        if hw.tor_switch:
+            description.append("is attached to tor_switch %s" %
+                               ",".join([ts.fqdn for ts in hw.tor_switch]))
+        else:
+            description.append("is attached to unnamed tor_switch hardware")
+    elif hw_type == 'chassis_hw':
+        if hw.chassis_hw:
+            description.append("is attached to chassis %s" %
+                               ",".join([c.fqdn for c in hw.chassis_hw]))
+        else:
+            description.append("is attached to unnamed chassis hardware")
+    elif getattr(hw, "name", None):
+        description.append("is attached to %s %s" % (hw_type, hw.name))
+    if interface.system:
+        description.append("points to system %s" % interface.system.fqdn)
+    systems = session.query(System).filter_by(mac=interface.mac).all()
+    if len(systems) == 1 and systems[0] != interface.system:
+        description.append("but mac is in use by '%s'" % systems[0].fqdn)
+    if len(systems) > 1:
+        description.append("and mac is in use by '%s'" %
+                           ",".join([s.fqdn for s in systems]))
+    return ", ".join(description)
+
 
 #if __name__=='__main__':

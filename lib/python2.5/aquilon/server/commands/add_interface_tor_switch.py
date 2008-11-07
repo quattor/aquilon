@@ -16,7 +16,8 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_tor_offsets)
+                                                 restrict_tor_offsets,
+                                                 describe_interface)
 from aquilon.aqdb.sy.tor_switch import TorSwitch
 from aquilon.server.processes import DSDBRunner
 
@@ -48,8 +49,8 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:
-            # FIXME: Write dbwrapper that gets a name for hardware_entity
-            raise ArgumentError("mac %s already in use." % mac)
+            msg = describe_interface(session, prev)
+            raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
 
         dbinterface = Interface(name=interface,
                                 hardware_entity=dbtor_switch.tor_switch_hw,

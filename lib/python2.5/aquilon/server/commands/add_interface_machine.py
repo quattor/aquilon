@@ -17,7 +17,8 @@ from aquilon.aqdb.sy.manager import Manager
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
+                                                 describe_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
@@ -82,8 +83,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 dbmanager = self.add_manager(session, dbmachine, old_ip,
                                              old_network)
             else:
-                # FIXME: Write dbwrapper that gets a name for hardware_entity
-                raise ArgumentError("mac %s already in use." % mac)
+                msg = describe_interface(session, prev)
+                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
 
         dbinterface = Interface(name=interface, hardware_entity=dbmachine,
                                 mac=mac, interface_type=itype, **extra)

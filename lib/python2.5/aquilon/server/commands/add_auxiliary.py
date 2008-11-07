@@ -13,7 +13,8 @@ from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_tor_offsets)
+                                                 restrict_tor_offsets,
+                                                 describe_interface)
 from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.sy.host import Host
 from aquilon.aqdb.hw.interface import Interface
@@ -56,9 +57,8 @@ class CommandAddAuxiliary(BrokerCommand):
         elif interface and mac:
             dbinterface = session.query(Interface).filter_by(mac=mac).first()
             if dbinterface:
-                # FIXME: Improve this error.
-                raise ArgumentError("Interface with mac '%s' already exists." %
-                                    mac)
+                msg = describe_interface(session, dbinterface)
+                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
             q = session.query(Interface)
             q = q.filter_by(hardware_entity=dbmachine, name=interface)
             dbinterface = q.first()
