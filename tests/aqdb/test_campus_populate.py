@@ -21,7 +21,7 @@ from aquilon.aqdb.loc.campus   import Campus, CampusDiffStruct
 #_fn  = 'New York'
 _cmt = 'TEST CAMPUS'
 
-class TestCampusPopulate():
+class TestCampusPopulate(object):
     """ Tests loading a campus from dsdb """
     #TODO: explore test generators for population of ALL campuses
 
@@ -63,17 +63,21 @@ class TestCampusPopulate():
             enough of them that I've hardwired these attributes here """
         import csv
         filename = os.path.join(_DIR,'data/campus.csv')
-        print filename
         return csv.DictReader(open(filename, 'rb'),
                               ['code', 'name', 'country'],
                               skipinitialspace=True)
 
-    def setUp(self):
+    def setUp(self,verbose=0):
+        self.verbose = verbose
         self.aqdb = db_factory()
         self.sess = self.aqdb.Session()
         assert self.sess
+        
         self.dsdb = DsdbConnection()
+        assert self.dsdb
+
         self.campuses = []
+        
         for row in self._get_campus_csv():
             code  = row['code']
             fname = row['name']
@@ -88,7 +92,7 @@ class TestCampusPopulate():
                 self.sess.close()
 
             self.campuses.append(Campus(name=code,
-                                        code=code,
+                #code=code,
                                         fullname=fname,
                                         comments=cmt))
             self.deleted = []
@@ -104,7 +108,7 @@ class TestCampusPopulate():
             cs = CampusDiffStruct(self.dsdb,
                                   self.aqdb.Session(),
                                   c,
-                                  verbose=1)
+                                  verbose=self.verbose)
 
             assert(cs.sync(), 'CAMPUS CREATION FAILED')
             #nose.assert_true(cs.sync(), '%s CREATION FAILED'%(c))

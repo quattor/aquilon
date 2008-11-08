@@ -1,10 +1,18 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
-import sys
 import os
+import sys
 import optparse
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
+_DIR    = os.path.dirname(os.path.realpath(__file__))
+_LIBDIR = os.path.join(_DIR, '..','..')
+_TESTDIR=os.path.join(_DIR,'..','..','..','..','tests','aqdb')
+
+if _LIBDIR not in sys.path:
+    sys.path.insert(0,_LIBDIR)
+
+if _TESTDIR not in sys.path:
+    sys.path.insert(1,_TESTDIR)
+
 import aquilon.aqdb.depends
 
 #FOR ALL YOU HATERS: this IS for interactive work. Step off the import * ;)

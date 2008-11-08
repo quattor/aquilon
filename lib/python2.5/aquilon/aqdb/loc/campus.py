@@ -4,8 +4,13 @@
 import os
 import sys
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+_DIR    = os.path.dirname(os.path.realpath(__file__))
+_LIBDIR = os.path.join(_DIR, '..', '..', '..')
+
+if _LIBDIR not in sys.path:
+    sys.path.insert(0, _LIBDIR)
+
+#sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
 import aquilon.aqdb.depends
 
 from sqlalchemy import Column, Integer, ForeignKey
@@ -29,24 +34,22 @@ campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
 table = campus
 
-def _get_campus_csv():
-    """ This is a cheap way to hardcode the proper name and code
-        data for campus, which isn't 100% clean in dsdb. There are few
-        enough of them that I've hardwired these attributes here """
-    import csv
-    filename = '../../../../tests/aqdb/data/campus.csv'
-    return csv.DictReader(open(filename, 'rb'),
-                          ['code', 'name', 'country'],
-                          skipinitialspace=True)
 
 def populate(db, *args, **kw):
-
     s = db.Session()
 
     if len(s.query(Campus).all()) < 1:
         #TODO: import the test code, run the setUp, and populate methods 
         #print 'would populate'
-        pass
+        _TESTDIR=os.path.join(_DIR,'..','..','..','..','tests','aqdb')
+        if _TESTDIR not in sys.path:
+            sys.path.insert(1,_TESTDIR)
+        import test_campus_populate as tcp
+        a = tcp.TestCampusPopulate()
+        a.setUp()
+        a.testPopulate()
+#        a.tearDown()
+
 
 class CampusDiffStruct(object):
     """ Handy for populating campuses and finding common parent for
