@@ -67,16 +67,6 @@ def __repr__(self):
     else:
        return '%s instance '%(self.__class__.__name__)
 
-#mk_table: could take an engine, meta, full dbf or a file
-#
-#@monkeypatch(Base)
-#def mk_table(*args, **kw):
-#    if hasattr(self,'__table__'):
-#        print 'would create a table'
-#        #self.__table__.create(checkfirst=True)
-#    else:
-#        raise TypeError('%s has no __table__ attribute'%(self.__class__))
-
 class db_factory(object):
     __shared_state = {}
 
@@ -129,11 +119,11 @@ class db_factory(object):
             self.engine = create_engine(self.dsn)
             self.connection = self.engine.connect()
         else:
-            msg = """
-supported database datasources are sqlite and oracle, your dsn is '%s' """%(
-    self.dsn).lstrip()
+            msg = "supported database datasources are sqlite and oracle.\n"
+            msg += "yours is '%s' "%(self.dsn)
+            sys.stderr.write(msg)
+            sys.exit(9)
 
-            noisy_exit(msg)
         assert(self.dsn)
         assert(self.engine)
 
@@ -250,6 +240,10 @@ supported database datasources are sqlite and oracle, your dsn is '%s' """%(
         else:
             print >> sys.stderr, self.buf.getvalue()
 
+#ensure forward compatibility for proper class naming convention
+#TODO: s/db_factory/DbFactory/g
+DbFactory = db_factory
+
 if __name__ == '__main__':
     if '-d' in sys.argv:
         print 'use --debug instead of -d'
@@ -296,4 +290,3 @@ if __name__ == '__main__':
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

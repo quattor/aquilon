@@ -5,7 +5,7 @@ import os
 import sys
 import msversion
 from   copy import copy
-from   ConfigParser import SafeConfigParser
+#from   ConfigParser import SafeConfigParser
 
 msversion.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
@@ -86,7 +86,6 @@ class DsdbConnection(object):
             #we're not raising this b/c it means you have
             #to import Sybase everywhere... reconsider this
 
-    #TODO: kw 'ids' + oper == 'network' for networks_by_id
     #TODO: check for kw 'bldgs' as type list for networks by bldg
     #TODO: rename oper (operator? not quite. more like data_type)
     def dump(self, data_type, *args, **kw):
@@ -109,10 +108,20 @@ class DsdbConnection(object):
                                                           self._dump(data_type))
 
             return getattr(self._fake_data[data_type], kw['method'])
+        elif data_type == 'buildings_by_campus':
+            if kw.has_key('campus'):
+                campus = kw.pop('campus')
+            else:
+                msg = "Campus is a required Argument for 'buildings_by_campus'"
+            sql = dt[data_type]
+            sql += "'%s'"%(campus)
+            return self.run_query(sql).fetchall()
 
         else:
             #do the regular dump routine
             return self.run_query(dt[data_type]).fetchall()
+            #this is sorta useless at the moment...
+            return self._dump(dt[data_type])
 
     def _dump(self, data_type, *args, **kw):
         try:
@@ -204,12 +213,16 @@ if __name__ == '__main__':
     print "getting host data for '%s'"%(host)
     print 'host %s is in the "%s" pod'%(host,db.get_host_pod(host))
 
-    del(db)
+    print 'buildings in ny campus:'
+    pprint(db.dump('buildings_by_campus', campus='ny'), indent =4)
+    print ' '
 
-    db = DsdbConnection(fake=True)
-    for m in ('removed', 'added', 'updated'):
-        pprint(db.dump('country', method=m), indent=4)
-        print
+    #del(db) #BORG anyway dude...
+
+    #db = DsdbConnection(fake=True)
+    #for m in ('removed', 'added', 'updated'):
+    #    pprint(db.dump('country', method=m), indent=4)
+    #    print
 
     db.close()
 # Copyright (C) 2008 Morgan Stanley

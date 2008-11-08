@@ -1,14 +1,12 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ A collection of table level functions for maintenance """
 
-from confirm import confirm
-import sys
 import os
+import sys
+from confirm import confirm
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
+DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+import aquilon.aqdb.depends
 
 from sqlalchemy import text
 from sqlalchemy.exceptions import SQLError

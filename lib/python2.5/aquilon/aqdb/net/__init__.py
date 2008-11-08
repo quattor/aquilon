@@ -1,20 +1,7 @@
 """ Network package """
 
-import os
-import sys
-
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-
-from aquilon.aqdb.depends import get_files
-
-__all__ = get_files(DIR)
-
 from network import Network
 from dns_domain import DnsDomain
-
-del os
-del sys
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

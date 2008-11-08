@@ -26,6 +26,8 @@ class Location(Base):
 
     name = Column(AqStr(16), nullable = False)
 
+    #code = Column(AqStr(16), nullable = False) #how to override the __init__?
+
     parent_id = Column(Integer, ForeignKey(
         'location.id', name='loc_parent_fk'), nullable = True)
 
@@ -131,6 +133,9 @@ class Location(Base):
 
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.name)
+
+#    def to_dot(self):
+#        return self.__repr__()
 
     def __str__(self):
         return str(self.name)

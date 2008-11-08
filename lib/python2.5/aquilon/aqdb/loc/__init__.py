@@ -1,21 +1,20 @@
-""" The auth package consists of all objects and tables
-    for authentication, authorization and audit """
+""" The location package consists of all objects and tables for location. """
 
-import os
-import sys
+from location  import Location
+from company   import Company
+from hub       import Hub
+from continent import Continent
+from country   import Country
+from campus    import Campus
+from city      import City
+from building  import Building
+from rack      import Rack
+from desk      import Desk
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-
-from aquilon.aqdb.depends import get_files
-
-__all__ = get_files(DIR)
-
-del os
-del sys
+from location_search_list import LocationSearchList
+from search_list_item     import SearchListItem
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

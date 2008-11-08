@@ -1,9 +1,8 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ functions for managing Oracle constraints """
 
 import re
-import sys
 import os
+import sys
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))

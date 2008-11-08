@@ -2,47 +2,59 @@
 """ tests network """
 import sys
 import os
-import msversion
 import unittest
-from exceptions import TypeError
+#from exceptions import TypeError
 
-if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..", "lib", "python2.5")
-    sys.path.insert(0, SRCDIR)
-    #import nose
-
+DIR = os.path.dirname(os.path.realpath(__file__))
+LIBDIR = os.path.join(DIR, "..", "..", "lib", "python2.5")
+sys.path.insert(0, LIBDIR)
 import aquilon.aqdb.depends
-import aquilon.aqdb.net
-from   aquilon.aqdb.db_factory    import db_factory
-from   aquilon.aqdb.net.network   import Network
-from   aquilon.aqdb.utils.shutils import load_all
+
+from aquilon.aqdb.net.network import Network
+from aquilon.aqdb.db_factory  import db_factory
 
 class testNetwork(unittest.TestCase):
 
     def setUp(self, *args, **kw):
-        #load_all()
         self.db = db_factory()
-        n = aquilon.aqdb.net.network.Network
-        self.a = self.db.s.query(n).first()
+        self.a = self.db.s.query(Network).first()
 
     def tearDown(self, *args, **kw):
         pass
 
+    def testLocation(self):
+        self.assert_(self.a.location)
+
+    def testAddresses(self):
+        self.assert_(self.a.addresses())
+
     def testNetmask(self):
         self.assert_(self.a.netmask())
-        print self.a.netmask()
 
     def testGateway(self):
         self.assert_(self.a.first_host())
-        print self.a.first_host()
 
     def testBroadcast(self):
         self.assert_(self.a.last_host())
-        print self.a.last_host()
+
+    def testCidr(self):
+        self.assert_(self.a.cidr)
+
+    def testIp(self):
+        self.assert_(self.a.ip)
+
+    def testName(self):
+        self.assert_(self.a.name)
+
+    def testSide(self):
+        self.assert_(self.a.side)
+
+    def testNetType(self):
+        self.assert_(self.a.network_type)
 
     def runTest(self):
         self.setUp()
+        self.testLocation()
         self.testNetmask()
         self.testGateway()
         self.testBroadcast()

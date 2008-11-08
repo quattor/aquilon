@@ -20,6 +20,15 @@ dispatch_tbl['campus_entries'] = """
         AND B.state >= 0
         AND C.state >= 0 """
 
+dispatch_tbl['buildings_by_campus'] = """
+    SELECT A.bldg_name from bldg A, campus_entry B, campus C
+    WHERE A.bldg_id = B.bldg_id
+    AND B.campus_id = C.campus_id
+    AND A.state >= 0
+    AND B.state >= 0
+    AND C.state >= 0
+    AND C.campus_name = """
+
 dispatch_tbl['city'] = """
     SELECT A.city_symbol, A.city_name, B.country_symbol
         FROM city A, country B

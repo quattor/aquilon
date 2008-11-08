@@ -2,20 +2,20 @@
 import os
 import sys
 import fnmatch
-import msversion
+import ms.version
 
 if not sys.modules.has_key('sqlalchemy'):
-    msversion.addpkg('sqlalchemy', '0.4.8', 'dist')
-    #msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
+    ms.version.addpkg('sqlalchemy', '0.4.8')
+    #ms.version.addpkg('sqlalchemy', '0.5beta', 'dev')
 
 if not sys.modules.has_key('cx_Oracle'):
-    msversion.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
+    ms.version.addpkg('cx_Oracle','4.4-10.2.0.1','dist')
 
 if not sys.modules.has_key('ipython'):
-    msversion.addpkg('ipython','0.8.2','dist')
+    ms.version.addpkg('ipython','0.8.2','dist')
 
 #if not sys.modules.has_key('migrate.changeset'):
-#    msversion.addpkg('sqlalchemy-migrate', '0.4.5', 'dev')
+#    ms.version.addpkg('sqlalchemy-migrate', '0.4.5', 'dev')
 
 def all_files(root, patterns='*', single_level=False, yield_folders=False):
     """ Expand patterns from semicolon-separated string to list """

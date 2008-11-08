@@ -1,22 +1,56 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 import sys
 import os
+import optparse
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
 import aquilon.aqdb.depends
 
-#from aquilon.aqdb.utils.table_admin  import *
-from aquilon.aqdb.utils.shutils      import * #this IS for interactive work, right?
+#FOR ALL YOU HATERS: this IS for interactive work. Step off the import * ;)
+from aquilon.aqdb.utils.shutils      import *
 from aquilon.aqdb.db_factory         import db_factory, Base
 from aquilon.aqdb.dsdb               import *
 
+def configure(*args, **kw):
+    usage = """ usage: %prog [options] """
 
-db = db_factory()
-Base.metadata.bind = db.engine
-s = db.session()
-#Base.metadata.bind.echo = True
+    desc = 'An ipython shell, useful for testing and exploring'
 
-#load_all()
+    p = optparse.OptionParser(usage=usage, prog=sys.argv[0], version='0.1',
+                              description=desc)
 
-ipshell()
+    p.add_option('-v',
+                 action = 'count',
+                 dest   = 'verbose',
+                 help   = 'increase verbosity by adding more (vv), etc.')
+
+    p.add_option('-l', '--load_all',
+                 action  = 'store_true',
+                 dest    = 'load_all',
+                 default = False,
+                 help    = 'load all modules and classes' )
+
+    opts, args = p.parse_args()
+    return opts
+
+def main(*args, **kw):
+    opts = configure(*args, **kw)
+
+    db = db_factory()
+    Base.metadata.bind = db.engine
+    s = db.Session()
+
+    if opts.verbose > 2:
+        Base.metadata.bind.echo = True
+
+    if opts.load_all:
+        if opts.verbose > 0:
+            load_all(verbose=True)
+        else:
+            load_all()
+
+    ipshell()
+
+if __name__ == '__main__':
+    main(sys.argv)

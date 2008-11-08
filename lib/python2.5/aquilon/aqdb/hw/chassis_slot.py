@@ -30,6 +30,7 @@ class ChassisSlot(Base):
                         ForeignKey('machine.id',
                                    name='chassis_slot_machine_fk'),
                         nullable=True)
+    #TODO: need a unique key against this, but what if it takes 2 slots?
 
     chassis = relation(Chassis, uselist=False,
                        backref=backref('slots', cascade='delete'),
