@@ -23,7 +23,6 @@ class Campus(Location):
                 ForeignKey('location.id', name = 'campus_loc_fk',
                            ondelete = 'CASCADE'),
                 primary_key=True)
-    timezone = Column(AqStr(64), nullable = True, default = 'FIX ME')
 
 campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
