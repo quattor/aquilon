@@ -81,6 +81,37 @@
       <transport trigger="fqdn" method="get" path="system/%(fqdn)s" />
    </command>
 
+   <command name="search_hardware">
+      Shows any information available for the matching hardware.  These
+      could be machines, top of rack switches, chassis, or any other hardware
+      tracked by AQDB.
+
+      Note that location searches are exact-only.  That is, if searching
+      for a machine in a rack, and the rack is in the requested building,
+      the search will not return the machine.
+      <optgroup name="search_hardware_opts" mandatory="True" fields="any">
+         <option name="model" type="string">model name</option>
+         <option name="vendor" type="string">vendor name</option>
+         <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="serial" type="string">serial number</option>
+         <optgroup name="search_hardware_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+         <option name="all" type="boolean">list all hardware</option>
+      </optgroup>
+      <optgroup name="search_system_prefs" mandatory="False">
+         <option name="fullinfo" type="boolean">show full information for the matching hardware</option>
+      </optgroup>
+      <transport method="get" path="find/hardware" />
+   </command>
+
    <command name="search_system">
       Shows any information available for the matching systems.  These
       could be hosts, top of rack switches, chassis, or any other system

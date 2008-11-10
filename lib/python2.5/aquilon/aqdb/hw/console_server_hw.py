@@ -25,6 +25,13 @@ class ConsoleServerHw(HardwareEntity):
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
 
+    @property
+    def hardware_name(self):
+        if self.console_server:
+            return ",".join(console_server.fqdn for console_server
+                            in self.console_server)
+        return HardwareEntity.hardware_name(self)
+
 console_server_hw = ConsoleServerHw.__table__
 console_server_hw.primary_key.name = 'cons_svr_hw_pk'
 
