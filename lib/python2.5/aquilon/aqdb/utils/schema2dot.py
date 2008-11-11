@@ -1,21 +1,73 @@
 import os
 import sys
 import types
-import msversion
+import ms.version
 
 if not sys.modules.has_key('pyparsing'):
-    msversion.addpkg('pyparsing', '1.5.0', 'dist')
+    ms.version.addpkg('pyparsing', '1.5.0', 'dist')
     import pyparsing
 
 if not sys.modules.has_key('pydot'):
-    msversion.addpkg('pydot', '1.0.2', 'dist')
+    ms.version.addpkg('pydot', '1.0.2', 'dist')
     import pydot
+
+if not sys.modules.has_key('sqlalchemy'):
+    ms.version.addpkg('sqlalchemy', '0.4.8', 'dist')
+    import sqlalchemy
+    import warnings
+    warnings.warn('schema2dot: loading sqlalchemy on my own')
 
 from sqlalchemy.orm.properties import PropertyLoader
 from sqlalchemy.orm import sync
 
 __all__ = ['create_uml_graph', 'create_schema_graph', 'show_uml_graph',
            'show_schema_graph']
+
+def _setup_graphviz():
+    if os.environ['PATH'].find('graphviz') < 0:
+        from aquilon.config import Config
+        from ConfigParser   import NoOptionError
+
+        try:
+            c = Config()
+        except Exception, e:
+            print >> sys.stderr, "failed to read configuration: %s" % e
+            sys.exit(os.EX_CONFIG)
+
+        try:
+            _GRAPHVIZ = c.get('DEFAULT', 'graphviz_dir')
+        except NoOptionError:
+            _GRAPHVIZ='/ms/dist/fsf/PROJ/graphviz/2.6/bin'
+
+        assert _GRAPHVIZ
+        os.environ['PATH'] += ':%s'%(_GRAPHVIZ)
+        return _GRAPHVIZ
+
+#TODO: schema/uml as an argument (DRY)
+def write_schema_graph(db, image_name = "/tmp/aqdb_schema.png"):
+    gv_path = _setup_graphviz()
+    try:
+        temp_fd, temp_file_name = tempfile.mkstemp(prefix='aqdbGraph',
+                                                   suffix='.dot',
+                                                   dir='/tmp')
+        graph = create_schema_graph(metadata = db.meta)
+        graph.write_dot(temp_file_name)
+        cmd = '%s/dot -Tpng -o %s %s'%(gv_path, image_name, temp_file_name)
+        #print 'running %s'%(cmd)
+        p = sp.Popen(cmd, shell  = True, stdout = sp.PIPE, stderr = sp.PIPE)
+        out,err = p.communicate()
+        if out:
+            print out
+            return False
+        elif err:
+            print err
+            return False
+        else:
+            return True
+    finally:
+        os.close(temp_fd)
+        os.remove(temp_file_name)
+    #TODO: use PIL's show/save_schema_graph(db, name)
 
 def _mk_label(mapper, show_operations, show_attributes,
               show_datatypes, bordersize):
@@ -35,19 +87,21 @@ def _mk_label(mapper, show_operations, show_attributes,
                     format_col(col) for col in sorted(
                         mapper.columns, key=lambda col:not col.primary_key))
     else:
-        [format_col(col) for col in sorted(mapper.columns, key=lambda col:not col.primary_key)]
+        [format_col(col) for col in sorted(
+            mapper.columns, key=lambda col:not col.primary_key)]
     if show_operations:
-        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(
-            '%s(%s)' % (name,", ".join(default is _mk_label and 
-                                       ("%s") % arg 
-                                       or ("%s=%s" % (arg,repr(default))) 
-                                       for default,arg in zip((func.func_defaults and 
-                                                               len(func.func_code.co_varnames)-1-(len(func.func_defaults) or 0) 
-                                                               or func.func_code.co_argcount-1)*[_mk_label]+list(func.func_defaults 
-                                                               or []), func.func_code.co_varnames[1:])
-            )) for name,func in mapper.class_.__dict__.items() if isinstance(
-                                    func, types.FunctionType) and 
-                                    func.__module__ == mapper.class_.__module__)
+        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>'%'<BR ALIGN="LEFT"/>'.join(
+            '%s(%s)' % (name,", ".join(default is _mk_label and (
+                "%s") % arg or (
+                "%s=%s" % (arg,repr(default))) for default,arg in zip(
+                (func.func_defaults and len(func.func_code.co_varnames)-1-(
+                    len(func.func_defaults) or 0) or
+                 func.func_code.co_argcount-1)*[_mk_label]+list(
+                    func.func_defaults or []),
+                func.func_code.co_varnames[1:]))) for name, func in
+            mapper.class_.__dict__.items() if isinstance(
+                func, types.FunctionType) and
+        func.__module__ == mapper.class_.__module__)
     html+= '</TABLE>>'
     return html
 
@@ -58,17 +112,17 @@ def create_uml_graph(mappers, show_operations=True, show_attributes=True, show_m
 
     for mapper in mappers:
         graph.add_node(
-            pydot.Node(mapper.class_.__name__, shape="plaintext", 
-                       label=_mk_label(mapper, show_operations, 
-                                       show_attributes, show_datatypes, 
-                                       linewidth), fontname=font, 
+            pydot.Node(mapper.class_.__name__, shape="plaintext",
+                       label=_mk_label(mapper, show_operations,
+                                       show_attributes, show_datatypes,
+                                       linewidth), fontname=font,
                                        fontsize="8.0"))
         if mapper.inherits:
             graph.add_edge(
                 pydot.Edge(mapper.inherits.class_.__name__,
                            mapper.class_.__name__,
                            arrowhead='none',
-                           arrowtail='empty', 
+                           arrowtail='empty',
                            style="setlinewidth(%s)" % linewidth,
                            arrowsize=linewidth))
 
@@ -174,7 +228,7 @@ def create_schema_graph(tables=None,
     for table in tables:
         graph.add_node(pydot.Node(str(table.name),
             shape="plaintext",
-            label=_render_table_html(table, metadata, 
+            label=_render_table_html(table, metadata,
                                      show_indexes, show_datatypes),
             fontname=font, fontsize="7.0"))
 
@@ -187,7 +241,7 @@ def create_schema_graph(tables=None,
             graph_edge = pydot.Edge(
                 headlabel="+ %s"%fk.column.name, taillabel='+ %s'%fk.parent.name,
                 arrowhead=is_inheritance and 'none' or 'odot' ,
-                arrowtail=(fk.parent.primary_key or 
+                arrowtail=(fk.parent.primary_key or
                            fk.parent.unique) and 'empty' or 'crow' ,
                 fontname=font, *edge, **relation_kwargs)
 
@@ -207,3 +261,21 @@ def show_schema_graph(db, name, *args, **kwargs):
     iostream = StringIO(create_schema_graph(db, name).create_png())
     #Image.open(iostream).show(command=kwargs.get('command','gwenview'))
     Image.open(iostream).save(name)
+
+
+""" def write_uml_graph(db, image_name = "aqdb_classes.dot"):
+    pass
+"""
+
+
+""" from aquilon.aqdb.utils.schema2dot import create_schema_graph,
+                                           create_uml_graph,
+                                           show_schema_graph,
+                                           show_uml_graph)
+def write_uml_graph(db, image_name = "aqdb_classes.dot"):
+    gv_path = _setup_graphviz()
+    Base.metadata = db.meta
+    graph = create_uml_graph(
+              [class_mapper(c) for c in Base._decl_class_registry.itervalues()])
+    graph.write_dot(name)
+"""

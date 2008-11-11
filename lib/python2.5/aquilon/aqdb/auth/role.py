@@ -1,9 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Contains tables and objects for authorization in Aquilon """
-
-import sys
-import os
-
 from aquilon.aqdb.table_types.name_table import make_name_class
 
 Role = make_name_class('Role', 'role')
@@ -11,7 +6,7 @@ role = Role.__table__
 table = role
 
 def populate(db, *args, **kw):
-    roles=['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
+    roles = ['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
 
     if db.s.query(Role).count() >= len(roles):
         return

@@ -19,6 +19,10 @@ from aquilon.aqdb.loc.location import Location, location
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.column_types.aqstr import AqStr
 
+#TODO: make CDS an inner class.
+# Then, in order to create a _cds, call cs.sync() in place of an __init__()
+# method for campus, with parameters
+
 class Campus(Location):
     """ Campus is a subtype of location """
     __tablename__ = 'campus'
@@ -27,29 +31,12 @@ class Campus(Location):
                 ForeignKey('location.id', name = 'campus_loc_fk',
                            ondelete = 'CASCADE'),
                 primary_key=True)
-    #timezone = Column(AqStr(64), nullable = True, default = 'FIX ME')
-    #TODO: have Campus.__init__ create a cs and call cs.sync()
+    timezone = Column(AqStr(64), nullable = True, default = 'FIX ME')
+
 
 campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
 table = campus
-
-
-def populate(db, *args, **kw):
-    s = db.Session()
-
-    if len(s.query(Campus).all()) < 1:
-        #TODO: import the test code, run the setUp, and populate methods 
-        #print 'would populate'
-        _TESTDIR=os.path.join(_DIR,'..','..','..','..','tests','aqdb')
-        if _TESTDIR not in sys.path:
-            sys.path.insert(1,_TESTDIR)
-        import test_campus_populate as tcp
-        a = tcp.TestCampusPopulate()
-        a.setUp()
-        a.testPopulate()
-#        a.tearDown()
-
 
 class CampusDiffStruct(object):
     """ Handy for populating campuses and finding common parent for
@@ -116,13 +103,12 @@ class CampusDiffStruct(object):
             msg = "No cities found for campus '%s'"%(self.co)
             raise ValueError(msg)
 
-        #we get null continents
-
         elif len(self.data['continents']) > 1:
             #we span continents, raise a BIG alarm!
             #TODO: give error message useful diagnostic info:
             # campus code plus the buildings and continents you found.
-            msg = "ERROR: continents are not to be spanned (this is a hub)"
+            msg = "ERROR: Campus %s with %s. Continents aren't to be spanned"%(
+                self.co, self.data['continents'])
             raise ValueError(msg)
 
     def sync(self):
@@ -137,7 +123,7 @@ class CampusDiffStruct(object):
                 len(self.data[atrb]) == 1 and atrb == 'cities'):
 
                 self._dbg(3,'Have to reparent %s %s'%(atrb, self.data[atrb]))
-                
+
                 self.data[atrb] = list(self.data[atrb])
                 self.co.parent = self.data[atrb][0].parent
 

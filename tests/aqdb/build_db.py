@@ -1,20 +1,27 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ The way to populate an aqdb instance """
 
+import os
 import re
 import sys
-import os
 import optparse
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+_DIR = os.path.dirname(os.path.realpath(__file__))
+_LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
+
+if _LIBDIR not in sys.path:
+    sys.path.insert(0, _LIBDIR)
 
 import aquilon.aqdb.depends
-
 
 from aquilon.aqdb.db_factory    import db_factory, Base, debug
 from aquilon.aqdb.utils.shutils import ipshell, load_all
 from aquilon.aqdb.utils         import table_admin as ta, constraints as cnst
+
+#TODO: get a dsdb object here, pass it around as needed
+#(e.g.location,testCampus)
+
+import test_campus_populate as tcp
 
 pkgs         = {}
 
@@ -160,6 +167,13 @@ def main(*args, **kw):
             except Exception, e:
                 sys.stderr.write(str(e))
                 print e, "\n"
+    try:
+        cps = tcp.TestCampusPopulate(db.Session(), debug=opts.debug)
+        cps.setUp()
+        cps.testPopulate()
+    except Exception, e:
+        print e
+        sys.stderr.write(str(e))
     else:
         pass
 

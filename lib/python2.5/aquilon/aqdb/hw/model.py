@@ -1,28 +1,21 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-""" Vendor and Model are representations of the various manufacturers and
-    the asset inventory of the kinds of machines we use in the plant """
-
+""" basic construct of model = vendor name + product name """
 
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
                         Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, PassiveDefault)
+
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.hw.vendor import Vendor
+from aquilon.aqdb.column_types.aqstr import AqStr
 
 
 class Model(Base):
+    """ Vendor and Model are representations of the various manufacturers and
+    the asset inventory of the kinds of machines we use in the plant """
     __tablename__ = 'model'
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
     name = Column(String(64))
@@ -84,16 +77,17 @@ def populate(db, *args, **kw):
 
         for i in f:
             m = Model(name = i[1],
-                      vendor = s.query(Vendor).filter_by(name =i[0]).first(),
+                      vendor = s.query(Vendor).filter_by(name =i[0]).one(),
                       machine_type = i[2])
             s.add(m)
+
         try:
             s.commit()
         except Exception,e:
             print e
         finally:
             s.close()
-        print 'created models %s'%(s.query(Model).all())
+        #print 'created models %s'%(s.query(Model).all())
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

@@ -1,16 +1,9 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ The high level configuration elements in use """
 
-import sys
 import os
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from aquilon.aqdb.table_types.subtype import subtype
-
 
 tl_doc = """ Configuration Top Level Directory or 'cfg_tld' are the high level
             namespace categories and live as the directories in template-king:
@@ -33,7 +26,7 @@ def populate(db, *args, **kw):
         return
 
     cfg_base = db.config.get("broker", "kingdir")
-    assert(cfg_base)
+    assert os.path.isdir(cfg_base)
 
     tlds=[]
     for i in os.listdir(cfg_base):
@@ -50,11 +43,12 @@ def populate(db, *args, **kw):
             else:
                 tlds.append(i)
 
-    print "Adding these TLDs: ", str(tlds)
     for i in tlds:
         t =Tld(type=i)
         db.s.add(t)
+
     db.s.commit()
+
 
     a=db.s.query(Tld).first()
     assert(a)
@@ -63,4 +57,3 @@ def populate(db, *args, **kw):
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-

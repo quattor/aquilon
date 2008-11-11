@@ -26,7 +26,7 @@ def populate(db, *args, **kw):
         import aquilon.aqdb.cfg.cfg_path as cfg
         created = []
         cfg_base = db.config.get("broker", "kingdir")
-        assert(cfg_base)
+        assert os.path.isdir(cfg_base)
 
         #in case user's config doesn't have one...
         if not cfg_base.endswith('/'):
@@ -42,7 +42,7 @@ def populate(db, *args, **kw):
                 else:
                     a=Vendor(name=j)
                     try:
-                        db.s.save(a)
+                        db.s.add(a)
                     except Exception,e:
                         db.s.rollback()
                         sys.stderr.write(e)
@@ -80,4 +80,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

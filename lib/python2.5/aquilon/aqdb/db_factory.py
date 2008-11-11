@@ -2,25 +2,28 @@
 """To be imported by classes and modules requiring aqdb access"""
 from __future__ import with_statement
 
-import pwd
-import getpass
-import sys
 import os
+import pwd
+import sys
+
+import getpass
 import StringIO
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..')))
-    import aquilon.aqdb.depends
+_DIR = os.path.dirname(os.path.realpath(__file__))
+_LIBDIR = os.path.join(_DIR, '..', '..')
+
+if _LIBDIR not in sys.path:
+    sys.path.insert(0, _LIBDIR)
+
+from aquilon.aqdb import depends
+from aquilon.config import Config
+from aquilon.aqdb.utils.confirm import confirm
 
 from sqlalchemy                  import __version__ as SA_version
 from sqlalchemy                  import MetaData, engine, create_engine, text
 from sqlalchemy.orm              import scoped_session, sessionmaker
 from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
 from sqlalchemy.ext.declarative  import declarative_base
-
-from aquilon.config import Config
-from aquilon.aqdb.utils.confirm import confirm
 
 if '--debug' in sys.argv:
     from aquilon.aqdb.utils.shutils import ipshell
@@ -70,7 +73,7 @@ def __repr__(self):
 class db_factory(object):
     __shared_state = {}
 
-    def __init__(self,*args, **kw):
+    def __init__(self, *args, **kw):
         #TODO: accept mock as arg
         self.__dict__ = self.__shared_state
 
@@ -112,7 +115,6 @@ class db_factory(object):
                         'Can not determine your password (%s).\nPassword:'%(
                             self.dsn)))
             self.login(passwds)
-            debug(self.engine, assert_only = True)
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
@@ -245,10 +247,6 @@ class db_factory(object):
 DbFactory = db_factory
 
 if __name__ == '__main__':
-    if '-d' in sys.argv:
-        print 'use --debug instead of -d'
-        sys.exit(1)
-
     #THE BORG OBJECT MAKES THIS IMPOSSIBLE TO TEST IN A SINGLE FILE...
     #leave the obvious stuff out since everything imports this. We'll know if
     #it's broken.
@@ -283,8 +281,8 @@ if __name__ == '__main__':
     debug('writing from buffer to stderr...')
 
     #can't use debug() here because it will *always write to stderr...
-    if '--debug' in sys.argv:
-        db2.flush_to_file()
+    #if '--debug' in sys.argv:
+    #    db2.flush_to_file()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

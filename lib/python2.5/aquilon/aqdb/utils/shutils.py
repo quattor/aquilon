@@ -1,51 +1,49 @@
 """ Wrapper for ipshell, and associated utility functions """
 
-import sys
 import os
+import sys
 import tempfile
 import subprocess as sp
-from sqlalchemy.orm import class_mapper
 
-from aquilon.aqdb.db_factory import Base
-from aquilon.aqdb.utils.schema2dot import create_schema_graph
+import schema2dot
+
 
 from IPython.Shell import IPShellEmbed
 _banner  = '***Embedded IPython, Ctrl-D to quit.'
 _args    = []
 ipshell = IPShellEmbed(_args, banner=_banner)
 
-#
-#TODO:
-#   (1) transform with map and filter. a la'
-#       http://diveintopython.org/functional_programming/data_centric.html
-#       This is to practice data-centric programming:
-#           -if you have too much data, filter it
-#           -if you don't have it exactly as what you want it, map it
-#     List comprehensions are POWER, and less error prone
-#
-#   (2) import aquilon.aqdb.loc.location.Location as Location with
-#
-#       import imp
-#       import sys
-#
-#   def __import__(name, globals=None, locals=None, fromlist=None):
-#       # Fast path: see if the module has already been imported.
-#       try:
-#           return sys.modules[name]
-#       except KeyError:
-#           pass
-#
-#       # If any of the following calls raises an exception,
-#       # there's a problem we can't handle -- let the caller handle it.
-#
-#       fp, pathname, description = imp.find_module(name)
-#
-#       try:
-#           return imp.load_module(name, fp, pathname, description)
-#       finally:
-#           # Since we may exit via an exception, close fp explicitly.
-#           if fp:
-#               fp.close()
+""" TODO:
+   (1) transform with map and filter. a la'
+       http://diveintopython.org/functional_programming/data_centric.html
+       This is to practice data-centric programming:
+           -if you have too much data, filter it
+           -if you don't have it exactly as what you want it, map it
+     List comprehensions are POWER, and less error prone
+
+   (2) import aquilon.aqdb.loc.location.Location as Location with
+
+       import imp
+       import sys
+
+   def __import__(name, globals=None, locals=None, fromlist=None):
+       # Fast path: see if the module has already been imported.
+       try:
+           return sys.modules[name]
+       except KeyError:
+           pass
+
+       # If any of the following calls raises an exception,
+       # there's a problem we can't handle -- let the caller handle it.
+
+       fp, pathname, description = imp.find_module(name)
+
+       try:
+           return imp.load_module(name, fp, pathname, description)
+       finally:
+           # Since we may exit via an exception, close fp explicitly.
+           if fp:
+               fp.close() """
 
 def load_all(verbose=0):
     import aquilon.aqdb
@@ -67,65 +65,11 @@ def load_all(verbose=0):
     if verbose > 1:
         print 'load_all() complete'
 
-def _setup_graphviz():
-    if os.environ['PATH'].find('graphviz') < 0:
-        from aquilon.config import Config
-        from ConfigParser   import NoOptionError
-
-        try:
-            c = Config()
-        except Exception, e:
-            print >> sys.stderr, "failed to read configuration: %s" % e
-            sys.exit(os.EX_CONFIG)
-
-        try:
-            _GRAPHVIZ = c.get('DEFAULT', 'graphviz_dir')
-        except NoOptionError:
-            _GRAPHVIZ='/ms/dist/fsf/PROJ/graphviz/2.6/bin'
-
-        assert _GRAPHVIZ
-        os.environ['PATH'] += ':%s'%(_GRAPHVIZ)
-        return _GRAPHVIZ
 
 #TODO: schema/uml as an argument (DRY)
-def write_schema_graph(db, image_name = "/tmp/aqdb_schema.png"):
-    gv_path = _setup_graphviz()
-    try:
-        temp_fd, temp_file_name = tempfile.mkstemp(prefix='aqdbGraph',
-                                                   suffix='.dot',
-                                                   dir='/tmp')
-        graph = create_schema_graph(metadata = db.meta)
-        graph.write_dot(temp_file_name)
-        cmd = '%s/dot -Tpng -o %s %s'%(gv_path, image_name, temp_file_name)
-        #print 'running %s'%(cmd)
-        p = sp.Popen(cmd, shell  = True, stdout = sp.PIPE, stderr = sp.PIPE)
-        out,err = p.communicate()
-        if out:
-            print out
-            return False
-        elif err:
-            print err
-            return False
-        else:
-            return True
-    finally:
-        os.close(temp_fd)
-        os.remove(temp_file_name)
-    #TODO: use PIL's show/save_schema_graph(db, name)
+def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
+    schema2dot.write_schema_graph(db,file_name)
 
-def write_uml_graph(db, image_name = "aqdb_classes.dot"):
-    pass
-#TODO: not totally working yet...seems to hang.
-#from aquilon.aqdb.utils.schema2dot import create_schema_graph
-#                                           create_uml_graph,
-#                                           show_schema_graph,
-#                                           show_uml_graph)
-#def write_uml_graph(db, image_name = "aqdb_classes.dot"):
-#    gv_path = _setup_graphviz()
-#    Base.metadata = db.meta
-#    graph = create_uml_graph(
-#              [class_mapper(c) for c in Base._decl_class_registry.itervalues()])
-#    graph.write_dot(name)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

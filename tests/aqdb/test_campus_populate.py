@@ -17,13 +17,20 @@ from aquilon.aqdb.db_factory   import db_factory
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.loc.campus   import Campus, CampusDiffStruct
 
-#_n   = 'ny'
-#_fn  = 'New York'
 _cmt = 'TEST CAMPUS'
 
 class TestCampusPopulate(object):
     """ Tests loading a campus from dsdb """
-    #TODO: explore test generators for population of ALL campuses
+
+    def __init__(self, sess, debug=False, test=False, *args, **kw):
+        self.dsdb = DsdbConnection()
+        assert self.dsdb
+
+        self.sess     = sess
+        self.debug    = debug
+        self.test     = test
+        self.campuses = []
+        self.deleted  = []
 
     def _reparent(self, child):
         child.parent = child.parent.parent
@@ -67,51 +74,42 @@ class TestCampusPopulate(object):
                               ['code', 'name', 'country'],
                               skipinitialspace=True)
 
-    def setUp(self,verbose=0):
-        self.verbose = verbose
-        self.aqdb = db_factory()
-        self.sess = self.aqdb.Session()
-        assert self.sess
-        
-        self.dsdb = DsdbConnection()
-        assert self.dsdb
+    def setUp(self):
 
-        self.campuses = []
-        
         for row in self._get_campus_csv():
             code  = row['code']
             fname = row['name']
             cmt   = ', '.join([row['name'], row['country'], _cmt])
 
-            #if the campus already exists, nuke it ahead of time
             c = self.sess.query(Campus).filter_by(name=code).first()
             if c:
-                print 'CAMPUS exists in setup! %s %s'%(
-                    code, c.sublocations)
-                self._clean_up(c)
-                self.sess.close()
+                #TODO: remove in a future version. was used in developing
+                if self.test:
+                    print 'Campus %s exists %s'%(fname, c.sublocations)
+                    self._clean_up(c)
+                    self.sess.close()
+                else:
+                    continue
 
             self.campuses.append(Campus(name=code,
-                #code=code,
+                                        #code=code,
                                         fullname=fname,
                                         comments=cmt))
-            self.deleted = []
+
 
     def tearDown(self):
         for c in self.sess.query(Campus).all():
             if not self._clean_up(c):
                 print 'tearDown() %s FAILED'%(c)
-        #print 'deleted %s'%(self.deleted)
 
     def testPopulate(self):
         for c in self.campuses:
             cs = CampusDiffStruct(self.dsdb,
-                                  self.aqdb.Session(),
+                                  self.sess,
                                   c,
-                                  verbose=self.verbose)
+                                  verbose=self.debug)
 
             assert(cs.sync(), 'CAMPUS CREATION FAILED')
-            #nose.assert_true(cs.sync(), '%s CREATION FAILED'%(c))
 
             new_campus = self.sess.query(Campus).filter_by(name=c.name).first()
 
@@ -119,22 +117,11 @@ class TestCampusPopulate(object):
                 if len(new_campus.sublocations) < 1:
                     print '  EMPTY %s: contains %s'%(new_campus, cs.buildings)
                 else:
-                    print 'created %s %s'%(new_campus,
-                                             new_campus.sublocations)
+                    if self.debug:
+                        print 'created Campus %s %s'%(new_campus,
+                                               new_campus.sublocations)
             else:
                 print 'CAMPUS %s failed'%(c.name)
-
-#if __name__ == "__main__":
-#    import sys
-#
-#    import ms.version
-#    ms.version.addpkg('nose','0.10.3')
-#    import nose
-#
-#    #nose.run()
-
-#    c = testCampusLoad()0
-#    c.runTest(sys.argv)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
@@ -149,14 +136,15 @@ class TestCampusPopulate(object):
 #        session.rollback()
 #        session.close()
 #        raise
-    """def test1Continents(self):
-        assert(self.cs.continents)
 
-    def test2Countries(self):
-        assert(self.cs.countries)
-
-    def test3Cities(self):
-        assert(self.cs.cities)
-
-    def test4Buildings(self):
-        assert(self.cs.buildings)"""
+#def test1Continents(self):
+#    assert(self.cs.continents)
+#
+#def test2Countries(self):
+#    assert(self.cs.countries)
+#
+#def test3Cities(self):
+#    assert(self.cs.cities)
+#
+#def test4Buildings(self):
+#    assert(self.cs.buildings)

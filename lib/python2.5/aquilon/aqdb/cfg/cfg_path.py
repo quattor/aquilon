@@ -50,7 +50,7 @@ def populate(db, *args, **kw):
         return
 
     cfg_base = db.config.get("broker", "kingdir")
-    assert(cfg_base)
+    assert os.path.isdir(cfg_base)
 
     #in case user's config doesn't have one...
     if not cfg_base.endswith('/'):
