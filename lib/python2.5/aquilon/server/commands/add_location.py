@@ -24,8 +24,9 @@ from aquilon.aqdb.loc.desk import Desk
 
 
 # FIXME: This probably belongs in location.py
-const.location_types = ("company", "hub", "continent", "country", "city",
-        "building", "rack", "desk")
+# It's also broken, as campus is not strictly between country and city.
+const.location_types = ("company", "hub", "continent", "country", "campus",
+                        "city", "building", "rack", "desk")
 
 
 class CommandAddLocation(BrokerCommand):
