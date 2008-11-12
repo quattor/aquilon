@@ -16,7 +16,7 @@ class CommandAddManagerManager(CommandAddManager):
 
     """
 
-    required_parameters = ["manager", "hostname", "ip"]
+    required_parameters = ["manager", "hostname"]
 
 
 #if __name__=='__main__':
