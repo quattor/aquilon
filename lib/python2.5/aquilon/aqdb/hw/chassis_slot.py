@@ -5,6 +5,7 @@ import os
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relation, backref
+from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.hw.machine import Machine
@@ -33,7 +34,8 @@ class ChassisSlot(Base):
     #TODO: need a unique key against this, but what if it takes 2 slots?
 
     chassis = relation(Chassis, uselist=False,
-                       backref=backref('slots', cascade='delete'),
+                       backref=backref('slots', cascade='delete',
+                                       order_by=[asc('slot_number')]),
                        passive_deletes=True)
 
     machine = relation(Machine, uselist=False,
