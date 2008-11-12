@@ -18,7 +18,7 @@ from aquilon.aqdb.column_types.aqstr      import AqStr
 from aquilon.aqdb.loc.location            import Location
 from aquilon.aqdb.hw.model                import Model
 
-#valid types are machine, tor_switch, chassis, console_switch
+#valid types are machine, tor_switch_hw, chassis_hw, console_server_hw
 class HardwareEntity(Base):
     __tablename__ = 'hardware_entity'
 

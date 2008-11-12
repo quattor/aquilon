@@ -85,6 +85,20 @@ class TestAddAuxiliary(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Interface: eth3", command)
 
+    def testrejectmacinuse(self):
+        command = ["add", "auxiliary",
+            "--auxiliary", "unittest01-e4.one-nyp.ms.com",
+            "--machine", "ut3c1n4", "--mac", self.hostmac4,
+            "--interface", "eth4", "--ip", "8.8.4.7"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Mac '%s' already in use" % self.hostmac4,
+                         command)
+
+    def testverifyrejectseventhip(self):
+        command = "show machine --machine ut3c1n4"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Interface: eth4", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAuxiliary)

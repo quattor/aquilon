@@ -83,6 +83,15 @@ class TestAddManager(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "already has an interface with mac", command)
 
+    def testfailaddunittest12bmc(self):
+        command = ["add", "manager", "--ip", self.hostip10,
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--manager", "unittest02ipmi.one-nyp.ms.com",
+                   "--interface", "ipmi", "--mac", self.hostmac10]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Mac '%s' already in use" % self.hostmac10,
+                         command)
+
     # Taking advantage of the fact that this runs after add_machine
     # and add_host, and that this *should* create a manager
     # Lots of verifications steps for this single test...

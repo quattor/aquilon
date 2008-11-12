@@ -110,11 +110,20 @@ class TestAddInterface(TestBrokerCommand):
         self.noouttest(["add", "interface", "--interface", "eth0",
             "--machine", "ut3c1n4", "--mac", testmac])
 
+    def testfailaddut3c1n4eth1(self):
+        # Mac in use by a chassis, below.
+        command = ["add", "interface", "--interface", "eth1",
+                   "--mac", self.hostmac8, "--machine", "ut3c1n4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Mac '%s' already in use: " % self.hostmac8,
+                         command)
+
     def testverifyaddut3c1n4interface(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Interface: eth0 %s boot=True" %
                          self.hostmac4.lower(), command)
+        self.matchclean(out, "Interface: eth1", command)
 
     def testverifycatut3c1n4interface(self):
         command = "cat --machine ut3c1n4"
@@ -139,6 +148,21 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip8, command)
         self.matchoutput(out, "Interface: oa %s boot=False" %
                          self.hostmac8, command)
+        self.matchclean(out, "Interface: oa2", command)
+
+    def testfailaddinterfaceut3c1(self):
+        command = ["add", "interface", "--interface", "oa",
+                   "--mac", self.hostmac8, "--ip", self.hostip8,
+                   "--chassis", "ut3c1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Mac '%s' already in use: " % self.hostmac8,
+                         command)
+
+    def testverifyfailaddinterfaceut3c1(self):
+        command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "Interface: oa", command)
 
     def testaddinterfacenp997gd1r04(self):
         command = ["add", "interface", "--interface", "xge49",
@@ -153,6 +177,21 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip9, command)
         self.matchoutput(out, "Interface: xge49 %s boot=False" %
                          self.hostmac9, command)
+        self.matchclean(out, "Interface: xge50", command)
+
+    def testfailaddinterfaceut3dg1r01(self):
+        command = ["add", "interface", "--interface", "xge49",
+                   "--mac", self.hostmac9, "--ip", self.hostip9,
+                   "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Mac '%s' already in use: " % self.hostmac9,
+                         command)
+
+    def testverifyfailaddinterfaceut3dg1r01(self):
+        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchclean(out, "Interface: xge49", command)
 
     # These two will eventually be created when testing the addition
     # of a whole rack of machines based on a CheckNet sweep.

@@ -13,7 +13,8 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
+                                                 describe_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.aqdb.sy.tor_switch import TorSwitch
 from aquilon.aqdb.hw.tor_switch_hw import TorSwitchHw
@@ -65,6 +66,12 @@ class CommandAddTorSwitch(BrokerCommand):
         if interface or mac or ip:
             if not (interface and mac and ip):
                 raise ArgumentError("If using --interface, --mac, or --ip, all of them must be given.")
+
+            prev = session.query(Interface).filter_by(mac=mac).first()
+            if prev:
+                msg = describe_interface(session, prev)
+                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
             restrict_tor_offsets(session, dbnetwork, ip)
