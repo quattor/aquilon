@@ -161,6 +161,7 @@
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="rack" type="string">Rack</option>
@@ -804,6 +805,7 @@
 	<option name="hub" type="string">Hub</option>
 	<option name="continent" type="string">Continent</option>
 	<option name="country" type="string">Country</option>
+        <option name="campus" type="string">Campus</option>
 	<option name="city" type="string">City</option>
 	<option name="building" type="string">Building</option>
 	<option name="rack" type="string">Rack</option>
@@ -822,6 +824,7 @@
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="rack" type="string">Rack</option>
@@ -843,6 +846,7 @@
 	<option name="hub" type="string">Hub</option>
 	<option name="continent" type="string">Continent</option>
 	<option name="country" type="string">Country</option>
+        <option name="campus" type="string">Campus</option>
 	<option name="city" type="string">City</option>
 	<option name="building" type="string">Building</option>
 	<option name="rack" type="string">Rack</option>
@@ -1142,6 +1146,16 @@
          <option name="name" type="string">building name</option>
       </optgroup>
       <transport method="delete" path="location/building/%(name)s" />
+   </command>
+
+   <command name="show_campus">
+      Show the list of campuses, or details about a particular campus.
+      <optgroup name="show_campus_opts" mandatory="True" fields="any">
+         <option name="name" type="string">campus name</option>
+         <option name="all" type="boolean">show all campuses</option>
+      </optgroup>
+      <transport method="get" path="location/campus" />
+      <transport trigger="name" method="get" path="location/campus/%(name)s" />
    </command>
 
    <command name="add_city">

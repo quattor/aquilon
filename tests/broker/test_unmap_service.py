@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -37,6 +33,14 @@ class TestUnmapService(TestBrokerCommand):
 
     def testverifyunmapdns(self):
         command = "show map --service dns --instance nyinfratest --hub ny"
+        self.notfoundtest(command.split(" "))
+
+    def testunmapaqd(self):
+        self.noouttest(["unmap", "service", "--campus", "ny",
+            "--service", "aqd", "--instance", "ny-prod"])
+
+    def testverifyunmapaqd(self):
+        command = "show map --service aqd --instance ny-prod --campus ny"
         self.notfoundtest(command.split(" "))
 
     def testunmapbootserver(self):

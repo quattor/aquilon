@@ -43,7 +43,7 @@ class CommandAddAuroraHost(CommandAddHost):
             fields = dsdb_runner.show_host(hostname)
         except ProcessException, e:
             raise ArgumentError("Could not find %s in dsdb: %s" %
-                    (dsdb_lookup, e))
+                                (hostname, e))
 
         fqdn = fields["fqdn"]
         dsdb_lookup = fields["dsdb_lookup"]

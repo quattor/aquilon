@@ -14,6 +14,7 @@ from aquilon.aqdb.loc.company import Company
 from aquilon.aqdb.loc.hub import Hub
 from aquilon.aqdb.loc.continent import Continent
 from aquilon.aqdb.loc.country import Country
+from aquilon.aqdb.loc.campus import Campus
 from aquilon.aqdb.loc.city import City
 from aquilon.aqdb.loc.building import Building
 from aquilon.aqdb.loc.rack import Rack

@@ -10,14 +10,23 @@ from aquilon.server.templates.base import Plenary
 class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine):
         Plenary.__init__(self)
-        self.hub = dbmachine.location.hub.fullname.lower()
-        self.building = dbmachine.location.building.name
-        if dbmachine.location.rack:
-            self.rack = dbmachine.location.rack.name
-            self.rackrow = dbmachine.location.rack.rack_row
-            self.rackcol = dbmachine.location.rack.rack_column
+        loc = dbmachine.location
+        self.hub = loc.hub.fullname.lower()
+        self.building = loc.building.name
+        if loc.rack:
+            self.rack = loc.rack.name
+            self.rackrow = loc.rack.rack_row
+            self.rackcol = loc.rack.rack_column
         else:
             self.rack = None
+        #if loc.campus:
+        #    self.campus = loc.campus.fullname.lower().strip().replace(" ", "-")
+        #else:
+        #    self.campus = None
+        #if loc.hub:
+        #   self.hub = loc.hub.fullname.lower()
+        #else:
+        #   self.hub = None
         
         # And a chassis location?
         if dbmachine.chassis_slot:
@@ -27,7 +36,7 @@ class PlenaryMachineInfo(Plenary):
         else:
             self.chassis = None
 
-        self.sysloc = dbmachine.location.sysloc()
+        self.sysloc = loc.sysloc()
         self.machine = dbmachine.name
         self.model = dbmachine.model.name
         self.machine_type = dbmachine.model.machine_type
@@ -80,6 +89,11 @@ class PlenaryMachineInfo(Plenary):
         if self.chassis:
             lines.append('"chassis" = "%s";'%self.chassis)
             lines.append('"slot" = %d;'%self.slot)
+
+        #if self.hub:
+        #    lines.append('"sysloc/hub" = "%s";' % self.hub)
+        #if self.campus:
+        #    lines.append('"sysloc/campus" = "%s";' % self.campus)
 
         # Now describe the hardware
         lines.append("")

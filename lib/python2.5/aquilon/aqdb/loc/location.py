@@ -87,6 +87,10 @@ class Location(Base):
         return self.p_dict.get('country', None)
     country = property(_country)
 
+    def _campus(self):
+        return self.p_dict.get('campus', None)
+    campus = property(_campus)
+
     def _city(self):
         return self.p_dict.get('city', None)
     city = property(_city)

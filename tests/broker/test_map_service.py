@@ -40,14 +40,14 @@ class TestMapService(TestBrokerCommand):
                 "Service: dns Instance: nyinfratest Map: Hub ny", command)
 
     def testmapaqd(self):
-        self.noouttest(["map", "service", "--hub", "ny",
+        self.noouttest(["map", "service", "--campus", "ny",
             "--service", "aqd", "--instance", "ny-prod"])
 
-    def testverifymapdns(self):
-        command = "show map --service aqd --instance ny-prod --hub ny"
+    def testverifymapaqd(self):
+        command = "show map --service aqd --instance ny-prod --campus ny"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                "Service: aqd Instance: ny-prod Map: Hub ny", command)
+                "Service: aqd Instance: ny-prod Map: Campus ny", command)
 
     def testmapbootserver(self):
         self.noouttest(["map", "service", "--rack", "ut3",

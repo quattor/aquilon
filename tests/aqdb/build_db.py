@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import optparse
+from traceback import print_exc
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
@@ -165,8 +166,8 @@ def main(*args, **kw):
             try:
                 mod.populate(db, opts.full)
             except Exception, e:
-                sys.stderr.write(str(e))
-                print e, "\n"
+                print >>sys.stderr, "Error populating %s" % mod.table.name
+                print_exc(file=sys.stderr)
     try:
         cps = tcp.TestCampusPopulate(db.Session(), debug=opts.debug)
         cps.setUp()
