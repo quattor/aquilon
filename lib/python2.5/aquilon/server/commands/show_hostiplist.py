@@ -34,9 +34,12 @@ class CommandShowHostIPList(BrokerCommand):
         #if archetype:
         #    dbarchetype = get_archetype(session, archetype)
         iplist = HostIPList()
-        # Maybe we want to query Host instead...
+        q = session.query(System)
+        # Outer-join in all the subclasses so that each access of
+        # system doesn't (necessarily) issue another query.
+        q = q.with_polymorphic(System.__mapper__.polymorphic_map.values())
         # Right now, this is returning everything with an ip.
-        q = session.query(System).filter(System.ip!=None)
+        q = q.filter(System.ip!=None)
         for system in q.all():
             # Do not include aurora hosts.  We are not canonical for
             # this information.  At least, not yet.
@@ -47,6 +50,8 @@ class CommandShowHostIPList(BrokerCommand):
             # For names on alternate interfaces, also provide the
             # name for the bootable (primary) interface.  This allows
             # the reverse IP address to be set to the primary.
+            # This is inefficient, but OK for now since we only have
+            # a few auxiliary systems.
             if system.system_type == 'auxiliary' and system.machine.host:
                 entry.append(system.machine.host.fqdn)
             else:
