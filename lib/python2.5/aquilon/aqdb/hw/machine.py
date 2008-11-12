@@ -50,6 +50,10 @@ class Machine(HardwareEntity):
     #TODO: synonym in location/model?
     #location = relation(Location, uselist = False)
 
+    @property
+    def hardware_name(self):
+        return self.name
+
 machine = Machine.__table__
 
 machine.primary_key.name = 'machine_pk'

@@ -29,6 +29,12 @@ class ChassisHw(HardwareEntity):
                                            ondelete = 'CASCADE'),
                                            primary_key = True)
 
+    @property
+    def hardware_name(self):
+        if self.chassis_hw:
+            return ",".join(chassis.fqdn for chassis in self.chassis_hw)
+        return HardwareEntity.hardware_name(self)
+
 chassis_hw = ChassisHw.__table__
 chassis_hw.primary_key.name = 'chassis_hw_pk'
 
