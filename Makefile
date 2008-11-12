@@ -1,4 +1,3 @@
-PYTHON = //ms/dist/python/PROJ/core/2.5/bin/python2.5
 SHELL  = /bin/ksh
 COMMON = ../install/common/
 QACOMMENT = -comment cmrs=qa
@@ -52,7 +51,7 @@ $(COMMON)bin/%: bin/%
 $(COMMON)%.pyc: $(COMMON)%.py
 	@echo "compiling $@"
 	@rm -f $@
-	@$(PYTHON) -mpy_compile $<
+	./compile_for_dist.py $<
 
 $(COMMON)lib/%: lib/%
 	@mkdir -p `dirname $@`
