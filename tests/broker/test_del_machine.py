@@ -75,6 +75,18 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine ut8s02p3"
         self.notfoundtest(command.split(" "))
 
+    def testdelhprack(self):
+        for i in range(51, 100):
+            port = i - 50
+            command = "del machine --machine ut9s03p%d" % port
+            self.noouttest(command.split(" "))
+
+    def testverifydelhprack(self):
+        for i in range(51, 100):
+            port = i - 50
+            command = "show machine --machine ut9s03p%d" % port
+            self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)

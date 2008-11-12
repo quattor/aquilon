@@ -75,6 +75,14 @@ class TestDelTorSwitch(TestBrokerCommand):
         command = "show tor_switch --tor_switch ut01ga1s02.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelut01ga1s03(self):
+        command = "del tor_switch --tor_switch ut01ga1s03.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut01ga1s03(self):
+        command = "show tor_switch --tor_switch ut01ga1s03.aqd-unittest.ms.com"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelTorSwitch)

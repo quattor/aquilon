@@ -35,6 +35,16 @@ class TestDelChassis(TestBrokerCommand):
         command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelut9chassis(self):
+        for i in range(1, 6):
+            command = "del chassis --chassis ut9c%d.aqd-unittest.ms.com" % i
+            self.noouttest(command.split(" "))
+
+    def testverifydelut9chassis(self):
+        for i in range(1, 6):
+            command = "show chassis --chassis ut9c%d.aqd-unittest.ms.com" % i
+            self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelChassis)
