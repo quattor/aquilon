@@ -6,7 +6,7 @@
 #
 #
 # set DOMAIN on commandline to build a specific cluster
-# default is to build 'production'
+# default is to build 'ny-prod'
 #
 # examples:
 #
@@ -18,7 +18,7 @@
 #
 #
 
-DOMAIN   = production
+DOMAIN   = ny-prod
 QROOT    = /var/quattor/
 CONFIG   = $(QROOT)/cfg/domains/$(DOMAIN)
 PROFILES = $(CONFIG)/profiles

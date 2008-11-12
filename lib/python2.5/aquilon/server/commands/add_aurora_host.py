@@ -128,7 +128,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['session'] = session
         kwargs['hostname'] = fqdn
         kwargs['archetype'] = 'aurora'
-        kwargs['domain'] = 'production'
+        kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
         kwargs['machine'] = dbmachine.name
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
