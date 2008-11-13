@@ -20,7 +20,7 @@ def get_network_byname(session, netname):
     try:
         dbnetwork = session.query(Network).filter_by(name=netname).one()
     except InvalidRequestError, e:
-        raise NotFoundException("Network %s not found: %s" % (dbnetwork, e))
+        raise NotFoundException("Network %s not found: %s" % (netname, e))
     return dbnetwork
 
 def get_network_byip(session, ipaddr):
