@@ -1,0 +1,16 @@
+Before running commands,
+
+module load 3rd/autosys/NYA
+
+# To insert...
+kuu cdb
+jil <unixeng-aqdrefreshnet-prod.jil
+
+# To verify
+autorep -q -J unixeng-aqdrefreshnet-prod
+
+# To fire a test...
+sendevent -E FORCE_STARTJOB -J unixeng-aqdrefreshent-prod
+
+# We also have jilgrep in the environment.
+
