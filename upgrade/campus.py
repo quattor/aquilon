@@ -14,23 +14,30 @@ _TESTDIR=os.path.join(_DIR,'..','tests','aqdb')
 if _TESTDIR not in sys.path:
     sys.path.insert(1,_TESTDIR)
 
-import test_campus_populate as tcp
 from aquilon.aqdb.db_factory import db_factory, Base
+from aquilon.aqdb.loc.campus import Campus
+import test_campus_populate as tcp
+
+def show(s):
+    print 'campuses: ',
+    print s.query(Campus).all()
 
 def populate(db, *args, **kw):
     s = db.Session()
-    a = tcp.TestCampusPopulate(sess=s)
+    a = tcp.TestCampusPopulate(s)
 
     if len(s.query(Campus).all()) < 1:
-        a.setUp(sess=s)
-        a.testPopulate(sess=s)
+        a.setUp()
+        a.testPopulate()
+    show(s)
 
 def depopulate(db, *args, **kw):
     s = db.Session()
-    a = tcp.TestCampusPopulate(sess=s)
+    a = tcp.TestCampusPopulate(s)
 
     if len(s.query(Campus).all()) > 0:
-        a.tearDown(sess=s)
+        a.tearDown()
+    show(s)
 
 def configure(*args, **kw):
     usage = """ usage: %prog [options] """
@@ -43,7 +50,7 @@ def configure(*args, **kw):
     p.add_option('--populate',
                  action  = 'store_true',
                  dest    = 'populate',
-                 default = True,
+                 default = False,
                  help    = 'populate campuses')
 
     p.add_option('--depopulate',

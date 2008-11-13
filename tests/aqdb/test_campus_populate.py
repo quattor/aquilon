@@ -79,7 +79,7 @@ class TestCampusPopulate(object):
         for row in self._get_campus_csv():
             code  = row['code']
             fname = row['name']
-            cmt   = ', '.join([row['name'], row['country'], _cmt])
+            #cmt   = ', '.join([row['name'], row['country'], _cmt])
 
             c = self.sess.query(Campus).filter_by(name=code).first()
             if c:
@@ -93,8 +93,8 @@ class TestCampusPopulate(object):
 
             self.campuses.append(Campus(name=code,
                                         #code=code,
-                                        fullname=fname,
-                                        comments=cmt))
+                                        fullname=fname))
+                                        #comments=cmt))
 
 
     def tearDown(self):
