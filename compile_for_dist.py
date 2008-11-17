@@ -8,6 +8,7 @@
 
 import sys
 import py_compile
+import re
 
 
 def main(args=None):
@@ -19,9 +20,16 @@ def main(args=None):
     """
     if args is None:
         args = sys.argv[1:]
+    dev_re = re.compile(r'/ms/dev/(?P<meta>[^/]+)/(?P<proj>[^/]+)'
+                        r'/(?P<release>[^/]+)/install/(?P<path>.*)')
     for filename in args:
         try:
-            dfile = filename.replace('/ms/dev/', '/ms/dist/', 1)
+            m = dev_re.match(filename)
+            if m:
+                dfile = "/ms/dist/%(meta)s/PROJ/%(proj)s" \
+                        "/%(release)s/%(path)s" % m.groupdict()
+            else:
+                dfile = filename
             py_compile.compile(filename, dfile=dfile, doraise=True)
         except py_compile.PyCompileError, e:
             sys.stderr.write(e.msg)
