@@ -33,7 +33,7 @@ class ChassisHw(HardwareEntity):
     def hardware_name(self):
         if self.chassis_hw:
             return ",".join(chassis.fqdn for chassis in self.chassis_hw)
-        return HardwareEntity.hardware_name(self)
+        return self._hardware_name
 
 chassis_hw = ChassisHw.__table__
 chassis_hw.primary_key.name = 'chassis_hw_pk'

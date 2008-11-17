@@ -45,9 +45,10 @@ class HardwareEntity(Base):
 
     __mapper_args__ = {'polymorphic_on' : hardware_entity_type}
 
+    _hardware_name = 'Unnamed hardware'
     @property
     def hardware_name(self):
-        return 'Unnamed hardware'
+        return self._hardware_name
 
 hardware_entity = HardwareEntity.__table__
 hardware_entity.primary_key.name = 'hardware_entity_pk'
