@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -27,6 +23,8 @@ class CommandShowLocationType(BrokerCommand):
     @format_results
     def render(self, session, type, name, **arguments):
         query = session.query(Location)
+        query = query.with_polymorphic(
+            Location.__mapper__.polymorphic_map.values())
         if type:
             query = query.filter_by(location_type=type)
         if name:
