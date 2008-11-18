@@ -4,6 +4,11 @@ import sys
 import fnmatch
 import ms.version
 
+#####
+# NEVER check in a version of this file to a for_next branch with 'dev'
+# in an addpkg call!!!
+#####
+
 if not sys.modules.has_key('sqlalchemy'):
     ms.version.addpkg('sqlalchemy', '0.4.8')
     #ms.version.addpkg('sqlalchemy', '0.5beta', 'dev')
@@ -12,8 +17,8 @@ if not sys.modules.has_key('cx_Oracle'):
     ms.version.addpkg('cx_Oracle','4.4-10.2.0.1')
 
 if not sys.modules.has_key('ipython'):
-    #ms.version.addpkg('ipython','0.8.2')
-    ms.version.addpkg('ipython', '0.9.1', 'dev')
+    ms.version.addpkg('ipython','0.8.2')
+    #ms.version.addpkg('ipython', '0.9.1', 'dev')
 
 #if not sys.modules.has_key('migrate.changeset'):
 #    ms.version.addpkg('sqlalchemy-migrate', '0.4.5', 'dev')
