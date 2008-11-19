@@ -18,6 +18,7 @@ class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
+    @add_transaction
     @az_check
     @format_results
     def render(self, session, name, **arguments):
