@@ -6,6 +6,7 @@
 
 import os
 
+from sqlalchemy.sql import text
 from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.python import log
@@ -73,6 +74,11 @@ class BrokerCommand(object):
         raise UnimplementedError("%s has not been implemented" %
                 self.__class__.__module__)
 
+    def set_readonly(self, session):
+        if self.config.get("database", "dsn").startswith("oracle"):
+            session.commit()
+            session.execute(text("set transaction read only"))
+
 def add_session(command):
     """Decorator to give any BrokerCommand a new session as a keyword arg.
 
@@ -132,6 +138,12 @@ def az_check(command):
             action = action[24:]
         self.az.check(session, principal=kwargs["user"],
                 action=action, resource=request.path)
+        # There is probably a better place for this check...
+        # It also places a hard dependency on consumers to also
+        # decorate with add_transaction to make sure this gets
+        # cleaned up.
+        if action.startswith("show") or action.startswith("search"):
+            self.set_readonly(session)
         return command(self, *args, **kwargs)
     new_command.__name__ = command.__name__
     new_command.__dict__ = command.__dict__
