@@ -6,8 +6,7 @@
 """Contains the logic for `aq show chassis`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.sy.chassis import Chassis
 
 
@@ -15,9 +14,6 @@ class CommandShowChassis(BrokerCommand):
 
     required_parameters = []
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         return session.query(Chassis).all()
 

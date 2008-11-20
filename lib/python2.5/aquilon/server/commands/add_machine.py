@@ -7,8 +7,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
@@ -22,8 +21,6 @@ class CommandAddMachine(BrokerCommand):
 
     required_parameters = ["machine", "model"]
 
-    @add_transaction
-    @az_check
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, machine, model, serial, chassis, slot,
             cpuname, cpuvendor, cpuspeed, cpucount, memory,

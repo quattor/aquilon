@@ -5,8 +5,7 @@
 # This module is part of Aquilon
 """Contains the logic for `aq show service`."""
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.server.dbwrappers.system import get_system
@@ -14,11 +13,9 @@ from aquilon.server.dbwrappers.service_instance import get_client_service_instan
 from aquilon.server.formats.service_instance import ServiceInstanceList
 from aquilon.server.formats.service import ServiceList
 
+
 class CommandShowService(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, server, client, **arguments):
         instance = arguments.get("instance", None)
         dbserver = server and get_system(session, server) or None
@@ -39,6 +36,5 @@ class CommandShowService(BrokerCommand):
         else:
             return ServiceList(session.query(Service).all())
 
-if __name__=='__main__':
 
-    pass
+#if __name__=='__main__':

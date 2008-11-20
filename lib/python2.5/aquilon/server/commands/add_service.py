@@ -6,8 +6,7 @@
 """Contains the logic for `aq add service`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.cfg.cfg_path import CfgPath
@@ -23,8 +22,6 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    @add_transaction
-    @az_check
     def render(self, session, service, instance, comments, user, **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
         pdir = self.config.get("broker", "plenarydir")

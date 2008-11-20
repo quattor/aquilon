@@ -9,8 +9,7 @@
 import re
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
@@ -34,8 +33,6 @@ class CommandAddAuroraHost(CommandAddHost):
     sys_loc_re = re.compile(
             r'^[-\.\w]+\s*(?:[-\.\w]*\.)?(\w+)\.(\w+)\.(\w+)\b$', re.M)
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, *args, **kwargs):
         # Pull relevant info out of dsdb...
         dsdb_runner = DSDBRunner()

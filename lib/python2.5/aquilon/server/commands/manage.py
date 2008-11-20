@@ -7,8 +7,7 @@
 
 
 import os
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
@@ -19,8 +18,6 @@ class CommandManage(BrokerCommand):
 
     required_parameters = ["domain", "hostname"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, hostname, **arguments):
         # FIXME: Need to verify that this server handles this domain?
         dbdomain = verify_domain(session, domain,

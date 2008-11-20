@@ -6,17 +6,13 @@
 """Contains the logic for `aq show manager --all`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.sy.manager import Manager
 
 
 class CommandShowManagerAll(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         return SimpleSystemList(session.query(Manager).all())
 

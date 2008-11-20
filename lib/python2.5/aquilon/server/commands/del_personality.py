@@ -8,8 +8,7 @@
 
 import os
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.commands.del_location import CommandDelLocation
 from aquilon.aqdb.cfg.cfg_path import CfgPath
@@ -22,8 +21,6 @@ class CommandDelPersonality(BrokerCommand):
 
     required_parameters = ["name", "archetype"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, archetype, **arguments):
         dbtld = session.query(Tld).filter_by(type="personality").first()
 
@@ -44,8 +41,6 @@ class CommandDelPersonality(BrokerCommand):
         session.delete(existing[0]);
         session.flush();
         return
-
-
 
 
 #if __name__=='__main__':

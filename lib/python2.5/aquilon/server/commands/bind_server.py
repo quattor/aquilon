@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -14,8 +10,7 @@ from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.svc.service_instance_server import ServiceInstanceServer
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
@@ -26,8 +21,6 @@ class CommandBindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service", "instance"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, service, instance, user, force=False, 
             **arguments):
         dbsystem = get_system(session, hostname)

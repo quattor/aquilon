@@ -10,8 +10,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon import const
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.loc.location import Location
 from aquilon.aqdb.loc.company import Company
 from aquilon.aqdb.loc.hub import Hub
@@ -34,8 +33,6 @@ class CommandAddLocation(BrokerCommand):
     required_parameters = ["name", "fullname", "type",
             "parentname", "parenttype", "comments"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, fullname, type, 
             parentname, parenttype, comments, **arguments):
         newLocation = session.query(Location).filter_by(name=name,

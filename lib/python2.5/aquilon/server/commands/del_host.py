@@ -11,8 +11,7 @@ import os
 from threading import Lock
 from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_dependencies)
 from aquilon.server.processes import (DSDBRunner, build_index)
 from aquilon.server.templates.host import PlenaryHost
@@ -24,8 +23,6 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, user, **arguments):
         # removing the plenary host requires a compile lock, however
         # we want to avoid deadlock by the fact that we're messing

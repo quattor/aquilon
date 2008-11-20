@@ -6,8 +6,7 @@
 """Contains the logic for `aq update machine --hostname`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.update_machine import CommandUpdateMachine
 from aquilon.server.dbwrappers.host import hostname_to_host
 
@@ -16,8 +15,6 @@ class CommandUpdateMachineHostname(CommandUpdateMachine):
 
     required_parameters = ["hostname"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
         arguments['machine'] = dbhost.machine.name

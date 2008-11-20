@@ -3,7 +3,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq add machine`."""
+"""Contains the logic for `aq update machine`."""
 
 
 from sqlalchemy.exceptions import InvalidRequestError
@@ -11,8 +11,7 @@ from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  UnimplementedError)
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import get_machine
@@ -27,8 +26,6 @@ class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    @add_transaction
-    @az_check
     def render(self, session, machine, model, serial, chassis, slot,
                clearchassis, multislot,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,

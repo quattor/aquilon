@@ -6,8 +6,7 @@
 """Contains the logic for `aq show machine`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.model import get_model
@@ -17,9 +16,6 @@ from aquilon.aqdb.hw.machine import Machine
 
 class CommandShowMachine(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, machine, model, chassis, slot, **arguments):
         q = session.query(Machine)
         if machine:

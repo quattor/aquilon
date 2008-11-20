@@ -6,8 +6,7 @@
 """Contains a wrapper for `aq add windows host`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_host import CommandAddHost
 
 
@@ -15,8 +14,6 @@ class CommandAddWindowsHost(CommandAddHost):
 
     required_parameters = ["hostname", "machine"]
 
-    @add_transaction
-    @az_check
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
         kwargs['domain'] = self.config.get("broker", "windows_host_domain")

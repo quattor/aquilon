@@ -12,8 +12,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.net.network import get_net_id_from_ip
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets,
@@ -26,8 +25,6 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
     required_parameters = ["interface", "chassis", "mac"]
 
-    @add_transaction
-    @az_check
     def render(self, session, interface, chassis, mac, comments, user,
                **arguments):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')

@@ -7,8 +7,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import parse_system
@@ -18,9 +17,6 @@ from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 
 class CommandShowTorSwitch(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, tor_switch, rack, model, **arguments):
         q = session.query(TorSwitch)
         if tor_switch:

@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -13,8 +9,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.aqdb.hw.disk import Disk
@@ -25,8 +20,6 @@ class CommandAddDisk(BrokerCommand):
 
     required_parameters = ["machine", "disk", "type", "capacity"]
 
-    @add_transaction
-    @az_check
     def render(self, session, machine, disk, type, capacity, comments,
             user, **arguments):
 

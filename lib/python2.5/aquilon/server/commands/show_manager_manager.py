@@ -6,8 +6,7 @@
 """Contains the logic for `aq show manager --manager`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.sy.manager import Manager
 
@@ -16,9 +15,6 @@ class CommandShowManagerManager(BrokerCommand):
 
     required_parameters = ["manager"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, manager, **kwargs):
         return get_system(session, manager, Manager, 'Manager')
 

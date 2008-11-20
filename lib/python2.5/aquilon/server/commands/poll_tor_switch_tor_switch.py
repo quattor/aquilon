@@ -6,8 +6,7 @@
 """Contains the logic for `aq poll tor_switch --tor_switch`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.poll_tor_switch import CommandPollTorSwitch
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.sy.tor_switch import TorSwitch
@@ -17,8 +16,6 @@ class CommandPollTorSwitchTorSwitch(CommandPollTorSwitch):
 
     required_parameters = ["tor_switch"]
 
-    @add_transaction
-    @az_check
     def render(self, session, tor_switch, **arguments):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
         return self.poll(session, [dbtor_switch])

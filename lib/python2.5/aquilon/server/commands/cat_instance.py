@@ -6,8 +6,7 @@
 """Contains the logic for `aq cat --service --instance`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.service import (PlenaryServiceInstance,
@@ -18,9 +17,6 @@ class CommandCatService(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    @add_transaction
-    @az_check
-    #@format_results
     def render(self, session, service, instance, default, **kwargs):
         dbservice = get_service(session, service)
         dbsi = get_service_instance(session, dbservice, instance)

@@ -9,8 +9,7 @@
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 
 
@@ -18,8 +17,6 @@ class CommandDelTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch"]
 
-    @add_transaction
-    @az_check
     def render(self, session, tor_switch, **arguments):
         dbtor_switch = get_tor_switch(session, tor_switch)
 

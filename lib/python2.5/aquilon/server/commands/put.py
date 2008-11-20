@@ -1,9 +1,5 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
@@ -14,8 +10,7 @@ import os
 from tempfile import mkstemp
 from base64 import b64decode
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import write_file, remove_file, run_command
 
@@ -24,8 +19,6 @@ class CommandPut(BrokerCommand):
 
     required_parameters = ["domain", "bundle"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, bundle, **arguments):
         # Verify that it exists before writing to the filesystem.
         dbdomain = verify_domain(session, domain,

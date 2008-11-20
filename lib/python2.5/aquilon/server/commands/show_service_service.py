@@ -6,21 +6,18 @@
 """Contains the logic for `aq show service --service`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service_instance import get_service_instance, get_client_service_instances
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.server.formats.service_instance import ServiceInstanceList
 
+
 class CommandShowServiceService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, service, server, client, **arguments):
         instance = arguments.get("instance", None)
         dbserver = server and get_system(session, server) or None
