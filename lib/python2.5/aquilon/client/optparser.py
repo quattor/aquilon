@@ -98,14 +98,21 @@ class commandline(Element):
 
     def commandList(self):
         res = self.help + "\nGlobal options:\n" + self.__allcommands.recursiveHelp(0)
-        res += "\nAvailable commands are:\n\n"
+        res += "Available commands are:"
 
-        k = self.__commandlist.keys()
-        k.sort()
-        for c in k:
-            res = res + "\t" + self.__commandlist[c].name + "\n"
+        commands = self.__commandlist.keys()
+        commands.sort()
+        maxlen = max([len(s) for s in commands]) + 4
+        columns = 75 / maxlen
+        rows = len(commands) / columns + 1
 
-        res += "\nYou can get more help with\n"
+        for row in xrange(rows):
+            res += "\n    "
+            for column in xrange(columns):
+                if column * rows + row < len(commands):
+                    res = res + "%-*s" % (maxlen, commands[column * rows + row])
+
+        res += "\n\nYou can get more help with\n"
         res += cmdName() + " help COMMAND\n  or\n" + cmdName() + " COMMAND --help\n"
 
         return res
@@ -448,7 +455,7 @@ class option(Element):
         whitespace = " " * (4 * indentlevel)
         help = self.help if len(self.help) else "\n"
 
-        helplines = textwrap.wrap(help, 45)
+        helplines = textwrap.wrap(help, 40)
         res = whitespace + "%*s %s\n" % (-35 + 4 * indentlevel, self.shortHelp(), helplines[0])
         for line in helplines[1:]:
             res = res + " " * 36 + line + "\n"
