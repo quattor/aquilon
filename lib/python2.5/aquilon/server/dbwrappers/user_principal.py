@@ -36,6 +36,13 @@ def get_or_create_user_principal(session, user,
         # Don't actually need the host... just need to verify that it's
         # in aqdb.
         dbhost = hostname_to_host(session, hostname)
+    # Short circuit the common case:
+    q = session.query(UserPrincipal).filter_by(name=user)
+    q = q.join('realm').filter_by(name=realm)
+    dbuser = q.first()
+    if dbuser:
+        return dbuser
+    # If here, need more complicated behavior...
     dbrealm = session.query(Realm).filter_by(name=realm).first()
     dbnobody = session.query(Role).filter_by(name='nobody').first()
     if not dbrealm:
@@ -51,8 +58,8 @@ def get_or_create_user_principal(session, user,
         if commitoncreate:
             session.commit()
         return dbuser
-    dbuser = session.query(UserPrincipal).filter_by(
-            name=user.strip().lower(), realm=dbrealm).first()
+    q = session.query(UserPrincipal).filter_by(name=user, realm=dbrealm)
+    dbuser = q.first()
     if not dbuser:
         if not createuser:
             raise ArgumentError("Could not find principal '%s' to permission, use --createuser to create a new record for the principal."
