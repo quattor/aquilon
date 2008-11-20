@@ -54,6 +54,21 @@ class TestClientFailure(TestBrokerCommand):
                 % (command, out))
         self.assertEqual(p.returncode, 2)
 
+    def testhelp(self):
+        command = "help"
+        out = self.commandtest(command)
+        self.matchoutput(out, "Available commands are:", command)
+
+    def testunknowncommand(self):
+        command = "command-does-not-exist"
+        (p, out, err) = self.runcommand(command)
+        self.matchoutput(err, "Available commands are:", command)
+        self.matchoutput(err, "Command command-does-not-exist is not known!",
+                         command)
+        self.assertEqual(p.returncode, 2,
+                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
+                % (command, p.returncode, 2, out))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClientFailure)
