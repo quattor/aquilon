@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -13,6 +12,7 @@ from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 from aquilon.aqdb.cfg.cfg_path import CfgPath
+
 
 class CommandShowPersonality(BrokerCommand):
 
@@ -33,4 +33,3 @@ class CommandShowPersonality(BrokerCommand):
         return all
 
 
-#if __name__=='__main__':

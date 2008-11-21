@@ -1,16 +1,13 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""Provide an anonymous access channel to the Site."""
+
 
 from twisted.web import server, http
 from twisted.python import log
+
 
 class AnonHTTPChannel(http.HTTPChannel):
     """
@@ -48,4 +45,5 @@ class AnonSite(server.Site):
                 self._escape(request.getHeader("referer") or "-"),
                 self._escape(request.getHeader("user-agent") or "-"))
             self.logFile.write(line)
+
 

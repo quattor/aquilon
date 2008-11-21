@@ -2,7 +2,6 @@
 """ tests the AqStr column_type """
 import sys
 import os
-import msversion
 
 import unittest
 
@@ -14,8 +13,6 @@ if __name__ == "__main__":
 #import nose
 
 import aquilon.aqdb.depends
-#msversion.addpkg('sqlalchemy', '0.5beta', 'dev')
-#msversion.addpkg('ipython','0.8.2','dist')
 
 import aquilon.aqdb.db_factory         as aqdbf
 import aquilon.aqdb.utils.shell        as shell

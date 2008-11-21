@@ -3,11 +3,11 @@
 
 import os
 import sys
-import msversion
+import ms.version
 from   copy import copy
 #from   ConfigParser import SafeConfigParser
 
-msversion.addpkg('sybase', '0.38-py25', 'dist')
+ms.version.addpkg('sybase', '0.38-py25', 'dist')
 import Sybase
 
 from dispatch_table import dispatch_tbl as dt

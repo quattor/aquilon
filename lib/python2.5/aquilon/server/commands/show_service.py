@@ -1,9 +1,9 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Contains the logic for `aq show service`."""
+
 
 from aquilon.server.broker import (format_results, add_transaction, az_check,
                                    BrokerCommand)
@@ -13,6 +13,7 @@ from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service_instance import get_client_service_instances
 from aquilon.server.formats.service_instance import ServiceInstanceList
 from aquilon.server.formats.service import ServiceList
+
 
 class CommandShowService(BrokerCommand):
 
@@ -39,6 +40,4 @@ class CommandShowService(BrokerCommand):
         else:
             return ServiceList(session.query(Service).all())
 
-if __name__=='__main__':
 
-    pass

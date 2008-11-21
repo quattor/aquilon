@@ -23,4 +23,3 @@ class CommandShowCampusName(CommandShowLocationType):
                                               type='campus', **arguments)
 
 
-#if __name__=='__main__':

@@ -1,9 +1,10 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""Option parsing for the aq client."""
+
 
 from optparse import OptionParser
 from xml.parsers import expat
@@ -12,6 +13,7 @@ import sys
 import re
 import textwrap
 import pdb
+
 
 def cmdName():
     return os.path.basename(sys.argv[0])
@@ -572,6 +574,7 @@ class OptParser (object):
 
 # =========================================================================== #
 
+
 if __name__ == '__main__':
     import sys, os
     BINDIR = os.path.dirname( os.path.realpath(sys.argv[0]) )
@@ -586,3 +589,5 @@ if __name__ == '__main__':
         print "Command:", command
         print "Command Options:", commandOptions
         print "Global Options:", globalOptions
+
+

@@ -1,9 +1,9 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Authorization stub for simple authorization checks."""
+
 
 from twisted.python import log
 
@@ -63,4 +63,5 @@ class AuthorizationBroker(object):
     def check(self, session, principal, action, resource):
         dbuser = get_or_create_user_principal(session, principal)
         return self._check(session, dbuser, action, resource, principal)
+
 

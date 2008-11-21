@@ -1,14 +1,11 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 
+
 from aquilon.server.templates.base import Plenary
+
 
 class PlenaryService(Plenary):
     def __init__(self, dbservice):
@@ -19,6 +16,7 @@ class PlenaryService(Plenary):
 
     def body(self, lines):
         return
+
 
 class PlenaryServiceClientDefault(Plenary):
     def __init__(self, dbservice):
@@ -62,4 +60,5 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     def body(self, lines):
         lines.append("'/system/services/%(service)s' = create('servicedata/%(service)s/%(name)s/config');" % self.__dict__)
         lines.append("include { 'service/%(service)s/client/config' };"%self.__dict__)
+
 

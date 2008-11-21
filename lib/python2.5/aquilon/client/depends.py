@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -8,8 +7,8 @@
     
 """
 
-import msversion
+import ms.version
 
-msversion.addpkg('zope.interface', '3.4.1', 'dist')
-msversion.addpkg('twisted', '8.1.0', 'dist')
+ms.version.addpkg('zope.interface', '3.3.0', 'dist')
+ms.version.addpkg('twisted', '8.1.0', 'dist')
 

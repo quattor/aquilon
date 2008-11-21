@@ -1,11 +1,12 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Any work by the broker to write out (or read in?) templates lives here."""
 
+
 from aquilon.server.templates.base import Plenary
+
 
 class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine):

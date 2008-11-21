@@ -1,17 +1,17 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
+#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-'''If you can read this, you should be Documenting'''
+"""Code to make connections with twisted through netcat."""
 
-import sys, os
+
+import os
+import sys
+
 from twisted.internet import reactor, protocol, address, error
 from twisted.python import log
+
 
 class NetCatConnector(protocol.ProcessProtocol):
     """
@@ -85,6 +85,7 @@ class NetCatConnector(protocol.ProcessProtocol):
         self.proto.connectionLost(status)
         self.controller.childProcessTerminated(status)
 
+
 class NetCatController(object):
     def __init__(self, proto, host, port):
         self.proto = proto
@@ -109,6 +110,7 @@ class NetCatController(object):
             str(self.port) )
         self.process = reactor.spawnProcess(self.connector, executable, args, env=env)
 
+
 if __name__ == '__main__':
     from twisted.protocols.basic import LineReceiver
     host = "localhost"
@@ -116,4 +118,5 @@ if __name__ == '__main__':
     p = NetCatController(LineReceiver(), host, port)
     reactor.callWhenRunning(p.startProcess)
     reactor.run()
+
 

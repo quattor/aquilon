@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -34,4 +33,3 @@ class ChassisHwFormatter(ObjectFormatter):
 ObjectFormatter.handlers[ChassisHw] = ChassisHwFormatter()
 
 
-#if __name__=='__main__':
