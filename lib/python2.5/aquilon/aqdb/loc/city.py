@@ -1,19 +1,8 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ City is a subclass of Location """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.loc.location import Location, location
 from aquilon.aqdb.column_types.aqstr import AqStr
-
 
 class City(Location):
     """ City is a subtype of location """
@@ -30,16 +19,15 @@ city.primary_key.name = 'city_pk'
 
 table = city
 
-def populate(db, *args, **kw):
-    s = db.session()
+def populate(sess, *args, **kw):
 
-    if len(s.query(City).all()) < 1:
+    if len(sess.query(City).all()) < 1:
         from aquilon.aqdb.loc.country import Country
         import aquilon.aqdb.dsdb as dsdb_
         dsdb = dsdb_.DsdbConnection()
 
         cntry= {}
-        for c in s.query(Country).all():
+        for c in sess.query(Country).all():
             cntry[c.name] = c
 
         for row in dsdb.dump('city'):
@@ -52,10 +40,9 @@ def populate(db, *args, **kw):
             a = City(name = str(row[0]),
                         fullname = str(row[1]),
                         parent = p)
-            s.add(a)
+            sess.add(a)
 
-        s.commit()
-        print 'created %s cities'%(len(s.query(City).all()))
+        sess.commit()
 
 
 # Copyright (C) 2008 Morgan Stanley

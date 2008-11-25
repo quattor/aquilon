@@ -1,17 +1,5 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-
-""" Status is an overloaded term, but we use it to represent various stages of
-    deployment, such as production, QA, dev, etc. each of which are also
-    overloaded terms... """
-
-
-import sys
+""" Manufacturer names """
 import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from aquilon.aqdb.table_types.name_table import make_name_class
 
@@ -21,8 +9,8 @@ vendor = Vendor.__table__
 table = vendor
 
 def populate(db, *args, **kw):
-
-    if len(db.s.query(Vendor).all()) < 1:
+    sess = db.Session()
+    if len(sess.query(Vendor).all()) < 1:
         import aquilon.aqdb.cfg.cfg_path as cfg
         created = []
         cfg_base = db.config.get("broker", "kingdir")
@@ -42,9 +30,9 @@ def populate(db, *args, **kw):
                 else:
                     a=Vendor(name=j)
                     try:
-                        db.s.add(a)
+                        sess.add(a)
                     except Exception,e:
-                        db.s.rollback()
+                        sess.rollback()
                         sys.stderr.write(e)
                         continue
                     created.append(j)
@@ -52,26 +40,26 @@ def populate(db, *args, **kw):
         aurora_vendor = Vendor(name='aurora_vendor',
                             comments='Placeholder vendor for Aurora hardware.')
 
-        db.s.save(aurora_vendor)
+        sess.save(aurora_vendor)
         created.append(aurora_vendor)
 
         for v in ['bnt', 'cisco']:
             if not v in created:
                 dbv = Vendor(name=v)
                 try:
-                    db.s.save(dbv)
+                    sess.save(dbv)
                 except Exception, e:
-                    db.s.rollback()
+                    sess.rollback()
                     print >> sys.stderr, e
                     continue
                 created.append(v)
 
         try:
-            db.s.commit()
+            sess.commit()
         except Exception,e:
             print >> sys.stderr, e
         finally:
-            db.s.close()
+            sess.close()
         print 'created %s vendors'%(len(created))
 
 

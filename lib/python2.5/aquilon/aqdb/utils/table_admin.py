@@ -1,12 +1,6 @@
 """ A collection of table level functions for maintenance """
 
-import os
-import sys
 from confirm import confirm
-
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-import aquilon.aqdb.depends
 
 from sqlalchemy import text
 from sqlalchemy.exceptions import SQLError

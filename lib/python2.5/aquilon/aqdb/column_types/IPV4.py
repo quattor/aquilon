@@ -1,23 +1,16 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Translates dotted quad strings into long integers """
-import sys
-import os
-from   exceptions import TypeError, AssertionError
-from struct import pack, unpack
-from socket import inet_aton, inet_ntoa
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
+from struct     import pack, unpack
+from socket     import inet_aton, inet_ntoa
+from exceptions import TypeError
 
-import sqlalchemy.types as types
+import sqlalchemy
 
 def dq_to_int(dq):
         return unpack('!L', inet_aton(dq))[0]
 
 def int_to_dq(n):
-#Force incoming Decimal to a long to prevent odd issues from struct.pack()
+    #Force incoming Decimal to a long to prevent odd issues from struct.pack()
     return inet_ntoa(pack('!L', long(n)))
 
 def cidr_to_int(cidr):
@@ -26,10 +19,10 @@ def cidr_to_int(cidr):
 def get_bcast(ip, cidr):
     return int_to_dq( dq_to_int(ip) |  (0xffffffff - cidr_to_int(cidr)))
 
-class IPV4(types.TypeDecorator):
+class IPV4(sqlalchemy.types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
 
-    impl        = types.Integer
+    impl        = sqlalchemy.types.Integer
     impl.length = 9  # hardcoding for now, TODO: figure it out and fix
 
     def process_bind_param(self, dq, engine):
@@ -64,8 +57,6 @@ class IPV4(types.TypeDecorator):
 
 
 def test_ipv4():
-    if not sys.modules.has_key('sqlalchemy'):
-        raise AssertionError('sqlalchemy module not in sys.modules')
 
     from sqlalchemy import (MetaData, Table, Column, Integer, insert)
 

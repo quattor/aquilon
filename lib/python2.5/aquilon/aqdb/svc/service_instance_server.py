@@ -1,15 +1,6 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Store the list of servers that backs a service instance."""
 
-
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
@@ -22,6 +13,8 @@ from aquilon.aqdb.svc.service_instance import ServiceInstance
 
 
 class ServiceInstanceServer(Base):
+    """ Store the list of servers that backs a service instance."""
+
     __tablename__ = 'service_instance_server'
 
     service_instance_id = Column(Integer, ForeignKey(
@@ -47,6 +40,7 @@ class ServiceInstanceServer(Base):
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.system.fqdn)
 
+
 service_instance_server = ServiceInstanceServer.__table__
 service_instance_server.primary_key.name = 'service_instance_server_pk'
 
@@ -62,4 +56,3 @@ ServiceInstance.servers = relation(ServiceInstanceServer,
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

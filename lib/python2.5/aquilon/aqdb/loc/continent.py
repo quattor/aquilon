@@ -1,14 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Continent is a subclass of Location """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.loc.location import Location, location
@@ -28,16 +18,15 @@ continent.primary_key.name = 'continent_pk'
 
 table = continent
 
-def populate(db, *args, **kw):
-    s=db.session()
+def populate(sess, *args, **kw):
 
     _continents = ('af', 'as', 'au', 'eu', 'na', 'sa')
 
-    if len(s.query(Continent).all()) < len(_continents):
+    if len(sess.query(Continent).all()) < len(_continents):
         from aquilon.aqdb.loc.hub import Hub
 
         hubs ={}
-        for hub in s.query(Hub).all():
+        for hub in sess.query(Hub).all():
             hubs[hub.name] = hub
         a = Continent(name = 'af', fullname = 'Africa', parent = hubs['ln'])
         b = Continent(name = 'as', fullname = 'Asia', parent = hubs['hk'])
@@ -49,12 +38,11 @@ def populate(db, *args, **kw):
                       fullname = 'South America', parent = hubs['ny'])
 
         for i in (a,b,c,d,e,f):
-            s.add(i)
-        s.commit()
+            sess.add(i)
+        sess.commit()
 
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

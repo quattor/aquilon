@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ The high level configuration elements in use """
 
 import os
@@ -22,7 +21,9 @@ tld.primary_key.name = 'tld_pk'
 table = tld
 
 def populate(db, *args, **kw):
-    if len(db.s.query(Tld).all()) > 0:
+    sess = db.Session()
+
+    if len(sess.query(Tld).all()) > 0:
         return
 
     cfg_base = db.config.get("broker", "kingdir")
@@ -45,12 +46,12 @@ def populate(db, *args, **kw):
 
     for i in tlds:
         t =Tld(type=i)
-        db.s.add(t)
+        sess.add(t)
 
-    db.s.commit()
+    sess.commit()
 
 
-    a=db.s.query(Tld).first()
+    a=sess.query(Tld).first()
     assert(a)
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-

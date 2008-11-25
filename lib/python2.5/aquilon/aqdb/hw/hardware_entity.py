@@ -1,13 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Base class of polymorphic hardware structures """
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy     import (Column, Table, Integer, Sequence, ForeignKey,
                             Index, String, DateTime)

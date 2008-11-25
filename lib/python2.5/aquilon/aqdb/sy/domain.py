@@ -1,14 +1,6 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Configuration Domains for Systems """
 
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
@@ -49,16 +41,16 @@ domain.append_constraint(
 
 table = domain
 
-def populate(db, *args, **kw):
+def populate(sess, *args, **kw):
 
-    if len(db.s.query(Domain).all()) < 1:
-        qs = db.s.query(QuattorServer).first()
+    if len(sess.query(Domain).all()) < 1:
+        qs = sess.query(QuattorServer).first()
         assert(qs)
 
-        cdb = db.s.query(UserPrincipal).filter_by(name = 'cdb').one()
+        cdb = sess.query(UserPrincipal).filter_by(name = 'cdb').one()
         assert(cdb)
 
-        daqscott = db.s.query(UserPrincipal).filter_by(name='daqscott').one()
+        daqscott = sess.query(UserPrincipal).filter_by(name='daqscott').one()
         assert(daqscott)
 
         q = Domain(name = 'daqscott', server = qs, owner = daqscott)
@@ -66,11 +58,11 @@ def populate(db, *args, **kw):
         r = Domain(name = 'ny-prod', server = qs, owner = cdb,
                    comments='The NY regional production domain')
 
-        db.s.add(q)
-        db.s.add(r)
-        db.s.commit()
+        sess.add(q)
+        sess.add(r)
+        sess.commit()
 
-        d=db.s.query(Domain).first()
+        d=sess.query(Domain).first()
         assert(d)
 
 

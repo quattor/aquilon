@@ -1,18 +1,9 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Machine Specifications: the rows of this table represent the default
     values of machine "models" so that users don't need to manaully enter the
     low level details of each one since this is mostly repeated data in large
     grid deployments, such as Saphire """
 
-
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
@@ -23,7 +14,6 @@ from aquilon.aqdb.hw.model     import Model
 from aquilon.aqdb.hw.vendor    import Vendor
 from aquilon.aqdb.hw.cpu       import Cpu
 from aquilon.aqdb.hw.disk_type import DiskType
-
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
@@ -80,8 +70,8 @@ machine_specs.append_constraint(
 
 table = machine_specs
 
-def populate(db, *args, **kw):
-    if len(db.s.query(MachineSpecs).all()) < 1:
+def populate(sess, *args, **kw):
+    if len(sess.query(MachineSpecs).all()) < 1:
         from sqlalchemy import insert
 
         specs = [["hs20-884345u", "xeon_2660", 2, 8192, 'scsi', 36, 2],
@@ -95,31 +85,28 @@ def populate(db, *args, **kw):
 
         for ms in specs:
             try:
-                dbmodel = db.s.query(Model).filter_by(name=ms[0]).one()
-                dbcpu   = db.s.query(Cpu).filter_by(name=ms[1]).one()
+                dbmodel = sess.query(Model).filter_by(name=ms[0]).one()
+                dbcpu   = sess.query(Cpu).filter_by(name=ms[1]).one()
                 cpu_quantity = ms[2]
                 memory = ms[3]
-                dbdisk_type = db.s.query(DiskType).filter_by(type=ms[4]).one()
+                dbdisk_type = sess.query(DiskType).filter_by(type=ms[4]).one()
                 disk_capacity = ms[5]
                 nic_count = ms[6]
                 dbms = MachineSpecs(model=dbmodel, cpu=dbcpu,
                         cpu_quantity=cpu_quantity, memory=memory,
                         disk_type=dbdisk_type, disk_capacity=disk_capacity,
                         nic_count=nic_count)
-                db.s.save(dbms)
+                sess.save(dbms)
             except Exception,e:
-                db.s.rollback()
+                sess.rollback()
                 print 'Creating machine specs: %s' % e
                 continue
             try:
-                db.s.commit()
+                sess.commit()
             except Exception,e:
-                db.s.rollback()
+                sess.rollback()
                 print 'Commiting ',e
                 continue
-
-
-
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

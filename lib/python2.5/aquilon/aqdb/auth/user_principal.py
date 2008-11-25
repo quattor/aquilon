@@ -43,14 +43,14 @@ user_principal.append_constraint(
 
 table = user_principal
 
-def populate(db, *args, **kw):
-    if len(db.s.query(UserPrincipal).all()) < 1:
+def populate(sess, *args, **kw):
+    if len(sess.query(UserPrincipal).all()) < 1:
         from sqlalchemy import insert
 
-        admin = db.s.query(Role).filter_by(name = 'aqd_admin').one()
-        eng   = db.s.query(Role).filter_by(name = 'engineering').one()
-        ops   = db.s.query(Role).filter_by(name = 'operations').one()
-        telco = db.s.query(Role).filter_by(name = 'telco_eng').one()
+        admin = sess.query(Role).filter_by(name = 'aqd_admin').one()
+        eng   = sess.query(Role).filter_by(name = 'engineering').one()
+        ops   = sess.query(Role).filter_by(name = 'operations').one()
+        telco = sess.query(Role).filter_by(name = 'telco_eng').one()
 
         admins  = ['cdb', 'njw', 'wesleyhe', 'daqscott', 'kgreen', 'benjones']
 
@@ -64,39 +64,40 @@ def populate(db, *args, **kw):
 
         telco_eng = ['dalys', 'medinad', 'peikonb', 'kulawiak']
 
-        r = db.s.query(Realm).first()
+        r = sess.query(Realm).first()
         assert(r.name == 'is1.morgan')
 
         for nm in admins:
             up=UserPrincipal(name = nm, realm = r,role = admin,
                              comments = 'AutoPopulated')
-            db.s.save(up)
-            db.s.commit()
+            sess.save(up)
+            sess.commit()
             assert(up)
 
         for nm in unixeng:
             up=UserPrincipal(name = nm, realm = r,role = eng,
                              comments = 'AutoPopulated')
-            db.s.save(up)
-            db.s.commit()
+            sess.save(up)
+            sess.commit()
             assert(up)
 
         for nm in operations:
             up=UserPrincipal(name = nm, realm = r, role = ops,
                              comments = 'AutoPopulated')
-            db.s.save(up)
-            db.s.commit()
+            sess.save(up)
+            sess.commit()
             assert(up)
 
         for nm in telco_eng:
             up = UserPrincipal(name = nm, realm = r, role = telco,
                                comments = 'AutoPopulated')
-            db.s.save(up)
-            db.s.commit()
+            sess.save(up)
+            sess.commit()
             assert(up)
 
-        a = db.s.query(UserPrincipal).first()
-        assert(a)
+        cnt = len(sess.query(UserPrincipal).all())
+        assert(cnt > 0)
+        print 'created %s users'%(cnt)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

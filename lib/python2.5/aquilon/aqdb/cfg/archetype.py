@@ -8,16 +8,16 @@ archetype.primary_key.name = 'archetype_pk'
 
 table = archetype
 
-def populate(db, *args, **kw):
-    if len(db.s.query(Archetype).all()) > 0:
+def populate(sess, *args, **kw):
+    if len(sess.query(Archetype).all()) > 0:
         return
 
     for a_name in ['aquilon', 'windows', 'aurora']:
         a = Archetype(name=a_name)
-        db.s.add(a)
-    db.s.commit()
+        sess.add(a)
+    sess.commit()
 
-    a = db.s.query(Archetype).first()
+    a = sess.query(Archetype).first()
     assert(a)
 
 # Copyright (C) 2008 Morgan Stanley

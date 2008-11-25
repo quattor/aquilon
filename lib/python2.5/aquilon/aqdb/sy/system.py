@@ -1,14 +1,5 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Systems are higher level constructs which can provide services """
-
-
 from datetime import datetime
-import os
-import sys
-
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
@@ -57,7 +48,7 @@ class System(Base):
 
     mac             = Column(AqMac(17), nullable = True)
     ip              = Column(IPV4, nullable = True)
-    network_id      = Column(Integer, ForeignKey(Network.c.id,
+    network_id      = Column(Integer, ForeignKey('network.id',
                                                  name = 'SYSTEM_NET_ID_FK'),
                                                 nullable = True)
 
@@ -68,7 +59,6 @@ class System(Base):
 
     dns_domain      = relation(DnsDomain)
     network         = relation(Network, backref = 'interfaces')
-
 
     __mapper_args__ = {'polymorphic_on' : system_type}
 

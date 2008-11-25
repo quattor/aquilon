@@ -39,9 +39,8 @@ model.append_constraint(UniqueConstraint('name','vendor_id',
 
 table = model
 
-def populate(db, *args, **kw):
-    s = db.session()
-    mlist=s.query(Model).all()
+def populate(sess, *args, **kw):
+    mlist=sess.query(Model).all()
 
     if not mlist:
 
@@ -77,17 +76,16 @@ def populate(db, *args, **kw):
 
         for i in f:
             m = Model(name = i[1],
-                      vendor = s.query(Vendor).filter_by(name =i[0]).one(),
+                      vendor = sess.query(Vendor).filter_by(name =i[0]).one(),
                       machine_type = i[2])
-            s.add(m)
+            sess.add(m)
 
         try:
-            s.commit()
+            sess.commit()
         except Exception,e:
             print e
         finally:
-            s.close()
-        #print 'created models %s'%(s.query(Model).all())
+            sess.close()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

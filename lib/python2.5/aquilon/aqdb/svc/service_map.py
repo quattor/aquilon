@@ -1,14 +1,6 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Maps service instances to locations. See class.__doc__ """
 
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
@@ -43,11 +35,11 @@ class ServiceMap(Base):
     location         = relation(Location, backref = 'service_maps')
     service_instance = relation(ServiceInstance, backref='service_map',
                                 passive_deletes = True)
-#    service         = synonym('_service') ???
 
     def _service(self):
         return self.service_instance.service
     service = property(_service)
+
     def __repr__(self):
         return '(Service Mapping) %s at %s (%s)'%(
             self.service_instance.service, self.location.name,
@@ -62,19 +54,8 @@ service_map.append_constraint(
 
 table = service_map
 
-def populate(db, *args, **kw):
-
-    from sqlalchemy import insert
-
-    s = db.session()
-
-    service_map.create(checkfirst = True)
-
-
-
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

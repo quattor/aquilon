@@ -1,18 +1,7 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Company is a subclass of Location """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.loc.location import Location, location
-
+from aquilon.aqdb.loc.location import Location
 
 class Company(Location):
     """ Company is a subtype of location """
@@ -28,18 +17,15 @@ company.primary_key.name = 'company_pk'
 
 table = company
 
-def populate(db, *args, **kw):
-    s=db.session()
+def populate(sess, *args, **kw):
 
-    company.create(checkfirst = True)
-
-    if len(s.query(Company).all()) < 1:
+    if len(sess.query(Company).all()) < 1:
         a = Company(name='ms', fullname = 'root node')
         #NO PARENT FOR THE ROOT NODE: breaks connect_by
         #TODO: audit for null parents in location table
         #      where its not the root node
-        s.add(a)
-        s.commit()
+        sess.add(a)
+        sess.commit()
 
 
 # Copyright (C) 2008 Morgan Stanley

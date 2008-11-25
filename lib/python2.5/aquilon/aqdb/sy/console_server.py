@@ -1,14 +1,5 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-""" At the moment,
-    sublass of System """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
+""" The stores the hostname/mac/ip of specialized appliances for console service
+    to machines and telco gear """
 
 from sqlalchemy import (Integer, String, Column, ForeignKey)
 from sqlalchemy.orm import relation, backref
@@ -38,28 +29,6 @@ console_server = ConsoleServer.__table__
 console_server.primary_key.name = 'cons_srv_pk'
 
 table = console_server
-
-def populate(db, *args, **kw):
-    if len(db.s.query(ConsoleServer).all()) < 1:
-        from aquilon.aqdb.net.dns_domain import DnsDomain
-        nm = 'test-cons-svr'
-
-        #dom = db.s.query(DnsDomain).filter_by(name = 'one-nyp.ms.com').one()
-        #assert(dom)
-
-        # Requires ConsoleServerHw as a parameter
-        #cs = ConsoleServer(name=nm, dns_domain=dom)
-        #db.s.add(cs)
-        #try:
-            #db.s.commit()
-        #except Exception, e:
-            #print e
-            #db.s.rollback()
-            #return False
-
-    #cs = db.s.query(ConsoleServer).filter_by(name=nm).one()
-    #assert(cs)
-    #assert(cs.dns_domain)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

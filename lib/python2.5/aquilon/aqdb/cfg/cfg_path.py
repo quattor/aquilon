@@ -1,9 +1,8 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ The tables/objects/mappings related to configuration in aquilon """
 
-from datetime import datetime
-import sys
 import os
+import sys
+from datetime import datetime
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint, Index)
@@ -46,7 +45,8 @@ Index('cfg_relative_path_idx', cfg_path.c.relative_path)
 table = cfg_path
 
 def populate(db, *args, **kw):
-    if len(db.s.query(CfgPath).all()) > 0:
+    sess = db.Session()
+    if len(sess.query(CfgPath).all()) > 0:
         return
 
     cfg_base = db.config.get("broker", "kingdir")
@@ -76,18 +76,18 @@ def populate(db, *args, **kw):
         if not slash:
             continue
         try:
-            dbtld = db.s.query(Tld).filter_by(type=tld).one()
+            dbtld = sess.query(Tld).filter_by(type=tld).one()
             f = CfgPath(tld=dbtld,relative_path=relative_path)
-            db.s.add(f)
+            sess.add(f)
         except Exception, e:
             sys.stderr.write(e)
-            db.s.rollback()
+            sess.rollback()
             continue
 
-    db.s.commit()
-    print 'created %s cfg_paths'%(len(db.s.query(CfgPath).all()))
+    sess.commit()
+    print 'created %s cfg_paths'%(len(sess.query(CfgPath).all()))
 
-    b=db.s.query(CfgPath).first()
+    b=sess.query(CfgPath).first()
     assert(b)
     assert(b.tld)
 

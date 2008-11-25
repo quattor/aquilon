@@ -1,7 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ ChassisSlot sets up a structure for tracking position within a chassis. """
-import sys
-import os
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relation, backref
@@ -49,15 +46,15 @@ table = chassis_slot
 
 # We don't create any chassis anymore, so there's no point in this...
 
-#def populate(db, *args, **kw):
+#def populate(sess, *args, **kw):
 #
-#    if len(db.s.query(ChassisSlot).all()) < 1:
-#        for c in db.s.query(Chassis).all():
+#    if len(sess.query(ChassisSlot).all()) < 1:
+#        for c in sess.query(Chassis).all():
 #            for node in range(1, 17):
 #                a = ChassisSlot(chassis=c, slot_number=node)
-#                db.s.add(a)
-#        db.s.commit()
-#        print 'created %d chassis slots' % db.s.query(ChassisSlot).count()
+#                sess.add(a)
+#        sess.commit()
+#        print 'created %d chassis slots' % sess.query(ChassisSlot).count()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

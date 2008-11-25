@@ -1,5 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
@@ -43,4 +41,3 @@ def confirm(prompt=None, resp=False):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-
