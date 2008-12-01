@@ -1,7 +1,9 @@
 import os
 import sys
 import types
+import tempfile
 import ms.version
+import subprocess as sp
 
 if not sys.modules.has_key('pyparsing'):
     ms.version.addpkg('pyparsing', '1.5.0', 'dist')
@@ -15,99 +17,39 @@ if not sys.modules.has_key('sqlalchemy'):
     ms.version.addpkg('sqlalchemy', '0.4.8', 'dist')
     import sqlalchemy
     import warnings
-    warnings.warn('schema2dot: loading sqlalchemy on my own')
+    #warnings.warn('schema2dot: loading sqlalchemy on my own')
 
-from sqlalchemy.orm.properties import PropertyLoader
+if not sys.modules.has_key('pil'):
+    ms.version.addpkg('pil','1.1.6')
+
+if not sys.modules.has_key('ms.modulecmd'):
+    ms.version.addpkg("ms.modulecmd", "1.0.0", "dev")
+from ms.modulecmd import Modulecmd
+
+m = Modulecmd()
+m.load('fsf/graphviz/2.6')
+
+#TODO:put this in the module itself, not here
+os.environ['LD_LIBRARY_PATH'] += ':/ms/dist/fsf/PROJ/libtool/1.5.18/lib'
+
 from sqlalchemy.orm import sync
+from sqlalchemy import Table, text
+from sqlalchemy.orm.properties import PropertyLoader
+from sqlalchemy.databases.postgres import PGDialect
 
-__all__ = ['create_uml_graph', 'create_schema_graph', 'show_uml_graph',
-           'show_schema_graph']
+__all__ = ['show_schema_graph', 'create_schema_graph']
+           #, 'show_uml_graph', 'create_uml_graph']
 
-def _setup_graphviz():
-    if os.environ['PATH'].find('graphviz') < 0:
-        from aquilon.config import Config
-        from ConfigParser   import NoOptionError
+def create_uml_graph(mappers,
+                     show_operations=True,
+                     show_attributes=True,
+                     show_multiplicity_one=False,
+                     show_datatypes=True,
+                     linewidth="1.0",
+                     font="Sans-Serif"):
 
-        try:
-            c = Config()
-        except Exception, e:
-            print >> sys.stderr, "failed to read configuration: %s" % e
-            sys.exit(os.EX_CONFIG)
-
-        try:
-            _GRAPHVIZ = c.get('DEFAULT', 'graphviz_dir')
-        except NoOptionError:
-            _GRAPHVIZ='/ms/dist/fsf/PROJ/graphviz/2.6/bin'
-
-        assert _GRAPHVIZ
-        os.environ['PATH'] += ':%s'%(_GRAPHVIZ)
-        return _GRAPHVIZ
-
-#TODO: schema/uml as an argument (DRY)
-def write_schema_graph(db, image_name = "/tmp/aqdb_schema.png"):
-    gv_path = _setup_graphviz()
-    try:
-        temp_fd, temp_file_name = tempfile.mkstemp(prefix='aqdbGraph',
-                                                   suffix='.dot',
-                                                   dir='/tmp')
-        graph = create_schema_graph(metadata = db.meta)
-        graph.write_dot(temp_file_name)
-        cmd = '%s/dot -Tpng -o %s %s'%(gv_path, image_name, temp_file_name)
-        #print 'running %s'%(cmd)
-        p = sp.Popen(cmd, shell  = True, stdout = sp.PIPE, stderr = sp.PIPE)
-        out,err = p.communicate()
-        if out:
-            print out
-            return False
-        elif err:
-            print err
-            return False
-        else:
-            return True
-    finally:
-        os.close(temp_fd)
-        os.remove(temp_file_name)
-    #TODO: use PIL's show/save_schema_graph(db, name)
-
-def _mk_label(mapper, show_operations, show_attributes,
-              show_datatypes, bordersize):
-    html = '''
-<<TABLE CELLSPACING="0" CELLPADDING="1" BORDER="0" CELLBORDER="%s" ALIGN="LEFT"
-><TR><TD><FONT POINT-SIZE="10">%s</FONT></TD></TR>'''%(
-        bordersize, mapper.class_.__name__)
-
-    def format_col(col):
-        colstr = '+%s' % (col.name)
-        if show_datatypes:
-            colstr += ' : %s' % (col.type.__class__.__name__)
-        return colstr
-
-    if show_attributes:
-        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(
-                    format_col(col) for col in sorted(
-                        mapper.columns, key=lambda col:not col.primary_key))
-    else:
-        [format_col(col) for col in sorted(
-            mapper.columns, key=lambda col:not col.primary_key)]
-    if show_operations:
-        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>'%'<BR ALIGN="LEFT"/>'.join(
-            '%s(%s)' % (name,", ".join(default is _mk_label and (
-                "%s") % arg or (
-                "%s=%s" % (arg,repr(default))) for default,arg in zip(
-                (func.func_defaults and len(func.func_code.co_varnames)-1-(
-                    len(func.func_defaults) or 0) or
-                 func.func_code.co_argcount-1)*[_mk_label]+list(
-                    func.func_defaults or []),
-                func.func_code.co_varnames[1:]))) for name, func in
-            mapper.class_.__dict__.items() if isinstance(
-                func, types.FunctionType) and
-        func.__module__ == mapper.class_.__module__)
-    html+= '</TABLE>>'
-    return html
-
-
-def create_uml_graph(mappers, show_operations=True, show_attributes=True, show_multiplicity_one=False, show_datatypes=True, linewidth="1.0", font="Sans-Serif"):
-    graph = pydot.Dot(prog='neato',mode="major",overlap="0",sep="0.01",pack="True",dim="3")
+    graph = pydot.Dot(prog='neato', mode="major", overlap="0", sep="0.01",
+                      pack="True",dim="3")
     relations = set()
 
     for mapper in mappers:
@@ -172,36 +114,7 @@ def create_uml_graph(mappers, show_operations=True, show_attributes=True, show_m
 
     return graph
 
-from sqlalchemy.databases.postgres import PGDialect
-from sqlalchemy import Table, text
 
-def _render_table_html(table, metadata, show_indexes, show_datatypes):
-    def format_col_type(col):
-        try:
-            return col.type.get_col_spec()
-        except NotImplementedError:
-            return str(col.type)
-    def format_col_str(col):
-         if show_datatypes:
-             return "- %s : %s" % (col.name, format_col_type(col))
-         else:
-             return "- %s" % col.name
-    html = '<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="CENTER">%s</TD></TR><TR><TD BORDER="1" CELLPADDING="0"></TD></TR>' % table.name
-
-    html += ''.join('<TR><TD ALIGN="LEFT" PORT="%s">%s</TD></TR>' % (col.name, format_col_str(col)) for col in table.columns)
-    if isinstance(metadata.bind.dialect, PGDialect):
-        # postgres engine doesn't reflect indexes
-        indexes = dict(
-                       (name,defin) for name,defin in metadata.bind.execute(
-                        text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s'" % table.name)))
-        if indexes and show_indexes:
-            html += '<TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
-            for index, defin in indexes.items():
-                ilabel = 'UNIQUE' in defin and 'UNIQUE ' or 'INDEX '
-                ilabel += defin[defin.index('('):]
-                html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % ilabel
-    html += '</TABLE>>'
-    return html
 
 def create_schema_graph(tables=None,
                         metadata=None,
@@ -249,23 +162,83 @@ def create_schema_graph(tables=None,
             graph.add_edge(graph_edge)
     return graph
 
-def show_uml_graph(*args, **kwargs):
+def show_uml_graph(db,image_name='/tmp/aqdb_uml.png', *args, **kw):
     from cStringIO import StringIO
     from PIL import Image
-    iostream = StringIO(create_uml_graph(*args, **kwargs).create_png())
-    Image.open(iostream).show(command=kwargs.get('command','gwenview'))
-
-def show_schema_graph(db, name, *args, **kwargs):
-    from cStringIO import StringIO
-    from PIL import Image
-    iostream = StringIO(create_schema_graph(db, name).create_png())
+    iostream = StringIO(create_uml_graph(metadata=db.meta).create_png())
     #Image.open(iostream).show(command=kwargs.get('command','gwenview'))
-    Image.open(iostream).save(name)
+    Image.open(iostream).save(image_name)
 
+def show_schema_graph(db, image_name = "/tmp/aqdb_schema.png", *args, **kwargs):
+    from cStringIO import StringIO
+    from PIL import Image
+    iostream = StringIO(create_schema_graph(*args,**kw).create_png())
+    #Image.open(iostream).show(command=kwargs.get('command','gwenview'))
+    Image.open(iostream).save(image_name)
 
-""" def write_uml_graph(db, image_name = "aqdb_classes.dot"):
-    pass
-"""
+def _render_table_html(table, metadata, show_indexes, show_datatypes):
+    def format_col_type(col):
+        try:
+            return col.type.get_col_spec()
+        except NotImplementedError:
+            return str(col.type)
+    def format_col_str(col):
+         if show_datatypes:
+             return "- %s : %s" % (col.name, format_col_type(col))
+         else:
+             return "- %s" % col.name
+    html = '<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="CENTER">%s</TD></TR><TR><TD BORDER="1" CELLPADDING="0"></TD></TR>' % table.name
+
+    html += ''.join('<TR><TD ALIGN="LEFT" PORT="%s">%s</TD></TR>' % (col.name, format_col_str(col)) for col in table.columns)
+    if isinstance(metadata.bind.dialect, PGDialect):
+        # postgres engine doesn't reflect indexes
+        indexes = dict(
+                       (name,defin) for name,defin in metadata.bind.execute(
+                        text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s'" % table.name)))
+        if indexes and show_indexes:
+            html += '<TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
+            for index, defin in indexes.items():
+                ilabel = 'UNIQUE' in defin and 'UNIQUE ' or 'INDEX '
+                ilabel += defin[defin.index('('):]
+                html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % ilabel
+    html += '</TABLE>>'
+    return html
+
+def _mk_label(mapper, show_operations, show_attributes,
+              show_datatypes, bordersize):
+    html = '''
+<<TABLE CELLSPACING="0" CELLPADDING="1" BORDER="0" CELLBORDER="%s" ALIGN="LEFT"
+><TR><TD><FONT POINT-SIZE="10">%s</FONT></TD></TR>'''%(
+        bordersize, mapper.class_.__name__)
+
+    def format_col(col):
+        colstr = '+%s' % (col.name)
+        if show_datatypes:
+            colstr += ' : %s' % (col.type.__class__.__name__)
+        return colstr
+
+    if show_attributes:
+        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % '<BR ALIGN="LEFT"/>'.join(
+                    format_col(col) for col in sorted(
+                        mapper.columns, key=lambda col:not col.primary_key))
+    else:
+        [format_col(col) for col in sorted(
+            mapper.columns, key=lambda col:not col.primary_key)]
+    if show_operations:
+        html += '<TR><TD ALIGN="LEFT">%s</TD></TR>'%'<BR ALIGN="LEFT"/>'.join(
+            '%s(%s)' % (name,", ".join(default is _mk_label and (
+                "%s") % arg or (
+                "%s=%s" % (arg,repr(default))) for default,arg in zip(
+                (func.func_defaults and len(func.func_code.co_varnames)-1-(
+                    len(func.func_defaults) or 0) or
+                 func.func_code.co_argcount-1)*[_mk_label]+list(
+                    func.func_defaults or []),
+                func.func_code.co_varnames[1:]))) for name, func in
+            mapper.class_.__dict__.items() if isinstance(
+                func, types.FunctionType) and
+        func.__module__ == mapper.class_.__module__)
+    html+= '</TABLE>>'
+    return html
 
 
 """ from aquilon.aqdb.utils.schema2dot import create_schema_graph,
