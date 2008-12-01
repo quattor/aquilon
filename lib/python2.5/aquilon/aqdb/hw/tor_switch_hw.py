@@ -35,7 +35,7 @@ class TorSwitchHw(HardwareEntity):
     def hardware_name(self):
         if self.tor_switch:
             return ",".join(tor_switch.fqdn for tor_switch in self.tor_switch)
-        return HardwareEntity.hardware_name(self)
+        return self._hardware_name
 
 tor_switch_hw = TorSwitchHw.__table__
 tor_switch_hw.primary_key.name = 'tor_switch_hw_pk'
