@@ -1,13 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Represent secondary interfaces """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Integer, String, Column, ForeignKey)
 from sqlalchemy.orm import relation
@@ -35,28 +26,6 @@ auxiliary = Auxiliary.__table__
 auxiliary.primary_key.name = 'aux_pk'
 
 table = auxiliary
-
-def populate(db, *args, **kw):
-    if len(db.s.query(Auxiliary).all()) < 1:
-        from aquilon.aqdb.net.dns_domain import DnsDomain
-        nm = 'aquilon1-e1'
-
-        dom = db.s.query(DnsDomain).filter_by(name = 'one-nyp.ms.com').one()
-        assert(dom)
-
-        as=Auxiliary(name=nm, dns_domain=dom)
-        db.s.add(as)
-        try:
-            db.s.commit()
-        except Exception, e:
-            #FIXME: need a machine and host created to test the process
-            #print e
-            db.s.close()
-            return False
-
-    as=db.s.query(Auxiliary).filter_by(name=nm).one()
-    assert(as)
-    assert(as.dns_domain)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

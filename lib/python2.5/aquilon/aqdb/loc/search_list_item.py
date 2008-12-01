@@ -1,13 +1,5 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
-
+""" an element of a list of location types """
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
@@ -63,13 +55,12 @@ LocationSearchList.location_types = relation(SearchListItem,
 
 table = search_list_item
 
-def populate(db, *args, **kw):
-    s = db.session()
+def populate(sess, *args, **kw):
 
-    m = s.query(LocationSearchList).first()
+    m = sess.query(LocationSearchList).first()
     assert m
 
-    if len(s.query(SearchListItem).all()) < 1:
+    if len(sess.query(SearchListItem).all()) < 1:
 
         sli1 = SearchListItem(location_type = 'chassis', lsl = m, position = 1)
         sli2 = SearchListItem(location_type = 'rack', lsl = m, position = 2)
@@ -81,12 +72,10 @@ def populate(db, *args, **kw):
         sli8 = SearchListItem(location_type = 'world', lsl = m, position = 8)
 
         for i in (sli1, sli2, sli3, sli4, sli5, sli6, sli7):
-            s.add(i)
-            s.commit()
+            sess.add(i)
+            sess.commit()
 
-        #print 'created Location Search List %s '%(m)
-
-    cnt = len(s.query(SearchListItem).all())
+    cnt = len(sess.query(SearchListItem).all())
     assert cnt > 6
 
 
@@ -96,4 +85,3 @@ def populate(db, *args, **kw):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

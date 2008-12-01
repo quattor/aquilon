@@ -2,10 +2,6 @@
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
 
-import os
-import sys
-
-
 from aquilon.aqdb.db_factory import monkeypatch
 from aquilon.aqdb.table_types.name_table import make_name_class
 
@@ -24,13 +20,12 @@ def __init__(self,name):
 def __repr__(self):
     return str(self.name)
 
-def populate(db, *args, **kw):
+def populate(sess, *args, **kw):
     from sqlalchemy import insert
     from sqlalchemy.exceptions import IntegrityError
 
-    s = db.session()
 
-    if len(s.query(Status).all()) < len(_statuses):
+    if len(sess.query(Status).all()) < len(_statuses):
         i=status.insert()
         for name in _statuses:
             try:
@@ -38,7 +33,7 @@ def populate(db, *args, **kw):
             except IntegrityError:
                 pass
 
-    assert len(s.query(Status).all()) == len(_statuses)
+    assert len(sess.query(Status).all()) == len(_statuses)
 
 
 

@@ -1,15 +1,7 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ If you can read this you should be documenting """
-
 from __future__ import with_statement
-from datetime import datetime
-import sys
+from datetime   import datetime
 import os
-
-#if __name__ == '__main__':
-#    DIR = os.path.dirname(os.path.realpath(__file__))
-#    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-#    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, UniqueConstraint)
@@ -41,7 +33,9 @@ cpu.append_constraint(
 table = cpu
 
 def populate(db, *args, **kw):
-    if len(db.s.query(Cpu).all()) < 1:
+    sess = db.Session()
+
+    if len(sess.query(Cpu).all()) < 1:
         import re
         m=re.compile('speed')
         cfg_base = db.config.get("broker", "kingdir")
@@ -70,7 +64,7 @@ def populate(db, *args, **kw):
 
         for vendor,name,speed in cpus:
             kw={}
-            vendor=db.s.query(Vendor).filter_by(name=vendor).first()
+            vendor=sess.query(Vendor).filter_by(name=vendor).first()
 
             assert(vendor)
             assert(name)
@@ -86,9 +80,9 @@ def populate(db, *args, **kw):
                 assert(isinstance(a,Cpu))
 
                 try:
-                    db.s.add(a)
+                    sess.add(a)
                 except Exception,e:
-                    db.s.rollback()
+                    sess.rollback()
                     print e
                     continue
             else:
@@ -99,22 +93,22 @@ def populate(db, *args, **kw):
                     print >> sys.stderr, msg
 
         try:
-            av = db.s.query(Vendor).filter_by(name='aurora_vendor').one()
+            av = sess.query(Vendor).filter_by(name='aurora_vendor').one()
             a = Cpu(vendor=av, name='aurora_cpu', speed=0,
                     comments='Placeholder Aurora CPU type.')
-            db.s.add(a)
+            sess.add(a)
         except Exception, e:
-            db.s.rollback()
+            sess.rollback()
             print e
 
         try:
-            db.s.commit()
+            sess.commit()
         except Exception,e:
-            db.s.rollback()
+            sess.rollback()
             sys.stderr.write(str(e))
 
-        cnt = len(db.s.query(Cpu).all())
-        print 'Created %s cpus'%(cnt)
+        cnt = len(sess.query(Cpu).all())
+        print 'created %s cpus'%(cnt)
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

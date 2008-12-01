@@ -1,18 +1,8 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Country is a subclass of Location """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.loc.location import Location, location
-
+from aquilon.aqdb.loc.location import Location
 
 class Country(Location):
     """ Country is a subtype of location """
@@ -28,10 +18,9 @@ country.primary_key.name = 'country_pk'
 
 table = country
 
-def populate(db, *args, **kw):
-    s = db.session()
+def populate(sess, *args, **kw):
 
-    if len(s.query(Country).all()) < 1:
+    if len(sess.query(Country).all()) < 1:
         from aquilon.aqdb.loc.continent import Continent
         from aquilon.aqdb.loc.hub import Hub
         import aquilon.aqdb.dsdb as dsdb_
@@ -41,7 +30,7 @@ def populate(db, *args, **kw):
 
         cnts = {}
 
-        for c in s.query(Continent).all():
+        for c in sess.query(Continent).all():
             cnts[c.name] = c
 
         for row in dsdb.dump('country'):
@@ -49,16 +38,16 @@ def populate(db, *args, **kw):
             a = Country(name = str(row[0]),
                         fullname = str(row[1]),
                         parent = cnts[str(row[2])])
-            s.add(a)
+            sess.add(a)
 
-        s.commit()
+        sess.commit()
 
         try:
-            s.commit()
+            sess.commit()
         except Exception, e:
             sys.stderr.write(e)
 
-        print 'created %s countries'%(len(s.query(Country).all()))
+        print 'created %s countries'%(len(sess.query(Country).all()))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

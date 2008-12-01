@@ -1,18 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Campus is a subclass of Location """
-
-import os
-import sys
-
-_DIR    = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', '..', '..')
-
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
-
-#sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-import aquilon.aqdb.depends
-
 from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.loc.location import Location, location
@@ -58,7 +44,7 @@ class CampusDiffStruct(object):
 
         q = self.sess.query(Building)
         self.buildings  = q.filter(
-            Location.c.name.in_(building_names)).all()
+            Location.name.in_(building_names)).all()
 
         self.data = {}
         self.data['cities']     = []

@@ -1,19 +1,10 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Top of Rack Swtiches """
-
-import sys
-import os
 from datetime import datetime
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy      import Table, Column, Integer, ForeignKey, DateTime
 from sqlalchemy.orm  import relation, deferred, backref
 
-from aquilon.aqdb.hw.hardware_entity  import HardwareEntity
+from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 
 #TODO: use selection of the tor_switch_hw specs to dynamically populate
 #      default values for all of the attrs where its possible

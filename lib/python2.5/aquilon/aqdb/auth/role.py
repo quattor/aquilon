@@ -5,10 +5,10 @@ Role = make_name_class('Role', 'role')
 role = Role.__table__
 table = role
 
-def populate(db, *args, **kw):
+def populate(sess, *args, **kw):
     roles = ['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
 
-    if db.s.query(Role).count() >= len(roles):
+    if sess.query(Role).count() >= len(roles):
         return
 
     from sqlalchemy import insert
@@ -17,10 +17,9 @@ def populate(db, *args, **kw):
 
     for i in roles:
         r=Role(name = i, comments = 'AutoPopulated')
-        db.s.add(r)
+        sess.add(r)
         assert(r)
-    db.s.commit()
-    print '\ncreated %s roles'%(len(roles))
+    sess.commit()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

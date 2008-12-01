@@ -1,23 +1,12 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-
 """ Column type to squash trailing/leading whitespace and lower case """
-import sys
-import os
+import sqlalchemy
 
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
-import sqlalchemy.types as types
-
-
-class AqStr(types.TypeDecorator):
+class AqStr(sqlalchemy.types.TypeDecorator):
     """a type that decorates String, normalizes case to lower and strips
         leading and trailing whitespace """
 
-    impl = types.String
+    impl = sqlalchemy.types.String
 
     def process_bind_param(self, value, engine):
         if value is None:

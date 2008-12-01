@@ -1,14 +1,6 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-""" If you can read this you should be documenting """
+""" The Location structures represent  """
 
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint, text)
@@ -17,7 +9,6 @@ from sqlalchemy.orm import deferred, relation, backref, object_session
 
 from aquilon.aqdb.db_factory import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-
 
 class Location(Base):
     __tablename__ = 'location'
@@ -32,8 +23,6 @@ class Location(Base):
         'location.id', name='loc_parent_fk'), nullable = True)
 
     location_type = Column(AqStr(32), nullable = False)
-
-    #KEEP FOR BACKWARDS COMPATIBILITY FOR NOW...
 
     #location_type_id = Column(Integer, ForeignKey(
     #    'location_type.id', ondelete = 'CASCADE',

@@ -39,7 +39,7 @@ pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
                 'interface', 'observed_mac', 'machine_specs', 'chassis_slot',
-                'console_server_hw', 'serial_cnxn'] #model_subtype
+                'console_server_hw', 'serial_cnxn']
 
 pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
                 'chassis', 'tor_switch', 'auxiliary', 'manager',
@@ -161,20 +161,34 @@ def main(*args, **kw):
             print e
             sys.exit(2)
     elif opts.populate:
+        s = db.Session()
         for mod in mods_to_populate:
             debug('populating %s'%(mod.table.name))
             try:
-                mod.populate(db, opts.full)
+                # special cases at the moment... usually for the db.config obj
+                if (mod.table.name    == 'network'
+                    or mod.table.name == 'cfg_path'
+                    or mod.table.name == 'tld'
+                    or mod.table.name == 'cpu'
+                    or mod.table.name == 'vendor'):
+
+                    mod.populate(db,opts.full)
+                else:
+                    mod.populate(s, opts.full)
+
             except Exception, e:
                 print >>sys.stderr, "Error populating %s" % mod.table.name
                 print_exc(file=sys.stderr)
-    try:
-        cps = tcp.TestCampusPopulate(db.Session(), debug=opts.debug)
-        cps.setUp()
-        cps.testPopulate()
-    except Exception, e:
-        print e
-        sys.stderr.write(str(e))
+
+        try:
+            cps = tcp.TestCampusPopulate(s, debug=opts.debug)
+            cps.setUp()
+            cps.testPopulate()
+            print 'created campuses'
+        except Exception, e:
+            print e
+            sys.stderr.write(str(e))
+
     else:
         pass
 

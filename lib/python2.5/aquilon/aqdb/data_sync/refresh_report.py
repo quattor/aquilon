@@ -22,8 +22,6 @@ class RefreshReport(object):
             pprint(self.errs, indent=4)
 
     def __repr__(self):
-#        if (not self.adds and not self.dels and not self.upds):
-#            return ''
         msg = ''
         if self.adds:
             msg += 'Additions: %s\n\n'%(self.adds)
@@ -40,4 +38,3 @@ class RefreshReport(object):
 # This module is part of Aquilon
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-

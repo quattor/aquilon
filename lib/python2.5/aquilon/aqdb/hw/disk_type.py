@@ -1,13 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ For the various types of disks we use """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from aquilon.aqdb.table_types.subtype import subtype
 
@@ -19,14 +10,14 @@ table = disk_type
 
 _disk_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash']
 
-def populate(db, *args, **kw):
-    if len(db.s.query(DiskType).all()) < 1:
+def populate(sess, *args, **kw):
+    if len(sess.query(DiskType).all()) < 1:
         for t in _disk_types:
             dt = DiskType(type = t, comments = 'AutoPopulated')
-            db.s.add(dt)
-        db.s.commit()
+            sess.add(dt)
+        sess.commit()
 
-    dt = db.s.query(DiskType).first()
+    dt = sess.query(DiskType).first()
     assert(dt)
 
 # Copyright (C) 2008 Morgan Stanley

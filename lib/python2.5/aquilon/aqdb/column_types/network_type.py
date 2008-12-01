@@ -1,16 +1,7 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Enum column type for network table """
-
 from exceptions import TypeError
-import sys
-import os
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
-import sqlalchemy.types as types
+import sqlalchemy
 
 
 _NETWORK_TYPES = ['transit', 'vip', 'management', 'unknown', 'grid_domain',
@@ -22,11 +13,11 @@ class NetworkTypeError(TypeError):
     def __str__(self):
         return "Illegal NetworkType '%s'" % self.value
 
-class NetworkType(types.TypeDecorator):
+class NetworkType(sqlalchemy.types.TypeDecorator):
     """a type that decorates String, and serves as an enum-like value check
        for the network table"""
 
-    impl = types.String
+    impl = sqlalchemy.types.String
 
     def process_bind_param(self, value, engine):
         value = value.strip().lower()

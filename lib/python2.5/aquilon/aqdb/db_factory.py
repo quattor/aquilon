@@ -1,13 +1,13 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """To be imported by classes and modules requiring aqdb access"""
 from __future__ import with_statement
 
+import re
 import os
 import pwd
 import sys
 
-import getpass
-import StringIO
+from getpass import getpass
+from StringIO import StringIO
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, '..', '..')
@@ -42,13 +42,6 @@ def debug(examinee,*args,**kw):
     else:
         pass
 
-def noisy_exit(msg=None):
-    if not msg:
-        #TODO: get the traceback another way
-        msg = 'Unhandled Exception...'
-    sys.stderr.write('%s\n'%msg)
-    sys.exit(9)
-
 def monkeypatch(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
@@ -74,7 +67,6 @@ class db_factory(object):
     __shared_state = {}
 
     def __init__(self, *args, **kw):
-        #TODO: accept mock as arg
         self.__dict__ = self.__shared_state
 
         try:
@@ -85,8 +77,12 @@ class db_factory(object):
 
         self.dsn = self.config.get('database', 'dsn')
 
-        #Let's be extra careful with prod when we're not CDB
-        if (self.dsn.endswith('@NYPO_AQUILON') and
+        #extra care with prod when not running as cdb.
+        #in prod on a reboot it may hang (waiting for input on stdin)
+        #never tested that...
+
+        prod_re = re.compile('@NYPO_AQUILON')
+        if (prod_re.search(self.dsn) and
                     os.environ['USER'] != 'cdb'):
 
             msg='your DSN is on the production database, are you SURE? '
@@ -94,16 +90,10 @@ class db_factory(object):
                 print 'Thanks for playing, come again.'
                 sys.exit(9)
 
-        #Handle Mock Engine
-        if 'mock' in args:
-            self.mock = True
-            self.buf = StringIO.StringIO()
-            self.outfile = kw.pop('outfile','/tmp/DDL.sql')
-            self.engine = create_engine(self.dsn,
-                                        strategy='mock',
-                                        executor = self.buffer_output)
+        self.buf = StringIO()  #for mock engine output
+
         #ORACLE
-        elif self.dsn.startswith('oracle'):
+        if self.dsn.startswith('oracle'):
             import cx_Oracle
             self.schema = self.config.get('database','dbuser')
 
@@ -111,17 +101,28 @@ class db_factory(object):
 
             if len(passwds) < 1:
                 passwds.append(
-                    getpass.getpass(
+                    getpass(
                         'Can not determine your password (%s).\nPassword:'%(
                             self.dsn)))
             self.login(passwds)
+
+        #DB2
+        elif self.dsn.startswith('ibm_db_sa'):
+            import ibm_db_sa
+            import ibm_db_dbi
+
+            user=''
+            self.engine = create_engine(
+                'ibm_db_sa:///NYTD_AQUILON?UID=%s'%(user))
+            self.connection = self.engine.connect()
+            self.engine.execute('set current schema AQUILON')
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
             self.connection = self.engine.connect()
         else:
-            msg = "supported database datasources are sqlite and oracle.\n"
+            msg = "supported database datasources are db2, sqlite and oracle.\n"
             msg += "yours is '%s' "%(self.dsn)
             sys.stderr.write(msg)
             sys.exit(9)
@@ -140,19 +141,11 @@ class db_factory(object):
             self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert(self.Session)
 
-        # This is an incredibly bad idea.  Don't use this variable, just
-        # create a session as necessary.  The scoped_session will ensure
-        # that you leverage a session in a local thread.  Mixing use of
-        # this variable with use of a scoped_session will result in
-        # inconsistencies and general confusion.
-        self.s = self.Session()
-
     def session(self):
         return self.Session()
 
     def login(self,passwds):
         errs = []
-        import re
         pswd_re = re.compile('PASSWORD')
         dsn_copy = self.dsn
 
@@ -203,7 +196,6 @@ class db_factory(object):
 
     def safe_execute(self, stmt, *args, **kw):
         """ convenience wrapper """
-        #debug('in safe execute with args: %s, kw: %s'%(args, kw))
 
         dbg = kw.pop('debug', False)
         verbose = kw.pop('verbose', False)
@@ -223,7 +215,7 @@ class db_factory(object):
             print >> sys.stderr, e
 
     def get_id(self, table, key, value):
-        """Convenience wrapper"""
+        """ convenience wrapper """
         res = self.safe_execute("SELECT id from %s where %s = :value"
                 % (table, key), value=value)
         if res:
@@ -235,10 +227,15 @@ class db_factory(object):
     def buffer_output(self, s, p=""):
         return self.buf.write(s + p)
 
-    def flush_to_file(self, outfile=None, *args, **kw):
+    def ddl(self, outfile=None):
+        #TODO: reflect out the non-null constraints from oracle dbs (how???)
+        mock_engine = create_engine(self.dsn, strategy='mock',
+                                    executor=self.buffer_output)
+        self.meta.reflect()
+        self.meta.create_all(mock_engine)
         if outfile:
             with open(outfile, 'w') as f:
-                f.write(self.buf.getvalue())
+               f.write(self.buf.getvalue())
         else:
             print >> sys.stderr, self.buf.getvalue()
 
@@ -246,43 +243,6 @@ class db_factory(object):
 #TODO: s/db_factory/DbFactory/g
 DbFactory = db_factory
 
-if __name__ == '__main__':
-    #THE BORG OBJECT MAKES THIS IMPOSSIBLE TO TEST IN A SINGLE FILE...
-    #leave the obvious stuff out since everything imports this. We'll know if
-    #it's broken.
-
-    #debug('Testing creation of factory...')
-    #db = db_factory()
-    #debug(db.engine)
-    #debug(db.meta)
-    #del(db)
-
-    debug('\n\nTesting MockEngine')
-    outfile='/tmp/mock.sql'
-
-    db2 = db_factory('mock')
-    db2.dsn = 'oracle://satest:satest@nyt-aqdb.one-nyp.ms.com:1521/AQUILON'
-
-    from sqlalchemy import Table, Column, Integer, String
-    t1 = Table('db_factory_test_table', db2.meta,
-               Column('c1', Integer, primary_key = True),
-               Column('c2', String(20)))
-
-    db2.meta.create_all()
-    db2.flush_to_file(outfile)
-
-    debug(os.path.isfile(outfile))
-    #os.system('/bin/cat %s'%(outfile))
-
-    #TODO: assert the has the right content with cached copy?
-    debug('removing %s'%(outfile))
-    os.remove(outfile)
-
-    debug('writing from buffer to stderr...')
-
-    #can't use debug() here because it will *always write to stderr...
-    #if '--debug' in sys.argv:
-    #    db2.flush_to_file()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

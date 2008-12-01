@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -11,7 +10,7 @@ import unittest
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    BINDIR = os.path.dirname(os.path.realpath(__file__))
     SRCDIR = os.path.join(BINDIR, "..", "..")
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
@@ -28,20 +27,25 @@ class TestBrokerStart(unittest.TestCase):
 
     def teststart(self):
         # FIXME: Either remove any old pidfiles, or ignore it as a warning
-        # from stderr...
+        # from stderr... or IMHO (daqscott) if pid files exist and are knc or
+        # python processes, kill -9 the pids and delete the files (with a
+        # warning message it tickles you)
+
         config = Config()
         twistd = os.path.join(config.get("broker", "srcdir"), "bin", "twistd")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
+
         args = [twistd, "--pidfile", pidfile, "--logfile", logfile,
                 "aqd", "--config", config.baseconfig]
+
         p = Popen(args)
-        #p = Popen(args, stdout=PIPE, stderr=PIPE)
-        #(out, err) = p.communicate()
-        #self.assertEqual(err, "")
-        #self.assertEqual(out, "")
         self.assertEqual(p.wait(), 0)
+
         # FIXME: Check that it is listening on the correct port(s)...
+
+        # FIXME: If it fails, either cat the log file, or tell the user to try
+        # running '%s -bn aqd --config %s'%(twistd, config.baseconfig)
 
     def testrsynctemplateking(self):
         config = Config()

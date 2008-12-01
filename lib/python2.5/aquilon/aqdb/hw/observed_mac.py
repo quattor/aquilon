@@ -1,16 +1,8 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Observed Mac's are represent the occurance of seeing a mac address on
     the cam table of a given switch. They are created to allow for automated
     machine builds and ip assignment """
 
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import Table, Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm                  import relation, deferred, backref

@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Hub is a group of continents.
     Got that straight? A GROUP OF CONTINENTS.
 
@@ -15,18 +14,9 @@
 
     Really."""
 
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.loc.location import Location, location
-
 
 class Hub(Location):
     """ Hub is a subtype of location """
@@ -42,26 +32,20 @@ hub.primary_key.name = 'hub_pk'
 
 table = hub
 
-def populate(db, *args, **kw):
-
-    s = db.session()
-
-    hub.create(checkfirst = True)
+def populate(sess, *args, **kw):
 
     _hubs = {
         'hk':  'Asia',
         'ln' : 'Europe',
         'ny' : 'Americas',
-        #NO MORE TK HUB!
-        #'tk' : 'Japan'
-        }
+    }
 
-    if len(s.query(Hub).all()) < len(_hubs.keys()):
+    if len(sess.query(Hub).all()) < len(_hubs.keys()):
         for h in _hubs:
             #FIX ME: don't fix it on id = 1 (breaks in certain conditions)
             a = Hub(name=h, fullname = _hubs[h], parent_id = 1)
-            s.add(a)
-        s.commit()
+            sess.add(a)
+        sess.commit()
 
 
 # Copyright (C) 2008 Morgan Stanley

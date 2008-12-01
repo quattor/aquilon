@@ -1,9 +1,6 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ The module governing tables and objects that represent IP networks in
     Aquilon. """
 
-import sys
-import os
 from datetime import datetime
 from struct   import pack, unpack
 from socket   import inet_aton, inet_ntoa
@@ -155,8 +152,7 @@ def populate(db, full, *args, **kw):
     #TODO:
         #populate comments
         #populate all non np/dd networks asynchronously
-
-    s = db.session()
+    s = db.Session()
 
     if len(s.query(Network).limit(30).all()) < 1:
         import aquilon.aqdb.dsdb as dsdb_

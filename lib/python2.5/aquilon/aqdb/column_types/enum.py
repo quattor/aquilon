@@ -1,15 +1,6 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-
-""" A starting point for discriminator columns. A future version will dynamically pull all possible values at run-time with some clever caching.
+""" A starting point for discriminator columns. A future version will
+dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import types, exceptions
 
@@ -56,9 +47,6 @@ class Enum(types.TypeDecorator):
         return value
 
 def test_enum():
-    if not sys.modules.has_key('sqlalchemy'):
-        raise AssertionError('sqlalchemy module not in sys.modules')
-
     from sqlalchemy import (MetaData, Table, Column, Integer, insert)
 
     t = Table('foo', MetaData('sqlite:///'),

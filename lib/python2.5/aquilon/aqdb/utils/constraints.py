@@ -1,12 +1,6 @@
 """ functions for managing Oracle constraints """
 
 import re
-import os
-import sys
-
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-import aquilon.aqdb.db_factory as dbf
 
 #TODO:
     #double check we're not touching FKs... looked like we might be

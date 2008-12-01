@@ -1,21 +1,11 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ This module implements the AqMac column_type. """
-
-import sys
-import os
 import re
+import sqlalchemy
 
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
-import sqlalchemy.types as types
 
 from aquilon.exceptions_ import ArgumentError
 
-
-class AqMac(types.TypeDecorator):
+class AqMac(sqlalchemy.types.TypeDecorator):
     """ A type that decorates MAC address.
 
         It normalizes case to lower, strips leading and trailing whitespace,
@@ -26,7 +16,7 @@ class AqMac(types.TypeDecorator):
 
         """
 
-    impl = types.String
+    impl = sqlalchemy.types.String
 
     unpadded_re = re.compile(r'\b([0-9a-f])\b')
     nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')

@@ -1,20 +1,10 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
-
 """ The types module incorporates all the various discriminator classes
     used by the project. Since they all must be pre-seeded to make the
     other modules load properly, we seperate them here to get them done
     before ahead of the other modules. """
 
-
 import types
 from datetime import datetime
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Sequence, Integer, String, DateTime,
                         UniqueConstraint, PrimaryKeyConstraint, select)
@@ -72,12 +62,6 @@ def populate_subtype(cls, items):
     else:
         raise TypeError('items arg must be a list')
 
-def get_subtype_id(nm=None,engine=None,cls=None):
-    """ To keep session out of __init__ methods for systems """
-    tbl = cls.__table__
-    assert isinstance(tbl,Table)
-    sl=select([tbl.c.id], tbl.c.type=='%s'%(nm))
-    return engine.execute(sl).fetchone()[0]
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

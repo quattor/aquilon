@@ -23,14 +23,18 @@ if not sys.modules.has_key('pil'):
     ms.version.addpkg('pil','1.1.6')
 
 if not sys.modules.has_key('ms.modulecmd'):
-    ms.version.addpkg("ms.modulecmd", "1.0.0", "dev")
+    ms.version.addpkg("ms.modulecmd", "1.0.0")
 from ms.modulecmd import Modulecmd
 
 m = Modulecmd()
 m.load('fsf/graphviz/2.6')
 
 #TODO:put this in the module itself, not here
-os.environ['LD_LIBRARY_PATH'] += ':/ms/dist/fsf/PROJ/libtool/1.5.18/lib'
+_LIBTOOL_PATH = '/ms/dist/fsf/PROJ/libtool/1.5.18/lib'
+if os.environ.get('LD_LIBRARY_PATH', None):
+    os.environ['LD_LIBRARY_PATH'] += ':' + _LIBTOOL_PATH
+else:
+    os.environ['LD_LIBRARY_PATH'] = _LIBTOOL_PATH
 
 from sqlalchemy.orm import sync
 from sqlalchemy import Table, text

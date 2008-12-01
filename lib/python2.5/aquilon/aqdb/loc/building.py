@@ -1,14 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 """ Building is a subclass of Location """
-
-import sys
-import os
-
-if __name__ == '__main__':
-    DIR = os.path.dirname(os.path.realpath(__file__))
-    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-    import aquilon.aqdb.depends
-
 from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.loc.location import Location, location
@@ -29,8 +19,9 @@ building.primary_key.name = 'building_pk'
 
 table = building
 
-def populate(db, *args, **kw):
-    if len(db.s.query(Building).all()) > 0:
+def populate(sess, *args, **kw):
+
+    if len(sess.query(Building).all()) > 0:
         return
 
     from aquilon.aqdb.loc.city import City
@@ -38,7 +29,7 @@ def populate(db, *args, **kw):
     dsdb = dsdb_.DsdbConnection()
 
     city = {}
-    for c in db.s.query(City).all():
+    for c in sess.query(City).all():
         city[c.name] = c
 
     for row in dsdb.dump('building'):
@@ -51,9 +42,9 @@ def populate(db, *args, **kw):
         a = Building(name = str(row[0]),
                     fullname = str(row[1]),
                     parent = city[str(row[2])])
-        db.s.add(a)
-    db.s.commit()
-    print 'created %s buildings'%(len(db.s.query(Building).all()))
+        sess.add(a)
+    sess.commit()
+    print 'created %s buildings'%(len(sess.query(Building).all()))
 
 
 # Copyright (C) 2008 Morgan Stanley
