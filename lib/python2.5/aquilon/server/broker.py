@@ -145,6 +145,7 @@ class BrokerCommand(object):
             if self.requires_azcheck:
                 self.az.check(session, principal=kwargs["user"],
                               action=self.action, resource=request.path)
+            self._audit(*args, **kwargs)
             if self.requires_readonly:
                 self._set_readonly(session)
             try:
@@ -177,6 +178,21 @@ class BrokerCommand(object):
         if self.config.get("database", "dsn").startswith("oracle"):
             session.commit()
             session.execute(text("set transaction read only"))
+
+    def _audit(self, *args, **kwargs):
+        session = kwargs.pop('session')
+        request = kwargs.pop('request')
+        user = kwargs.pop('user', None)
+        kwargs['aqformat'] = kwargs.pop('style', 'raw')
+        # TODO: Have this less hard-coded...
+        if self.action == 'put':
+            kwargs.pop('bundle')
+        # TODO: Something fancier...
+        kwargs_str = str(kwargs)
+        if len(kwargs_str) > 1024:
+            kwargs_str = kwargs_str[0:1020] + '...'
+        log.msg('command=%s user=%s args=%s kwargs=%s' %
+                (self.action, user, args, kwargs_str))
 
 
 # FIXME: This utility method may be better suited elsewhere.
