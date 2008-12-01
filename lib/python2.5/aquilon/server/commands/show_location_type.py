@@ -18,6 +18,8 @@ class CommandShowLocationType(BrokerCommand):
 
     def render(self, session, type, name, **arguments):
         query = session.query(Location)
+        query = query.with_polymorphic(
+            Location.__mapper__.polymorphic_map.values())
         if type:
             query = query.filter_by(location_type=type)
         if name:
