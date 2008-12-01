@@ -5,8 +5,7 @@
 """Contains the logic for `aq add interface --hostname`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_interface_machine import (
         CommandAddInterfaceMachine)
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -16,8 +15,6 @@ class CommandAddInterfaceHostname(CommandAddInterfaceMachine):
 
     required_parameters = ["hostname", "mac", "interface"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
         arguments['machine'] = dbhost.machine.name

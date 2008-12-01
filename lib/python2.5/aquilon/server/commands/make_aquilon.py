@@ -11,8 +11,7 @@ from socket import gethostbyname
 
 from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
                                  ArgumentError, NameServiceError)
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import choose_service_instance
@@ -27,8 +26,6 @@ class CommandMakeAquilon(BrokerCommand):
 
     required_parameters = ["hostname", "os", "personality"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, os, personality, buildstatus,
                user, **arguments):
         dbhost = hostname_to_host(session, hostname)

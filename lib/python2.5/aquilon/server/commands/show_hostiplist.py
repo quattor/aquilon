@@ -5,10 +5,7 @@
 """Contains the logic for `aq show hostiplist`."""
 
 
-from sqlalchemy.sql import text
-
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.aqdb.sy.system import System
@@ -18,15 +15,7 @@ class CommandShowHostIPList(BrokerCommand):
 
     default_style = "csv"
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
-        # Quick fix to make sure that the whole query is consistent.
-        # TODO: Make this more generally available.
-        if self.config.get("database", "dsn").startswith("oracle"):
-            session.execute(text("set transaction read only"))
-
         # FIXME: Currently ignores archetype and outputs regardless
         # of whether we want hosts...
         #archetype = arguments.get("archetype", None)

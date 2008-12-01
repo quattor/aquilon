@@ -5,8 +5,7 @@
 """Contains the logic for `aq search hardware`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
 from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 from aquilon.server.dbwrappers.hardware_entity import (
@@ -17,9 +16,6 @@ class CommandSearchHardware(BrokerCommand):
 
     required_parameters = []
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, fullinfo, **arguments):
         q = search_hardware_entity_query(session, HardwareEntity, **arguments)
         if fullinfo:

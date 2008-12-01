@@ -5,8 +5,7 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_tor_offsets)
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -20,8 +19,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine"]
 
-    @add_transaction
-    @az_check
     def render(self, session, interface, machine, mac, ip, boot, comments,
             user, **arguments):
         """This command expects to locate an interface based only on name

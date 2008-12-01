@@ -5,8 +5,7 @@
 """Contains the logic for `aq show dns_domain --dns_domain`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.dns_domain import get_dns_domain
 
 
@@ -14,9 +13,6 @@ class CommandShowDnsDomainDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, dns_domain, **arguments):
         return get_dns_domain(session, dns_domain)
 

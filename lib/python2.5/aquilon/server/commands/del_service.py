@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.svc.service_map import ServiceMap
@@ -21,8 +20,6 @@ class CommandDelService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    @add_transaction
-    @az_check
     def render(self, session, service, instance, **arguments):
         # This should fail nicely if the service is required for an archetype.
         dbservice = get_service(session, service)

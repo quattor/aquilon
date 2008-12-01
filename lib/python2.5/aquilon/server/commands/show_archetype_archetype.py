@@ -5,8 +5,7 @@
 """Contains the logic for `aq show archetype --archetype`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.archetype import get_archetype
 
 
@@ -14,9 +13,6 @@ class CommandShowArchetypeArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, archetype, **arguments):
         return get_archetype(session, archetype)
 

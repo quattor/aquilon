@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.vendor import get_vendor
 from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.server.dbwrappers.cpu import get_cpu
@@ -21,8 +20,6 @@ class CommandAddModel(BrokerCommand):
 
     required_parameters = ["name", "vendor", "type"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, vendor, type,
             cputype, cpunum, mem, disktype, disksize, nics,
             comments, **arguments):

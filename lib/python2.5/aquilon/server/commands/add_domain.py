@@ -8,8 +8,7 @@
 import os
 
 from aquilon.exceptions_ import AuthorizationException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.sy.domain import Domain
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
@@ -22,8 +21,6 @@ class CommandAddDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, user, **arguments):
         dbuser = get_or_create_user_principal(session, user)
         if not dbuser:

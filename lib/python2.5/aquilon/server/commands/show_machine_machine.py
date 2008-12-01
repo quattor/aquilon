@@ -5,8 +5,7 @@
 """Contains the logic for `aq show machine --machine`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_machine import CommandShowMachine
 
 

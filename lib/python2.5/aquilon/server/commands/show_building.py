@@ -5,8 +5,7 @@
 """Contains the logic for `aq show building`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
@@ -14,9 +13,6 @@ class CommandShowBuilding(CommandShowLocationType):
 
     required_parameters = []
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
                 type='building', **arguments)

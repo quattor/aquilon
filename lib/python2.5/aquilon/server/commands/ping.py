@@ -5,13 +5,15 @@
 """Contains the logic for `aq ping`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 
 
 class CommandPing(BrokerCommand):
 
-    @format_results
+    requires_transaction = False
+    requires_azcheck = False
+    requires_format = True
+
     def render(self, **arguments):
         return "pong"
 

@@ -5,8 +5,7 @@
 """Contains the logic for `aq show location --type --name`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 

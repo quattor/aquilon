@@ -5,8 +5,7 @@
 """Contains the logic for `aq del building`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.del_location import CommandDelLocation
 
 
@@ -14,8 +13,6 @@ class CommandDelBuilding(CommandDelLocation):
 
     required_parameters = ["name"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, **arguments):
         return CommandDelLocation.render(self, session=session, name=name,
                 type='building', **arguments)

@@ -5,17 +5,13 @@
 """Contains the logic for `aq show cpu`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.vendor import get_vendor
 from aquilon.aqdb.hw.cpu import Cpu
 
 
 class CommandShowCpu(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, cpu, vendor, speed, **arguments):
         q = session.query(Cpu)
         if cpu:

@@ -9,8 +9,7 @@ import os
 
 from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.commands.del_host import delhost_lock
@@ -21,8 +20,6 @@ class CommandDelAuxiliary(BrokerCommand):
 
     required_parameters = ["auxiliary"]
 
-    @add_transaction
-    @az_check
     def render(self, session, auxiliary, user, **arguments):
         log.msg("Aquiring lock to attempt to delete %s" % auxiliary)
         delhost_lock.acquire()

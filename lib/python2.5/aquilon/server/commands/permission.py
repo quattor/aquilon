@@ -5,8 +5,7 @@
 """Contains the logic for `aq permission`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 from aquilon.server.dbwrappers.role import get_role
@@ -16,8 +15,6 @@ class CommandPermission(BrokerCommand):
 
     required_parameters = ["principal", "role"]
 
-    @add_transaction
-    @az_check
     def render(self, session, principal, role, createuser, createrealm,
             **arguments):
         dbrole = get_role(session, role)

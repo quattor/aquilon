@@ -5,16 +5,12 @@
 """Contains the logic for `aq show archetype`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.cfg.archetype import Archetype
 
 
 class CommandShowArchetype(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         return session.query(Archetype).all()
 

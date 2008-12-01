@@ -7,8 +7,7 @@
 
 import os
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import run_command
 
@@ -17,8 +16,6 @@ class CommandDeploy(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, to, **arguments):
         """ This currently ignores the 'to' parameter."""
 

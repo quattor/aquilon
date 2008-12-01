@@ -5,8 +5,7 @@
 """Contains the logic for `aq show tor_switch --tor_switch`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_tor_switch import CommandShowTorSwitch
 
 

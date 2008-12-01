@@ -7,8 +7,7 @@
 
 from sqlalchemy.sql import select
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostMachineList
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.aqdb.sy.host import Host
@@ -18,9 +17,6 @@ class CommandShowHostMachineList(BrokerCommand):
 
     default_style = "csv"
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         archetype = arguments.get("archetype", None)
         if archetype:

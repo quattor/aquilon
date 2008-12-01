@@ -6,8 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
@@ -25,8 +24,6 @@ class CommandAddHost(BrokerCommand):
 
     required_parameters = ["hostname", "machine", "archetype", "domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, machine, archetype, domain,
                buildstatus, user, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,

@@ -8,8 +8,7 @@
 import os
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import remove_dir
 
@@ -18,8 +17,6 @@ class CommandDelDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, **arguments):
         # FIXME: This will fail if the domain does not exist.  We might
         # want to allow the directory to be deleted anyway, assuming it

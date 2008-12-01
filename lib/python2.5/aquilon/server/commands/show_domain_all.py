@@ -5,16 +5,12 @@
 """Contains the logic for `aq show domain --all`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.sy.domain import Domain
 
 
 class CommandShowDomainAll(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         return session.query(Domain).all()
 

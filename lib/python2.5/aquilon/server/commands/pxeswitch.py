@@ -8,8 +8,7 @@
 from socket import gethostbyname
 
 from aquilon.exceptions_ import NameServiceError, ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import run_command
@@ -19,8 +18,6 @@ class CommandPxeswitch(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, install, localboot, status, firmware,
                **arguments):
         dbhost = hostname_to_host(session, hostname)

@@ -5,8 +5,7 @@
 """Contains the logic for `aq show model`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.hw.model import Model
 from aquilon.aqdb.hw.vendor import Vendor
 
@@ -15,9 +14,6 @@ class CommandShowModel(BrokerCommand):
     """ This is more like a 'search' command than a 'show' command, and
         will probably be converted at some time in the future."""
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, name, vendor, type, **arguments):
         q = session.query(Model)
         if name is not None:

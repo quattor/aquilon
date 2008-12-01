@@ -6,8 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
@@ -24,8 +23,6 @@ class CommandAddManager(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, manager, interface, mac, comments,
                user, **arguments):
         dbhost = hostname_to_host(session, hostname)

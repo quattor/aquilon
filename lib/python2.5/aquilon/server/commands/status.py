@@ -5,17 +5,15 @@
 """Contains the logic for `aq status`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 
 
 class CommandStatus(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
+    requires_format = True
+
     def render(self, session, user, **arguments):
         stat = []
         stat.append("Aquilon Broker %s" % self.config.get("broker", "version"))

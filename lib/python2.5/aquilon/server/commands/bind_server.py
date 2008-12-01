@@ -9,8 +9,7 @@ from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.svc.service_instance_server import ServiceInstanceServer
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
@@ -21,8 +20,6 @@ class CommandBindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service", "instance"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, service, instance, user, force=False, 
             **arguments):
         dbsystem = get_system(session, hostname)

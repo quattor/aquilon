@@ -5,8 +5,7 @@
 """Contains the logic for `aq unmap service`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.svc.service_map import ServiceMap
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.location import get_location
@@ -17,8 +16,6 @@ class CommandUnmapService(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    @add_transaction
-    @az_check
     def render(self, session, service, instance, **arguments):
         dbservice = get_service(session, service)
         dblocation = get_location(session, **arguments)

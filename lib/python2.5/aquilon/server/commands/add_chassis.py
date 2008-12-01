@@ -6,8 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.sy.chassis import Chassis
 from aquilon.aqdb.hw.chassis_hw import ChassisHw
 from aquilon.server.dbwrappers.location import get_location
@@ -19,8 +18,6 @@ class CommandAddChassis(BrokerCommand):
 
     required_parameters = ["chassis", "rack", "model"]
 
-    @add_transaction
-    @az_check
     def render(self, session, chassis, rack, serial, model, comments, **arguments):
         (short, dbdns_domain) = parse_system_and_verify_free(session, chassis)
         dblocation = get_location(session, rack=rack)

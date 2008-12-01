@@ -5,8 +5,7 @@
 """Contains the logic for `aq add hub`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_location import CommandAddLocation
 
 
@@ -14,8 +13,6 @@ class CommandAddHub(CommandAddLocation):
 
     required_parameters = ["name"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, fullname, comments, **arguments):
         return CommandAddLocation.render(self, session=session, name=name,
                 type='hub', fullname=fullname,

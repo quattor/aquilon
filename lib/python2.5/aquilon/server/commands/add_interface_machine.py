@@ -13,8 +13,7 @@ from aquilon.aqdb.hw.interface import Interface
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.sy.manager import Manager
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
                                                  describe_interface)
@@ -27,8 +26,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine", "mac"]
 
-    @add_transaction
-    @az_check
     def render(self, session, interface, machine, mac, comments,
             user, **arguments):
         dbmachine = get_machine(session, machine)

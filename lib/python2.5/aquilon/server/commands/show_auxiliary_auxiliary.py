@@ -5,8 +5,7 @@
 """Contains the logic for `aq show auxiliary --auxiliary`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.sy.auxiliary import Auxiliary
 
@@ -15,9 +14,6 @@ class CommandShowAuxiliaryAuxiliary(BrokerCommand):
 
     required_parameters = ["auxiliary"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, auxiliary, **kwargs):
         return get_system(session, auxiliary, Auxiliary, 'Auxiliary')
 

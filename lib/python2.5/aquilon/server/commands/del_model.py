@@ -9,8 +9,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from twisted.python import log
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.vendor import get_vendor
 from aquilon.aqdb.hw.model import Model
 
@@ -19,8 +18,6 @@ class CommandDelModel(BrokerCommand):
 
     required_parameters = ["name", "vendor", "type"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, vendor, type, **arguments):
         dbvendor = get_vendor(session, vendor)
         try:

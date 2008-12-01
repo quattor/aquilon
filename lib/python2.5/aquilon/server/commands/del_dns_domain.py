@@ -6,8 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.dns_domain import get_dns_domain
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.sy.system import System
@@ -17,8 +16,6 @@ class CommandDelDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, dns_domain, **arguments):
         dbdns_domain = get_dns_domain(session, dns_domain)
 

@@ -6,8 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
@@ -27,8 +26,6 @@ class CommandAddTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch", "model"]
 
-    @add_transaction
-    @az_check
     def render(self, session,
             tor_switch, model,
             rack, building, rackid, rackrow, rackcolumn,

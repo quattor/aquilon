@@ -5,8 +5,7 @@
 """Contains the logic for `aq get`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 
 
@@ -14,8 +13,6 @@ class CommandGet(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, **arguments):
         # Verify that it exists before returning the command to pull.
         dbdomain = verify_domain(session, domain,

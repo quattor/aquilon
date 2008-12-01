@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.loc.location import Location
 
 
@@ -17,9 +16,6 @@ class CommandShowLocationType(BrokerCommand):
 
     required_parameters = ["type"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, type, name, **arguments):
         query = session.query(Location)
         if type:

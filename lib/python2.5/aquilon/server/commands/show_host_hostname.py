@@ -5,8 +5,7 @@
 """Contains the logic for `aq show host --hostname`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 
 
@@ -14,9 +13,6 @@ class CommandShowHostHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, hostname, **kwargs):
         return hostname_to_host(session, hostname)
 

@@ -5,8 +5,7 @@
 """Contains the logic for `aq update domain`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 from aquilon.server.dbwrappers.domain import get_domain
@@ -16,8 +15,6 @@ class CommandUpdateDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    @add_transaction
-    @az_check
     def render(self, session, domain, comments, owner, compiler, user,
                **arguments):
         dbdomain = get_domain(session, domain)

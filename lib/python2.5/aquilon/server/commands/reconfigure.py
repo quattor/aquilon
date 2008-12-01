@@ -5,8 +5,7 @@
 """Contains a wrapper for `aq reconfigure`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.make_aquilon import CommandMakeAquilon
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.sy.build_item import BuildItem
@@ -18,8 +17,7 @@ class CommandReconfigure(CommandMakeAquilon):
 
     required_parameters = ["hostname"]
 
-    @az_check
-    def render(self, session, hostname, user, **arguments):
+    def render(self, session, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         buildlist = session.query(BuildItem).filter_by(host=dbhost).all()

@@ -11,8 +11,7 @@ from StringIO import StringIO
 from twisted.python import log
 
 from aquilon.exceptions_ import AquilonError, NotFoundException
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.observed_mac import get_or_create_observed_mac
 from aquilon.server.processes import run_command
@@ -40,8 +39,6 @@ class CommandPollTorSwitch(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    @add_transaction
-    @az_check
     def render(self, session, rack, **arguments):
         dblocation = get_location(session, rack=rack)
         q = session.query(TorSwitch)

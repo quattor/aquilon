@@ -5,8 +5,7 @@
 """Contains the logic for `aq add personality`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.archetype import Archetype
 from aquilon.aqdb.cfg.tld import Tld
@@ -19,8 +18,6 @@ class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["name"]
 
-    @add_transaction
-    @az_check
     def render(self, session, name, archetype, user, **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(name)):

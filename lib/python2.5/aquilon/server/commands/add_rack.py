@@ -5,8 +5,7 @@
 """Contains the logic for `aq add rack`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 
 
@@ -14,8 +13,6 @@ class CommandAddRack(BrokerCommand):
 
     required_parameters = ["rackid", "building", "row", "column"]
 
-    @add_transaction
-    @az_check
     def render(self, session, rackid, building, row, column, fullname,
             comments, **arguments):
         dbrack = get_or_create_rack(session=session, rackid=rackid,

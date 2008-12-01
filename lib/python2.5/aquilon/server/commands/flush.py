@@ -5,7 +5,7 @@
 """Contains the logic for `aq flush`."""
 
 
-from aquilon.server.broker import (add_transaction, az_check, BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.sy.domain import Domain
@@ -19,8 +19,6 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 
 class CommandFlush(BrokerCommand):
 
-    @add_transaction
-    @az_check
     def render(self, session, user, **arguments):
         plenarydir = self.config.get("broker", "plenarydir")
         success = []

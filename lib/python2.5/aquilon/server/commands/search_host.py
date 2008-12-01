@@ -5,8 +5,7 @@
 """Contains the logic for `aq search host`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.sy.host import Host
 from aquilon.aqdb.cfg.cfg_path import CfgPath
@@ -24,9 +23,6 @@ class CommandSearchHost(BrokerCommand):
 
     required_parameters = []
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, hostname, machine, domain, archetype,
                buildstatus, personality, os, service, instance,
                fullinfo, **arguments):

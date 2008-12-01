@@ -10,8 +10,7 @@ from threading import Lock
 
 from twisted.python import log
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   force_int, BrokerCommand)
+from aquilon.server.broker import force_int, BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.aqdb.dsdb import DsdbConnection
 from aquilon.aqdb.data_sync.net_refresh import NetRefresher
@@ -23,10 +22,8 @@ refresh_network_lock = Lock()
 class CommandRefreshNetwork(BrokerCommand):
 
     required_parameters = ["building"]
+    requires_format = True
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, user, building, dryrun, loglevel, **arguments):
         log.msg("Aquiring lock to refresh network for building %s" % building)
         refresh_network_lock.acquire()

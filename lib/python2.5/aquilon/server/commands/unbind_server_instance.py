@@ -5,8 +5,7 @@
 """Contains a wrapper for `aq unbind server --instance`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.unbind_server import CommandUnbindServer
 
 
@@ -14,8 +13,6 @@ class CommandUnbindServerInstance(CommandUnbindServer):
 
     required_parameters = ["hostname", "service", "instance"]
 
-    @add_transaction
-    @az_check
     def render(self, *args, **arguments):
         # The superclass already contains the logic to handle this case.
         return CommandUnbindServer.render(self, *args, **arguments)

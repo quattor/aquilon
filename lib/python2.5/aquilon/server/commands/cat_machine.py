@@ -6,8 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import (add_transaction, az_check, format_results,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.processes import read_file
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -17,9 +16,6 @@ class CommandCatMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    @add_transaction
-    @az_check
-    #@format_results
     def render(self, session, machine, **kwargs):
         dbmachine = get_machine(session, machine)
         if dbmachine.model.machine_type not in [

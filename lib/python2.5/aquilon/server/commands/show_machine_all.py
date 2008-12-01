@@ -5,17 +5,13 @@
 """Contains the logic for `aq show machine --all`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.machine import SimpleMachineList
 from aquilon.aqdb.hw.machine import Machine
 
 
 class CommandShowHostAll(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         return SimpleMachineList(session.query(Machine).all())
 

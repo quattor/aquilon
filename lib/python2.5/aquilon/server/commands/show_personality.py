@@ -5,8 +5,7 @@
 """Contains the logic for `aq show personality`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 
@@ -15,8 +14,6 @@ class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         # This is a bit ick for now, since personalities don't have their
         # own table, instead they're just entries in the cfgpath. Ideally,

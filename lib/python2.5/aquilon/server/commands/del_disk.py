@@ -7,8 +7,7 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.hw.disk import Disk
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand, force_int)
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -18,8 +17,6 @@ class CommandDelDisk(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    @add_transaction
-    @az_check
     def render(self, session, machine, disk, type, capacity, all, user,
             **arguments):
         dbmachine = get_machine(session, machine)

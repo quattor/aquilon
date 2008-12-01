@@ -5,17 +5,13 @@
 """Contains the logic for `aq show manager --missing`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.interface import MissingManagersList
 from aquilon.aqdb.hw.interface import Interface
 
 
 class CommandShowManagerMissing(BrokerCommand):
 
-    @add_transaction
-    @az_check
-    @format_results
     def render(self, session, **arguments):
         q = session.query(Interface)
         q = q.filter_by(interface_type='management')

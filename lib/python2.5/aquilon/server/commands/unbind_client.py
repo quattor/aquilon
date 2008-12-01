@@ -5,8 +5,7 @@
 """Contains the logic for `aq unbind client`."""
 
 
-from aquilon.server.broker import (format_results, add_transaction, az_check,
-                                   BrokerCommand)
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
@@ -16,8 +15,6 @@ class CommandUnbindClient(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    @add_transaction
-    @az_check
     def render(self, session, hostname, service, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = get_service(session, service)
