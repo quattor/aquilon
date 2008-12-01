@@ -1,18 +1,16 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header: //eai/aquilon/aqd/1.2.1/src/lib/python2.5/aquilon/server/formats/formatters.py#1 $
-# $Change: 645284 $
-# $DateTime: 2008/07/09 19:56:59 $
-# $Author: wesleyhe $
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Base classes for formatting objects."""
 
-from aquilon.config import Config
-from aquilon.exceptions_ import ProtocolError
+
 import sys
 import os
+
+from aquilon.config import Config
+from aquilon.exceptions_ import ProtocolError
+
 
 class ResponseFormatter(object):
     """This handles the top level of formatting results... results
@@ -219,4 +217,3 @@ class ObjectFormatter(object):
 ObjectFormatter.default_handler = ObjectFormatter()
 
 
-#if __name__=='__main__':

@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -13,7 +12,6 @@ import re
 
 from aquilon.config import Config
 
-sys.path.append("//ms/dist/python/PROJ/ms.version/prod-2.5/common/lib/")
 import ms.version
 ms.version.addpkg('setuptools', '0.6c8-py25')
 ms.version.addpkg('protoc', 'prod', meta='aquilon')
@@ -23,6 +21,7 @@ sys.path.append("/ms/dist/aquilon/PROJ/protocols/1.0/lib/python")
 import aqdsystems_pb2
 import aqdnetworks_pb2
 import aqdservices_pb2
+
 
 class TestBrokerCommand(unittest.TestCase):
 
@@ -275,6 +274,4 @@ class TestBrokerCommand(unittest.TestCase):
                 % (command, out, err))
         return
 
-
-#if __name__=='__main__':
 
