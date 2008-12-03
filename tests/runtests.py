@@ -29,6 +29,8 @@ def usage():
     --help      returns this message
     --debug     enable debug (not implemented)
     --config    supply an alternate config file
+    --coverage  generate code coverage metrics for the broker
+                in logs/aqd.coverage.
 
     Note that:
     %s
@@ -48,13 +50,14 @@ def force_yes(msg):
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hdc:",
-            ["help", "debug", "config="])
+                               ["help", "debug", "config=", "coverage"])
 except getopt.GetoptError, e:
     print >>sys.stderr, str(e)
     usage()
     sys.exit(2)
 
 configfile = default_configfile
+coverage = False
 for o, a in opts:
     if o in ("-h", "--help"):
         usage()
@@ -64,6 +67,8 @@ for o, a in opts:
         debug = True
     elif o in ("-c", "--config"):
         configfile = a
+    elif o in ("--coverage"):
+        coverage = True
     else:
         assert False, "unhandled option"
 
@@ -84,6 +89,8 @@ if not config.has_section("unittest"):
     config.add_section("unittest")
 if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
+if coverage:
+    config.set("unittest", "coverage", "True")
 
 production_database = "NYPO_AQUILON"
 if (config.get("database", "vendor") == "oracle" and
