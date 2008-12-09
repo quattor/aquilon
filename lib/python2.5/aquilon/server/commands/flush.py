@@ -10,7 +10,11 @@ from aquilon.aqdb.svc.service import Service
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.sy.domain import Domain
 from twisted.python import log
-from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance)
+from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance, 
+                                              PlenaryServiceInstanceServer,
+                                              PlenaryServiceClientDefault, PlenaryServiceServerDefault, 
+                                              PlenaryServiceInstanceClientDefault, 
+                                              PlenaryServiceInstanceServerDefault)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.domain import compileLock, compileRelease
@@ -31,17 +35,27 @@ class CommandFlush(BrokerCommand):
             log.msg("flushing services")
             for dbservice in session.query(Service).all():
                 try:
-                    total += 1
+                    total += 3
                     plenary_info = PlenaryService(dbservice)
                     plenary_info.write(plenarydir, user, locked=True)
+                    plenary_info = PlenaryServiceClientDefault(dbservice)
+                    plenary_info.write(plenarydir, user, locked=True)
+                    plenary_info = PlenaryServiceServerDefault(dbservice)
+                    plenary_info.write(plenarydir, user, locked=True)
                 except Exception, e:
-                    failed.append("sevice %s failed: %s" % (dbservice.name, e))
+                    failed.append("service %s failed: %s" % (dbservice.name, e))
                     continue
 
                 for dbinst in dbservice.instances:
                     try:
-                        total += 1
+                        total += 4
                         plenary_info = PlenaryServiceInstance(dbservice, dbinst)
+                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info = PlenaryServiceInstanceServer(dbservice, dbinst)
+                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbinst)
+                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbinst)
                         plenary_info.write(plenarydir, user, locked=True)
                     except Exception, e:
                         failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
