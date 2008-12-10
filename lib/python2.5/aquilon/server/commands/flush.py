@@ -54,7 +54,11 @@ class CommandFlush(BrokerCommand):
                     plenary_info = PlenaryMachineInfo(machine)
                     plenary_info.write(plenarydir, user, locked=True)
                 except Exception, e:
-                    failed.append("machine %s failed: %s" % (machine.host.fqdn, e))
+                    label = machine.name
+                    if machine.host:
+                        label = "%s (host: %s)" % (machine.name,
+                                                   machine.host.fqdn)
+                    failed.append("machine %s failed: %s" % (label, e))
                     continue
 
             # what about the plenary hosts within domains... do we want those too?
