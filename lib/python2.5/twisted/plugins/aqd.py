@@ -18,6 +18,7 @@ from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
 from twisted.runner.procmon import ProcessMonitor
 from twisted.internet import reactor
+from ms.modulecmd import Modulecmd
 
 from aquilon.config import Config
 from aquilon.server.kncwrappers import KNCSite
@@ -52,6 +53,12 @@ class AQDMaker(object):
 
     def makeService(self, options):
         config = Config(configfile=options["config"])
+
+        # Set up the environment...
+        m = Modulecmd()
+        m.load(config.get("broker", "CheckNet_module"))
+        if config.has_option("database", "module"):
+            m.load(config.get("database", "module"))
 
         # Set this up before the aqdb libs get imported...
         rootlog = logging.getLogger()

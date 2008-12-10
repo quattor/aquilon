@@ -13,6 +13,18 @@ _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
 if _LIBDIR not in sys.path:
     sys.path.insert(0, _LIBDIR)
 
+# Do any necessary module loads...
+from aquilon.config import Config
+import ms.version
+ms.version.addpkg('ms.modulecmd', '1.0.1', 'dist')
+from ms.modulecmd import Modulecmd
+
+config = Config()
+m = Modulecmd()
+if config.has_option("database", "module"):
+    m.load(config.get("database", "module"))
+
+# OK, now bring everything else in...
 import aquilon.aqdb.depends
 
 from aquilon.aqdb.db_factory    import db_factory, Base, debug

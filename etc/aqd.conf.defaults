@@ -42,6 +42,7 @@ exportlog = %(dbdir)s/aqdb_export.log
 import = %(vendor_home)s/bin/imp
 password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
 password_file = %(password_base)s/%(environment)s/%(dbuser)s
+module = orcl/10.2.0.1.0
 
 [database_sqlite]
 dbfile = %(dbdir)s/aquilon.db
@@ -85,6 +86,7 @@ dsdb_use_testdb = False
 server_notifications =
 client_notifications = yes
 CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
+CheckNet_module = /ms/dist/NetEng/modules/prod
 aurora_host_domain = ny-prod
 windows_host_domain = ny-prod
 
