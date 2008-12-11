@@ -5,7 +5,6 @@
 """Base classes for formatting objects."""
 
 
-import sys
 import os
 
 from aquilon.config import Config
@@ -73,7 +72,6 @@ class ObjectFormatter(object):
     each time, the dict can be checked and value returned."""
     config = Config()
     protodir = config.get("protocols", "directory")
-    sys.path.append(protodir)
 
     handlers = {}
     """ The handlers dictionary should have an entry for every subclass.

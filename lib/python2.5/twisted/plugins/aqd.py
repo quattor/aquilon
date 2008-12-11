@@ -5,6 +5,7 @@
 """Provide a twistd plugin for aqd to start up."""
 
 import os
+import sys
 import logging
 from logging import Handler
 
@@ -59,6 +60,7 @@ class AQDMaker(object):
         m.load(config.get("broker", "CheckNet_module"))
         if config.has_option("database", "module"):
             m.load(config.get("database", "module"))
+        sys.path.append(config.get("protocols", "directory"))
 
         # Set this up before the aqdb libs get imported...
         rootlog = logging.getLogger()
