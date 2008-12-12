@@ -32,7 +32,7 @@ class CommandAddDisk(BrokerCommand):
         dbdisk = Disk(machine=dbmachine, device_name=disk,
                 disk_type=dbdisk_type, capacity=capacity, comments=comments)
         try:
-            session.save(dbdisk)
+            session.add(dbdisk)
         except InvalidRequestError, e:
             raise ArgumentError("Could not add disk: %s" % e)
 

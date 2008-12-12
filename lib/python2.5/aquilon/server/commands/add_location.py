@@ -84,7 +84,7 @@ class CommandAddLocation(BrokerCommand):
 
         new_location = location_type(name=name, fullname=fullname,
                 parent=dbparent, **optional_args)
-        session.save(new_location)
+        session.add(new_location)
         return
 
 

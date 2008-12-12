@@ -51,7 +51,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         dbinterface = Interface(name=interface,
                                 hardware_entity=dbchassis.chassis_hw,
                                 mac=mac, interface_type='oa', **extra)
-        session.save(dbinterface)
+        session.add(dbinterface)
 
         ip = generate_ip(session, dbinterface, **arguments)
         if not ip:
@@ -64,8 +64,8 @@ class CommandAddInterfaceChassis(BrokerCommand):
         dbchassis.network = dbnetwork
         dbchassis.mac = mac
         dbinterface.system = dbchassis
-        session.update(dbinterface)
-        session.update(dbchassis)
+        session.add(dbinterface)
+        session.add(dbchassis)
 
         session.flush()
         session.refresh(dbinterface)

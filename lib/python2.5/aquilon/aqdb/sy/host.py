@@ -30,7 +30,7 @@ class Host(System):
                 primary_key = True)
 
     machine_id   = Column(Integer, ForeignKey(
-        'machine.id', name = 'host_machine_fk'), nullable = False)
+        'machine.machine_id', name = 'host_machine_fk'), nullable = False)
 
     domain_id    = Column(Integer, ForeignKey(
         'domain.id', name = 'host_domain_fk'), nullable = False)

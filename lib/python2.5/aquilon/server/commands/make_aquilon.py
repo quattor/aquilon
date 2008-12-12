@@ -67,7 +67,7 @@ class CommandMakeAquilon(BrokerCommand):
             else:
                 # FIXME: This could fail if there is already an item at 0
                 dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
-            session.save_or_update(dbos_bi)
+            session.add(dbos_bi)
 
         if personality:
             dbpersonality = get_cfg_path(session, "personality", personality)
@@ -79,12 +79,12 @@ class CommandMakeAquilon(BrokerCommand):
                 # FIXME: This could fail if there is already an item at 1
                 dbpersonality_bi = BuildItem(host=dbhost,
                         cfg_path=dbpersonality, position=1)
-            session.save_or_update(dbpersonality_bi)
+            session.add(dbpersonality_bi)
 
         if buildstatus:
             dbstatus = get_status(session, buildstatus)
             dbhost.status = dbstatus
-            session.update(dbhost)
+            session.add(dbhost)
 
         session.flush()
         session.refresh(dbhost)
@@ -97,11 +97,13 @@ class CommandMakeAquilon(BrokerCommand):
             if dbservice_bi:
                 continue
             dbinstance = choose_service_instance(session, dbhost, item.service)
+            max_position = session.query(BuildItem).count() + 1
+            print 'MAX POSITION = %s'%(max_position)
             dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
-                    position=3)
+                    position=max_position)
             dbhost.templates.append(dbservice_bi)
             dbhost.templates._reorder()
-            session.save(dbservice_bi)
+            session.add(dbservice_bi)
 
         session.flush()
         session.refresh(dbhost)
@@ -109,5 +111,3 @@ class CommandMakeAquilon(BrokerCommand):
 
         td = TemplateDomain()
         return td.compile(session, dbhost.domain, user, only=dbhost)
-
-

@@ -45,7 +45,7 @@ class CommandManage(BrokerCommand):
             pass
 
         dbhost.domain = dbdomain
-        session.save_or_update(dbhost)
+        session.add(dbhost)
 
         return
 

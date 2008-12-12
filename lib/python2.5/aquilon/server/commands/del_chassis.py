@@ -13,16 +13,22 @@ from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.sy.chassis import Chassis
 from aquilon.aqdb.hw.chassis_slot import ChassisSlot
 
-
 class CommandDelChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
     def render(self, session, chassis, **arguments):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')
-        q = session.query(ChassisSlot).filter_by(chassis=dbchassis)
-        machine_count = q.count(ChassisSlot.machine_id != None)
-        if machine_count:
+        q = session.query(ChassisSlot).filter_by(
+            chassis=dbchassis).filter(
+                ChassisSlot.machine_id != None)
+#        log.msg(str(q))
+#        machine_count = q.count()
+
+        if q.count() > 0:
+#            log.msg('GOT MACHINE_COUNT=%s'%(machine_count))
+#            for i in q.all():
+#                log.msg('  %s of type %s'%(i.machine_id, type(i.machine_id)))
             raise ArgumentError("Cannot remove chassis '%s': still in use by %d machines" %
                                 (dbchassis.fqdn, machine_count))
 
@@ -39,5 +45,3 @@ class CommandDelChassis(BrokerCommand):
         session.delete(dbchassis.chassis_hw)
         session.delete(dbchassis)
         return
-
-

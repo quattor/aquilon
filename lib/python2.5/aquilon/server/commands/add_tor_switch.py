@@ -54,10 +54,10 @@ class CommandAddTorSwitch(BrokerCommand):
 
         dbtor_switch_hw = TorSwitchHw(location=dblocation, model=dbmodel,
                                       serial_no=serial)
-        session.save(dbtor_switch_hw)
+        session.add(dbtor_switch_hw)
         dbtor_switch = TorSwitch(name=short, dns_domain=dbdns_domain,
                                  tor_switch_hw=dbtor_switch_hw)
-        session.save(dbtor_switch)
+        session.add(dbtor_switch)
 
         if interface or mac or ip:
             if not (interface and mac and ip):
@@ -74,11 +74,11 @@ class CommandAddTorSwitch(BrokerCommand):
             dbtor_switch.mac = mac
             dbtor_switch.ip = ip
             dbtor_switch.network = dbnetwork
-            session.update(dbtor_switch)
+            session.add(dbtor_switch)
             dbinterface = Interface(name=interface, interface_type='public',
                                     mac=mac, system=dbtor_switch,
                                     hardware_entity=dbtor_switch_hw)
-            session.save(dbinterface)
+            session.add(dbinterface)
             session.flush()
 
             # FIXME: This information will need to go to dsdb.

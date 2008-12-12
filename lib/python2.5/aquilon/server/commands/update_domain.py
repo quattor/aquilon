@@ -27,7 +27,7 @@ class CommandUpdateDomain(BrokerCommand):
             dbdomain.comments = comments
         if compiler:
             dbdomain.compiler = compiler
-        session.update(dbdomain)
+        session.add(dbdomain)
         return
 
 

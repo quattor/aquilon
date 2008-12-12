@@ -65,10 +65,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 elif i.bootable:
                     oldinfo = self.snapshot(i)
                     i.bootable = False
-                    session.update(i)
+                    session.add(i)
         if dbinterface.system:
-            session.update(dbinterface.system)
-        session.update(dbinterface)
+            session.add(dbinterface.system)
+        session.add(dbinterface)
         session.flush()
         session.refresh(dbinterface)
         session.refresh(dbinterface.hardware_entity)
@@ -79,7 +79,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         if (dbinterface.system and not
                 (dbinterface.system.system_type == 'host' and
                  dbinterface.system.archetype.name == 'aurora')):
-            # This relies on *not* being able to set the boot flag 
+            # This relies on *not* being able to set the boot flag
             # (directly) to false.
             dsdb_runner = DSDBRunner()
             dsdb_runner.update_host(dbinterface, oldinfo)
@@ -96,5 +96,3 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             ip = dbinterface.system.ip
         return {"mac":dbinterface.mac, "ip":ip,
                 "boot":dbinterface.bootable, "name":dbinterface.name}
-
-

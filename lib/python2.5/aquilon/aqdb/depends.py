@@ -3,8 +3,9 @@ import ms.version
 #####
 # NEVER check in a version of this file to a for_next branch with 'dev'
 # in an addpkg call!!!
-#####
-
+#######
+# TODO: dist an 0.5 release candidate 
+######
 ms.version.addpkg('sqlalchemy', '0.4.8')
 #ms.version.addpkg('sqlalchemy', '0.5beta', 'dev')
 

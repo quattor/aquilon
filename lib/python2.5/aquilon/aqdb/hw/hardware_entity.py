@@ -1,4 +1,3 @@
-#!/ms/dist/python/PROJ/core/2.5.0/bin/python
 """ Base class of polymorphic hardware structures """
 from datetime import datetime
 

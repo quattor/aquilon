@@ -36,7 +36,7 @@ class CommandAddDomain(BrokerCommand):
             compiler = self.config.get("broker", "domain_default_panc")
             dbdomain = Domain(name=domain, server=dbquattor_server,
                               owner=dbuser, compiler=compiler)
-            session.save_or_update(dbdomain)
+            session.add(dbdomain)
         domaindir = os.path.join(self.config.get("broker", "templatesdir"),
                 dbdomain.name)
         # FIXME: If this command fails, should the domain entry be

@@ -65,7 +65,7 @@ class CommandAddMachine(BrokerCommand):
             if not dbslot:
                 dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
             dbslot.machine = dbmachine
-            session.save_or_update(dbslot)
+            session.add(dbslot)
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

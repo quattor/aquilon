@@ -34,7 +34,7 @@ class CommandUpdateMachine(BrokerCommand):
         if clearchassis:
             for dbslot in dbmachine.chassis_slot:
                 dbslot.machine = None
-                session.update(dbslot)
+                session.add(dbslot)
             session.flush()
             session.refresh(dbmachine)
 
@@ -105,7 +105,7 @@ class CommandUpdateMachine(BrokerCommand):
         if serial:
             dbmachine.serial_no=serial
 
-        session.update(dbmachine)
+        session.add(dbmachine)
         session.flush()
         session.refresh(dbmachine)
 
@@ -149,11 +149,11 @@ class CommandUpdateMachine(BrokerCommand):
                                     "%s" % (dbchassis.fqdn, slot,
                                             dbslot.machine.name))
             dbslot.machine = dbmachine
-            session.update(dbslot)
+            session.add(dbslot)
         else:
             dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot,
                                  machine=dbmachine)
-            session.save(dbslot)
+            session.add(dbslot)
         return
 
 

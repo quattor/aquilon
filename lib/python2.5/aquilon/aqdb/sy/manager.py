@@ -14,7 +14,7 @@ class Manager(System):
                                               name = 'mgr_system_fk'),
                                              primary_key = True)
 
-    machine_id  = Column(Integer, ForeignKey('machine.id',
+    machine_id  = Column(Integer, ForeignKey('machine.machine_id',
                                                name = 'mgr_machine_fk'),
                                               nullable = False)
 

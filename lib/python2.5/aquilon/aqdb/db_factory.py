@@ -19,7 +19,6 @@ from aquilon.aqdb import depends
 from aquilon.config import Config
 from aquilon.aqdb.utils.confirm import confirm
 
-from sqlalchemy                  import __version__ as SA_version
 from sqlalchemy                  import MetaData, engine, create_engine, text
 from sqlalchemy.orm              import scoped_session, sessionmaker
 from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
@@ -133,12 +132,7 @@ class db_factory(object):
         self.meta   = MetaData(self.engine)
         assert(self.meta)
 
-        if SA_version.startswith('0.4'):
-            self.Session = scoped_session(sessionmaker(bind = self.engine,
-                                                       autoflush = True,
-                                                       transactional = True))
-        else:
-            self.Session = scoped_session(sessionmaker(bind=self.engine))
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert(self.Session)
 
     def session(self):

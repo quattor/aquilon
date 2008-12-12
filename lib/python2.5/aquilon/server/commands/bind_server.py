@@ -44,7 +44,7 @@ class CommandBindServer(BrokerCommand):
             position += 1
         sis = ServiceInstanceServer(service_instance=dbinstance,
                                     system=dbsystem, position=position)
-        session.save(sis)
+        session.add(sis)
         session.flush()
         session.refresh(dbinstance)
 

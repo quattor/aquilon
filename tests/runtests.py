@@ -5,17 +5,19 @@
 # This script is part of Aquilon
 """This sets up and runs the broker unit tests."""
 
-import sys
 import os
-BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+import sys
+import getopt
+import unittest
+from subprocess import Popen
+
+BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
 sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
-import unittest
-from subprocess import Popen
-import getopt
 
 from aquilon.config import Config
+from aquilon.utils  import kill_from_pid_file
 
 from broker.orderedsuite import BrokerTestSuite
 from aqdb.orderedsuite import DatabaseTestSuite
@@ -97,6 +99,9 @@ if not os.path.exists("/var/spool/keytabs/%s" % config.get("broker", "user")):
             stdout=1, stderr=2)
     rc = p.wait()
 
+pid_file = os.path.join(config.get('broker', 'rundir') , 'aqd.pid')
+kill_from_pid_file(pid_file)
+
 for label in ["quattordir", "kingdir", "swrepdir", ]:
     dir = config.get("broker", label)
     if os.path.exists(dir):
@@ -152,4 +157,3 @@ suite = unittest.TestSuite()
 suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
 unittest.TextTestRunner(verbosity=2).run(suite)
-

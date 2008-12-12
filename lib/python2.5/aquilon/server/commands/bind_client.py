@@ -51,7 +51,7 @@ class CommandBindClient(BrokerCommand):
         while i in positions:
             i += 1
         bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path, position=i)
-        session.save(bi)
+        session.add(bi)
         session.flush()
         session.refresh(dbhost)
         return

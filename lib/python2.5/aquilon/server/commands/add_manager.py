@@ -61,7 +61,7 @@ class CommandAddManager(BrokerCommand):
             dbinterface = Interface(name=interface,
                                     interface_type='management', mac=mac,
                                     bootable=False, hardware_entity=dbmachine)
-            session.save(dbinterface)
+            session.add(dbinterface)
         else:
             raise ArgumentError("No management interface found.")
 
@@ -81,7 +81,7 @@ class CommandAddManager(BrokerCommand):
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,
                             machine=dbmachine, ip=ip, network=dbnetwork,
                             mac=dbinterface.mac, comments=comments)
-        session.save(dbmanager)
+        session.add(dbmanager)
         dbinterface.system = dbmanager
 
         session.flush()

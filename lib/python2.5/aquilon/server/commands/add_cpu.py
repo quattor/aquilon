@@ -22,7 +22,7 @@ class CommandAddCpu(BrokerCommand):
         speed = force_int("speed", speed)
         dbcpu = Cpu(name=cpu, vendor=dbvendor, speed=speed, comments=comments)
         try:
-            session.save(dbcpu)
+            session.add(dbcpu)
         except InvalidRequestError, e:
             raise ArgumentError("Could not add cpu: %s" % e)
         return

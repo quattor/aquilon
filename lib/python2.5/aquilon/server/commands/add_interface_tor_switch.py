@@ -51,7 +51,7 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         dbinterface = Interface(name=interface,
                                 hardware_entity=dbtor_switch.tor_switch_hw,
                                 mac=mac, interface_type='oa', **extra)
-        session.save(dbinterface)
+        session.add(dbinterface)
 
         ip = generate_ip(session, dbinterface, **arguments)
         if not ip:
@@ -64,8 +64,8 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         dbtor_switch.network = dbnetwork
         dbtor_switch.mac = mac
         dbinterface.system = dbtor_switch
-        session.update(dbinterface)
-        session.update(dbtor_switch)
+        session.add(dbinterface)
+        session.add(dbtor_switch)
 
         session.flush()
         session.refresh(dbinterface)

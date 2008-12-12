@@ -67,7 +67,7 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbrack = session.query(Rack).filter_by(name=rack).first()
                 if not dbrack:
                     dbrack = Rack(name=rack, fullname=rack, parent=dbbuilding)
-                    session.save(dbrack)
+                    session.add(dbrack)
                 dblocation = dbrack
                 chassis = rack + "c" + cid
                 dbdns_domain = session.query(DnsDomain).filter_by(
@@ -78,10 +78,10 @@ class CommandAddAuroraHost(CommandAddHost):
                     dbchassis_model = get_model(session, 'aurora_chassis_model')
                     dbchassis_hw = ChassisHw(location=dbrack,
                                              model=dbchassis_model)
-                    session.save(dbchassis_hw)
+                    session.add(dbchassis_hw)
                     dbchassis = Chassis(name=chassis, dns_domain=dbdns_domain,
                                         chassis_hw=dbchassis_hw)
-                    session.save(dbchassis)
+                    session.add(dbchassis)
                 dbslot = session.query(ChassisSlot).filter_by(
                         chassis=dbchassis, slot_number=nodenum).first()
                 # Note: Could be even more persnickity here and check that
@@ -89,7 +89,7 @@ class CommandAddAuroraHost(CommandAddHost):
                 if not dbslot:
                     dbslot = ChassisSlot(chassis=dbchassis,
                                          slot_number=nodenum)
-                    session.save(dbslot)
+                    session.add(dbslot)
             else:
                 try:
                     out = run_command([self.config.get("broker", "sys_loc"),
@@ -116,7 +116,7 @@ class CommandAddAuroraHost(CommandAddHost):
             # create_machine already does a save and a flush
             if dbslot:
                 dbslot.machine = dbmachine
-                session.update(dbslot)
+                session.add(dbslot)
         # FIXME: Pull this from somewhere.
         buildstatus = 'ready'
 
