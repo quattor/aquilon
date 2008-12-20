@@ -25,9 +25,8 @@ class TemplateDomain(object):
         pass
 
     def compile(self, session, domain, user, only=None):
-        """flush all host templates within a domain and trigger a
-        recompile. The build directories are checked and constructed
-        if neccessary, so no prior setup is required.  The compile may
+        """The build directories are checked and constructed
+        if necessary, so no prior setup is required.  The compile may
         take some time (current rate is 10 hosts per second, with a
         couple of seconds of constant overhead), and the possibility
         of blocking on the compile lock.
@@ -69,15 +68,6 @@ class TemplateDomain(object):
                 hl = domain.hosts
             if (len(hl) == 0):
                 return 'no hosts: nothing to do'
-
-            log.msg("flushing %d hosts"%len(hl))
-            for h in hl:
-                p = PlenaryHost(h)
-                try:
-                    p.write(profiledir, user, locked=True)
-                except IncompleteError, e:
-                    pass
-                    #log.msg("Encountered incomplete host: %s" % e)
 
             domaindir = os_path.join(config.get("broker", "templatesdir"), domain.name)
             includes = [domaindir,

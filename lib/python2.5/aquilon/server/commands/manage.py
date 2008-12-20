@@ -23,29 +23,48 @@ class CommandManage(BrokerCommand):
                 self.config.get("broker", "servername"))
         dbhost = hostname_to_host(session, hostname)
 
-        # Clean up any old files in the old domain
-        # Note, that these files may not exist if we've never compiled
-        # in the old domain, so we just try the lot.
-        # We don't create a new plenary host in the new domain - that'll
-        # be done lazily when someone next tries to compile the new domain.
         try:
+            compileLock()
+
+            # Clean up any old files in the old domain
+            # Note, that these files may not exist if we've never compiled
+            # in the old domain, so we just try the lot.
             builddir = os.path.join(self.config.get("broker", "builddir"),
                                     "domains", dbhost.domain.name, "profiles")
             plenary = PlenaryHost(dbhost)
-            plenary.remove(builddir)
+            # we don't care if unlink fails
+            try:
+                plenary.remove(builddir)
+            except:
+                pass
             plenary = None
             qdir = self.config.get("broker", "quattordir")
             domain = dbhost.domain.name
             fqdn = dbhost.fqdn
             f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml")
-            remove_file(f)
+            # we don't care if unlink fails
+            try:
+                remove_file(f)
+            except:
+                pass
             f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
-            remove_file(f)
-        finally:
-            pass
+            try:
+                remove_file(f)
+            except:
+                pass
 
-        dbhost.domain = dbdomain
-        session.save_or_update(dbhost)
+            dbhost.domain = dbdomain
+            session.save_or_update(dbhost)
+
+            # Now we recreate the plenary to ensure that the domain is ready
+            # to compile
+            plenary = PlenaryHost(dbhost)
+            domdir = os.path.join(self.config.get("broker", "builddir"),
+                                  "domains", dbdomain.name, "profiles")
+            plenary.write(domdir, user, locked=True)
+
+        finally:
+            compileRelease()
 
         return
 
