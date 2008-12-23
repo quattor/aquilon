@@ -105,7 +105,13 @@ def remove_dir(dir):
                 thisdir = os.path.join(root, name)
                 os.rmdir(thisdir)
             except OSError, e:
-                log.msg("Failed to remove '%s': %s" % (thisdir, e))
+                # If this 'directory' is a symlink, the rmdir command
+                # will fail.  Try to remove it as a file.  If this
+                # fails, report the original error.
+                try:
+                    os.remove(thisdir)
+                except OSError, e1:
+                    log.msg("Failed to remove '%s': %s" % (thisdir, e))
     try:
         os.rmdir(dir)
     except OSError, e:
