@@ -65,10 +65,14 @@ def __repr__(self):
 
 class db_factory(object):
     __shared_state = {}
+    #__started = False
 
     def __init__(self, *args, **kw):
-        self.__dict__ = self.__shared_state
+        if getattr(self, '__started', None):
+            return
 
+        self.__dict__ = self.__shared_state
+        
         try:
             self.config = Config()
         except Exception, e:

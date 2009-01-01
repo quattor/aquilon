@@ -20,6 +20,9 @@ class testDbFactory(unittest.TestCase):
         if os.path.isfile(self.outfile):
             os.remove(self.outfile)
 
+    def get_db(self, *args, **kw):
+        return self.db
+
     def tearDown(self, *args, **kw):
         #os.system('/bin/cat %s'%(self.outfile))
         os.remove(self.outfile)

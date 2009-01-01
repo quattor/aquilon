@@ -2,6 +2,7 @@ import os
 import sys
 import types
 import tempfile
+import cStringIO
 import ms.version
 import subprocess as sp
 
@@ -21,6 +22,7 @@ if not sys.modules.has_key('sqlalchemy'):
 
 if not sys.modules.has_key('pil'):
     ms.version.addpkg('pil','1.1.6')
+from PIL import Image
 
 if not sys.modules.has_key('ms.modulecmd'):
     ms.version.addpkg("ms.modulecmd", "1.0.0")
@@ -31,6 +33,7 @@ m.load('fsf/graphviz/2.6')
 
 #TODO:put this in the module itself, not here
 _LIBTOOL_PATH = '/ms/dist/fsf/PROJ/libtool/1.5.18/lib'
+#TODO: also, the empty path is a bug!
 if os.environ.get('LD_LIBRARY_PATH', None):
     os.environ['LD_LIBRARY_PATH'] += ':' + _LIBTOOL_PATH
 else:
@@ -118,8 +121,6 @@ def create_uml_graph(mappers,
 
     return graph
 
-
-
 def create_schema_graph(tables=None,
                         metadata=None,
                         show_indexes=True,
@@ -166,19 +167,13 @@ def create_schema_graph(tables=None,
             graph.add_edge(graph_edge)
     return graph
 
-def show_uml_graph(db,image_name='/tmp/aqdb_uml.png', *args, **kw):
-    from cStringIO import StringIO
-    from PIL import Image
-    iostream = StringIO(create_uml_graph(metadata=db.meta).create_png())
-    #Image.open(iostream).show(command=kwargs.get('command','gwenview'))
-    Image.open(iostream).save(image_name)
+    ios = cStringIO.StringIO(create_uml_graph(
+        [class_mapper(c) for c in Base._decl_class_registry.itervalues()])).create_png()
+    Image.open(ios).save(image_name)
 
 def show_schema_graph(db, image_name = "/tmp/aqdb_schema.png", *args, **kwargs):
-    from cStringIO import StringIO
-    from PIL import Image
-    iostream = StringIO(create_schema_graph(*args,**kw).create_png())
-    #Image.open(iostream).show(command=kwargs.get('command','gwenview'))
-    Image.open(iostream).save(image_name)
+    ios = cStringIO.StringIO(create_schema_graph(metadata=db.meta).create_png())
+    Image.open(ios).save(image_name)
 
 def _render_table_html(table, metadata, show_indexes, show_datatypes):
     def format_col_type(col):
@@ -210,6 +205,7 @@ def _render_table_html(table, metadata, show_indexes, show_datatypes):
 
 def _mk_label(mapper, show_operations, show_attributes,
               show_datatypes, bordersize):
+#TODO: use template strings for these
     html = '''
 <<TABLE CELLSPACING="0" CELLPADDING="1" BORDER="0" CELLBORDER="%s" ALIGN="LEFT"
 ><TR><TD><FONT POINT-SIZE="10">%s</FONT></TD></TR>'''%(
@@ -250,7 +246,6 @@ def _mk_label(mapper, show_operations, show_attributes,
                                            show_schema_graph,
                                            show_uml_graph)
 def write_uml_graph(db, image_name = "aqdb_classes.dot"):
-    gv_path = _setup_graphviz()
     Base.metadata = db.meta
     graph = create_uml_graph(
               [class_mapper(c) for c in Base._decl_class_registry.itervalues()])

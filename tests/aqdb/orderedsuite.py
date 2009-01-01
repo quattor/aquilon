@@ -2,15 +2,15 @@
 """
 Module for testing the aqdb commands.
 """
-
 import os
 import sys
+import __init__
 import unittest
 
-if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+#if __name__ == "__main__":
+#    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+#    SRCDIR = os.path.join(BINDIR, "..", "..")
+#    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
 from test_rebuild import TestRebuild
 

@@ -1,3 +1,4 @@
+import os
 import ms.version
 
 #####
@@ -5,8 +6,10 @@ import ms.version
 # in an addpkg call!!!
 #####
 
-ms.version.addpkg('sqlalchemy', '0.4.8')
-#ms.version.addpkg('sqlalchemy', '0.5beta', 'dev')
+#if os.getlogin() == 'daqscott' and os.path.isdir(_DEV):
+#    ms.version.addpkg('sqlalchemy', '0.5beta', 'dev')
+#else:
+ms.version.addpkg('sqlalchemy','0.4.8')
 
 ms.version.addpkg('cx_Oracle','4.4-10.2.0.1')
 
