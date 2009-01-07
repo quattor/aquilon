@@ -42,16 +42,9 @@ class CommandManage(BrokerCommand):
             domain = dbhost.domain.name
             fqdn = dbhost.fqdn
             f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml")
-            # we don't care if unlink fails
-            try:
-                remove_file(f)
-            except:
-                pass
+            remove_file(f)
             f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
-            try:
-                remove_file(f)
-            except:
-                pass
+            remove_file(f)
 
             dbhost.domain = dbdomain
             session.save_or_update(dbhost)
