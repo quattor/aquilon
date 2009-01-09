@@ -19,7 +19,7 @@ from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
 from twisted.runner.procmon import ProcessMonitor
 from twisted.internet import reactor
-from ms.modulecmd import Modulecmd
+from ms.modulecmd import Modulecmd, ModulecmdExecError
 
 from aquilon.config import Config
 from aquilon.server.kncwrappers import KNCSite
@@ -46,6 +46,17 @@ class BridgeLogHandler(Handler):
         log.msg(record.getMessage())
 
 
+def log_module_load(cmd, mod):
+    """Wrapper for logging Modulecmd actions and errors."""
+    try:
+        log.msg("Loading module %s." % mod)
+        cmd.load(mod)
+        log.msg("Module %s loaded successfully." % mod)
+    except ModulecmdExecError, e:
+        log.msg("Failed loading module %s, return code %d and stderr '%s'." %
+                (mod, e.exitcode, e.stderr))
+
+
 class AQDMaker(object):
     implements(IServiceMaker, IPlugin)
     tapname = "aqd"
@@ -57,9 +68,9 @@ class AQDMaker(object):
 
         # Set up the environment...
         m = Modulecmd()
-        m.load(config.get("broker", "CheckNet_module"))
+        log_module_load(m, config.get("broker", "CheckNet_module"))
         if config.has_option("database", "module"):
-            m.load(config.get("database", "module"))
+            log_module_load(m, config.get("database", "module"))
         sys.path.append(config.get("protocols", "directory"))
 
         # Set this up before the aqdb libs get imported...
