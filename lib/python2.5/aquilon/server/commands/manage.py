@@ -11,7 +11,7 @@ from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.processes import remove_file
-
+from aquilon.server.templates.base import compileLock, compileRelease
 
 class CommandManage(BrokerCommand):
 
@@ -32,11 +32,7 @@ class CommandManage(BrokerCommand):
             builddir = os.path.join(self.config.get("broker", "builddir"),
                                     "domains", dbhost.domain.name, "profiles")
             plenary = PlenaryHost(dbhost)
-            # we don't care if unlink fails
-            try:
-                plenary.remove(builddir)
-            except:
-                pass
+            plenary.remove(builddir, locked=True)
             plenary = None
             qdir = self.config.get("broker", "quattordir")
             domain = dbhost.domain.name
@@ -54,7 +50,7 @@ class CommandManage(BrokerCommand):
             plenary = PlenaryHost(dbhost)
             domdir = os.path.join(self.config.get("broker", "builddir"),
                                   "domains", dbdomain.name, "profiles")
-            plenary.write(domdir, user, locked=True)
+            plenary.write(domdir, locked=True)
 
         finally:
             compileRelease()

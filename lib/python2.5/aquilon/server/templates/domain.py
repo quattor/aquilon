@@ -21,10 +21,11 @@ from aquilon.server.templates.host import PlenaryHost
 
 class TemplateDomain(object):
 
-    def __init__(self):
+    def __init__(self, name):
+        self.domain = name
         pass
 
-    def compile(self, session, domain, user, only=None):
+    def compile(self, session, only=None, locked=False):
         """The build directories are checked and constructed
         if necessary, so no prior setup is required.  The compile may
         take some time (current rate is 10 hosts per second, with a
@@ -32,24 +33,19 @@ class TemplateDomain(object):
         of blocking on the compile lock.
 
         If the 'only' parameter is provided, then it should be a
-        single host object and just that host will be compiled. The
-        domain parameter should be of Domain class, and must match the
-        domain of the host specified by the only parameter (if
-        provided).  The 'user' is the username requesting the compile
-        and is purely used as information to annotate any output
-        files.
+        single host object and just that host will be compiled.
 
         May raise ArgumentError exception, else returns the standard
         output (as a string) of the compile
         """
 
-        log.msg("preparing domain %s for compile"%domain.name)
+        log.msg("preparing domain %s for compile"%self.domain.name)
 
         # Ensure that the compile directory is in a good state.
         config = Config()
         outputdir = config.get("broker", "profilesdir")
         builddir = config.get("broker", "builddir")
-        profiledir = "%s/domains/%s/profiles"% (builddir, domain.name)
+        profiledir = "%s/domains/%s/profiles"% (builddir, self.domain.name)
         if not os.path.exists(profiledir):
             try:
                 os.makedirs(profiledir, mode=0770)
@@ -60,16 +56,17 @@ class TemplateDomain(object):
         # XXX: This command could take many minutes, it'd be really
         # nice to be able to give progress messages to the user
         try:
-            compileLock()
+            if (not locked):
+                compileLock()
 
             if (only):
                 hl = [ only ]
             else:
-                hl = domain.hosts
+                hl = self.domain.hosts
             if (len(hl) == 0):
                 return 'no hosts: nothing to do'
 
-            domaindir = os_path.join(config.get("broker", "templatesdir"), domain.name)
+            domaindir = os_path.join(config.get("broker", "templatesdir"), self.domain.name)
             includes = [domaindir,
                         config.get("broker", "plenarydir"),
                         config.get("broker", "swrepdir")]
@@ -81,10 +78,10 @@ class TemplateDomain(object):
             args.append("-f")
             args.append("%s/GNUmakefile.build" % config.get("broker", "compiletooldir"))
             args.append("MAKE=%s -f %s"%(args[0], args[2]))
-            args.append("DOMAIN=%s"%domain.name)
+            args.append("DOMAIN=%s"%self.domain.name)
             args.append("TOOLDIR=%s"%config.get("broker", "compiletooldir"))
             args.append("QROOT=%s"%config.get("broker", "quattordir"))
-            args.append("PANC=%s" % domain.compiler)
+            args.append("PANC=%s" % self.domain.compiler)
             if (only):
                 args.append("only")
                 args.append("HOST=%s"%only.fqdn)
@@ -97,7 +94,8 @@ class TemplateDomain(object):
                 raise ArgumentError("\n%s%s"%(e.out,e.err))
 
         finally:
-            compileRelease();
+            if (not locked):
+                compileRelease()
 
         build_index(config, session, outputdir)
         return out
