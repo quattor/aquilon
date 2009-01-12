@@ -4,14 +4,9 @@
 import os
 import re
 import sys
+import __init__
 import optparse
-from traceback import print_exc
-
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
-
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
+from   traceback import print_exc
 
 # Do any necessary module loads...
 from aquilon.config import Config
@@ -31,8 +26,8 @@ from aquilon.aqdb.db_factory    import db_factory, Base, debug
 from aquilon.aqdb.utils.shutils import ipshell, load_all
 from aquilon.aqdb.utils         import table_admin as ta, constraints as cnst
 
-#TODO: get a dsdb object here, pass it around as needed
-#(e.g.location,testCampus)
+#TODO: get a dsdb object here, pass it around as needed 
+# -OR- put it in DbFactory? (for things like loc/net populate)
 
 import test_campus_populate as tcp
 

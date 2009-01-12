@@ -65,9 +65,15 @@ def __repr__(self):
 
 class db_factory(object):
     __shared_state = {}
+    __started = False # at the class definition, that is
 
     def __init__(self, *args, **kw):
         self.__dict__ = self.__shared_state
+
+        if self.__started:
+            return
+
+        self.__started = True
 
         try:
             self.config = Config()

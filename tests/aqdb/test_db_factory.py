@@ -20,6 +20,9 @@ class testDbFactory(unittest.TestCase):
         if os.path.isfile(self.outfile):
             os.remove(self.outfile)
 
+    def get_db(self, *args, **kw):
+        return self.db
+
     def tearDown(self, *args, **kw):
         #os.system('/bin/cat %s'%(self.outfile))
         os.remove(self.outfile)
@@ -47,5 +50,22 @@ def main(*args, **kw):
 if __name__ == "__main__":
     main(sys.argv)
 
+#would test singleton functionality
+__sql = """
+  SELECT substr(a.spid,1,9) pid,
+         substr(b.sid,1,5) sid,
+         substr(b.serial#,1,5) ser#,
+         substr(b.machine,1,6) box,
+         substr(b.username,1,10) username,
+         substr(b.osuser,1,8) os_user,
+         substr(b.program,1,30) program
+  FROM v$session b, v$process a
+  WHERE b.paddr  = a.addr and type='USER'
+  AND b.username = 'SATEST'
+  ORDER BY spid;
+
+  exit;
+
+"""
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

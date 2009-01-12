@@ -64,6 +64,7 @@ def load_all(verbose=0):
 
     if verbose > 1:
         print 'load_all() complete'
+    return True
 
 
 #TODO: schema/uml as an argument (DRY)
