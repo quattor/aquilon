@@ -98,7 +98,6 @@ class CommandMakeAquilon(BrokerCommand):
                 continue
             dbinstance = choose_service_instance(session, dbhost, item.service)
             max_position = session.query(BuildItem).count() + 1
-            print 'MAX POSITION = %s'%(max_position)
             dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
                     position=max_position)
             dbhost.templates.append(dbservice_bi)

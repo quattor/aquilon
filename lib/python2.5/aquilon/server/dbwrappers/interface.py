@@ -26,7 +26,6 @@ from aquilon.server.dbwrappers.system import get_system
 # FIXME: interface type?  interfaces for hardware entities in general?
 def get_interface(session, interface, machine, mac, ip):
     q = session.query(Interface)
-    print interface, machine, mac, ip
     if machine:
         q = q.filter(Interface.hardware_entity_id==Machine.machine_id)
         q = q.filter(Machine.name==machine)

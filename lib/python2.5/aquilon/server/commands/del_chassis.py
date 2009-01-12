@@ -22,13 +22,8 @@ class CommandDelChassis(BrokerCommand):
         q = session.query(ChassisSlot).filter_by(
             chassis=dbchassis).filter(
                 ChassisSlot.machine_id != None)
-#        log.msg(str(q))
-#        machine_count = q.count()
 
         if q.count() > 0:
-#            log.msg('GOT MACHINE_COUNT=%s'%(machine_count))
-#            for i in q.all():
-#                log.msg('  %s of type %s'%(i.machine_id, type(i.machine_id)))
             raise ArgumentError("Cannot remove chassis '%s': still in use by %d machines" %
                                 (dbchassis.fqdn, machine_count))
 
