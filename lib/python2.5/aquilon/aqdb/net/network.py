@@ -7,7 +7,7 @@ from socket   import inet_aton, inet_ntoa
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
                         CheckConstraint, UniqueConstraint, DateTime,
-                        ForeignKey, insert, select, func )
+                        ForeignKey, Boolean, insert, select, func )
 
 from sqlalchemy.sql import and_
 from sqlalchemy.orm import relation, deferred, synonym
@@ -66,19 +66,20 @@ class Network(Base):
 
     network_type  = Column(AqStr(32),  nullable = False, default = 'unknown')
     #TODO:  constrain <= 32, >= 1
-    cidr          = Column(Integer,    nullable = False)
-    name          = Column(AqStr(255), nullable = False) #TODO: default to ip
-    ip            = Column(IPV4,       nullable = False)
-    bcast         = Column(IPV4,       nullable = False)
-    mask          = Column(Integer,    nullable = False) #TODO: ENUM!!!
-    side          = Column(AqStr(4),   nullable = True, default = 'a')
-    dsdb_id       = Column(Integer,    nullable = False)
-
-    creation_date = deferred(Column(DateTime, default = datetime.now,
+    cidr            = Column(Integer,    nullable = False)
+    name            = Column(AqStr(255), nullable = False) #TODO: default to ip
+    ip              = Column(IPV4,       nullable = False)
+    bcast           = Column(IPV4,       nullable = False)
+    mask            = Column(Integer,    nullable = False) #TODO: ENUM!!!
+    side            = Column(AqStr(4),   nullable = True, default = 'a')
+    dsdb_id         = Column(Integer,    nullable = False)
+    is_discoverable = Column(Boolean,    nullable = False, default = False)
+    is_disovered    = Column(Boolean,    nullable = False, default = False)
+    creation_date   = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False))
-    comments      = deferred(Column(String(255), nullable = True))
+    comments        = deferred(Column(String(255), nullable = True))
 
-    location      = relation(Location, backref = 'networks')
+    location        = relation(Location, backref = 'networks')
 
     def netmask(self):
         bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
@@ -148,7 +149,7 @@ def get_net_id_from_ip(s, ip):
 #        d[row[0]] = row[1]
 #    return d
 
-def populate(db, full, *args, **kw):
+def populate(db, full=False, *args, **kw):
     #TODO:
         #populate comments
         #populate all non np/dd networks asynchronously
@@ -158,7 +159,6 @@ def populate(db, full, *args, **kw):
         import aquilon.aqdb.dsdb as dsdb_
 
         from aquilon.aqdb.loc.building import Building, building
-        from sqlalchemy import insert
         import time
 
         print 'starting to import networks...'
@@ -177,8 +177,13 @@ def populate(db, full, *args, **kw):
 
         count=0
 
+        if full:
+            dump_action = 'network_full'
+        else:
+            dump_action = 'np_network'
+
         for (name, ip, mask, network_type, bldg_name, side,
-             dsdb_id) in dsdb.dump('np_network'):
+             dsdb_id) in dsdb.dump(dump_action):
 
             kw = {}
             try:
@@ -187,7 +192,6 @@ def populate(db, full, *args, **kw):
                 print "Can't find building '%s'\n%s"%(bldg_name, row)
                 continue
 
-
             kw['name']           = name
             kw['ip']             = ip
             kw['mask']           = mask
@@ -195,6 +199,9 @@ def populate(db, full, *args, **kw):
             kw['bcast']          = get_bcast(ip, kw['cidr'])
 
             kw['network_type']   = network_type
+
+            if network_type == 'tor_net' or 'grid access':
+                kw['is_discoverable'] = True
 
             if side:
                 kw['side']       = side
