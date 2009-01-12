@@ -64,15 +64,18 @@ def __repr__(self):
        return '%s instance '%(self.__class__.__name__)
 
 class db_factory(object):
+    ## this just means it's false at the class definitions
     __shared_state = {}
-    #__started = False
+    __started = False
 
     def __init__(self, *args, **kw):
-        if getattr(self, '__started', None):
+        self.__dict__  = self.__shared_state
+
+        if self.__started:
             return
 
-        self.__dict__ = self.__shared_state
-        
+        self.__started = True
+
         try:
             self.config = Config()
         except Exception, e:
