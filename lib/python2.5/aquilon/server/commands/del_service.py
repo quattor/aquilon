@@ -13,7 +13,9 @@ from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.svc.service_map import ServiceMap
 from aquilon.server.templates.service import (PlenaryService,
-        PlenaryServiceInstance, PlenaryServiceInstanceClientDefault)
+        PlenaryServiceClientDefault, PlenaryServiceServerDefault,
+        PlenaryServiceInstance, PlenaryServiceInstanceClientDefault,
+        PlenaryServiceInstanceServerDefault)
 
 
 class CommandDelService(BrokerCommand):
@@ -26,8 +28,16 @@ class CommandDelService(BrokerCommand):
         if not instance:
             if dbservice.instances:
                 raise ArgumentError("Cannot remove service with instances defined.")
+
             plenary_info = PlenaryService(dbservice)
             plenary_info.remove(self.config.get("broker", "plenarydir"))
+
+            plenary_info = PlenaryServiceClientDefault(dbservice)
+            plenary_info.remove(self.config.get("broker", "plenarydir"))
+
+            plenary_info = PlenaryServiceServerDefault(dbservice)
+            plenary_info.remove(self.config.get("broker", "plenarydir"))
+
             session.delete(dbservice)
             return
         dbsi = session.query(ServiceInstance).filter_by(
@@ -41,6 +51,9 @@ class CommandDelService(BrokerCommand):
             plenary_info.remove(self.config.get("broker", "plenarydir"))
 
             plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
+            plenary_info.remove
+
+            plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbsi)
             plenary_info.remove
 
             # Check the service map and remove any mappings

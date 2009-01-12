@@ -14,7 +14,9 @@ from aquilon.server.templates.domain import (compileLock, compileRelease)
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance,
                                               PlenaryServiceClientDefault,
-                                              PlenaryServiceInstanceClientDefault)
+                                              PlenaryServiceServerDefault,
+                                              PlenaryServiceInstanceClientDefault,
+                                              PlenaryServiceInstanceServerDefault)
 
 
 class CommandAddService(BrokerCommand):
@@ -55,8 +57,10 @@ class CommandAddService(BrokerCommand):
                 plenary_info = PlenaryService(dbservice)
                 plenary_info.write(pdir, user, locked=True)
 
-                # Create the default service client template
+                # Create the default service client and server template
                 plenary_info = PlenaryServiceClientDefault(dbservice)
+                plenary_info.write(pdir, user, locked=True)
+                plenary_info = PlenaryServiceServerDefault(dbservice)
                 plenary_info.write(pdir, user, locked=True)
 
             if not instance:
@@ -80,8 +84,10 @@ class CommandAddService(BrokerCommand):
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
             plenary_info.write(pdir, user, locked=True)
             
-            # Create the default service template
+            # Create the default service client and server template
             plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
+            plenary_info.write(pdir, user, locked=True)
+            plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbsi)
             plenary_info.write(pdir, user, locked=True)
 
         finally:

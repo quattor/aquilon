@@ -29,6 +29,16 @@ class PlenaryServiceClientDefault(Plenary):
     def body(self, lines):
         return
 
+class PlenaryServiceServerDefault(Plenary):
+    def __init__(self, dbservice):
+        Plenary.__init__(self)
+        self.name = dbservice.name
+        self.plenary_core = "service/%(name)s/server" % self.__dict__
+        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.template_type = ''
+
+    def body(self, lines):
+        return
 
 class PlenaryServiceInstance(Plenary):
     def __init__(self, dbservice, dbinstance):
@@ -46,6 +56,21 @@ class PlenaryServiceInstance(Plenary):
         lines.append("'instance' = '%(name)s';" % self.__dict__)
         lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.servers]) + ");")
 
+class PlenaryServiceInstanceServer(Plenary):
+    def __init__(self, dbservice, dbinstance):
+        Plenary.__init__(self)
+        self.servers = dbinstance.servers
+        self.service = dbservice.name
+        self.path    = dbinstance.cfg_path
+        self.name = dbinstance.name
+        self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
+        self.plenary_template = self.plenary_core + "/srvconfig"
+        self.template_type = 'structure'
+
+    def body(self, lines):
+        lines.append("'instance' = '%(name)s';" % self.__dict__)
+        lines.append("'clients' = list(" + ", ".join([("'" + client.host.fqdn + "'") for client in self.path.build_items]) + ");")
+
 
 class PlenaryServiceInstanceClientDefault(Plenary):
     def __init__(self, dbservice, dbinstance):
@@ -61,4 +86,17 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         lines.append("'/system/services/%(service)s' = create('servicedata/%(service)s/%(name)s/config');" % self.__dict__)
         lines.append("include { 'service/%(service)s/client/config' };"%self.__dict__)
 
+class PlenaryServiceInstanceServerDefault(Plenary):
+    def __init__(self, dbservice, dbinstance):
+        Plenary.__init__(self)
+        self.servers = dbinstance.servers
+        self.service = dbservice.name
+        self.name = dbinstance.name
+        self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
+        self.plenary_template = self.plenary_core + "/config"
+        self.template_type = ''
+
+    def body(self, lines):
+        lines.append("'/system/provides/%(service)s' = create('servicedata/%(service)s/%(name)s/srvconfig');" % self.__dict__)
+        lines.append("include { 'service/%(service)s/server/config' };"%self.__dict__)
 

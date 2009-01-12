@@ -16,6 +16,7 @@ class PlenaryPersonality(Plenary):
         self.template_type = ''
 
     def body(self, lines):
-        return
+        lines.append("variable PERSONALITY = '%(name)s';" % self.__dict__)
+        lines.append("include { 'personality/config' };");
 
 

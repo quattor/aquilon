@@ -49,7 +49,11 @@ class Plenary(object):
 
         lines = []
         lines.append("# Generated from %s for %s" % (self.servername, user))
-        lines.append("%(template_type)s template %(plenary_template)s;" % self.__dict__)
+        ttype = self.template_type
+        if (ttype != ""):
+            ttype = self.template_type + " "
+
+        lines.append("%stemplate %s;" % (ttype, self.plenary_template))
         lines.append("")
         self.body(lines)
         content = "\n".join(lines)+"\n"
