@@ -39,6 +39,12 @@ class TestBrokerStart(unittest.TestCase):
         args = [twistd, "--pidfile", pidfile, "--logfile", logfile,
                 "aqd", "--config", config.baseconfig]
 
+        if config.has_option("unittest", "coverage"):
+            if config.getboolean("unittest", "coverage"):
+                args.append("--coverage")
+                args.append(os.path.join(config.get("broker", "logdir"),
+                                         "aqd.coverage"))
+
         p = Popen(args)
         self.assertEqual(p.wait(), 0)
 

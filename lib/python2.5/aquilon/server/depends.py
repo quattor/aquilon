@@ -17,5 +17,6 @@ ms.version.addpkg('protoc', 'prod', meta='aquilon')
 ms.version.addpkg('zope.interface', '3.3.0', 'dist')
 ms.version.addpkg('twisted', '8.1.0', 'dist')
 ms.version.addpkg('ms.modulecmd', '1.0.1', 'dist')
+ms.version.addpkg('coverage', '2.80', 'dist')
 
 

@@ -12,6 +12,7 @@ from logging import Handler
 # This is done by the wrapper script.
 #import aquilon.server.depends
 
+import coverage
 from zope.interface import implements
 from twisted.python import usage, log
 from twisted.plugin import IPlugin
@@ -31,13 +32,10 @@ from aquilon.server.anonwrappers import AnonSite
 
 
 class Options(usage.Options):
-    optFlags = [
-                ["noauth", None, "Do not start the knc listener."],
-                ["usesock", None, "use a unix socket to connect"],
-            ]
-    optParameters = [
-                ["config", None, "Configuration file to use."],
-            ]
+    optFlags = [["noauth", None, "Do not start the knc listener."],
+                ["usesock", None, "use a unix socket to connect"]]
+    optParameters = [["config", None, None, "Configuration file to use."],
+                     ["coverage", None, None, "Code Coverage file to create."]]
 
 
 class BridgeLogHandler(Handler):
@@ -64,6 +62,12 @@ class AQDMaker(object):
     options = Options
 
     def makeService(self, options):
+        if options["coverage"]:
+            write_test = open(options['coverage'], 'w')
+            write_test.close()
+            coverage.erase()
+            coverage.start()
+
         config = Config(configfile=options["config"])
 
         # Set up the environment...
@@ -130,6 +134,31 @@ class AQDMaker(object):
             config.get("broker", "kncport")])
         mon.startService()
         reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
+
+        def start_coverage():
+            log.msg("Starting coverage")
+            #coverage.erase()
+            coverage.start()
+
+        def stop_coverage():
+            log.msg("Finishing coverage")
+            coverage.stop()
+            sourcefiles = []
+            aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
+                                          "lib", "python2.5", "aquilon")
+            sourcefiles = []
+            for dirpath, dirname, filenames in os.walk(aquilon_srcdir):
+                for filename in filenames:
+                    if not filename.endswith('.py'):
+                        continue
+                    sourcefiles.append(os.path.join(dirpath, filename))
+            output = open(options["coverage"], 'w')
+            coverage.report(sourcefiles, file=output)
+            output.close()
+
+        if options["coverage"]:
+            reactor.addSystemEventTrigger('after', 'startup', start_coverage)
+            reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
         unixsocket = "unix:%s:mode=600" % sockname
         kncSite = KNCSite( restServer )
