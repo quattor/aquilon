@@ -10,7 +10,7 @@ from tempfile import mkdtemp
 from socket import gethostbyname
 
 from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
-                                 ArgumentError, NameServiceError)
+                                 ArgumentError, NameServiceError, AquilonError)
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -20,7 +20,8 @@ from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates.domain import TemplateDomain
-
+from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.host import PlenaryHost
 
 class CommandMakeAquilon(BrokerCommand):
 
@@ -29,6 +30,7 @@ class CommandMakeAquilon(BrokerCommand):
     def render(self, session, hostname, os, personality, buildstatus,
                user, **arguments):
         dbhost = hostname_to_host(session, hostname)
+        domdir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%dbhost.domain.name
 
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
         # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
@@ -46,68 +48,106 @@ class CommandMakeAquilon(BrokerCommand):
             raise ArgumentError("Host %s has archetype %s, needs to be aquilon for command to succeed." %
                     (hostname, dbhost.archetype.name))
 
-        # Currently, for the Host to be created it *must* be associated with
-        # a Machine already.  If that ever changes, need to check here and
-        # bail if dbhost.machine does not exist.
 
-        # Need to get all the BuildItem objects for this host.
-        # They should include:
-        # - exactly one OS
-        # - exactly one personality
-        # And may include:
-        # - many services
-        # - many features?
+        # We grab a template compile lock over this whole operation,
+        # which means that we will wait until any outstanding compiles
+        # have completed before we start modifying files within template
+        # domains.
+        old_content = None
+        try:
+            compileLock()
+            plenary_host = PlenaryHost(dbhost)
 
-        if os:
-            dbos = get_cfg_path(session, "os", os)
-            dbos_bi = session.query(BuildItem).filter_by(host=dbhost).join(
-                'cfg_path').filter_by(tld=dbos.tld).first()
-            if dbos_bi:
-                dbos_bi.cfg_path = dbos
+            try:
+                old_content = plenary_host.read(domdir)
+            except IOError, e: 
+                # Sigh, it's an IOError if the file doesn't exist.
+                old_content = None
+            
+            # Currently, for the Host to be created it *must* be associated with
+            # a Machine already.  If that ever changes, need to check here and
+            # bail if dbhost.machine does not exist.
+
+            # Need to get all the BuildItem objects for this host.
+            # They should include:
+            # - exactly one OS
+            # - exactly one personality
+            # And may include:
+            # - many services
+            # - many features?
+
+            if os:
+                dbos = get_cfg_path(session, "os", os)
+                dbos_bi = session.query(BuildItem).filter_by(host=dbhost).join(
+                    'cfg_path').filter_by(tld=dbos.tld).first()
+                if dbos_bi:
+                    dbos_bi.cfg_path = dbos
+                else:
+                    # FIXME: This could fail if there is already an item at 0
+                    dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
+                session.save_or_update(dbos_bi)
+
+            if personality:
+                dbpersonality = get_cfg_path(session, "personality", personality)
+                dbpersonality_bi = session.query(BuildItem).filter_by(host=dbhost).join(
+                    'cfg_path').filter_by(tld=dbpersonality.tld).first()
+                if dbpersonality_bi:
+                    dbpersonality_bi.cfg_path = dbpersonality
+                else:
+                    # FIXME: This could fail if there is already an item at 1
+                    dbpersonality_bi = BuildItem(host=dbhost,
+                            cfg_path=dbpersonality, position=1)
+                session.save_or_update(dbpersonality_bi)
+
+            if buildstatus:
+                dbstatus = get_status(session, buildstatus)
+                dbhost.status = dbstatus
+                session.update(dbhost)
+
+            session.flush()
+            session.refresh(dbhost)
+            dbservice_tld = session.query(Tld).filter_by(type='service').one()
+            for item in dbhost.archetype.service_list:
+                dbservice_bi = session.query(BuildItem).filter_by(
+                        host=dbhost).join('cfg_path').filter_by(
+                        tld=dbservice_tld).filter(CfgPath.relative_path.like(
+                        item.service.name + '/%')).first()
+                if dbservice_bi:
+                    continue
+                dbinstance = choose_service_instance(session, dbhost, item.service)
+                dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
+                        position=3)
+                dbhost.templates.append(dbservice_bi)
+                dbhost.templates._reorder()
+                session.save(dbservice_bi)
+
+            session.flush()
+            session.refresh(dbhost)
+            session.refresh(dbhost.machine)
+            
+            plenary_host.write(domdir, locked=True)
+            
+            td = TemplateDomain(dbhost.domain)
+            out = td.compile(session, only=dbhost, locked=True)
+
+        except:
+            # If this was a change, then we need to revert the plenary,
+            # to avoid this domain being un-compilable in the future.
+            # If this was a new file, we can just remove the plenary.
+            if (old_content is None):
+                plenary_host.remove(domdir, locked=True)
             else:
-                # FIXME: This could fail if there is already an item at 0
-                dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
-            session.save_or_update(dbos_bi)
+                # this method corrupts the mtime, which will cause this
+                # host to be compiled next time from a normal "make".
+                plenary_host.write(domdir, locked=True, content=old_content)
 
-        if personality:
-            dbpersonality = get_cfg_path(session, "personality", personality)
-            dbpersonality_bi = session.query(BuildItem).filter_by(host=dbhost).join(
-                'cfg_path').filter_by(tld=dbpersonality.tld).first()
-            if dbpersonality_bi:
-                dbpersonality_bi.cfg_path = dbpersonality
-            else:
-                # FIXME: This could fail if there is already an item at 1
-                dbpersonality_bi = BuildItem(host=dbhost,
-                        cfg_path=dbpersonality, position=1)
-            session.save_or_update(dbpersonality_bi)
+            # Okay, cleaned up templates, make sure the caller knows
+            # we've aborted so that DB can be appropriately rollback'd.
+            raise
 
-        if buildstatus:
-            dbstatus = get_status(session, buildstatus)
-            dbhost.status = dbstatus
-            session.update(dbhost)
+        finally:
+            compileRelease()
 
-        session.flush()
-        session.refresh(dbhost)
-        dbservice_tld = session.query(Tld).filter_by(type='service').one()
-        for item in dbhost.archetype.service_list:
-            dbservice_bi = session.query(BuildItem).filter_by(
-                    host=dbhost).join('cfg_path').filter_by(
-                    tld=dbservice_tld).filter(CfgPath.relative_path.like(
-                    item.service.name + '/%')).first()
-            if dbservice_bi:
-                continue
-            dbinstance = choose_service_instance(session, dbhost, item.service)
-            dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
-                    position=3)
-            dbhost.templates.append(dbservice_bi)
-            dbhost.templates._reorder()
-            session.save(dbservice_bi)
-
-        session.flush()
-        session.refresh(dbhost)
-        session.refresh(dbhost.machine)
-
-        td = TemplateDomain()
-        return td.compile(session, dbhost.domain, user, only=dbhost)
+        return out
 
 

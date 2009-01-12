@@ -41,22 +41,19 @@ class Plenary(object):
         self.template_type = 'structure'
         self.servername = config.get("broker", "servername")
         
-    def write(self, dir, user, locked=False):
+    def write(self, dir, user=None, locked=False, content=None):
+        # user is simply left for compatibility: it's no longer used
         if (hasattr(self, "machine_type") and
                 self.machine_type == 'aurora_node'):
             # Don't bother writing plenary files for dummy aurora hardware.
             return
 
-        lines = []
-        lines.append("# Generated from %s for %s" % (self.servername, user))
-        ttype = self.template_type
-        if (ttype != ""):
-            ttype = self.template_type + " "
-
-        lines.append("%stemplate %s;" % (ttype, self.plenary_template))
-        lines.append("")
-        self.body(lines)
-        content = "\n".join(lines)+"\n"
+        if content is None:
+            lines = []
+            lines.append("%(template_type)s template %(plenary_template)s;" % self.__dict__)
+            lines.append("")
+            self.body(lines)
+            content = "\n".join(lines)+"\n"
 
         plenary_path = os.path.join(dir, self.plenary_core)
         plenary_file = os.path.join(dir, self.plenary_template) + ".tpl"
@@ -80,13 +77,15 @@ class Plenary(object):
     def read(self, plenarydir):
         return read_file(plenarydir, self.plenary_template + ".tpl")
 
-    def remove(self, plenarydir):
+    def remove(self, plenarydir, locked=False):
         plenary_file = os.path.join(plenarydir, self.plenary_template + ".tpl")
         try:
-            compileLock()
+            if (not locked):
+                compileLock()
             remove_file(plenary_file)
         finally:
-            compileRelease()
+            if (not locked):
+                compileRelease()
         return
 
 

@@ -22,7 +22,7 @@ class CommandCompile(BrokerCommand):
         d = session.query(Domain).filter_by(name=domain).all()
         if (len(d) != 1):
             raise NotFoundException("Domain '%s' not found"%domain)
-        dom = TemplateDomain()
-        return dom.compile(session, d[0], user)
+        dom = TemplateDomain(d[0])
+        return dom.compile(session)
 
 
