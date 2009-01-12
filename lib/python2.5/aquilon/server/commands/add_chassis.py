@@ -27,10 +27,10 @@ class CommandAddChassis(BrokerCommand):
         # FIXME: Precreate chassis slots?
         dbchassis_hw = ChassisHw(location=dblocation, model=dbmodel,
                                  serial_no=serial)
-        session.save(dbchassis_hw)
+        session.add(dbchassis_hw)
         dbchassis = Chassis(name=short, dns_domain=dbdns_domain,
                             chassis_hw=dbchassis_hw, comments=comments)
-        session.save(dbchassis)
+        session.add(dbchassis)
         return
 
 

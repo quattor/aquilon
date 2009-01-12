@@ -36,9 +36,9 @@ class CommandAddService(BrokerCommand):
                     tld=dbtld, relative_path=service).first()
                 if not dbcfg_path:
                     dbcfg_path = CfgPath(tld=dbtld, relative_path=service)
-                    session.save(dbcfg_path)
+                    session.add(dbcfg_path)
                 dbservice = Service(name=service, cfg_path=dbcfg_path)
-                session.save(dbservice)
+                session.add(dbservice)
 
                 # Note: Technically, there should be complicated logic
                 # here to check that any service instance stuff that
@@ -72,10 +72,10 @@ class CommandAddService(BrokerCommand):
             if not dbcfg_path:
                 dbcfg_path = CfgPath(tld=dbservice.cfg_path.tld,
                                      relative_path=relative_path)
-                session.save(dbcfg_path)
+                session.add(dbcfg_path)
             dbsi = ServiceInstance(service=dbservice, name=instance,
                     cfg_path=dbcfg_path)
-            session.save(dbsi)
+            session.add(dbsi)
             session.flush()
             session.refresh(dbservice)
             session.refresh(dbsi)

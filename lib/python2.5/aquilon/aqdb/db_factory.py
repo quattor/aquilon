@@ -145,6 +145,7 @@ class db_factory(object):
                                                        transactional = True))
         else:
             self.Session = scoped_session(sessionmaker(bind=self.engine))
+
         assert(self.Session)
 
     def session(self):

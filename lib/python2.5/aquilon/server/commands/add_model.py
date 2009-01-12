@@ -43,7 +43,7 @@ class CommandAddModel(BrokerCommand):
         dbmodel = Model(name=name, vendor=dbvendor, machine_type=type,
                 comments=comments)
         try:
-            session.save(dbmodel)
+            session.add(dbmodel)
         except InvalidRequestError, e:
             raise ArgumentError("Could not add model: %s" % e)
 
@@ -53,7 +53,7 @@ class CommandAddModel(BrokerCommand):
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
                     cpu_quantity=cpunum, memory=mem, disk_type=dbdisk_type,
                     disk_capacity=disksize, nic_count=nics)
-            session.save(dbmachine_specs)
+            session.add(dbmachine_specs)
         return
 
 

@@ -89,8 +89,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if dbmanager:
             dbinterface.system = dbmanager
             dbmanager.mac = dbinterface.mac
-            session.save(dbmanager)
-        session.save(dbinterface)
+            session.add(dbmanager)
+        session.add(dbinterface)
         session.flush()
         session.refresh(dbinterface)
         session.refresh(dbmachine)
@@ -103,7 +103,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 log.msg("Could not reserve IP %s for %s in dsdb: %s" %
                         (dbmanager.ip, dbmanager.fqdn, e))
                 dbinterface.system = None
-                session.save(dbinterface)
+                session.add(dbinterface)
                 session.remove(dbmanager)
                 session.flush()
                 session.refresh(dbinterface)
@@ -158,7 +158,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             return
         log.msg("Renaming machine '%s' as '%s'" % (dbmachine.name, short))
         dbmachine.name = short
-        session.update(dbmachine)
+        session.add(dbmachine)
 
     def add_manager(self, session, dbmachine, old_ip, old_network):
         if not old_ip:

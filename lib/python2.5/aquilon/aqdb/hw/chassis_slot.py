@@ -16,7 +16,7 @@ class ChassisSlot(Base):
     __tablename__ = 'chassis_slot'
 
     chassis_id = Column(Integer,
-                        ForeignKey('chassis.id',
+                        ForeignKey('chassis.system_id',
                                    name='chassis_slot_chassis_fk',
                                    ondelete='CASCADE'),
                         primary_key=True)
@@ -25,18 +25,19 @@ class ChassisSlot(Base):
 
     # TODO: Code constraint that these are Blades...
     machine_id = Column(Integer,
-                        ForeignKey('machine.id',
+                        ForeignKey('machine.machine_id',
                                    name='chassis_slot_machine_fk'),
                         nullable=True)
     #TODO: need a unique key against this, but what if it takes 2 slots?
 
     chassis = relation(Chassis, uselist=False,
-                       backref=backref('slots', cascade='delete',
+                       backref=backref('slots', cascade='delete, delete-orphan',
                                        order_by=[asc('slot_number')]),
                        passive_deletes=True)
 
     machine = relation(Machine, uselist=False,
-                       backref=backref('chassis_slot'))
+                       backref=backref('chassis_slot',
+                                       cascade='delete, delete-orphan'))
 
 chassis_slot = ChassisSlot.__table__
 chassis_slot.primary_key.name = 'chassis_slot_pk'

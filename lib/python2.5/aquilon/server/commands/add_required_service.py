@@ -20,7 +20,7 @@ class CommandAddRequiredService(BrokerCommand):
         dbservice = get_service(session, service)
         dbsli = ServiceListItem(archetype=dbarchetype, service=dbservice,
                 comments=comments)
-        session.save_or_update(dbsli)
+        session.add(dbsli)
         return
 
 

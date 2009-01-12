@@ -1,13 +1,6 @@
 """ Individual, physical disks """
 
 from datetime import datetime
-#import sys
-#import os
-#
-#if __name__ == '__main__':
-#    DIR = os.path.dirname(os.path.realpath(__file__))
-#    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-#    import aquilon.aqdb.depends
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         ForeignKey, PassiveDefault, UniqueConstraint)
@@ -28,7 +21,7 @@ class Disk(Base):
     id            = Column(Integer, Sequence('disk_id_seq'), primary_key = True)
     device_name   = Column(AqStr(128), nullable = False, default = 'sda')
 
-    machine_id    = Column(Integer, ForeignKey('machine.id',
+    machine_id    = Column(Integer, ForeignKey('machine.machine_id',
                                                name = 'disk_machine_fk',
                                                ondelete='CASCADE'),
                                               nullable = False)

@@ -65,6 +65,9 @@ class TestUpdateInterface(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateInterface)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    import aquilon.aqdb.depends
+    import nose
 
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateInterface)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
+    nose.runmodule()

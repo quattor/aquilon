@@ -20,7 +20,7 @@ class CommandAddDnsDomain(BrokerCommand):
             raise ArgumentError("DNS domain %s already exists." % dns_domain)
 
         dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
-        session.save(dbdns_domain)
+        session.add(dbdns_domain)
         session.flush()
         session.refresh(dbdns_domain)
 

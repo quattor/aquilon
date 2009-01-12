@@ -43,7 +43,7 @@ class CommandManage(BrokerCommand):
             remove_file(f)
 
             dbhost.domain = dbdomain
-            session.save_or_update(dbhost)
+            session.add(dbhost)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile

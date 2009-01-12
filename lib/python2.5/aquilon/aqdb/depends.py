@@ -16,6 +16,5 @@ ms.version.addpkg('ipython','0.9.1')
 
 ms.version.addpkg('nose','0.10.3')
 
-
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

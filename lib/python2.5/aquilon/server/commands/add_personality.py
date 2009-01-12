@@ -34,7 +34,7 @@ class CommandAddPersonality(BrokerCommand):
             raise ArgumentError("personality '%s' already exists"%name)
         
         dbpersona = CfgPath(tld=dbtld, relative_path=name)
-        session.save(dbpersona)
+        session.add(dbpersona)
 
         plenary = PlenaryPersonality(dbpersona)
         pdir = os.path.join(self.config.get("broker", "plenarydir"), archetype)

@@ -8,7 +8,6 @@ To an extent, this has become a dumping ground for any common ip methods.
 
 """
 
-
 from twisted.python import log
 from sqlalchemy.exceptions import InvalidRequestError
 from sqlalchemy.sql.expression import asc, desc
@@ -27,16 +26,17 @@ from aquilon.server.dbwrappers.system import get_system
 # FIXME: interface type?  interfaces for hardware entities in general?
 def get_interface(session, interface, machine, mac, ip):
     q = session.query(Interface)
+    if machine:
+        q = q.filter(Interface.hardware_entity_id==Machine.machine_id)
+        q = q.filter(Machine.name==machine)
     if interface:
         q = q.filter_by(name=interface)
-    if machine:
-        q = q.filter(Interface.hardware_entity_id==Machine.id)
-        q = q.filter(Machine.name==machine)
     if mac:
         q = q.filter_by(mac=mac)
     if ip:
         q = q.filter_by(ip=ip)
         pass
+
     try:
         dbinterface = q.one()
     except InvalidRequestError, e:
@@ -169,5 +169,3 @@ def describe_interface(session, interface):
         description.append("and mac is in use by '%s'" %
                            ",".join([s.fqdn for s in systems]))
     return ", ".join(description)
-
-

@@ -21,7 +21,7 @@ class CommandPermission(BrokerCommand):
         dbuser = get_or_create_user_principal(session, principal, 
                 createuser, createrealm)
         dbuser.role = dbrole
-        session.save_or_update(dbuser)
+        session.add(dbuser)
         return
 
 

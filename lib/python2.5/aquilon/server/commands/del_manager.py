@@ -36,7 +36,7 @@ class CommandDelManager(BrokerCommand):
             # sqlalchemy.
             for dbinterface in dbmanager.interfaces:
                 dbinterface.system = None
-                session.update(dbinterface)
+                session.add(dbinterface)
 
             session.delete(dbmanager)
             session.flush()

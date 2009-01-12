@@ -89,6 +89,9 @@ class TestDelMachine(TestBrokerCommand):
 
 
 if __name__=='__main__':
+    import aquilon.aqdb.depends
+    import nose
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMachine)
-    unittest.TextTestRunner(verbosity=2).run(suite)
 
+    #unittest.TextTestRunner(verbosity=2).run(suite)
+    nose.runmodule()

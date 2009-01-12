@@ -11,7 +11,7 @@ from aquilon.aqdb.hw.chassis_hw  import ChassisHw
 class Chassis(System):
     __tablename__ = 'chassis'
 
-    id              = Column(Integer, ForeignKey('system.id',
+    system_id       = Column(Integer, ForeignKey('system.id',
                                     name = 'chassis_sys_fk',
                                     ondelete = 'CASCADE'),
                                    primary_key = True)

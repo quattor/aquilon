@@ -77,10 +77,10 @@ class CommandAddHost(BrokerCommand):
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
                 mac=mac, ip=ip, network=dbnetwork,
                 name=short, dns_domain=dbdns_domain, archetype=dbarchetype)
-        session.save(dbhost)
+        session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost
-            session.update(dbinterface)
+            session.add(dbinterface)
         session.flush()
         session.refresh(dbhost)
 

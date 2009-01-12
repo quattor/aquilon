@@ -39,7 +39,7 @@ class CommandDelAuxiliary(BrokerCommand):
             # sqlalchemy.
             for dbinterface in dbauxiliary.interfaces:
                 dbinterface.system = None
-                session.update(dbinterface)
+                session.add(dbinterface)
 
             session.delete(dbauxiliary)
             session.flush()

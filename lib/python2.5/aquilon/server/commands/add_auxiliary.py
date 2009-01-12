@@ -66,7 +66,7 @@ class CommandAddAuxiliary(BrokerCommand):
             dbinterface = Interface(name=interface, interface_type='public',
                                     mac=mac,
                                     bootable=False, hardware_entity=dbmachine)
-            session.save(dbinterface)
+            session.add(dbinterface)
 
         if dbinterface.system:
             raise ArgumentError("Interface '%s' of machine '%s' already provides '%s'" %
@@ -85,7 +85,7 @@ class CommandAddAuxiliary(BrokerCommand):
                                 machine=dbmachine,
                                 ip=ip, network=dbnetwork, mac=dbinterface.mac, 
                                 comments=comments)
-        session.save(dbauxiliary)
+        session.add(dbauxiliary)
         dbinterface.system = dbauxiliary
 
         session.flush()

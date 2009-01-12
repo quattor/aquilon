@@ -4,13 +4,7 @@
     blade center e's in VA but they are like rackmounts as well"""
 
 from datetime import datetime
-#import sys
-#import os
-#
-#if __name__ == '__main__':
-#    DIR = os.path.dirname(os.path.realpath(__file__))
-#    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-#    import aquilon.aqdb.depends
+
 
 from sqlalchemy      import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm  import relation, deferred, backref

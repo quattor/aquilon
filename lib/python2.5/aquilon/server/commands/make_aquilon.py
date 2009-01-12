@@ -48,7 +48,6 @@ class CommandMakeAquilon(BrokerCommand):
             raise ArgumentError("Host %s has archetype %s, needs to be aquilon for command to succeed." %
                     (hostname, dbhost.archetype.name))
 
-
         # We grab a template compile lock over this whole operation,
         # which means that we will wait until any outstanding compiles
         # have completed before we start modifying files within template
@@ -85,7 +84,7 @@ class CommandMakeAquilon(BrokerCommand):
                 else:
                     # FIXME: This could fail if there is already an item at 0
                     dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
-                session.save_or_update(dbos_bi)
+                session.add(dbos_bi)
 
             if personality:
                 dbpersonality = get_cfg_path(session, "personality", personality)
@@ -97,12 +96,12 @@ class CommandMakeAquilon(BrokerCommand):
                     # FIXME: This could fail if there is already an item at 1
                     dbpersonality_bi = BuildItem(host=dbhost,
                             cfg_path=dbpersonality, position=1)
-                session.save_or_update(dbpersonality_bi)
+                session.add(dbpersonality_bi)
 
             if buildstatus:
                 dbstatus = get_status(session, buildstatus)
                 dbhost.status = dbstatus
-                session.update(dbhost)
+                session.add(dbhost)
 
             session.flush()
             session.refresh(dbhost)
@@ -115,11 +114,12 @@ class CommandMakeAquilon(BrokerCommand):
                 if dbservice_bi:
                     continue
                 dbinstance = choose_service_instance(session, dbhost, item.service)
+                max_position = session.query(BuildItem).count() + 1
                 dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
-                        position=3)
+                        position=max_position)
                 dbhost.templates.append(dbservice_bi)
                 dbhost.templates._reorder()
-                session.save(dbservice_bi)
+                session.add(dbservice_bi)
 
             session.flush()
             session.refresh(dbhost)
