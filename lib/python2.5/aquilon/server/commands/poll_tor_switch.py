@@ -98,11 +98,18 @@ class CommandPollTorSwitch(BrokerCommand):
                         raise AquilonError("Invalid CheckNet header, no field for source port." % e)
                 mac = row.get(mac_label, None)
                 port = row.get(port_label, None)
-                if mac is None or port is None:
-                    log.msg("Invalid line %d of CheckNet output." %
-                            reader.line_num)
+                if mac is None or port is None or \
+                   len(mac) == 0 or len(port) == 0:
+                    log.msg("Invalid line of CheckNet output: %s" % row)
                     continue
-                macports.append([mac, int(port)])
+                try:
+                    port_int = int(port)
+                except ValueError, e:
+                    log.msg("Error parsing port number in CheckNet output "
+                            "line: %s error: %s" % (row, e))
+                    continue
+                macports.append([mac, port_int])
+
         except CSVError, e:
             raise AquilonError("Error parsing CheckNet results: %s" % e)
         return macports
