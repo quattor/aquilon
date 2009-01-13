@@ -230,6 +230,53 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --instance service-instance-does-not-exist"
         self.noouttest(command.split(" "))
 
+    def testmodelavailable(self):
+        command = "search host --model vb1205xm"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest15.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest17.aqd-unittest.ms.com", command)
+
+    def testmodelunavailable(self):
+        command = "search host --model model-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model model-does-not-exist not found",
+                         command)
+
+    def testvendoravailable(self):
+        command = "search host --vendor dell"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
+
+    def testvendorunavailable(self):
+        command = "search host --vendor vendor-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Vendor vendor-does-not-exist not found",
+                         command)
+
+    def testserialavailable(self):
+        command = "search host --serial 99C5553"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+
+    def testserialunavailable(self):
+        command = "search host --serial serial-does-not-exist"
+        self.noouttest(command.split(" "))
+
+    def testlocationavailable(self):
+        command = "search host --rack ut3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
+
+    def testlocationunavailable(self):
+        command = "search host --building building-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Building 'building-does-not-exist' not found",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)

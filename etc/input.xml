@@ -149,6 +149,19 @@
          <option name="os" type="string">os</option>
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
+         <option name="model" type="string">machine model name</option>
+         <option name="vendor" type="string">machine vendor name</option>
+         <option name="serial" type="string">machine serial number</option>
+         <optgroup name="search_hardware_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
          <option name="all" type="boolean">list all systems</option>
       </optgroup>
       <optgroup name="search_host_prefs" mandatory="False">
