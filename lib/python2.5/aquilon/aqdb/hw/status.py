@@ -5,7 +5,7 @@
 from aquilon.aqdb.db_factory import monkeypatch
 from aquilon.aqdb.table_types.name_table import make_name_class
 
-_statuses = ['blind', 'build', 'ready']
+_statuses = ['blind', 'build', 'ready', 'failed']
 
 Status = make_name_class('Status','status')
 status = Status.__table__
