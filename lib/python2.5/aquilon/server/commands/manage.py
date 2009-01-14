@@ -12,6 +12,7 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.processes import remove_file
 from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.exceptions_ import IncompleteError
 
 class CommandManage(BrokerCommand):
 
@@ -46,11 +47,18 @@ class CommandManage(BrokerCommand):
             session.add(dbhost)
 
             # Now we recreate the plenary to ensure that the domain is ready
-            # to compile
-            plenary = PlenaryHost(dbhost)
-            domdir = os.path.join(self.config.get("broker", "builddir"),
-                                  "domains", dbdomain.name, "profiles")
-            plenary.write(domdir, locked=True)
+            # to compile, however (esp. if there was no existing template), we
+            # have to be aware that there might not be enough information yet
+            # with which we can create a template
+            try:
+                plenary = PlenaryHost(dbhost)
+                domdir = os.path.join(self.config.get("broker", "builddir"),
+                                      "domains", dbdomain.name, "profiles")
+                plenary.write(domdir, locked=True)
+            except IncompleteError, e:
+                # This template cannot be written, we leave it alone
+                # It would be nice to flag the state in the the host?
+                pass
 
         finally:
             compileRelease()
