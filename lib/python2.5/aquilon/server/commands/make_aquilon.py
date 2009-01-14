@@ -22,6 +22,7 @@ from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.service import PlenaryServiceInstanceServerDefault
 
 class CommandMakeAquilon(BrokerCommand):
 
@@ -106,6 +107,7 @@ class CommandMakeAquilon(BrokerCommand):
             session.flush()
             session.refresh(dbhost)
             dbservice_tld = session.query(Tld).filter_by(type='service').one()
+            plenarydir = self.config.get("broker", "plenarydir")
             for item in dbhost.archetype.service_list:
                 dbservice_bi = session.query(BuildItem).filter_by(
                         host=dbhost).join('cfg_path').filter_by(
@@ -114,12 +116,20 @@ class CommandMakeAquilon(BrokerCommand):
                 if dbservice_bi:
                     continue
                 dbinstance = choose_service_instance(session, dbhost, item.service)
+                # This should be refactored to combine bind_client and this code
                 max_position = session.query(BuildItem).count() + 1
                 dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
                         position=max_position)
                 dbhost.templates.append(dbservice_bi)
                 dbhost.templates._reorder()
                 session.add(dbservice_bi)
+
+                # Do I need the next two lines?
+                session.flush()
+                session.refresh(dbinstance)
+
+                plenary_info = PlenaryServiceInstanceServerDefault(item.service, dbinstance)
+                plenary_info.write(plenarydir, user, locked=True)
 
             session.flush()
             session.refresh(dbhost)

@@ -16,6 +16,7 @@ from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import (get_service_instance,
                                                         choose_service_instance)
 
+from aquilon.server.templates.service import PlenaryServiceInstanceServer
 
 class CommandBindClient(BrokerCommand):
 
@@ -54,6 +55,11 @@ class CommandBindClient(BrokerCommand):
         session.add(bi)
         session.flush()
         session.refresh(dbhost)
+
+        plenarydir = self.config.get("broker", "plenarydir")
+        plenary_info = PlenaryServiceInstanceServer(dbservice, dbinstance)
+        plenary_info.write(plenarydir)
+
         return
 
 
