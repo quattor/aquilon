@@ -23,16 +23,28 @@ from brokertest import TestBrokerCommand
 
 class TestUnbindClient(TestBrokerCommand):
 
-    def testunbinddns(self):
+    def testunbinduts(self):
         self.noouttest(["unbind", "client",
             "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "dns"])
+            "--service", "utsvc"])
 
-    def testverifyunbinddns(self):
+    def testverifyunbinduts(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Template: service/dns/nyinfratest", command)
+        self.matchclean(out, "Template: service/utsvc/utsi1", command)
 
+    def testrejectunbindrequired(self):
+        command = "unbind client --hostname unittest02.one-nyp.ms.com --service afs"
+        self.badrequesttest(command.split(" "))
+
+    def testzulu(self):
+        # We want to put things back to how they were, in order
+        # to allow later tests to see utsi1 with clients.
+        # We can't use the fixtures, because the tests are stateful,
+        # so we just specify this as another test to run last.
+        self.noouttest(["bind", "client",
+            "--hostname", "unittest02.one-nyp.ms.com",
+            "--service", "utsvc", "--instance", "utsi2"])
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindClient)

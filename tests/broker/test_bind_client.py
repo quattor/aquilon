@@ -38,6 +38,26 @@ class TestBindClient(TestBrokerCommand):
             "--hostname", "unittest02.one-nyp.ms.com",
             "--service", "dns", "--instance", "nyinfratest"])
 
+    def testbinduts00(self):
+        self.noouttest(["bind", "client",
+            "--hostname", "unittest00.one-nyp.ms.com",
+            "--service", "utsvc", "--instance", "utsi1"])
+
+    def testverifybinduts00(self):
+        command = "show host --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/utsvc/utsi1", command)
+
+    def testbinduts02(self):
+        self.noouttest(["bind", "client",
+            "--hostname", "unittest02.one-nyp.ms.com",
+            "--service", "utsvc", "--instance", "utsi2"])
+
+    def testverifybinduts02(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Template: service/utsvc/utsi2", command)
+
     def testverifybinddns(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
