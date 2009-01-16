@@ -32,7 +32,7 @@ def get_or_create_quattor_server(session, quattor_server):
     dbquattor_server = QuattorServer(name=quattor_server,
             dns_domain=dbdns_domain,
             comments='Automatically generated entry')
-    session.save(dbquattor_server)
+    session.add(dbquattor_server)
     return dbquattor_server
 
 

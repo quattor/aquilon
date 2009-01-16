@@ -42,7 +42,7 @@ def get_or_create_rack(session, rackid, building, rackrow, rackcolumn,
         fullname = rack
     dbrack = Rack(name=rack, fullname=fullname, parent=dbbuilding,
             rack_row=rackrow, rack_column=rackcolumn, comments=comments)
-    session.save(dbrack)
+    session.add(dbrack)
     return dbrack
 
 
