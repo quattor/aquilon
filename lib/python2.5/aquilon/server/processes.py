@@ -11,12 +11,14 @@ the chain.
 """
 
 
+from __future__ import with_statement
 import os
 import time
 import socket
 import re
 import xml.etree.ElementTree as ET
 from subprocess import Popen, PIPE
+from tempfile import mkstemp
 
 from twisted.python import log
 
@@ -118,11 +120,45 @@ def remove_dir(dir):
         log.msg("Failed to remove '%s': %s" % (dir, e))
     return
 
-def write_file(filename, content):
-    # FIXME: Wrap errors in a ProcessException?
-    f = open(filename, 'w')
-    f.write(content)
-    f.close()
+def write_file(filename, content, mode=None):
+    """Atomically write content into the specified filename.
+
+    The content is written into a temp file in the same directory as
+    filename, and then swapped into place with rename.  This assumes
+    that both the file and the directory can be written to by the
+    broker.  The same directory was used instead of a temporary
+    directory because atomic swaps are generally only available when
+    the source and the target are on the same filesystem.
+
+    If mode is set, change permissions on the file (newly created or
+    pre-existing) to the new mode.  If unset and the file exists, the
+    current permissions will be kept.  If unset and the file is new,
+    the default is 0644.
+
+    This method may raise OSError if any of the OS-related methods
+    (creating the temp file, writing to it, correcting permissions,
+    swapping into place) fail.  The method will attempt to remove
+    the temp file if it had been created.
+
+    """
+    if mode is None:
+        try:
+            old_mode = os.stat(filename).st_mode
+        except OSError, e:
+            old_mode = 0644
+    (dirname, basename) = os.path.split(filename)
+    (fd, fpath) = mkstemp(prefix=basename, dir=dirname)
+    try:
+        with os.fdopen(fd, 'w') as f:
+            f.write(content)
+        if mode is None:
+            os.chmod(fpath, old_mode)
+        else:
+            os.chmod(fpath, mode)
+        os.rename(fpath, filename)
+    finally:
+        if os.path.exists(fpath):
+            os.remove(fpath)
 
 def read_file(path, filename):
     fullfile = os.path.join(path, filename)
@@ -218,9 +254,7 @@ def build_index(config, session, profilesdir):
                 % (mtime, host))
     content.append("</profiles>")
 
-    f = open(index_path, 'w')
-    f.write("\n".join(content))
-    f.close()
+    write_file(index_path, "\n".join(content))
 
     if config.has_option("broker", "server_notifications"):
         service_modules = {}
