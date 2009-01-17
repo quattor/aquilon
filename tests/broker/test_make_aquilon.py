@@ -17,6 +17,8 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+# This tests the "make aquilon" command, which has
+# the specific feature of auto-binding required services.
 
 class TestMakeAquilon(TestBrokerCommand):
 
