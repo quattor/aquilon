@@ -309,6 +309,7 @@ class RestServer(ResponsePage):
                 if not myinstance:
                     log.msg("No class instance available for %s" % fullcommand)
                     myinstance = BrokerCommand()
+                myinstance.command = name
                 rendermethod = method.upper()
                 if container.handlers.get(rendermethod, None):
                     log.msg("Warning: Already have a %s here at %s..." %

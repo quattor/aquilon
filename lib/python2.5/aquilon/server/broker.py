@@ -94,6 +94,8 @@ class BrokerCommand(object):
         package_prefix = "aquilon.server.commands."
         if self.action.startswith(package_prefix):
             self.action = self.action[len(package_prefix):]
+        # self.command is set correctly in resources.py after parsing input.xml
+        self.command = self.action
         # The readonly and format flags are done here for convenience
         # and simplicity.  They could be overridden by the __init__
         # method of any show/search/cat commands that do not want these
