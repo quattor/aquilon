@@ -197,6 +197,9 @@ class ResponsePage(resource.Resource):
         else:
             request.setHeader('content-length', 0)
         request.finish()
+        if hasattr(request, 'aq_audit_id'):
+            log.msg('Command #%d finished.' % request.aq_audit_id)
+            delattr(request, 'aq_audit_id')
         return
 
     def wrapNonInternalError(self, failure, request):
