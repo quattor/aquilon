@@ -15,7 +15,7 @@ def get_or_create_observed_mac(session, dbswitch, port, mac):
         return dbobserved_mac
     dbobserved_mac = ObservedMac(switch=dbswitch, port_number=port,
                                  mac_address=mac)
-    session.save(dbobserved_mac)
+    session.add(dbobserved_mac)
     return dbobserved_mac
 
 

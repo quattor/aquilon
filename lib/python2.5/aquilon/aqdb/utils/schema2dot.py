@@ -15,7 +15,7 @@ if not sys.modules.has_key('pydot'):
     import pydot
 
 if not sys.modules.has_key('sqlalchemy'):
-    ms.version.addpkg('sqlalchemy', '0.4.8', 'dist')
+    ms.version.addpkg('sqlalchemy', '0.5.0') #TODO: REMOVE THIS STANZA!
     import sqlalchemy
     import warnings
     #warnings.warn('schema2dot: loading sqlalchemy on my own')

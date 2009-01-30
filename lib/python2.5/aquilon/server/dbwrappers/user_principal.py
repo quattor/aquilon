@@ -51,10 +51,10 @@ def get_or_create_user_principal(session, user,
                     % (realm, principal))
         log.msg("Realm %s did not exist, creating..." % realm)
         dbrealm = Realm(name=realm)
-        session.save(dbrealm)
+        session.add(dbrealm)
         log.msg("Creating user %s@%s..." % (user, realm))
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
-        session.save(dbuser)
+        session.add(dbuser)
         if commitoncreate:
             session.commit()
         return dbuser
@@ -66,7 +66,7 @@ def get_or_create_user_principal(session, user,
                     % principal)
         log.msg("User %s did not exist in realm %s, creating..." % (user, realm))
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
-        session.save(dbuser)
+        session.add(dbuser)
         if commitoncreate:
             session.commit()
     return dbuser
