@@ -17,6 +17,9 @@ from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.dbwrappers.model import get_model
+from aquilon.server.dbwrappers.vendor import get_vendor
 
 
 class CommandSearchHost(BrokerCommand):
@@ -25,6 +28,7 @@ class CommandSearchHost(BrokerCommand):
 
     def render(self, session, hostname, machine, domain, archetype,
                buildstatus, personality, os, service, instance,
+               model, vendor, serial,
                fullinfo, **arguments):
         if hostname:
             arguments['fqdn'] = hostname
@@ -71,6 +75,25 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
             q = q.join(['build_items', 'cfg_path', 'tld'])
             q = q.filter_by(type='service')
+            q = q.reset_joinpoint()
+        dblocation = get_location(session, **arguments)
+        if dblocation:
+            q = q.join(['machine'])
+            q = q.filter_by(location=dblocation)
+            q = q.reset_joinpoint()
+        if model:
+            dbmodel = get_model(session, model)
+            q = q.join(['machine'])
+            q = q.filter_by(model=dbmodel)
+            q = q.reset_joinpoint()
+        if vendor:
+            dbvendor = get_vendor(session, vendor)
+            q = q.join(['machine', 'model'])
+            q = q.filter_by(vendor=dbvendor)
+            q = q.reset_joinpoint()
+        if serial:
+            q = q.join(['machine'])
+            q = q.filter_by(serial_no=serial)
             q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
