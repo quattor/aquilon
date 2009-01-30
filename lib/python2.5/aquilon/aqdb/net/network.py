@@ -74,7 +74,7 @@ class Network(Base):
     side            = Column(AqStr(4),   nullable = True, default = 'a')
     dsdb_id         = Column(Integer,    nullable = False)
     is_discoverable = Column(Boolean,    nullable = False, default = False)
-    is_disovered    = Column(Boolean,    nullable = False, default = False)
+    is_discovered   = Column(Boolean,    nullable = False, default = False)
     creation_date   = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False))
     comments        = deferred(Column(String(255), nullable = True))
