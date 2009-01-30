@@ -12,8 +12,11 @@ from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_dependencies)
+from aquilon.server.dbwrappers.service_instance import get_client_service_instances
 from aquilon.server.processes import (DSDBRunner, build_index)
 from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.service import PlenaryServiceInstanceServer
+from aquilon.server.templates.base import (compileLock, compileRelease)
 
 delhost_lock = Lock()
 
@@ -36,6 +39,7 @@ class CommandDelHost(BrokerCommand):
 
         log.msg("Aquiring lock to attempt to delete %s" % hostname)
         delhost_lock.acquire()
+        bindings = [] # Any service bindings that we need to clean up afterwards
         try:
             log.msg("Aquired lock, attempting to delete %s" % hostname)
             # Check dependencies, translate into user-friendly message
@@ -53,10 +57,12 @@ class CommandDelHost(BrokerCommand):
             dbmachine = dbhost.machine
             ip = dbhost.ip
     
-            for template in dbhost.templates:
-                log.msg("Before deleting host '%s', removing template '%s'"
-                        % (fqdn, template.cfg_path))
-                session.delete(template)
+            for binding in dbhost.templates:
+                if (binding.cfg_path.svc_inst):
+                    bindings.append(binding.cfg_path.svc_inst)
+                log.msg("Before deleting host '%s', removing binding '%s'"
+                        % (fqdn, binding.cfg_path))
+                session.delete(binding)
 
             session.delete(dbhost)
             session.flush()
@@ -77,22 +83,34 @@ class CommandDelHost(BrokerCommand):
 
         # Only if we got here with no exceptions do we clean the template
         if (delplenary):
-            ph.remove(builddir)
-            profiles = self.config.get("broker", "profilesdir")
+            try:
+                compileLock()
+                ph.remove(builddir, locked=True)
+                profiles = self.config.get("broker", "profilesdir")
+                plenarydir = self.config.get("broker", "plenarydir")
 
-            # subsidiary cleanup for hygiene
-            # (we don't actually care if these fail, since it doesn't break anything)
-            qdir = self.config.get("broker", "quattordir")
-            for file in [
-                os.path.join(self.config.get("broker", "depsdir"), domain, fqdn+".dep"),
-                os.path.join(profiles, fqdn+".xml"),
-                os.path.join(qdir, "build", "xml", domain, fqdn+".xml"),
-                os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
-                ]:
-                try:
-                    os.remove(file)
-                except:
-                    pass
+                # Update any plenary client mappings
+                for si in bindings:
+                    log.msg("removing plenary from binding for %s"%si.cfg_path)
+                    plenary_info = PlenaryServiceInstanceServer(si.service, si)
+                    plenary_info.write(plenarydir, locked=True)
+
+                # subsidiary cleanup for hygiene
+                # (we don't actually care if these fail, since it doesn't break anything)
+                qdir = self.config.get("broker", "quattordir")
+                for file in [
+                    os.path.join(self.config.get("broker", "depsdir"), domain, fqdn+".dep"),
+                    os.path.join(profiles, fqdn+".xml"),
+                    os.path.join(qdir, "build", "xml", domain, fqdn+".xml"),
+                    os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
+                    ]:
+                    try:
+                        os.remove(file)
+                    except:
+                        pass
+            finally:
+                compileRelease()
+                
             build_index(self.config, session, profiles)
 
         return
