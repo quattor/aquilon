@@ -16,7 +16,16 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.server.authorization import AuthorizationBroker
 from aquilon.aqdb.db_factory import db_factory
 from aquilon.server.formats.formatters import ResponseFormatter
+from aquilon.server.dbwrappers.user_principal import (
+        get_or_create_user_principal)
 
+
+audit_id = 0
+"""This will help with debugging active incoming requests.
+
+   Eventually it will be replaced by a primary key in the audit log table.
+
+   """
 
 class BrokerCommand(object):
     """ The basis for each command module under commands.
@@ -94,6 +103,8 @@ class BrokerCommand(object):
         package_prefix = "aquilon.server.commands."
         if self.action.startswith(package_prefix):
             self.action = self.action[len(package_prefix):]
+        # self.command is set correctly in resources.py after parsing input.xml
+        self.command = self.action
         # The readonly and format flags are done here for convenience
         # and simplicity.  They could be overridden by the __init__
         # method of any show/search/cat commands that do not want these
@@ -129,7 +140,10 @@ class BrokerCommand(object):
         """
         def updated_render(self, *args, **kwargs):
             request = kwargs["request"]
+            principal = request.channel.getPrincipal()
+            kwargs["user"] = principal
             if not self.requires_transaction and not self.requires_azcheck:
+                self._audit(*args, **kwargs)
                 # These five lines are duped below... seemed like the
                 # simplest way to code this method.
                 retval = command(*args, **kwargs)
@@ -140,10 +154,12 @@ class BrokerCommand(object):
             if not "session" in kwargs:
                 kwargs["session"] = self.dbf.session()
             session = kwargs["session"]
-            if not "user" in kwargs:
-                kwargs["user"] = request.channel.getPrincipal()
+            dbuser = get_or_create_user_principal(session, principal,
+                                                  commitoncreate=True)
+            kwargs["dbuser"] = dbuser
+            self._audit(*args, **kwargs)
             if self.requires_azcheck:
-                self.az.check(session, principal=kwargs["user"],
+                self.az.check(principal=principal, dbuser=dbuser,
                               action=self.action, resource=request.path)
             if self.requires_readonly:
                 self._set_readonly(session)
@@ -177,6 +193,25 @@ class BrokerCommand(object):
         if self.config.get("database", "dsn").startswith("oracle"):
             session.commit()
             session.execute(text("set transaction read only"))
+
+    def _audit(self, *args, **kwargs):
+        session = kwargs.pop('session', None)
+        request = kwargs.pop('request')
+        user = kwargs.pop('user', None)
+        dbuser = kwargs.pop('dbuser', None)
+        kwargs['aqformat'] = kwargs.pop('style', 'raw')
+        # TODO: Have this less hard-coded...
+        if self.action == 'put':
+            kwargs.pop('bundle')
+        # TODO: Something fancier...
+        kwargs_str = str(kwargs)
+        if len(kwargs_str) > 1024:
+            kwargs_str = kwargs_str[0:1020] + '...'
+        global audit_id
+        audit_id += 1
+        request.aq_audit_id = audit_id
+        log.msg('Incoming command #%d from user=%s aq %s with arguments %s' %
+                (request.aq_audit_id, user, self.command, kwargs_str))
 
 
 # FIXME: This utility method may be better suited elsewhere.

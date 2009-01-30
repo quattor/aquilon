@@ -8,8 +8,7 @@
 from twisted.python import log
 
 from aquilon.exceptions_ import AuthorizationException
-from aquilon.server.dbwrappers.user_principal import (
-        get_or_create_user_principal, host_re)
+from aquilon.server.dbwrappers.user_principal import host_re
 
 
 class AuthorizationBroker(object):
@@ -22,7 +21,7 @@ class AuthorizationBroker(object):
         self.__dict__ = self.__shared_state
 
     # FIXME: Hard coded check for now.
-    def _check(self, session, dbuser, action, resource, principal):
+    def check(self, principal, dbuser, action, resource):
         if action.startswith('show') or action.startswith('search') \
            or action == 'status':
             return True
@@ -32,8 +31,7 @@ class AuthorizationBroker(object):
                     (action, resource))
         # Special-casing the aquilon hosts... this is a special user
         # that provides a bucket for all host-generated activity.
-        if self._check_aquilonhost(session, dbuser, action, resource,
-                                   principal):
+        if self._check_aquilonhost(principal, dbuser, action, resource):
             return True
         if dbuser.role.name == 'nobody':
             raise AuthorizationException(
@@ -47,7 +45,7 @@ class AuthorizationBroker(object):
                         "Must have the aqd_admin role to %s." % action)
         return True
 
-    def _check_aquilonhost(self, session, dbuser, action, resource, principal):
+    def _check_aquilonhost(self, principal, dbuser, action, resource):
         """ Return true if the incoming user is an aquilon host and this is
             one of the few things that a host is allowed to change on its
             own."""
@@ -59,10 +57,5 @@ class AuthorizationBroker(object):
         if resource.startswith("/host/%s/" % m.group(1)):
             return True
         return False
-
-    def check(self, session, principal, action, resource):
-        dbuser = get_or_create_user_principal(session, principal,
-                                              commitoncreate=True)
-        return self._check(session, dbuser, action, resource, principal)
 
 

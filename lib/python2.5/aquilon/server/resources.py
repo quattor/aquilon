@@ -197,6 +197,9 @@ class ResponsePage(resource.Resource):
         else:
             request.setHeader('content-length', 0)
         request.finish()
+        if hasattr(request, 'aq_audit_id'):
+            log.msg('Command #%d finished.' % request.aq_audit_id)
+            delattr(request, 'aq_audit_id')
         return
 
     def wrapNonInternalError(self, failure, request):
@@ -309,6 +312,7 @@ class RestServer(ResponsePage):
                 if not myinstance:
                     log.msg("No class instance available for %s" % fullcommand)
                     myinstance = BrokerCommand()
+                myinstance.command = name
                 rendermethod = method.upper()
                 if container.handlers.get(rendermethod, None):
                     log.msg("Warning: Already have a %s here at %s..." %

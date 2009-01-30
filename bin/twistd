@@ -22,13 +22,24 @@ from twisted.scripts import twistd
 # This bit is taken from the twisted.application.app... we
 # really want logging to start up before the app does.  This may need
 # to be revisited on future twisted upgrades.  The below is a clone
-# of 8.1.0, except that startLogging has been moved one line earlier.
+# of 8.1.0, except that startLogging has been broken up to increase
+# the rotate length and moved one line earlier to start before the app.
 def updated_application_run(self):
     """
     Run the application.
     """
     self.preApplication()
-    self.startLogging(self.getLogObserver())
+    observer = self.getLogObserver()
+    # Serious hack... should create hooks to make this sane.
+    if hasattr(observer, 'im_self') and hasattr(observer.im_self, 'write') \
+       and hasattr(observer.im_self.write, 'im_self') \
+       and hasattr(observer.im_self.write.im_self, 'rotateLength'):
+        # When logging to a file, observer is a FileLogObserver's emit
+        # method.  So im_self gets us the FLO.  The write attribute
+        # has been aliased from the FileLog's write attribute, so *that*
+        # im_self gets us the FileLog.  Then we can set rotateLength.  Whew!
+        observer.im_self.write.im_self.rotateLength = 10000000
+    self.startLogging(observer)
     self.application = self.createOrGetApplication()
     self.postApplication()
 
