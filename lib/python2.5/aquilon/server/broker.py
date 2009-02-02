@@ -199,7 +199,7 @@ class BrokerCommand(object):
         request = kwargs.pop('request')
         user = kwargs.pop('user', None)
         dbuser = kwargs.pop('dbuser', None)
-        kwargs['aqformat'] = kwargs.pop('style', 'raw')
+        kwargs['format'] = kwargs.pop('style', 'raw')
         # TODO: Have this less hard-coded...
         if self.action == 'put':
             kwargs.pop('bundle')
