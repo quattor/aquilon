@@ -17,7 +17,7 @@ open DEP, ">$depfile"
 
 my $target = $depfile;
 $target =~ s/\.dep$/\.xml/;
-$target =~ s{^deps}{build/xml};
+$target =~ s{/deps/}{/build/xml/};
 
 while (<STDIN>) {
 

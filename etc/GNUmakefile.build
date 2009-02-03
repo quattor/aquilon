@@ -1,9 +1,4 @@
 # -*- makefile -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-#
 #
 # set DOMAIN on commandline to build a specific cluster
 # default is to build 'ny-prod'
@@ -16,7 +11,19 @@
 #   make only HOST=<hostname>   -- ditto
 #   make only HOSTS="h1 h2 h3"  -- efficient way of forcing several hosts
 #
-#
+
+# The directory structure under QROOT is modelled after the SCDB implementation
+# which expects the build and cfg subdirectories. We've added a "deps"
+# directory and a "hosts" directory which track what's going on.
+# The only reason for the "hosts" directory is to be able to compile templates
+# that depend on other hosts (a fairly rare occurrence) without requiring
+# all hosts to be in the same template domain. This is why the "hosts" directory
+# is "global" and has no template domain qualifier.
+
+#   build/xml/$domain/* = (pan deps and pan output xml files)
+#   cfg/domains/$domain/profiles/*.tpl = input host profiles
+#   deps/$domain/*.dep = makefile-style dependencies, constructed by us (mkdep)
+#   hosts/*.tpl = working host tpls, copied from cfg/domains/$domain/profiles
 
 DOMAIN   = ny-prod
 QROOT    = /var/quattor/
@@ -30,7 +37,6 @@ HOSTDIR  = $(QROOT)/hosts
 TOOLDIR   = $(QROOT)/build
 PERL5     = /ms/dist/perl5/bin/perl5.8
 MKDEP     = $(TOOLDIR)/mkdep
-CLEANDEPS = $(TOOLDIR)/cleandeps
 
 RSYNC = /ms/dist/fsf/PROJ/rsync/2.6.6/bin/rsync
 
@@ -88,7 +94,7 @@ endif
 # declare targets
 #
 
-.PHONY: begin build build_xmls xmls cleandeps deps only count end debug dedebug
+.PHONY: begin build build_xmls xmls deps only count end debug dedebug
 .SILENT:
 
 #
@@ -116,16 +122,7 @@ endif
 # this is just the sequence of actions to update all of the cluster
 #
 
-build: begin cleandeps build_xmldeps build_deps build_xmls end
-
-
-#
-# we have a custom clean script
-# which can cope with changing include paths 
-# 
-cleandeps: $(DEPENDS)
-	@echo $(DATE) Cleaning old XML dependencies $(REDIR)
-	@$(PERL5) $(CLEANDEPS) $(DEPENDS) $(PANC_OPTS)
+build: begin build_xmldeps build_deps build_xmls end
 
 count:
 	@$(MAKE) DEEP=1 DOMAIN=$(DOMAIN) xmls | grep .tpl | wc -l
