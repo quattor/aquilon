@@ -7,7 +7,7 @@ from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
 from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.column_types.aqstr  import AqStr
-from aquilon.aqdb.db_factory          import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.hw.disk_type        import DiskType
 from aquilon.aqdb.hw.machine          import Machine
 

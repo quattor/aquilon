@@ -7,7 +7,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
 
 from sqlalchemy.orm import deferred, relation, backref, object_session
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 class Location(Base):

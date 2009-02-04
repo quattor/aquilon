@@ -6,7 +6,7 @@ from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.auth.role import Role, role
 from aquilon.aqdb.auth.realm import Realm, realm
 

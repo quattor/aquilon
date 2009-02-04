@@ -13,7 +13,7 @@ from sqlalchemy.sql import and_
 from sqlalchemy.orm import relation, deferred, synonym
 
 from aquilon.exceptions_             import ArgumentError
-from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.loc.location       import Location, location
 from aquilon.aqdb.column_types.IPV4  import (IPV4, dq_to_int, get_bcast,

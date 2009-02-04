@@ -8,7 +8,7 @@ from sqlalchemy     import (Table, Column, Integer, String, DateTime, Sequence,
                             UniqueConstraint, PrimaryKeyConstraint, select)
 from sqlalchemy.orm import deferred
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 

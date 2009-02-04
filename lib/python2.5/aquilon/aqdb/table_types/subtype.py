@@ -10,7 +10,7 @@ from sqlalchemy import (Table, Column, Sequence, Integer, String, DateTime,
                         UniqueConstraint, PrimaryKeyConstraint, select)
 from sqlalchemy.orm import deferred
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 
 def subtype(nm,tbl,dstr=None):
     """ A factory object for subtypes in Aqdb."""

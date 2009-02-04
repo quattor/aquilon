@@ -9,7 +9,7 @@ from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         select, ForeignKey, PassiveDefault, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.db_factory   import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.hw.model     import Model
 from aquilon.aqdb.hw.vendor    import Vendor
 from aquilon.aqdb.hw.cpu       import Cpu

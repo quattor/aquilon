@@ -8,7 +8,7 @@ from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
 
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.hw.vendor import Vendor
 from aquilon.aqdb.column_types.aqstr import AqStr
 

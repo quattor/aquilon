@@ -9,7 +9,7 @@ from sqlalchemy.orm                  import relation, deferred, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.sql.expression       import asc
 
-from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.net.network        import Network
 from aquilon.aqdb.sy.tor_switch      import TorSwitch
 from aquilon.aqdb.column_types.aqmac import AqMac

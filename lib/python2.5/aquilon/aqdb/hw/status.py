@@ -2,7 +2,7 @@
     deployment, such as production, QA, dev, etc. each of which are also
     overloaded terms... """
 
-from aquilon.aqdb.db_factory import monkeypatch
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.table_types.name_table import make_name_class
 
 _statuses = ['blind', 'build', 'ready', 'failed']

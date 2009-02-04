@@ -21,7 +21,7 @@ from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.sql import and_, not_
 
-from aquilon.aqdb.db_factory              import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.table_types.name_table  import make_name_class
 from aquilon.exceptions_                  import ArgumentError
 from aquilon.aqdb.column_types.aqstr      import AqStr

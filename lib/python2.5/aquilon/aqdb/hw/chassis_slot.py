@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import asc
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.hw.machine import Machine
 from aquilon.aqdb.sy.chassis import Chassis
 

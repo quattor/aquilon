@@ -7,7 +7,7 @@ from sqlalchemy      import (Table, Column, Integer, ForeignKey, Sequence,
 
 from sqlalchemy.orm  import relation, deferred, backref
 
-from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.hw.hardware_entity import HardwareEntity
 from aquilon.aqdb.sy.console_server  import ConsoleServer

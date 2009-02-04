@@ -1,7 +1,7 @@
 """ The named parent table for lists of location types to search service
     maps later on when automatic configuration of services takes places """
 
-from aquilon.aqdb.db_factory import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.table_types.name_table import make_name_class
 
 LocationSearchList = make_name_class('LocationSearchList',

@@ -6,7 +6,7 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.sy.host            import Host
 from aquilon.aqdb.cfg.archetype      import Archetype
 from aquilon.aqdb.svc.service        import Service

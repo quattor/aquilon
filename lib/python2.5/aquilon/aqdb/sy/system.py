@@ -5,7 +5,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.db_factory         import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types.IPV4  import IPV4
 from aquilon.aqdb.column_types.aqmac import AqMac

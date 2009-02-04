@@ -22,7 +22,6 @@ from aquilon.aqdb.utils.confirm import confirm
 from sqlalchemy                  import MetaData, engine, create_engine, text
 from sqlalchemy.orm              import scoped_session, sessionmaker
 from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
-from sqlalchemy.ext.declarative  import declarative_base
 
 if '--debug' in sys.argv:
     from aquilon.aqdb.utils.shutils import ipshell
@@ -41,28 +40,7 @@ def debug(examinee,*args,**kw):
     else:
         pass
 
-def monkeypatch(cls):
-    def decorator(func):
-        setattr(cls, func.__name__, func)
-        return func
-    return decorator
-
-Base = declarative_base()
-
-@monkeypatch(Base)
-def __repr__(self):
-    if hasattr(self,'name'):
-        return self.__class__.__name__ + ' ' + str(self.name)
-    elif hasattr(self,'type'):
-        return self.__class__.__name__ + ' ' + str(self.type)
-    elif hasattr(self,'service'):
-        return self.__class__.__name__ + ' ' + str(self.service.name)
-    elif hasattr(self,'system'):
-        return self.__class__.__name__ + ' ' + str(self.system.name)
-    else:
-       return '%s instance '%(self.__class__.__name__)
-
-class db_factory(object):
+class DbFactory(object):
     __shared_state = {}
     __started = False # at the class definition, that is
 
@@ -241,7 +219,7 @@ class db_factory(object):
 
 #ensure forward compatibility for proper class naming convention
 #TODO: s/db_factory/DbFactory/g
-DbFactory = db_factory
+db_factory = DbFactory
 
 
 # Copyright (C) 2008 Morgan Stanley

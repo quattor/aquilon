@@ -5,7 +5,7 @@ from sqlalchemy     import (Column, Table, Integer, Sequence, ForeignKey,
                             Index, String, DateTime)
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.db_factory              import Base
+from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr      import AqStr
 from aquilon.aqdb.loc.location            import Location
 from aquilon.aqdb.hw.model                import Model

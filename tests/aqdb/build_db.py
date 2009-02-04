@@ -5,8 +5,11 @@ import os
 import re
 import sys
 import __init__
+import logging
 import optparse
 from   traceback import print_exc
+
+log = logging.getLogger('aqdb.populate')
 
 # Do any necessary module loads...
 from aquilon.config import Config
@@ -22,11 +25,12 @@ if config.has_option("database", "module"):
 # OK, now bring everything else in...
 import aquilon.aqdb.depends
 
-from aquilon.aqdb.db_factory    import db_factory, Base, debug
+from aquilon.aqdb.base          import Base
+from aquilon.aqdb.db_factory    import db_factory, debug
 from aquilon.aqdb.utils.shutils import ipshell, load_all
 from aquilon.aqdb.utils         import table_admin as ta, constraints as cnst
 
-#TODO: get a dsdb object here, pass it around as needed 
+#TODO: get a dsdb object here, pass it around as needed
 # -OR- put it in DbFactory? (for things like loc/net populate)
 
 import test_campus_populate as tcp

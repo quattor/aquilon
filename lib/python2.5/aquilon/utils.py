@@ -18,3 +18,9 @@ def kill_from_pid_file(pid_file):
             os.kill(pid, signal.SIGQUIT)
         except Exception,e:
             pass
+
+def monkeypatch(cls):
+    def decorator(func):
+        setattr(cls, func.__name__, func)
+        return func
+    return decorator
