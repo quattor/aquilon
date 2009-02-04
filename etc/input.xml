@@ -58,6 +58,15 @@
       <transport method="get" path="ping" />
    </command>
 
+   <command name="show_active_commands">
+      Show any active commands currently running on the broker.
+
+      In this version, the command does not make a database connection
+      and parses the broker logs to determine active connections.  This
+      behavior may change in a future version.
+      <transport method="get" path="active_commands" />
+   </command>
+
    <command name="show_host">
       Shows the complete configuration for a given host. If the '--all' option
       is provided, then the command simply outputs a listing of all known hostnames.
