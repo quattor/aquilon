@@ -154,16 +154,16 @@ class BrokerCommand(object):
             if not "session" in kwargs:
                 kwargs["session"] = self.dbf.session()
             session = kwargs["session"]
-            dbuser = get_or_create_user_principal(session, principal,
-                                                  commitoncreate=True)
-            kwargs["dbuser"] = dbuser
-            self._audit(*args, **kwargs)
-            if self.requires_azcheck:
-                self.az.check(principal=principal, dbuser=dbuser,
-                              action=self.action, resource=request.path)
-            if self.requires_readonly:
-                self._set_readonly(session)
             try:
+                dbuser = get_or_create_user_principal(session, principal,
+                                                      commitoncreate=True)
+                kwargs["dbuser"] = dbuser
+                self._audit(*args, **kwargs)
+                if self.requires_azcheck:
+                    self.az.check(principal=principal, dbuser=dbuser,
+                                  action=self.action, resource=request.path)
+                if self.requires_readonly:
+                    self._set_readonly(session)
                 # begin() is only required if session has transactional=False
                 #session.begin()
                 # Command is an instance method, and will already have self...
