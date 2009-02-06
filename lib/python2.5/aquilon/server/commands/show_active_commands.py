@@ -35,15 +35,15 @@ class CommandShowActive(BrokerCommand):
                     retval.append("(%s) %s" % (id, line))
         return "\n".join(retval)
 
-    starting_re = re.compile(r'^(?P<timestamp>[\s\d:-]+) \[-\] Starting aqd')
-    incoming_re = re.compile(r'^(?P<timestamp>[\s\d:-]+) \[(?P<channel>.*?)\]'
+    starting_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[-\] Starting aqd')
+    incoming_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[(?P<channel>.*?)\]'
                              r' Incoming command #(?P<id>\d+)'
                              r' from user=(?P<user>\S+)'
                              r' aq (?P<command>\S+)'
                              r' with arguments {(?P<bareargs>.*)}')
-    finished_re = re.compile(r'^(?P<timestamp>[\s\d:-]+) \[-\]'
+    finished_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[-\]'
                              r' Command #(?P<id>\d+) finished.')
-    log_re = re.compile(r'^(?P<timestamp>[\s\d:-]+) \[(?P<channel>.*?)\]'
+    log_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[(?P<channel>.*?)\]'
                         r' (?P<log>.*)$')
     args_re = re.compile(r'\'(?P<option>\w+)\': (?P<parameter>\'.*?\')')
 
