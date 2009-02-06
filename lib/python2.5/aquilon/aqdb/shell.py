@@ -17,7 +17,7 @@ import aquilon.aqdb.depends
 
 #FOR ALL YOU HATERS: this IS for interactive work. Step off the import * ;)
 from aquilon.aqdb.utils.shutils      import *
-from aquilon.aquilon.base            import Base
+from aquilon.aqdb.base               import Base
 from aquilon.aqdb.db_factory         import db_factory
 from aquilon.aqdb.dsdb               import *
 
