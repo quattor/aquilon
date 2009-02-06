@@ -8,6 +8,7 @@
 import re
 
 from twisted.python import log
+from sqlalchemy.orm import eagerload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.auth.user_principal import UserPrincipal
@@ -36,8 +37,10 @@ def get_or_create_user_principal(session, user,
         # Don't actually need the host... just need to verify that it's
         # in aqdb.
         dbhost = hostname_to_host(session, hostname)
-    # Short circuit the common case:
+    # Short circuit the common case, and optimize it to eager load in
+    # a single query since this happens on every command:
     q = session.query(UserPrincipal).filter_by(name=user)
+    q = q.options(eagerload('role'), eagerload('realm'))
     q = q.join('realm').filter_by(name=realm)
     dbuser = q.first()
     if dbuser:

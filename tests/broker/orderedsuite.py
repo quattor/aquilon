@@ -24,6 +24,7 @@ if __name__ == "__main__":
 from test_start import TestBrokerStart
 from test_ping import TestPing
 from test_status import TestStatus
+from test_show_active_commands import TestShowActiveCommands
 from test_permission import TestPermission
 from test_add_dns_domain import TestAddDnsDomain
 from test_add_domain import TestAddDomain
@@ -115,7 +116,9 @@ class BrokerTestSuite(unittest.TestSuite):
 
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
-        for test in [TestBrokerStart, TestPing, TestStatus, TestPermission,
+        for test in [TestBrokerStart,
+                TestPing, TestStatus, TestShowActiveCommands,
+                TestPermission,
                 TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestAddPersonality,
