@@ -20,27 +20,36 @@ from brokertest import TestBrokerCommand
 class TestCompile(TestBrokerCommand):
 
     def testaddchange(self):
-        # The plenary template should still be valid, but this
-        # changes the dependencies to trigger a compile.
-        sitedir = os.path.join(self.scratchdir, "unittest", "service",
-                "utsvc", "utsi1", "client")
-        self.gitcommand(["rm", "config.tpl"], cwd=sitedir)
+        # Change the template used by utsi1 clients to trigger a recompile.
+        templatedir = os.path.join(self.scratchdir, "unittest")
+        template = os.path.join(templatedir, "service", "utsvc", "utsi1",
+                                "client", "config.tpl")
+        f = open(template)
+        try:
+            contents = f.readlines()
+        finally:
+            f.close()
+        contents.append("#Added by unittest broker/test_compile\n")
+        f = open(template, 'w')
+        try:
+            f.writelines(contents)
+        finally:
+            f.close()
         self.gitcommand(["commit", "-a", "-m",
-                "removed unit test service instance 1"],
-                cwd=os.path.join(self.scratchdir, "unittest"))
+                         "modified unit test service instance 1"],
+                         cwd=templatedir)
         self.ignoreoutputtest(["put", "--domain", "unittest"],
-                env=self.gitenv(),
-                cwd=os.path.join(self.scratchdir, "unittest"))
+                              env=self.gitenv(), cwd=templatedir)
 
     def testcompileunittest(self):
         command = "compile --domain unittest"
         out = self.commandtest(command.split(" "))
-        # This could be more intelligent, maybe check that >= 2
-        # hosts are being recompiled.
-        self.matchoutput(out, "Cleaning old XML dependencies", command)
-        self.matchoutput(out, "Updating XML dependencies", command)
-        self.matchoutput(out, "Updating makefile dependencies", command)
-        self.matchoutput(out, "Updating host XML configs", command)
+        # Currently assumes that there is only one client of utsi1.
+        # The idea is to check that only that hosts that needed to
+        # be compiled actually were.
+        self.matchoutput(out, "Updated 1 XML dependencies", command)
+        self.matchoutput(out, "Updated 1 makefile dependencies", command)
+        self.matchoutput(out, "Updated 1 host XML configs", command)
 
 
 if __name__=='__main__':
