@@ -60,6 +60,9 @@ class CommandBindClient(BrokerCommand):
         plenary_info = PlenaryServiceInstanceServer(dbservice, dbinstance)
         plenary_info.write(plenarydir)
 
+        # FIXME: A re-bind should rewrite the plenary template for the
+        # previous service as well.
+
         return
 
 
