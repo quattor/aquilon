@@ -34,11 +34,11 @@ def configure(*args, **kw):
                  dest   = 'verbose',
                  help   = 'increase verbosity by adding more (vv), etc.')
 
-    p.add_option('-l', '--load_all',
+    p.add_option('-n', '--no_load',
                  action  = 'store_true',
-                 dest    = 'load_all',
+                 dest    = 'no_load_all',
                  default = False,
-                 help    = 'load all modules and classes' )
+                 help    = 'do not load all modules' )
 
     opts, args = p.parse_args()
     return opts
@@ -53,7 +53,9 @@ def main(*args, **kw):
     if opts.verbose > 2:
         Base.metadata.bind.echo = True
 
-    if opts.load_all:
+    if opts.no_load_all:
+        pass
+    else:
         if opts.verbose > 0:
             load_all(verbose=True)
         else:
