@@ -145,8 +145,8 @@ def create_schema_graph(tables=None,
                       concentrate=concentrate, rankdir=rankdir)
     for table in tables:
         graph.add_node(pydot.Node(str(table.name),
-            shape="plaintext",
-            label=_render_table_html(table, metadata,
+            shape="record",
+            label=_render_table_record(table, metadata,
                                      show_indexes, show_datatypes),
             fontname=font, fontsize="7.0"))
 
@@ -176,33 +176,23 @@ def show_schema_graph(db, image_name = "/tmp/aqdb_schema.png", *args, **kwargs):
     ios = cStringIO.StringIO(create_schema_graph(metadata=db.meta).create_png())
     Image.open(ios).save(image_name)
 
-def _render_table_html(table, metadata, show_indexes, show_datatypes):
+def _render_table_record(table, metadata, show_indexes, show_datatypes):
     def format_col_type(col):
         try:
             return col.type.get_col_spec()
         except NotImplementedError:
             return str(col.type)
-    def format_col_str(col):
-         if show_datatypes:
-             return "- %s : %s" % (col.name, format_col_type(col))
-         else:
-             return "- %s" % col.name
-    html = '<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0"><TR><TD ALIGN="CENTER">%s</TD></TR><TR><TD BORDER="1" CELLPADDING="0"></TD></TR>' % table.name
 
-    html += ''.join('<TR><TD ALIGN="LEFT" PORT="%s">%s</TD></TR>' % (col.name, format_col_str(col)) for col in table.columns)
-    if isinstance(metadata.bind.dialect, PGDialect):
-        # postgres engine doesn't reflect indexes
-        indexes = dict(
-                       (name,defin) for name,defin in metadata.bind.execute(
-                        text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '%s'" % table.name)))
-        if indexes and show_indexes:
-            html += '<TR><TD BORDER="1" CELLPADDING="0"></TD></TR>'
-            for index, defin in indexes.items():
-                ilabel = 'UNIQUE' in defin and 'UNIQUE ' or 'INDEX '
-                ilabel += defin[defin.index('('):]
-                html += '<TR><TD ALIGN="LEFT">%s</TD></TR>' % ilabel
-    html += '</TABLE>>'
-    return html
+    cols = list()
+    for col in table.columns:
+        str="- %s" % (col.name)
+        if show_datatypes:
+            str = "%s : %s"%(str, format_col_type(col))
+        cols.append(str)
+
+    text="\"{%s|%s}\"" % (table.name, "\\l".join(cols))
+    return text
+
 
 def _mk_label(mapper, show_operations, show_attributes,
               show_datatypes, bordersize):

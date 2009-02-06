@@ -57,6 +57,10 @@ class PlenaryHost(Plenary):
             elif t.cfg_path.tld.type == 'service':
                 services.append(repr(t.cfg_path) + '/client/config')
 
+        provides = []
+        for sis in self.dbhost.sislist:
+            provides.append(repr(sis.service_instance.cfg_path) + '/server/config');
+
         templates = []
         templates.append("archetype/base")
         if not os_template:
@@ -67,6 +71,8 @@ class PlenaryHost(Plenary):
         if not personality_template:
             raise IncompleteError("Host %s is missing personality." %
                                   self.name)
+        for provide in provides:
+            templates.append(provide)
         templates.append(personality_template)
         templates.append("archetype/final")
 
