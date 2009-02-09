@@ -7,11 +7,6 @@ import sys
 import __init__
 import unittest
 
-#if __name__ == "__main__":
-#    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-#    SRCDIR = os.path.join(BINDIR, "..", "..")
-#    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
-
 from test_rebuild import TestRebuild
 
 class DatabaseTestSuite(unittest.TestSuite):
@@ -23,11 +18,10 @@ class DatabaseTestSuite(unittest.TestSuite):
 
 
 if __name__=='__main__':
-    suite = DatabaseTestSuite()
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    import nose
+    nose.runmodule()
 
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-

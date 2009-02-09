@@ -25,8 +25,11 @@ def populate(sess, *args, **kw):
         return
 
     from aquilon.aqdb.loc.city import City
-    import aquilon.aqdb.dsdb as dsdb_
-    dsdb = dsdb_.DsdbConnection()
+
+    log = kw['log']
+    assert log, "no log in kwargs for Building.populate()"
+    dsdb = kw['dsdb']
+    assert dsdb, "No dsdb in kwargs for Building.populate()"
 
     city = {}
     for c in sess.query(City).all():
@@ -35,8 +38,8 @@ def populate(sess, *args, **kw):
     for row in dsdb.dump('building'):
         try:
             p = city[str(row[2])]
-        except KeyError,e :
-            print >> sys.stderr, e
+        except KeyError, e:
+            log.error(str(e))
             continue
 
         a = Building(name = str(row[0]),
@@ -44,7 +47,7 @@ def populate(sess, *args, **kw):
                     parent = city[str(row[2])])
         sess.add(a)
     sess.commit()
-    print 'created %s buildings'%(len(sess.query(Building).all()))
+    log.debug('created %s buildings'%(len(sess.query(Building).all())))
 
 
 # Copyright (C) 2008 Morgan Stanley

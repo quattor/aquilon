@@ -23,8 +23,11 @@ def populate(sess, *args, **kw):
 
     if len(sess.query(City).all()) < 1:
         from aquilon.aqdb.loc.country import Country
-        import aquilon.aqdb.dsdb as dsdb_
-        dsdb = dsdb_.DsdbConnection()
+
+        log = kw['log']
+        assert log, "no log in kwargs for City.populate()"
+        dsdb = kw['dsdb']
+        assert dsdb, "No dsdb in kwargs for City.populate()"
 
         cntry= {}
         for c in sess.query(Country).all():
@@ -34,7 +37,7 @@ def populate(sess, *args, **kw):
             try:
                 p = cntry[str(row[2])]
             except KeyError, e:
-                sys.stderr.write('couldnt find country %s'%(str(row[2])))
+                log.error('couldnt find country %s'%(str(row[2])))
                 continue
 
             a = City(name = str(row[0]),

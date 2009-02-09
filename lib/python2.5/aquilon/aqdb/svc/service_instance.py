@@ -4,14 +4,18 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
-from sqlalchemy.orm import relation, deferred, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session
 
-from aquilon.aqdb.base import Base
-from aquilon.aqdb.table_types.name_table  import make_name_class
-from aquilon.aqdb.column_types.aqstr      import AqStr
-from aquilon.aqdb.svc.service             import Service
-from aquilon.aqdb.cfg.cfg_path            import CfgPath
-from aquilon.aqdb.sy.build_item           import BuildItem
+from aquilon.aqdb.base               import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.svc.service        import Service
+from aquilon.aqdb.cfg.cfg_path       import CfgPath
+from aquilon.aqdb.sy.build_item      import BuildItem
+#from aquilon.aqdb.auth.audit_info    import AuditInfo
+
+_TN  = 'service_instance'
+_ABV = 'svc_inst'
+_PRECEDENCE = 200
 
 
 class ServiceInstance(Base):
@@ -19,24 +23,30 @@ class ServiceInstance(Base):
         particular purpose (aka usage). If machines have a 'personality'
         dictated by the application they run """
 
-    __tablename__ = 'service_instance'
+    __tablename__  = _TN
 
-    id           = Column(Integer, Sequence('service_instance_id_seq'),
-                        primary_key = True)
+    id           = Column(Integer, Sequence('%s_id_seq'%(_TN)),
+                          primary_key = True)
 
-    service_id   = Column(Integer, ForeignKey('service.id',
-                                              name = 'svc_inst_svc_fk'),
+    service_id   = Column(Integer,
+                          ForeignKey('service.id', name = '%s_svc_fk'%(_ABV)),
                           nullable = False)
 
     name          = Column(AqStr(64), nullable=False)
 
-    cfg_path_id   = Column(Integer, ForeignKey('cfg_path.id',
-                                              name='svc_inst_cfg_pth_fk'),
-                          nullable = False)
+    cfg_path_id   = Column(Integer,
+                           ForeignKey('cfg_path.id', name='%s_cfg_pth_fk'%_ABV),
+                           nullable = False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments      = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default = datetime.now,
+                                    nullable = False )
+    comments      = Column(String(255), nullable = True)
+
+#    audit_info_id   = deferred(Column(Integer, ForeignKey(
+#            'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
+#                                      nullable = False))
+
+#    audit_info = relation(AuditInfo)
 
     service       = relation(Service,  uselist = False, backref = 'instances')
 
@@ -53,11 +63,13 @@ class ServiceInstance(Base):
                            self.service.name, self.name)
 
 service_instance = ServiceInstance.__table__
+table            = ServiceInstance.__table__
+
+table.info['abrev']      = _ABV
+table.info['precedence'] = _PRECEDENCE
+
 service_instance.primary_key.name = 'svc_inst_pk'
 UniqueConstraint('service_id', 'name', name='svc_inst_server_uk')
-
-table = service_instance
-
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

@@ -32,13 +32,17 @@ cpu.append_constraint(
 
 table = cpu
 
-def populate(db, *args, **kw):
-    sess = db.Session()
+def populate(sess, *args, **kw):
 
     if len(sess.query(Cpu).all()) < 1:
         import re
         m=re.compile('speed')
-        cfg_base = db.config.get("broker", "kingdir")
+
+        cfg_base = kw['cfg_base']
+        assert os.path.isdir(cfg_base), "no cfg path supplied"
+
+        log = kw['log']
+
         #get all dir names immediately under template-king/hardware/cpu/
         base=os.path.join(str(cfg_base),'hardware/cpu')
         cpus=[]
@@ -83,14 +87,10 @@ def populate(db, *args, **kw):
                     sess.add(a)
                 except Exception,e:
                     sess.rollback()
-                    print e
+                    log.error(str(e))
                     continue
             else:
-                msg="CREATE CPU: cant find vendor '%s'"%(vendor)
-                if logging:
-                    logging.error(msg)
-                else:
-                    print >> sys.stderr, msg
+                log.error("CREATE CPU: cant find vendor '%s'"%(vendor))
 
         try:
             av = sess.query(Vendor).filter_by(name='aurora_vendor').one()
@@ -99,16 +99,16 @@ def populate(db, *args, **kw):
             sess.add(a)
         except Exception, e:
             sess.rollback()
-            print e
+            log.error(str(e))
 
         try:
             sess.commit()
         except Exception,e:
             sess.rollback()
-            sys.stderr.write(str(e))
+            log.error(str(e))
 
         cnt = len(sess.query(Cpu).all())
-        print 'created %s cpus'%(cnt)
+        log.debug('created %s cpus'%(cnt))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

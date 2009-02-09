@@ -3,7 +3,6 @@
     the get_files call here and have it generate dynamically """
 
 __all__ = ( 'depends',
-            'table_types',
             'column_types',
             'auth',
             'cfg',

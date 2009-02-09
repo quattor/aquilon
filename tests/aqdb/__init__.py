@@ -7,7 +7,4 @@ _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
 if _LIBDIR not in sys.path:
     sys.path.insert(0,_LIBDIR)
 
-def init_path(*args, **kw):
-    if _LIBDIR not in sys.path:
-        sys.path.insert(0,_LIBDIR)
-
+import aquilon.aqdb.depends

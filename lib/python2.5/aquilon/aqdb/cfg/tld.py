@@ -1,10 +1,23 @@
 """ The high level configuration elements in use """
 
 import os
+from datetime import datetime
 
-from aquilon.aqdb.table_types.subtype import subtype
+from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
+                        UniqueConstraint)
 
-tl_doc = """ Configuration Top Level Directory or 'cfg_tld' are the high level
+from sqlalchemy.orm import relation, deferred
+
+from aquilon.aqdb.base               import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+#from aquilon.aqdb.auth.audit_info    import AuditInfo
+
+_ABV = 'tld'
+_PRECEDENCE = 71
+
+
+class Tld(Base):
+    """ Configuration Top Level Directory or 'cfg_tld' are the high level
             namespace categories and live as the directories in template-king:
 
             aquilon   (the only archetype for now)
@@ -12,21 +25,37 @@ tl_doc = """ Configuration Top Level Directory or 'cfg_tld' are the high level
             hardware  (vendors + types prefabricated)
             services
             feature
-            personality """
+            personality
+    """
+    __tablename__  = 'tld'
 
-Tld= subtype('Tld', 'tld', tl_doc)
-tld = Tld.__table__
+    id             = Column(Integer, Sequence('%s_seq'%_ABV), primary_key=True)
+    type           = Column('type', AqStr(32), nullable=False)
+    creation_date = deferred(Column(DateTime, default = datetime.now,
+                                    nullable = False))
+    comments      = deferred(Column(String(255), nullable = True))
+#    audit_info_id  = deferred(Column(Integer, ForeignKey('audit_info.id',
+#                         name = '%s_audit_info_fk'%(_ABV)), nullable = False))
+
+#    audit_info     = relation(AuditInfo)
+
+    def __str__(self):
+        return str(self.type)
+
+tld   = Tld.__table__
+table = Tld.__table__
+
+table.info['abrev']      = _ABV
+table.info['precedence'] = _PRECEDENCE
+
 tld.primary_key.name = 'tld_pk'
+tld.append_constraint(UniqueConstraint('type', name='tld_uk'))
 
-table = tld
-
-def populate(db, *args, **kw):
-    sess = db.Session()
-
+def populate(sess, **kw):
     if len(sess.query(Tld).all()) > 0:
         return
 
-    cfg_base = db.config.get("broker", "kingdir")
+    cfg_base = kw['cfg_base']
     assert os.path.isdir(cfg_base)
 
     tlds=[]
@@ -45,11 +74,14 @@ def populate(db, *args, **kw):
                 tlds.append(i)
 
     for i in tlds:
-        t =Tld(type=i)
+        t =Tld(type=i)#, audit_info=kw['audit_info'])
         sess.add(t)
 
-    sess.commit()
-
+    try:
+        sess.commit()
+    except Exception, e:
+        sess.rollback()
+        raise e
 
     a=sess.query(Tld).first()
     assert(a)
@@ -58,3 +90,14 @@ def populate(db, *args, **kw):
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
+
+"""
+    def __eq__(self,other):
+        if isinstance(other,str):
+            if self.type == other:
+                return True
+            else:
+                return False
+        else:
+            raise ArgumentError('Can only be compared to strings')
+"""

@@ -1,7 +1,10 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/ms/dist/python/PROJ/core/2.5.4-0/bin/python
 import os
 import sys
 import optparse
+import tempfile
+
+import subprocess as sp
 
 _DIR    = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, '..','..')
@@ -16,10 +19,15 @@ if _TESTDIR not in sys.path:
 import aquilon.aqdb.depends
 
 #FOR ALL YOU HATERS: this IS for interactive work. Step off the import * ;)
-from aquilon.aqdb.utils.shutils      import *
-from aquilon.aqdb.base               import Base
-from aquilon.aqdb.db_factory         import db_factory
-from aquilon.aqdb.dsdb               import *
+from aquilon.aqdb.base       import Base
+from aquilon.aqdb.db_factory import db_factory
+from aquilon.aqdb.dsdb       import *
+from aquilon.aqdb.utils      import schema2dot
+
+from IPython.Shell import IPShellEmbed
+_banner  = '***Embedded IPython, Ctrl-D to quit.'
+_args    = []
+ipshell = IPShellEmbed(_args, banner=_banner)
 
 def configure(*args, **kw):
     usage = """ usage: %prog [options] """
@@ -62,6 +70,32 @@ def main(*args, **kw):
             load_all()
 
     ipshell()
+
+def load_all(verbose=0):
+    import aquilon.aqdb
+    #left a hole in between for verbose=1. not sure we'll ever use it
+    for i in aquilon.aqdb.__all__:
+        if verbose > 1:
+            print "Importing aquilon.aqdb.%s" % i
+
+        __import__("aquilon.aqdb.%s" % i)
+        mod = getattr(aquilon.aqdb, i)
+
+        if hasattr(mod, "__all__"):
+            for j in mod.__all__:
+                if verbose > 1:
+                    print "Importing aquilon.aqdb.%s.%s" % (i, j)
+
+                __import__("aquilon.aqdb.%s.%s" % (i, j))
+
+    if verbose > 1:
+        print 'load_all() complete'
+    return True
+
+
+#TODO: schema/uml as an argument (DRY)
+def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
+    schema2dot.write_schema_graph(db,file_name)
 
 if __name__ == '__main__':
     main(sys.argv)

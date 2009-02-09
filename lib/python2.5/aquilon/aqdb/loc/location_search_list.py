@@ -1,23 +1,62 @@
-""" The named parent table for lists of location types to search service
-    maps later on when automatic configuration of services takes places """
+""" Lists of location types that define search ordering (as an algorithm).
+    Intended for use with service maps during automated instance selection """
+from datetime import datetime
 
-from aquilon.aqdb.base import Base
-from aquilon.aqdb.table_types.name_table import make_name_class
+from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
+                        UniqueConstraint)
 
-LocationSearchList = make_name_class('LocationSearchList',
-                                     'location_search_list')
+from sqlalchemy.orm import relation
+
+from aquilon.aqdb.base               import Base
+from aquilon.aqdb.column_types.aqstr import AqStr
+
+_ABV = 'lsl'
+_PRECEDENCE = 50
+
+class LocationSearchList(Base):
+    """ Lists of location types that define search ordering (as an algorithm).
+    Intended for use with service maps during automated instance selection """
+
+    __tablename__ = 'location_search_list'
+
+    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key = True)
+
+    name = Column(AqStr(32), nullable = False)
+
+    creation_date = Column(DateTime, default = datetime.now,
+                                    nullable = False )
+    comments      = Column(String(255), nullable = True)
+
+#    audit_info_id   = deferred(Column(Integer, ForeignKey(
+#            'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
+#                                      nullable = False))
+
+#    audit_info = relation(AuditInfo)
 
 location_search_list = LocationSearchList.__table__
+table                = LocationSearchList.__table__
+
+table.info['abrev']      = _ABV
+table.info['precedence'] = _PRECEDENCE
+
 location_search_list.primary_key.name = 'loc_search_list_pk'
 
-table = location_search_list
 
 def populate(sess, *args, **kw):
 
     if len(sess.query(LocationSearchList).all()) < 1:
-        l = LocationSearchList(name = 'full', comments = 'Chassis -> Company')
+        #ai = sess.query(AuditInfo).filter_by(id=1).one()
+        #assert ai
+
+        #l = LocationSearchList(name = 'full', audit_info = kw['audit_info'])
+        l = LocationSearchList(name = 'full')
         sess.add(l)
-        sess.commit()
+
+        try:
+            sess.commit()
+        except Exception, e:
+            sess.rollback()
+            raise e
 
     m = sess.query(LocationSearchList).first()
     assert m
