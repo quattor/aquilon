@@ -21,9 +21,32 @@ from aquilon.server.templates.host import PlenaryHost
 
 class TemplateDomain(object):
 
-    def __init__(self, name):
-        self.domain = name
+    def __init__(self, dom):
+        self.domain = dom
         pass
+
+    def directories(self):
+        """Return a list of directories required for compiling this domain"""
+        config = Config()
+        dirs = []
+        dirs.append(os.path.join(config.get("broker", "templatesdir"),
+                    self.domain.name))
+
+        dirs.append(os.path.join(config.get("broker", "quattordir"), 
+                                 "deps", 
+                                 self.domain.name))
+
+        dirs.append(os.path.join(config.get("broker", "quattordir"), 
+                                 "cfg", 
+                                 "domains",
+                                 self.domain.name))
+              
+        dirs.append(os.path.join(config.get("broker", "quattordir"), 
+                                 "build", 
+                                 "xml",
+                                 self.domain.name))
+        return dirs
+
 
     def compile(self, session, only=None, locked=False):
         """The build directories are checked and constructed
@@ -44,13 +67,14 @@ class TemplateDomain(object):
         # Ensure that the compile directory is in a good state.
         config = Config()
         outputdir = config.get("broker", "profilesdir")
-        builddir = config.get("broker", "builddir")
-        profiledir = "%s/domains/%s/profiles"% (builddir, self.domain.name)
-        if not os.path.exists(profiledir):
-            try:
-                os.makedirs(profiledir, mode=0770)
-            except OSError, e:
-                raise ArgumentError("failed to mkdir %s: %s" % (builddir, e))
+
+        for d in self.directories():
+            if not os.path.exists(d):
+                try:
+                    log.msg("creating %s"%d)
+                    os.makedirs(d, mode=0770)
+                except OSError, e:
+                    raise ArgumentError("failed to mkdir %s: %s" % (d, e))
 
         # Check that all host templates are up-to-date
         # XXX: This command could take many minutes, it'd be really
