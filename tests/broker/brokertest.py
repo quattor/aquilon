@@ -168,57 +168,68 @@ class TestBrokerCommand(unittest.TestCase):
     # addressed, this unit test should be updated.
     def notfoundtest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
-        self.assertEqual(err, "",
-                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, err))
         if p.returncode == 0:
+            self.assertEqual(err, "",
+                             "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                             (command, err))
             self.assertEqual(out, "",
-                    "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                    % (command, out))
+                             "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                             (command, out))
         else:
             self.assertEqual(p.returncode, 4,
-                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
-                % (command, p.returncode, 4, out))
-            self.assertEqual(out.find("Not Found"), 0,
-                    "STDOUT for %s did not start with Not Found:\n@@@\n'%s'\n@@@\n"
-                    % (command, out))
-        return out
+                             "Return code for %s was %d instead of %d"
+                             "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                             "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                             (command, p.returncode, 4, out, err))
+            self.assertEqual(out, "",
+                             "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                             (command, out))
+            self.assertEqual(err.find("Not Found"), 0,
+                             "STDERR for %s did not start with Not Found:"
+                             "\n@@@\n'%s'\n@@@\n" % (command, out))
+        return err
 
     def badrequesttest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
-        self.assertEqual(err, "",
-                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, err))
         self.assertEqual(p.returncode, 4,
-                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
-                % (command, p.returncode, 4, out))
-        self.assertEqual(out.find("Bad Request"), 0,
-                "STDOUT for %s did not start with Bad Request:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
-        return out
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 4, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
+        self.assertEqual(err.find("Bad Request"), 0,
+                         "STDERR for %s did not start with Bad Request:"
+                         "\n@@@\n'%s'\n@@@\n" %
+                         (command, err))
+        return err
 
     def internalerrortest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
-        self.assertEqual(err, "",
-                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, err))
         self.assertEqual(p.returncode, 5,
-                "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
-                % (command, p.returncode, 5, out))
-        self.assertEqual(out.find("Internal Server Error"), 0,
-                "STDOUT for %s did not start with Internal Server Error:\n@@@\n'%s'\n@@@\n"
-                % (command, out))
-        return out
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 5, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
+        self.assertEqual(err.find("Internal Server Error"), 0,
+                         "STDERR for %s did not start with "
+                         "Internal Server Error:\n@@@\n'%s'\n@@@\n" %
+                         (command, err))
+        return err
 
     def matchoutput(self, out, s, command):
-        self.assert_(out.find(s) >= 0, 
-                "STDOUT for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                % (command, s, out))
+        self.assert_(out.find(s) >= 0,
+                     "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %
+                     (command, s, out))
 
     def matchclean(self, out, s, command):
-        self.assert_(out.find(s) < 0, 
-                "STDOUT for %s includes '%s':\n@@@\n'%s'\n@@@\n"
-                % (command, s, out))
+        self.assert_(out.find(s) < 0,
+                     "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
+                     (command, s, out))
 
     def parse_netlist_msg(self, msg):
         netlist = aqdnetworks_pb2.NetworkList()
