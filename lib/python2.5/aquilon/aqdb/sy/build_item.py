@@ -31,7 +31,10 @@ class BuildItem(Base):
                                     nullable = False))
     comments      = deferred(Column(String(255), nullable = True))
 
-    host     = relation(Host, backref = 'build_items')
+    # Having lazy=False here is essential.  This outer join saves
+    # thousands of queries whenever finding clients of a service
+    # instance.
+    host = relation(Host, backref='build_items', lazy=False)
     #TODO: auto-updated "last_used" column?
     cfg_path = relation(CfgPath, uselist = False, backref = 'build_items')
 
