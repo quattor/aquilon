@@ -38,7 +38,7 @@ print-%: ; @$(error $* is $($*) ($(value $*)))
 
 BIN_FILES := $(shell find bin -type f)
 LIB_FILES := $(shell find lib -type f)
-ETC_FILES := $(shell find etc -type f)
+ETC_FILES := $(shell find etc -type f | grep -v templates)
 PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
 
 FILES = $(BIN_FILES) $(LIB_FILES) $(MAN_FILES) $(ETC_FILES) $(PYC_FILES)
@@ -68,10 +68,16 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 # Running twistd after all the files have been installed generates a
 # dropin.cache file that would otherwise be missing (and that missing
 # file causes the server to complain loudly on startup).
-# The file will only be generated as needed.
+# The file will only be generated as needed.  The remove_stale script
+# skips dropin.cache.
+#
+# For gen_completion.py, there's no point in doing something make-like
+# and sophisticated for this, since remove_stale is dumb and will always
+# remove the generated files anyway.
 .PHONY: install
 install: remove_stale $(INSTALLFILES)
 	$(COMMON)bin/twistd --help >/dev/null
+	./gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
 
 .PHONY: remove_stale
 remove_stale:

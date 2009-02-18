@@ -15,13 +15,16 @@ import xml.etree.ElementTree as ET
 from Cheetah.Template import Template
 
 if __name__ == "__main__":
-    parser = optparse.OptionParser(usage="usage: %prog [options] template1 [template2 ...]")
+    parser = optparse.OptionParser(usage="usage: %prog [options] template1 [template2 ...]\n   or: %prog [options] --all")
     parser.add_option("-o", "--outputdir", type="string", dest="output_dir",
                       help="the directory to put generated files in", metavar="DIRECTORY")
     parser.add_option("-t", "--templatedir", type="string", dest="template_dir",
                       help="the directory to search for templates", metavar="DIRECTORY")
     parser.add_option("-i", "--input", type="string", dest="input_filename",
                       help="name of the input XML file", metavar="FILE")
+    parser.set_defaults(generate_all=False)
+    parser.add_option("-a", "--all", action="store_true", dest="generate_all",
+                      help="generate output for all available templates")
 
     bindir = os.path.dirname( os.path.realpath(sys.argv[0]) )
     parser.set_defaults(output_dir = ".",
@@ -29,6 +32,14 @@ if __name__ == "__main__":
                         input_filename = os.path.join(bindir, "etc", "input.xml"))
 
     (options, args) = parser.parse_args()
+
+    if options.generate_all:
+        if len(args) >= 1:
+            parser.print_help()
+            sys.exit(os.EX_USAGE)
+        for f in os.listdir(options.template_dir):
+            if f.endswith('.tmpl'):
+                args.append(f[0:-5])
 
     if len(args) < 1:
         parser.print_help()
