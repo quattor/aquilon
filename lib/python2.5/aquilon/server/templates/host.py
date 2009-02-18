@@ -5,6 +5,7 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 
+from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError
 from aquilon.server.templates.base import Plenary
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -18,6 +19,7 @@ class PlenaryHost(Plenary):
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
         self.dbhost = dbhost
+        self.dir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%dbhost.domain.name
 
     def body(self, lines):
         # FIXME: Enforce that one of the interfaces is marked boot?

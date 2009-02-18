@@ -37,11 +37,13 @@ def compileRelease():
 
 class Plenary(object):
     def __init__(self):
-        config = Config();
+        self.config = Config();
         self.template_type = 'structure'
-        self.servername = config.get("broker", "servername")
+        self.servername = self.config.get("broker", "servername")
         
-    def write(self, dir, user=None, locked=False, content=None):
+    def write(self, dir=None, user=None, locked=False, content=None):
+        if dir is not None:
+            self.dir = dir
         # user is simply left for compatibility: it's no longer used
         if (hasattr(self, "machine_type") and
                 self.machine_type == 'aurora_node'):
@@ -50,17 +52,20 @@ class Plenary(object):
 
         if content is None:
             lines = []
-            lines.append("%(template_type)s template %(plenary_template)s;" % self.__dict__)
+            type=self.template_type
+            if type is not None:
+                type = type + " "
+            lines.append("%stemplate %s;" % (type, self.plenary_template)
             lines.append("")
             self.body(lines)
             content = "\n".join(lines)+"\n"
 
-        plenary_path = os.path.join(dir, self.plenary_core)
-        plenary_file = os.path.join(dir, self.plenary_template) + ".tpl"
+        plenary_path = os.path.join(self.dir, self.plenary_core)
+        plenary_file = os.path.join(self.dir, self.plenary_template) + ".tpl"
         # optimise out the write (leaving the mtime good for make)
         # if nothing is actually changed
         if os.path.exists(plenary_file):
-            old = read_file(dir, self.plenary_template+".tpl")
+            old = read_file(self.dir, self.plenary_template+".tpl")
             if (old == content):
                 return
             

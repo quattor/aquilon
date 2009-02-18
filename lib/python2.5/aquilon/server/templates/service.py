@@ -13,6 +13,7 @@ class PlenaryService(Plenary):
         self.name = dbservice.name
         self.plenary_core = "servicedata/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         return
@@ -25,6 +26,7 @@ class PlenaryServiceClientDefault(Plenary):
         self.plenary_core = "service/%(name)s/client" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
         self.template_type = ''
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         return
@@ -36,6 +38,7 @@ class PlenaryServiceServerDefault(Plenary):
         self.plenary_core = "service/%(name)s/server" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
         self.template_type = ''
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         return
@@ -49,6 +52,7 @@ class PlenaryServiceInstance(Plenary):
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
         self.template_type = 'structure'
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
@@ -66,6 +70,7 @@ class PlenaryServiceInstanceServer(Plenary):
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/srvconfig"
         self.template_type = 'structure'
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         lines.append("'instance' = '%(name)s';" % self.__dict__)
@@ -81,6 +86,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
         self.template_type = ''
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         lines.append("'/system/services/%(service)s' = create('servicedata/%(service)s/%(name)s/config');" % self.__dict__)
@@ -95,6 +101,7 @@ class PlenaryServiceInstanceServerDefault(Plenary):
         self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"
         self.template_type = ''
+        self.dir = self.config.get("plenarydir")
 
     def body(self, lines):
         lines.append("'/system/provides/%(service)s' = create('servicedata/%(service)s/%(name)s/srvconfig');" % self.__dict__)
