@@ -1,0 +1,154 @@
+# bash completion for the Aquilon client
+
+## redefine variable substitution metacharacter to ~, $ is just too
+## common in shell scripts
+#compiler-settings
+cheetahVarStartToken = ~
+#end compiler-settings
+
+<%
+commands = filter(lambda c: c.attrib.has_key("name") and c.attrib["name"] != "*",
+                  self.tree.getiterator("command"))
+global_command = filter(lambda c: c.attrib.has_key("name") and c.attrib["name"] == "*",
+                        self.tree.getiterator("command"))[0]
+global_options = global_command.getiterator("option")
+
+def option_has_parameter(opt):
+    return opt.attrib.has_key("type") and opt.attrib["type"] != "boolean"
+
+global_options_with_params = filter(option_has_parameter, global_options)
+%>
+
+_aq_sqlite="/ms/dist/fsf/PROJ/sqlite/3.5.4/bin/sqlite3"
+_aq_datawarehouse="/ms/dist/aquilon/PROJ/datawarehouse/incr"
+
+_aq_complete_hostname ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select hostname from hosts where hostname glob '$1*'"
+}
+
+_aq_complete_building ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct building from hosts"
+}
+
+_aq_complete_region ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct region from hosts"
+}
+
+_aq_complete_city ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct city from hosts"
+}
+
+_aq_complete_archetype ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct archetype from hosts"
+}
+
+_aq_complete_personality ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct personality from hosts"
+}
+
+_aq_complete_service ()
+{
+    $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct service from servers"
+}
+
+_aq_complete_instance ()
+{
+    $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct instance from servers"
+}
+
+_aq ()
+{
+    local cur cmds cmdOpts opt globalOpts globalParam optsParam optBase i
+
+    COMPREPLY=()
+    cur=${COMP_WORDS[COMP_CWORD]}
+
+    cmds='#echo " ".join( [ cmd.attrib["name"] for cmd in commands ] ) #'
+    globalOpts='#echo " ".join( [ "--" + opt.attrib["name"] for opt in global_options ] ) #'
+    globalParam='#echo "|".join( [ "--" + opt.attrib["name"] for opt in filter(option_has_parameter, global_options) ] ) #'
+
+    if [[ $COMP_CWORD -eq 1 ]]; then
+        COMPREPLY=( $( compgen -W "$cmds" -- $cur ) )
+        return 0
+    fi
+
+    if [[ $COMP_CWORD -eq 2 && ${COMP_WORDS[1]} == "help" ]]; then
+        COMPREPLY=( $( compgen -W "$cmds" -- $cur ) )
+        return 0
+    fi
+
+    # auto-complete some options
+    if [[ $COMP_CWORD -gt 2 && ! ( $cur =~ "^-") ]]; then
+        local opt full_opt subject list
+
+	full_opt=${COMP_WORDS[ $(( $COMP_CWORD - 1 )) ]}
+	opt=${full_opt/--/}
+
+	if [[ $opt == "name" ]]; then
+	    # --name is a special case, extract from the command name
+	    # what we're looking for
+	    opt=${COMP_WORDS[1]\#\#*_}
+	fi
+
+	subject=""
+	if typeset -F _aq_complete_${opt} >/dev/null 2>&1; then
+	    subject=${opt}
+	fi
+
+	if [[ -n "$subject" ]]; then
+	    list=$( _aq_complete_${opt} )
+	    COMPREPLY=( $( compgen -W "$list" -- $cur ) )
+	    return 0
+	fi
+    fi
+
+    cmdOpts=
+    case ${COMP_WORDS[1]} in
+    #for cmd in commands
+<%
+
+options = filter(lambda o: o.attrib.has_key("name"), cmd.getiterator("option"))
+options_with_params = filter(option_has_parameter, options) 
+
+%>
+    ~{cmd.attrib["name"]})
+        cmdOpts='#echo " ".join( [ "--" + opt.attrib["name"] for opt in options ] ) #'
+        optsParam='#echo "|".join( [ "--" + opt.attrib["name"] for opt in options_with_params ] ) #'
+        ;;
+    #end for
+    esac
+
+    # append global options
+    # cmdOpts="$cmdOpts $globalOpts"
+    # optsParam="$optsParam|$globalParams"
+
+    # take out options already given
+    for (( i = 2; i<= $COMP_CWORD-1; ++i)); do
+        opt=${COMP_WORDS[$i]}
+
+        case $opt in
+            --*) optBase=${opt/=*/} ;;
+            -*)  optBase=${opt:0:2} ;;
+        esac
+
+        cmdOpts=" $cmdOpts "
+        cmdOpts=${cmdOpts/ ${optBase} / }
+
+        # skip next option if this one requires a parameter
+        if [[ "$opt" =~ "$optsParam" ]]; then
+            ((++i))
+        fi
+    done
+
+    COMPREPLY=( $( compgen -W "$cmdOpts" -- $cur ) )
+
+    return 0
+}
+
+complete -F _aq -o default aq
