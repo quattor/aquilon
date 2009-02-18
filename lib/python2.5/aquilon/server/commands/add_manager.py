@@ -96,7 +96,7 @@ class CommandAddManager(BrokerCommand):
             raise ArgumentError("Could not add host to dsdb: %s" % e)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+        plenary_info.write()
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

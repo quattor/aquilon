@@ -30,10 +30,8 @@ class CommandManage(BrokerCommand):
             # Clean up any old files in the old domain
             # Note, that these files may not exist if we've never compiled
             # in the old domain, so we just try the lot.
-            builddir = os.path.join(self.config.get("broker", "builddir"),
-                                    "domains", dbhost.domain.name, "profiles")
             plenary = PlenaryHost(dbhost)
-            plenary.remove(builddir, locked=True)
+            plenary.remove(locked=True)
             plenary = None
             qdir = self.config.get("broker", "quattordir")
             domain = dbhost.domain.name
@@ -52,9 +50,7 @@ class CommandManage(BrokerCommand):
             # with which we can create a template
             try:
                 plenary = PlenaryHost(dbhost)
-                domdir = os.path.join(self.config.get("broker", "builddir"),
-                                      "domains", dbdomain.name, "profiles")
-                plenary.write(domdir, locked=True)
+                plenary.write(locked=True)
             except IncompleteError, e:
                 # This template cannot be written, we leave it alone
                 # It would be nice to flag the state in the the host?

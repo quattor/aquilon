@@ -36,9 +36,8 @@ class CommandAddPersonality(BrokerCommand):
         dbpersona = CfgPath(tld=dbtld, relative_path=name)
         session.add(dbpersona)
 
-        plenary = PlenaryPersonality(dbpersona)
-        pdir = os.path.join(self.config.get("broker", "plenarydir"), archetype)
-        plenary.write(pdir, user)
+        plenary = PlenaryPersonality(dbpersona, archetype)
+        plenary.write()
         return
 
 

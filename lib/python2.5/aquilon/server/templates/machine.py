@@ -74,6 +74,7 @@ class PlenaryMachineInfo(Plenary):
         self.plenary_core = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
         self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
+        self.dir = self.config.get("broker", "plenarydir")
         return
 
     def body(self, lines):

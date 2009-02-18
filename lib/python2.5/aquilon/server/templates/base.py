@@ -55,7 +55,7 @@ class Plenary(object):
             type=self.template_type
             if type is not None:
                 type = type + " "
-            lines.append("%stemplate %s;" % (type, self.plenary_template)
+            lines.append("%stemplate %s;" % (type, self.plenary_template))
             lines.append("")
             self.body(lines)
             content = "\n".join(lines)+"\n"
@@ -79,11 +79,15 @@ class Plenary(object):
             if (not locked):
                 compileRelease()
 
-    def read(self, plenarydir):
-        return read_file(plenarydir, self.plenary_template + ".tpl")
+    def read(self, dir=None):
+        if dir is not None:
+            self.dir = dir
+        return read_file(self.dir, self.plenary_template + ".tpl")
 
-    def remove(self, plenarydir, locked=False):
-        plenary_file = os.path.join(plenarydir, self.plenary_template + ".tpl")
+    def remove(self, dir=None, locked=False):
+        if dir is not None:
+            self.dir = dir
+        plenary_file = os.path.join(self.dir, self.plenary_template + ".tpl")
         try:
             if (not locked):
                 compileLock()

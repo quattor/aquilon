@@ -37,7 +37,7 @@ class CommandAddDisk(BrokerCommand):
             raise ArgumentError("Could not add disk: %s" % e)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+        plenary_info.write()
         return
 
 

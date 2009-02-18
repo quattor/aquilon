@@ -44,7 +44,7 @@ class CommandDelMachine(BrokerCommand):
                     (dbmachine.name, disk.device_name))
             session.delete(disk)
         session.delete(dbmachine)
-        plenary_info.remove(self.config.get("broker", "plenarydir"))
+        plenary_info.remove()
         return
 
 

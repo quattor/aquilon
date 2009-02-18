@@ -33,9 +33,8 @@ class CommandDelPersonality(BrokerCommand):
             raise ArgumentError("personality '%s' is in use and cannot be deleted"%name)
 
         # All clear
-        plenary = PlenaryPersonality(existing[0])
-        pdir = os.path.join(self.config.get("broker", "plenarydir"), archetype)
-        plenary.remove(pdir)
+        plenary = PlenaryPersonality(existing[0], archetype)
+        plenary.remove()
         
         session.delete(existing[0]);
         session.flush();
