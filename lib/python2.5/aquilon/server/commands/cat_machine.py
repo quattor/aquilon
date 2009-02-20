@@ -23,6 +23,6 @@ class CommandCatMachine(BrokerCommand):
             raise ArgumentError("Plenary file not available for %s machines." %
                     dbmachine.model.machine_type)
         plenary_info = PlenaryMachineInfo(dbmachine)
-        return plenary_info.read(self.config.get("broker", "plenarydir"))
+        return plenary_info.read()
 
 

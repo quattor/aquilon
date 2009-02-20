@@ -14,7 +14,8 @@ from aquilon.aqdb.svc.service_instance import ServiceInstance
 from aquilon.aqdb.svc.service_map import ServiceMap
 from aquilon.server.templates.service import (PlenaryService,
         PlenaryServiceClientDefault, PlenaryServiceServerDefault,
-        PlenaryServiceInstance, PlenaryServiceInstanceClientDefault,
+        PlenaryServiceInstance, PlenaryServiceInstanceServer,
+        PlenaryServiceInstanceClientDefault,
         PlenaryServiceInstanceServerDefault)
 
 
@@ -30,13 +31,13 @@ class CommandDelService(BrokerCommand):
                 raise ArgumentError("Cannot remove service with instances defined.")
 
             plenary_info = PlenaryService(dbservice)
-            plenary_info.remove(self.config.get("broker", "plenarydir"))
+            plenary_info.remove()
 
             plenary_info = PlenaryServiceClientDefault(dbservice)
-            plenary_info.remove(self.config.get("broker", "plenarydir"))
+            plenary_info.remove()
 
             plenary_info = PlenaryServiceServerDefault(dbservice)
-            plenary_info.remove(self.config.get("broker", "plenarydir"))
+            plenary_info.remove()
 
             session.delete(dbservice)
             return
@@ -48,13 +49,16 @@ class CommandDelService(BrokerCommand):
                 raise ArgumentError("instance has clients and cannot be deleted.")
 
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-            plenary_info.remove(self.config.get("broker", "plenarydir"))
+            plenary_info.remove()
+
+            plenary_info = PlenaryServiceInstanceServer(dbservice, dbsi)
+            plenary_info.remove()
 
             plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
-            plenary_info.remove
+            plenary_info.remove()
 
             plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbsi)
-            plenary_info.remove
+            plenary_info.remove()
 
             # Check the service map and remove any mappings
             for dbmap in session.query(ServiceMap).filter_by(service_instance=dbsi).all():

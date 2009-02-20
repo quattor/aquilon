@@ -28,9 +28,8 @@ class CommandUnbindClient(BrokerCommand):
         if dbtemplate:
             session.delete(dbtemplate)
             session.flush()
-            plenarydir = self.config.get("broker", "plenarydir")
             plenary_info = PlenaryServiceInstanceServer(dbservice, dbtemplate.cfg_path.svc_inst)
-            plenary_info.write(plenarydir)
+            plenary_info.write()
 
         session.refresh(dbhost)
         return

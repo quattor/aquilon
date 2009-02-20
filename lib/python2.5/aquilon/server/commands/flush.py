@@ -24,7 +24,6 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 class CommandFlush(BrokerCommand):
 
     def render(self, session, user, **arguments):
-        plenarydir = self.config.get("broker", "plenarydir")
         success = []
         failed = []
         total = 0
@@ -37,11 +36,11 @@ class CommandFlush(BrokerCommand):
                 try:
                     total += 3
                     plenary_info = PlenaryService(dbservice)
-                    plenary_info.write(plenarydir, user, locked=True)
+                    plenary_info.write(locked=True)
                     plenary_info = PlenaryServiceClientDefault(dbservice)
-                    plenary_info.write(plenarydir, user, locked=True)
+                    plenary_info.write(locked=True)
                     plenary_info = PlenaryServiceServerDefault(dbservice)
-                    plenary_info.write(plenarydir, user, locked=True)
+                    plenary_info.write(locked=True)
                 except Exception, e:
                     failed.append("service %s failed: %s" % (dbservice.name, e))
                     continue
@@ -50,13 +49,13 @@ class CommandFlush(BrokerCommand):
                     try:
                         total += 4
                         plenary_info = PlenaryServiceInstance(dbservice, dbinst)
-                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info.write(locked=True)
                         plenary_info = PlenaryServiceInstanceServer(dbservice, dbinst)
-                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info.write(locked=True)
                         plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbinst)
-                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info.write(locked=True)
                         plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbinst)
-                        plenary_info.write(plenarydir, user, locked=True)
+                        plenary_info.write(locked=True)
                     except Exception, e:
                         failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
                         continue
@@ -66,7 +65,7 @@ class CommandFlush(BrokerCommand):
                 try:
                     total += 1
                     plenary_info = PlenaryMachineInfo(machine)
-                    plenary_info.write(plenarydir, user, locked=True)
+                    plenary_info.write(locked=True)
                 except Exception, e:
                     label = machine.name
                     if machine.host:
@@ -78,13 +77,11 @@ class CommandFlush(BrokerCommand):
             # what about the plenary hosts within domains... do we want those too?
             # let's say yes for now...
             for d in session.query(Domain).all():
-                domdir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%d.name
-                
                 for h in d.hosts:
                     try:
                         total += 1
                         plenary_host = PlenaryHost(h)
-                        plenary_host.write(domdir, user, locked=True)
+                        plenary_host.write(locked=True)
                     except IncompleteError, e:
                         pass
                         #log.msg("Not flushing host: %s" % e)

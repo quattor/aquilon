@@ -86,8 +86,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         if isinstance(dbinterface.hardware_entity, Machine):
             plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
-            plenary_info.write(self.config.get("broker", "plenarydir"),
-                    self.config.get("broker", "servername"), user)
+            plenary_info.write()
         return
 
     def snapshot(self, dbinterface):

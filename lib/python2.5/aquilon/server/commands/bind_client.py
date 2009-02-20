@@ -7,7 +7,7 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.dbwrappers.host import (hostname_to_host,
@@ -17,6 +17,7 @@ from aquilon.server.dbwrappers.service_instance import (get_service_instance,
                                                         choose_service_instance)
 
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
+from aquilon.server.templates.host import PlenaryHost
 
 class CommandBindClient(BrokerCommand):
 
@@ -39,7 +40,11 @@ class CommandBindClient(BrokerCommand):
                 raise ArgumentError("Host %s is already bound to %s, use unbind to clear first or rebind to force."
                         % (hostname, dbtemplate.cfg_path.relative_path))
             session.delete(dbtemplate)
-        # FIXME: Should enforce that the instance has a server bound to it.
+            # We're changing our binding, so make sure that we notify
+            # the old serviceinstance that the clientlist has changed
+            plenary_info = PlenaryServiceInstanceServer(dbservice, dbinstance)
+            plenary_info.write()
+
         positions = []
         session.flush()
         session.refresh(dbhost)
@@ -56,12 +61,15 @@ class CommandBindClient(BrokerCommand):
         session.flush()
         session.refresh(dbhost)
 
-        plenarydir = self.config.get("broker", "plenarydir")
         plenary_info = PlenaryServiceInstanceServer(dbservice, dbinstance)
-        plenary_info.write(plenarydir)
+        plenary_info.write()
 
-        # FIXME: A re-bind should rewrite the plenary template for the
-        # previous service as well.
+        try:
+            plenary_host = PlenaryHost(dbhost)
+            plenary_host.write()
+        except IncompleteError, e:
+            # host has insufficient information to make a template with
+            pass
 
         return
 

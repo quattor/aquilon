@@ -41,7 +41,7 @@ class CommandUnbindServer(BrokerCommand):
         for dbinstance in dbinstances:
             session.refresh(dbinstance)
             plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
-            plenary_info.write(self.config.get("broker", "plenarydir"), user)
+            plenary_info.write()
 
         # XXX: Need to recompile...
         return

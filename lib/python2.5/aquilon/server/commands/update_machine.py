@@ -114,7 +114,7 @@ class CommandUpdateMachine(BrokerCommand):
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+        plenary_info.write()
 
         if dbmachine.host:
             # XXX: May need to reconfigure.

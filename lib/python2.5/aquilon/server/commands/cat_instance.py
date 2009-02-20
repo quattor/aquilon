@@ -23,6 +23,6 @@ class CommandCatService(BrokerCommand):
             plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
         else:
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-        return plenary_info.read(self.config.get("broker", "plenarydir"))
+        return plenary_info.read()
 
 

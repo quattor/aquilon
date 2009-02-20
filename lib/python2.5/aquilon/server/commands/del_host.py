@@ -44,7 +44,6 @@ class CommandDelHost(BrokerCommand):
             log.msg("Aquired lock, attempting to delete %s" % hostname)
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
-            builddir = os.path.join(self.config.get("broker", "builddir"), "domains", dbhost.domain.name, "profiles")
             ph = PlenaryHost(dbhost)
             domain = dbhost.domain.name
             fqdn   = dbhost.fqdn
@@ -85,15 +84,14 @@ class CommandDelHost(BrokerCommand):
         if (delplenary):
             try:
                 compileLock()
-                ph.remove(builddir, locked=True)
+                ph.remove(locked=True)
                 profiles = self.config.get("broker", "profilesdir")
-                plenarydir = self.config.get("broker", "plenarydir")
 
                 # Update any plenary client mappings
                 for si in bindings:
                     log.msg("removing plenary from binding for %s"%si.cfg_path)
                     plenary_info = PlenaryServiceInstanceServer(si.service, si)
-                    plenary_info.write(plenarydir, locked=True)
+                    plenary_info.write(locked=True)
 
                 # subsidiary cleanup for hygiene
                 # (we don't actually care if these fail, since it doesn't break anything)

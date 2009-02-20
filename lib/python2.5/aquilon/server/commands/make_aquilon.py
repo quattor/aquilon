@@ -22,7 +22,7 @@ from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.service import PlenaryServiceInstanceServerDefault
+from aquilon.server.templates.service import PlenaryServiceInstanceServer
 
 class CommandMakeAquilon(BrokerCommand):
 
@@ -31,7 +31,6 @@ class CommandMakeAquilon(BrokerCommand):
     def render(self, session, hostname, os, personality, buildstatus,
                user, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        domdir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%dbhost.domain.name
 
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
         # be change to a warning.  The check should only be made in prod though (which also means there's no unittest)
@@ -59,7 +58,7 @@ class CommandMakeAquilon(BrokerCommand):
             plenary_host = PlenaryHost(dbhost)
 
             try:
-                old_content = plenary_host.read(domdir)
+                old_content = plenary_host.read()
             except IOError, e: 
                 # Sigh, it's an IOError if the file doesn't exist.
                 old_content = None
@@ -107,7 +106,7 @@ class CommandMakeAquilon(BrokerCommand):
             session.flush()
             session.refresh(dbhost)
             dbservice_tld = session.query(Tld).filter_by(type='service').one()
-            plenarydir = self.config.get("broker", "plenarydir")
+
             for item in dbhost.archetype.service_list:
                 dbservice_bi = session.query(BuildItem).filter_by(
                         host=dbhost).join('cfg_path').filter_by(
@@ -128,14 +127,14 @@ class CommandMakeAquilon(BrokerCommand):
                 session.flush()
                 session.refresh(dbinstance)
 
-                plenary_info = PlenaryServiceInstanceServerDefault(item.service, dbinstance)
-                plenary_info.write(plenarydir, user, locked=True)
+                plenary_info = PlenaryServiceInstanceServer(item.service, dbinstance)
+                plenary_info.write(locked=True)
 
             session.flush()
             session.refresh(dbhost)
             session.refresh(dbhost.machine)
             
-            plenary_host.write(domdir, locked=True)
+            plenary_host.write(locked=True)
             
             td = TemplateDomain(dbhost.domain)
             out = td.compile(session, only=dbhost, locked=True)
@@ -145,11 +144,11 @@ class CommandMakeAquilon(BrokerCommand):
             # to avoid this domain being un-compilable in the future.
             # If this was a new file, we can just remove the plenary.
             if (old_content is None):
-                plenary_host.remove(domdir, locked=True)
+                plenary_host.remove(locked=True)
             else:
                 # this method corrupts the mtime, which will cause this
                 # host to be compiled next time from a normal "make".
-                plenary_host.write(domdir, locked=True, content=old_content)
+                plenary_host.write(locked=True, content=old_content)
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.

@@ -110,7 +110,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 session.refresh(dbmachine)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write(self.config.get("broker", "plenarydir"), user)
+        plenary_info.write()
 
         if dbmachine.host:
             # FIXME: reconfigure host
