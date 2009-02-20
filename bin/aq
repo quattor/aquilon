@@ -105,7 +105,7 @@ def gotPage(pageData, uri, expect, globalOptions):
         return d
     else:
         if globalOptions.get("httpinfo"):
-            print "[OK] %s" % uri
+            print >>sys.stderr, "[OK] %s" % uri
         if pageData:
             format = ""
             if globalOptions.get("format"):
@@ -184,12 +184,14 @@ def handleFailure(failure, uri, globalOptions):
     """Final stop handling for all errors - this will return success
     and let the reactor stop cleanly."""
     if failure.check(error.ProcessTerminated):
-        print "Communications subprocess terminated:", failure.getErrorMessage()
+        print >>sys.stderr, "Communications subprocess terminated:%s" % \
+                failure.getErrorMessage()
     elif failure.check(web_error.Error):
         if globalOptions.get("httpinfo"):
-            print "[%s] %s" % (failure.value.status, uri)
-        print "%s: %s" % (http.RESPONSES.get(int(failure.value.status)),
-                failure.value.response)
+            print >>sys.stderr, "[%s] %s" % (failure.value.status, uri)
+        print >>sys.stderr, "%s: %s" % (
+            http.RESPONSES.get(int(failure.value.status)),
+            failure.value.response)
         # Quick hack... failure codes will usually be 4xx or 5xx...
         # maybe it will help to encode that in the return code.
         try:
@@ -217,8 +219,9 @@ if __name__ == "__main__":
         (command, transport, commandOptions, globalOptions) = \
                 parser.getOptions()
     except ParsingError, e:
-        print '%s: Option parsing error: %s' % (sys.argv[0], e.error)
-        print '%s: Try --help for usage details.' % (sys.argv[0])
+        print >>sys.stderr, '%s: Option parsing error: %s' % (sys.argv[0],
+                                                              e.error)
+        print >>sys.stderr, '%s: Try --help for usage details.' % (sys.argv[0])
         sys.exit(1)
 
     if globalOptions.get('debug'):
