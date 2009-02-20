@@ -7,7 +7,7 @@
 
 import os
 
-from aquilon.exceptions_ import AuthorizationException
+from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.sy.domain import Domain
 from aquilon.server.dbwrappers.user_principal import (
@@ -15,7 +15,7 @@ from aquilon.server.dbwrappers.user_principal import (
 from aquilon.server.dbwrappers.quattor_server import (
         get_or_create_quattor_server)
 from aquilon.server.processes import run_command
-
+import re
 
 class CommandAddDomain(BrokerCommand):
 
@@ -28,10 +28,13 @@ class CommandAddDomain(BrokerCommand):
                     + " an authenticated connection.")
         dbquattor_server = get_or_create_quattor_server(session,
                 self.config.get("broker", "servername"))
+
+        valid = re.compile('^[a-zA-Z0-9_.-]+$')
+        if (not valid.match(domain)):
+            raise ArgumentError("domain name '%s' is not valid"%domain)
+
         # For now, succeed without error if the domain already exists.
         dbdomain = session.query(Domain).filter_by(name=domain).first()
-        # FIXME: Check that the domain name is composed only of characters
-        # that are valid for a directory name.
         if not dbdomain:
             compiler = self.config.get("broker", "domain_default_panc")
             dbdomain = Domain(name=domain, server=dbquattor_server,

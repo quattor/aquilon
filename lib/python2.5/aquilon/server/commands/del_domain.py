@@ -11,6 +11,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import remove_dir
+from aquilon.server.templates.domain import TemplateDomain
 
 
 class CommandDelDomain(BrokerCommand):
@@ -28,9 +29,11 @@ class CommandDelDomain(BrokerCommand):
             raise ArgumentError("Cannot delete domain %s while hosts are still attached."
                     % dbdomain.name)
         session.delete(dbdomain)
-        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
-                dbdomain.name)
-        remove_dir(domaindir)
+
+        domain = TemplateDomain(dbdomain)
+        for dir in domain.directories():
+            remove_dir(dir)
+
         return
 
 
