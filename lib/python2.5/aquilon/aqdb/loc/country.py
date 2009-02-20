@@ -23,10 +23,11 @@ def populate(sess, *args, **kw):
     if len(sess.query(Country).all()) < 1:
         from aquilon.aqdb.loc.continent import Continent
         from aquilon.aqdb.loc.hub import Hub
-        import aquilon.aqdb.dsdb as dsdb_
 
-        dsdb = dsdb_.DsdbConnection()
-        assert dsdb
+        log = kw['log']
+        assert log, "no log in kwargs for Country.populate()"
+        dsdb = kw['dsdb']
+        assert dsdb, "No dsdb in kwargs for Country.populate()"
 
         cnts = {}
 
@@ -45,9 +46,9 @@ def populate(sess, *args, **kw):
         try:
             sess.commit()
         except Exception, e:
-            sys.stderr.write(e)
+            log.error(str(e))
 
-        print 'created %s countries'%(len(sess.query(Country).all()))
+        log.debug('created %s countries'%(len(sess.query(Country).all())))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

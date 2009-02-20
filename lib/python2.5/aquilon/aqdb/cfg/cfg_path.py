@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint, Index)
 
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation
 
 from aquilon.aqdb.cfg.tld            import Tld
 from aquilon.aqdb.base import Base
@@ -24,9 +24,9 @@ class CfgPath(Base):
 
     relative_path = Column(AqStr(255), nullable=False)
     last_used     = Column(DateTime, default=datetime.now)
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable = False ))
-    comments      = deferred(Column(String(255), nullable = True))
+    creation_date = Column(DateTime, default=datetime.now, nullable = False )
+    comments      = Column(String(255), nullable = True)
+
     tld           = relation(Tld, lazy = False)
 
     def __str__(self):
@@ -44,13 +44,14 @@ Index('cfg_relative_path_idx', cfg_path.c.relative_path)
 
 table = cfg_path
 
-def populate(db, *args, **kw):
-    sess = db.Session()
+def populate(sess, *args, **kw):
     if len(sess.query(CfgPath).all()) > 0:
         return
 
-    cfg_base = db.config.get("broker", "kingdir")
-    assert os.path.isdir(cfg_base)
+    log = kw['log']
+
+    cfg_base = kw['cfg_base']
+    assert os.path.isdir(cfg_base), "no cfg path supplied"
 
     #in case user's config doesn't have one...
     if not cfg_base.endswith('/'):
@@ -85,7 +86,7 @@ def populate(db, *args, **kw):
             continue
 
     sess.commit()
-    print 'created %s cfg_paths'%(len(sess.query(CfgPath).all()))
+    log.debug('created %s cfg_paths'%(len(sess.query(CfgPath).all())))
 
     b=sess.query(CfgPath).first()
     assert(b)

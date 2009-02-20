@@ -45,6 +45,7 @@ table = user_principal
 
 def populate(sess, *args, **kw):
     if len(sess.query(UserPrincipal).all()) < 1:
+        log = kw['log']
         from sqlalchemy import insert
 
         admin = sess.query(Role).filter_by(name = 'aqd_admin').one()
@@ -97,7 +98,7 @@ def populate(sess, *args, **kw):
 
         cnt = len(sess.query(UserPrincipal).all())
         assert(cnt > 0)
-        print 'created %s users'%(cnt)
+        log.debug('created %s users'%(cnt))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

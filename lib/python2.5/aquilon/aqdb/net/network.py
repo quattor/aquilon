@@ -149,38 +149,32 @@ def get_net_id_from_ip(s, ip):
 #        d[row[0]] = row[1]
 #    return d
 
-def populate(db, full=False, *args, **kw):
+def populate(s, *args, **kw):
     #TODO:
         #populate comments
         #populate all non np/dd networks asynchronously
-    s = db.Session()
 
     if len(s.query(Network).limit(30).all()) < 1:
-        import aquilon.aqdb.dsdb as dsdb_
-
-        from aquilon.aqdb.loc.building import Building, building
+        from aquilon.aqdb.loc.building import Building
         import time
 
-        print 'starting to import networks...'
-        start = time.clock()
-
+        log = kw['log']
+        dsdb = kw['dsdb']
         b_cache={}
-        sel=select( [location.c.name, building.c.id],
-            location.c.id == building.c.id )
-
-        for row in db.engine.execute(sel).fetchall():
-            b_cache[row[0]]=row[1]
-
-        dsdb = dsdb_.DsdbConnection()
-
-        #type_cache = get_type_cache(dsdb)
-
         count=0
 
-        if full:
+        if kw.pop('full', None):
             dump_action = 'network_full'
         else:
             dump_action = 'np_network'
+
+        log.debug('starting to import networks...')
+        start = time.clock()
+
+        for b in s.query(Building.name, Building.id).all():
+            b_cache[b.name] = b.id
+
+        #type_cache = get_type_cache(dsdb)
 
         for (name, ip, mask, network_type, bldg_name, side,
              dsdb_id) in dsdb.dump(dump_action):
@@ -189,7 +183,7 @@ def populate(db, full=False, *args, **kw):
             try:
                 kw['location_id'] = b_cache[bldg_name]
             except KeyError:
-                print "Can't find building '%s'\n%s"%(bldg_name, row)
+                log.error("Can't find building '%s'\n%s"%(bldg_name, row))
                 continue
 
             kw['name']           = name
@@ -217,7 +211,7 @@ def populate(db, full=False, *args, **kw):
         s.commit()
         stend = time.clock()
         thetime = stend - start
-        print 'created %s networks in %2f'%(count, thetime)
+        log.info('created %s networks in %2f'%(count, thetime))
 
 
 #for fast lookups as opposed to a computed column approach

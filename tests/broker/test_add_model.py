@@ -32,7 +32,7 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "NIC count: 4", command)
-        self.matchoutput(out, "Disk: sda 36 GB scsi", command)
+        self.matchoutput(out, "Disk: sda 36 GB DiskType scsi", command)
 
     def testverifyshowtypetorswitch(self):
         command = "show model --type tor_switch"
@@ -83,4 +83,3 @@ class TestAddModel(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

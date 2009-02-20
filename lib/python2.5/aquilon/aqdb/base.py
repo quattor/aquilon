@@ -1,23 +1,10 @@
-import os
-import sys
-
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, "..", "..")
-
-if _LIBDIR not in sys.path:
-    sys.path.insert(0,_LIBDIR)
-
-import aquilon.aqdb.depends
-
-from aquilon.utils              import monkeypatch
+from aquilon.utils import monkeypatch
 
 from sqlalchemy.ext.declarative import declarative_base
+
+#These extensions will be coming soon...
 #from aquilon.aqdb.history.history_meta import VersionedMeta
 #from aquilon.aqdb.history.audit import audit_listener_for_class
-
-#Upfront Design Decisions:
-#  -Could have renamed to AqdBase, it doesn't contribute much, requires another
-#  project wide search and replace and is just more to type
 
 class Base(object):
     def __repr__(self):

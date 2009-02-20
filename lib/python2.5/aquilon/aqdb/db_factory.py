@@ -9,36 +9,13 @@ import sys
 from getpass import getpass
 from StringIO import StringIO
 
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', '..')
-
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
-
-from aquilon.aqdb import depends
+from aquilon.aqdb   import depends
 from aquilon.config import Config
-from aquilon.aqdb.utils.confirm import confirm
+from aquilon.utils  import confirm
 
 from sqlalchemy                  import MetaData, engine, create_engine, text
 from sqlalchemy.orm              import scoped_session, sessionmaker
 from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
-
-if '--debug' in sys.argv:
-    from aquilon.aqdb.utils.shutils import ipshell
-else:
-    ipshell = lambda: "No ipshell imported"
-
-def debug(examinee,*args,**kw):
-    if '--debug' in sys.argv:
-        if isinstance(examinee,str) and not kw.has_key('assert_only'):
-            sys.stderr.write('%s\n'%(examinee))
-        else:
-            if kw.has_key('assert_only'):
-                assert(examinee)
-            else:
-                assert(examinee, 'Object is: %s'%(examinee))
-    else:
-        pass
 
 class DbFactory(object):
     __shared_state = {}
@@ -64,10 +41,7 @@ class DbFactory(object):
         #in prod on a reboot it may hang (waiting for input on stdin)
         #never tested that...
 
-        prod_re = re.compile('@NYPO_AQUILON')
-        if (prod_re.search(self.dsn) and
-                    os.environ['USER'] != 'cdb'):
-
+        if is_prod_ora_instance(self.dsn):
             msg='your DSN is on the production database, are you SURE? '
             if not confirm(prompt=msg, resp=False):
                 print 'Thanks for playing, come again.'
@@ -78,6 +52,7 @@ class DbFactory(object):
         #ORACLE
         if self.dsn.startswith('oracle'):
             import cx_Oracle
+            self.vendor = 'oracle'
             self.schema = self.config.get('database','dbuser')
 
             passwds = self._get_password_list()
@@ -94,6 +69,8 @@ class DbFactory(object):
             import ibm_db_sa
             import ibm_db_dbi
 
+            self.vendor = 'db2'
+
             user=''
             self.engine = create_engine(
                 'ibm_db_sa:///NYTD_AQUILON?UID=%s'%(user))
@@ -104,14 +81,16 @@ class DbFactory(object):
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
             self.connection = self.engine.connect()
+            self.vendor = 'sqlite'
         else:
             msg = "supported database datasources are db2, sqlite and oracle.\n"
             msg += "yours is '%s' "%(self.dsn)
             sys.stderr.write(msg)
             sys.exit(9)
 
-        assert(self.dsn)
-        assert(self.engine)
+
+        assert(self.dsn, 'No dsn in DbFactory.__init__')
+        assert(self.engine, 'No engine in DbFactory.__init__')
 
         self.meta   = MetaData(self.engine)
         assert(self.meta)
@@ -129,7 +108,6 @@ class DbFactory(object):
 
         for p in passwds:
             self.dsn = re.sub(pswd_re,p,dsn_copy)
-            debug('trying dsn %s'%(self.dsn))
 
             self.engine = create_engine(self.dsn)
 
@@ -175,18 +153,6 @@ class DbFactory(object):
     def safe_execute(self, stmt, *args, **kw):
         """ convenience wrapper """
 
-        dbg = kw.pop('debug', False)
-        verbose = kw.pop('verbose', False)
-
-        if debug == True:
-            verbose = True
-
-        if dbg or verbose:
-            print '%s'%(stmt)
-
-        if dbg == True:
-            return True
-
         try:
             return self.engine.execute(text(stmt), **kw)
         except SQLError, e:
@@ -216,11 +182,70 @@ class DbFactory(object):
                f.write(self.buf.getvalue())
         else:
             print >> sys.stderr, self.buf.getvalue()
+    def get_tables(self):
+        """ return a list of table names from the current databases public
+        schema """
+
+        if self.vendor is 'oracle':
+            sql='select table_name from user_tables'
+            return [name for (name, ) in self.safe_execute(sql)]
+
+    def get_sequences(self):
+        """ return a list of the sequence names from the current databases
+            public schema  """
+
+        sql='select sequence_name from user_sequences'
+        return [name for (name, ) in self.safe_execute(sql)]
+
+    def drop_all_tables_and_sequences(self, no_confirm=False):
+        """ MetaData.drop_all() doesn't play nice with db's that have sequences.
+            you're alternative is to call this """
+        if self.vendor is 'sqlite':
+            dbfile = config.get("database", "dbfile")
+            if os.path.exists(dbfile):
+                os.unlink(dbfile)
+
+        elif self.vendor is not 'oracle':
+            raise ValueError('can not drop %s databases'%(self.vendor))
+
+        if is_prod_ora_instance(self.dsn):
+            msg('drop_all_tables not permitted on the production database')
+            raise ValueError(msg)
+
+        msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
+               % self.dsn)
+
+        if no_confirm or confirm(prompt=msg, resp=False):
+            for table in self.get_tables():
+                self.safe_execute('DROP TABLE %s CASCADE CONSTRAINTS' %(table))
+
+            for seq in self.get_sequences():
+                self.safe_execute('DROP SEQUENCE %s'%(seq))
+
+            self.safe_execute('PURGE RECYCLEBIN')
 
 #ensure forward compatibility for proper class naming convention
 #TODO: s/db_factory/DbFactory/g
 db_factory = DbFactory
 
+def is_prod_ora_instance(dsn):
+    prod_re = re.compile('@NYPO_AQUILON',re.IGNORECASE)
+    if prod_re.search(dsn):
+        return True
+    else:
+        return False
+
+def is_prod_user():
+    if os.environ['USER'] == 'cdb':
+        return True
+    else:
+        return False
+
+def is_prod(dsn):
+    if is_prod_ora_instance(dsn) and is_prod_user():
+        return True
+    else:
+        return False
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
