@@ -10,12 +10,15 @@ import unittest
 
 from subprocess import Popen, PIPE
 
+from aquilon.config import Config
+
 class TestRebuild(unittest.TestCase):
 
     def testrebuild(self):
         env = {}
         for (key, value) in os.environ.items():
             env[key] = value
+        env["AQDCONF"] = Config().baseconfig
 
         cmd = ['./build_db.py', '--delete', '--populate']
 

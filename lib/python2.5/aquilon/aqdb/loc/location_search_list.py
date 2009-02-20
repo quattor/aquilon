@@ -40,7 +40,11 @@ table.info['abrev']      = _ABV
 table.info['precedence'] = _PRECEDENCE
 
 location_search_list.primary_key.name = 'loc_search_list_pk'
-
+location_search_list.append_constraint(
+    UniqueConstraint('name', name='location_search_list_uk'))
+# This would appear to be the new naming convention... not renaming without
+# a migration plan, though.
+#    UniqueConstraint('name', name='%s_uk' % (_ABV)))
 
 def populate(sess, *args, **kw):
 

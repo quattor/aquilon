@@ -18,7 +18,7 @@ class Archetype(Base):
 
     id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key = True)
     name = Column(AqStr(32), nullable = False)
-    reation_date = deferred(Column(DateTime, default = datetime.now,
+    creation_date = deferred(Column(DateTime, default = datetime.now,
                                     nullable = False))
     comments      = deferred(Column(String(255), nullable = True))
 
