@@ -37,16 +37,6 @@ class DbFactory(object):
 
         self.dsn = self.config.get('database', 'dsn')
 
-        #extra care with prod when not running as cdb.
-        #in prod on a reboot it may hang (waiting for input on stdin)
-        #never tested that...
-
-        if is_prod_ora_instance(self.dsn):
-            msg='your DSN is on the production database, are you SURE? '
-            if not confirm(prompt=msg, resp=False):
-                print 'Thanks for playing, come again.'
-                sys.exit(9)
-
         self.buf = StringIO()  #for mock engine output
 
         #ORACLE
