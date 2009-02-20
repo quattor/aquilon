@@ -31,6 +31,7 @@ table = Role.__table__
 
 table.info['precedence'] = _PRECEDENCE
 
+role.primary_key.name = 'role_pk'
 role.append_constraint(UniqueConstraint('name',name='role_uk'))
 
 def populate(sess, *args, **kw):

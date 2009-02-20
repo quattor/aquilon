@@ -31,6 +31,7 @@ table = Realm.__table__
 
 table.info['precedence'] = _PRECEDENCE
 
+realm.primary_key.name = 'realm_pk'
 realm.append_constraint(UniqueConstraint('name',name='realm_uk'))
 
 def populate(sess, *args, **kw):
