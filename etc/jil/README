@@ -2,15 +2,20 @@ Before running commands,
 
 module load 3rd/autosys/NYA
 
-# To insert...
+# To insert, run from nyaqd1
+ssh nyaqd1
 kuu cdb
-jil <unixeng-aqdrefreshnet-prod.jil
+module load 3rd/autosys/NYA
+jil <unixeng-aqdrefreshnetdd-prod.jil
+jil <unixeng-aqdrefreshnetds-prod.jil
 
 # To verify
-autorep -q -J unixeng-aqdrefreshnet-prod
+autorep -q -J unixeng-aqdrefreshnetdd-prod
+autorep -q -J unixeng-aqdrefreshnetds-prod
 
 # To fire a test...
-sendevent -E FORCE_STARTJOB -J unixeng-aqdrefreshent-prod
+sendevent -E FORCE_STARTJOB -J unixeng-aqdrefreshnetdd-prod
+sendevent -E FORCE_STARTJOB -J unixeng-aqdrefreshnetds-prod
 
 # We also have jilgrep in the environment.
 
