@@ -140,6 +140,7 @@ class ObjectFormatter(object):
         return handler.format_proto(result)
 
     def add_host_msg(self, host_msg, host):
+        """Host here is actually a system!"""
         host_msg.hostname = str(host.name)
         if hasattr(host, "fqdn"):
             host_msg.fqdn = host.fqdn
@@ -160,6 +161,12 @@ class ObjectFormatter(object):
             host_msg.mac = str(host.mac)
         if hasattr(host, "system_type"):
             host_msg.type = str(host.system_type)
+        if hasattr(host, "build_items"):
+            for build_item in host.build_items:
+                if build_item.cfg_path.tld.type == 'personality':
+                    host_msg.personality.name = \
+                            build_item.cfg_path.relative_path
+                    break
         if hasattr(host, "machine"):
             host_msg.machine.name = str(host.machine.name)
             if hasattr(host.machine, "location"):
