@@ -197,6 +197,9 @@ class ObjectFormatter(object):
                     if hasattr(i.system, "fqdn"):
                         int_msg.fqdn = i.system.fqdn
 
+    def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
+        dns_domain_msg.name = dns_domain.name
+
     def add_service_msg(self, service_msg, service, service_instance=False):
         """Adds a service message, will either nest the given service_instance in the message,
         or will add all the service instances which are available as a backref from a service object"""

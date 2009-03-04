@@ -31,7 +31,8 @@ class TestBrokerCommand(unittest.TestCase):
         protodir = self.config.get("protocols", "directory")
         if protodir not in sys.path:
             sys.path.append(protodir)
-        for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2']:
+        for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
+                  'aqddnsdomains_pb2']:
             globals()[m] = __import__(m)
 
         # This method is cumbersome.  Should probably develop something
@@ -278,6 +279,20 @@ class TestBrokerCommand(unittest.TestCase):
                                  "%d host(s) expected, got %d\n" %
                                  (expect, received))
         return hostlist
+
+    def parse_dns_domainlist_msg(self, msg, expect=None):
+        dns_domainlist = aqddnsdomains_pb2.DNSDomainList()
+        dns_domainlist.ParseFromString(msg)
+        received = len(dns_domainlist.dns_domains)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No DNS domains listed in DNSDomainList "
+                            "protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d DNS domain(s) expected, got %d\n" %
+                                 (expect, received))
+        return dns_domainlist
 
     def parse_servicemap_msg(self, msg, expect=None):
         servicemaplist = aqdservices_pb2.ServiceMapList()
