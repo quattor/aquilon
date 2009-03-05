@@ -24,7 +24,7 @@ class CommandUpdateNetwork(BrokerCommand):
 
         if network or ip:
             dbnetwork = network and get_network_byname(session, network) or None
-            dbnetwork = ip and get_network_byip(session, ip) or None
+            dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
             if not dbnetwork:
                 raise NotFoundException('No valid network supplied')
             networks.append(dbnetwork)
@@ -62,9 +62,9 @@ class CommandUpdateNetwork(BrokerCommand):
                     net.is_discoverable = True
                 elif discoverable == "n":
                     net.is_discoverable = False
-                if discovered:
-                    if discovered == "y":
-                        net.is_discovered = True
+            if discovered:
+                if discovered == "y":
+                    net.is_discovered = True
                 elif discoverable == "n":
                     net.is_discoverable = False
 

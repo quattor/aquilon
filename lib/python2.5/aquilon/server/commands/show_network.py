@@ -20,7 +20,7 @@ class CommandShowNetwork(BrokerCommand):
 
     def render(self, session, network, ip, all, discovered, discoverable, type=False, hosts=False, **arguments):
         dbnetwork = network and get_network_byname(session, network) or None
-        dbnetwork = ip and get_network_byip(session, ip) or None
+        dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
         q = session.query(Network)
         if dbnetwork:
             if hosts:
