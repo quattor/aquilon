@@ -145,7 +145,7 @@ class ObjectFormatter(object):
         if hasattr(host, "fqdn"):
             host_msg.fqdn = host.fqdn
         if hasattr(host, "dns_domain"):
-            host_msg.dns_domain = host.dns_domain.name
+            host_msg.dns_domain = str(host.dns_domain.name)
         if hasattr(host, "archetype"):
             host_msg.archetype.name = str(host.archetype.name)
         if hasattr(host, "domain"):
@@ -165,7 +165,7 @@ class ObjectFormatter(object):
             for build_item in host.build_items:
                 if build_item.cfg_path.tld.type == 'personality':
                     host_msg.personality.name = \
-                            build_item.cfg_path.relative_path
+                            str(build_item.cfg_path.relative_path)
                     break
         if hasattr(host, "machine"):
             host_msg.machine.name = str(host.machine.name)
@@ -198,7 +198,7 @@ class ObjectFormatter(object):
                         int_msg.fqdn = i.system.fqdn
 
     def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
-        dns_domain_msg.name = dns_domain.name
+        dns_domain_msg.name = str(dns_domain.name)
 
     def add_service_msg(self, service_msg, service, service_instance=False):
         """Adds a service message, will either nest the given service_instance in the message,
