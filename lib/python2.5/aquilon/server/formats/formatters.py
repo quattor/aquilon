@@ -143,7 +143,7 @@ class ObjectFormatter(object):
         host_msg.hostname = str(host.name)
         if hasattr(host, "fqdn"):
             host_msg.fqdn = host.fqdn
-        if hasattr(host, "archtype"):
+        if hasattr(host, "archetype"):
             host_msg.archetype.name = str(host.archetype.name)
         if hasattr(host, "domain"):
             host_msg.domain.name = str(host.domain.name)

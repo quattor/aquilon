@@ -78,6 +78,7 @@ from test_show_network import TestShowNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
+from test_update_network import TestUpdateNetwork
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
@@ -141,7 +142,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchSystem, TestSearchHost,
                 TestUpdateInterface, TestUpdateMachine,
-                TestShowNetwork, TestRefreshNetwork,
+                TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,

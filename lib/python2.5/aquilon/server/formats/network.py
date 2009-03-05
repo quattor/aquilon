@@ -8,7 +8,6 @@
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.net.network import Network
 
-
 class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
     def format_raw(self, network, indent=""):
@@ -21,6 +20,8 @@ class NetworkFormatter(ObjectFormatter):
         details.append(indent + "Country: %s" % str(network.location.country.name))
         details.append(indent + "Side: %s" % network.side)
         details.append(indent + "Network Type: %s" % network.network_type)
+        details.append(indent + "Discoverable: %s" % str(network.is_discoverable))
+        details.append(indent + "Discovered: %s" % str(network.is_discovered))
         if network.comments:
             details.append(indent + "  Comments: %s" % network.comments)
         return "\n".join(details)
@@ -71,11 +72,11 @@ class SimpleNetworkList(list):
 
 class SimpleNetworkListFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
-    fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Comments"]
+    fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
     def format_raw(self, nlist, indent=""):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:
-            details.append(indent + str("\t".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.comments)])))
+            details.append(indent + str("\t".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.is_discoverable), str(network.is_discovered), str(network.comments)])))
         return "\n".join(details)
 
     def format_proto(self, nlist):
@@ -96,6 +97,8 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         net_msg.location.name = str(net.location.name)
         net_msg.location.location_type = str(net.location.location_type)
         net_msg.type = str(net.network_type)
+        net_msg.discoverable = net.is_discoverable
+        net_msg.discovered = net.is_discovered
         for system in net.interfaces:
             self.add_host_msg(net_msg.hosts.add(), system)
 
