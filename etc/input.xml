@@ -208,6 +208,8 @@
          <optgroup name="show_network_options" fields="any">
             <option name="type" type="string">Network type</option>
             <option name="hosts" type="boolean">Hosts</option>
+            <option name="discoverable" type="boolean">Discoverable</option>
+            <option name="discovered" type="boolean">Discovered</option>
          </optgroup>
          <optgroup name="show_network_location_opts" fields="any">
 	    <option name="company" type="string">Company</option>
@@ -658,6 +660,34 @@
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
       <transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s" />
       <transport trigger="tor_switch" method="put" path="tor_switch/%(tor_switch)s/interface/%(interface)s" />
+   </command>
+
+   <command name="update_network">
+     Update information about the specified network or networks.
+     
+     Update the network either by name or ip of the network, or in bulk with location,
+     and/or network type.
+     <optgroup name="update_network_opts" mandatory="True" fields="any">
+	<option name="network" type="string" conflicts="ip update_network_location_opts">Network name</option> 
+	<option name="ip" type="string" conflicts="network update_network_location_opts">Network name</option> 
+	<option name="type" type="string" conflicts="ip network">Network type</option>
+	<optgroup name="update_network_location_opts" fields="any">
+            <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+	</optgroup>
+     </optgroup>
+     <optgroup name="update_network_modifiers" mandatory="True" fields="any">
+	<option name="discoverable" type="string" conflicts="">Set network(s) updateable</option>
+	<option name="discovered" type="string" conflicts="">Set network(s) updated</option>
+    </optgroup>
+     <transport method="post" path="network" />
    </command>
 
    <command name="update_interface">

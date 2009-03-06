@@ -18,10 +18,9 @@ class CommandShowNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network, ip, all, type=False, hosts=False, **arguments):
+    def render(self, session, network, ip, all, discovered, discoverable, type=False, hosts=False, **arguments):
         dbnetwork = network and get_network_byname(session, network) or None
-        dbnetwork = ip and get_network_byip(session, ip) or None
-        ints = []
+        dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
         q = session.query(Network)
         if dbnetwork:
             if hosts:
@@ -30,6 +29,10 @@ class CommandShowNetwork(BrokerCommand):
                 return dbnetwork
         if type:
             q = q.filter_by(network_type = type)
+        if discoverable:
+            q = q.filter_by(is_discoverable = True)
+        if discovered:
+            q = q.filter_by(is_discovered = True)
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
