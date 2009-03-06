@@ -192,8 +192,8 @@ class ObjectFormatter(object):
                         int_msg.ip = str(i.system.ip)
                     if hasattr(i, "bootable"):
                         int_msg.bootable = i.bootable
-                    if hasattr(i, "network_id"):
-                        int_msg.network_id = i.network_id
+                    if hasattr(i.system, "network_id"):
+                        int_msg.network_id = i.system.network_id
                     if hasattr(i.system, "fqdn"):
                         int_msg.fqdn = i.system.fqdn
 
