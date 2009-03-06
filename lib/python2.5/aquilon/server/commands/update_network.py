@@ -65,5 +65,5 @@ class CommandUpdateNetwork(BrokerCommand):
             if discovered:
                 if discovered == "y":
                     net.is_discovered = True
-                elif discoverable == "n":
+                elif discovered == "n":
                     net.is_discovered = False
