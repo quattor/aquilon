@@ -1153,6 +1153,20 @@
       <transport method="put" path="location/add_rack/%(building)s/%(rackid)s" />
    </command>
 
+   <command name="update_rack">
+      Update the row and column parameters for a rack.
+      <optgroup name="update_rack_input" mandatory="True" fields="all">
+         <option name="name" type="string">Name of the rack</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="row" type="string">Row of the tile location (letters only)</option>
+         <option name="column" type="string">Column of the tile location (numbers only)</option>
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="location/rack/%(name)s" />
+   </command>
+
    <command name="show_rack">
       Show the rack list, or details about a particular rack.
       <optgroup name="show_rack_opts" mandatory="True" fields="any">
