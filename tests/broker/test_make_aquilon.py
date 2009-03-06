@@ -88,6 +88,26 @@ class TestMakeAquilon(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/dns/nyinfratest", command)
 
+    def testverifyproto(self):
+        command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
+                   "--format=proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.failUnlessEqual(host.hostname, 'unittest00')
+        self.failUnlessEqual(host.personality.name, 'compileserver')
+        self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
+        self.failUnlessEqual(host.mac, self.hostmac2)
+        self.failUnlessEqual(host.ip, self.hostip2)
+        self.failUnlessEqual(host.archetype.name, 'aquilon')
+        self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
+        self.failUnlessEqual(host.domain.name, 'unittest')
+        self.failUnlessEqual(host.status, 'blind')
+        self.failUnlessEqual(host.machine.name, 'ut3c1n3')
+        self.failUnlessEqual(host.sysloc, 'ut.ny.na')
+        self.failUnlessEqual(host.type, 'host')
+        self.failUnlessEqual(host.personality.name, 'compileserver')
+
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

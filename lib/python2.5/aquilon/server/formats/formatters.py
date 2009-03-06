@@ -140,10 +140,13 @@ class ObjectFormatter(object):
         return handler.format_proto(result)
 
     def add_host_msg(self, host_msg, host):
+        """Host here is actually a system!"""
         host_msg.hostname = str(host.name)
         if hasattr(host, "fqdn"):
             host_msg.fqdn = host.fqdn
-        if hasattr(host, "archtype"):
+        if hasattr(host, "dns_domain"):
+            host_msg.dns_domain = str(host.dns_domain.name)
+        if hasattr(host, "archetype"):
             host_msg.archetype.name = str(host.archetype.name)
         if hasattr(host, "domain"):
             host_msg.domain.name = str(host.domain.name)
@@ -158,6 +161,12 @@ class ObjectFormatter(object):
             host_msg.mac = str(host.mac)
         if hasattr(host, "system_type"):
             host_msg.type = str(host.system_type)
+        if hasattr(host, "build_items"):
+            for build_item in host.build_items:
+                if build_item.cfg_path.tld.type == 'personality':
+                    host_msg.personality.name = \
+                            str(build_item.cfg_path.relative_path)
+                    break
         if hasattr(host, "machine"):
             host_msg.machine.name = str(host.machine.name)
             if hasattr(host.machine, "location"):
@@ -183,10 +192,13 @@ class ObjectFormatter(object):
                         int_msg.ip = str(i.system.ip)
                     if hasattr(i, "bootable"):
                         int_msg.bootable = i.bootable
-                    if hasattr(i, "network_id"):
-                        int_msg.network_id = i.network_id
+                    if hasattr(i.system, "network_id"):
+                        int_msg.network_id = i.system.network_id
                     if hasattr(i.system, "fqdn"):
                         int_msg.fqdn = i.system.fqdn
+
+    def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
+        dns_domain_msg.name = str(dns_domain.name)
 
     def add_service_msg(self, service_msg, service, service_instance=False):
         """Adds a service message, will either nest the given service_instance in the message,

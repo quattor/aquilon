@@ -7,6 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.server.formats.dns_domain import DNSDomainList
 
 
 class CommandShowDnsDomain(BrokerCommand):
@@ -14,6 +15,6 @@ class CommandShowDnsDomain(BrokerCommand):
     required_parameters = []
 
     def render(self, session, **arguments):
-        return session.query(DnsDomain).all()
+        return DNSDomainList(session.query(DnsDomain).all())
 
 

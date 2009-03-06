@@ -16,17 +16,25 @@ import ms.version
 ms.version.addpkg('setuptools', '0.6c8-py25')
 ms.version.addpkg('protoc', 'prod', meta='aquilon')
 
-# XXX Should get protocol path from config.  TestBrokerCommand.__init__ ?
-sys.path.append("/ms/dist/aquilon/PROJ/protocols/1.0/lib/python")
-import aqdsystems_pb2
-import aqdnetworks_pb2
-import aqdservices_pb2
-
 
 class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
         self.config = Config()
+
+        # Need to import protocol buffers after we have the config
+        # object all squared away and we can set the sys.path
+        # variable appropriately.
+        # It would be simpler just to change sys.path in runtests.py,
+        # but this allows for each test to be run individually (without
+        # the runtests.py wrapper).
+        protodir = self.config.get("protocols", "directory")
+        if protodir not in sys.path:
+            sys.path.append(protodir)
+        for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
+                  'aqddnsdomains_pb2']:
+            globals()[m] = __import__(m)
+
         # This method is cumbersome.  Should probably develop something
         # like unittest.conf.defaults.
         if self.config.has_option("unittest", "scratchdir"):
@@ -231,29 +239,74 @@ class TestBrokerCommand(unittest.TestCase):
                      "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
                      (command, s, out))
 
-    def parse_netlist_msg(self, msg):
+    def parse_netlist_msg(self, msg, expect=None):
         netlist = aqdnetworks_pb2.NetworkList()
         netlist.ParseFromString(msg)
-        self.assert_(len(netlist.networks) > 0,
-                     "No networks listed in NetworkList protobuf message\n")
+        received = len(netlist.networks)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No networks listed in NetworkList "
+                            "protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d network(s) expected, got %d\n" %
+                                 (expect, received))
+        return netlist
 
-    def parse_srvlist_msg(self, msg):
+    def parse_srvlist_msg(self, msg, expect=None):
         srvlist = aqdservices_pb2.ServiceList()
         srvlist.ParseFromString(msg)
-        self.assert_(len(srvlist.services) > 0,
-                     "No services listed in ServiceList protobuf message\n")
+        received = len(srvlist.services)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No services listed in ServiceList "
+                            "protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d service(s) expected, got %d\n" %
+                                 (expect, received))
+        return srvlist
 
-    def parse_hostlist_msg(self, msg):
+    def parse_hostlist_msg(self, msg, expect=None):
         hostlist = aqdsystems_pb2.HostList()
         hostlist.ParseFromString(msg)
-        self.assert_(len(hostlist.hosts) > 0,
-                     "No hosts listed in HostList protobuf message\n")
+        received = len(hostlist.hosts)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No hosts listed in HostList protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d host(s) expected, got %d\n" %
+                                 (expect, received))
+        return hostlist
 
-    def parse_servicemap_msg(self, msg):
+    def parse_dns_domainlist_msg(self, msg, expect=None):
+        dns_domainlist = aqddnsdomains_pb2.DNSDomainList()
+        dns_domainlist.ParseFromString(msg)
+        received = len(dns_domainlist.dns_domains)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No DNS domains listed in DNSDomainList "
+                            "protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d DNS domain(s) expected, got %d\n" %
+                                 (expect, received))
+        return dns_domainlist
+
+    def parse_servicemap_msg(self, msg, expect=None):
         servicemaplist = aqdservices_pb2.ServiceMapList()
         servicemaplist.ParseFromString(msg)
-        self.assert_(len(servicemaplist.servicemaps) > 0,
-                     "No service maps listed in ServiceMapList protobuf message\n")
+        received = len(servicemaplist.servicemaps)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No service maps listed in ServiceMapList "
+                            "protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d host(s) expected, got %d\n" %
+                                 (expect, received))
+        return servicemaplist
 
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")
