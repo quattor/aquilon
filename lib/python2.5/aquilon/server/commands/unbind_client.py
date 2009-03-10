@@ -5,12 +5,13 @@
 """Contains the logic for `aq unbind client`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
+from aquilon.server.templates.host import PlenaryHost
 
 
 class CommandUnbindClient(BrokerCommand):
@@ -28,6 +29,15 @@ class CommandUnbindClient(BrokerCommand):
         if dbtemplate:
             session.delete(dbtemplate)
             session.flush()
+
+            try:
+                plenary_info = PlenaryHost(dbhost)
+                plenary_info.write()
+            except IncompleteError, e:
+                # This template cannot be written, we leave it alone
+                # It would be nice to flag the state in the the host?
+                pass
+
             plenary_info = PlenaryServiceInstanceServer(dbservice, dbtemplate.cfg_path.svc_inst)
             plenary_info.write()
 
