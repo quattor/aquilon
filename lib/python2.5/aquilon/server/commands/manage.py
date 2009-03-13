@@ -40,6 +40,8 @@ class CommandManage(BrokerCommand):
             remove_file(f)
             f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
             remove_file(f)
+            f = os.path.join(qdir, "deps", domain, fqdn+".dep")
+            remove_file(f)
 
             dbhost.domain = dbdomain
             session.add(dbhost)
