@@ -33,6 +33,17 @@ class TestAddPersonality(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: personality/utpersonality", command)
 
+    def testaddwindowsdesktop(self):
+        command = "add personality --name desktop --archetype windows"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddwindowsdesktop(self):
+        command = "show personality --name desktop --archetype windows"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Personality: desktop Archetype: windows",
+                         command)
+        self.matchoutput(out, "Template: personality/desktop", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)

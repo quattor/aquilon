@@ -110,6 +110,35 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'archetype/final' };""",
             command)
 
+    def testreconfigurewindowsstatus(self):
+        self.noouttest(["reconfigure",
+                        "--hostname", "unittest01.one-nyp.ms.com",
+                        "--buildstatus", "ready"])
+
+    def testreconfigurewindowsmissingargs(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Nothing to do.", command)
+
+    def testreconfigurewindowspersonality(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--personality", "desktop"]
+        self.noouttest(command)
+
+    def testreconfigurewindowsos(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--os", "linux/4.0.1-x86_64"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "hosts with archetype aquilon", command)
+
+    def testverifyreconfigurewindows(self):
+        command = "show host --hostname unittest01.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "Archetype: windows", command)
+        self.matchoutput(out, "Personality: desktop", command)
+        self.matchoutput(out, "Build Status: ready", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
