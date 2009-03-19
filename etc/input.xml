@@ -955,14 +955,17 @@
       host's bootserver.
       After a successful installation, the host will automatically pxeswitch
       itself back to local disk booting.
+      The --configure option forces a reset of the configuration files for this host on 
+      the bootserver.
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
       <optgroup name="pxeswitch_action" mandatory="True" fields="any">
-         <option name="install" type="boolean" conflicts="localboot status firmware">Do an install</option>
-         <option name="localboot" type="boolean" conflicts="install status firmware">set the host to boot from local disc</option>
-         <option name="status" type="boolean" conflicts="install localboot firmware">set the host to boot from local disc</option>
-         <option name="firmware" type="boolean" conflicts="install localboot status">set the host to boot its firmware image</option>
+         <option name="install" type="boolean" conflicts="localboot status firmware configure">set the host to install from the network at next reboot</option>
+         <option name="configure" type="boolean" conflicts="localboot status firmware install">(re)initialize the pxeswitch configuration</option>
+         <option name="localboot" type="boolean" conflicts="install status firmware configure">set the host to boot from local disk</option>
+         <option name="status" type="boolean" conflicts="install localboot firmware configure">display the current status of how the host will boot</option>
+         <option name="firmware" type="boolean" conflicts="install localboot status configure">set the host to boot its firmware image</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
    </command>
