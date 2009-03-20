@@ -22,7 +22,7 @@ from tempfile import mkstemp
 
 from twisted.python import log
 
-from aquilon.exceptions_ import ProcessException, AquilonError
+from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
 from aquilon.config import Config
 from aquilon.server.dbwrappers.service import get_service
 
