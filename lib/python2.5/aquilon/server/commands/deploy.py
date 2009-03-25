@@ -8,6 +8,7 @@
 import os
 
 from aquilon.server.broker import BrokerCommand
+from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import run_command
 
@@ -26,8 +27,13 @@ class CommandDeploy(BrokerCommand):
                 dbdomain.name)
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
                 os.environ.get("PATH", ""))}
-        run_command(["git", "pull", domaindir], env=git_env,
-                path=self.config.get("broker", "kingdir"))
+        try:
+            run_command(["git", "pull", domaindir], env=git_env,
+                    path=self.config.get("broker", "kingdir"))
+        except ProcessException, e:
+            run_command(["git", "reset", "--hard"], env=git_env,
+                    path=self.config.get("broker", "kingdir"))
+            raise ArgumentError("\n%s%s" %(e.out,e.err))
         return
 
 
