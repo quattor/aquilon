@@ -320,7 +320,7 @@ class TestBrokerCommand(unittest.TestCase):
             newenv["PATH"] = git_path
         return newenv
 
-    def gitcommand(self, command, **kwargs):
+    def gitcommand_raw(self, command, **kwargs):
         git = self.config.get("broker", "git")
         if isinstance(command, list):
             args = command[:]
@@ -331,11 +331,29 @@ class TestBrokerCommand(unittest.TestCase):
         if kwargs.has_key("env"):
             env = self.gitenv(kwargs.pop("env"))
         p = Popen(args, stdout=PIPE, stderr=PIPE, env=env, **kwargs)
-        (out, err) = p.communicate()
+        return p
+
+    def gitcommand(self, command, **kwargs):
+        p = self.gitcommand_raw(command, **kwargs)
         # Ignore out/err unless we get a non-zero return code, then log it.
+        (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0,
                 "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                 % (command, out, err))
+        return
+
+    def gitcommand_expectfailure(self, command, **kwargs):
+        p = self.gitcommand_raw(command, **kwargs)
+        # Ignore out/err unless we get a non-zero return code, then log it.
+        (out, err) = p.communicate()
+        self.assertEqual(p.returncode, 1,
+                "Zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                % (command, out, err))
+        return err
+
+    def check_git_merge_health(self, repo):
+        command = "merge HEAD"
+        out = self.gitcommand(command.split(" "), cwd=repo)
         return
 
 
