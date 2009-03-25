@@ -22,7 +22,7 @@ from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.base               import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.cfg.cfg_path       import CfgPath
+from aquilon.aqdb.cfg                import CfgPath, Tld
 #from aquilon.aqdb.auth.audit_info    import AuditInfo
 from aquilon.exceptions_             import ArgumentError
 
@@ -71,6 +71,34 @@ service.append_constraint(
     UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
 table = service
+
+#def populate(sess, **kw):
+#    if sess.query(Service).count() > 0:
+#        return
+#
+#    import os
+#
+#    cfg_base = kw['cfg_base']
+#    svc_dir = os.path.join(cfg_base,'service')
+#    assert os.path.isdir(svc_dir), "No service directory in Service.populate()"
+#
+#    svc_dir = os.path.join(cfg_base, 'service')
+#
+#    svc = sess.query(Tld).filter_by(type='service').one()
+#    q = sess.query(CfgPath).filter_by(tld=svc)
+#
+#    for i in os.listdir(svc_dir):
+#        my_path = os.path.join(svc_dir,i)
+#        if os.path.isdir(my_path):
+#            cp  = q.filter_by(relative_path=i).one()
+#            svc = Service(name=i, cfg_path=cp)
+#            sess.add(svc)
+#
+#    try:
+#        sess.commit()
+#    except Exception, e:
+#        sess.rollback()
+#        raise e
 
 
 # Copyright (C) 2008 Morgan Stanley

@@ -124,11 +124,10 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['session'] = session
         kwargs['hostname'] = fqdn
         kwargs['archetype'] = 'aurora'
+        kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
         kwargs['machine'] = dbmachine.name
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
         # The superclass already contains the rest of the logic to handle this.
         return CommandAddHost.render(self, *args, **kwargs)
-
-

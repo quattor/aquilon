@@ -46,5 +46,3 @@ class CommandShowHostIPList(BrokerCommand):
                 entry.append("")
             iplist.append(entry)
         return iplist
-
-

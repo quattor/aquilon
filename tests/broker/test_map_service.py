@@ -21,64 +21,71 @@ class TestMapService(TestBrokerCommand):
 
     def testmapafs(self):
         self.noouttest(["map", "service", "--building", "ut",
-            "--service", "afs", "--instance", "q.ny.ms.com"])
+            "--service", "afs", "--instance", "q.ny.ms.com",
+            "--archetype", "aquilon"])
 
     def testverifymapafs(self):
-        command = "show map --service afs --instance q.ny.ms.com --building ut"
+        command = "show map --archetype aquilon --service afs --instance q.ny.ms.com --building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: afs Instance: q.ny.ms.com Map: Building ut", command)
 
     def testmapdns(self):
         self.noouttest(["map", "service", "--hub", "ny",
-            "--service", "dns", "--instance", "nyinfratest"])
+            "--service", "dns", "--instance", "nyinfratest",
+            "--archetype", "aquilon"])
 
     def testverifymapdns(self):
-        command = "show map --service dns --instance nyinfratest --hub ny"
+        command = "show map --archetype aquilon --service dns --instance nyinfratest --hub ny"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: dns Instance: nyinfratest Map: Hub ny", command)
 
     def testmapaqd(self):
         self.noouttest(["map", "service", "--campus", "ny",
-            "--service", "aqd", "--instance", "ny-prod"])
+            "--service", "aqd", "--instance", "ny-prod",
+            "--archetype", "aquilon"])
 
     def testverifymapaqd(self):
-        command = "show map --service aqd --instance ny-prod --campus ny"
+        command = "show map --archetype aquilon --service aqd --instance ny-prod --campus ny"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: aqd Instance: ny-prod Map: Campus ny", command)
 
     def testmapbootserver(self):
         self.noouttest(["map", "service", "--rack", "ut3",
-            "--service", "bootserver", "--instance", "np.test"])
+            "--service", "bootserver", "--instance", "np.test",
+            "--archetype", "aquilon"])
 
     def testverifymapbootserver(self):
-        command = "show map --service bootserver --instance np.test --rack ut3"
+        command = "show map --archetype aquilon --service bootserver --instance np.test --rack ut3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: bootserver Instance: np.test Map: Rack ut3", command)
 
     def testmapntp(self):
         self.noouttest(["map", "service", "--city", "ny",
-            "--service", "ntp", "--instance", "pa.ny.na"])
+            "--service", "ntp", "--instance", "pa.ny.na",
+            "--archetype", "aquilon"])
 
     def testverifymapntp(self):
-        command = "show map --service ntp --instance pa.ny.na --city ny"
+        command = "show map --archetype aquilon --service ntp --instance pa.ny.na --city ny"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: ntp Instance: pa.ny.na Map: City ny", command)
 
     def testmaputsi1(self):
         self.noouttest(["map", "service", "--building", "ut",
-            "--service", "utsvc", "--instance", "utsi1"])
+            "--service", "utsvc", "--instance", "utsi1",
+            "--archetype", "aquilon"])
 
     def testmaputsi2(self):
         self.noouttest(["map", "service", "--building", "ut",
-            "--service", "utsvc", "--instance", "utsi2"])
+            "--service", "utsvc", "--instance", "utsi2",
+            "--archetype", "aquilon"])
 
     def testverifymaputsvc(self):
-        command = "show map --service utsvc"
+        command = "show map --archetype aquilon --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                 "Service: utsvc Instance: utsi1 Map: Building ut", command)
@@ -86,12 +93,19 @@ class TestMapService(TestBrokerCommand):
                 "Service: utsvc Instance: utsi2 Map: Building ut", command)
 
     def testverifyutmapproto(self):
-        command = "show map --building ut --format proto"
+        command = "show map --archetype aquilon --building ut --format proto"
         out = self.commandtest(command.split(" "))
         self.parse_servicemap_msg(out)
+
+    #def testmaputsilpersona(self):
+    #    self.noouttest(["map", "service", "--comany", "ms", "--service", "utsvc",
+    #                    "--instance", "utsi2", "--archetype", "aquilon",
+    #                    "--personality", "compileserver"])
+    #
+    #def testverifymappersona(self):
+    #    command = "show map -- "
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

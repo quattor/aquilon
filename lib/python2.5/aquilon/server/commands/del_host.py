@@ -55,7 +55,7 @@ class CommandDelHost(BrokerCommand):
             archetype = dbhost.archetype.name
             dbmachine = dbhost.machine
             ip = dbhost.ip
-    
+
             for binding in dbhost.templates:
                 if (binding.cfg_path.svc_inst):
                     bindings.append(binding.cfg_path.svc_inst)
@@ -66,7 +66,7 @@ class CommandDelHost(BrokerCommand):
             session.delete(dbhost)
             session.flush()
             delplenary = True
-    
+
             if archetype != 'aurora':
                 try:
                     dsdb_runner = DSDBRunner()
@@ -108,9 +108,7 @@ class CommandDelHost(BrokerCommand):
                         pass
             finally:
                 compileRelease()
-                
+
             build_index(self.config, session, profiles)
 
         return
-
-

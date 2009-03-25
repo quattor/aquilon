@@ -49,7 +49,7 @@ RSYNC = /ms/dist/fsf/PROJ/rsync/2.6.6/bin/rsync
 # one day try and compile simultaneously two hosts of different
 # archetypes.
 
-PANC      = /ms/dev/elfms/panc/7.2.9/src/distro/bin/panc
+PANC      = /ms/dev/elfms/panc/8.2.3/src/distro/bin/panc
 PANC_OPTS = -I $(CONFIG) \
             -I $(QROOT)/templates/$(DOMAIN) \
             -I $(QROOT)/templates/$(DOMAIN)/aquilon \

@@ -10,7 +10,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
@@ -22,10 +22,11 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddHost(BrokerCommand):
 
-    required_parameters = ["hostname", "machine", "archetype", "domain"]
+    required_parameters = ["hostname", "machine", "archetype", "personality",
+                           "domain"]
 
-    def render(self, session, hostname, machine, archetype, domain,
-               buildstatus, user, skip_dsdb_check=False, **arguments):
+    def render(self, session, hostname, machine, archetype, personality,
+               domain, buildstatus, user, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:
@@ -33,7 +34,7 @@ class CommandAddHost(BrokerCommand):
         else:
             dbstatus = get_status(session, "build")
         dbmachine = get_machine(session, machine)
-        dbarchetype = get_archetype(session, archetype)
+        dbpersonality = get_personality(session, archetype, personality)
 
         if dbmachine.model.machine_type not in [
                 'blade', 'workstation', 'rackmount', 'aurora_node']:
@@ -41,7 +42,7 @@ class CommandAddHost(BrokerCommand):
                     (dbmachine.model.machine_type))
 
         if (dbmachine.model.machine_type == 'aurora_node' and
-                dbarchetype.name != 'aurora'):
+                dbpersonality.archetype.name != 'aurora'):
             raise ArgumentError("Machines of aurora_node can only be added with archetype aurora")
 
         session.refresh(dbmachine)
@@ -51,7 +52,7 @@ class CommandAddHost(BrokerCommand):
 
         dbinterface = None
         mac = None
-        if dbarchetype.name != 'aurora':
+        if dbpersonality.archetype.name != 'aurora':
             # Any host being added to DSDB will need a valid primary interface.
             if not dbmachine.interfaces:
                 raise ArgumentError("Machine '%s' has no interfaces." % machine)
@@ -76,7 +77,7 @@ class CommandAddHost(BrokerCommand):
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
                 mac=mac, ip=ip, network=dbnetwork,
-                name=short, dns_domain=dbdns_domain, archetype=dbarchetype)
+                name=short, dns_domain=dbdns_domain, personality=dbpersonality)
         session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost
@@ -102,5 +103,3 @@ class CommandAddHost(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
-
-

@@ -11,11 +11,9 @@ from aquilon.server.commands.add_host import CommandAddHost
 
 class CommandAddAquilonHost(CommandAddHost):
 
-    required_parameters = ["hostname", "machine", "domain"]
+    required_parameters = ["hostname", "machine", "domain", "personality"]
 
     def render(self, *args, **kwargs):
         # The superclass already contains the logic to handle this case.
         kwargs['archetype'] = 'aquilon'
         return CommandAddHost.render(self, *args, **kwargs)
-
-

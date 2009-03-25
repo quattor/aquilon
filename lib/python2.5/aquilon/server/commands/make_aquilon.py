@@ -13,6 +13,7 @@ from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
                                  ArgumentError, NameServiceError, AquilonError)
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
+from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import choose_service_instance
 from aquilon.server.dbwrappers.status import get_status
@@ -26,7 +27,7 @@ from aquilon.server.templates.service import PlenaryServiceInstanceServer
 
 class CommandMakeAquilon(BrokerCommand):
 
-    required_parameters = ["hostname", "os", "personality"]
+    required_parameters = ["hostname", "os"]
 
     def render(self, session, hostname, os, personality, buildstatus,
                user, **arguments):
@@ -59,10 +60,10 @@ class CommandMakeAquilon(BrokerCommand):
 
             try:
                 old_content = plenary_host.read()
-            except IOError, e: 
+            except IOError, e:
                 # Sigh, it's an IOError if the file doesn't exist.
                 old_content = None
-            
+
             # Currently, for the Host to be created it *must* be associated with
             # a Machine already.  If that ever changes, need to check here and
             # bail if dbhost.machine does not exist.
@@ -87,16 +88,11 @@ class CommandMakeAquilon(BrokerCommand):
                 session.add(dbos_bi)
 
             if personality:
-                dbpersonality = get_cfg_path(session, "personality", personality)
-                dbpersonality_bi = session.query(BuildItem).filter_by(host=dbhost).join(
-                    'cfg_path').filter_by(tld=dbpersonality.tld).first()
-                if dbpersonality_bi:
-                    dbpersonality_bi.cfg_path = dbpersonality
-                else:
-                    # FIXME: This could fail if there is already an item at 1
-                    dbpersonality_bi = BuildItem(host=dbhost,
-                            cfg_path=dbpersonality, position=1)
-                session.add(dbpersonality_bi)
+                # Yes, the current archetype is assumed from the old
+                # personality...
+                dbpersonality = get_personality(session, dbhost.archetype.name,
+                                                personality)
+                dbhost.personality = dbpersonality
 
             if buildstatus:
                 dbstatus = get_status(session, buildstatus)
@@ -133,9 +129,9 @@ class CommandMakeAquilon(BrokerCommand):
             session.flush()
             session.refresh(dbhost)
             session.refresh(dbhost.machine)
-            
+
             plenary_host.write(locked=True)
-            
+
             td = TemplateDomain(dbhost.domain)
             out = td.compile(session, only=dbhost, locked=True)
 

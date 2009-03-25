@@ -23,7 +23,8 @@ class TestAddHost(TestBrokerCommand):
         self.noouttest(["add", "host",
             "--hostname", "unittest02.one-nyp.ms.com", "--ip", self.hostip0,
             "--machine", "ut3c5n10", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon"])
+            "--buildstatus", "build", "--archetype", "aquilon",
+            "--personality", "compileserver"])
 
     def testverifyaddunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -65,7 +66,8 @@ class TestAddHost(TestBrokerCommand):
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--ipalgorithm", "max",
             "--machine", "ut8s02p1", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon"])
+            "--buildstatus", "build", "--archetype", "aquilon",
+            "--personality", "compileserver"])
 
     def testverifyunittest15(self):
         command = "show host --hostname unittest15.aqd-unittest.ms.com"
@@ -80,7 +82,8 @@ class TestAddHost(TestBrokerCommand):
                    "--ipfromip", self.hostip14,
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
-                   "--buildstatus", "build", "--archetype", "aquilon"]
+                   "--buildstatus", "build", "--archetype", "aquilon",
+                   "--personality","compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "No remaining IPs found on network", command)
 
@@ -90,7 +93,8 @@ class TestAddHost(TestBrokerCommand):
             "--ipfromip", self.hostip14,
             "--ipalgorithm", "lowest",
             "--machine", "ut8s02p2", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon"])
+            "--buildstatus", "build", "--archetype", "aquilon",
+            "--personality","inventory"])
 
     def testverifyunittest16(self):
         command = "show host --hostname unittest16.aqd-unittest.ms.com"
@@ -104,7 +108,8 @@ class TestAddHost(TestBrokerCommand):
             "--hostname", "unittest17.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--machine", "ut8s02p3", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon"])
+            "--buildstatus", "build", "--archetype", "aquilon",
+            "--personality","inventory"])
 
     def testverifyunittest17(self):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
@@ -117,4 +122,3 @@ class TestAddHost(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

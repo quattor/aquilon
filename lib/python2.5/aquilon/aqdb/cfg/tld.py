@@ -57,6 +57,7 @@ def populate(sess, **kw):
 
     cfg_base = kw['cfg_base']
     assert os.path.isdir(cfg_base)
+    skip = ('.git', 'personality')
 
     tlds=[]
     for i in os.listdir(cfg_base):
@@ -68,7 +69,7 @@ def populate(sess, **kw):
                 for j in os.listdir(p):
                     if os.path.isdir(os.path.abspath(os.path.join(p, j))):
                         tlds.append(j)
-            elif i == ".git":
+            elif i in skip:
                 continue
             else:
                 tlds.append(i)

@@ -16,6 +16,7 @@ class HostFormatter(ObjectFormatter):
         if host.ip:
             details.append(indent + "  IP: %s" % host.ip)
         details.append(self.redirect_raw(host.machine, indent+"  "))
+        details.append(self.redirect_raw(host.personality, indent+" "))
         details.append(self.redirect_raw(host.archetype, indent+"  "))
         details.append(self.redirect_raw(host.domain, indent+"  "))
         details.append(self.redirect_raw(host.status, indent+"  "))
@@ -41,7 +42,7 @@ class SimpleHostList(list):
 
 class SimpleHostListFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
-    
+
     def format_raw(self, shlist, indent=""):
         return str("\n".join([indent + host.fqdn for host in shlist]))
 
@@ -88,5 +89,3 @@ class HostMachineListFormatter(ObjectFormatter):
         return str("\n".join([str.join(",",(host.fqdn, host.machine.name)) for host in hlist]))
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()
-
-

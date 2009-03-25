@@ -21,62 +21,68 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapafs(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-            "--service", "afs", "--instance", "q.ny.ms.com"])
+            "--service", "afs", "--instance", "q.ny.ms.com",
+            "--archetype", "aquilon"])
 
     def testverifyunmapafs(self):
-        command = "show map --service afs --instance q.ny.ms.com --building ut"
+        command = "show map --archetype aquilon --service afs --instance q.ny.ms.com --building ut"
         self.notfoundtest(command.split(" "))
 
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
-            "--service", "dns", "--instance", "nyinfratest"])
+            "--service", "dns", "--instance", "nyinfratest",
+            "--archetype", "aquilon"])
 
     def testverifyunmapdns(self):
-        command = "show map --service dns --instance nyinfratest --hub ny"
+        command = "show map --archetype aquilon --service dns --instance nyinfratest --hub ny"
         self.notfoundtest(command.split(" "))
 
     def testunmapaqd(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
-            "--service", "aqd", "--instance", "ny-prod"])
+            "--service", "aqd", "--instance", "ny-prod",
+            "--archetype", "aquilon"])
 
     def testverifyunmapaqd(self):
-        command = "show map --service aqd --instance ny-prod --campus ny"
+        command = "show map --archetype aquilon --service aqd --instance ny-prod --campus ny"
         self.notfoundtest(command.split(" "))
 
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--rack", "ut3",
-            "--service", "bootserver", "--instance", "np.test"])
+            "--service", "bootserver", "--instance", "np.test",
+            "--archetype", "aquilon"])
 
     def testverifyunmapbootserver(self):
-        command = "show map --service bootserver --instance np.test --rack ut3"
+        command = "show map --archetype aquilon --service bootserver --instance np.test --rack ut3"
         self.notfoundtest(command.split(" "))
 
     def testunmapntp(self):
         self.noouttest(["unmap", "service", "--city", "ny",
-            "--service", "ntp", "--instance", "pa.ny.na"])
+            "--service", "ntp", "--instance", "pa.ny.na",
+            "--archetype", "aquilon"])
 
     def testverifyunmapntp(self):
-        command = "show map --service ntp --instance pa.ny.na --city ny"
+        command = "show map --archetype aquilon --service ntp --instance pa.ny.na --city ny"
         self.notfoundtest(command.split(" "))
 
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-            "--service", "utsvc", "--instance", "utsi1"])
+            "--service", "utsvc", "--instance", "utsi1",
+            "--archetype", "aquilon"])
 
     def testverifyunmaputsi1(self):
-        command = "show map --service utsvc --instance utsi1 --building ut"
+        command = "show map --archetype aquilon --service utsvc --instance utsi1 --building ut"
         self.notfoundtest(command.split(" "))
 
     def testunmaputsi2(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-            "--service", "utsvc", "--instance", "utsi2"])
+            "--service", "utsvc", "--instance", "utsi2",
+            "--archetype", "aquilon"])
 
     def testverifyunmaputsi2(self):
-        command = "show map --service utsvc --instance utsi2 --building ut"
+        command = "show map --archetype aquilon --service utsvc --instance utsi2 --building ut"
         self.notfoundtest(command.split(" "))
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnmapService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

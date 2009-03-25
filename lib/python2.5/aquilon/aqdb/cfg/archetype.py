@@ -1,7 +1,7 @@
 """ Archetype specifies the metaclass of the build """
 from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Boolean)
 from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.base               import Base
@@ -16,11 +16,12 @@ class Archetype(Base):
     """ Archetype names """
     __tablename__  = _ABV
 
-    id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key = True)
-    name = Column(AqStr(32), nullable = False)
+    id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
+    name = Column(AqStr(32), nullable=False)
+    is_compileable = Column(Boolean, default=False, nullable=False)
     creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments      = deferred(Column(String(255), nullable = True))
+                                    nullable=False))
+    comments      = deferred(Column(String(255), nullable=True))
 
     #audit_info_id   = deferred(Column(Integer, ForeignKey(
     #        'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
@@ -54,7 +55,6 @@ def populate(sess, *args, **kw):
     except Exception, e:
         sess.rollback()
         raise e
-
 
     a = sess.query(Archetype).first()
     assert(a)

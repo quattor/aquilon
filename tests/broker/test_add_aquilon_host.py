@@ -22,7 +22,8 @@ class TestAddAquilonHost(TestBrokerCommand):
     def testaddunittest00(self):
         self.noouttest(["add", "aquilon", "host",
             "--hostname", "unittest00.one-nyp.ms.com", "--ip", self.hostip2,
-            "--machine", "ut3c1n3", "--domain", "unittest"])
+            "--machine", "ut3c1n3", "--domain", "unittest",
+            "--personality", "inventory"])
 
     def testverifyaddunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -50,7 +51,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
             "--hostname", "unittest12.aqd-unittest.ms.com",
             "--ip", self.hostip12, "--buildstatus", "blind",
-            "--machine", "ut3s01p1a", "--domain", "unittest"])
+            "--machine", "ut3s01p1a", "--domain", "unittest",
+            "--personality", "compileserver"])
 
     def testverifyaddunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
@@ -67,7 +69,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
             "--hostname", "unittest13.aqd-unittest.ms.com",
             "--ip", self.hostip13, "--buildstatus", "blind",
-            "--machine", "ut3s01p1b", "--domain", "unittest"])
+            "--machine", "ut3s01p1b", "--domain", "unittest",
+            "--personality", "compileserver"])
 
     def testverifyaddunittest13(self):
         command = "show host --hostname unittest13.aqd-unittest.ms.com"
@@ -84,4 +87,3 @@ class TestAddAquilonHost(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAquilonHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

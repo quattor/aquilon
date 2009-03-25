@@ -25,7 +25,8 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakeunittest02(self):
         self.noouttest(["make", "aquilon",
             "--hostname", "unittest02.one-nyp.ms.com",
-            "--personality", "compileserver", "--os", "linux/4.0.1-x86_64"])
+            "--os", "linux/4.0.1-x86_64"])
+
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest02.one-nyp.ms.com.xml")))
@@ -107,6 +108,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.failUnlessEqual(host.sysloc, 'ut.ny.na')
         self.failUnlessEqual(host.type, 'host')
         self.failUnlessEqual(host.personality.name, 'compileserver')
+        self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"
@@ -149,4 +151,3 @@ class TestMakeAquilon(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeAquilon)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

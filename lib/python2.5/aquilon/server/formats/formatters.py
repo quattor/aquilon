@@ -65,8 +65,9 @@ class ObjectFormatter(object):
         but it is expected that they will be overridden to provide more
         useful information.
      """
-    
+
     loaded_protocols = {}
+
     """The loaded_protocols dict will store the modules that are being
     loaded for each requested protocol. Rather than trying to import one
     each time, the dict can be checked and value returned."""
@@ -74,6 +75,7 @@ class ObjectFormatter(object):
     protodir = config.get("protocols", "directory")
 
     handlers = {}
+
     """ The handlers dictionary should have an entry for every subclass.
         Typically this will be defined immediately after defining the
         subclass.
@@ -93,7 +95,7 @@ class ObjectFormatter(object):
                 if self.loaded_protocols[self.protocol] == False:
                     error = "path %s protocol: %s error: previous import attempt was unsuccessful" % (self.protodir, self.protocol)
                     raise ProtocolError, error
-            
+
 
     def get_protocol(self):
         if hasattr(self, "protocol"):
@@ -146,8 +148,6 @@ class ObjectFormatter(object):
             host_msg.fqdn = host.fqdn
         if hasattr(host, "dns_domain"):
             host_msg.dns_domain = str(host.dns_domain.name)
-        if hasattr(host, "archetype"):
-            host_msg.archetype.name = str(host.archetype.name)
         if hasattr(host, "domain"):
             host_msg.domain.name = str(host.domain.name)
             host_msg.domain.owner = str(host.domain.owner.name)
@@ -161,12 +161,10 @@ class ObjectFormatter(object):
             host_msg.mac = str(host.mac)
         if hasattr(host, "system_type"):
             host_msg.type = str(host.system_type)
-        if hasattr(host, "build_items"):
-            for build_item in host.build_items:
-                if build_item.cfg_path.tld.type == 'personality':
-                    host_msg.personality.name = \
-                            str(build_item.cfg_path.relative_path)
-                    break
+        if hasattr(host, "personality"):
+            host_msg.personality.name = str(host.personality.name)
+            host_msg.personality.archetype.name = str(host.personality.archetype.name)
+            host_msg.archetype.name = str(host.archetype.name)
         if hasattr(host, "machine"):
             host_msg.machine.name = str(host.machine.name)
             if hasattr(host.machine, "location"):
@@ -223,5 +221,3 @@ class ObjectFormatter(object):
         self.add_service_msg(sm_msg.service, service_map.service, service_map.service_instance)
 
 ObjectFormatter.default_handler = ObjectFormatter()
-
-

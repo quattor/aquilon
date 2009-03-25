@@ -46,6 +46,18 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: aqd", command)
 
+    # Lame.  This will be fixed in a few commits.
+    def testaddrequiredpersonality(self):
+        command = ["add_required_service", "--service=aqd",
+                   "--archetype=aquilon", "--personality=compileserver"]
+        self.noouttest(command)
+
+    def testverifyaddrequiredpersonality(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--name=compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: aqd", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)
