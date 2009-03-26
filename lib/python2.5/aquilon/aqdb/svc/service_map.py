@@ -41,9 +41,9 @@ class ServiceMap(Base):
     service = property(_service)
 
     def __repr__(self):
-        return '(Service Mapping) %s at %s (%s)'%(
-            self.service_instance.service, self.location.name,
-            self.location.type)
+        return '<Service Mapping of service %s at %s %s >'%(
+            self.service_instance.service, self.location.location_type,
+            self.location.name)
 
 service_map = ServiceMap.__table__
 service_map.primary_key.name = 'service_map_pk'

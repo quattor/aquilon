@@ -148,6 +148,15 @@ class TestBrokerCommand(unittest.TestCase):
         err = self.msversion_dev_re.sub('', err)
         return (p, out, err)
 
+    def successtest(self, command, **kwargs):
+        (p, out, err) = self.runcommand(command, **kwargs)
+        self.assertEqual(p.returncode, 0,
+                         "Non-zero return code for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         "STDERR:\n@@@\n'%s'\n@@@\n"
+                         % (command, out, err))
+        return (out, err)
+
     def commandtest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(err, "",
@@ -207,10 +216,17 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(out, "",
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))
-        self.assertEqual(err.find("Bad Request"), 0,
-                         "STDERR for %s did not start with Bad Request:"
-                         "\n@@@\n'%s'\n@@@\n" %
-                         (command, err))
+        if "--debug" in command:
+            # Looser requirement when there's debug output involved...
+            self.failUnless(err.find("Bad Request") >= 0,
+                            "STDERR for %s did not include Bad Request:"
+                            "\n@@@\n'%s'\n@@@\n" %
+                            (command, err))
+        else:
+            self.assertEqual(err.find("Bad Request"), 0,
+                             "STDERR for %s did not start with Bad Request:"
+                             "\n@@@\n'%s'\n@@@\n" %
+                             (command, err))
         return err
 
     def internalerrortest(self, command, **kwargs):
@@ -226,6 +242,22 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(err.find("Internal Server Error"), 0,
                          "STDERR for %s did not start with "
                          "Internal Server Error:\n@@@\n'%s'\n@@@\n" %
+                         (command, err))
+        return err
+
+    def unimplementederrortest(self, command, **kwargs):
+        (p, out, err) = self.runcommand(command, **kwargs)
+        self.assertEqual(p.returncode, 5,
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 5, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
+        self.assertEqual(err.find("Not Implemented"), 0,
+                         "STDERR for %s did not start with "
+                         "Not Implemented:\n@@@\n'%s'\n@@@\n" %
                          (command, err))
         return err
 
@@ -337,5 +369,27 @@ class TestBrokerCommand(unittest.TestCase):
                 "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                 % (command, out, err))
         return
+
+    def grepcommand(self, command, **kwargs):
+        if self.config.has_option("unittest", "grep"):
+            grep = self.config.get("unittest", "grep")
+        else:
+            grep = "/bin/grep"
+        if isinstance(command, list):
+            args = command[:]
+        else:
+            args = [command]
+        args.insert(0, grep)
+        env = {}
+        p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
+        (out, err) = p.communicate()
+        # Ignore out/err unless we get a non-zero return code, then log it.
+        if p.returncode == 0:
+            return out.splitlines()
+        if p.returncode == 1:
+            return []
+        self.fail("Error return code for %s, "
+                  "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                  % (command, out, err))
 
 

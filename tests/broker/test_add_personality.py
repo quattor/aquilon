@@ -101,6 +101,46 @@ class TestAddPersonality(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Template: personality/desktop", command)
 
+    def testaddbadaquilonpersonality(self):
+        # This personality is 'bad' because there will not be a set of
+        # templates defined for it in the repository.
+        command = "add personality --name badpersonality --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testverifybadaquilonpersonality(self):
+        command = "show personality --name badpersonality --archetype aquilon"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Personality: badpersonality Archetype: aquilon",
+                         command)
+        self.matchoutput(out, "Template: personality/badpersonality", command)
+
+    def testaddbadaquilonpersonality2(self):
+        # This personality is double 'bad'... there will be a required
+        # service for the personality that has no instances.
+        command = "add personality --name badpersonality2 --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testverifybadaquilonpersonality2(self):
+        command = "show personality --name badpersonality2 --archetype aquilon"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Personality: badpersonality2 Archetype: aquilon",
+                         command)
+        self.matchoutput(out, "Template: personality/badpersonality2", command)
+
+    def testaddinvalidpersonalityname(self):
+        command = ["add_personality", "--name", "this is a bad; name",
+                   "--archetype", "aquilon"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "name 'this is a bad; name' is not valid",
+                         command)
+
+    def testaddduplicate(self):
+        command = ["add_personality", "--name", "inventory",
+                   "--archetype", "aquilon"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "already exists", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)

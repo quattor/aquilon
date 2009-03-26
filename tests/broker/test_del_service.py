@@ -55,6 +55,8 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: dns Instance: nyinfratest", command)
 
+    # At this point, pa.ny.na still is still mapped.  del_service
+    # should silently remove the mappings.
     def testdelntpinstance(self):
         command = "del service --service ntp --instance pa.ny.na"
         self.noouttest(command.split(" "))
@@ -85,6 +87,15 @@ class TestDelService(TestBrokerCommand):
     def testverifydelutsvc2(self):
         command = "show service --service utsvc2"
         self.notfoundtest(command.split(" "))
+
+    def testdelunmappedservice(self):
+        command = "del service --service unmapped --instance instance1"
+        self.noouttest(command.split(" "))
+
+    def testverifydelunmappedservice(self):
+        command = "show service --service unmapped"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: unmapped Instance: instance1", command)
 
 
 if __name__=='__main__':

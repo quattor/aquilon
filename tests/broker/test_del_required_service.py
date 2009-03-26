@@ -23,33 +23,58 @@ class TestDelRequiredService(TestBrokerCommand):
         command = "del required service --service afs --archetype aquilon"
         self.noouttest(command.split(" "))
 
-    def testverifydelrequiredafs(self):
-        command = "show archetype --archetype aquilon"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: afs", command)
-
     def testdelrequireddns(self):
         command = "del required service --service dns --archetype aquilon"
         self.noouttest(command.split(" "))
 
-    def testverifydelrequireddns(self):
+    def testdelrequiredaqd(self):
+        command = "del required service --service aqd --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testdelrequiredntp(self):
+        command = "del required service --service ntp --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testdelrequiredbootserver(self):
+        command = ["del_required_service",
+                   "--service=bootserver", "--archetype=aquilon"]
+        self.noouttest(command)
+
+    def testverifydelrequiredservices(self):
         command = "show archetype --archetype aquilon"
         out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: afs", command)
+        self.matchclean(out, "Service: aqd", command)
+        self.matchclean(out, "Service: bootserver", command)
         self.matchclean(out, "Service: dns", command)
+        self.matchclean(out, "Service: ntp", command)
 
-    # This is lame.  Will be fixed in a few commits.
     def testdelrequiredpersonality(self):
-        command = ["del_required_service", "--service=aqd",
-                   "--archetype=aquilon", "--personality=compileserver"]
-        self.noouttest(command)
+        for service in ["chooser1", "chooser2", "chooser3"]:
+            command = ["del_required_service", "--service", service,
+                       "--archetype=aquilon", "--personality=unixeng-test"]
+            self.noouttest(command)
 
     def testverifydelrequiredpersonality(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--name=compileserver"]
+                   "--name=unixeng-test"]
         out = self.commandtest(command)
-        self.matchclean(out, "Service: aqd", command)
+        self.matchclean(out, "Service: chooser1", command)
+        self.matchclean(out, "Service: chooser2", command)
+        self.matchclean(out, "Service: chooser3", command)
+
+    def testdelrequiredbadpersonality(self):
+        command = ["del_required_service", "--service", "badservice",
+                   "--archetype=aquilon", "--personality=badpersonality2"]
+        self.noouttest(command)
+
+    def testverifydelrequiredbadpersonality(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--name=badpersonality2"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Service: badservice", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -11,7 +11,7 @@ from aquilon.server.commands.add_host import CommandAddHost
 
 class CommandAddWindowsHost(CommandAddHost):
 
-    required_parameters = ["hostname", "machine", "personality"]
+    required_parameters = ["hostname", "machine"]
 
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'

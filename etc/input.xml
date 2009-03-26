@@ -10,7 +10,8 @@
             Silent mode, generate little output
          </option>
          <option name="debug" short="d" type="boolean" conflicts="">
-            Generate debug statements sent to stderr.
+            Generate debug statements sent to stderr.  Some commands may
+            also increase output from the server on stdout.
          </option>
          <option name="httpinfo" short="u" type="boolean" conflicts="">
             Show the URL being accessed and the response code.
@@ -344,7 +345,6 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
-         <option name="personality" type="string">Personality name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
@@ -355,6 +355,7 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
+         <option name="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -378,7 +379,6 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
-         <option name="personality" type="string">Personality name</option>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -389,6 +389,7 @@
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
+         <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
@@ -409,7 +410,6 @@
       <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
-         <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.</option>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -419,6 +419,7 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
+         <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.  Currently defaults to 'generic'.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
@@ -919,9 +920,7 @@
          <option name="service" type="string">service name</option>
          <option name="instance" type="string">instance name</option>
          <option name="archetype" type="string">archetype name</option>
-         <optgroup name="show_map_personality_opts" fields="any">
-            <option name="personality" type="string">personality name</option>
-         </optgroup>
+         <option name="personality" type="string">personality name</option>
          <optgroup name="show_map_location_opts" fields="any">
             <option name="company" type="string">Company</option>
             <option name="hub" type="string">Hub</option>
@@ -933,6 +932,7 @@
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="all" type="boolean">show all maps</option>
       </optgroup>
       <transport method="get" path="show/map" />
    </command>
@@ -992,13 +992,18 @@
    </command>
 
    <command name="reconfigure">
-      re-build the configuration settings for the specified host, using all
-      of the current service bindings and definitions. This "flushes" any configuration
-      settings, by: regenerating the host profile; forcing the bootservers to rebuild
-      their state for this host; notifying all datawarehouse tools that the host has been
-      updated; notifying the host that it's configuration has been updated. These tasks
-      are done even if there is no real change in configuration. It's the same as just
-      running "make_aquilon" again, with the original arguments.
+      re-build the configuration settings for the specified host, using
+      all of the current service bindings and definitions.  This
+      "flushes" any configuration settings, by: regenerating the host
+      profile; checking all service bindings against the service maps;
+      forcing the bootservers to rebuild their state for this host;
+      notifying all datawarehouse tools that the host has been updated;
+      notifying the host that it's configuration has been updated. These
+      tasks are done even if there is no real change in configuration.
+      It's the same as just running "make_aquilon" again, with the
+      original arguments.  Any services that are not listed as required
+      for the personality or the archetype are dropped unless the
+      --keepbindings flag is specified.
       <optgroup name="reconfigure_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
@@ -1006,6 +1011,7 @@
          <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -1432,14 +1438,17 @@
   </command>
 
    <command name="make_aquilon">
-      Create an aquilon host. Any required services which are not bound will cause
-      an implicit bind_client to occur. The host information will be compiled into
-      a working configuration. Any errors in creating the configuration will be
-      printed to the screen and cause the command to fail. If the configuration is
-      successfully created, then the new configuration will be "advertised" to the
-      host itself, to the data warehouse and to the bootservers, making the host
-      ready to build. The bootservers will put the host into "install" mode of
-      pxeswitch.
+      Create an aquilon host.  Any required services which are not bound
+      will cause an implicit bind_client to occur.  Any services that
+      are not listed as required for the personality or the archetype
+      are dropped unless the --keepbindings flag is specified.  The host
+      information will be compiled into a working configuration.  Any
+      errors in creating the configuration will be printed to the screen
+      and cause the command to fail.  If the configuration is
+      successfully created, then the new configuration will be
+      "advertised" to the host itself, to the data warehouse and to the
+      bootservers, making the host ready to build.  The bootservers will
+      put the host into "install" mode of pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
          <option name="os" type="string">OS to assign to host</option>
@@ -1447,6 +1456,7 @@
       <optgroup name="optional_opts">
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>

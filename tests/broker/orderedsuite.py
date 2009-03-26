@@ -62,7 +62,10 @@ from test_reconfigure import TestReconfigure
 from test_flush import TestFlush
 from test_compile import TestCompile
 from test_bind_server import TestBindServer
+from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
+from test_constraints_personality import TestPersonalityConstraints
+from test_constraints_service import TestServiceConstraints
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
@@ -132,11 +135,13 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager,
                 TestMapService, TestBindClient, TestPrebindServer,
+                TestServiceConstraints,
                 TestMakeAquilon,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestFlush, TestCompile,
                 TestBindServer,
-                TestBindServerConstraints,
+                TestBindClientConstraints, TestBindServerConstraints,
+                TestPersonalityConstraints,
                 TestDomainConstraints, TestMachineConstraints,
                 TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,

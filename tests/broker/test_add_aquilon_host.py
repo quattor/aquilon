@@ -1,6 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
 """Module for testing the add aquilon host command."""
@@ -32,6 +32,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip2, command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Personality: inventory", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
 
@@ -51,8 +52,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "aquilon", "host",
             "--hostname", "unittest12.aqd-unittest.ms.com",
             "--ip", self.hostip12, "--buildstatus", "blind",
-            "--machine", "ut3s01p1a", "--domain", "unittest",
-            "--personality", "compileserver"])
+            "--machine", "ut3s01p1a", "--domain", "unittest"])
 
     def testverifyaddunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
@@ -62,6 +62,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip12, command)
         self.matchoutput(out, "Rackmount: ut3s01p1a", command)
         self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Personality: inventory", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 
@@ -80,6 +81,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip13, command)
         self.matchoutput(out, "Rackmount: ut3s01p1b", command)
         self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Personality: compileserver", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 

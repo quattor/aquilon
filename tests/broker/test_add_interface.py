@@ -245,6 +245,14 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface: eth0 %s boot=True" %
                          self.hostmac17.lower(), command)
 
+    def testaddhprackinterfaces(self):
+        for i in range(51, 100):
+            hostmac = getattr(self, "hostmac%d" % i)
+            port = i - 50
+            machine = "ut9s03p%d" % port
+            self.noouttest(["add", "interface", "--interface", "eth0",
+                            "--machine", machine, "--mac", hostmac])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

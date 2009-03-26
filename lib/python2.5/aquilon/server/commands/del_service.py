@@ -11,7 +11,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.svc.service_map import ServiceMap
+from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
 from aquilon.server.templates.service import (PlenaryService,
         PlenaryServiceClientDefault, PlenaryServiceServerDefault,
         PlenaryServiceInstance, PlenaryServiceInstanceServer,
@@ -53,7 +53,11 @@ class CommandDelService(BrokerCommand):
                 raise ArgumentError("instance is still being provided by servers.")
 
             # Check the service map and remove any mappings
-            for dbmap in session.query(ServiceMap).filter_by(service_instance=dbsi).all():
+            for dbmap in session.query(ServiceMap).filter_by(
+                    service_instance=dbsi).all():
+                session.delete(dbmap)
+            for dbmap in session.query(PersonalityServiceMap).filter_by(
+                    service_instance=dbsi).all():
                 session.delete(dbmap)
 
             session.delete(dbsi)

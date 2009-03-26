@@ -6,7 +6,6 @@
 
 
 from os import path as os_path, environ as os_environ
-from tempfile import mkdtemp
 from socket import gethostbyname
 
 from aquilon.exceptions_ import (ProcessException, DetailedProcessException,
@@ -15,22 +14,19 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.service_instance import choose_service_instance
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.aqdb.cfg.cfg_path import CfgPath
-from aquilon.aqdb.cfg.tld import Tld
 from aquilon.aqdb.sy.build_item import BuildItem
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.service import PlenaryServiceInstanceServer
+from aquilon.server.services import Chooser
 
 class CommandMakeAquilon(BrokerCommand):
 
     required_parameters = ["hostname", "os"]
 
     def render(self, session, hostname, os, personality, buildstatus,
-               user, **arguments):
+               debug, user, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Right now configuration won't work if the host doesn't resolve.  If/when aii is fixed, this should
@@ -54,6 +50,7 @@ class CommandMakeAquilon(BrokerCommand):
         # have completed before we start modifying files within template
         # domains.
         old_content = None
+        chooser = None
         try:
             compileLock()
             plenary_host = PlenaryHost(dbhost)
@@ -100,36 +97,17 @@ class CommandMakeAquilon(BrokerCommand):
                 session.add(dbhost)
 
             session.flush()
-            session.refresh(dbhost)
-            dbservice_tld = session.query(Tld).filter_by(type='service').one()
+            #session.refresh(dbhost)
 
-            for item in dbhost.archetype.service_list:
-                dbservice_bi = session.query(BuildItem).filter_by(
-                        host=dbhost).join('cfg_path').filter_by(
-                        tld=dbservice_tld).filter(CfgPath.relative_path.like(
-                        item.service.name + '/%')).first()
-                if dbservice_bi:
-                    continue
-                dbinstance = choose_service_instance(session, dbhost, item.service)
-                # This should be refactored to combine bind_client and this code
-                max_position = session.query(BuildItem).count() + 1
-                dbservice_bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path,
-                        position=max_position)
-                dbhost.templates.append(dbservice_bi)
-                dbhost.templates._reorder()
-                session.add(dbservice_bi)
+            if arguments.get("keepbindings", None):
+                chooser = Chooser(dbhost, required_only=False, debug=debug)
+            else:
+                chooser = Chooser(dbhost, required_only=True, debug=debug)
+            chooser.set_required()
+            chooser.flush_changes()
+            chooser.write_plenary_templates(locked=True)
 
-                # Do I need the next two lines?
-                session.flush()
-                session.refresh(dbinstance)
-
-                plenary_info = PlenaryServiceInstanceServer(item.service, dbinstance)
-                plenary_info.write(locked=True)
-
-            session.flush()
-            session.refresh(dbhost)
-            session.refresh(dbhost.machine)
-
+            plenary_host = PlenaryHost(dbhost)
             plenary_host.write(locked=True)
 
             td = TemplateDomain(dbhost.domain)
@@ -146,13 +124,24 @@ class CommandMakeAquilon(BrokerCommand):
                 # host to be compiled next time from a normal "make".
                 plenary_host.write(locked=True, content=old_content)
 
+            # Black magic... need to find out if sqlalchemy objects
+            # will re-vivify after a rollback based on id.
+            if chooser:
+                session.rollback()
+                chooser.write_plenary_templates(locked=True)
+
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
+
+            # Error will not include any debug output...
             raise
 
         finally:
             compileRelease()
 
-        return out
+        # This command does not use a formatter.  Maybe it should.
+        if chooser and chooser.debug_info:
+            return str("\n".join(chooser.debug_info + [out]))
+        return str(out)
 
 

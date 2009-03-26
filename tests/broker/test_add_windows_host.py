@@ -22,8 +22,7 @@ class TestAddWindowsHost(TestBrokerCommand):
     def testaddunittest01(self):
         self.noouttest(["add", "windows", "host",
             "--hostname", "unittest01.one-nyp.ms.com", "--ip", self.hostip4,
-            "--machine", "ut3c1n4",
-            "--personality", "generic"])
+            "--machine", "ut3c1n4"])
 
     def testverifyaddunittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"

@@ -11,7 +11,7 @@ from aquilon.server.commands.add_host import CommandAddHost
 
 class CommandAddAquilonHost(CommandAddHost):
 
-    required_parameters = ["hostname", "machine", "domain", "personality"]
+    required_parameters = ["hostname", "machine", "domain"]
 
     def render(self, *args, **kwargs):
         # The superclass already contains the logic to handle this case.

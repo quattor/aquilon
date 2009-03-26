@@ -80,6 +80,18 @@ class TestUnbindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Server: nyaqd1.ms.com", command)
 
+    def testunbindchooser(self):
+        for service in ["chooser1", "chooser2", "chooser3"]:
+            for (s, n) in [(1, 'a'), (2, 'b'), (3, 'c')]:
+                if service == 'chooser2' and n == 'b':
+                    continue
+                if service == 'chooser3' and n == 'c':
+                    continue
+                server = "server%d.aqd-unittest.ms.com" % s
+                instance = "ut.%s" % n
+                self.noouttest(["unbind", "server", "--hostname", server,
+                                "--service", service, "--instance", instance])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindServer)

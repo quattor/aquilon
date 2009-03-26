@@ -3,7 +3,13 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing the bind server command."""
+"""Module for testing the bind server command.
+
+Note: This runs after make_aquilon and reconfigure tests.  If server
+bindings are needed *before* those tests, they need to be in with
+the TestPrebindServer tests.
+
+"""
 
 import os
 import sys

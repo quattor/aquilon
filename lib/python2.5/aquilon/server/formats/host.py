@@ -16,7 +16,7 @@ class HostFormatter(ObjectFormatter):
         if host.ip:
             details.append(indent + "  IP: %s" % host.ip)
         details.append(self.redirect_raw(host.machine, indent+"  "))
-        details.append(self.redirect_raw(host.personality, indent+" "))
+        details.append(self.redirect_raw(host.personality, indent+"  "))
         details.append(self.redirect_raw(host.archetype, indent+"  "))
         details.append(self.redirect_raw(host.domain, indent+"  "))
         details.append(self.redirect_raw(host.status, indent+"  "))

@@ -70,9 +70,6 @@ class PlenaryHost(Plenary):
         templates.append(os_template)
         for service in services:
             templates.append(service)
-        if not personality_template:
-            raise IncompleteError("Host %s is missing personality." %
-                                  self.name)
         for provide in provides:
             templates.append(provide)
         templates.append(personality_template)

@@ -23,10 +23,14 @@ class CommandUnmapService(BrokerCommand):
         dblocation = get_location(session, **arguments)
         dbinstance = get_service_instance(session, dbservice, instance)
 
-        if archetype and personality:
+        # The archetype is required, so will always be set.
+        if personality:
             dbpersona = get_personality(session, archetype, personality)
             dbmap = session.query(PersonalityServiceMap).filter_by(
                 personality=dbpersona)
+        elif archetype != 'aquilon':
+            raise UnimplementedError("Archetype level ServiceMaps other "
+                                     "than aquilon are not yet available")
         else:
             dbmap = session.query(ServiceMap)
 

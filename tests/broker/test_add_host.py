@@ -1,6 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
 """Module for testing the add host command."""
@@ -21,10 +21,11 @@ class TestAddHost(TestBrokerCommand):
 
     def testaddunittest02(self):
         self.noouttest(["add", "host",
-            "--hostname", "unittest02.one-nyp.ms.com", "--ip", self.hostip0,
-            "--machine", "ut3c5n10", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon",
-            "--personality", "compileserver"])
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--ip", self.hostip0,
+                        "--machine", "ut3c5n10", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon",
+                        "--personality", "compileserver"])
 
     def testverifyaddunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -33,6 +34,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip0, command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
+        self.matchoutput(out, "Personality: compileserver", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
 
@@ -66,8 +68,7 @@ class TestAddHost(TestBrokerCommand):
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--ipalgorithm", "max",
             "--machine", "ut8s02p1", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon",
-            "--personality", "compileserver"])
+            "--buildstatus", "build", "--archetype", "aquilon"])
 
     def testverifyunittest15(self):
         command = "show host --hostname unittest15.aqd-unittest.ms.com"
@@ -75,6 +76,7 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Hostname: unittest15.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % self.hostip15, command)
+        self.matchoutput(out, "Personality: inventory", command)
 
     def testaddunittest16bad(self):
         command = ["add", "host",
@@ -83,18 +85,18 @@ class TestAddHost(TestBrokerCommand):
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
-                   "--personality","compileserver"]
+                   "--personality", "compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "No remaining IPs found on network", command)
 
     def testaddunittest16good(self):
         self.noouttest(["add", "host",
-            "--hostname", "unittest16.aqd-unittest.ms.com",
-            "--ipfromip", self.hostip14,
-            "--ipalgorithm", "lowest",
-            "--machine", "ut8s02p2", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon",
-            "--personality","inventory"])
+                        "--hostname", "unittest16.aqd-unittest.ms.com",
+                        "--ipfromip", self.hostip14,
+                        "--ipalgorithm", "lowest",
+                        "--machine", "ut8s02p2", "--domain", "unittest",
+                        "--buildstatus", "build", "--archetype", "aquilon",
+                        "--personality", "compileserver"])
 
     def testverifyunittest16(self):
         command = "show host --hostname unittest16.aqd-unittest.ms.com"
@@ -102,14 +104,14 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Hostname: unittest16.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % self.hostip16, command)
+        self.matchoutput(out, "Personality: compileserver", command)
 
     def testaddunittest17(self):
         self.noouttest(["add", "host",
             "--hostname", "unittest17.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--machine", "ut8s02p3", "--domain", "unittest",
-            "--buildstatus", "build", "--archetype", "aquilon",
-            "--personality","inventory"])
+            "--buildstatus", "build", "--archetype", "aquilon"])
 
     def testverifyunittest17(self):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
@@ -117,6 +119,28 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % self.hostip17, command)
+        self.matchoutput(out, "Personality: inventory", command)
+
+    def testpopulatehprackhosts(self):
+        # This gives us server1.aqd-unittest.ms.com through server10
+        # and aquilon60.aqd-unittest.ms.com through aquilon100
+        # It also needs to run *after* the testadd* methods above
+        # as some of them rely on a clean IP space for testing the
+        # auto-allocation algorithms.
+        servers = 0
+        for i in range(51, 100):
+            if servers < 10:
+                servers += 1
+                hostname = "server%d.aqd-unittest.ms.com" % servers
+            else:
+                hostname = "aquilon%d.aqd-unittest.ms.com" % i
+            port = i - 50
+            hostip = getattr(self, "hostip%d" % i)
+            command = ["add", "host", "--hostname", hostname,
+                       "--ipfromip", hostip, "--machine", "ut9s03p%d" % port,
+                       "--domain", "unittest", "--buildstatus", "build",
+                       "--archetype", "aquilon", "--personality", "inventory"]
+            self.noouttest(command)
 
 
 if __name__=='__main__':

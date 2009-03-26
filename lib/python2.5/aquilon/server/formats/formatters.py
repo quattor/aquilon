@@ -219,5 +219,11 @@ class ObjectFormatter(object):
         sm_msg.location.name = str(service_map.location.name)
         sm_msg.location.location_type = str(service_map.location.location_type)
         self.add_service_msg(sm_msg.service, service_map.service, service_map.service_instance)
+        if hasattr(service_map, "personality"):
+            sm_msg.personality.name = str(service_map.personality.name)
+            sm_msg.personality.archetype.name = \
+                    str(service_map.personality.archetype.name)
+        else:
+            sm_msg.personality.archetype.name = 'aquilon'
 
 ObjectFormatter.default_handler = ObjectFormatter()

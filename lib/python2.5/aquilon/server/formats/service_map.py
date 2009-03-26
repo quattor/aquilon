@@ -7,13 +7,14 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.svc.service_map import ServiceMap
+from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):
     protocol = "aqdservices_pb2"
     def format_raw(self, sm, indent=""):
-        return indent + "Service: %s Instance: %s Map: %s %s" % (
+        return indent + \
+                "Archetype: aquilon Service: %s Instance: %s Map: %s %s" % (
                 sm.service.name, sm.service_instance.name,
                 sm.location.location_type.capitalize(), sm.location.name)
     def format_proto(self, sm):
@@ -21,6 +22,17 @@ class ServiceMapFormatter(ObjectFormatter):
         return smlf.format_proto([sm])
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
+
+class PersonalityServiceMapFormatter(ServiceMapFormatter):
+    def format_raw(self, sm, indent=""):
+        return "%sArchetype: %s Personality: %s " \
+               "Service: %s Instance: %s Map: %s %s" % (
+                   indent, sm.personality.archetype.name, sm.personality.name,
+                   sm.service.name, sm.service_instance.name,
+                   sm.location.location_type.capitalize(), sm.location.name)
+
+ObjectFormatter.handlers[PersonalityServiceMap] = \
+        PersonalityServiceMapFormatter()
 
 class ServiceMapList(list):
     pass

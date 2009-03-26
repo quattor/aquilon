@@ -1,5 +1,5 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
 """Contains the logic for `aq add host`."""
@@ -10,6 +10,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
+from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
@@ -22,8 +23,7 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddHost(BrokerCommand):
 
-    required_parameters = ["hostname", "machine", "archetype", "personality",
-                           "domain"]
+    required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     def render(self, session, hostname, machine, archetype, personality,
                domain, buildstatus, user, skip_dsdb_check=False, **arguments):
@@ -34,6 +34,13 @@ class CommandAddHost(BrokerCommand):
         else:
             dbstatus = get_status(session, "build")
         dbmachine = get_machine(session, machine)
+
+        if not personality:
+            dbarchetype = get_archetype(session, archetype)
+            if dbarchetype.name == 'aquilon':
+                personality = 'inventory'
+            else:
+                personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
 
         if dbmachine.model.machine_type not in [
@@ -103,3 +110,5 @@ class CommandAddHost(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
+
+
