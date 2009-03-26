@@ -97,6 +97,7 @@ windows_host_domain = ny-prod
 sqlalchemy.engine = WARNING
 sqlalchemy.pool   = WARNING
 sqlalchemy.orm    = WARNING
+aquilon = INFO
 
 [protocols]
 directory = /ms/dist/aquilon/PROJ/protocols/1.2/common/lib/python
