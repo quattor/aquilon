@@ -16,8 +16,6 @@ class CommandAddWindowsHost(CommandAddHost):
     def render(self, *args, **kwargs):
         kwargs['archetype'] = 'windows'
         kwargs['domain'] = self.config.get("broker", "windows_host_domain")
-        if 'buildstatus' not in kwargs:
-            kwargs['buildstatus'] = 'build'
         # The superclass already contains the logic to handle this case.
         return CommandAddHost.render(self, *args, **kwargs)
 
