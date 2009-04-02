@@ -44,7 +44,7 @@ def populate(sess, *args, **kw):
     if len(sess.query(Archetype).all()) > 0:
         return
 
-    for a_name in ['aquilon', 'windows', 'aurora', 'aegis', 'vm']:
+    for a_name in ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost']:
         #a = Archetype(name=a_name, audit_info = kw['audit_info'])
         a = Archetype(name=a_name)
         sess.add(a)
