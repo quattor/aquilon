@@ -99,6 +99,17 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelhprackhosts(self):
+        servers = 0
+        for i in range(51, 100):
+            if servers < 10:
+                servers += 1
+                hostname = "server%d.aqd-unittest.ms.com" % servers
+            else:
+                hostname = "aquilon%d.aqd-unittest.ms.com" % i
+            command = ["del", "host", "--hostname", hostname]
+            self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

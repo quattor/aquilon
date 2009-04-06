@@ -11,7 +11,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.svc.service_map import ServiceMap
+from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
 from aquilon.server.templates.service import (PlenaryService,
         PlenaryServiceClientDefault, PlenaryServiceServerDefault,
         PlenaryServiceInstance, PlenaryServiceInstanceServer,
@@ -30,6 +30,9 @@ class CommandDelService(BrokerCommand):
             if dbservice.instances:
                 raise ArgumentError("Cannot remove service with instances defined.")
 
+            session.delete(dbservice)
+            session.flush()
+
             plenary_info = PlenaryService(dbservice)
             plenary_info.remove()
 
@@ -39,7 +42,6 @@ class CommandDelService(BrokerCommand):
             plenary_info = PlenaryServiceServerDefault(dbservice)
             plenary_info.remove()
 
-            session.delete(dbservice)
             return
         dbsi = session.query(ServiceInstance).filter_by(
                 name=instance, service=dbservice).first()
@@ -47,6 +49,19 @@ class CommandDelService(BrokerCommand):
         if dbsi:
             if dbsi.client_count > 0:
                 raise ArgumentError("instance has clients and cannot be deleted.")
+            if dbsi.servers:
+                raise ArgumentError("instance is still being provided by servers.")
+
+            # Check the service map and remove any mappings
+            for dbmap in session.query(ServiceMap).filter_by(
+                    service_instance=dbsi).all():
+                session.delete(dbmap)
+            for dbmap in session.query(PersonalityServiceMap).filter_by(
+                    service_instance=dbsi).all():
+                session.delete(dbmap)
+
+            session.delete(dbsi)
+            session.flush()
 
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
             plenary_info.remove()
@@ -60,14 +75,6 @@ class CommandDelService(BrokerCommand):
             plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbsi)
             plenary_info.remove()
 
-            # Check the service map and remove any mappings
-            for dbmap in session.query(ServiceMap).filter_by(service_instance=dbsi).all():
-                session.delete(dbmap)
-
-            session.delete(dbsi)
-            session.flush()
-            session.refresh(dbservice)
-            
         # FIXME: Cascade to relevant objects...
         return
 

@@ -57,9 +57,12 @@ def populate(sess, *args, **kw):
     if not cfg_base.endswith('/'):
         cfg_base += '/'
 
+    removes = ('.git', 'personality', 't')
+
     for root, dirs, files in os.walk(cfg_base):
-        if ".git" in dirs:
-            dirs.remove(".git")
+        for r in removes:
+            if r in dirs:
+                dirs.remove(r)
 
         if root == cfg_base:
             continue
@@ -81,7 +84,8 @@ def populate(sess, *args, **kw):
             f = CfgPath(tld=dbtld,relative_path=relative_path)
             sess.add(f)
         except Exception, e:
-            sys.stderr.write(e)
+            msg = str(e) + ' for tld '+ tld
+            log.error(msg)
             sess.rollback()
             continue
 

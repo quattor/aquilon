@@ -19,7 +19,12 @@ from brokertest import TestBrokerCommand
 
 class TestCompile(TestBrokerCommand):
 
-    def testaddchange(self):
+    def test_000_precompile(self):
+        # Before the tests below, make sure everything is up to date.
+        command = "compile --domain unittest"
+        out = self.commandtest(command.split(" "))
+
+    def test_100_addchange(self):
         # Change the template used by utsi1 clients to trigger a recompile.
         templatedir = os.path.join(self.scratchdir, "unittest")
         template = os.path.join(templatedir, "service", "utsvc", "utsi1",
@@ -41,7 +46,7 @@ class TestCompile(TestBrokerCommand):
         self.ignoreoutputtest(["put", "--domain", "unittest"],
                               env=self.gitenv(), cwd=templatedir)
 
-    def testcompileunittest(self):
+    def test_200_compileunittest(self):
         command = "compile --domain unittest"
         out = self.commandtest(command.split(" "))
         # Currently assumes that there is only one client of utsi1.

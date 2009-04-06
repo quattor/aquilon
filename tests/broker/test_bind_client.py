@@ -1,10 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
 """Module for testing the bind client command."""
@@ -21,31 +17,16 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
-# Testing manually binding client to services.
-# Once a client has been bound, you can't use it to test
-# the auto-selection logic in make_aquilon, so check
-# any changes against that test (which happens after this
-# one).
-
-# The test assumes that hosts unittest00 and unittest02
-# are defined and that the services afs, dns, uts are defined.
-# At the end of this test, we will leave the state such that:
-#
-#  unittest00:
-#     afs        = None (for later testing in make_aquilon)
-#     bootserver = np.test (via map)
-#     dns        = None (for later testing in make_aquilon)
-#     ntp        = pa.ny.na (via map)
-#     utsvc      = utsi1
-#
-#  unittest02:
-#     afs        = q.ny.ms.com
-#     bootserver = np.test
-#     dns        = nyinfratest
-#     ntp        = pa.ny.na
-#     utsvc      = utsi2
 
 class TestBindClient(TestBrokerCommand):
+    """Testing manually binding client to services.
+
+    Once a client has been bound, you can't use it to test
+    the auto-selection logic in make_aquilon.  Those tests
+    are done exclusively with the chooser* services, which
+    should not be used here.
+
+    """
 
     def testbindafs(self):
         self.noouttest(["bind", "client",
@@ -62,32 +43,6 @@ class TestBindClient(TestBrokerCommand):
             "--hostname", "unittest02.one-nyp.ms.com",
             "--service", "dns", "--instance", "nyinfratest"])
 
-    def testbindutsauto(self):
-        # Bind two clients using the service map, then
-        # check that the instances were correctly balanced
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "utsvc"])
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "utsvc"])
-        command = "show service --service utsvc"
-        out = self.commandtest(command.split(" "))
-        count_re = re.compile(r'Client Count: (\d+)')
-        inst_count = 0
-        for m in count_re.finditer(out):
-            inst_count += 1
-            self.assert_(int(m.group(1)) > 0,
-                    "Service Instance of utsvc has a client count <= 0:\n@@@\n'%s'\n@@@\n" %
-                    out)
-        self.assert_(inst_count > 1,
-                "Not enough utsvc service instances found:\n@@@\n'%s'\n@@@\n" % out)
-        # put the state back to normal to allow further testing
-        command = "unbind client --host unittest00.one-nyp.ms.com --service utsvc"
-        self.noouttest(command.split(" "))
-        command = "unbind client --host unittest02.one-nyp.ms.com --service utsvc"
-        self.noouttest(command.split(" "))
-
     def testbindutsi1(self):
         self.noouttest(["bind", "client",
             "--hostname", "unittest00.one-nyp.ms.com",
@@ -99,9 +54,11 @@ class TestBindClient(TestBrokerCommand):
         self.matchoutput(out, "Template: service/utsvc/utsi1", command)
 
     def testbindutsi2(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "utsvc", "--instance", "utsi2"])
+        command = ["bind", "client", "--debug",
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "utsvc", "--instance", "utsi2"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Creating service Chooser", command)
 
     def testverifybindutsi2(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"

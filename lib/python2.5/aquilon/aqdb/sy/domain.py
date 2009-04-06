@@ -23,7 +23,7 @@ class Domain(Base):
                        ForeignKey('quattor_server.id', name = 'domain_qs_fk'),
                        nullable = False)
     compiler = Column(String(255), nullable = False, default =
-                      '/ms/dist/elfms/PROJ/panc/7.2.9/bin/panc')
+                      '/ms/dist/elfms/PROJ/panc/8.2.3/bin/panc')
     owner_id = Column(Integer, ForeignKey(
         'user_principal.id', name = 'domain_user_princ_fk'), nullable = False)
 

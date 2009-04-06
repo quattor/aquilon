@@ -27,6 +27,9 @@ class CommandAddService(BrokerCommand):
     def render(self, session, service, instance, comments, user, **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
         compileLock();
+        #TODO: if service rows in the database exist, but the plenary files
+        #are not written out, it looks like a successful add, even though
+        #it will fail. 
         try:
             if not dbservice:
                 # FIXME: Could have better error handling
@@ -85,7 +88,7 @@ class CommandAddService(BrokerCommand):
             plenary_info.write(locked=True)
             plenary_info = PlenaryServiceInstanceServer(dbservice, dbsi)
             plenary_info.write(locked=True)
-            
+
             # Create the default service client and server template
             plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
             plenary_info.write(locked=True)
@@ -94,7 +97,5 @@ class CommandAddService(BrokerCommand):
 
         finally:
             compileRelease()
-            
+
         return
-
-

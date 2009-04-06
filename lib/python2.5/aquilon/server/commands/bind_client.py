@@ -7,62 +7,32 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import IncompleteError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.sy.build_item import BuildItem
-from aquilon.server.dbwrappers.host import (hostname_to_host,
-                                            get_host_build_item)
+from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service import get_service
-from aquilon.server.dbwrappers.service_instance import (get_service_instance,
-                                                        choose_service_instance)
-
-from aquilon.server.templates.service import PlenaryServiceInstanceServer
+from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.server.services import Chooser
 from aquilon.server.templates.host import PlenaryHost
 
 class CommandBindClient(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, hostname, service, instance, force=False,
-            **arguments):
+    def render(self, session, hostname, service, instance, debug, force=False,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = get_service(session, service)
+        chooser = Chooser(dbhost, required_only=False, debug=debug)
         if instance:
             dbinstance = get_service_instance(session, dbservice, instance)
+            chooser.set_single(dbservice, dbinstance, force=force)
         else:
-            dbinstance = choose_service_instance(session, dbhost, dbservice)
-        dbtemplate = get_host_build_item(session, dbhost, dbservice)
-        if dbtemplate:
-            if dbtemplate.cfg_path == dbinstance.cfg_path:
-                # Already set - no problems.
-                return
-            if not force:
-                raise ArgumentError("Host %s is already bound to %s, use unbind to clear first or rebind to force."
-                        % (hostname, dbtemplate.cfg_path.relative_path))
-            session.delete(dbtemplate)
-            # We're changing our binding, so make sure that we notify
-            # the old serviceinstance that the clientlist has changed
-            plenary_info = PlenaryServiceInstanceServer(dbservice, dbinstance)
-            plenary_info.write()
+            chooser.set_single(dbservice, force=force)
 
-        positions = []
-        session.flush()
-        session.refresh(dbhost)
-        for template in dbhost.templates:
-            positions.append(template.position)
-            if template.cfg_path == dbinstance:
-                return
-        # Do not bind to 0 (os) or 1 (personality)
-        i = 2
-        while i in positions:
-            i += 1
-        bi = BuildItem(host=dbhost, cfg_path=dbinstance.cfg_path, position=i)
-        session.add(bi)
-        session.flush()
-        session.refresh(dbhost)
-
-        plenary_info = PlenaryServiceInstanceServer(dbservice, dbinstance)
-        plenary_info.write()
+        # FIXME: Get a single compileLock for here and below.
+        chooser.flush_changes()
+        chooser.write_plenary_templates(locked=False)
 
         try:
             plenary_host = PlenaryHost(dbhost)
@@ -71,6 +41,10 @@ class CommandBindClient(BrokerCommand):
             # host has insufficient information to make a template with
             pass
 
+        if chooser.debug_info:
+            # The output of bind client does not run through a formatter.
+            # Maybe it should.
+            return str("\n".join(chooser.debug_info))
         return
 
 

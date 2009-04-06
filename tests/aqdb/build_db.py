@@ -25,12 +25,10 @@ m = Modulecmd()
 if config.has_option("database", "module"):
     m.load(config.get("database", "module"))
 
-
 from aquilon.aqdb.base          import Base
-
-import test_campus_populate as tcp
 from aquilon.aqdb.db_factory    import db_factory
 from aquilon.aqdb.utils         import constraints as cnst
+import test_campus_populate as tcp
 
 pkgs         = {}
 
@@ -42,7 +40,7 @@ pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
 
 pkgs['net']  = ['dns_domain', 'network']
 
-pkgs['cfg']  = ['archetype', 'tld', 'cfg_path']
+pkgs['cfg']  = ['archetype', 'personality','tld', 'cfg_path']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
@@ -54,7 +52,7 @@ pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
                 'console_server']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_instance_server',
-                'service_map', 'service_list_item']
+                'service_map', 'service_list_item', 'personality_service_list_item']
 
 order        = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 

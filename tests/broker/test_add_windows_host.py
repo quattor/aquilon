@@ -31,6 +31,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.hostip4, command)
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Archetype: windows", command)
+        self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Build Status: build", command)
 
@@ -38,4 +39,3 @@ class TestAddWindowsHost(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddWindowsHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

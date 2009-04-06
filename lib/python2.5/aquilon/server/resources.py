@@ -153,12 +153,12 @@ class ResponsePage(resource.Resource):
         None.  If there are any problems, the Deferred will errback with
         a failure.
         
-        This should probably rely on the input.xml file for the list
-        of required and optional arguments.  For now, it is just a 
-        utility function.
+        As a hack, debug is always allowed as an argument.  Should
+        maybe have a flag on global options in input.xml for this.
+
         """
 
-        required_map = {}
+        required_map = {"debug": False}
         for arg in optional or []:
             required_map[arg] = False
         for arg in required or []:

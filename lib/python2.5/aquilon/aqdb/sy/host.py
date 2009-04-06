@@ -10,7 +10,7 @@ from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr   import AqStr
 from aquilon.aqdb.sy.system            import System
 from aquilon.aqdb.sy.domain            import Domain
-from aquilon.aqdb.cfg.archetype        import Archetype
+from aquilon.aqdb.cfg                  import Personality
 from aquilon.aqdb.hw.machine           import Machine
 from aquilon.aqdb.hw.status            import Status
 
@@ -35,16 +35,16 @@ class Host(System):
     domain_id    = Column(Integer, ForeignKey(
         'domain.id', name = 'host_domain_fk'), nullable = False)
 
-    archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name = 'host_arch_fk'), nullable = False)
+    personality_id = Column(Integer, ForeignKey(
+        'personality.id', name = 'host_prsnlty_fk'), nullable = False)
 
     status_id    = Column(Integer, ForeignKey(
         'status.id', name = 'host_status_fk'), nullable = False)
 
-    machine   = relation(Machine,   backref=backref('host', uselist=False))
-    domain    = relation(Domain,    backref = 'hosts')
-    archetype = relation(Archetype, backref = 'hosts')
-    status    = relation(Status,    backref = 'hosts')
+    machine     = relation(Machine, backref=backref('host', uselist=False))
+    domain      = relation(Domain, backref='hosts')
+    personality = relation(Personality, backref='hosts')
+    status      = relation(Status, backref='hosts')
 
     """ The following relation is defined in BuildItem to avoid circular
     import dependencies. Perhaps it can be restated another way than
@@ -58,9 +58,13 @@ class Host(System):
         return self.machine.location
     location = property(_get_location) #TODO: make these synonms?
 
-    def _sysloc(self):
+    def _get_sysloc(self):
         return self.machine.location.sysloc()
-    sysloc = property(_sysloc)
+    sysloc = property(_get_sysloc)
+
+    def _get_archetype(self):
+        return self.personality.archetype
+    archetype = property(_get_archetype)
 
     def __repr__(self):
         return 'Host %s'%(self.name)

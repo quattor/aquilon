@@ -8,12 +8,13 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.sy.host import Host
-from aquilon.aqdb.cfg.cfg_path import CfgPath
+from aquilon.aqdb.cfg import CfgPath
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.domain import get_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
@@ -39,16 +40,21 @@ class CommandSearchHost(BrokerCommand):
         if domain:
             dbdomain = get_domain(session, domain)
             q = q.filter_by(domain=dbdomain)
-        if archetype:
+
+        if personality and archetype:
+            dbpersonality = get_personality(session, archetype, personality)
+            q.filter_by(personality=dbpersonality)
+        elif personality:
+            q = q.join('personality').filter_by(name=personality)
+            q = q.reset_joinpoint()
+        elif archetype:
             dbarchetype = get_archetype(session, archetype)
-            q = q.filter_by(archetype=dbarchetype)
+            q = q.join('personality').filter_by(archetype=dbarchetype)
+            q = q.reset_joinpoint()
+
         if buildstatus:
             dbbuildstatus = get_status(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
-        if personality:
-            dbpersonality = get_cfg_path(session, "personality", personality)
-            q = q.join('build_items').filter_by(cfg_path=dbpersonality)
-            q = q.reset_joinpoint()
         if os:
             dbos = get_cfg_path(session, "os", os)
             q = q.join('build_items').filter_by(cfg_path=dbos)

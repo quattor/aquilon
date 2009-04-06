@@ -175,12 +175,24 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
+    def testpersonalityavailable2(self):
+        command = "search host --archetype aquilon --personality compileserver"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+
     def testpersonalityunavailable(self):
-        command = "search host --personality personality-does-not-exist"
+        # Will only get this error if archetype is specified
+        command = "search host --archetype aquilon --personality personality-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "personality template "
-                              "personality-does-not-exist not found",
+        self.matchoutput(out, "Personality "
+                              "personality-does-not-exist in Archetype aquilon not found",
                          command)
+
+    def testpersonalityunavailable2(self):
+        # Will only get an error if archetype is specified
+        command = "search host --personality personality-does-not-exist"
+        self.noouttest(command.split(" "))
 
     def testosavailable(self):
         command = "search host --os linux/4.0.1-x86_64"
@@ -281,4 +293,3 @@ class TestSearchHost(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

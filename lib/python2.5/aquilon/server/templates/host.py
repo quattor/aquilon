@@ -49,13 +49,13 @@ class PlenaryHost(Plenary):
                     "name":dbinterface.name})
 
         os_template = None
-        personality_template = None
+        personality_template = "personality/%s/config" % \
+                self.dbhost.personality.name
+
         services = []
         for t in self.dbhost.templates:
             if t.cfg_path.tld.type == 'os':
                 os_template = repr(t.cfg_path) + '/config'
-            elif t.cfg_path.tld.type == 'personality':
-                personality_template = repr(t.cfg_path) + '/config'
             elif t.cfg_path.tld.type == 'service':
                 services.append(repr(t.cfg_path) + '/client/config')
 
@@ -70,9 +70,6 @@ class PlenaryHost(Plenary):
         templates.append(os_template)
         for service in services:
             templates.append(service)
-        if not personality_template:
-            raise IncompleteError("Host %s is missing personality." %
-                                  self.name)
         for provide in provides:
             templates.append(provide)
         templates.append(personality_template)

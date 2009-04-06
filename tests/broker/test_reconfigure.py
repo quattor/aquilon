@@ -22,7 +22,9 @@ class TestReconfigure(TestBrokerCommand):
     # The unbind test has removed the service bindings for dns,
     # it should now be set again.
     # The rebind test has changed the service bindings for afs,
-    # it should now be set to q.ln.ms.com.
+    # it should now be set to q.ln.ms.com.  The reconfigure will
+    # force it *back* to using a correct service map entry, in
+    # this case q.ny.ms.com.
     def testreconfigureunittest02(self):
         self.noouttest(["reconfigure",
             "--hostname", "unittest02.one-nyp.ms.com",
@@ -49,7 +51,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'os/linux/4.0.1-x86_64/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'service/afs/q.ln.ms.com/client/config' };""",
+            """include { 'service/afs/q.ny.ms.com/client/config' };""",
             command)
         self.matchoutput(out,
             """include { 'service/bootserver/np.test/client/config' };""",
@@ -109,6 +111,87 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """include { 'archetype/final' };""",
             command)
+
+    def testreconfigurewindowsstatus(self):
+        self.noouttest(["reconfigure",
+                        "--hostname", "unittest01.one-nyp.ms.com",
+                        "--buildstatus", "ready"])
+
+    def testreconfigurewindowsmissingargs(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Nothing to do.", command)
+
+    def testreconfigurewindowspersonality(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--personality", "desktop"]
+        self.noouttest(command)
+
+    def testreconfigurewindowsos(self):
+        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                   "--os", "linux/4.0.1-x86_64"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "hosts with archetype aquilon", command)
+
+    def testverifyreconfigurewindows(self):
+        command = "show host --hostname unittest01.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "Archetype: windows", command)
+        self.matchoutput(out, "Personality: desktop", command)
+        self.matchoutput(out, "Build Status: ready", command)
+
+    def testreconfigureos(self):
+        command = ["reconfigure",
+                   "--hostname", "aquilon61.aqd-unittest.ms.com",
+                   "--os", "linux/5.0-x86_64"]
+        self.noouttest(command)
+
+    def testmissingpersonalitytemplate(self):
+        command = ["reconfigure",
+                   "--hostname", "aquilon62.aqd-unittest.ms.com",
+                   "--personality", "badpersonality"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "cannot locate template", command)
+        buildfile = os.path.join(self.config.get("broker", "builddir"),
+                                 "domains", "unittest", "profiles",
+                                 "aquilon62.aqd-unittest.ms.com.tpl")
+        results = self.grepcommand(["-l", "badpersonality", buildfile])
+        self.failIf(results, "Found bad personality data in plenary "
+                             "template for aquilon62.aqd-unittest.ms.com")
+
+    def testkeepbindings(self):
+        command = ["reconfigure", "--keepbindings",
+                   "--hostname", "aquilon86.aqd-unittest.ms.com",
+                   "--personality", "inventory"]
+        self.noouttest(command)
+
+    def verifykeepbindings(self):
+        for service in ["chooser1", "chooser2", "chooser3"]:
+            command = ["search_host", "--service", service,
+                       "--hostname", "aquilon86.aqd-unittest.ms.com",
+                       "--personality", "inventory"]
+            out = self.commandtest(command)
+            self.matchoutput(out, "aquilon86.aqd-unittest.ms.com")
+
+    def testremovebindings(self):
+        command = ["reconfigure",
+                   "--hostname", "aquilon87.aqd-unittest.ms.com",
+                   "--personality", "inventory"]
+        self.noouttest(command)
+
+    def verifyremovebindings(self):
+        for service in ["chooser1", "chooser2", "chooser3"]:
+            command = ["search_host", "--service", service,
+                       "--hostname", "aquilon87.aqd-unittest.ms.com"]
+            self.noouttest(command)
+
+    def testreconfiguredebug(self):
+        command = ["reconfigure", "--debug",
+                   "--hostname", "aquilon88.aqd-unittest.ms.com",
+                   "--personality", "inventory"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Creating service Chooser", command)
 
 
 if __name__=='__main__':

@@ -23,28 +23,67 @@ class TestAddRequiredService(TestBrokerCommand):
         command = "add required service --service afs --archetype aquilon"
         self.noouttest(command.split(" "))
 
-    def testverifyaddrequiredafs(self):
-        command = "show archetype --archetype aquilon"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: afs", command)
-
     def testaddrequireddns(self):
         command = "add required service --service dns --archetype aquilon"
         self.noouttest(command.split(" "))
-
-    def testverifyaddrequireddns(self):
-        command = "show archetype --archetype aquilon"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: dns", command)
 
     def testaddrequiredaqd(self):
         command = "add required service --service aqd --archetype aquilon"
         self.noouttest(command.split(" "))
 
-    def testverifyaddrequiredaqd(self):
+    def testaddrequiredntp(self):
+        command = "add required service --service ntp --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testaddrequiredbootserver(self):
+        command = ["add_required_service",
+                   "--service=bootserver", "--archetype=aquilon"]
+        self.noouttest(command)
+
+    def testverifyaddrequiredservices(self):
         command = "show archetype --archetype aquilon"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: afs", command)
         self.matchoutput(out, "Service: aqd", command)
+        self.matchoutput(out, "Service: bootserver", command)
+        self.matchoutput(out, "Service: dns", command)
+        self.matchoutput(out, "Service: ntp", command)
+
+    def testaddrequiredpersonality(self):
+        for service in ["chooser1", "chooser2", "chooser3"]:
+            command = ["add_required_service", "--service", service,
+                       "--archetype=aquilon", "--personality=unixeng-test"]
+            self.noouttest(command)
+
+    def testverifyaddrequiredpersonality(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--name=unixeng-test"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: chooser1", command)
+        self.matchoutput(out, "Service: chooser2", command)
+        self.matchoutput(out, "Service: chooser3", command)
+
+    def testaddrequiredutsvc(self):
+        command = ["add_required_service", "--personality=compileserver",
+                   "--service=utsvc", "--archetype=aquilon"]
+        self.noouttest(command)
+
+    def testverifyaddrequiredutsvc(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--name=compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: utsvc", command)
+
+    def testaddrequiredbadservice(self):
+        command = ["add_required_service", "--service=badservice",
+                   "--personality=badpersonality2", "--archetype=aquilon"]
+        self.noouttest(command)
+
+    def testverifyaddrequiredbadservice(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--name=badpersonality2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: badservice", command)
 
 
 if __name__=='__main__':

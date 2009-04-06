@@ -4,15 +4,13 @@
 # This module is part of Aquilon
 """Contains the logic for `aq del personality`."""
 
-
 import os
 
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.commands.del_location import CommandDelLocation
-from aquilon.aqdb.cfg.cfg_path import CfgPath
-from aquilon.aqdb.sy.build_item import BuildItem
-from aquilon.aqdb.cfg.tld import Tld
+from aquilon.aqdb.cfg import Personality, Archetype
+from aquilon.aqdb.sy import Host
 from aquilon.server.templates.personality import PlenaryPersonality
 
 
@@ -21,23 +19,19 @@ class CommandDelPersonality(BrokerCommand):
     required_parameters = ["name", "archetype"]
 
     def render(self, session, name, archetype, **arguments):
-        dbtld = session.query(Tld).filter_by(type="personality").first()
+        q = session.query(Personality)
 
-        existing = session.query(CfgPath).filter_by(relative_path=name, tld=dbtld).all()
-        if (len(existing) == 0):
-            raise ArgumentError("personality '%s' is unknown"%name)
-        
-        # Check dependencies.
-        dbbuilds = session.query(BuildItem).filter_by(cfg_path=existing[0]).all()
-        if (len(dbbuilds) > 0):
+        dbpersona = get_personality(session, archetype, name)
+
+        # Check dependencies
+        dbhosts = session.query(Host).filter_by(personality=dbpersona).all()
+        if (len(dbhosts) > 0):
             raise ArgumentError("personality '%s' is in use and cannot be deleted"%name)
 
         # All clear
-        plenary = PlenaryPersonality(existing[0], archetype)
+        plenary = PlenaryPersonality(dbpersona)
+        session.flush()
         plenary.remove()
-        
-        session.delete(existing[0]);
-        session.flush();
+
+        session.delete(dbpersona)
         return
-
-

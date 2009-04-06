@@ -2,15 +2,15 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq show hostiplist`."""
-
+"""Contains the logic for `aq show hostmachinelist`."""
 
 from sqlalchemy.sql import select
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostMachineList
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.sy.host import Host
+from aquilon.aqdb.sy  import Host
+from aquilon.aqdb.cfg import Archetype, Personality
 
 
 class CommandShowHostMachineList(BrokerCommand):
@@ -19,11 +19,9 @@ class CommandShowHostMachineList(BrokerCommand):
 
     def render(self, session, **arguments):
         archetype = arguments.get("archetype", None)
-        if archetype:
-            dbarchetype = get_archetype(session, archetype)
         q = session.query(Host)
         if archetype:
-            q = q.filter_by(archetype = dbarchetype)
+            dbarchetype = get_archetype(session, archetype)
+            q = q.join('personality').filter_by(archetype=dbarchetype)
+            q = q.reset_joinpoint()
         return HostMachineList(q.all())
-
-

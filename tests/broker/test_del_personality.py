@@ -27,6 +27,30 @@ class TestDelPersonality(TestBrokerCommand):
         command = "show personality --name utpersonality --archetype aquilon"
         self.notfoundtest(command.split(" "))
 
+    def testdelwindowsdesktop(self):
+        command = "del personality --name desktop --archetype windows"
+        self.noouttest(command.split(" "))
+
+    def testverifydelwindowsdesktop(self):
+        command = "show personality --name desktop --archetype windows"
+        self.notfoundtest(command.split(" "))
+
+    def testdelbadaquilonpersonality(self):
+        command = "del personality --name badpersonality --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testverifydelbadaquilonpersonality(self):
+        command = "show personality --name badpersonality --archetype aquilon"
+        self.notfoundtest(command.split(" "))
+
+    def testdelbadaquilonpersonality2(self):
+        command = "del personality --name badpersonality2 --archetype aquilon"
+        self.noouttest(command.split(" "))
+
+    def testverifydelbadaquilonpersonality2(self):
+        command = "show personality --name badpersonality2 --archetype aquilon"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)

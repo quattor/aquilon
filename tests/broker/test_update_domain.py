@@ -24,7 +24,7 @@ class TestUpdateDomain(TestBrokerCommand):
                         "--owner", "testuseraqd_admin@is1.morgan",
                         "--comments", "Updated Comments",
                         "--compiler",
-                        "/ms/dist/elfms/PROJ/panc/7.2.4/bin/panc"])
+                        "/ms/dist/elfms/PROJ/panc/8.2.7/bin/panc"])
 
     def testverifyupdatedomain(self):
         command = "show domain --domain changetest1"
@@ -32,7 +32,7 @@ class TestUpdateDomain(TestBrokerCommand):
         self.matchoutput(out, "Domain: changetest1", command)
         self.matchoutput(out, "Owner: testuseraqd_admin", command)
         self.matchoutput(out,
-                         "Compiler: /ms/dist/elfms/PROJ/panc/7.2.4/bin/panc",
+                         "Compiler: /ms/dist/elfms/PROJ/panc/8.2.7/bin/panc",
                          command)
         self.matchoutput(out, "Comments: Updated Comments", command)
 

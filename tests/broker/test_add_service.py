@@ -163,6 +163,71 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: utsvc2", command)
 
+    def testaddchooser1(self):
+        command = "add service --service chooser1"
+        self.noouttest(command.split(" "))
+
+    def testaddchooser2(self):
+        command = "add service --service chooser2"
+        self.noouttest(command.split(" "))
+
+    def testaddchooser3(self):
+        command = "add service --service chooser3"
+        self.noouttest(command.split(" "))
+
+    # Testing server affinity - ut.a will be available to all
+    # three of chooser[123], but it will be the only instance
+    # (with corresponding server) in common to all three.
+    def testaddchooser1uta(self):
+        command = "add service --service chooser1 --instance ut.a"
+        self.noouttest(command.split(" "))
+
+    def testaddchooser1utb(self):
+        command = "add service --service chooser1 --instance ut.b"
+        self.noouttest(command.split(" "))
+
+    def testaddchooser1utc(self):
+        command = "add service --service chooser1 --instance ut.c"
+        self.noouttest(command.split(" "))
+
+    # Skipping ut.b for chooser2
+    def testaddchooser2uta(self):
+        command = "add service --service chooser2 --instance ut.a"
+        self.noouttest(command.split(" "))
+
+    def testaddchooser2utc(self):
+        command = "add service --service chooser2 --instance ut.c"
+        self.noouttest(command.split(" "))
+
+    # Skipping ut.c for chooser3
+    def testaddchooser3uta(self):
+        command = "add service --service chooser3 --instance ut.a"
+        self.noouttest(command.split(" "))
+
+    def testaddchooser3utb(self):
+        command = "add service --service chooser3 --instance ut.b"
+        self.noouttest(command.split(" "))
+
+    def testaddbadservice(self):
+        # This service will not have any instances...
+        command = "add service --service badservice"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddbadservice(self):
+        command = "show service --service badservice"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: badservice", command)
+
+    def testaddunmappedservice(self):
+        # These service instances will not have any maps...
+        command = "add service --service unmapped --instance instance1"
+        self.noouttest(command.split(" "))
+
+    def testverifyunmappedservice(self):
+        command = "show service --service unmapped"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: unmapped", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

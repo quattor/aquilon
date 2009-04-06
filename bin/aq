@@ -264,6 +264,10 @@ if __name__ == "__main__":
     for k, v in commandOptions.iteritems():
         newOptions[str(k)] = str(v)
     commandOptions = newOptions
+    # Should maybe have an input.xml flag on which global options
+    # to include... for now it's just debug.
+    if globalOptions.get("debug", None):
+        commandOptions["debug"] = str(globalOptions["debug"])
 
     # Quote options so that they can be safely included in the URI
     cleanOptions = {}

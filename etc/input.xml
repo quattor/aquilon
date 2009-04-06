@@ -10,7 +10,8 @@
             Silent mode, generate little output
          </option>
          <option name="debug" short="d" type="boolean" conflicts="">
-            Generate debug statements sent to stderr.
+            Generate debug statements sent to stderr.  Some commands may
+            also increase output from the server on stdout.
          </option>
          <option name="httpinfo" short="u" type="boolean" conflicts="">
             Show the URL being accessed and the response code.
@@ -197,9 +198,9 @@
       <transport trigger="all" method="get" path="domain" />
       <transport trigger="domain" method="get" path="domain/%(domain)s" />
    </command>
-   
+
    <command name="show_network">
-      %prog show network 
+      %prog show network
       Shows the configuration for a network, or for networks selected by location
       <optgroup name="show_network_Input" mandatory="True" fields="any">
          <option name="network" type="string" conflicts="">Network name</option>
@@ -345,15 +346,16 @@
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
-	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
+         <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-	    <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-	 </optgroup>
+            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
+         <option name="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -377,22 +379,23 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
-	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
+         <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-	    <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-	 </optgroup>
+            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
+         <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
 
    <command name="add_windows_host">
-      Add a new host to the database with archetype windows.  Requires a 
+      Add a new host to the database with archetype windows.  Requires a
       machine with a bootable interface and a valid IP address.
 
       The IP address can be derived based on aqdb availabililty using:
@@ -407,15 +410,16 @@
       <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
-	 <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
+         <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-	    <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-	 </optgroup>
+            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
+         <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.  Currently defaults to 'generic'.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
@@ -664,12 +668,12 @@
 
    <command name="update_network">
      Update information about the specified network or networks.
-     
+
      Update the network either by name or ip of the network, or in bulk with location,
      and/or network type.
      <optgroup name="update_network_opts" mandatory="True" fields="any">
-	<option name="network" type="string" conflicts="ip update_network_location_opts">Network name</option> 
-	<option name="ip" type="string" conflicts="network update_network_location_opts">Network name</option> 
+	<option name="network" type="string" conflicts="ip update_network_location_opts">Network name</option>
+	<option name="ip" type="string" conflicts="network update_network_location_opts">Network name</option>
 	<option name="type" type="string" conflicts="ip network">Network type</option>
 	<optgroup name="update_network_location_opts" fields="any">
             <option name="company" type="string">Company</option>
@@ -730,7 +734,7 @@
    <command name="add_service">
       Add a new service. If --instance is also specified, then also
       create a named instance for this service at the same time. Default templates
-      describing the service will be created so that any service instances can be 
+      describing the service will be created so that any service instances can be
       immediately used (bound and configured) by clients.
       <optgroup name="add_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
@@ -838,20 +842,24 @@
    </command>
 
    <command name="add_required_service">
-      Add a required service for an archetype. Once a service is required, then
-      any time a host of that archetype is built, it will cause an implicit bind_server
-      to occur for any unbound required services. If an instance cannot be automatically
-      bound, then hosts will fail to build, therefore you should ensure that any
-      required services have appropriate service mappings to declare which instances
-      to use by default.
+      Add a required service for an archetype or for only a particular
+      personality in the archetype.  Once a service is required, then
+      any time a host of that archetype or personality is built, it
+      will cause an implicit bind_server to occur for any unbound
+      required services.  If an instance cannot be automatically bound,
+      then hosts will fail to build, therefore you should ensure that
+      any required services have appropriate service mappings to
+      declare which instances to use by default.
       <optgroup name="add_required_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="archetype" type="string" mandatory="True">archetype name</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="personality" type="string">personality name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="archetype/%(archetype)s/service/%(service)s" />
+      <transport method="put" path="service/%(service)s/required_for/archetype/%(archetype)s" />
+      <transport trigger="personality" method="put" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />
    </command>
 
    <command name="show_archetype">
@@ -864,14 +872,19 @@
    </command>
 
    <command name="del_required_service">
-      Delete a service from the list of required services for an archetype. Hosts which
-      are already bound to a service because it used to be required will be unmodified. If 
+      Delete a service from the list of required services for an
+      archetype or personality.  Hosts which are already bound to a
+      service because it used to be required will be unmodified. If
       you wish to unbind those clients, you must do so manually.
       <optgroup name="del_required_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="archetype" type="string" mandatory="True">archetype name</option>
       </optgroup>
-      <transport method="delete" path="archetype/%(archetype)s/service/%(service)s" />
+      <optgroup name="del_required_service_optional">
+         <option name="personality" type="string" mandatory="True">personality name</option>
+      </optgroup>
+      <transport method="delete" path="service/%(service)s/required_for/archetype/%(archetype)s" />
+      <transport trigger="personality" method="delete" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />
    </command>
 
    <command name="map_service">
@@ -882,17 +895,21 @@
       <optgroup name="map_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="instance" type="string" mandatory="True">instance name</option>
+         <option name="archetype" type="string">archetype name</option>
+      </optgroup>
+      <optgroup name="map_service_personality_opts" fields="any">
+         <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="map_service_location_opts" mandatory="True" fields="any">
-	<option name="company" type="string">Company</option>
-	<option name="hub" type="string">Hub</option>
-	<option name="continent" type="string">Continent</option>
-	<option name="country" type="string">Country</option>
+        <option name="company" type="string">Company</option>
+        <option name="hub" type="string">Hub</option>
+        <option name="continent" type="string">Continent</option>
+        <option name="country" type="string">Country</option>
         <option name="campus" type="string">Campus</option>
-	<option name="city" type="string">City</option>
-	<option name="building" type="string">Building</option>
-	<option name="rack" type="string">Rack</option>
-	<option name="desk" type="string">Desk</option>
+        <option name="city" type="string">City</option>
+        <option name="building" type="string">Building</option>
+        <option name="rack" type="string">Rack</option>
+        <option name="desk" type="string">Desk</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/map" />
    </command>
@@ -902,17 +919,20 @@
       <optgroup name="show_map_opts" mandatory="True" fields="any">
          <option name="service" type="string">service name</option>
          <option name="instance" type="string">instance name</option>
+         <option name="archetype" type="string">archetype name</option>
+         <option name="personality" type="string">personality name</option>
          <optgroup name="show_map_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
-	    <option name="hub" type="string">Hub</option>
-	    <option name="continent" type="string">Continent</option>
-	    <option name="country" type="string">Country</option>
+            <option name="company" type="string">Company</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
             <option name="campus" type="string">Campus</option>
-	    <option name="city" type="string">City</option>
-	    <option name="building" type="string">Building</option>
-	    <option name="rack" type="string">Rack</option>
-	    <option name="desk" type="string">Desk</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="all" type="boolean">show all maps</option>
       </optgroup>
       <transport method="get" path="show/map" />
    </command>
@@ -923,17 +943,21 @@
       <optgroup name="unmap_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="instance" type="string" mandatory="True">instance name</option>
+         <option name="archetype" type="string">archetype name</option>
+      </optgroup>
+      <optgroup name="unmap_service_personality_opts" fields="any">
+         <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="unmap_service_location_opts" mandatory="True" fields="any">
-	<option name="company" type="string">Company</option>
-	<option name="hub" type="string">Hub</option>
-	<option name="continent" type="string">Continent</option>
-	<option name="country" type="string">Country</option>
-        <option name="campus" type="string">Campus</option>
-	<option name="city" type="string">City</option>
-	<option name="building" type="string">Building</option>
-	<option name="rack" type="string">Rack</option>
-	<option name="desk" type="string">Desk</option>
+         <option name="company" type="string">Company</option>
+         <option name="hub" type="string">Hub</option>
+         <option name="continent" type="string">Continent</option>
+         <option name="country" type="string">Country</option>
+         <option name="campus" type="string">Campus</option>
+         <option name="city" type="string">City</option>
+         <option name="building" type="string">Building</option>
+         <option name="rack" type="string">Rack</option>
+         <option name="desk" type="string">Desk</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/unmap" />
    </command>
@@ -971,13 +995,18 @@
    </command>
 
    <command name="reconfigure">
-      re-build the configuration settings for the specified host, using all
-      of the current service bindings and definitions. This "flushes" any configuration
-      settings, by: regenerating the host profile; forcing the bootservers to rebuild 
-      their state for this host; notifying all datawarehouse tools that the host has been
-      updated; notifying the host that it's configuration has been updated. These tasks
-      are done even if there is no real change in configuration. It's the same as just
-      running "make_aquilon" again, with the original arguments.
+      re-build the configuration settings for the specified host, using
+      all of the current service bindings and definitions.  This
+      "flushes" any configuration settings, by: regenerating the host
+      profile; checking all service bindings against the service maps;
+      forcing the bootservers to rebuild their state for this host;
+      notifying all datawarehouse tools that the host has been updated;
+      notifying the host that it's configuration has been updated. These
+      tasks are done even if there is no real change in configuration.
+      It's the same as just running "make_aquilon" again, with the
+      original arguments.  Any services that are not listed as required
+      for the personality or the archetype are dropped unless the
+      --keepbindings flag is specified.
       <optgroup name="reconfigure_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
       </optgroup>
@@ -985,6 +1014,7 @@
          <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -1037,7 +1067,7 @@
    </command>
 
    <command name="put">
-      Upload the templates (and all their changes) in the current directory to the 
+      Upload the templates (and all their changes) in the current directory to the
       specified template domain. You should run "compile" on the domain afterwards to
       confirm any changes.
       <optgroup name="put options" mandatory="True" fields="all">
@@ -1137,7 +1167,7 @@
    </command>
 
    <command name="add_chassis">
-      Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS. 
+      Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS.
       <optgroup name="add_chassis_input" mandatory="True" fields="all">
          <option name="chassis" type="string">FQDN name of the new chassis</option>
          <option name="rack" type="string">Name of the rack location for this chassis</option>
@@ -1386,7 +1416,7 @@
          <option name="name" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="put" path="personality/add_personality/%(archetype)s/%(name)s" />
+      <transport method="put" path="personality/%(archetype)s/%(name)s" />
   </command>
 
   <command name="del_personality">
@@ -1400,34 +1430,36 @@
   </command>
 
   <command name="show_personality">
-      Show personality details.
+      Show personality details.  Specifying both name and archetype will
+      uniquely identify a personality.
       <optgroup name="show_personality_opts" mandatory="True" fields="any">
-         <optgroup name="show_personality_name_opts" fields="all">
-            <option name="name" type="string" conflicts="all">which personality to show</option>
-            <option name="archetype" type="string">which archetype to use</option>
-         </optgroup>
-         <option name="all" type="boolean" conflicts="name">all</option>
+         <option name="name" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
+         <option name="archetype" type="string" conflicts="all">which archetype to use</option>
+         <option name="all" type="boolean" conflicts="name archetype">all</option>
       </optgroup>
       <transport method="get" path="personality" />
-      <transport trigger="name" method="get" path="personality/%(archetype)s/%(name)s" />
   </command>
 
    <command name="make_aquilon">
-      Create an aquilon host. Any required services which are not bound will cause
-      an implicit bind_client to occur. The host information will be compiled into
-      a working configuration. Any errors in creating the configuration will be
-      printed to the screen and cause the command to fail. If the configuration is
-      successfully created, then the new configuration will be "advertised" to the
-      host itself, to the data warehouse and to the bootservers, making the host
-      ready to build. The bootservers will put the host into "install" mode of
-      pxeswitch.
+      Create an aquilon host.  Any required services which are not bound
+      will cause an implicit bind_client to occur.  Any services that
+      are not listed as required for the personality or the archetype
+      are dropped unless the --keepbindings flag is specified.  The host
+      information will be compiled into a working configuration.  Any
+      errors in creating the configuration will be printed to the screen
+      and cause the command to fail.  If the configuration is
+      successfully created, then the new configuration will be
+      "advertised" to the host itself, to the data warehouse and to the
+      bootservers, making the host ready to build.  The bootservers will
+      put the host into "install" mode of pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
          <option name="os" type="string">OS to assign to host</option>
-         <option name="personality" type="string">Personality of the host</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
@@ -1643,4 +1675,3 @@
    </command>
 
 </commandline>
-

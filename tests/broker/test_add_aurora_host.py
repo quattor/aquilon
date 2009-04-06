@@ -1,6 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
 """Module for testing the add aurora host command."""
@@ -31,6 +31,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ", command)
         self.matchoutput(out, "Slot: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
+        self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Status: ready", command)
 
@@ -46,6 +47,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Building: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
+        self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Status: ready", command)
 

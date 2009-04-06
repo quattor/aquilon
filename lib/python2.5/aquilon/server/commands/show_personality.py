@@ -6,20 +6,24 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_location_type import CommandShowLocationType
-from aquilon.aqdb.cfg.cfg_path import CfgPath
+from aquilon.server.dbwrappers.personality import get_personality
+from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.aqdb.cfg import Personality
 
 
 class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
-        # This is a bit ick for now, since personalities don't have their
-        # own table, instead they're just entries in the cfgpath. Ideally,
-        # we'd be looking in the Personality table and one of the attributes
-        # there would be the cfgpath.
-        all = session.query(CfgPath).join('tld').filter_by(type="personality").all()
-        return all
+    def render(self, session, name, archetype, **arguments):
+        if archetype and name:
+            return get_personality(session, archetype, name)
+        q = session.query(Personality)
+        if archetype:
+            dbarchetype = get_archetype(session, archetype)
+            q = q.filter_by(archetype=dbarchetype)
+        if name:
+            q = q.filter_by(name=name)
+        return q.all()
 
 
