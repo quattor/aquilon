@@ -20,7 +20,7 @@ class CommandShowServiceService(BrokerCommand):
     def render(self, session, service, server, client, **arguments):
         instance = arguments.get("instance", None)
         dbserver = server and get_system(session, server) or None
-        dbclient = client and get_system(session, server) or None
+        dbclient = client and get_system(session, client) or None
         dbservice = get_service(session, service)
         if dbserver:
             return ServiceInstanceList(
