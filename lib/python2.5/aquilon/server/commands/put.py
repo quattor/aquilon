@@ -10,6 +10,7 @@ from tempfile import mkstemp
 from base64 import b64decode
 
 from aquilon.server.broker import BrokerCommand
+from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import write_file, remove_file, run_command
 
@@ -36,7 +37,10 @@ class CommandPut(BrokerCommand):
                 env=git_env)
             run_command(["git", "pull", filename, "HEAD"], path=domaindir,
                 env=git_env)
+        except ProcessException, e:
+            run_command(["git", "reset", "--hard"], env=git_env, path=domaindir)
             run_command(["git-update-server-info"], path=domaindir, env=git_env)
+            raise ArgumentError("\n%s%s" %(e.out,e.err))
         finally:
             remove_file(filename)
         return

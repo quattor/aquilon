@@ -33,6 +33,7 @@ from test_get_domain import TestGetDomain
 from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
 from test_sync_domain import TestSyncDomain
+from test_merge_conflicts import TestMergeConflicts
 from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
@@ -123,6 +124,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestPermission,
                 TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
+                TestMergeConflicts,
                 TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddCpu, TestAddModel,
