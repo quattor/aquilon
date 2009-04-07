@@ -26,9 +26,17 @@ class TestReconfigure(TestBrokerCommand):
     # force it *back* to using a correct service map entry, in
     # this case q.ny.ms.com.
     def testreconfigureunittest02(self):
-        self.noouttest(["reconfigure",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--buildstatus", "ready"])
+        command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--buildstatus", "ready"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service afs instance q.ny.ms.com",
+                         command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com removing binding for "
+                         "service afs instance q.ln.ms.com",
+                         command)
 
     def testverifybuildstatus(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -178,7 +186,11 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure",
                    "--hostname", "aquilon87.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "removing binding for service chooser1", command)
+        self.matchoutput(out, "removing binding for service chooser2", command)
+        self.matchoutput(out, "removing binding for service chooser3", command)
+        self.matchclean(out, "adding binding", command)
 
     def verifyremovebindings(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
