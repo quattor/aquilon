@@ -43,7 +43,7 @@ class CommandSearchHost(BrokerCommand):
 
         if personality and archetype:
             dbpersonality = get_personality(session, archetype, personality)
-            q.filter_by(personality=dbpersonality)
+            q = q.filter_by(personality=dbpersonality)
         elif personality:
             q = q.join('personality').filter_by(name=personality)
             q = q.reset_joinpoint()

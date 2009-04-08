@@ -180,6 +180,7 @@ class TestSearchHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "aquilon86.aqd-unittest.ms.com", command)
 
     def testpersonalityunavailable(self):
         # Will only get this error if archetype is specified
