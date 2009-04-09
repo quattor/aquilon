@@ -22,12 +22,22 @@ class TestUnbindClient(TestBrokerCommand):
     def test_100_bind_unmapped(self):
         command = ["bind_client", "--hostname=unittest02.one-nyp.ms.com",
                    "--service=unmapped", "--instance=instance1"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service unmapped instance instance1",
+                         command)
+        self.matchclean(out, "removing binding", command)
 
     def test_100_bind_unmapped_unbuilt(self):
         command = ["bind_client", "--hostname=aquilon94.aqd-unittest.ms.com",
                    "--service=unmapped", "--instance=instance1"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "aquilon94.aqd-unittest.ms.com adding binding for "
+                         "service unmapped instance instance1",
+                         command)
+        self.matchclean(out, "removing binding", command)
 
     def test_200_verify_bind_cat(self):
         command = ["cat", "--hostname=unittest02.one-nyp.ms.com"]

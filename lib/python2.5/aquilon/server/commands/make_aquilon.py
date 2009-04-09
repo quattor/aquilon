@@ -142,6 +142,6 @@ class CommandMakeAquilon(BrokerCommand):
         # This command does not use a formatter.  Maybe it should.
         if chooser and chooser.debug_info:
             return str("\n".join(chooser.debug_info + [out]))
-        return str(out)
+        return str("\n".join(chooser.messages + [out]))
 
 

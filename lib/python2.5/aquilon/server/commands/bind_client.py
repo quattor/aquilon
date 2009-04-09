@@ -45,6 +45,6 @@ class CommandBindClient(BrokerCommand):
             # The output of bind client does not run through a formatter.
             # Maybe it should.
             return str("\n".join(chooser.debug_info))
-        return
+        return str("\n".join(chooser.messages))
 
 

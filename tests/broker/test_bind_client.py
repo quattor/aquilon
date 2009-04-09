@@ -29,9 +29,13 @@ class TestBindClient(TestBrokerCommand):
     """
 
     def testbindafs(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "afs", "--instance", "q.ny.ms.com"])
+        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "afs", "--instance", "q.ny.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service afs instance q.ny.ms.com",
+                         command)
 
     def testverifybindafs(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -39,14 +43,22 @@ class TestBindClient(TestBrokerCommand):
         self.matchoutput(out, "Template: service/afs/q.ny.ms.com", command)
 
     def testbinddns(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "dns", "--instance", "nyinfratest"])
+        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "dns", "--instance", "nyinfratest"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service dns instance nyinfratest",
+                         command)
 
     def testbindutsi1(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "utsvc", "--instance", "utsi1"])
+        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--service", "utsvc", "--instance", "utsi1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com adding binding for "
+                         "service utsvc instance utsi1",
+                         command)
 
     def testverifybindutsi1(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -71,9 +83,13 @@ class TestBindClient(TestBrokerCommand):
         self.matchoutput(out, "Template: service/dns/nyinfratest", command)
 
     def testbindbootserver(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "bootserver", "--instance", "np.test"])
+        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "bootserver", "--instance", "np.test"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service bootserver instance np.test",
+                         command)
 
     def testverifybindbootserver(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -81,9 +97,13 @@ class TestBindClient(TestBrokerCommand):
         self.matchoutput(out, "Template: service/bootserver/np.test", command)
 
     def testbindntp(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--service", "ntp", "--instance", "pa.ny.na"])
+        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "ntp", "--instance", "pa.ny.na"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service ntp instance pa.ny.na",
+                         command)
 
     def testverifybindntp(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -95,9 +115,13 @@ class TestBindClient(TestBrokerCommand):
     # functionality for bind client, below.
 
     def testbindautobootserver(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "bootserver"])
+        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--service", "bootserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com adding binding for "
+                         "service bootserver instance np.test",
+                         command)
 
     def testverifybindautobootserver(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -105,9 +129,13 @@ class TestBindClient(TestBrokerCommand):
         self.matchoutput(out, "Template: service/bootserver/np.test", command)
 
     def testbindautontp(self):
-        self.noouttest(["bind", "client",
-            "--hostname", "unittest00.one-nyp.ms.com",
-            "--service", "ntp"])
+        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--service", "ntp"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com adding binding for "
+                         "service ntp instance pa.ny.na",
+                         command)
 
     def testverifybindautontp(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"

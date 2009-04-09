@@ -63,6 +63,8 @@ class Chooser(object):
             self.required_services.add(item.service)
         self.staging_services = {}
         """Stores interim service instance lists."""
+        self.messages = []
+        """Report info-level log messages."""
         self.errors = []
         """Report as many errors as possible in one shot."""
         self.servers = {}
@@ -100,6 +102,14 @@ class Chooser(object):
         if self.is_debug_enabled:
             self.debug_info.append(msg % args)
         log.debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        """Store status messages of interest to users."""
+        formatted = msg % args
+        if self.is_debug_enabled:
+            self.debug_info.append(formatted)
+        self.messages.append(formatted)
+        log.info(msg, *args, **kwargs)
 
     def error(self, msg, *args, **kwargs):
         """Errors are consolidated so that many can be reported at once."""
@@ -204,7 +214,7 @@ class Chooser(object):
         if self.errors:
             if self.is_debug_enabled:
                 raise ArgumentError("\n".join(self.debug_info))
-            raise ArgumentError("\n".join(self.errors))
+            raise ArgumentError("\n".join(self.messages + self.errors))
 
     def choose_past_use(self, dbservice):
         """If more than one service instance was found in the maps,
@@ -361,7 +371,7 @@ class Chooser(object):
             if bi.position > max_position:
                 max_position = bi.position
         for instance in self.instances_bound:
-            self.debug("%s adding binding for service %s instance %s",
+            self.info("%s adding binding for service %s instance %s",
                        self.dbhost.fqdn,
                        instance.service.name, instance.name)
             if self.original_service_instances.get(instance.service, None):
@@ -383,7 +393,7 @@ class Chooser(object):
                            position=max_position)
             self.dbhost.templates.append(bi)
         for instance in self.instances_unbound:
-            self.debug("%s removing binding for service %s instance %s",
+            self.info("%s removing binding for service %s instance %s",
                        self.dbhost.fqdn,
                        instance.service.name, instance.name)
             if self.chosen_services.get(instance.service, None):
