@@ -11,7 +11,13 @@ from aquilon.aqdb.cfg.archetype import Archetype
 
 class ArchetypeFormatter(ObjectFormatter):
     def format_raw(self, archetype, indent=""):
-        details = [ indent + "Archetype: %s" % archetype.name ]
+        flags = []
+        if archetype.is_compileable:
+            flags.append("compilable")
+        flagstr = ""
+        if len(flags) != 0:
+            flagstr = " [" + " ".join(flags) + "]"
+        details = [ indent + "Archetype: %s%s" % (archetype.name, flagstr) ]
         for item in archetype.service_list:
             details.append(indent + "  Required Service: %s"
                     % item.service.name)

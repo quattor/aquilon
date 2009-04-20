@@ -864,8 +864,9 @@
 
    <command name="show_archetype">
       Show information about an archetype, including required services.
-      <optgroup name="show_archetype_opts">
+      <optgroup name="show_archetype_opts" mandatory="True" fields="any">
          <option name="archetype" type="string">archetype name</option>
+         <option name="all" type="boolean" conflicts="archetype">Select all services</option>
       </optgroup>
       <transport trigger="archetype" method="get" path="archetype/%(archetype)s" />
       <transport method="get" path="archetype" />
@@ -895,9 +896,9 @@
       <optgroup name="map_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="instance" type="string" mandatory="True">instance name</option>
-         <option name="archetype" type="string">archetype name</option>
       </optgroup>
-      <optgroup name="map_service_personality_opts" fields="any">
+      <optgroup name="map_service_personality_opts" fields="all">
+         <option name="archetype" type="string">archetype name</option>      
          <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="map_service_location_opts" mandatory="True" fields="any">
@@ -1030,6 +1031,18 @@
       <transport method="put" path="domain/%(domain)s" />
    </command>
 
+   <command name="update_archetype">
+      Update the meta-information for an archetype.
+
+      <optgroup name="update_archetype_mandatory" mandatory="True" fields="all">
+         <option name="archetype" type="string">Name of the archetype</option>
+      </optgroup>
+      <optgroup name="update_archetype_options" mandatory="True" fields="any">
+         <option name="compilable" type="boolean">Can hosts be compiled?</option>
+      </optgroup>
+      <transport method="post" path="archetype/%(archetype)s" />
+   </command>
+   
    <command name="update_domain">
       Update the meta-information for a template domain.  This includes
       domain owner, comments about the domain, and the location of the
@@ -1407,6 +1420,23 @@
       <transport method="delete" path="location/hub/%(name)s" />
    </command>
 
+  <command name="add_archetype">
+      Create an archetype.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="name" type="string">The name to create</option>
+      </optgroup>
+      <transport method="put" path="archetype/%(name)s" />
+  </command>
+
+  <command name="del_archetype">
+      Delete an archetype.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="name" type="string">The name to create</option>
+      </optgroup>
+      <transport method="delete" path="archetype/%(name)s" />
+  </command>
+
+
   <command name="add_personality">
       Create a personality. A default template will be created, however
       this default will be insufficient for real usage and will need to
@@ -1440,6 +1470,32 @@
       <transport method="get" path="personality" />
   </command>
 
+   <command name="make">
+      Build a host configuration.  Any required services which are not bound
+      will cause an implicit bind_client to occur.  Any services that
+      are not listed as required for the personality or the archetype
+      are dropped unless the --keepbindings flag is specified.  The host
+      information will be compiled into a working configuration.  Any
+      errors in creating the configuration will be printed to the screen
+      and cause the command to fail.  If the configuration is
+      successfully created, then the new configuration may be
+      "advertised" to the host itself, to the data warehouse and to the
+      bootservers, making the host ready to build.  If this is a new host, then
+      The bootservers will
+      put the host into "install" mode of pxeswitch.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="hostname" type="string">Host name to make</option>
+         <option name="os" type="string">OS to assign to host</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="archetype" type="string">Archetype of the host (defaults to aquilon)</option>
+         <option name="personality" type="string">Personality of the host</option>
+         <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+      </optgroup>
+      <transport method="post" path="host/%(hostname)s/command/make" />
+   </command>
+   
    <command name="make_aquilon">
       Create an aquilon host.  Any required services which are not bound
       will cause an implicit bind_client to occur.  Any services that

@@ -7,11 +7,10 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.cfg import Archetype, Personality
+from aquilon.aqdb.cfg import Personality
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.templates.personality import PlenaryPersonality
 import re
-import os
 
 class CommandAddPersonality(BrokerCommand):
 
