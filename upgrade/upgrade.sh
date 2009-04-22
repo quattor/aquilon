@@ -12,7 +12,5 @@ echo
 read -s -p "provide the cdb password> " PASSWD
 echo 
 
-sqlplus -S cdb/"$PASSWD"@"$DB" @personality_upgrade
-sqlplus -S cdb/"$PASSWD"@"$DB" @archetype_upgrade
-sqlplus -S cdb/"$PASSWD"@"$DB" @analyze
-
+#sqlplus -S cdb/"$PASSWD"@"$DB" @<script>
+#TODO: move to migrate?
