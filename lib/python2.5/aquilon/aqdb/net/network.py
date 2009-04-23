@@ -15,71 +15,57 @@ from sqlalchemy.orm import relation, deferred, synonym
 from aquilon.exceptions_             import ArgumentError
 from aquilon.aqdb.base import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.loc.location       import Location, location
+from aquilon.aqdb.loc.location       import Location
 from aquilon.aqdb.column_types.IPV4  import (IPV4, dq_to_int, get_bcast,
                                              int_to_dq)
 
-""" Network Type can be one of four values which have been carried over as
-    legacy from the network table in DSDB:
-        *   management: no networks have it(@ 3/27/08), it's probably useless
-
-        *   transit: for the phyical interfaces of zebra nodes
-
-        *   vip:     for the zebra addresses themselves
-
-        *   unknown: for network rows in DSDB with NULL values for 'type'
-
-        *   tor_net: tor switches are managed in band, which means that
-                     if you know the ip/netmask of the switch, you know the
-                     network which it provides for, and the 5th and 6th address
-                     are reserved for a dynamic pool for the switch on the net
-        *   external/external_vendor
-        *   heartbeat
-        *   wan
-        *   campus
-"""
-
-
 #TODO: enum type for network_type, cidr
 class Network(Base):
-    """ Represents subnets in aqdb.
+    """ Represents subnets in aqdb. Network Type can be one of four values
+        which have been carried over as legacy from the network table in DSDB:
 
-    Network Type can be one of four values which have been carried over as
-    legacy from the network table in DSDB:
-        *   management: no networks have it(@ 3/27/08), it's probably useless
-        *   transit: for the phyical interfaces of zebra nodes
-        *   vip:     for the zebra addresses themselves
-        *   unknown: for network rows in DSDB with NULL values for 'type'
+        *management: no networks have it(@ 3/27/08), it's probably useless
 
-        *   tor: tor switches are managed in band, which means that if you know
-                 the ip/netmask of the switch, you know the layer 2 network
-                 which it provides access to.
+        *transit: for the phyical interfaces of zebra nodes
+
+        *vip:     for the zebra addresses themselves
+
+        *unknown: for network rows in DSDB with NULL values for 'type'
+
+        *tor_net: tor switches are managed in band, which means that
+                  if you know the ip/netmask of the switch, you know the
+                  network which it provides for, and the 5th and 6th address
+                  are reserved for a dynamic pool for the switch on the net
+
+        *external/external_vendor
+        *heartbeat
+        *wan
+        *campus
 """
 
     __tablename__ = 'network'
 
     id            = Column(Integer,
-                           Sequence('network_id_seq'), primary_key = True)
+                           Sequence('network_id_seq'), primary_key=True)
 
     location_id   = Column('location_id', Integer, ForeignKey(
-        'location.id', name = 'network_loc_fk'), nullable = False)
+        'location.id', name='network_loc_fk'), nullable=False)
 
-    network_type  = Column(AqStr(32),  nullable = False, default = 'unknown')
+    network_type  = Column(AqStr(32),  nullable=False, default='unknown')
     #TODO:  constrain <= 32, >= 1
-    cidr            = Column(Integer,    nullable = False)
-    name            = Column(AqStr(255), nullable = False) #TODO: default to ip
-    ip              = Column(IPV4,       nullable = False)
-    bcast           = Column(IPV4,       nullable = False)
-    mask            = Column(Integer,    nullable = False) #TODO: ENUM!!!
-    side            = Column(AqStr(4),   nullable = True, default = 'a')
-    dsdb_id         = Column(Integer,    nullable = False)
-    is_discoverable = Column(Boolean,    nullable = False, default = False)
-    is_discovered   = Column(Boolean,    nullable = False, default = False)
-    creation_date   = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments        = deferred(Column(String(255), nullable = True))
+    cidr            = Column(Integer,    nullable=False)
+    name            = Column(AqStr(255), nullable=False) #TODO: default to ip
+    ip              = Column(IPV4,       nullable=False)
+    bcast           = Column(IPV4,       nullable=False)
+    mask            = Column(Integer,    nullable=False) #TODO: ENUM!!!
+    side            = Column(AqStr(4),   nullable=True, default='a')
+    is_discoverable = Column(Boolean,    nullable=False, default=False)
+    is_discovered   = Column(Boolean,    nullable=False, default=False)
+    creation_date   = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments        = deferred(Column(String(255), nullable=True))
 
-    location        = relation(Location, backref = 'networks')
+    location        = relation(Location, backref='networks')
 
     def netmask(self):
         bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
@@ -112,9 +98,6 @@ class Network(Base):
 
 network = Network.__table__
 network.primary_key.name = 'network_pk'
-
-network.append_constraint(
-    UniqueConstraint('dsdb_id', name = 'network_dsdb_id_uk'))
 
 network.append_constraint(
     UniqueConstraint('ip', name = 'net_ip_uk'))
@@ -176,9 +159,8 @@ def populate(s, *args, **kw):
 
         #type_cache = get_type_cache(dsdb)
 
-        for (name, ip, mask, network_type, bldg_name, side,
-             dsdb_id) in dsdb.dump(dump_action):
-
+        for (name, ip, mask, network_type, bldg_name, 
+             side) in dsdb.dump(dump_action):
             kw = {}
             try:
                 kw['location_id'] = b_cache[bldg_name]
@@ -199,7 +181,6 @@ def populate(s, *args, **kw):
 
             if side:
                 kw['side']       = side
-            kw['dsdb_id']        = dsdb_id
 
             c=Network(**kw)
             s.add(c)

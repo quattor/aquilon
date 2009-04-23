@@ -61,11 +61,11 @@ class NetRefresher(object):
         """ loc argument is a sysloc string (DSDB stores this instead) """
         d = {}
         #query returns in order name, ip, mask, type_id, bldg, side
-        for (name, ip, mask, type,
-             bldg, side, dsdb_id) in self.dsdb.get_network_by_sysloc(
+        for (name, ip, mask, type, bldg,
+             side) in self.dsdb.get_network_by_sysloc(
                                                     self.location.sysloc()):
             d[ip] = NetRecord(ip=ip, name=name, net_type=type,
-                              mask=mask, bldg=bldg, side=side, dsdb_id=dsdb_id)
+                              mask=mask, bldg=bldg, side=side)
         return d
 
     def _pull_aqdb_data(self, *args, **kw):
@@ -156,8 +156,8 @@ class NetRefresher(object):
                               bcast        = get_bcast(ds[i].ip, c),
                               network_type = ds[i].net_type,
                               side         = ds[i].side,
-                              location     = self.location,
-                              dsdb_id      = ds[i].dsdb_id)
+                              location     = self.location)
+
                 net.comments = getattr(ds[i], 'comments', None)
     #TODO: use a memoized query:
     #self.session.query(Building).filter_by(name=ds[i].bldg).one()
