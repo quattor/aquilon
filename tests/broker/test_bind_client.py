@@ -94,7 +94,7 @@ class TestBindClient(TestBrokerCommand):
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Creating service Chooser", command)
+        self.matchoutput(out, "Creating service Chooser", command)
 
     def testverifybindutsi2(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"

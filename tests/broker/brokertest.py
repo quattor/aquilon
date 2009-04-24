@@ -238,9 +238,6 @@ class TestBrokerCommand(unittest.TestCase):
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
                          "\nSTDERR:\n@@@\n'%s'\n@@@" %
                          (command, p.returncode, 4, out, err))
-        self.assertEqual(out, "",
-                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
-                         (command, out))
         if "--debug" in command:
             # Looser requirement when there's debug output involved...
             self.failUnless(err.find("Bad Request") >= 0,
@@ -248,6 +245,9 @@ class TestBrokerCommand(unittest.TestCase):
                             "\n@@@\n'%s'\n@@@\n" %
                             (command, err))
         else:
+            self.assertEqual(out, "",
+                             "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                             (command, out))
             self.assertEqual(err.find("Bad Request"), 0,
                              "STDERR for %s did not start with Bad Request:"
                              "\n@@@\n'%s'\n@@@\n" %
