@@ -285,7 +285,8 @@ if __name__ == "__main__":
         # handle failed requests
         res = conn.getresponse()
         if res.status != httplib.OK:
-            print "%s: %s" % (httplib.responses[res.status], res.read())
+            print >>sys.stderr, "%s: %s" % (httplib.responses[res.status],
+                                            res.read())
             sys.exit(res.status / 100)
 
         # get data otherwise
