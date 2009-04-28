@@ -51,7 +51,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 itype = 'management'
                 break
 
-        prev = session.query(Interface).filter_by(mac=mac).first()
+        if mac:
+            prev = session.query(Interface).filter_by(mac=mac).first()
         dbmanager = None
         pending_removals = []
         if prev:

@@ -655,10 +655,10 @@
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="comments" type="string">Comments</option>
-         <option name="ip" type="string" conflicts="hostname machine ipfromip ipfromsystem autoip">IP address</option>
-         <option name="ipfromip" type="string" conflicts="hostname machine ip ipfromsystem autoip">choose IP address in subnet</option>
-         <option name="ipfromsystem" type="string" conflicts="hostname machine ip ipfromip autoip">choose IP address in subnet of system</option>
-	 <option name="autoip" type="boolean" conflicts="hostname machine ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         <option name="ip" type="string" conflicts="hostname ipfromip ipfromsystem autoip">IP address</option>
+         <option name="ipfromip" type="string" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
+         <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
+	 <option name="autoip" type="boolean" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -898,7 +898,7 @@
          <option name="instance" type="string" mandatory="True">instance name</option>
       </optgroup>
       <optgroup name="map_service_personality_opts" fields="all">
-         <option name="archetype" type="string">archetype name</option>      
+         <option name="archetype" type="string">archetype name</option>
          <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="map_service_location_opts" mandatory="True" fields="any">
@@ -1042,7 +1042,7 @@
       </optgroup>
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
-   
+
    <command name="update_domain">
       Update the meta-information for a template domain.  This includes
       domain owner, comments about the domain, and the location of the
@@ -1495,7 +1495,7 @@
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
-   
+
    <command name="make_aquilon">
       Create an aquilon host.  Any required services which are not bound
       will cause an implicit bind_client to occur.  Any services that

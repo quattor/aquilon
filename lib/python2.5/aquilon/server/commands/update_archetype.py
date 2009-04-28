@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.archetype import get_archetype
-    
+
 class CommandUpdateArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
@@ -17,7 +17,7 @@ class CommandUpdateArchetype(BrokerCommand):
         dbarchetype = get_archetype(session, kwargs["archetype"])
         if "compilable" in kwargs:
             dbarchetype.is_compileable = kwargs["compilable"]
-                 
+
         session.add(dbarchetype)
         return
 

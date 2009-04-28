@@ -20,7 +20,7 @@ class CommandAddArchetype(BrokerCommand):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(name)):
             raise ArgumentError("name '%s' is not valid" % name)
-        if name in ["hardware", "machine", "pan", "t", 
+        if name in ["hardware", "machine", "pan", "t",
                     "service", "servicedata"]:
             raise ArgumentError("name '%s' is reserved" % name)
 
