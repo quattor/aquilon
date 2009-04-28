@@ -159,8 +159,24 @@ p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
 rc = p.wait()
 # FIXME: check rc
 
+
+class VerboseTextTestResult(unittest._TextTestResult):
+    def addError(self, test, err):
+        unittest._TextTestResult.addError(self, test, err)
+
+    def addFailure(self, test, err):
+        unittest._TextTestResult.addFailure(self, test, err)
+        self.stream.writeln("%s" % self.failures[-1][1])
+
+
+class VerboseTextTestRunner(unittest.TextTestRunner):
+    def _makeResult(self):
+        return VerboseTextTestResult(self.stream, self.descriptions,
+                                     self.verbosity)
+
+
 suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
-unittest.TextTestRunner(verbosity=2).run(suite)
+VerboseTextTestRunner(verbosity=2).run(suite)
