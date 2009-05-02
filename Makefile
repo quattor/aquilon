@@ -3,6 +3,8 @@ COMMON = ../install/common/
 QACOMMENT = -comment cmrs=qa
 QCELLS = q.ny,q.ln,q.hk,q.tk
 TCM_COMMENT = "-comment tcm FILL IT IN NOW"
+PYTHON_DEFAULT = /usr/bin/env python2.5
+PYTHON=/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 
 MPR    := $(shell echo $(PWD) | awk -F/ '{print $$(NF-3), $$(NF-2), $$(NF-1)}')
 META   = $(word 1,$(MPR))
@@ -36,7 +38,7 @@ print-%: ; @$(error $* is $($*) ($(value $*)))
 # The goal is to be readable by someone who doesn't know make very well,
 # to make it maintainable, not to impress you with how well I know the tool
 
-BIN_FILES := $(shell find bin -type f)
+BIN_FILES := $(shell find bin -type f | sed -e 's/.py$$//')
 LIB_FILES := $(shell find lib -type f)
 ETC_FILES := $(shell find etc -type f | grep -v templates)
 PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
@@ -44,9 +46,10 @@ PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
 FILES = $(BIN_FILES) $(LIB_FILES) $(MAN_FILES) $(ETC_FILES) $(PYC_FILES)
 INSTALLFILES = $(addprefix $(COMMON),$(FILES))
 
-$(COMMON)bin/%: bin/%
+$(COMMON)bin/%: bin/%.py
 	@mkdir -p `dirname $@`
-	install -m $(PERMS) $< $@
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON)\1,' <$< >$@
+	chmod $(PERMS) $@
 
 $(COMMON)%.pyc: $(COMMON)%.py
 	@echo "compiling $@"

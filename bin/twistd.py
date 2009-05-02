@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/usr/bin/env python2.5
 
 # Twisted, the Framework of Your Internet
 # Copyright (c) 2001-2004 Twisted Matrix Laboratories.

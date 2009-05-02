@@ -32,11 +32,13 @@ class TestBrokerStart(unittest.TestCase):
         # warning message it tickles you)
 
         config = Config()
-        twistd = os.path.join(config.get("broker", "srcdir"), "bin", "twistd")
+        twistd = os.path.join(config.get("broker", "srcdir"),
+                              "bin", "twistd.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 
-        args = [twistd, "--pidfile", pidfile, "--logfile", logfile,
+        args = [sys.executable, twistd,
+                "--pidfile", pidfile, "--logfile", logfile,
                 "aqd", "--config", config.baseconfig]
 
         if config.has_option("unittest", "coverage"):

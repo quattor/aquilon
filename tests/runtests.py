@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -93,6 +93,9 @@ if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
 if coverage:
     config.set("unittest", "coverage", "True")
+
+# FIXME: Check to see if sys.executable (or maybe platform.python_version)
+# matches whatever is specified in the Makefile and warn if different.
 
 production_database = "NYPO_AQUILON"
 if (config.get("database", "vendor") == "oracle" and
