@@ -5,13 +5,10 @@
 """Contains the logic for `aq make aquilon`."""
 
 
-from socket import gethostbyname
-
-from aquilon.exceptions_ import (ArgumentError, NameServiceError)
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.aqdb.sy.build_item import BuildItem
@@ -25,7 +22,7 @@ class CommandMake(BrokerCommand):
     required_parameters = ["hostname", "os"]
 
     def render(self, session, hostname, os, archetype, personality, buildstatus,
-               debug, user, **arguments):
+               debug, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
 
@@ -57,14 +54,6 @@ class CommandMake(BrokerCommand):
             # - many services
             # - many features?
 
-            if archetype:
-                dbarch = get_archetype(session, archetype)
-                dbhost.archetype = dbarch
-
-            if not dbhost.archetype.is_compileable:
-                raise ArgumentError("Host %s is not a compilable archetype (%s)" %
-                        (hostname, dbhost.archetype.name))
-
             if os:
                 dbos = get_cfg_path(session, "os", os)
                 dbos_bi = session.query(BuildItem).filter_by(host=dbhost).join(
@@ -77,11 +66,16 @@ class CommandMake(BrokerCommand):
                 session.add(dbos_bi)
 
             if personality:
-                # Yes, the current archetype is assumed from the old
-                # personality...
-                dbpersonality = get_personality(session, dbhost.archetype.name,
-                                                personality)
+                arch = archetype
+                if not arch:
+                    arch = dbhost.archetype.name
+
+                dbpersonality = get_personality(session, arch, personality)
                 dbhost.personality = dbpersonality
+
+            if not dbhost.archetype.is_compileable:
+                raise ArgumentError("Host %s is not a compilable archetype (%s)" %
+                        (hostname, dbhost.archetype.name))
 
             if buildstatus:
                 dbstatus = get_status(session, buildstatus)
@@ -110,7 +104,8 @@ class CommandMake(BrokerCommand):
             # to avoid this domain being un-compilable in the future.
             # If this was a new file, we can just remove the plenary.
             if (old_content is None):
-                plenary_host.remove(locked=True)
+                #plenary_host.remove(locked=True)
+                pass
             else:
                 # this method corrupts the mtime, which will cause this
                 # host to be compiled next time from a normal "make".

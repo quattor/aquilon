@@ -14,22 +14,22 @@ import re
 
 class CommandAddPersonality(BrokerCommand):
 
-    required_parameters = ["name", "archetype"]
+    required_parameters = ["personality", "archetype"]
 
-    def render(self, session, name, archetype, user, **arguments):
+    def render(self, session, personality, archetype, **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
-        if (not valid.match(name)):
-            raise ArgumentError("name '%s' is not valid"% name)
+        if (not valid.match(personality)):
+            raise ArgumentError("name '%s' is not valid"% personality)
 
         dbarchetype = get_archetype(session, archetype)
 
         existing = session.query(Personality).filter_by(
-            name=name,archetype=dbarchetype).all()
+            name=personality,archetype=dbarchetype).first()
 
-        if (len(existing) != 0):
-            raise ArgumentError("personality '%s' already exists"%name)
+        if existing:
+            raise ArgumentError("personality '%s' already exists" % personality)
 
-        dbpersona = Personality(name=name, archetype=dbarchetype)
+        dbpersona = Personality(name=personality, archetype=dbarchetype)
 
         session.add(dbpersona)
         session.flush()

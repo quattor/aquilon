@@ -15,15 +15,15 @@ class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, name, archetype, **arguments):
-        if archetype and name:
-            return get_personality(session, archetype, name)
+    def render(self, session, personality, archetype, **arguments):
+        if archetype and personality:
+            return get_personality(session, archetype, personality)
         q = session.query(Personality)
         if archetype:
             dbarchetype = get_archetype(session, archetype)
             q = q.filter_by(archetype=dbarchetype)
-        if name:
-            q = q.filter_by(name=name)
+        if personality:
+            q = q.filter_by(name=personality)
         return q.all()
 
 

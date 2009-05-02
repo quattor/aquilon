@@ -248,7 +248,7 @@
       <optgroup name="show_hostiplist_options">
          <option name="archetype" type="string">Archetype name</option>
       </optgroup>
-      <transport trigger="archetype" method="get" path="archetype/%(archetype)s/hostiplist" />
+      <transport trigger="archetype" method="get" path="search/hostiplist/archetype/%(archetype)s" />
       <transport method="get" path="search/hostiplist" />
    </command>
 
@@ -664,6 +664,36 @@
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
       <transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s" />
       <transport trigger="tor_switch" method="put" path="tor_switch/%(tor_switch)s/interface/%(interface)s" />
+   </command>
+
+   <command name="add_network">
+     Define a new network.
+
+     Specify the network either by name or ip/mask of the network.
+     <optgroup name="add_network_mandatory" mandatory="True" fields="all">
+	<option name="network" type="string">Network name</option>
+	<option name="ip" type="string">Network IP address</option>
+	<option name="mask" type="string">Network IP mask</option>
+	<optgroup name="update_network_location_opts" mandatory="True" fields="any">
+            <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+	</optgroup>
+     </optgroup>
+
+     <optgroup name="add_network_modifiers" mandatory="False" fields="any">
+	<option name="discoverable" type="string">Set network(s) updateable</option>
+	<option name="discovered" type="string">Set network(s) updated</option>
+	<option name="type" type="string">Network type, defaults to 'unknown'</option>
+	<option name="side" type="string">Network side, defaults to 'a'</option>
+    </optgroup>
+     <transport method="put" path="network" />
    </command>
 
    <command name="update_network">
@@ -1423,17 +1453,17 @@
   <command name="add_archetype">
       Create an archetype.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="name" type="string">The name to create</option>
+         <option name="archetype" type="string">The name to create</option>
       </optgroup>
-      <transport method="put" path="archetype/%(name)s" />
+      <transport method="put" path="archetype/%(archetype)s" />
   </command>
 
   <command name="del_archetype">
       Delete an archetype.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="name" type="string">The name to create</option>
+         <option name="archetype" type="string">The name to delete</option>
       </optgroup>
-      <transport method="delete" path="archetype/%(name)s" />
+      <transport method="delete" path="archetype/%(archetype)s" />
   </command>
 
 
@@ -1443,29 +1473,78 @@
       be edited in order to provide realistic information for such things as
       cost allocations, usage, etc.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="name" type="string">The name to create</option>
+         <option name="personality" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="put" path="personality/%(archetype)s/%(name)s" />
+      <transport method="put" path="personality/%(archetype)s/%(personality)s" />
+  </command>
+
+  <command name="add_vendor">
+      Create a vendor definition.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="vendor" type="string">The name of the vendor</option>
+      </optgroup>
+      <transport method="put" path="vendor/%(vendor)s" />
+  </command>
+
+  <command name="show_vendor">
+      Create a vendor definition.
+      <optgroup name="mandatory_options" mandatory="True" fields="any">
+         <option name="vendor" type="string">The name of the vendor</option>
+         <option name="all" type="boolean" conflicts="vendor">Show all vendors</option>
+      </optgroup>
+      <transport trigger="vendor" method="get" path="vendor/%(vendor)s" />
+      <transport trigger="all" method="get" path="vendor"/>
+  </command>
+
+  <command name="add_os">
+      Create an operating system definition.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="os" type="string">The name of the operating system</option>
+         <option name="vers" type="string">The version of the operating system</option>
+         <option name="archetype" type="string">Which archetype the OS is being added to</option>
+      </optgroup>
+      <transport method="put" path="os/%(os)s/%(vers)s/%(archetype)s" />
+  </command>
+
+  <command name="del_os">
+      Delete an operating system definition.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="os" type="string">The name of the operating system</option>
+         <option name="vers" type="string">The version of the operating system</option>
+         <option name="archetype" type="string">Which archetype the OS is being deleted from</option>
+      </optgroup>
+      <transport method="delete" path="os/%(os)s/%(vers)s/%(archetype)s" />
+  </command>
+  
+  <command name="show_os">
+      Show an operating system definition.
+      <optgroup name="show_os_opts" mandatory="True" fields="any">
+         <option name="os" type="string">The name of the operating system</option>
+         <option name="vers" type="string">The version of the operating system</option>
+         <option name="archetype" type="string">The archetype to search within</option>
+         <option name="all" type="boolean">Show all operating systems</option>
+      </optgroup>
+      <transport method="get" path="os"/>
   </command>
 
   <command name="del_personality">
       Delete a personality. This command will fail if any hosts are currently
       using the personality.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="name" type="string">The name to delete</option>
+         <option name="personality" type="string">The name to delete</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
-      <transport method="delete" path="personality/%(archetype)s/%(name)s" />
+      <transport method="delete" path="personality/%(archetype)s/%(personality)s" />
   </command>
 
   <command name="show_personality">
       Show personality details.  Specifying both name and archetype will
       uniquely identify a personality.
       <optgroup name="show_personality_opts" mandatory="True" fields="any">
-         <option name="name" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
+         <option name="personality" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
          <option name="archetype" type="string" conflicts="all">which archetype to use</option>
-         <option name="all" type="boolean" conflicts="name archetype">all</option>
+         <option name="all" type="boolean" conflicts="personality archetype">all</option>
       </optgroup>
       <transport method="get" path="personality" />
   </command>

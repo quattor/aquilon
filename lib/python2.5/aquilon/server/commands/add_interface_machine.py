@@ -5,7 +5,6 @@
 """Contains the logic for `aq add interface --machine`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
 from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
@@ -16,8 +15,7 @@ from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.sy.manager import Manager
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
-                                                 describe_interface)
+from aquilon.server.dbwrappers.interface import describe_interface
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -29,8 +27,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine", "mac"]
 
-    def render(self, session, interface, machine, mac, comments,
-            user, **arguments):
+    def render(self, session, interface, machine, mac, comments, **arguments):
         dbmachine = get_machine(session, machine)
         extra = {}
         if interface == 'eth0':

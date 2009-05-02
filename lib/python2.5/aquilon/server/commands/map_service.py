@@ -4,7 +4,7 @@
 # This module is part of Aquilon
 """Contains the logic for `aq map service`."""
 
-
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
 from aquilon.server.dbwrappers.service import get_service
@@ -17,15 +17,13 @@ class CommandMapService(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, **kwargs):
-        session = kwargs.pop("session")
-        service = kwargs.pop("service")
-        instance = kwargs.pop("instance")
-        archetype = kwargs.pop("archetype")
-        personality = kwargs.pop("personality")
+    def render(self, session, service, instance, archetype, personality, **kwargs):
         dbservice = get_service(session, service)
         dblocation = get_location(session, **kwargs)
         dbinstance = get_service_instance(session, dbservice, instance)
+
+        if archetype is None and personality:
+            raise ArgumentError("specifying personality requires you to also specify archetype")
 
         if archetype is not None and personality is not None:
             dbpersona = get_personality(session, archetype, personality)

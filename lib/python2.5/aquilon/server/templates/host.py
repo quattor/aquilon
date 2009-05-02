@@ -76,8 +76,9 @@ class PlenaryHost(Plenary):
         templates.append("archetype/final")
 
         # Okay, here's the real content
-        lines.append("# this is an %s host, so all templates should be sourced from there"%self.dbhost.archetype.name)
-        lines.append("variable LOADPATH = list('%s');"%self.dbhost.archetype.name)
+        arcdir = self.dbhost.archetype.name
+        lines.append("# this is an %s host, so all templates should be sourced from there" % self.dbhost.archetype.name)
+        lines.append("variable LOADPATH = list('%s');" % arcdir)
         lines.append("")
         lines.append("include { 'pan/units' };")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)

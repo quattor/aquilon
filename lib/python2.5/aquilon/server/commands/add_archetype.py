@@ -2,7 +2,6 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq add personality`."""
 
 
 from aquilon.server.broker import BrokerCommand
@@ -12,24 +11,21 @@ import re
 
 class CommandAddArchetype(BrokerCommand):
 
-    required_parameters = ["name"]
+    required_parameters = ["archetype"]
 
-    def render(self, **kwargs):
-        session = kwargs.pop("session")
-        name = kwargs.pop("name")
+    def render(self, session, archetype, **kwargs):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
-        if (not valid.match(name)):
-            raise ArgumentError("name '%s' is not valid" % name)
-        if name in ["hardware", "machine", "pan", "t",
+        if (not valid.match(archetype)):
+            raise ArgumentError("name '%s' is not valid" % archetype)
+        if archetype in ["hardware", "machine", "pan", "t",
                     "service", "servicedata"]:
-            raise ArgumentError("name '%s' is reserved" % name)
+            raise ArgumentError("name '%s' is reserved" % archetype)
 
-        existing = session.query(Archetype).filter_by(name=name).all()
+        existing = session.query(Archetype).filter_by(name=archetype).first()
+        if existing:
+            raise ArgumentError("archetype '%s' already exists" % archetype)
 
-        if (len(existing) != 0):
-            raise ArgumentError("archetype '%s' already exists" % name)
-
-        dbarch = Archetype(name=name)
+        dbarch = Archetype(name=archetype)
 
         session.add(dbarch)
         session.flush()

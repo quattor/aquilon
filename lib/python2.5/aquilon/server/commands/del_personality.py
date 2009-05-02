@@ -4,8 +4,6 @@
 # This module is part of Aquilon
 """Contains the logic for `aq del personality`."""
 
-import os
-
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.exceptions_ import ArgumentError
@@ -16,17 +14,15 @@ from aquilon.server.templates.personality import PlenaryPersonality
 
 class CommandDelPersonality(BrokerCommand):
 
-    required_parameters = ["name", "archetype"]
+    required_parameters = ["personality", "archetype"]
 
-    def render(self, session, name, archetype, **arguments):
-        q = session.query(Personality)
-
-        dbpersona = get_personality(session, archetype, name)
+    def render(self, session, personality, archetype, **arguments):
+        dbpersona = get_personality(session, archetype, personality)
 
         # Check dependencies
-        dbhosts = session.query(Host).filter_by(personality=dbpersona).all()
-        if (len(dbhosts) > 0):
-            raise ArgumentError("personality '%s' is in use and cannot be deleted"%name)
+        dbhosts = session.query(Host).filter_by(personality=dbpersona).first()
+        if dbhosts:
+            raise ArgumentError("personality '%s' is in use and cannot be deleted" % personality)
 
         # All clear
         plenary = PlenaryPersonality(dbpersona)
