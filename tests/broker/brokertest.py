@@ -262,6 +262,18 @@ class TestBrokerCommand(unittest.TestCase):
                          (command, err))
         return err
 
+    def badoptiontest(self, command, **kwargs):
+        (p, out, err) = self.runcommand(command, **kwargs)
+        self.assertEqual(p.returncode, 2,
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 2, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
+        return err
+
     def matchoutput(self, out, s, command):
         self.assert_(out.find(s) >= 0,
                      "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %

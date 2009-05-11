@@ -20,13 +20,14 @@ from brokertest import TestBrokerCommand
 class TestPersonalityConstraints(TestBrokerCommand):
 
     def testdelpersonalitywithhost(self):
-        command = "del personality --name inventory --archetype aquilon"
+        command = "del personality --personality inventory --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "is in use and cannot be deleted", command)
 
     def testverifydelpersonalitywithhostfailed(self):
-        command = "show personality --name inventory --archetype aquilon"
-        out = self.commandtest(command.split(" "))
+        command = ["show_personality", "--personality=inventory",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
         self.matchoutput(out,
                          "Personality: inventory Archetype: aquilon",
                          command)

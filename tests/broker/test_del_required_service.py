@@ -57,7 +57,7 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def testverifydelrequiredpersonality(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--name=unixeng-test"]
+                   "--personality=unixeng-test"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: chooser1", command)
         self.matchclean(out, "Service: chooser2", command)
@@ -70,7 +70,7 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def testverifydelrequiredbadpersonality(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--name=badpersonality2"]
+                   "--personality=badpersonality2"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: badservice", command)
 

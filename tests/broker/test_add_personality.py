@@ -20,12 +20,14 @@ from brokertest import TestBrokerCommand
 class TestAddPersonality(TestBrokerCommand):
 
     def testaddutpersonality(self):
-        command = "add personality --name utpersonality --archetype aquilon"
-        self.noouttest(command.split(" "))
+        command = ["add_personality", "--personality=utpersonality",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
 
     def testverifyaddutpersonality(self):
-        command = "show personality --name utpersonality --archetype aquilon"
-        out = self.commandtest(command.split(" "))
+        command = ["show_personality", "--personality=utpersonality",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
                          command)
         self.matchoutput(out, "Template: personality/utpersonality", command)
@@ -64,24 +66,24 @@ class TestAddPersonality(TestBrokerCommand):
     def testshowarchetypeunavailable2(self):
         command = ["show", "personality",
                    "--archetype", "archetype-does-not-exist",
-                   "--name", "personality-does-not-exist"]
+                   "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Archetype archetype-does-not-exist", command)
 
     def testshowpersonalityunavailable(self):
         command = ["show", "personality", "--archetype", "aquilon",
-                   "--name", "personality-does-not-exist"]
+                   "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality personality-does-not-exist",
                          command)
 
     def testshowpersonalityunavailable2(self):
         command = ["show", "personality",
-                   "--name", "personality-does-not-exist"]
+                   "--personality", "personality-does-not-exist"]
         self.noouttest(command)
 
     def testshowpersonalityname(self):
-        command = "show personality --name generic"
+        command = "show personality --personality generic"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
@@ -91,11 +93,11 @@ class TestAddPersonality(TestBrokerCommand):
         self.matchoutput(out, "Template: personality/generic", command)
 
     def testaddwindowsdesktop(self):
-        command = "add personality --name desktop --archetype windows"
+        command = "add personality --personality desktop --archetype windows"
         self.noouttest(command.split(" "))
 
     def testverifyaddwindowsdesktop(self):
-        command = "show personality --name desktop --archetype windows"
+        command = "show personality --personality desktop --archetype windows"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: desktop Archetype: windows",
                          command)
@@ -104,12 +106,14 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddbadaquilonpersonality(self):
         # This personality is 'bad' because there will not be a set of
         # templates defined for it in the repository.
-        command = "add personality --name badpersonality --archetype aquilon"
-        self.noouttest(command.split(" "))
+        command = ["add_personality", "--personality=badpersonality",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
 
     def testverifybadaquilonpersonality(self):
-        command = "show personality --name badpersonality --archetype aquilon"
-        out = self.commandtest(command.split(" "))
+        command = ["show_personality", "--personality=badpersonality",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
         self.matchoutput(out, "Personality: badpersonality Archetype: aquilon",
                          command)
         self.matchoutput(out, "Template: personality/badpersonality", command)
@@ -117,26 +121,28 @@ class TestAddPersonality(TestBrokerCommand):
     def testaddbadaquilonpersonality2(self):
         # This personality is double 'bad'... there will be a required
         # service for the personality that has no instances.
-        command = "add personality --name badpersonality2 --archetype aquilon"
-        self.noouttest(command.split(" "))
+        command = ["add_personality", "--personality=badpersonality2",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
 
     def testverifybadaquilonpersonality2(self):
-        command = "show personality --name badpersonality2 --archetype aquilon"
-        out = self.commandtest(command.split(" "))
+        command = ["show_personality", "--personality=badpersonality2",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
         self.matchoutput(out,
                          "Personality: badpersonality2 Archetype: aquilon",
                          command)
         self.matchoutput(out, "Template: personality/badpersonality2", command)
 
     def testaddinvalidpersonalityname(self):
-        command = ["add_personality", "--name", "this is a bad; name",
+        command = ["add_personality", "--personality", "this is a bad; name",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'this is a bad; name' is not valid",
                          command)
 
     def testaddduplicate(self):
-        command = ["add_personality", "--name", "inventory",
+        command = ["add_personality", "--personality", "inventory",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already exists", command)

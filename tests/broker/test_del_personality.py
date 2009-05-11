@@ -20,36 +20,42 @@ from brokertest import TestBrokerCommand
 class TestDelPersonality(TestBrokerCommand):
 
     def testdelutpersonality(self):
-        command = "del personality --name utpersonality --archetype aquilon"
-        self.noouttest(command.split(" "))
+        command = ["del_personality", "--personality=utpersonality",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
 
     def testverifydelutpersonality(self):
-        command = "show personality --name utpersonality --archetype aquilon"
-        self.notfoundtest(command.split(" "))
+        command = ["show_personality", "--personality=utpersonality",
+                   "--archetype=aquilon"]
+        self.notfoundtest(command)
 
     def testdelwindowsdesktop(self):
-        command = "del personality --name desktop --archetype windows"
+        command = "del personality --personality desktop --archetype windows"
         self.noouttest(command.split(" "))
 
     def testverifydelwindowsdesktop(self):
-        command = "show personality --name desktop --archetype windows"
+        command = "show personality --personality desktop --archetype windows"
         self.notfoundtest(command.split(" "))
 
     def testdelbadaquilonpersonality(self):
-        command = "del personality --name badpersonality --archetype aquilon"
-        self.noouttest(command.split(" "))
+        command = ["del_personality", "--personality=badpersonality",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
 
     def testverifydelbadaquilonpersonality(self):
-        command = "show personality --name badpersonality --archetype aquilon"
-        self.notfoundtest(command.split(" "))
+        command = ["show_personality", "--personality=badpersonality",
+                   "--archetype=aquilon"]
+        self.notfoundtest(command)
 
     def testdelbadaquilonpersonality2(self):
-        command = "del personality --name badpersonality2 --archetype aquilon"
-        self.noouttest(command.split(" "))
+        command = ["del_personality", "--personality=badpersonality2",
+                   "--archetype=aquilon"]
+        self.noouttest(command)
 
     def testverifydelbadaquilonpersonality2(self):
-        command = "show personality --name badpersonality2 --archetype aquilon"
-        self.notfoundtest(command.split(" "))
+        command = ["show_personality", "--personality=badpersonality2",
+                   "--archetype=aquilon"]
+        self.notfoundtest(command)
 
 
 if __name__=='__main__':
