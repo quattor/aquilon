@@ -139,11 +139,10 @@ for dir in dirs:
     except OSError, e:
         print >>sys.stderr, "Could not create %s: %s" % (dir, e)
 
-template_king_host = config.get("unittest", "template_king_host")
 # The template-king also gets synced as part of the broker tests,
 # but this makes it available for the initial database build.
 p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-    "%s:/var/quattor/template-king" % template_king_host,
+    config.get("unittest", "template_king_path"),
     # Minor hack... ignores config kingdir...
     config.get("broker", "quattordir")),
     stdout=1, stderr=2)

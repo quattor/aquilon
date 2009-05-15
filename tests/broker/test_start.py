@@ -55,9 +55,8 @@ class TestBrokerStart(unittest.TestCase):
 
     def testrsynctemplateking(self):
         config = Config()
-        template_king_host = config.get("unittest", "template_king_host")
         p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-            "%s:/var/quattor/template-king" % template_king_host,
+            config.get("unittest", "template_king_path"),
             # Minor hack... ignores config kingdir...
             config.get("broker", "quattordir")),
             stdout=PIPE, stderr=PIPE)
