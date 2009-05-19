@@ -26,9 +26,9 @@ class NetworkFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % network.comments)
         return "\n".join(details)
 
-    def format_proto(self, network):
+    def format_proto(self, network, skeleton=None):
         snlf = SimpleNetworkListFormatter()
-        return(snlf.format_proto([network]))
+        return(snlf.format_proto([network], skeleton))
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()
 
@@ -58,9 +58,9 @@ class NetworkHostListFormatter(ObjectFormatter):
                 details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, system.mac))
         return "\n".join(details)
 
-    def format_proto(self, netlist):
+    def format_proto(self, netlist, skeleton=None):
         snlf = SimpleNetworkListFormatter()
-        return(snlf.format_proto(netlist))
+        return(snlf.format_proto(netlist, skeleton))
 
 ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
 
@@ -79,7 +79,7 @@ class SimpleNetworkListFormatter(ObjectFormatter):
             details.append(indent + str("\t".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.is_discoverable), str(network.is_discovered), str(network.comments)])))
         return "\n".join(details)
 
-    def format_proto(self, nlist):
+    def format_proto(self, nlist, skeleton=None):
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
             self.add_net_msg(netlist_msg.networks.add(), n)

@@ -35,8 +35,23 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_csv(result)
 
     def format_proto(self, result, request):
-        """This should be implemented the same way as format_raw for now."""
-        return ObjectFormatter.redirect_proto(result)
+        """This implementation is very similar to format_raw.
+
+        The result should just always be set up so that we can serialize
+        it here and return that string.  Howver, there is still code
+        from the original implementation that has already done that
+        before we get here.
+
+        Also of concern is that some/many of the current protobuf
+        formatters are unimplemented and will return raw output.
+        The check for a SerializeToString method may be left here to
+        handle those cases.
+
+        """
+        res = ObjectFormatter.redirect_proto(result)
+        if hasattr(res, "SerializeToString"):
+            return res.SerializeToString()
+        return res
 
     def format_html(self, result, request):
         if request.code and request.code >= 300:
@@ -111,7 +126,7 @@ class ObjectFormatter(object):
     def format_csv(self, result):
         return self.format_raw(result)
 
-    def format_proto(self, result):
+    def format_proto(self, result, skeleton=None):
         return self.format_raw(result)
 
     def format_html(self, result):
@@ -136,10 +151,10 @@ class ObjectFormatter(object):
         return handler.format_html(result)
 
     @staticmethod
-    def redirect_proto(result):
+    def redirect_proto(result, skeleton=None):
         handler = ObjectFormatter.handlers.get(result.__class__,
                 ObjectFormatter.default_handler)
-        return handler.format_proto(result)
+        return handler.format_proto(result, skeleton)
 
     def add_host_msg(self, host_msg, host):
         """Host here is actually a system!"""

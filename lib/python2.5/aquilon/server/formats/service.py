@@ -19,9 +19,9 @@ class ServiceFormatter(ObjectFormatter):
         for instance in service.instances:
             details.append(self.redirect_raw(instance, indent+"  "))
         return "\n".join(details)
-    def format_proto(self, service):
+    def format_proto(self, service, skeleton=None):
         slf = ServiceListFormatter()
-        return slf.format_proto([service])
+        return slf.format_proto([service], skeleton)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()
 
@@ -31,7 +31,7 @@ class ServiceList(list):
 
 class ServiceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
-    def format_proto(self, sl):
+    def format_proto(self, sl, skeleton=None):
         servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
         for service in sl:
             self.add_service_msg(servicelist_msg.services.add(), service)

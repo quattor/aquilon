@@ -26,10 +26,10 @@ class HostFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)
 
-    def format_proto(self, host):
+    def format_proto(self, host, skeleton=None):
         # we actually want to return a SimpleHostList of one host...
         shlf = SimpleHostListFormatter()
-        return(shlf.format_proto([host]))
+        return(shlf.format_proto([host], skeleton))
 
 ObjectFormatter.handlers[Host] = HostFormatter()
 
@@ -55,7 +55,7 @@ class SimpleHostListFormatter(ObjectFormatter):
             """<li><a href="/host/%(fqdn)s.html">%(fqdn)s</a></li>"""
             % {"fqdn": host.fqdn} for host in shlist])
 
-    def format_proto(self, shlist):
+    def format_proto(self, shlist, skeleton=None):
         hostlist_msg = self.loaded_protocols[self.protocol].HostList()
         for h in shlist:
             self.add_host_msg(hostlist_msg.hosts.add(), h)

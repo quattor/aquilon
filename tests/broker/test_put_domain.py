@@ -1,10 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# $Header$
-# $Change$
-# $DateTime$
-# $Author$
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
 """Module for testing the put domain command."""
@@ -95,6 +91,32 @@ class TestPutDomain(TestBrokerCommand):
         self.gitcommand(["commit", "-a", "-m",
                 "added unit test service instance 2"],
                 cwd=os.path.join(self.scratchdir, "unittest"))
+
+    def testaddutpersonality(self):
+        personalitydir = os.path.join(self.scratchdir, "unittest", "aquilon",
+                                      "personality", "utpersonality")
+        if not os.path.exists(personalitydir):
+            os.makedirs(personalitydir)
+        template = os.path.join(personalitydir, "espinfo.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines(
+                """structure template personality/utpersonality/espinfo;
+
+"name" = "utpersonality";
+"description" = "regression test personality";
+"class" = "INFRASTRUCTURE";
+"infrafunction" = "Sapphire-INV";
+"function" = "development";
+"users" = list("IT / TECHNOLOGY");
+"threshold" = 50;
+                """)
+        finally:
+            f.close()
+        self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
+        self.gitcommand(["commit", "-a", "-m",
+                         "added personality utpersonality"],
+                         cwd=os.path.join(self.scratchdir, "unittest"))
 
     def testputunittestdomain(self):
         self.ignoreoutputtest(["put", "--domain", "unittest"],
