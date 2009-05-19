@@ -139,7 +139,8 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--os", "linux/4.0.1-x86_64"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "hosts with archetype aquilon", command)
+        self.matchoutput(err, "Can only set os for compileable archetypes",
+                         command)
 
     def testverifyreconfigurewindows(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"

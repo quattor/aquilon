@@ -2,7 +2,7 @@
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Contains the logic for `aq make aquilon`."""
+"""Contains the logic for `aq make`."""
 
 
 from aquilon.exceptions_ import ArgumentError
@@ -21,10 +21,17 @@ class CommandMake(BrokerCommand):
 
     required_parameters = ["hostname", "os"]
 
-    def render(self, session, hostname, os, archetype, personality, buildstatus,
-               debug, **arguments):
+    def render(self, session, hostname, os, archetype, personality,
+               buildstatus, debug, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
+        # FIXME: Should this still be done for aquilon hosts?
+        #if self.config.get("broker", "environment") == "prod":
+        #    try:
+        #        gethostbyname(dbhost.fqdn)
+        #    except Exception, e:
+        #        raise NameServiceError("Could not (yet) resolve the name for %s externally, so a build would fail.  Please try again later.  Exact error: %s" %
+        #                (dbhost.fqdn, e))
 
         # We grab a template compile lock over this whole operation,
         # which means that we will wait until any outstanding compiles
@@ -49,10 +56,8 @@ class CommandMake(BrokerCommand):
             # Need to get all the BuildItem objects for this host.
             # They should include:
             # - exactly one OS
-            # - exactly one personality
             # And may include:
             # - many services
-            # - many features?
 
             if os:
                 dbos = get_cfg_path(session, "os", os)
@@ -104,8 +109,10 @@ class CommandMake(BrokerCommand):
             # to avoid this domain being un-compilable in the future.
             # If this was a new file, we can just remove the plenary.
             if (old_content is None):
-                #plenary_host.remove(locked=True)
-                pass
+                # FIXME: Why was this commented out?  Should it occur
+                # only if archetype == 'aquilon'?
+                plenary_host.remove(locked=True)
+                #pass
             else:
                 # this method corrupts the mtime, which will cause this
                 # host to be compiled next time from a normal "make".
@@ -126,9 +133,12 @@ class CommandMake(BrokerCommand):
         finally:
             compileRelease()
 
+        # If out is empty, make sure we use an empty list to prevent
+        # an extra newline below.
+        out_array = out and [out] or []
         # This command does not use a formatter.  Maybe it should.
         if chooser and chooser.debug_info:
-            return str("\n".join(chooser.debug_info + [out]))
-        return str(out)
+            return str("\n".join(chooser.debug_info + out_array))
+        return str("\n".join(chooser.messages + out_array))
 
 

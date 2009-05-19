@@ -48,6 +48,8 @@ def populate(sess, *args, **kw):
     for a_name in ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost']:
         #a = Archetype(name=a_name, audit_info = kw['audit_info'])
         a = Archetype(name=a_name)
+        if a_name in ['aquilon', 'vmhost']:
+            a.is_compileable = True
         sess.add(a)
 
     try:
