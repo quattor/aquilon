@@ -27,7 +27,7 @@ class CommandAddOS(BrokerCommand):
         existing = session.query(CfgPath).filter_by(relative_path=path, tld=dbtld).first()
 
         if existing:
-            raise ArgumentError("os '%s' already exists" % os)
+            raise ArgumentError("OS version '%s' already exists" % path)
 
         dbos = CfgPath(tld=dbtld, relative_path=path)
 

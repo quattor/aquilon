@@ -34,6 +34,8 @@ from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
 from test_sync_domain import TestSyncDomain
 from test_merge_conflicts import TestMergeConflicts
+from test_add_archetype import TestAddArchetype
+from test_add_os import TestAddOS
 from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
@@ -84,6 +86,7 @@ from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
 from test_update_rack import TestUpdateRack
 from test_update_network import TestUpdateNetwork
+from test_update_archetype import TestUpdateArchetype
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
@@ -104,6 +107,8 @@ from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
 from test_del_personality import TestDelPersonality
+from test_del_os import TestDelOS
+from test_del_archetype import TestDelArchetype
 from test_del_domain import TestDelDomain
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
@@ -128,7 +133,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestMergeConflicts,
-                TestAddPersonality,
+                TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddCpu, TestAddModel,
                 TestAddTorSwitch, TestPollTorSwitch,
@@ -151,6 +156,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchHardware, TestSearchSystem, TestSearchHost,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
                 TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
+                TestUpdateArchetype,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
@@ -158,7 +164,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
-                TestDelPersonality,
+                TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:

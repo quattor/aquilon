@@ -1,12 +1,14 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# Copyright (C) 2008 Morgan Stanley
+# Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
+
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.sy import Host
+from aquilon.aqdb.cfg import Personality
+
 
 class CommandDelArchetype(BrokerCommand):
 
@@ -16,11 +18,12 @@ class CommandDelArchetype(BrokerCommand):
         dbarch = get_archetype(session, archetype)
 
         # Check dependencies
-        dbhosts = session.query(Host).filter_by(archetype=dbarch).first()
-        if dbhosts:
-            raise ArgumentError("archetype '%s' is in use and cannot be deleted" % archetype)
+        if session.query(Personality).filter_by(archetype=dbarch).first():
+            raise ArgumentError("archetype '%s' is in use and "
+                                "cannot be deleted" % archetype)
 
         # All clear
         session.delete(dbarch)
-        session.flush()
         return
+
+

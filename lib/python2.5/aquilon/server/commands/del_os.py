@@ -6,7 +6,7 @@
 import os
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.cfg.cfg_path import CfgPath
 from aquilon.aqdb.cfg.tld import Tld
 
@@ -17,13 +17,18 @@ class CommandDelOS(BrokerCommand):
 
     def render(self, session, os, vers, archetype, **arguments):
         dbtld = session.query(Tld).filter_by(type="os").first()
-        existing = session.query(CfgPath).filter_by(relative_path=os+"/"+vers, tld=dbtld).all()
+        relative_path = os + "/" + vers
+        q = session.query(CfgPath)
+        q = q.filter_by(relative_path=relative_path, tld=dbtld)
+        existing = q.all()
         if not existing:
-            raise ArgumentError("OS '%s' is unknown" % os)
+            raise NotFoundException("OS version '%s' is unknown" %
+                                    relative_path)
 
         # TODO: Check dependencies
 
         for tpl in existing:
             session.delete(tpl)
-        session.flush()
         return
+
+

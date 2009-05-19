@@ -1063,12 +1063,13 @@
    </command>
 
    <command name="update_archetype">
-      Update the meta-information for an archetype.
+      Update the meta-information for an archetype.  If the compilable flag
+      is not given the attribute will be set to false for the archetype.
 
       <optgroup name="update_archetype_mandatory" mandatory="True" fields="all">
          <option name="archetype" type="string">Name of the archetype</option>
       </optgroup>
-      <optgroup name="update_archetype_options" mandatory="True" fields="any">
+      <optgroup name="update_archetype_options" mandatory="False">
          <option name="compilable" type="boolean">Can hosts be compiled?</option>
       </optgroup>
       <transport method="post" path="archetype/%(archetype)s" />
