@@ -3,15 +3,21 @@
 #
 # This module is part of Aquilon
 
-from aquilon.server.broker import BrokerCommand
+
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.hw import Vendor
+from aquilon.server.broker import BrokerCommand
+
 
 class CommandShowVendorVendor(BrokerCommand):
 
     required_parameters = [ "vendor" ]
 
     def render(self, session, vendor, **arguments):
-        vlist = session.query(Vendor).filter_by(name=vendor).all()
-        return vlist
+        dbvendor = session.query(Vendor).filter_by(name=vendor).first()
+        if not dbvendor:
+            raise NotFoundException("Could not find vendor with name '%s'." %
+                                    vendor)
+        return dbvendor
 
 

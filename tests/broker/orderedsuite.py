@@ -41,6 +41,7 @@ from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
 from test_add_building import TestAddBuilding
 from test_add_rack import TestAddRack
+from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_tor_switch import TestAddTorSwitch
@@ -67,9 +68,11 @@ from test_compile import TestCompile
 from test_bind_server import TestBindServer
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
+from test_constraints_archetype import TestArchetypeConstraints
 from test_constraints_personality import TestPersonalityConstraints
 from test_constraints_service import TestServiceConstraints
 from test_constraints_domain import TestDomainConstraints
+from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_show_hostiplist import TestShowHostIPList
@@ -102,6 +105,7 @@ from test_del_chassis import TestDelChassis
 from test_del_tor_switch import TestDelTorSwitch
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
+from test_del_vendor import TestDelVendor
 from test_del_rack import TestDelRack
 from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
@@ -135,7 +139,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
-                TestAddRack, TestAddCpu, TestAddModel,
+                TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
@@ -148,9 +152,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestFlush, TestCompile,
                 TestBindServer,
                 TestBindClientConstraints, TestBindServerConstraints,
-                TestPersonalityConstraints,
-                TestDomainConstraints, TestMachineConstraints,
-                TestTorSwitchConstraints,
+                TestArchetypeConstraints, TestPersonalityConstraints,
+                TestDomainConstraints, TestVendorConstraints,
+                TestMachineConstraints, TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchSystem, TestSearchHost,
@@ -162,7 +166,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindServer, TestUnmapService,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
+                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelVendor,
+                TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelDnsDomain,

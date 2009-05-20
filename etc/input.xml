@@ -1489,6 +1489,14 @@
       <transport method="put" path="vendor/%(vendor)s" />
   </command>
 
+  <command name="del_vendor">
+      Create a vendor definition.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="vendor" type="string">The name of the vendor</option>
+      </optgroup>
+      <transport method="delete" path="vendor/%(vendor)s" />
+  </command>
+
   <command name="show_vendor">
       Create a vendor definition.
       <optgroup name="mandatory_options" mandatory="True" fields="any">
