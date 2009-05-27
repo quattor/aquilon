@@ -6,8 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc.personality_service_list_item import \
-        PersonalityServiceListItem
+from aquilon.aqdb.model import PersonalityServiceListItem
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.service import get_service
 
@@ -25,5 +24,3 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                                             comments=comments)
         session.add(dbpsli)
         return
-
-

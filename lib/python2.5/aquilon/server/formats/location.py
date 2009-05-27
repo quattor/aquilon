@@ -8,16 +8,8 @@
 from inspect import isclass
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.loc.location import Location
-from aquilon.aqdb.loc.company import Company
-from aquilon.aqdb.loc.hub import Hub
-from aquilon.aqdb.loc.continent import Continent
-from aquilon.aqdb.loc.country import Country
-from aquilon.aqdb.loc.campus import Campus
-from aquilon.aqdb.loc.city import City
-from aquilon.aqdb.loc.building import Building
-from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.loc.desk import Desk
+from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
+                                 Campus, City, Building, Rack, Desk)
 
 
 class LocationFormatter(ObjectFormatter):
@@ -67,5 +59,3 @@ for location_type in globals().values():
         continue
     if issubclass(location_type, Location):
         ObjectFormatter.handlers[location_type] = LocationFormatter()
-
-

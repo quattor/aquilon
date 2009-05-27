@@ -7,7 +7,7 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.sy.tor_switch import TorSwitch
+from aquilon.aqdb.model import TorSwitch
 
 
 class TorSwitchFormatter(ObjectFormatter):

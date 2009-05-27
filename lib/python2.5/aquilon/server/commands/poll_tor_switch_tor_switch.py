@@ -8,7 +8,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.poll_tor_switch import CommandPollTorSwitch
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.sy.tor_switch import TorSwitch
+from aquilon.aqdb.model import TorSwitch
 
 
 class CommandPollTorSwitchTorSwitch(CommandPollTorSwitch):

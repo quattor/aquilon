@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity
 from aquilon.server.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 

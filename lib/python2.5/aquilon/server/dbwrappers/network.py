@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.net.network import Network
+from aquilon.aqdb.model import Network
 
 
 def get_network_byname(session, netname):
@@ -24,5 +24,3 @@ def get_network_byip(session, ipaddr):
     except InvalidRequestError, e:
         raise NotFoundException("Network with address %s not found: %s" % (ipaddr, e))
     return dbnetwork
-        
-

@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.sy.manager import Manager
+from aquilon.aqdb.model import Manager
 
 
 class CommandShowManagerManager(BrokerCommand):

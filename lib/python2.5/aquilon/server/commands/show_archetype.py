@@ -6,7 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.cfg.archetype import Archetype
+from aquilon.aqdb.model import Archetype
 
 
 class CommandShowArchetype(BrokerCommand):

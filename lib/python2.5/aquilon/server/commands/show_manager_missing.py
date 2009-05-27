@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.interface import MissingManagersList
-from aquilon.aqdb.hw.interface import Interface
+from aquilon.aqdb.model import Interface
 
 
 class CommandShowManagerMissing(BrokerCommand):

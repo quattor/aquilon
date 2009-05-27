@@ -10,10 +10,8 @@ from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  IncompleteError)
-from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.net.network import get_net_id_from_ip
-from aquilon.aqdb.sy.manager import Manager
+from aquilon.aqdb.model import Interface, Machine, Manager
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
@@ -214,5 +212,3 @@ class CommandAddInterfaceMachine(BrokerCommand):
                             machine=dbmachine,
                             ip=old_ip, network=old_network)
         return dbmanager
-
-

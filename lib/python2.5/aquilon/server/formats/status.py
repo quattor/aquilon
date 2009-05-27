@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.status import Status
+from aquilon.aqdb.model import Status
 
 
 class StatusFormatter(ObjectFormatter):

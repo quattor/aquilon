@@ -7,7 +7,7 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.svc.service_instance import ServiceInstance
+from aquilon.aqdb.model import ServiceInstance
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
@@ -35,7 +35,7 @@ ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
 class ServiceInstanceList(list):
     """holds a list of service instances to be formatted"""
     pass
-    
+
 class ServiceInstanceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
     def format_proto(self, sil):
@@ -45,5 +45,3 @@ class ServiceInstanceListFormatter(ListFormatter):
         return servicelist_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
-
-

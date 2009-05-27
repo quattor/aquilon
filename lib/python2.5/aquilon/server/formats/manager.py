@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.sy.manager import Manager
+from aquilon.aqdb.model import Manager
 
 
 class ManagerFormatter(ObjectFormatter):

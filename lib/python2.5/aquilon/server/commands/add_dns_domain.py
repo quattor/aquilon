@@ -7,7 +7,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.aqdb.model import DnsDomain
 from aquilon.server.processes import DSDBRunner
 
 

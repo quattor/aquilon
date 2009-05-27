@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.net.dns_domain import DnsDomain
-from aquilon.aqdb.sy.system import System
+from aquilon.aqdb.model import DnsDomain, System
 from aquilon.server.dbwrappers.dns_domain import get_dns_domain
 from aquilon.server.dbwrappers.network import get_network_byip
 
@@ -88,5 +87,3 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('type', None):
         q = q.filter_by(system_type=kwargs['type'])
     return q
-
-

@@ -4,7 +4,7 @@
 import os
 import sys
 import ms.version
-from   copy import copy
+from copy import copy
 #from   ConfigParser import SafeConfigParser
 
 ms.version.addpkg('sybase', '0.38-py25', 'dist')
@@ -139,6 +139,8 @@ class DsdbConnection(object):
         raise ValueError('no principal found for %s'%(self.dsn))
 
     def _get_krb_cnxn(self):
+        #regional copies don't accept kerberos login
+        self.dsn = 'NYP_DSDB11'
         principal = self._get_principal()
 
         self.syb = Sybase.connect(self.dsn, '', '', 'dsdb',

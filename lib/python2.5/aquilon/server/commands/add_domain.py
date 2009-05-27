@@ -9,7 +9,7 @@ import os
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.sy.domain import Domain
+from aquilon.aqdb.model import Domain
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 from aquilon.server.dbwrappers.quattor_server import (

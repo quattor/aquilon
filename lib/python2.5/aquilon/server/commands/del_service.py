@@ -10,8 +10,8 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
-from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import (ServiceInstance, ServiceMap,
+                                 PersonalityServiceMap)
 from aquilon.server.templates.service import (PlenaryService,
         PlenaryServiceClientDefault, PlenaryServiceServerDefault,
         PlenaryServiceInstance, PlenaryServiceInstanceServer,
@@ -77,5 +77,3 @@ class CommandDelService(BrokerCommand):
 
         # FIXME: Cascade to relevant objects...
         return
-
-

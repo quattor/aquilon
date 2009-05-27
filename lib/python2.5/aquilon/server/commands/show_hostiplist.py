@@ -8,7 +8,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.sy.system import System
+from aquilon.aqdb.model import System
 
 
 class CommandShowHostIPList(BrokerCommand):

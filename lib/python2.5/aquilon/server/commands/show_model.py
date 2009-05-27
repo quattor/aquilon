@@ -6,8 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.hw.model import Model
-from aquilon.aqdb.hw.vendor import Vendor
+from aquilon.aqdb.model import Model, Vendor
 
 
 class CommandShowModel(BrokerCommand):
@@ -24,5 +23,3 @@ class CommandShowModel(BrokerCommand):
         if type is not None:
             q = q.filter(Model.machine_type.like(type + '%'))
         return q.all()
-
-

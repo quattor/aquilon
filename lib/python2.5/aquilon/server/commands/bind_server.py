@@ -8,7 +8,7 @@
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.svc.service_instance_server import ServiceInstanceServer
+from aquilon.aqdb.model import ServiceInstanceServer
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service import get_service

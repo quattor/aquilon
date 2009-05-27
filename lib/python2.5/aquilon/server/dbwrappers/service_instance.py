@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.sy.build_item import BuildItem
+from aquilon.aqdb.model import BuildItem, ServiceInstance
 
 
 def get_service_instance(session, dbservice, instance):
@@ -26,5 +25,3 @@ def get_client_service_instances(session, dbclient):
     builditems = session.query(BuildItem).filter_by(host=dbclient).all()
     service_instances = [bi.cfg_path.svc_inst for bi in builditems]
     return service_instances
-
-

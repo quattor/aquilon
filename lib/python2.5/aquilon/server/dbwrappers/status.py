@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hw.status import Status
+from aquilon.aqdb.model import Status
 
 
 def get_status(session, status):

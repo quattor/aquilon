@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hw.model import Model
+from aquilon.aqdb.model import Model
 
 
 def get_model(session, model):

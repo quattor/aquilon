@@ -11,7 +11,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.disk_type import get_disk_type
-from aquilon.aqdb.hw.disk import Disk
+from aquilon.aqdb.model import Disk
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 

@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.cfg.cfg_path import CfgPath
+from aquilon.aqdb.model import CfgPath
 
 
 class CfgPathFormatter(ObjectFormatter):

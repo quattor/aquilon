@@ -9,14 +9,13 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.net.network import get_net_id_from_ip
+from aquilon.aqdb.model import Interface, Chassis
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets,
                                                  describe_interface)
-from aquilon.aqdb.sy.chassis import Chassis
 from aquilon.server.processes import DSDBRunner
 
 
@@ -77,5 +76,3 @@ class CommandAddInterfaceChassis(BrokerCommand):
         except ProcessException, e:
             raise ArgumentError("Could not add hostname to dsdb: %s" % e)
         return
-
-

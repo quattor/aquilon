@@ -9,7 +9,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.loc.location import Location
+from aquilon.aqdb.model import Location
 
 
 class CommandShowLocationType(BrokerCommand):

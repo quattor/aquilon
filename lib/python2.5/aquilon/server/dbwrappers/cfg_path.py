@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.cfg.cfg_path import CfgPath
+from aquilon.aqdb.model import CfgPath
 
 
 def get_cfg_path(session, cfg_tld, cfg_path):
@@ -20,5 +20,3 @@ def get_cfg_path(session, cfg_tld, cfg_path):
         raise NotFoundException("%s template %s not found: %s" %
                 (cfg_tld, cfg_path, e))
     return dbcfg_path
-
-

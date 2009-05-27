@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hw.vendor import Vendor
+from aquilon.aqdb.model import Vendor
 
 
 def get_vendor(session, vendor):

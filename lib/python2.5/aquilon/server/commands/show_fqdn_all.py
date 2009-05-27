@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.sy.system import System
+from aquilon.aqdb.model import System
 
 
 class CommandShowFqdnAll(BrokerCommand):

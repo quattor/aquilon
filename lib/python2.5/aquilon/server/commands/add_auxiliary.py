@@ -13,10 +13,8 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets,
                                                  describe_interface)
-from aquilon.aqdb.net.network import get_net_id_from_ip
-from aquilon.aqdb.sy.host import Host
-from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.sy.auxiliary import Auxiliary
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Host, Interface, Auxiliary
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 
@@ -83,7 +81,7 @@ class CommandAddAuxiliary(BrokerCommand):
 
         dbauxiliary = Auxiliary(name=short, dns_domain=dbdns_domain,
                                 machine=dbmachine,
-                                ip=ip, network=dbnetwork, mac=dbinterface.mac, 
+                                ip=ip, network=dbnetwork, mac=dbinterface.mac,
                                 comments=comments)
         session.add(dbauxiliary)
         dbinterface.system = dbauxiliary
@@ -107,5 +105,3 @@ class CommandAddAuxiliary(BrokerCommand):
             pass
 
         return
-
-

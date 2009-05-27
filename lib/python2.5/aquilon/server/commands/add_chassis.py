@@ -7,8 +7,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.sy.chassis import Chassis
-from aquilon.aqdb.hw.chassis_hw import ChassisHw
+from aquilon.aqdb.model import Chassis, ChassisHw
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
@@ -32,5 +31,3 @@ class CommandAddChassis(BrokerCommand):
                             chassis_hw=dbchassis_hw, comments=comments)
         session.add(dbchassis)
         return
-
-

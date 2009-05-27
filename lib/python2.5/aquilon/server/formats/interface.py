@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.interface import Interface
+from aquilon.aqdb.model import Interface
 
 
 class InterfaceFormatter(ObjectFormatter):

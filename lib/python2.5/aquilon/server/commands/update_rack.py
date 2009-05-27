@@ -6,7 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.model import Machine
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.machine import PlenaryMachineInfo

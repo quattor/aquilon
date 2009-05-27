@@ -6,14 +6,12 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc.service import Service
-from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.sy.domain import Domain
+from aquilon.aqdb.model import Service, Machine, Domain
 from twisted.python import log
-from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance, 
+from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance,
                                               PlenaryServiceInstanceServer,
-                                              PlenaryServiceClientDefault, PlenaryServiceServerDefault, 
-                                              PlenaryServiceInstanceClientDefault, 
+                                              PlenaryServiceClientDefault, PlenaryServiceServerDefault,
+                                              PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServerDefault)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
@@ -96,5 +94,3 @@ class CommandFlush(BrokerCommand):
             compileRelease()
 
         return
-
-

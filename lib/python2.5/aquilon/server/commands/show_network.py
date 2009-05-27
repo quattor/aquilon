@@ -6,8 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.net.network import Network
-from aquilon.aqdb.hw.interface import Interface
+from aquilon.aqdb.model import Interface, Network
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.server.formats.network import SimpleNetworkList
@@ -40,5 +39,3 @@ class CommandShowNetwork(BrokerCommand):
             return NetworkHostList(q.all())
         else:
             return SimpleNetworkList(q.all())
-
-

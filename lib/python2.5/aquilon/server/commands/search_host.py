@@ -7,8 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.sy.host import Host
-from aquilon.aqdb.cfg import CfgPath
+from aquilon.aqdb.model import Host, CfgPath
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.domain import get_domain
 from aquilon.server.dbwrappers.status import get_status
@@ -104,5 +103,3 @@ class CommandSearchHost(BrokerCommand):
         if fullinfo:
             return q.all()
         return SimpleSystemList(q.all())
-
-

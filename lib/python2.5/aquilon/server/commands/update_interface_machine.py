@@ -11,8 +11,8 @@ from aquilon.server.dbwrappers.interface import (get_interface,
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.net.network import get_net_id_from_ip
-from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Machine
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):

@@ -1,11 +1,11 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/ms/dist/python/PROJ/core/2.5.4/bin/python
 """ tests network """
 import __init__
 import unittest
 
 import aquilon.aqdb.depends
 
-from aquilon.aqdb.net.network import Network
+from aquilon.aqdb.model import Network
 from aquilon.aqdb.db_factory  import db_factory
 
 #class testNetwork(unittest.TestCase):

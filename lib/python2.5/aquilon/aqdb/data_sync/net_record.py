@@ -3,10 +3,11 @@ import os
 import sys
 DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-#import aquilon.aqdb.depends
 
 #TODO: rename _mask_to_cidr, it's not really hidden
-from aquilon.aqdb.net.network import Network, get_bcast, _mask_to_cidr
+from aquilon.aqdb.model import Network
+from aquilon.aqdb.model.network import get_bcast, _mask_to_cidr
+
 
 class NetRecord(object):
     """ To make comparing dsdb and aqdb network structures easier """

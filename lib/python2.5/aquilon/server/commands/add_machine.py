@@ -12,8 +12,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.sy.chassis import Chassis
-from aquilon.aqdb.hw.chassis_slot import ChassisSlot
+from aquilon.aqdb.model import Chassis, ChassisSlot
 
 
 class CommandAddMachine(BrokerCommand):
@@ -74,5 +73,3 @@ class CommandAddMachine(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
-
-

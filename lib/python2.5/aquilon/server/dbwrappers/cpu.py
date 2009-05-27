@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.model import Cpu
 
 
 # FIXME: CPU is not specified uniquely with just name!

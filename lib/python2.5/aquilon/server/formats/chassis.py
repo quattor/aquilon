@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.sy.chassis import Chassis
+from aquilon.aqdb.model import Chassis
 
 
 class ChassisFormatter(ObjectFormatter):

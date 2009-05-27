@@ -13,13 +13,8 @@ from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.aqdb.loc.building import Building
-from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.sy.chassis import Chassis
-from aquilon.aqdb.hw.chassis_hw import ChassisHw
-from aquilon.aqdb.hw.chassis_slot import ChassisSlot
-from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw,
+                                 ChassisSlot, Machine, DnsDomain)
 
 
 class CommandAddAuroraHost(CommandAddHost):

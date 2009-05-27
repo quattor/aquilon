@@ -9,7 +9,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.cfg import Archetype, Personality
+from aquilon.aqdb.model import Archetype, Personality
 
 def get_personality(session, archetype, personality):
     try:

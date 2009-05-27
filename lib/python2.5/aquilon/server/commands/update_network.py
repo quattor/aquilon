@@ -12,7 +12,7 @@ from aquilon.exceptions_ import (ArgumentError, NotFoundException)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
-from aquilon.aqdb.net.network import Network
+from aquilon.aqdb.model import Network
 import re
 
 class CommandUpdateNetwork(BrokerCommand):

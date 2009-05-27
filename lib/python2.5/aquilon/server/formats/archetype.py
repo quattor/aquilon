@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.cfg.archetype import Archetype
+from aquilon.aqdb.model import Archetype
 
 
 class ArchetypeFormatter(ObjectFormatter):

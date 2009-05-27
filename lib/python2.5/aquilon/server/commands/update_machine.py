@@ -16,9 +16,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.sy.chassis import Chassis
-from aquilon.aqdb.hw.chassis_slot import ChassisSlot
-from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.model import Cpu, Chassis, ChassisSlot
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -155,5 +153,3 @@ class CommandUpdateMachine(BrokerCommand):
                                  machine=dbmachine)
             session.add(dbslot)
         return
-
-

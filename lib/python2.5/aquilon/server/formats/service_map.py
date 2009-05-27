@@ -7,7 +7,7 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):

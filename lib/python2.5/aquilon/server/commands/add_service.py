@@ -6,10 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc.service import Service
-from aquilon.aqdb.svc.service_instance import ServiceInstance
-from aquilon.aqdb.cfg.cfg_path import CfgPath
-from aquilon.aqdb.cfg.tld import Tld
+from aquilon.aqdb.model import Service, ServiceInstance, CfgPath, Tld
 from aquilon.server.templates.domain import (compileLock, compileRelease)
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance,
@@ -29,7 +26,7 @@ class CommandAddService(BrokerCommand):
         compileLock();
         #TODO: if service rows in the database exist, but the plenary files
         #are not written out, it looks like a successful add, even though
-        #it will fail. 
+        #it will fail.
         try:
             if not dbservice:
                 # FIXME: Could have better error handling

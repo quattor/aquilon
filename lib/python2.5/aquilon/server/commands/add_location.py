@@ -10,16 +10,8 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.loc.location import Location
-from aquilon.aqdb.loc.company import Company
-from aquilon.aqdb.loc.hub import Hub
-from aquilon.aqdb.loc.continent import Continent
-from aquilon.aqdb.loc.country import Country
-from aquilon.aqdb.loc.city import City
-from aquilon.aqdb.loc.building import Building
-from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.loc.desk import Desk
-
+from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
+                                 City, Building, Rack, Desk)
 
 # FIXME: This probably belongs in location.py
 # It's also broken, as campus is not strictly between country and city.
@@ -32,7 +24,7 @@ class CommandAddLocation(BrokerCommand):
     required_parameters = ["name", "fullname", "type",
             "parentname", "parenttype", "comments"]
 
-    def render(self, session, name, fullname, type, 
+    def render(self, session, name, fullname, type,
             parentname, parenttype, comments, **arguments):
         newLocation = session.query(Location).filter_by(name=name,
                 location_type=type).first()
@@ -86,5 +78,3 @@ class CommandAddLocation(BrokerCommand):
                 parent=dbparent, **optional_args)
         session.add(new_location)
         return
-
-

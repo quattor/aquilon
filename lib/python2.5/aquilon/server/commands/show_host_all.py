@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import SimpleHostList
-from aquilon.aqdb.sy.host import Host
+from aquilon.aqdb.model import Host
 
 
 class CommandShowHostAll(BrokerCommand):

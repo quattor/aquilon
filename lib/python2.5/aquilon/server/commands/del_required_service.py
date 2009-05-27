@@ -9,7 +9,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc.service_list_item import ServiceListItem
+from aquilon.aqdb.model import ServiceListItem
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.service import get_service
 

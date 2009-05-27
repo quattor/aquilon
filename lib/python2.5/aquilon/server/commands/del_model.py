@@ -11,7 +11,7 @@ from twisted.python import log
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.aqdb.hw.model import Model
+from aquilon.aqdb.model import Model
 
 
 class CommandDelModel(BrokerCommand):

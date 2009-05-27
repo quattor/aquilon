@@ -6,7 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.sy.domain import Domain
+from aquilon.aqdb.model import Domain
 from aquilon.exceptions_ import NotFoundException
 
 

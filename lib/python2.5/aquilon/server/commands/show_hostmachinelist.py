@@ -9,8 +9,7 @@ from sqlalchemy.sql import select
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostMachineList
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.sy  import Host
-from aquilon.aqdb.cfg import Archetype, Personality
+from aquilon.aqdb.model import Host, Archetype, Personality
 
 
 class CommandShowHostMachineList(BrokerCommand):

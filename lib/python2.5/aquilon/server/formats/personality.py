@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.cfg import Personality
+from aquilon.aqdb.model import Personality
 
 
 class PersonalityFormatter(ObjectFormatter):

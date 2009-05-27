@@ -12,8 +12,7 @@ from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.vendor import get_vendor
 from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.server.dbwrappers.cpu import get_cpu
-from aquilon.aqdb.hw.model import Model
-from aquilon.aqdb.hw.machine_specs import MachineSpecs
+from aquilon.aqdb.model import Model, MachineSpecs
 
 
 class CommandAddModel(BrokerCommand):
@@ -55,5 +54,3 @@ class CommandAddModel(BrokerCommand):
                     disk_capacity=disksize, nic_count=nics)
             session.add(dbmachine_specs)
         return
-
-

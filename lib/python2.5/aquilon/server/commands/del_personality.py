@@ -9,8 +9,7 @@ import os
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.cfg import Personality, Archetype
-from aquilon.aqdb.sy import Host
+from aquilon.aqdb.model import Personality, Archetype, Host
 from aquilon.server.templates.personality import PlenaryPersonality
 
 

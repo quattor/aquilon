@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.machine_specs import MachineSpecs
+from aquilon.aqdb.model import MachineSpecs
 
 
 class MachineSpecsFormatter(ObjectFormatter):

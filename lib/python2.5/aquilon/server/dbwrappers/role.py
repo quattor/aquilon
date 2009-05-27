@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.auth.role import Role
+from aquilon.aqdb.model import Role
 
 
 def get_role(session, role):
@@ -17,5 +17,3 @@ def get_role(session, role):
     except InvalidRequestError, e:
         raise NotFoundException("Role %s not found: %s" % (role, e))
     return dbrole
-
-

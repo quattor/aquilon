@@ -15,7 +15,7 @@ from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.aqdb.sy.build_item import BuildItem
+from aquilon.aqdb.model import BuildItem
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost

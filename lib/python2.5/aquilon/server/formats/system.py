@@ -6,9 +6,9 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.sy.system import System
+from aquilon.aqdb.model import System
 # Pull this in, at least temporarily, because *nothing* else references it
-from aquilon.aqdb.sy.console_server import ConsoleServer
+from aquilon.aqdb.model import ConsoleServer
 
 
 # Should never get invoked...
@@ -46,5 +46,3 @@ class SimpleSystemListFormatter(ObjectFormatter):
             % {"fqdn": system.fqdn} for system in sslist])
 
 ObjectFormatter.handlers[SimpleSystemList] = SimpleSystemListFormatter()
-
-

@@ -6,7 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.auth.user_principal import UserPrincipal
+from aquilon.aqdb.model import UserPrincipal
 
 
 class CommandShowPrincipal(BrokerCommand):

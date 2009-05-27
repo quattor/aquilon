@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.sy.chassis import Chassis
+from aquilon.aqdb.model import Chassis
 
 
 class CommandShowChassisChassis(BrokerCommand):

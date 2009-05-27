@@ -5,8 +5,8 @@ import __init__
 
 import aquilon.aqdb.depends
 
-from aquilon.aqdb.loc.building import Building
-from aquilon.aqdb.loc.campus   import Campus, CampusDiffStruct
+from aquilon.aqdb.model import Building, Campus, Continent
+from aquilon.aqdb.model.campus import CampusDiffStruct
 
 _cmt = 'TEST CAMPUS'
 
@@ -67,6 +67,10 @@ class TestCampusPopulate(object):
                               skipinitialspace=True)
 
     def setUp(self):
+        no_continents = len(self.sess.query(Continent).all())
+        if  no_continents < 4:
+            self.log.error('Not enough continents (found %s)')
+            return False
 
         for row in self._get_campus_csv():
             code  = row['code']

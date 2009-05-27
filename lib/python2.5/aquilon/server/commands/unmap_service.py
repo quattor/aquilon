@@ -6,7 +6,7 @@
 
 from aquilon.exceptions_ import UnimplementedError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality

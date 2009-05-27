@@ -6,7 +6,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.loc.rack import Rack
+from aquilon.aqdb.model import Rack
 from aquilon.server.broker import force_int
 from aquilon.server.dbwrappers.location import get_location
 
@@ -44,5 +44,3 @@ def get_or_create_rack(session, rackid, building, rackrow, rackcolumn,
             rack_row=rackrow, rack_column=rackcolumn, comments=comments)
     session.add(dbrack)
     return dbrack
-
-

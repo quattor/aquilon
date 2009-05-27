@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.net.dns_domain import DnsDomain
-from aquilon.aqdb.sy.host import Host
+from aquilon.aqdb.model import Host, DnsDomain
 from aquilon.server.dbwrappers.system import get_system
 
 
@@ -30,5 +29,3 @@ def get_host_dependencies(session, dbhost):
     ret = []
     # XXX: Show any service instance which has dbhost as an element in host_list.hosts
     return ret
-
-

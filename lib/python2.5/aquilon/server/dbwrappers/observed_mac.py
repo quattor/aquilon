@@ -5,7 +5,7 @@
 """Wrapper to make getting a observed_mac simpler."""
 
 
-from aquilon.aqdb.hw.observed_mac import ObservedMac
+from aquilon.aqdb.model import ObservedMac
 
 
 def get_or_create_observed_mac(session, dbswitch, port, mac):

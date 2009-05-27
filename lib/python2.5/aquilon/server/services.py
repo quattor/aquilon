@@ -11,9 +11,8 @@ from random import choice
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.cfg.tld import Tld
-from aquilon.aqdb.sy.build_item import BuildItem
-from aquilon.aqdb.svc import ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import (Tld, BuildItem, ServiceMap,
+                                 PersonalityServiceMap)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 
 
@@ -427,5 +426,3 @@ class Chooser(object):
                 plenary_info = PlenaryServiceInstanceServer(instance.service,
                                                             instance)
                 plenary_info.write(locked=locked)
-
-

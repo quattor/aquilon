@@ -9,12 +9,13 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon import const
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.loc.location import Location
+from aquilon.aqdb.model import Location
 
 
 def get_location(session, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
     location_type = None
+    #TODO: remove dependency on const and pull types from a distinct query
     for lt in const.location_types:
         if kwargs.get(lt):
             if location_type:
@@ -30,5 +31,3 @@ def get_location(session, **kwargs):
         raise NotFoundException("%s '%s' not found: %s"
                 % (location_type.capitalize(), kwargs[location_type], e))
     return dblocation
-
-

@@ -10,7 +10,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.model import Machine
 
 
 class CommandShowMachine(BrokerCommand):

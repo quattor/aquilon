@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.hardware import MachineType
+from aquilon.aqdb.model import MachineType
 
 
 def get_machine_type(session, machine_type):
@@ -17,5 +17,3 @@ def get_machine_type(session, machine_type):
     except InvalidRequestError, e:
         raise NotFoundException("MachineType %s not found: %s" % (machine_type, e))
     return dbmachine_type
-
-

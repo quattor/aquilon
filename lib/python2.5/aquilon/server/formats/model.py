@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.model import Model
+from aquilon.aqdb.model import Model
 
 
 class ModelFormatter(ObjectFormatter):
@@ -21,5 +21,3 @@ class ModelFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()
-
-

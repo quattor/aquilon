@@ -6,8 +6,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc.service import Service
-from aquilon.aqdb.svc.service_instance import ServiceInstance
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service_instance import get_client_service_instances
 from aquilon.server.formats.service_instance import ServiceInstanceList
@@ -35,5 +34,3 @@ class CommandShowService(BrokerCommand):
             return ServiceInstanceList(service_instances)
         else:
             return ServiceList(session.query(Service).all())
-
-

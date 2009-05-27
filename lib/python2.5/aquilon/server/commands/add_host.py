@@ -15,8 +15,8 @@ from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
-from aquilon.aqdb.net.network import get_net_id_from_ip
-from aquilon.aqdb.sy.host import Host
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Host
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 
@@ -110,5 +110,3 @@ class CommandAddHost(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
-
-

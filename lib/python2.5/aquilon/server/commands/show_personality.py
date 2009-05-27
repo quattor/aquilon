@@ -8,7 +8,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.cfg import Personality
+from aquilon.aqdb.model import Personality
 
 
 class CommandShowPersonality(BrokerCommand):

@@ -10,8 +10,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import parse_system
-from aquilon.aqdb.sy.tor_switch import TorSwitch
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import TorSwitch, HardwareEntity
 
 
 class CommandShowTorSwitch(BrokerCommand):
@@ -34,5 +33,3 @@ class CommandShowTorSwitch(BrokerCommand):
             q = q.filter(TorSwitch.tor_switch_id==HardwareEntity.id)
             q = q.filter(HardwareEntity.model_id==dbmodel.id)
         return q.all()
-
-

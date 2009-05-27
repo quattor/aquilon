@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.model import Cpu
 
 
 class CommandShowCpu(BrokerCommand):

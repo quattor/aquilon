@@ -8,8 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.sy.quattor_server import QuattorServer
-from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.aqdb.model import QuattorServer, DnsDomain
 
 
 def get_quattor_server(session, quattor_server):
@@ -34,5 +33,3 @@ def get_or_create_quattor_server(session, quattor_server):
             comments='Automatically generated entry')
     session.add(dbquattor_server)
     return dbquattor_server
-
-

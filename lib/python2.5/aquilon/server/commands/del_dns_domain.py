@@ -9,7 +9,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.dns_domain import get_dns_domain
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.sy.system import System
+from aquilon.aqdb.model import System
 
 
 class CommandDelDnsDomain(BrokerCommand):

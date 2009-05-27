@@ -7,7 +7,7 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.aqdb.model import DnsDomain
 
 
 class DnsDomainFormatter(ObjectFormatter):
@@ -40,5 +40,3 @@ class DNSDomainListFormatter(ListFormatter):
 
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()
 ObjectFormatter.handlers[DNSDomainList] = DNSDomainListFormatter()
-
-

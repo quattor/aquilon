@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity
 
 
 # Should never get invoked...

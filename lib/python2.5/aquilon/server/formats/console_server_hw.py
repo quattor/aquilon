@@ -7,8 +7,7 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.console_server_hw import ConsoleServerHw
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import ConsoleServerHw, HardwareEntity
 
 
 class ConsoleServerHwFormatter(ObjectFormatter):
@@ -31,5 +30,3 @@ class ConsoleServerHwFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[ConsoleServerHw] = ConsoleServerHwFormatter()
-
-

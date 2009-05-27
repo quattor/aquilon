@@ -7,8 +7,7 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.chassis_hw import ChassisHw
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import ChassisHw, HardwareEntity
 
 
 class ChassisHwFormatter(ObjectFormatter):
@@ -31,5 +30,3 @@ class ChassisHwFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[ChassisHw] = ChassisHwFormatter()
-
-

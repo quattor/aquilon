@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.vendor import get_vendor
@@ -38,5 +38,3 @@ def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
     if kwargs.get('serial', None):
         q = q.filter_by(serial_no=kwargs['serial'])
     return q
-
-

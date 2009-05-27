@@ -8,9 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.hw.cpu import Cpu
-from aquilon.aqdb.hw.disk import Disk
+from aquilon.aqdb.model import Cpu, Disk, Machine
 from aquilon.server.broker import force_int
 
 
@@ -58,7 +56,7 @@ def create_machine(session, machine, dblocation, dbmodel,
                 raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
         else:
             raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
-    
+
     if cpucount is None:
         if dbmodel.machine_specs:
             cpucount = dbmodel.machine_specs.cpu_quantity
@@ -89,5 +87,3 @@ def create_machine(session, machine, dblocation, dbmodel,
 
     session.flush()
     return dbmachine
-
-

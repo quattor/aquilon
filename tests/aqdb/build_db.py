@@ -25,9 +25,9 @@ m = Modulecmd()
 if config.has_option("database", "module"):
     m.load(config.get("database", "module"))
 
-from aquilon.aqdb.base          import Base
-from aquilon.aqdb.db_factory    import db_factory
-from aquilon.aqdb.utils         import constraints as cnst
+from aquilon.aqdb.model      import Base
+from aquilon.aqdb.db_factory import db_factory
+from aquilon.aqdb.utils      import constraints as cnst
 import test_campus_populate as tcp
 
 pkgs         = {}
@@ -131,7 +131,7 @@ def main(*args, **kw):
 
     for p in order:
         for module_name in pkgs[p]:
-            pkg_name = 'aquilon.aqdb.%s'%(p)
+            pkg_name = 'aquilon.aqdb.model'
 
             try:
                 mod = importName(pkg_name,module_name)
@@ -167,6 +167,7 @@ def main(*args, **kw):
                 #TODO: make death on first fail an option
                 sys.exit(9)
 
+    if opts.populate:
         try:
             import test_campus_populate as tcp
             cps = tcp.TestCampusPopulate(s, **kwargs)

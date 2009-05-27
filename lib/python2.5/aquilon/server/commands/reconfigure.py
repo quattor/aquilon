@@ -10,7 +10,7 @@ from aquilon.server.commands.make_aquilon import CommandMakeAquilon
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.aqdb.sy.build_item import BuildItem
+from aquilon.aqdb.model import BuildItem
 from aquilon.exceptions_ import ArgumentError
 
 

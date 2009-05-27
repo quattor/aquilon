@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.net.dns_domain import DnsDomain
+from aquilon.aqdb.model import DnsDomain
 
 
 def get_dns_domain(session, dns_domain):

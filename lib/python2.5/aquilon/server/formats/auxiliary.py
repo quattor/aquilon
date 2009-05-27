@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.sy.auxiliary import Auxiliary
+from aquilon.aqdb.model import Auxiliary
 
 
 class AuxiliaryFormatter(ObjectFormatter):

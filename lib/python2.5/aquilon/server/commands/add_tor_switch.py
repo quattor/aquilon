@@ -14,12 +14,9 @@ from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
                                                  describe_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.aqdb.sy.tor_switch import TorSwitch
-from aquilon.aqdb.hw.tor_switch_hw import TorSwitchHw
-from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
-from aquilon.aqdb.loc.rack import Rack
-from aquilon.aqdb.net.network import get_net_id_from_ip
+from aquilon.aqdb.model import (TorSwitch, TorSwitchHw, Interface,
+                                 HardwareEntity, Rack)
+from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
 class CommandAddTorSwitch(BrokerCommand):
@@ -83,5 +80,3 @@ class CommandAddTorSwitch(BrokerCommand):
 
             # FIXME: This information will need to go to dsdb.
         return
-
-

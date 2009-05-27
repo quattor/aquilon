@@ -8,7 +8,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.sy.tor_switch import TorSwitch
+from aquilon.aqdb.model import TorSwitch
 from aquilon.server.dbwrappers.system import get_system
 
 

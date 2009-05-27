@@ -7,7 +7,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.sy.auxiliary import Auxiliary
+from aquilon.aqdb.model import Auxiliary
 
 
 class CommandShowAuxiliaryAuxiliary(BrokerCommand):

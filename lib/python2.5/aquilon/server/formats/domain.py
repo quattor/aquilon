@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.sy.domain import Domain
+from aquilon.aqdb.model import Domain
 
 
 class DomainFormatter(ObjectFormatter):

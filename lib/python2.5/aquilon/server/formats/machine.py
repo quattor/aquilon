@@ -7,7 +7,7 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.machine import Machine
+from aquilon.aqdb.model import Machine
 
 
 class MachineFormatter(ObjectFormatter):

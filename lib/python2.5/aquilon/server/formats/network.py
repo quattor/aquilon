@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.net.network import Network
+from aquilon.aqdb.model import Network
 
 class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
@@ -114,5 +114,3 @@ class SimpleNetworkListFormatter(ObjectFormatter):
             % {"ip": network.ip} for ip in shlist])
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
-
-

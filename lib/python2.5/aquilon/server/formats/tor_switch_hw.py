@@ -7,8 +7,7 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.tor_switch_hw import TorSwitchHw
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import TorSwitchHw, HardwareEntity
 
 
 class TorSwitchHwFormatter(ObjectFormatter):
@@ -31,5 +30,3 @@ class TorSwitchHwFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[TorSwitchHw] = TorSwitchHwFormatter()
-
-

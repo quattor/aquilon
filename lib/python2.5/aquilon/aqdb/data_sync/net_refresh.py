@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/ms/dist/python/PROJ/core/2.5.4/bin/python
 """ to refresh network data from dsdb """
 
 import os
@@ -12,24 +12,13 @@ import aquilon.aqdb.depends
 
 from sqlalchemy.exceptions      import DatabaseError, IntegrityError
 
-#TODO: fix all the damn location imports with a shortcut in loc/__init__
-from aquilon.aqdb.loc.hub       import Hub
-from aquilon.aqdb.loc.city      import City
-from aquilon.aqdb.loc.company   import Company
-from aquilon.aqdb.loc.country   import Country
-from aquilon.aqdb.loc.building  import Building
-from aquilon.aqdb.loc.continent import Continent
-from aquilon.aqdb.loc.location  import Location
+from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
+                                 City, Building, System, TorSwitch, Network)
+from aquilon.aqdb.model.network import  _mask_to_cidr, get_bcast
 
-#TODO: likewise, all the imports for system subtypes
-from aquilon.aqdb.sy.system     import System
-from aquilon.aqdb.sy.tor_switch import TorSwitch
-
-from aquilon.aqdb.db_factory    import db_factory
-from aquilon.aqdb.dsdb          import DsdbConnection
-from aquilon.aqdb.net.network   import Network, _mask_to_cidr, get_bcast
-from aquilon.aqdb.data_sync     import NetRecord
-from aquilon.aqdb.data_sync     import RefreshReport
+from aquilon.aqdb.db_factory import db_factory
+from aquilon.aqdb.dsdb       import DsdbConnection
+from aquilon.aqdb.data_sync  import NetRecord, RefreshReport
 
 class NetRefresher(object):
     """ Class to encapsulate what's needed to replicate networks from AQDB

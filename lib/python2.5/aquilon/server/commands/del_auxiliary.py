@@ -13,7 +13,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.commands.del_host import delhost_lock
-from aquilon.aqdb.sy.auxiliary import Auxiliary
+from aquilon.aqdb.model import Auxiliary
 
 
 class CommandDelAuxiliary(BrokerCommand):

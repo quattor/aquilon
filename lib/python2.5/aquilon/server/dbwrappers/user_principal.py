@@ -11,9 +11,7 @@ from twisted.python import log
 from sqlalchemy.orm import eagerload
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.auth.user_principal import UserPrincipal
-from aquilon.aqdb.auth.realm import Realm
-from aquilon.aqdb.auth.role import Role
+from aquilon.aqdb.model import Role, Realm, UserPrincipal
 from aquilon.server.dbwrappers.host import hostname_to_host
 
 
@@ -73,5 +71,3 @@ def get_or_create_user_principal(session, user,
         if commitoncreate:
             session.commit()
     return dbuser
-
-

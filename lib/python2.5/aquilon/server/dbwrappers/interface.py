@@ -13,13 +13,10 @@ from sqlalchemy.exceptions import InvalidRequestError
 from sqlalchemy.sql.expression import asc, desc
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.hw.interface import Interface
-from aquilon.aqdb.hw.machine import Machine
-from aquilon.aqdb.hw.observed_mac import ObservedMac
-from aquilon.aqdb.net.network import get_net_id_from_ip
 from aquilon.aqdb.column_types.IPV4 import dq_to_int
-from aquilon.aqdb.sy.tor_switch import TorSwitch
-from aquilon.aqdb.sy.system import System
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import (Interface, Machine, ObservedMac, TorSwitch,
+                                 System)
 from aquilon.server.dbwrappers.system import get_system
 
 

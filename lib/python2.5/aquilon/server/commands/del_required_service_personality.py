@@ -9,8 +9,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.svc.personality_service_list_item import \
-        PersonalityServiceListItem
+from aquilon.aqdb.model import PersonalityServiceListItem
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.service import get_service
 
@@ -31,5 +30,3 @@ class CommandDelRequiredServicePersonality(BrokerCommand):
                                     (service, archetype, personality, e))
         session.delete(dbpsli)
         return
-
-

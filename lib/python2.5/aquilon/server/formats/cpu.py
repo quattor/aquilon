@@ -6,7 +6,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.hw.cpu import Cpu
+from aquilon.aqdb.model import Cpu
 
 
 class CpuFormatter(ObjectFormatter):

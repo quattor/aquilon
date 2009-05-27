@@ -15,8 +15,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.observed_mac import get_or_create_observed_mac
 from aquilon.server.processes import run_command
-from aquilon.aqdb.sy.tor_switch import TorSwitch
-from aquilon.aqdb.hw.hardware_entity import HardwareEntity
+from aquilon.aqdb.model import TorSwitch, HardwareEntity
 
 
 # This runs...
@@ -113,5 +112,3 @@ class CommandPollTorSwitch(BrokerCommand):
         except CSVError, e:
             raise AquilonError("Error parsing CheckNet results: %s" % e)
         return macports
-
-
