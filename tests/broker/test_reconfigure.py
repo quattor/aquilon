@@ -169,6 +169,16 @@ class TestReconfigure(TestBrokerCommand):
         self.failIf(results, "Found bad personality data in plenary "
                              "template for aquilon62.aqd-unittest.ms.com")
 
+    def testmissingpersonality(self):
+        command = ["reconfigure",
+                   "--hostname", "aquilon62.aqd-unittest.ms.com",
+                   "--archetype", "windows"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Changing archetype also requires "
+                         "specifying personality.",
+                         command)
+
     def testkeepbindings(self):
         command = ["reconfigure", "--keepbindings",
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
