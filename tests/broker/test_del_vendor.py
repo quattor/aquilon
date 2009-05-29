@@ -20,6 +20,13 @@ from brokertest import TestBrokerCommand
 
 class TestDelVendor(TestBrokerCommand):
 
+    def testdelinvalidvendor(self):
+        command = ["del_vendor", "--vendor=vendor-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "No vendor with name 'vendor-does-not-exist'",
+                         command)
+
     def testdelutvendor(self):
         command = ["del_vendor", "--vendor=utvendor"]
         self.noouttest(command)
