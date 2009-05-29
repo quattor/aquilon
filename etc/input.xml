@@ -1490,7 +1490,7 @@
   </command>
 
   <command name="del_vendor">
-      Create a vendor definition.
+      Remove a vendor definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="vendor" type="string">The name of the vendor</option>
       </optgroup>
@@ -1498,7 +1498,7 @@
   </command>
 
   <command name="show_vendor">
-      Create a vendor definition.
+      Show currently defined vendors.
       <optgroup name="mandatory_options" mandatory="True" fields="any">
          <option name="vendor" type="string">The name of the vendor</option>
          <option name="all" type="boolean" conflicts="vendor">Show all vendors</option>
@@ -1526,7 +1526,7 @@
       </optgroup>
       <transport method="delete" path="os/%(os)s/%(vers)s/%(archetype)s" />
   </command>
-  
+
   <command name="show_os">
       Show an operating system definition.
       <optgroup name="show_os_opts" mandatory="True" fields="any">
