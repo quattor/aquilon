@@ -25,14 +25,6 @@ class CommandMake(BrokerCommand):
                buildstatus, debug, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
-        # FIXME: Should this still be done for aquilon hosts?
-        #if self.config.get("broker", "environment") == "prod":
-        #    try:
-        #        gethostbyname(dbhost.fqdn)
-        #    except Exception, e:
-        #        raise NameServiceError("Could not (yet) resolve the name for %s externally, so a build would fail.  Please try again later.  Exact error: %s" %
-        #                (dbhost.fqdn, e))
-
         # We grab a template compile lock over this whole operation,
         # which means that we will wait until any outstanding compiles
         # have completed before we start modifying files within template
@@ -88,7 +80,6 @@ class CommandMake(BrokerCommand):
                 session.add(dbhost)
 
             session.flush()
-            #session.refresh(dbhost)
 
             if arguments.get("keepbindings", None):
                 chooser = Chooser(dbhost, required_only=False, debug=debug)
@@ -109,17 +100,14 @@ class CommandMake(BrokerCommand):
             # to avoid this domain being un-compilable in the future.
             # If this was a new file, we can just remove the plenary.
             if (old_content is None):
-                # FIXME: Why was this commented out?  Should it occur
-                # only if archetype == 'aquilon'?
                 plenary_host.remove(locked=True)
-                #pass
             else:
                 # this method corrupts the mtime, which will cause this
                 # host to be compiled next time from a normal "make".
                 plenary_host.write(locked=True, content=old_content)
 
-            # Black magic... need to find out if sqlalchemy objects
-            # will re-vivify after a rollback based on id.
+            # Black magic... sqlalchemy objects will re-vivify after a
+            # rollback based on id.
             if chooser:
                 session.rollback()
                 chooser.write_plenary_templates(locked=True)
