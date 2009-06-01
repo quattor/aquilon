@@ -8,6 +8,7 @@
 from twisted.python import log
 
 from aquilon.exceptions_ import AuthorizationException
+from aquilon.config import Config
 from aquilon.server.dbwrappers.user_principal import host_re
 
 
@@ -19,6 +20,7 @@ class AuthorizationBroker(object):
 
     def __init__(self):
         self.__dict__ = self.__shared_state
+        self.config = Config()
 
     # FIXME: Hard coded check for now.
     def check(self, principal, dbuser, action, resource):
@@ -35,14 +37,22 @@ class AuthorizationBroker(object):
             return True
         if dbuser.role.name == 'nobody':
             raise AuthorizationException(
-                    "Unauthorized access attempt to %s on %s.  Request permission from 'aqd-eng@morganstanley.com'." % 
-                    (action, resource))
+                "Unauthorized access attempt to %s on %s.  "
+                "Request permission from '%s'." %
+                (action, resource,
+                 self.config.get("broker", "authorization_mailgroup")))
         # Right now, anybody in a group can do anything they want, except...
-        if action == 'permission' or action == 'flush' or \
-           action == 'update_domain':
-            if dbuser.role.name != 'aqd_admin':
+        if action in ['add_archetype', 'update_archetype', 'del_archetype',
+                      'add_vendor', 'del_vendor',
+                      'add_os', 'del_os']:
+            if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(
-                        "Must have the aqd_admin role to %s." % action)
+                    "Must have the engineering or aqd_admin role to %s." %
+                    action)
+        if action in ['permission', 'flush', 'update_domain', 'add_network']:
+            if dbuser.role.name not in ['aqd_admin']:
+                raise AuthorizationException(
+                    "Must have the aqd_admin role to %s." % action)
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):
