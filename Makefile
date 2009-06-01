@@ -51,7 +51,7 @@ $(COMMON)bin/%: bin/%
 $(COMMON)%.pyc: $(COMMON)%.py
 	@echo "compiling $@"
 	@rm -f $@
-	./compile_for_dist.py $<
+	./build/compile_for_dist.py $<
 
 $(COMMON)lib/%: lib/%
 	@mkdir -p `dirname $@`
@@ -77,11 +77,11 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 .PHONY: install
 install: remove_stale $(INSTALLFILES)
 	$(COMMON)bin/twistd --help >/dev/null
-	./gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
+	./build/gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
 
 .PHONY: remove_stale
 remove_stale:
-	./remove_stale.py "$(COMMON)"
+	./build/remove_stale.py "$(COMMON)"
 
 .PHONY: default
 default:
