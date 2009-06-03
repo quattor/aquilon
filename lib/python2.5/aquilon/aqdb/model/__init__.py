@@ -1,75 +1,75 @@
-from base import Base
+from aquilon.aqdb.model.base import Base
 
 #AUTHORIZATION
-from role           import Role
-from realm          import Realm
-from user_principal import UserPrincipal
+from aquilon.aqdb.model.role import Role
+from aquilon.aqdb.model.realm import Realm
+from aquilon.aqdb.model.user_principal import UserPrincipal
 
 #LOCATION
-from location  import Location
-from company   import Company
-from hub       import Hub
-from continent import Continent
-from country   import Country
-from city      import City
-from building  import Building
-from campus    import Campus
-from rack      import Rack
-from desk      import Desk
-from location_search_list import LocationSearchList
-from search_list_item     import SearchListItem
+from aquilon.aqdb.model.location import Location
+from aquilon.aqdb.model.company import Company
+from aquilon.aqdb.model.hub import Hub
+from aquilon.aqdb.model.continent import Continent
+from aquilon.aqdb.model.country import Country
+from aquilon.aqdb.model.city import City
+from aquilon.aqdb.model.building import Building
+from aquilon.aqdb.model.campus import Campus
+from aquilon.aqdb.model.rack import Rack
+from aquilon.aqdb.model.desk import Desk
+from aquilon.aqdb.model.location_search_list import LocationSearchList
+from aquilon.aqdb.model.search_list_item import SearchListItem
 
 #NETWORK
-from network    import Network
-from dns_domain import DnsDomain
+from aquilon.aqdb.model.network import Network
+from aquilon.aqdb.model.dns_domain import DnsDomain
 
 #CONFIG
-from tld         import Tld
-from cfg_path    import CfgPath
-from archetype   import Archetype
-from personality import Personality
+from aquilon.aqdb.model.tld import Tld
+from aquilon.aqdb.model.cfg_path import CfgPath
+from aquilon.aqdb.model.archetype import Archetype
+from aquilon.aqdb.model.personality import Personality
 
 #HARDWARE
-from vendor            import Vendor
-from model             import Model
-from hardware_entity   import HardwareEntity
-from cpu               import Cpu
-from machine           import Machine
-from disk_type         import DiskType
-from disk              import Disk
-from machine_specs     import MachineSpecs
-from status            import Status
-from tor_switch_hw     import TorSwitchHw
-from chassis_hw        import ChassisHw
-from console_server_hw import ConsoleServerHw
+from aquilon.aqdb.model.vendor import Vendor
+from aquilon.aqdb.model.model import Model
+from aquilon.aqdb.model.hardware_entity import HardwareEntity
+from aquilon.aqdb.model.cpu import Cpu
+from aquilon.aqdb.model.machine import Machine
+from aquilon.aqdb.model.disk_type import DiskType
+from aquilon.aqdb.model.disk import Disk
+from aquilon.aqdb.model.machine_specs import MachineSpecs
+from aquilon.aqdb.model.status import Status
+from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
+from aquilon.aqdb.model.chassis_hw import ChassisHw
+from aquilon.aqdb.model.console_server_hw import ConsoleServerHw
 
 
 #SYSTEM
-from system         import System
-from chassis        import Chassis
-from console_server import ConsoleServer
-from manager        import Manager
-from quattor_server import QuattorServer
-from domain         import Domain
-from host           import Host
-from build_item     import BuildItem
-from tor_switch     import TorSwitch
+from aquilon.aqdb.model.system import System
+from aquilon.aqdb.model.chassis import Chassis
+from aquilon.aqdb.model.console_server import ConsoleServer
+from aquilon.aqdb.model.manager import Manager
+from aquilon.aqdb.model.quattor_server import QuattorServer
+from aquilon.aqdb.model.domain import Domain
+from aquilon.aqdb.model.host import Host
+from aquilon.aqdb.model.build_item import BuildItem
+from aquilon.aqdb.model.tor_switch import TorSwitch
 
 #HARDWARE/SYSTEM LINKAGES
-from observed_mac import ObservedMac
-from serial_cnxn  import SerialCnxn
-from chassis_slot import ChassisSlot
-from interface    import Interface
-from auxiliary    import Auxiliary
+from aquilon.aqdb.model.observed_mac import ObservedMac
+from aquilon.aqdb.model.serial_cnxn  import SerialCnxn
+from aquilon.aqdb.model.chassis_slot import ChassisSlot
+from aquilon.aqdb.model.interface    import Interface
+from aquilon.aqdb.model.auxiliary import Auxiliary
 
 #SERVICE
-from service                 import Service
-from service_instance        import ServiceInstance
-from service_instance_server import ServiceInstanceServer
-from service_map             import ServiceMap
-from service_list_item       import ServiceListItem
-from personality_service_map import PersonalityServiceMap
-from personality_service_list_item import PersonalityServiceListItem
+from aquilon.aqdb.model.service import Service
+from aquilon.aqdb.model.service_instance import ServiceInstance
+from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
+from aquilon.aqdb.model.service_map import ServiceMap
+from aquilon.aqdb.model.service_list_item import ServiceListItem
+from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
+from aquilon.aqdb.model.personality_service_list_item import PersonalityServiceListItem
 
 
 # Copyright (C) 2008 Morgan Stanley

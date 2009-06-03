@@ -13,18 +13,20 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 
 class Cpu(Base):
     __tablename__ = 'cpu'
-    id            = Column(Integer, Sequence('cpu_id_seq'), primary_key = True)
-    name          = Column(AqStr(64), nullable = False)
-    vendor_id     = Column(Integer, ForeignKey(
-        'vendor.id', name = 'cpu_vendor_fk'), nullable = False)
-    speed         = Column(Integer, nullable = False)
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False ))
-    comments      = deferred(Column(String(255), nullable = True))
-    vendor        = relation(Vendor)
+    id = Column(Integer, Sequence('cpu_id_seq'), primary_key=True)
+    name = Column(AqStr(64), nullable=False)
+    vendor_id = Column(Integer, ForeignKey('vendor.id',
+                                           name='cpu_vendor_fk'),
+                       nullable=False)
+
+    speed = Column(Integer, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False ))
+    comments = deferred(Column(String(255), nullable=True))
+    vendor = relation(Vendor)
 
 cpu = Cpu.__table__
-cpu.primary_key.name = 'cpu_pk'
+cpu.primary_key.name='cpu_pk'
 
 cpu.append_constraint(
     UniqueConstraint('vendor_id','name','speed', name='cpu_nm_speed_uk'))

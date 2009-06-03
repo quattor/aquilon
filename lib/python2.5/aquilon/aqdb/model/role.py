@@ -17,9 +17,9 @@ _PRECEDENCE = 10
 class Role(Base):
     __tablename__ = 'role'
 
-    id = Column(Integer, Sequence('role_seq'), primary_key = True)
+    id = Column(Integer, Sequence('role_seq'), primary_key=True)
 
-    name = Column(AqStr(32), nullable = False)
+    name = Column(AqStr(32), nullable=False)
 
     creation_date = deferred(Column(DateTime,
                                     nullable=False, default=datetime.now))
@@ -31,7 +31,7 @@ table = Role.__table__
 
 table.info['precedence'] = _PRECEDENCE
 
-role.primary_key.name = 'role_pk'
+role.primary_key.name='role_pk'
 role.append_constraint(UniqueConstraint('name',name='role_uk'))
 
 def populate(sess, *args, **kw):

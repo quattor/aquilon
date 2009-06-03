@@ -58,28 +58,29 @@ class Network(Base):
 
     __tablename__ = 'network'
 
-    id            = Column(Integer,
-                           Sequence('network_id_seq'), primary_key = True)
+    id = Column(Integer, Sequence('network_id_seq'), primary_key=True)
 
-    location_id   = Column('location_id', Integer, ForeignKey(
-        'location.id', name = 'network_loc_fk'), nullable = False)
+    location_id = Column('location_id', Integer, ForeignKey('location.id',
+                                                            name='network_loc_fk'),
+                         nullable=False)
 
-    network_type  = Column(AqStr(32),  nullable = False, default = 'unknown')
+    network_type = Column(AqStr(32), nullable=False, default='unknown')
     #TODO:  constrain <= 32, >= 1
-    cidr            = Column(Integer,    nullable = False)
-    name            = Column(AqStr(255), nullable = False) #TODO: default to ip
-    ip              = Column(IPV4,       nullable = False)
-    bcast           = Column(IPV4,       nullable = False)
-    mask            = Column(Integer,    nullable = False) #TODO: ENUM!!!
-    side            = Column(AqStr(4),   nullable = True, default = 'a')
-    dsdb_id         = Column(Integer,    nullable = False)
-    is_discoverable = Column(Boolean,    nullable = False, default = False)
-    is_discovered   = Column(Boolean,    nullable = False, default = False)
-    creation_date   = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments        = deferred(Column(String(255), nullable = True))
+    cidr = Column(Integer, nullable=False)
+    name = Column(AqStr(255), nullable=False) #TODO: default to ip
+    ip = Column(IPV4, nullable=False)
+    bcast = Column(IPV4, nullable=False)
+    mask = Column(Integer, nullable=False) #TODO: ENUM!!!
+    side = Column(AqStr(4), nullable=True, default = 'a')
+    dsdb_id = Column(Integer, nullable=False)
 
-    location        = relation(Location, backref = 'networks')
+    is_discoverable = Column(Boolean, nullable=False, default=False)
+    is_discovered = Column(Boolean, nullable=False, default=False)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
+
+    location = relation(Location, backref='networks')
 
     def netmask(self):
         bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
@@ -111,13 +112,13 @@ class Network(Base):
     #TODO: custom str
 
 network = Network.__table__
-network.primary_key.name = 'network_pk'
+network.primary_key.name='network_pk'
 
 network.append_constraint(
-    UniqueConstraint('dsdb_id', name = 'network_dsdb_id_uk'))
+    UniqueConstraint('dsdb_id', name='network_dsdb_id_uk'))
 
 network.append_constraint(
-    UniqueConstraint('ip', name = 'net_ip_uk'))
+    UniqueConstraint('ip', name='net_ip_uk'))
 
 Index('net_loc_id_idx', network.c.location_id)
 
@@ -186,20 +187,20 @@ def populate(s, *args, **kw):
                 log.error("Can't find building '%s'\n%s"%(bldg_name, row))
                 continue
 
-            kw['name']           = name
-            kw['ip']             = ip
-            kw['mask']           = mask
-            kw['cidr']           = _mask_to_cidr[mask]
-            kw['bcast']          = get_bcast(ip, kw['cidr'])
+            kw['name'] = name
+            kw['ip'] = ip
+            kw['mask'] = mask
+            kw['cidr'] = _mask_to_cidr[mask]
+            kw['bcast'] = get_bcast(ip, kw['cidr'])
 
-            kw['network_type']   = network_type
+            kw['network_type'] = network_type
 
             if network_type == 'tor_net' or 'grid access':
                 kw['is_discoverable'] = True
 
             if side:
-                kw['side']       = side
-            kw['dsdb_id']        = dsdb_id
+                kw['side'] = side
+            kw['dsdb_id'] = dsdb_id
 
             c=Network(**kw)
             s.add(c)

@@ -16,9 +16,9 @@ class TorSwitchHw(HardwareEntity):
     #TODO: rename to id?
     hardware_entity_id = Column(Integer,
                                 ForeignKey('hardware_entity.id',
-                                           name = 'tor_switch_hw_ent_fk',
-                                           ondelete = 'CASCADE'),
-                                           primary_key = True)
+                                           name='tor_switch_hw_ent_fk',
+                                           ondelete='CASCADE'),
+                                           primary_key=True)
 
     last_poll = Column(DateTime, nullable=False, default=datetime.now)
 
@@ -29,7 +29,7 @@ class TorSwitchHw(HardwareEntity):
         return self._hardware_name
 
 tor_switch_hw = TorSwitchHw.__table__
-tor_switch_hw.primary_key.name = 'tor_switch_hw_pk'
+tor_switch_hw.primary_key.name='tor_switch_hw_pk'
 
 table = tor_switch_hw
 

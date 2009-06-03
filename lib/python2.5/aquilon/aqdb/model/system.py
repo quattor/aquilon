@@ -1,14 +1,12 @@
 """ Systems are higher level constructs which can provide services """
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint)
+from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, DnsDomain, Network
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.IPV4  import IPV4
-from aquilon.aqdb.column_types.aqmac import AqMac
+from aquilon.aqdb.column_types import AqStr, IPV4, AqMac
 
 #TODO: enum type for system_type column
 #_sys_types = ['host', 'tor_switch', 'console_switch', 'chassis', 'manager',
@@ -32,31 +30,30 @@ class System(Base):
     """
     __tablename__ = 'system'
 
-    id              = Column(Integer,
-                           Sequence('SYSTEM_SEQ'), primary_key=True)
+    id = Column(Integer, Sequence('SYSTEM_SEQ'), primary_key=True)
 
-    name            = Column(AqStr(64), nullable = False)
+    name = Column(AqStr(64), nullable=False)
 
     #TODO: create enum_types for this
-    system_type     = Column(AqStr(32), nullable = False)
+    system_type = Column(AqStr(32), nullable=False)
 
-    dns_domain_id   = Column(Integer,
-                           ForeignKey('dns_domain.id', name = 'SYSTEM_DNS_FK'),
-                           nullable = False ) #TODO: default
+    dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
+                                               name='SYSTEM_DNS_FK'),
+                           nullable=False ) #TODO: default
 
-    mac             = Column(AqMac(17), nullable = True)
-    ip              = Column(IPV4, nullable = True)
-    network_id      = Column(Integer, ForeignKey('network.id',
-                                                 name = 'SYSTEM_NET_ID_FK'),
-                                                nullable = True)
+    mac = Column(AqMac(17), nullable=True)
+    ip = Column(IPV4, nullable=True)
+    network_id = Column(Integer, ForeignKey('network.id',
+                                                 name='SYSTEM_NET_ID_FK'),
+                                                nullable=True)
 
-    creation_date   = deferred(Column( DateTime, default = datetime.now,
-                                    nullable = False))
+    creation_date = deferred(Column( DateTime, default=datetime.now,
+                                    nullable=False))
 
-    comments        = deferred(Column('comments', String(255), nullable=True))
+    comments = deferred(Column('comments', String(255), nullable=True))
 
-    dns_domain      = relation(DnsDomain)
-    network         = relation(Network, backref = 'interfaces')
+    dns_domain = relation(DnsDomain)
+    network = relation(Network, backref='interfaces')
 
     __mapper_args__ = {'polymorphic_on' : system_type}
 
@@ -65,12 +62,10 @@ class System(Base):
     fqdn = property(_fqdn)
 
 system = System.__table__
-system.primary_key.name = 'SYSTEM_PK'
+system.primary_key.name='SYSTEM_PK'
 
 system.append_constraint(
-    # Removing type. Unsure it's needed
-    #    UniqueConstraint('name', 'dns_domain_id', 'system_type',
-    UniqueConstraint('name','dns_domain_id', name = 'SYSTEM_DNS_NAME_UK'))
+    UniqueConstraint('name','dns_domain_id', name='SYSTEM_DNS_NAME_UK'))
 
 system.append_constraint(                    #systm_pt_uk means 'primary tuple'
     UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='SYSTEM_PT_UK'))

@@ -21,29 +21,29 @@ from aquilon.aqdb.model import Location
 class Hub(Location):
     """ Hub is a subtype of location """
     __tablename__ = 'hub'
-    __mapper_args__ = {'polymorphic_identity' : 'hub'}
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'hub_loc_fk',
-                           ondelete = 'CASCADE'),
+    __mapper_args__ = {'polymorphic_identity':'hub'}
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='hub_loc_fk',
+                                    ondelete='CASCADE'),
                 primary_key=True)
 
 hub = Hub.__table__
-hub.primary_key.name = 'hub_pk'
+hub.primary_key.name='hub_pk'
 
 table = hub
 
 def populate(sess, *args, **kw):
 
     _hubs = {
-        'hk':  'Asia',
-        'ln' : 'Europe',
-        'ny' : 'Americas',
+        'hk':'Asia',
+        'ln':'Europe',
+        'ny':'Americas',
     }
 
     if len(sess.query(Hub).all()) < len(_hubs.keys()):
         for h in _hubs:
             #FIX ME: don't fix it on id = 1 (breaks in certain conditions)
-            a = Hub(name=h, fullname = _hubs[h], parent_id = 1)
+            a = Hub(name=h, fullname=_hubs[h], parent_id=1)
             sess.add(a)
         sess.commit()
 

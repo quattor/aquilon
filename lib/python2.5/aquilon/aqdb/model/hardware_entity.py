@@ -12,28 +12,27 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 class HardwareEntity(Base):
     __tablename__ = 'hardware_entity'
 
-    id  = Column(Integer, Sequence('hardware_entity_seq'), primary_key=True)
+    id = Column(Integer, Sequence('hardware_entity_seq'), primary_key=True)
 
     hardware_entity_type = Column(AqStr(64), nullable=False)
 
-    location_id          = Column(Integer, ForeignKey('location.id',
+    location_id = Column(Integer, ForeignKey('location.id',
                                             name='hw_ent_loc_fk'),
                                             nullable=False)
 
-    model_id             = Column(Integer, ForeignKey('model.id',
-                                            name='hw_ent_model_fk'),
-                                            nullable=False)
+    model_id = Column(Integer, ForeignKey('model.id',
+                                          name='hw_ent_model_fk'),
+                      nullable=False)
 
-    serial_no            = Column(String(64), nullable = True)
+    serial_no = Column(String(64), nullable=True)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                                nullable = False ))
-    comments      = deferred(Column(String(255), nullable = True))
+    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False ))
+    comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, uselist = False)
-    model    = relation(Model, uselist = False)
+    location = relation(Location, uselist=False)
+    model = relation(Model, uselist=False)
 
-    __mapper_args__ = {'polymorphic_on' : hardware_entity_type}
+    __mapper_args__ = {'polymorphic_on':hardware_entity_type}
 
     _hardware_name = 'Unnamed hardware'
     @property
@@ -41,7 +40,7 @@ class HardwareEntity(Base):
         return self._hardware_name
 
 hardware_entity = HardwareEntity.__table__
-hardware_entity.primary_key.name = 'hardware_entity_pk'
+hardware_entity.primary_key.name='hardware_entity_pk'
 Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
 
 table = hardware_entity

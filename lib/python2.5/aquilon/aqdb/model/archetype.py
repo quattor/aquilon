@@ -5,40 +5,26 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
 from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base
-#from aquilon.aqdb.auth.audit_info    import AuditInfo
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'archetype'
-_PRECEDENCE = 70
 
 
 class Archetype(Base):
     """ Archetype names """
     __tablename__  = _ABV
 
-    id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     is_compileable = Column(Boolean, default=False, nullable=False)
-    creation_date = deferred(Column(DateTime, default = datetime.now,
+    creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    comments      = deferred(Column(String(255), nullable=True))
-
-    #audit_info_id   = deferred(Column(Integer, ForeignKey(
-    #        'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
-    #                                  nullable = False))
-
-    #audit_info = relation(AuditInfo)
-
-    #def __str__(self):
-    #    return str(self.name)
+    comments = deferred(Column(String(255), nullable=True))
 
 archetype = Archetype.__table__
-table     = Archetype.__table__
+table = Archetype.__table__
 
-table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
-
-archetype.primary_key.name = '%s_pk'%(_ABV)
+archetype.primary_key.name='%s_pk'%(_ABV)
 archetype.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
 
 def populate(sess, *args, **kw):
@@ -46,7 +32,6 @@ def populate(sess, *args, **kw):
         return
 
     for a_name in ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost']:
-        #a = Archetype(name=a_name, audit_info = kw['audit_info'])
         a = Archetype(name=a_name)
         sess.add(a)
 

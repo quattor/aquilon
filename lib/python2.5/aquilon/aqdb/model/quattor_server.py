@@ -10,14 +10,14 @@ class QuattorServer(System):
     __tablename__ = 'quattor_server'
 
     id = Column(Integer,
-                ForeignKey('system.id', ondelete = 'CASCADE',
-                           name = 'qs_system_fk'), primary_key = True)
+                ForeignKey('system.id', ondelete='CASCADE',
+                           name='qs_system_fk'), primary_key=True)
 
-    system = relation(System, uselist = False, backref = 'quattor_server')
+    system = relation(System, uselist=False, backref='quattor_server')
     __mapper_args__ = {'polymorphic_identity' : 'quattor_server'}
 
 quattor_server = QuattorServer.__table__
-quattor_server.primary_key.name = 'qs_pk'
+quattor_server.primary_key.name='qs_pk'
 
 table = quattor_server
 
@@ -25,7 +25,7 @@ def populate(sess, *args, **kw):
     if len(sess.query(QuattorServer).all()) < 1:
         from dns_domain import DnsDomain
 
-        dom = sess.query(DnsDomain).filter_by(name = 'ms.com').one()
+        dom = sess.query(DnsDomain).filter_by(name='ms.com').one()
         assert(dom)
 
         qs=QuattorServer(name='oziyp2', dns_domain=dom)

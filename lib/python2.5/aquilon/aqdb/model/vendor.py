@@ -9,38 +9,25 @@ from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base, Tld
 from aquilon.aqdb.column_types.aqstr import AqStr
-#from aquilon.aqdb.auth.audit_info    import AuditInfo
 
 _ABV = 'vendor'
-_PRECEDENCE = 50
 
 class Vendor(Base):
     """ Vendor names """
     __tablename__  = _ABV
 
-    id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key = True)
-    name = Column(AqStr(32), nullable = False)
+    id = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
+    name = Column(AqStr(32), nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                        nullable = False ))
-    comments      = deferred(Column(String(255), nullable = True))
-
-#    audit_info_id   = deferred(Column(Integer, ForeignKey(
-#            'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
-#                                      nullable = False))
-
-#    audit_info = relation(AuditInfo)
-
-    #def __str__(self):
-    #    return str(self.name)
+    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
 vendor = Vendor.__table__
-table  = Vendor.__table__
+table = Vendor.__table__
 
 table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
 
-vendor.primary_key.name = '%s_pk'%(_ABV)
+vendor.primary_key.name='%s_pk'%(_ABV)
 vendor.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
 
 def populate(sess, **kw):
@@ -48,8 +35,6 @@ def populate(sess, **kw):
     if len(sess.query(Vendor).all()) < 1:
         import cfg_path as cfg
         created = []
-
-        #ai = kw['audit_info']
 
         cfg_base = kw['cfg_base']
         assert os.path.isdir(cfg_base)
@@ -66,7 +51,7 @@ def populate(sess, **kw):
                 if j in created:
                     continue
                 else:
-                    a=Vendor(name=j)#, audit_info=kw['audit_info'])
+                    a=Vendor(name=j)
                     try:
                         sess.add(a)
                     except Exception,e:
@@ -76,15 +61,13 @@ def populate(sess, **kw):
                     created.append(j)
 
         aurora_vendor = Vendor(name='aurora_vendor',
-                               #audit_info=kw['audit_info'])
                              comments='Placeholder vendor for Aurora hardware.')
-
         sess.add(aurora_vendor)
         created.append(aurora_vendor)
 
         for v in ['bnt', 'cisco']:
             if not v in created:
-                dbv = Vendor(name=v)#, audit_info=kw['audit_info'])
+                dbv = Vendor(name=v)
                 try:
                     sess.add(dbv)
                 except Exception, e:

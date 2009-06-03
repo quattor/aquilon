@@ -15,22 +15,24 @@ class ServiceInstanceServer(Base):
 
     __tablename__ = 'service_instance_server'
 
-    service_instance_id = Column(Integer, ForeignKey(
-        'service_instance.id', ondelete = 'CASCADE', name = 'sis_si_fk'),
-                          primary_key = True)
+    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
+                                                     name='sis_si_fk',
+                                                     ondelete='CASCADE'),
+                                 primary_key=True)
 
-    system_id           = Column(Integer, ForeignKey(
-        'system.id', ondelete = 'CASCADE', name = 'sis_system_fk'),
-                          primary_key = True)
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='sis_system_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
 
-    position            = Column(Integer, nullable = False)
+    position = Column(Integer, nullable=False)
 
-    creation_date       = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments            = deferred(Column(String(255), nullable = True))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
-    service_instance    = relation(ServiceInstance)
-    system              = relation(System, uselist=False, backref='sislist')
+    service_instance = relation(ServiceInstance)
+    system = relation(System, uselist=False, backref='sislist')
 
     def __str__(self):
         return str(self.system.fqdn)
@@ -40,7 +42,7 @@ class ServiceInstanceServer(Base):
 
 
 service_instance_server = ServiceInstanceServer.__table__
-service_instance_server.primary_key.name = 'service_instance_server_pk'
+service_instance_server.primary_key.name='service_instance_server_pk'
 
 table = service_instance_server
 

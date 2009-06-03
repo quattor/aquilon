@@ -8,7 +8,7 @@ from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import (Base, System, Domain, Machine, Status,
                                 Personality)
-from aquilon.aqdb.column_types.aqstr   import AqStr
+from aquilon.aqdb.column_types.aqstr import AqStr
 
 
 class Host(System):
@@ -19,28 +19,33 @@ class Host(System):
         place for it. """
 
     __tablename__ = 'host'
-    __mapper_args__ = {'polymorphic_identity' : 'host'}
+    __mapper_args__ = {'polymorphic_identity':'host'}
 
-    id = Column(Integer, ForeignKey(
-        'system.id', ondelete = 'CASCADE', name = 'host_system_fk'),
-                primary_key = True)
+    id = Column(Integer, ForeignKey('system.id',
+                                    ondelete='CASCADE',
+                                    name='host_system_fk'),
+                primary_key=True)
 
-    machine_id   = Column(Integer, ForeignKey(
-        'machine.machine_id', name = 'host_machine_fk'), nullable = False)
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                            name='host_machine_fk'),
+                        nullable=False)
 
-    domain_id    = Column(Integer, ForeignKey(
-        'domain.id', name = 'host_domain_fk'), nullable = False)
+    domain_id = Column(Integer, ForeignKey('domain.id',
+                                           name='host_domain_fk'),
+                       nullable=False)
 
-    personality_id = Column(Integer, ForeignKey(
-        'personality.id', name = 'host_prsnlty_fk'), nullable = False)
+    personality_id = Column(Integer, ForeignKey('personality.id',
+                                                name='host_prsnlty_fk'),
+                            nullable=False)
 
-    status_id    = Column(Integer, ForeignKey(
-        'status.id', name = 'host_status_fk'), nullable = False)
+    status_id = Column(Integer, ForeignKey('status.id',
+                                              name='host_status_fk'),
+                          nullable=False)
 
-    machine     = relation(Machine, backref=backref('host', uselist=False))
-    domain      = relation(Domain, backref='hosts')
+    machine = relation(Machine, backref=backref('host', uselist=False))
+    domain = relation(Domain, backref='hosts')
     personality = relation(Personality, backref='hosts')
-    status      = relation(Status, backref='hosts')
+    status = relation(Status, backref='hosts')
 
     """ The following relation is defined in BuildItem to avoid circular
     import dependencies. Perhaps it can be restated another way than
@@ -67,7 +72,7 @@ class Host(System):
 
 #TODO: synonym for location, sysloc, fqdn (in system)
 host = Host.__table__
-host.primary_key.name = 'host_pk'
+host.primary_key.name='host_pk'
 host.append_constraint(
     UniqueConstraint('machine_id', 'domain_id', name='host_machine_domain_uk'))
 

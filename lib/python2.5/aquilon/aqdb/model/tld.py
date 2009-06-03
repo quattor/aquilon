@@ -10,10 +10,8 @@ from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-#from aquilon.aqdb.auth.audit_info    import AuditInfo
 
 _ABV = 'tld'
-_PRECEDENCE = 71
 
 
 class Tld(Base):
@@ -29,15 +27,10 @@ class Tld(Base):
     """
     __tablename__  = 'tld'
 
-    id             = Column(Integer, Sequence('%s_seq'%_ABV), primary_key=True)
-    type           = Column('type', AqStr(32), nullable=False)
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments      = deferred(Column(String(255), nullable = True))
-#    audit_info_id  = deferred(Column(Integer, ForeignKey('audit_info.id',
-#                         name = '%s_audit_info_fk'%(_ABV)), nullable = False))
-
-#    audit_info     = relation(AuditInfo)
+    id = Column(Integer, Sequence('%s_seq'%_ABV), primary_key=True)
+    type = Column('type', AqStr(32), nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     def __str__(self):
         return str(self.type)
@@ -45,10 +38,8 @@ class Tld(Base):
 tld   = Tld.__table__
 table = Tld.__table__
 
-table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
 
-tld.primary_key.name = 'tld_pk'
+tld.primary_key.name='tld_pk'
 tld.append_constraint(UniqueConstraint('type', name='tld_uk'))
 
 def populate(sess, **kw):
@@ -75,7 +66,7 @@ def populate(sess, **kw):
                 tlds.append(i)
 
     for i in tlds:
-        t =Tld(type=i)#, audit_info=kw['audit_info'])
+        t =Tld(type=i)
         sess.add(t)
 
     try:
@@ -92,13 +83,3 @@ def populate(sess, **kw):
 #
 # This module is part of Aquilon
 
-"""
-    def __eq__(self,other):
-        if isinstance(other,str):
-            if self.type == other:
-                return True
-            else:
-                return False
-        else:
-            raise ArgumentError('Can only be compared to strings')
-"""

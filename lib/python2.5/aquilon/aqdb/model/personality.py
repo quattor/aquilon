@@ -12,22 +12,20 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'prsnlty'
 _TN  = 'personality'
-_PRECEDENCE = 71
-
 
 class Personality(Base):
     """ Personality names """
     __tablename__  = _TN
 
-    id   = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name = '%s_arch_fk'%(_ABV)), nullable=False)
+        'archetype.id', name='%s_arch_fk'%(_ABV)), nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments      = Column(String(255), nullable=True)
+    comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref="personality", uselist=False)
+    archetype = relation(Archetype, backref='personality', uselist=False)
 
     def __repr__(self):
         s = ("<"+self.__class__.__name__ + " name ='"+ self.name +
@@ -44,10 +42,8 @@ class Personality(Base):
 personality = Personality.__table__
 table       = Personality.__table__
 
-table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
 
-personality.primary_key.name = '%s_pk'%(_ABV)
+personality.primary_key.name='%s_pk'%(_ABV)
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
                                                name='%s_uk'%(_TN)))
 

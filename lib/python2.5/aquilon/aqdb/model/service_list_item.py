@@ -17,26 +17,28 @@ class ServiceListItem(Base):
 
     __tablename__ = 'service_list_item'
 
-    id            = Column(Integer, Sequence('service_list_item_id_seq'),
+    id = Column(Integer, Sequence('service_list_item_id_seq'),
                            primary_key=True)
 
-    service_id    = Column(Integer, ForeignKey(
-                           'service.id', name='sli_svc_fk',
-                           ondelete = 'CASCADE'), nullable = False)
+    service_id = Column(Integer, ForeignKey('service.id',
+                                            name='sli_svc_fk',
+                                            ondelete='CASCADE'),
+                        nullable=False)
 
-    archetype_id  = Column(Integer, ForeignKey(
-                           'archetype.id', name='sli_arctype_fk',
-                           ondelete = 'CASCADE'), nullable = False)
+    archetype_id = Column(Integer, ForeignKey('archetype.id',
+                                              name='sli_arctype_fk',
+                                              ondelete='CASCADE'),
+                          nullable=False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False ))
-    comments      = deferred(Column(String(255), nullable=True))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False ))
+    comments = deferred(Column(String(255), nullable=True))
 
-    archetype     = relation(Archetype, backref = 'service_list')
-    service       = relation(Service)
+    archetype = relation(Archetype, backref='service_list')
+    service = relation(Service)
 
 service_list_item = ServiceListItem.__table__
-service_list_item.primary_key.name = 'svc_list_item_pk'
+service_list_item.primary_key.name='svc_list_item_pk'
 service_list_item.append_constraint(
     UniqueConstraint('archetype_id', 'service_id', name='svc_list_svc_uk'))
 

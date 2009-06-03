@@ -112,13 +112,3 @@ class TestCampusPopulate(object):
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
 
-#def commitment_phobic(func):
-#    """ Decorator any db command in try/catch """
-#    try:
-#        retval = func()
-#        return retval
-#    except Exception,e:
-#        print e
-#        session.rollback()
-#        session.close()
-#        raise

@@ -8,14 +8,14 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 class Desk(Location):
     """ Desk is a subtype of location """
     __tablename__ = 'desk'
-    __mapper_args__ = {'polymorphic_identity' : 'desk'}
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'desk_loc_fk',
-                           ondelete = 'CASCADE'),
+    __mapper_args__ = {'polymorphic_identity':'desk'}
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='desk_loc_fk',
+                                    ondelete='CASCADE'),
                 primary_key=True)
 
 desk = Desk.__table__
-desk.primary_key.name = 'desk_pk'
+desk.primary_key.name='desk_pk'
 
 table = desk
 

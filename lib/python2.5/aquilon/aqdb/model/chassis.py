@@ -10,24 +10,22 @@ from aquilon.aqdb.model import System, ChassisHw
 class Chassis(System):
     __tablename__ = 'chassis'
 
-    system_id       = Column(Integer, ForeignKey('system.id',
-                                    name = 'chassis_sys_fk',
-                                    ondelete = 'CASCADE'),
-                                   primary_key = True)
+    system_id = Column(Integer, ForeignKey('system.id', name='chassis_sys_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
 
-    chassis_hw_id   = Column(Integer, ForeignKey(
-                                            'chassis_hw.hardware_entity_id',
-                                            name = 'chassis_sys_hw_fk',
-                                            ondelete='CASCADE'),
-                                        nullable=False)
+    chassis_hw_id = Column(Integer, ForeignKey('chassis_hw.hardware_entity_id',
+                                               name='chassis_sys_hw_fk',
+                                               ondelete='CASCADE'),
+                           nullable=False)
 
     chassis_hw      = relation(ChassisHw, uselist=False,
                                backref=backref('chassis_hw', cascade='delete'))
 
-    __mapper_args__ = {'polymorphic_identity' : 'chassis'}
+    __mapper_args__ = {'polymorphic_identity':'chassis'}
 
 chassis = Chassis.__table__
-chassis.primary_key.name = 'chassis_pk'
+chassis.primary_key.name='chassis_pk'
 
 table = chassis
 

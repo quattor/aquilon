@@ -11,53 +11,43 @@ from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base, Location
 from aquilon.aqdb.column_types.aqstr import AqStr
-#from aquilon.aqdb.auth.audit_info    import AuditInfo
 
-_ABV = 'dns_domain'
-_PRECEDENCE = 62
+
+_TN = 'dns_domain'
 
 class DnsDomain(Base):
     """ For Dns Domain names """
-    __tablename__  = _ABV
+    __tablename__  = _TN
 
-    id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key = True)
-    name = Column(AqStr(32), nullable = False)
+    id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
+    name = Column(AqStr(32), nullable=False)
 
-    creation_date = Column(DateTime, default = datetime.now,
-                                    nullable = False )
-    comments      = Column(String(255), nullable = True)
-
-#    audit_info_id   = deferred(Column(Integer, ForeignKey(
-#            'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
-#                                      nullable = False))
-
-#    audit_info = relation(AuditInfo)
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
     def __str__(self):
         return str(self.name)
 
 
 dns_domain = DnsDomain.__table__
-table      = DnsDomain.__table__
+table = DnsDomain.__table__
 
-table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
 
-dns_domain.primary_key.name = '%s_pk'%(_ABV)
-dns_domain.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
+dns_domain.primary_key.name='%s_pk'%(_TN)
+dns_domain.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
 
 def populate(sess, *args, **kw):
 
     if len(sess.query(DnsDomain).all()) < 1:
 
-        ms   = DnsDomain(name = 'ms.com')#,
+        ms   = DnsDomain(name='ms.com')#,
                          #audit_info = kw['audit_info'])
 
-        onyp = DnsDomain(name = 'one-nyp.ms.com',
+        onyp = DnsDomain(name='one-nyp.ms.com',
                          #audit_info = kw['audit_info'])
                          comments = '1 NYP test domain')
 
-        devin1 = DnsDomain(name = 'devin1.ms.com',
+        devin1 = DnsDomain(name='devin1.ms.com',
                            #audit_info = kw['audit_info'])
                            comments='43881 Devin Shafron Drive domain')
 

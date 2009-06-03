@@ -3,19 +3,20 @@
 from sqlalchemy import Column, Integer, Numeric, ForeignKey
 
 from aquilon.aqdb.model import Location
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr
 
 class Rack(Location):
     """ Rack is a subtype of location """
     __tablename__ = 'rack'
-    __mapper_args__ = {'polymorphic_identity' : 'rack'}
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'rack_loc_fk',
-                           ondelete = 'CASCADE'), primary_key=True)
+    __mapper_args__ = {'polymorphic_identity':'rack'}
+
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='rack_loc_fk',
+                                    ondelete='CASCADE'), primary_key=True)
 
     #TODO: POSTHASTE: constrain to alphabetic in row, and make both non-nullable
-    rack_row    = Column(AqStr(4), nullable = True)
-    rack_column = Column(Integer,  nullable = True)
+    rack_row    = Column(AqStr(4), nullable=True)
+    rack_column = Column(Integer, nullable=True)
 
 rack = Rack.__table__
 rack.primary_key.name = 'rack_pk'
@@ -34,8 +35,8 @@ def populate(sess, *args, **kw):
             print e
             sys.exit(9)
 
-        rack_name = 'np3'
-        a = Rack(name = rack_name, fullname = 'Rack %s'%(rack_name),
+        rack_name='np3'
+        a = Rack(name = rack_name, fullname='Rack %s'%(rack_name),
                      parent = np, comments = 'AutoPopulated')
         sess.add(a)
         try:

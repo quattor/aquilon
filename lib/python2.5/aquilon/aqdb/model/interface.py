@@ -19,50 +19,48 @@ class Interface(Base):
 
     __tablename__ = 'interface'
 
-    id   = Column(Integer, Sequence('interface_seq'), primary_key=True)
+    id = Column(Integer, Sequence('interface_seq'), primary_key=True)
 
     name = Column(AqStr(32), nullable=False) #like e0, hme1, etc.
 
-    mac  = Column(AqMac(17), nullable=False)
+    mac = Column(AqMac(17), nullable=False)
 
-    bootable           = Column(Boolean, nullable=False, default=False)
+    bootable = Column(Boolean, nullable=False, default=False)
 
-    interface_type     = Column(AqStr(32), nullable=False) #TODO: index
+    interface_type = Column(AqStr(32), nullable=False) #TODO: index
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                                    name = 'IFACE_HW_ENT_FK',
-                                                    ondelete = 'CASCADE'),
-                                                   nullable = False)
+                                                    name='IFACE_HW_ENT_FK',
+                                                    ondelete='CASCADE'),
+                                nullable=False)
 
-    system_id          = Column(Integer, ForeignKey('system.id',
-                                                 name = 'IFACE_SYSTEM_FK',
-                                                 ondelete = 'CASCADE'),
-                                                nullable = True)
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='IFACE_SYSTEM_FK',
+                                           ondelete='CASCADE'),
+                       nullable=True)
 
-    creation_date      = deferred(Column('creation_date', DateTime,
-                                       default = datetime.now,
-                                     nullable = False))
+    creation_date = deferred(Column('creation_date', DateTime,
+                                    default=datetime.now,
+                                    nullable=False))
 
-    comments           = deferred(Column('comments',String(255)))
+    comments = deferred(Column('comments',String(255)))
 
-    hardware_entity    = relation(HardwareEntity, backref = 'interfaces',
-                             passive_deletes = True)
+    hardware_entity = relation(HardwareEntity, backref='interfaces',
+                               passive_deletes=True)
 
-    system             = relation(System, backref = 'interfaces',
-                               passive_deletes = True)
+    system = relation(System, backref='interfaces', passive_deletes=True)
 
     # We'll need seperate python classes for each subtype if we want to
     # use single table inheritance like this.
     #__mapper_args__ = {'polymorphic_on' : interface_type}
 
 interface = Interface.__table__
-interface.primary_key.name = 'interface_pk'
+interface.primary_key.name='interface_pk'
 
-interface.append_constraint(
-        UniqueConstraint('mac', name = 'iface_mac_addr_uk'))
+interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
 
-interface.append_constraint(
-        UniqueConstraint('hardware_entity_id', 'name', name = 'iface_hw_name_uk'))
+interface.append_constraint(UniqueConstraint('hardware_entity_id', 'name',
+                                             name='iface_hw_name_uk'))
 
 table = interface
 

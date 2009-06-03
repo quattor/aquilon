@@ -13,13 +13,13 @@ class Campus(Location):
     __tablename__ = 'campus'
     __mapper_args__ = {'polymorphic_identity' : 'campus'}
     id = Column(Integer,
-                ForeignKey('location.id', name = 'campus_loc_fk',
-                           ondelete = 'CASCADE'),
+                ForeignKey('location.id', name='campus_loc_fk',
+                           ondelete='CASCADE'),
                 primary_key=True)
 
 
 campus = Campus.__table__
-campus.primary_key.name = 'campus_pk'
+campus.primary_key.name='campus_pk'
 table = campus
 
 class CampusDiffStruct(object):
@@ -34,8 +34,8 @@ class CampusDiffStruct(object):
         self.verbose = verbose
 
         building_names = map(lambda x: x[0],
-                           dsdb.dump('buildings_by_campus',
-                                     campus=self.co.name))
+                             dsdb.dump('buildings_by_campus',
+                                       campus=self.co.name))
 
         if len(building_names) < 1:
             msg = "No buildings found for campus '%s'"%(self.co.code)
@@ -46,8 +46,8 @@ class CampusDiffStruct(object):
             Location.name.in_(building_names)).all()
 
         self.data = {}
-        self.data['cities']     = []
-        self.data['countries']  = []
+        self.data['cities'] = []
+        self.data['countries'] = []
         self.data['continents'] = []
 
         for b in self.buildings:

@@ -9,13 +9,13 @@ class Building(Location):
     __tablename__ = 'building'
     __mapper_args__ = {'polymorphic_identity' : 'building'}
 
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'building_loc_fk',
-                           ondelete = 'CASCADE'),
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='building_loc_fk',
+                                    ondelete='CASCADE'),
                 primary_key=True)
 
 building = Building.__table__
-building.primary_key.name = 'building_pk'
+building.primary_key.name='building_pk'
 
 table = building
 
@@ -24,7 +24,7 @@ def populate(sess, *args, **kw):
     if len(sess.query(Building).all()) > 0:
         return
 
-    from city import City
+    from aquilon.aqdb.model import City
 
     log = kw['log']
     assert log, "no log in kwargs for Building.populate()"

@@ -6,31 +6,22 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 
-#from sqlalchemy.orm import relation
-
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-#from aquilon.aqdb.auth.audit_info    import AuditInfo
 
-_ABV = 'status'
-_PRECEDENCE = 50
 _statuses = ['blind', 'build', 'ready']
+
+_TN = 'status'
 
 class Status(Base):
     """ Status names """
-    __tablename__  = _ABV
+    __tablename__  = _TN
 
-    id   = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-    creation_date = Column(DateTime, default = datetime.now,
-                                    nullable = False )
-    comments      = Column(String(255), nullable = True)
-
-#    audit_info_id   = deferred(Column(Integer, ForeignKey(
-#            'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
-#                                      nullable = False))
-
-#    audit_info = relation(AuditInfo)
+    creation_date = Column(DateTime, default=datetime.now,
+                                    nullable=False )
+    comments = Column(String(255), nullable=True)
 
     def __init__(self,name):
         e = "Status is a static table and can't be instanced, only queried."
@@ -42,23 +33,19 @@ class Status(Base):
 status = Status.__table__
 table  = Status.__table__
 
-table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
-
-status.primary_key.name = '%s_pk'%(_ABV)
-status.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
+status.primary_key.name='%s_pk'%(_TN)
+status.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
 
 
 def populate(sess, *args, **kw):
     from sqlalchemy import insert
     from sqlalchemy.exceptions import IntegrityError
-    #ai_id = kw['audit_info'].id
 
     if len(sess.query(Status).all()) < len(_statuses):
         i=status.insert()
         for name in _statuses:
             try:
-                i.execute(name=name)#), audit_info_id=ai_id)
+                i.execute(name=name)
             except IntegrityError:
                 pass
 

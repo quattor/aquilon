@@ -2,10 +2,9 @@
 
 from datetime import datetime
 
-from sqlalchemy      import (Table, Column, Integer, ForeignKey, Sequence,
+from sqlalchemy import (Table, Column, Integer, ForeignKey, Sequence,
                              UniqueConstraint)
-
-from sqlalchemy.orm  import relation, deferred, backref
+from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, ConsoleServer, HardwareEntity
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -15,31 +14,30 @@ class SerialCnxn(Base):
 
     __tablename__ = 'serial_cnxn'
 
-    id = Column(Integer, Sequence(name='serial_cnxn_seq'), primary_key = True)
+    id = Column(Integer, Sequence(name='serial_cnxn_seq'), primary_key=True)
 
-    console_server_id = Column(Integer,
-                               ForeignKey('console_server.id',
-                                           name='serial_cnxn_cons_svr_fk',
-                                           ondelete='CASCADE'),
-                               nullable = False)
+    console_server_id = Column(Integer, ForeignKey('console_server.id',
+                                                   name='serial_cnxn_cons_svr_fk',
+                                                   ondelete='CASCADE'),
+                               nullable=False)
 
     port_number = Column(Integer, nullable=False )
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                           name='serial_cnxn_hw_ent_fk',
-                                           ondelete='CASCADE'),
+                                                    name='serial_cnxn_hw_ent_fk',
+                                                    ondelete='CASCADE'),
                                 nullable=False)
 
-    name = Column(AqStr(64), nullable = False)
+    name = Column(AqStr(64), nullable=False)
 
 serial_cnxn = SerialCnxn.__table__
-serial_cnxn.primary_key.name = 'serial_cnxn_pk'
+serial_cnxn.primary_key.name='serial_cnxn_pk'
 
 serial_cnxn.append_constraint(UniqueConstraint(
-    'console_server_id','port_number', name = 'serial_cnxn_cons_port_uk'))
+    'console_server_id','port_number', name='serial_cnxn_cons_port_uk'))
 
 serial_cnxn.append_constraint(UniqueConstraint(
-    'hardware_entity_id', 'name', name = 'serial_cnxn_hw_name_uk'))
+    'hardware_entity_id', 'name', name='serial_cnxn_hw_name_uk'))
 
 table = SerialCnxn.__table__
 

@@ -12,18 +12,16 @@ class ChassisSlot(Base):
 
     __tablename__ = 'chassis_slot'
 
-    chassis_id = Column(Integer,
-                        ForeignKey('chassis.system_id',
-                                   name='chassis_slot_chassis_fk',
-                                   ondelete='CASCADE'),
+    chassis_id = Column(Integer, ForeignKey('chassis.system_id',
+                                            name='chassis_slot_chassis_fk',
+                                            ondelete='CASCADE'),
                         primary_key=True)
 
     slot_number = Column(Integer, primary_key=True)
 
     # TODO: Code constraint that these are Blades...
-    machine_id = Column(Integer,
-                        ForeignKey('machine.machine_id',
-                                   name='chassis_slot_machine_fk'),
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                            name='chassis_slot_machine_fk'),
                         nullable=True)
     #TODO: need a unique key against this, but what if it takes 2 slots?
 
@@ -37,22 +35,9 @@ class ChassisSlot(Base):
                                        cascade='delete, delete-orphan'))
 
 chassis_slot = ChassisSlot.__table__
-chassis_slot.primary_key.name = 'chassis_slot_pk'
+chassis_slot.primary_key.name='chassis_slot_pk'
 
 table = chassis_slot
-
-
-# We don't create any chassis anymore, so there's no point in this...
-
-#def populate(sess, *args, **kw):
-#
-#    if len(sess.query(ChassisSlot).all()) < 1:
-#        for c in sess.query(Chassis).all():
-#            for node in range(1, 17):
-#                a = ChassisSlot(chassis=c, slot_number=node)
-#                sess.add(a)
-#        sess.commit()
-#        print 'created %d chassis slots' % sess.query(ChassisSlot).count()
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon

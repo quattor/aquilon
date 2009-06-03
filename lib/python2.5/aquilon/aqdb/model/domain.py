@@ -14,27 +14,30 @@ class Domain(Base):
     """ Domain is to be used as the top most level for path traversal of the SCM
             Represents individual config repositories """
     __tablename__ = 'domain'
-    id = Column(Integer, Sequence('domain_id_seq'), primary_key = True)
-    name = Column(AqStr(32), nullable = False)
-    server_id = Column(Integer,
-                       ForeignKey('quattor_server.id', name = 'domain_qs_fk'),
-                       nullable = False)
-    compiler = Column(String(255), nullable = False, default =
-                      '/ms/dist/elfms/PROJ/panc/8.2.3/bin/panc')
-    owner_id = Column(Integer, ForeignKey(
-        'user_principal.id', name = 'domain_user_princ_fk'), nullable = False)
+    id = Column(Integer, Sequence('domain_id_seq'), primary_key=True)
+    name = Column(AqStr(32), nullable=False)
+
+    server_id = Column(Integer, ForeignKey('quattor_server.id',
+                                           name='domain_qs_fk'),
+                       nullable=False)
+
+    compiler = Column(String(255), nullable=False,
+                      default='/ms/dist/elfms/PROJ/panc/8.2.3/bin/panc')
+
+    owner_id = Column(Integer, ForeignKey('user_principal.id',
+                                          name='domain_user_princ_fk'),
+                      nullable=False)
 
     creation_date = deferred(Column( DateTime, default=datetime.now,
-                                    nullable = False))
-    comments      = deferred(Column('comments', String(255), nullable=True))
+                                    nullable=False))
+    comments = deferred(Column('comments', String(255), nullable=True))
 
-    server        = relation(QuattorServer, backref = 'domains')
-    owner         = relation(UserPrincipal, uselist = False, backref = 'domain')
+    server = relation(QuattorServer, backref='domains')
+    owner = relation(UserPrincipal, uselist=False, backref='domain')
 
 domain = Domain.__table__
-domain.primary_key.name = 'domain_pk'
-domain.append_constraint(
-    UniqueConstraint('name',name='domain_uk'))
+domain.primary_key.name='domain_pk'
+domain.append_constraint(UniqueConstraint('name',name='domain_uk'))
 
 table = domain
 
@@ -44,15 +47,15 @@ def populate(sess, *args, **kw):
         qs = sess.query(QuattorServer).first()
         assert(qs)
 
-        cdb = sess.query(UserPrincipal).filter_by(name = 'cdb').one()
+        cdb = sess.query(UserPrincipal).filter_by(name='cdb').one()
         assert(cdb)
 
         daqscott = sess.query(UserPrincipal).filter_by(name='daqscott').one()
         assert(daqscott)
 
-        q = Domain(name = 'daqscott', server = qs, owner = daqscott)
+        q = Domain(name='daqscott', server = qs, owner = daqscott)
 
-        r = Domain(name = 'ny-prod', server = qs, owner = cdb,
+        r = Domain(name='ny-prod', server = qs, owner = cdb,
                    comments='The NY regional production domain')
 
         sess.add(q)

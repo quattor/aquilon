@@ -4,8 +4,8 @@ import os
 import sys
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint, Index)
+from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint, Index)
 
 from sqlalchemy.orm import relation
 
@@ -15,18 +15,17 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 class CfgPath(Base):
     __tablename__ = 'cfg_path'
 
-    id            = Column(Integer,
-                           Sequence('cfg_path_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('cfg_path_id_seq'), primary_key=True)
 
-    tld_id        = Column(Integer, ForeignKey('tld.id',
-                                      name = 'cfg_path_tld_fk'), nullable=False)
+    tld_id = Column(Integer, ForeignKey('tld.id', name='cfg_path_tld_fk'),
+                    nullable=False)
 
     relative_path = Column(AqStr(255), nullable=False)
-    last_used     = Column(DateTime, default=datetime.now)
-    creation_date = Column(DateTime, default=datetime.now, nullable = False )
-    comments      = Column(String(255), nullable = True)
+    last_used = Column(DateTime, default=datetime.now)
+    creation_date = Column(DateTime, default=datetime.now, nullable=False )
+    comments = Column(String(255), nullable=True)
 
-    tld           = relation(Tld, lazy = False)
+    tld = relation(Tld, lazy=False)
 
     def __str__(self):
         return '%s/%s'%(self.tld,self.relative_path)
@@ -34,7 +33,7 @@ class CfgPath(Base):
         return '%s/%s'%(self.tld,self.relative_path)
 
 cfg_path = CfgPath.__table__
-cfg_path.primary_key.name = 'cfg_path_pk'
+cfg_path.primary_key.name='cfg_path_pk'
 
 cfg_path.append_constraint(
     UniqueConstraint('tld_id','relative_path',name='cfg_path_uk'))

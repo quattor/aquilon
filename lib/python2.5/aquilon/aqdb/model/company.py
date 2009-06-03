@@ -6,21 +6,21 @@ from aquilon.aqdb.model import Location
 class Company(Location):
     """ Company is a subtype of location """
     __tablename__ = 'company'
-    __mapper_args__ = {'polymorphic_identity' : 'company'}
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'company_loc_fk',
-                           ondelete = 'CASCADE'),
+    __mapper_args__ = {'polymorphic_identity':'company'}
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='company_loc_fk',
+                                    ondelete='CASCADE'),
                 primary_key=True)
 
 company = Company.__table__
-company.primary_key.name = 'company_pk'
+company.primary_key.name='company_pk'
 
 table = company
 
 def populate(sess, *args, **kw):
 
     if len(sess.query(Company).all()) < 1:
-        a = Company(name='ms', fullname = 'root node')
+        a = Company(name='ms', fullname='root node')
         #NO PARENT FOR THE ROOT NODE: breaks connect_by
         #TODO: audit for null parents in location table
         #      where its not the root node

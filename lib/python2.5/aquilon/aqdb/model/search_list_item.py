@@ -17,19 +17,20 @@ class SearchListItem(Base):
 
     __tablename__ = 'search_list_item'
 
-    id = Column('id', Integer, Sequence('sli_seq'), primary_key = True)
+    id = Column('id', Integer, Sequence('sli_seq'), primary_key=True)
 
-    location_search_list_id = Column(Integer, ForeignKey(
-        'location_search_list.id', ondelete = 'CASCADE',
-        name = 'sli_list_fk'), nullable = False)
+    location_search_list_id = Column(Integer, ForeignKey('location_search_list.id',
+                                                         name='sli_list_fk',
+                                                         ondelete='CASCADE'),
+                                     nullable=False)
 
-    location_type = Column(AqStr(32), nullable = False)
+    location_type = Column(AqStr(32), nullable=False)
 
-    position      = Column(Integer, nullable = False)
+    position = Column(Integer, nullable=False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments      = deferred(Column(String(255), nullable = True))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     lsl = relation(LocationSearchList)
 #TODO: add better str and repr methods:
@@ -39,14 +40,14 @@ class SearchListItem(Base):
 
 search_list_item = SearchListItem.__table__
 
-search_list_item.primary_key.name = 'search_li_pk'
+search_list_item.primary_key.name='search_li_pk'
 
 search_list_item.append_constraint(
     UniqueConstraint('id', 'location_type', name='sli_loc_typ_uk'))
 
 search_list_item.append_constraint(
     UniqueConstraint('location_type', 'position',
-                     name = 'sli_loc_typ_pos_uk'))
+                     name='sli_loc_typ_pos_uk'))
 
 LocationSearchList.location_types = relation(SearchListItem,
                           collection_class = ordering_list('position'),

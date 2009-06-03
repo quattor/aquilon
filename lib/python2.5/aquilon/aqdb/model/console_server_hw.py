@@ -9,13 +9,12 @@ from aquilon.aqdb.model import HardwareEntity
 
 class ConsoleServerHw(HardwareEntity):
     __tablename__ = 'console_server_hw'
-    __mapper_args__ = {'polymorphic_identity' : 'console_server_hw'}
+    __mapper_args__ = {'polymorphic_identity':'console_server_hw'}
 
-    hardware_entity_id = Column(Integer,
-                                ForeignKey('hardware_entity.id',
-                                           name = 'cons_svr_hw_fk',
-                                           ondelete = 'CASCADE'),
-                                           primary_key = True)
+    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
+                                                    name='cons_svr_hw_fk',
+                                                    ondelete='CASCADE'),
+                                primary_key=True)
 
     @property
     def hardware_name(self):
@@ -25,7 +24,7 @@ class ConsoleServerHw(HardwareEntity):
         return self._hardware_name
 
 console_server_hw = ConsoleServerHw.__table__
-console_server_hw.primary_key.name = 'cons_svr_hw_pk'
+console_server_hw.primary_key.name='cons_svr_hw_pk'
 
 table = console_server_hw
 

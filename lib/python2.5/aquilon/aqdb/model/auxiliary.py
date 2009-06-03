@@ -1,6 +1,6 @@
 """ Represent secondary interfaces """
 
-from sqlalchemy import (Integer, String, Column, ForeignKey)
+from sqlalchemy import Integer, Column, ForeignKey
 from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import System, Machine
@@ -9,20 +9,20 @@ class Auxiliary(System):
     __tablename__ = 'auxiliary'
 
     id = Column(Integer, ForeignKey('system.id',
-                                     name = 'aux_system_fk',
-                                     ondelete = 'CASCADE'),
-                                    primary_key = True)
+                                    name='aux_system_fk',
+                                    ondelete='CASCADE'),
+                primary_key=True)
 
-    machine_id  = Column(Integer, ForeignKey('machine.machine_id',
-                                             name = 'aux_machine_fk'),
-                                            nullable = False)
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                             name='aux_machine_fk'),
+                         nullable=False)
 
-    machine     = relation(Machine, backref='auxiliaries')
+    machine = relation(Machine, backref='auxiliaries')
 
-    __mapper_args__ = {'polymorphic_identity' : 'auxiliary'}
+    __mapper_args__ = {'polymorphic_identity':'auxiliary'}
 
 auxiliary = Auxiliary.__table__
-auxiliary.primary_key.name = 'aux_pk'
+auxiliary.primary_key.name='aux_pk'
 
 table = auxiliary
 

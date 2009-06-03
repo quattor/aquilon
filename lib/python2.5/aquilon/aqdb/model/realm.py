@@ -12,14 +12,13 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 #Upfront Design Decisions:
 #  -Needs it's own creation_date + comments columns. Audit log depends on
 #   this table for it's info, and would have a circular dependency
-_PRECEDENCE = 10
 
 class Realm(Base):
     __tablename__ = 'realm'
 
-    id = Column(Integer, Sequence('realm_seq'), primary_key = True)
+    id = Column(Integer, Sequence('realm_seq'), primary_key=True)
 
-    name = Column(AqStr(32), nullable = False)
+    name = Column(AqStr(32), nullable=False)
 
     creation_date = deferred(Column(DateTime,
                                     nullable=False, default=datetime.now))
@@ -29,14 +28,13 @@ class Realm(Base):
 realm = Realm.__table__
 table = Realm.__table__
 
-table.info['precedence'] = _PRECEDENCE
 
-realm.primary_key.name = 'realm_pk'
+realm.primary_key.name='realm_pk'
 realm.append_constraint(UniqueConstraint('name',name='realm_uk'))
 
 def populate(sess, *args, **kw):
     if sess.query(Realm).count() == 0:
-        r = Realm(name = 'is1.morgan')
+        r = Realm(name='is1.morgan')
         sess.add(r)
         sess.commit()
         r = sess.query(Realm).first()

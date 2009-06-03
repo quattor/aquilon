@@ -8,21 +8,21 @@ class City(Location):
     """ City is a subtype of location """
     __tablename__ = 'city'
     __mapper_args__ = {'polymorphic_identity' : 'city'}
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'city_loc_fk',
-                           ondelete = 'CASCADE'),
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='city_loc_fk',
+                                    ondelete='CASCADE'),
                 primary_key=True)
-    timezone = Column(AqStr(64), nullable = True, default = 'TZ = FIX ME')
+    timezone = Column(AqStr(64), nullable=True, default = 'TZ = FIX ME')
 
 city = City.__table__
-city.primary_key.name = 'city_pk'
+city.primary_key.name='city_pk'
 
 table = city
 
 def populate(sess, *args, **kw):
 
     if len(sess.query(City).all()) < 1:
-        from country import Country
+        from aquilon.aqdb.model import Country
 
         log = kw['log']
         assert log, "no log in kwargs for City.populate()"

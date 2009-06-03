@@ -7,10 +7,9 @@ from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-#from aquilon.aqdb.auth.audit_info    import AuditInfo
+
 
 _ABV = 'disk_type'
-_PRECEDENCE = 50
 _disk_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash']
 
 
@@ -18,35 +17,23 @@ class DiskType(Base):
     """ Disk Type: scsi, cciss, sata, etc. """
     __tablename__  = _ABV
 
-    id   = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key = True)
-    type = Column(AqStr(32), nullable = False)
+    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
+    type = Column(AqStr(32), nullable=False)
 
-    creation_date = Column(DateTime, default = datetime.now, nullable = False)
-    comments      = Column(String(255), nullable = True)
-
-    #audit_info_id   = deferred(Column(Integer, ForeignKey(
-    #        'audit_info.id', name = '%s_audit_info_fk'%(_ABV)),
-    #                                  nullable = False))
-
-    #audit_info = relation(AuditInfo)
-
-    #def __str__(self):
-    #    return str(self.typ)
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
 disk_type = DiskType.__table__
-table     = DiskType.__table__
+table = DiskType.__table__
 
-table.info['abrev']      = _ABV
-table.info['precedence'] = _PRECEDENCE
-
-disk_type.primary_key.name = '%s_pk'%(_ABV)
+disk_type.primary_key.name='%s_pk'%(_ABV)
 disk_type.append_constraint(UniqueConstraint('type',name='%s_uk'%(_ABV)))
 
 
 def populate(sess, *args, **kw):
     if len(sess.query(DiskType).all()) < 1:
         for t in _disk_types:
-            dt = DiskType(type = t)#, audit_info=kw['audit_info'])
+            dt = DiskType(type = t)
             sess.add(dt)
         try:
             sess.commit()

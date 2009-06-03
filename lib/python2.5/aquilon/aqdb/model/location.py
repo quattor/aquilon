@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint, text)
+from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint, text)
 
 from sqlalchemy.orm import deferred, relation, backref, object_session
 
@@ -15,24 +15,24 @@ class Location(Base):
 
     id = Column(Integer, Sequence('location_id_seq'), primary_key=True)
 
-    name = Column(AqStr(16), nullable = False)
+    name = Column(AqStr(16), nullable=False)
 
-    #code = Column(AqStr(16), nullable = False) #how to override the __init__?
+    #code = Column(AqStr(16), nullable=False) #how to override the __init__?
 
     parent_id = Column(Integer, ForeignKey(
-        'location.id', name='loc_parent_fk'), nullable = True)
+        'location.id', name='loc_parent_fk'), nullable=True)
 
-    location_type = Column(AqStr(32), nullable = False)
+    location_type = Column(AqStr(32), nullable=False)
 
     #location_type_id = Column(Integer, ForeignKey(
-    #    'location_type.id', ondelete = 'CASCADE',
-    #    name = 'sli_loc_typ__fk'), nullable = False)
+    #    'location_type.id', ondelete='CASCADE',
+    #    name='sli_loc_typ__fk'), nullable=False)
 
-    fullname = Column(String(255), nullable = False)
+    fullname = Column(String(255), nullable=False)
 
-    creation_date = deferred(Column(DateTime, default = datetime.now,
-                                    nullable = False))
-    comments = deferred(Column(String(255), nullable = True))
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     __mapper_args__ = {'polymorphic_on' : location_type}
 
@@ -102,7 +102,7 @@ class Location(Base):
             self.sublocations[node] = node
 
     def sysloc(self):
-        if str(self.location_type) in ['building','rack','chassis','desk']:
+        if str(self.location_type) in ['building', 'rack', 'chassis', 'desk']:
             return str('.'.join([str(self.p_dict[item]) for item in
                 ['building', 'city', 'continent']]))
 
@@ -127,9 +127,6 @@ class Location(Base):
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.name)
 
-#    def to_dot(self):
-#        return self.__repr__()
-
     def __str__(self):
         return str(self.name)
 
@@ -140,8 +137,9 @@ location.primary_key.name = 'location_pk'
 location.append_constraint(
     UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
-Location.sublocations = relation('Location', backref = backref(
-        'parent', remote_side=[location.c.id],))
+Location.sublocations = relation('Location',
+                                 backref=backref('parent',
+                                                 remote_side=[location.c.id],))
 
 table = location
 

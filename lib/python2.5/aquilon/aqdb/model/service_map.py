@@ -22,17 +22,17 @@ class ServiceMap(Base):
                                                 name='svc_map_svc_inst_fk'),
                           nullable=False)
 
-    location_id   = Column(Integer, ForeignKey('location.id',
+    location_id = Column(Integer, ForeignKey('location.id',
                                              ondelete='CASCADE',
                                              name='svc_map_loc_fk'),
                     nullable=False)
 
-    creation_date    = deferred(Column(DateTime, default = datetime.now,
-                                       nullable = False))
-    comments         = deferred(Column(String(255), nullable = True))
-    location         = relation(Location, backref = 'service_maps')
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                       nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
+    location = relation(Location, backref='service_maps')
     service_instance = relation(ServiceInstance, backref='service_map',
-                                passive_deletes = True)
+                                passive_deletes=True)
 
     def _service(self):
         return self.service_instance.service
@@ -44,7 +44,7 @@ class ServiceMap(Base):
             self.location.name)
 
 service_map = ServiceMap.__table__
-service_map.primary_key.name = 'service_map_pk'
+service_map.primary_key.name='service_map_pk'
 
 service_map.append_constraint(
     UniqueConstraint('service_instance_id', 'location_id',

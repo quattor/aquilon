@@ -19,7 +19,7 @@ class PersonalityServiceMap(Base):
         personality can choose as their provider during service
         autoconfiguration. """
 
-    __tablename__ = 'personality_service_map'
+    __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
 
@@ -27,7 +27,7 @@ class PersonalityServiceMap(Base):
                                                 name='%s_svc_inst_fk'%(_ABV)),
                           nullable=False)
 
-    location_id    = Column(Integer, ForeignKey('location.id',
+    location_id = Column(Integer, ForeignKey('location.id',
                                                 ondelete='CASCADE',
                                                 name='%s_loc_fk'%(_ABV)),
                             nullable=False)
@@ -37,13 +37,12 @@ class PersonalityServiceMap(Base):
                                                   ondelete='CASCADE'),
                             nullable=False)
 
-    creation_date    = deferred(Column(DateTime, default=datetime.now,
-                                       nullable=False))
-    comments         = deferred(Column(String(255), nullable=True))
+    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
-    location         = relation(Location, backref = 'personality_service_maps')
+    location = relation(Location, backref='personality_service_maps')
     service_instance = relation(ServiceInstance, backref='personality_service_map')
-    personality      = relation(Personality, backref='maps', uselist=False)
+    personality = relation(Personality, backref='maps', uselist=False)
 
     #Archetype probably shouldn't be exposed at this table/object: This isn't
     #intended for use with Archetype, but I'm not 100% sure yet
@@ -63,12 +62,12 @@ class PersonalityServiceMap(Base):
 personality_service_map = PersonalityServiceMap.__table__
 table = personality_service_map
 
-personality_service_map.primary_key.name = 'prsnlty_svc_map_pk'
+personality_service_map.primary_key.name='prsnlty_svc_map_pk'
 
 #TODO: reconsider the surrogate primary key?
-personality_service_map.append_constraint(UniqueConstraint(
-    'personality_id', 'service_instance_id', 'location_id',
-    name='%s_loc_inst_uk'%(_ABV)))
+personality_service_map.append_constraint(
+    UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
+                     name='%s_loc_inst_uk'%(_ABV)))
 
 
 

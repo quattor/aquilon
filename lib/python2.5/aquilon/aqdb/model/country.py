@@ -7,22 +7,20 @@ from aquilon.aqdb.model import Location
 class Country(Location):
     """ Country is a subtype of location """
     __tablename__ = 'country'
-    __mapper_args__ = {'polymorphic_identity' : 'country'}
-    id = Column(Integer,
-                ForeignKey('location.id', name = 'country_loc_fk',
-                           ondelete = 'CASCADE'),
+    __mapper_args__ = {'polymorphic_identity':'country'}
+    id = Column(Integer,ForeignKey('location.id',
+                                   name='country_loc_fk',
+                                   ondelete='CASCADE'),
                 primary_key=True)
 
 country = Country.__table__
-country.primary_key.name = 'country_pk'
+country.primary_key.name='country_pk'
 
 table = country
 
 def populate(sess, *args, **kw):
-
     if len(sess.query(Country).all()) < 1:
-        from continent import Continent
-        from hub import Hub
+        from aquilon.aqdb.model import Continent, Hub
 
         log = kw['log']
         assert log, "no log in kwargs for Country.populate()"

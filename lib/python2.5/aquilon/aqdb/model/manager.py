@@ -8,18 +8,18 @@ from aquilon.aqdb.model import Machine, System
 class Manager(System):
     __tablename__ = 'manager'
 
-    id          = Column(Integer, ForeignKey('system.id',
-                                              ondelete = 'CASCADE',
-                                              name = 'mgr_system_fk'),
-                                             primary_key = True)
+    id = Column(Integer, ForeignKey('system.id',
+                                    name='mgr_system_fk',
+                                    ondelete='CASCADE'),
+                primary_key=True)
 
-    machine_id  = Column(Integer, ForeignKey('machine.machine_id',
-                                               name = 'mgr_machine_fk'),
-                                              nullable = False)
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                            name='mgr_machine_fk'),
+                        nullable=False)
 
-    machine     = relation(Machine, uselist=False, backref='manager')
+    machine = relation(Machine, uselist=False, backref='manager')
 
-    __mapper_args__ = {'polymorphic_identity' : 'manager'}
+    __mapper_args__ = {'polymorphic_identity':'manager'}
 
 manager = Manager.__table__
 manager.primary_key.name = 'mgr_pk'

@@ -2,9 +2,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (MetaData, create_engine, UniqueConstraint, Table,
-                        Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, PassiveDefault)
+from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint)
 
 from sqlalchemy.orm import relation, deferred
 
@@ -19,22 +18,21 @@ class Model(Base):
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
     name = Column(String(64))
 
-    vendor_id = Column(Integer,
-                       ForeignKey('vendor.id', name = 'model_vendor_fk'),
-                       nullable = False)
-    machine_type = Column(AqStr(16), nullable = False)
+    vendor_id = Column(Integer, ForeignKey('vendor.id',
+                                           name='model_vendor_fk'),
+                       nullable=False)
+    machine_type = Column(AqStr(16), nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable = False))
+    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
     comments = deferred(Column(String(255)))
 
     vendor = relation(Vendor)
 
 model = Model.__table__
-model.primary_key.name = 'model_pk'
+model.primary_key.name='model_pk'
 
 model.append_constraint(UniqueConstraint('name','vendor_id',
-                                   name = 'model_name_vendor_uk'))
+                                   name='model_name_vendor_uk'))
 
 table = model
 
