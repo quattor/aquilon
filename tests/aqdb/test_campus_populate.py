@@ -103,12 +103,9 @@ class TestCampusPopulate(object):
             if new_campus:
                 if len(new_campus.sublocations) < 1:
                     self.log.debug('  EMPTY %s: contains %s'%(new_campus, cs.buildings))
-                else:
-                    self.log.debug('created Campus %s %s'%(new_campus,
-                                               new_campus.sublocations))
+
             else:
                 self.log.error('CAMPUS %s failed'%(c.name))
 
 # Copyright (C) 2008 Morgan Stanley
 # This module is part of Aquilon
-
