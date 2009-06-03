@@ -16,7 +16,7 @@ class Model(Base):
     the asset inventory of the kinds of machines we use in the plant """
     __tablename__ = 'model'
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
-    name = Column(String(64))
+    name = Column(AqStr(64), nullable=False)
 
     vendor_id = Column(Integer, ForeignKey('vendor.id',
                                            name='model_vendor_fk'),
