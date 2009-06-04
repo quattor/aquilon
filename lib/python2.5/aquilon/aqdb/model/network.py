@@ -19,8 +19,12 @@ from aquilon.aqdb.column_types.IPV4  import (IPV4, dq_to_int, get_bcast,
                                              int_to_dq)
 from aquilon.aqdb.model import Base, Location
 
-""" Network Type can be one of four values which have been carried over as
-    legacy from the network table in DSDB:
+
+#TODO: enum type for network_type, cidr
+class Network(Base):
+    """ Represents subnets in aqdb.  Network Type can be one of four values
+        which have been carried over as legacy from the network table in DSDB:
+
         *   management: no networks have it(@ 3/27/08), it's probably useless
 
         *   transit: for the phyical interfaces of zebra nodes
@@ -33,27 +37,11 @@ from aquilon.aqdb.model import Base, Location
                      if you know the ip/netmask of the switch, you know the
                      network which it provides for, and the 5th and 6th address
                      are reserved for a dynamic pool for the switch on the net
-        *   external/external_vendor
-        *   heartbeat
-        *   wan
-        *   campus
-"""
 
-
-#TODO: enum type for network_type, cidr
-class Network(Base):
-    """ Represents subnets in aqdb.
-
-    Network Type can be one of four values which have been carried over as
-    legacy from the network table in DSDB:
-        *   management: no networks have it(@ 3/27/08), it's probably useless
-        *   transit: for the phyical interfaces of zebra nodes
-        *   vip:     for the zebra addresses themselves
-        *   unknown: for network rows in DSDB with NULL values for 'type'
-
-        *   tor: tor switches are managed in band, which means that if you know
-                 the ip/netmask of the switch, you know the layer 2 network
-                 which it provides access to.
+        *external/external_vendor
+        *heartbeat
+        *wan
+        *campus
 """
 
     __tablename__ = 'network'
@@ -72,7 +60,6 @@ class Network(Base):
     bcast = Column(IPV4, nullable=False)
     mask = Column(Integer, nullable=False) #TODO: ENUM!!!
     side = Column(AqStr(4), nullable=True, default = 'a')
-    dsdb_id = Column(Integer, nullable=False)
 
     is_discoverable = Column(Boolean, nullable=False, default=False)
     is_discovered = Column(Boolean, nullable=False, default=False)
@@ -113,9 +100,6 @@ class Network(Base):
 
 network = Network.__table__
 network.primary_key.name='network_pk'
-
-network.append_constraint(
-    UniqueConstraint('dsdb_id', name='network_dsdb_id_uk'))
 
 network.append_constraint(
     UniqueConstraint('ip', name='net_ip_uk'))
@@ -177,8 +161,8 @@ def populate(s, *args, **kw):
 
         #type_cache = get_type_cache(dsdb)
 
-        for (name, ip, mask, network_type, bldg_name, side,
-             dsdb_id) in dsdb.dump(dump_action):
+        for (name, ip, mask, network_type, bldg_name,
+             side) in dsdb.dump(dump_action):
 
             kw = {}
             try:
@@ -200,7 +184,6 @@ def populate(s, *args, **kw):
 
             if side:
                 kw['side'] = side
-            kw['dsdb_id'] = dsdb_id
 
             c=Network(**kw)
             s.add(c)

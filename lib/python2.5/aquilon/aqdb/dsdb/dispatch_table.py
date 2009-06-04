@@ -55,46 +55,15 @@ dispatch_tbl['bucket'] = """
 dispatch_tbl['net_base'] = """
     SELECT  A.net_name, A.net_ip_addr, abs(A.net_mask) as mask, B.network_type,
             SUBSTRING(location,CHAR_LENGTH(A.location) - 7,2) as sysloc,
-            A.side, A.net_id FROM network A, network_type B
+            A.side FROM network A, network_type B
     WHERE A.net_ip_addr != '127.0.0.0'
     AND isnull(A.net_type_id,0) = B.network_type_id
-    AND A.state >= 0 """ #removed net_id for now, it may not be needed in the new strategy
+    AND A.state >= 0 """
 
 dispatch_tbl['network_full'] = dispatch_tbl['net_base']
 
-#dispatch_tbl['city_by_bldg'] = """
-#select A.city_symbol from city A, bldg B
-#where A.city_id = B.city_id
-#AND A.state >= 0
-#AND B.state >= 0
-#AND B.bldg_name = """
-
-#    SELECT  net_name,
-#            net_ip_addr,
-#            abs(net_mask),
-#            isnull(net_type_id,0),
-#            SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
-#            side, net_id FROM network
-#    WHERE
-#    net_ip_addr != '127.0.0.0'
-#    AND state >= 0  """
-
 dispatch_tbl['np_network'] = ' '.join([dispatch_tbl['net_base'],
                                        "AND A.location like '%np.ny.na'"])
-#"""
-#    SELECT  net_name,
-#            net_ip_addr,
-#            abs(net_mask),
-#            isnull(net_type_id,0),
-#            SUBSTRING(location,CHAR_LENGTH(location) - 7,2) as sysloc,
-#            side, net_id FROM network
-#    WHERE state >= 0
-#    AND net_ip_addr != '127.0.0.0'
-#    AND location like '%np.ny.na' """
-
-dispatch_tbl['net_ids'] = """
-SELECT net_id FROM network WHERE net_ip_addr != '127.0.0.0' AND state >= 0 """
-
 dispatch_tbl['net_type'] = """
     SELECT * FROM network_type """
 
