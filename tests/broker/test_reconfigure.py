@@ -139,7 +139,8 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--os", "linux/4.0.1-x86_64"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "hosts with archetype aquilon", command)
+        self.matchoutput(err, "Can only set os for compileable archetypes",
+                         command)
 
     def testverifyreconfigurewindows(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
@@ -167,6 +168,16 @@ class TestReconfigure(TestBrokerCommand):
         results = self.grepcommand(["-l", "badpersonality", buildfile])
         self.failIf(results, "Found bad personality data in plenary "
                              "template for aquilon62.aqd-unittest.ms.com")
+
+    def testmissingpersonality(self):
+        command = ["reconfigure",
+                   "--hostname", "aquilon62.aqd-unittest.ms.com",
+                   "--archetype", "windows"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Changing archetype also requires "
+                         "specifying personality.",
+                         command)
 
     def testkeepbindings(self):
         command = ["reconfigure", "--keepbindings",

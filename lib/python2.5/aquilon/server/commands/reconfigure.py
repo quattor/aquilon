@@ -6,7 +6,8 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.make_aquilon import CommandMakeAquilon
+from aquilon.server.commands.make import CommandMake
+from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.personality import get_personality
@@ -14,41 +15,51 @@ from aquilon.aqdb.model import BuildItem
 from aquilon.exceptions_ import ArgumentError
 
 
-class CommandReconfigure(CommandMakeAquilon):
-    """The make aquilon command already contains the logic required."""
+class CommandReconfigure(CommandMake):
+    """The make command mostly contains the logic required."""
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, os, personality, buildstatus,
-               **arguments):
-        """There is some duplication here with make_aquilon.
+    def render(self, session, hostname, os, archetype, personality,
+               buildstatus, **arguments):
+        """There is some duplication here with make.
 
-        It seemed to be the cleanest way to allow non-aquilon hosts
-        to use reconfigure for buildstatus and personality.
+        It seemed to be the cleanest way to allow hosts with non-compileable
+        archetypes to use reconfigure for buildstatus and personality.
 
         """
         dbhost = hostname_to_host(session, hostname)
 
-        if dbhost.archetype.name == 'aquilon':
-            # For aquilon hosts, check if make_aquilon has run.  (This
-            # is a lame check - should really check to see if OS is set.)
+        dbarchetype = dbhost.archetype
+        if archetype and archetype != dbhost.archetype.name:
+            if not personality:
+                raise ArgumentError("Changing archetype also requires "
+                                    "specifying personality.")
+            dbarchetype = get_archetype(session, archetype)
+            # TODO: Once OS is a first class object this block needs
+            # to check that either OS is also being reset or that the
+            # OS is valid for the new archetype.
+
+        if dbarchetype.is_compileable:
+            # Check if make_aquilon has run.  (This is a lame check -
+            # should really check to see if OS is set.)
             # If the error is not raised, we fall through to the end
             # of the method where MakeAquilon is called.
             builditem = session.query(BuildItem).filter_by(host=dbhost).first()
             if not builditem:
                 raise ArgumentError("host %s has not been built. "
-                                    "Run 'make_aquilon' first." % hostname)
+                                    "Run 'make' first." % hostname)
         # The rest of these conditionals currently apply to all
         # non-aquilon hosts.
         elif os:
-            raise ArgumentError("Can only set os for "
-                                "hosts with archetype aquilon.")
+            raise ArgumentError("Can only set os for compileable archetypes "
+                                "like aquilon.")
         elif buildstatus or personality:
             if buildstatus:
                 dbstatus = get_status(session, buildstatus)
                 dbhost.status = dbstatus
             if personality:
-                dbpersonality = get_personality(session, dbhost.archetype.name,
+                dbpersonality = get_personality(session, dbarchetype.name,
                                                 personality)
                 dbhost.personality = dbpersonality
             session.add(dbhost)
@@ -56,9 +67,9 @@ class CommandReconfigure(CommandMakeAquilon):
         else:
             raise ArgumentError("Nothing to do.")
 
-        return CommandMakeAquilon.render(self, session=session,
-                                         hostname=hostname, os=os,
-                                         personality=personality,
-                                         buildstatus=buildstatus, **arguments)
+        return CommandMake.render(self, session=session, hostname=hostname,
+                                  os=os, archetype=archetype,
+                                  personality=personality,
+                                  buildstatus=buildstatus, **arguments)
 
 

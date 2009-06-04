@@ -34,11 +34,14 @@ from test_put_domain import TestPutDomain
 from test_deploy_domain import TestDeployDomain
 from test_sync_domain import TestSyncDomain
 from test_merge_conflicts import TestMergeConflicts
+from test_add_archetype import TestAddArchetype
+from test_add_os import TestAddOS
 from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
 from test_add_building import TestAddBuilding
 from test_add_rack import TestAddRack
+from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_tor_switch import TestAddTorSwitch
@@ -65,9 +68,11 @@ from test_compile import TestCompile
 from test_bind_server import TestBindServer
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
+from test_constraints_archetype import TestArchetypeConstraints
 from test_constraints_personality import TestPersonalityConstraints
 from test_constraints_service import TestServiceConstraints
 from test_constraints_domain import TestDomainConstraints
+from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_show_hostiplist import TestShowHostIPList
@@ -84,6 +89,7 @@ from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
 from test_update_rack import TestUpdateRack
 from test_update_network import TestUpdateNetwork
+from test_update_archetype import TestUpdateArchetype
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
@@ -99,11 +105,14 @@ from test_del_chassis import TestDelChassis
 from test_del_tor_switch import TestDelTorSwitch
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
+from test_del_vendor import TestDelVendor
 from test_del_rack import TestDelRack
 from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
 from test_del_personality import TestDelPersonality
+from test_del_os import TestDelOS
+from test_del_archetype import TestDelArchetype
 from test_del_domain import TestDelDomain
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
@@ -128,9 +137,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestMergeConflicts,
-                TestAddPersonality,
+                TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
-                TestAddRack, TestAddCpu, TestAddModel,
+                TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
@@ -143,22 +152,24 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestFlush, TestCompile,
                 TestBindServer,
                 TestBindClientConstraints, TestBindServerConstraints,
-                TestPersonalityConstraints,
-                TestDomainConstraints, TestMachineConstraints,
-                TestTorSwitchConstraints,
+                TestArchetypeConstraints, TestPersonalityConstraints,
+                TestDomainConstraints, TestVendorConstraints,
+                TestMachineConstraints, TestTorSwitchConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchSystem, TestSearchHost,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
                 TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
+                TestUpdateArchetype,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelRack,
+                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelVendor,
+                TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
-                TestDelPersonality,
+                TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:

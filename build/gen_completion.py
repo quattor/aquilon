@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_option("-a", "--all", action="store_true", dest="generate_all",
                       help="generate output for all available templates")
 
-    bindir = os.path.dirname( os.path.realpath(sys.argv[0]) )
+    bindir = os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), "..")
     parser.set_defaults(output_dir = ".",
                         template_dir = os.path.join(bindir, "etc", "templates"),
                         input_filename = os.path.join(bindir, "etc", "input.xml"))

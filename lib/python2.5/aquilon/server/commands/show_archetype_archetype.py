@@ -1,13 +1,10 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
-# Copyright (C) 2008 Morgan Stanley
-#
+# See LICENSE for copying information
 # This module is part of Aquilon
-"""Contains the logic for `aq show archetype --archetype`."""
 
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.archetype import get_archetype
-
 
 class CommandShowArchetypeArchetype(BrokerCommand):
 

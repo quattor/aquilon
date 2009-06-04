@@ -1,11 +1,11 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/usr/bin/env python2.5
 
 # Twisted, the Framework of Your Internet
 # Copyright (c) 2001-2004 Twisted Matrix Laboratories.
 # See LICENSE for details.
 
-# This is an (almost) completely new version of the script under
-# /ms/dist/python/PROJ/twisted/2.5.0-py25/bin/twistd
+# This is an (almost) completely new version of the script from
+# the original twisted distributed.
 # hacked to understand the MS layout.
 # It was then enhanced (marked with comments below) to handle 8.1.0.
 

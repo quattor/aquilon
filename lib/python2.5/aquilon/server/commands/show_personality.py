@@ -21,11 +21,11 @@ class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, name, archetype, domain, **arguments):
+    def render(self, session, personality, archetype, domain, **arguments):
         if domain:
             dbdomain = get_domain(session, domain)
-        if archetype and name:
-            dbpersonality = get_personality(session, archetype, name)
+        if archetype and personality:
+            dbpersonality = get_personality(session, archetype, personality)
             if not domain:
                 return dbpersonality
             threshold = self.get_threshold(dbpersonality, dbdomain)
@@ -34,8 +34,8 @@ class CommandShowPersonality(BrokerCommand):
         if archetype:
             dbarchetype = get_archetype(session, archetype)
             q = q.filter_by(archetype=dbarchetype)
-        if name:
-            q = q.filter_by(name=name)
+        if personality:
+            q = q.filter_by(name=personality)
         results = PersonalityList()
         if not domain:
             results.extend(q.all())

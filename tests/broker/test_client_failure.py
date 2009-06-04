@@ -69,6 +69,10 @@ class TestClientFailure(TestBrokerCommand):
                 "Return code for %s was %d instead of %d, STDOUT:\n@@@\n'%s'\n"
                 % (command, p.returncode, 2, out))
 
+    def testunauthorized(self):
+        command = "flush"
+        out = self.unauthorizedtest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClientFailure)

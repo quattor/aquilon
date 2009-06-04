@@ -267,7 +267,7 @@ class TestMakeAquilon(TestBrokerCommand):
                    "--hostname", "unittest01.one-nyp.ms.com",
                    "--os", "linux/4.0.1-x86_64"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "needs to be aquilon for command", command)
+        self.matchoutput(out, "is not a compilable archetype", command)
 
     # Turns out this test is completely bogus.  There is a sequence of
     # binding that would allow a client to bind to ut.a on chooser1

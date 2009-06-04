@@ -3,7 +3,7 @@
 # Copyright (C) 2009 Morgan Stanley
 #
 # This module is part of Aquilon
-"""Module for testing constraints in commands involving personality."""
+"""Module for testing constraints in commands involving archetype."""
 
 import os
 import sys
@@ -17,23 +17,20 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestPersonalityConstraints(TestBrokerCommand):
+class TestArchetypeConstraints(TestBrokerCommand):
 
-    def testdelpersonalitywithhost(self):
-        command = "del personality --personality inventory --archetype aquilon"
+    def testdelarchetypewithpersonality(self):
+        command = "del archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "is in use and cannot be deleted", command)
+        self.matchoutput(out, "in use and cannot be deleted", command)
 
-    def testverifydelpersonalitywithhostfailed(self):
-        command = ["show_personality", "--personality=inventory",
-                   "--archetype=aquilon"]
+    def testverifydelarchetypewithmodel(self):
+        command = ["show_archetype", "--archetype=aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Personality: inventory Archetype: aquilon",
-                         command)
+        self.matchoutput(out, "Archetype: aquilon", command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestPersonalityConstraints)
+        TestArchetypeConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

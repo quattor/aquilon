@@ -121,13 +121,14 @@ class TestBrokerCommand(unittest.TestCase):
     msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
 
     def runcommand(self, command, **kwargs):
-        aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq")
+        aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
         kncport = self.config.get("broker", "kncport")
         if isinstance(command, list):
             args = command[:]
         else:
             args = [command]
-        args.insert(0, aq)
+        args.insert(0, sys.executable)
+        args.insert(1, aq)
         args.append("--aqport")
         args.append(kncport)
         args.append("--aquser")
@@ -229,6 +230,44 @@ class TestBrokerCommand(unittest.TestCase):
                              (command, err))
         return err
 
+    def unauthorizedtest(self, command, **kwargs):
+        aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
+        openport = self.config.get("broker", "openport")
+        if isinstance(command, list):
+            args = command[:]
+        else:
+            args = [command]
+        args.insert(0, sys.executable)
+        args.insert(1, aq)
+        args.append("--aqport")
+        args.append(openport)
+        args.append("--noauth")
+        p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
+        (out, err) = p.communicate()
+        # Strip any msversion dev warnings out of STDERR
+        err = self.msversion_dev_re.sub('', err)
+        self.assertEqual(p.returncode, 4,
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 4, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
+        if "--debug" in command:
+            # Looser requirement when there's debug output involved...
+            self.failUnless(err.find("Unauthorized") >= 0,
+                            "STDERR for %s did not include Unauthorized:"
+                            "\n@@@\n'%s'\n@@@\n" %
+                            (command, err))
+        else:
+            self.assertEqual(err.find("Unauthorized"), 0,
+                             "STDERR for %s did not start with Unauthorized:"
+                             "\n@@@\n'%s'\n@@@\n" %
+                             (command, err))
+        self.matchoutput(err, "Unauthorized anonymous access attempt", command)
+        return err
+
     def internalerrortest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(p.returncode, 5,
@@ -259,6 +298,18 @@ class TestBrokerCommand(unittest.TestCase):
                          "STDERR for %s did not start with "
                          "Not Implemented:\n@@@\n'%s'\n@@@\n" %
                          (command, err))
+        return err
+
+    def badoptiontest(self, command, **kwargs):
+        (p, out, err) = self.runcommand(command, **kwargs)
+        self.assertEqual(p.returncode, 2,
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 2, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
         return err
 
     def matchoutput(self, out, s, command):

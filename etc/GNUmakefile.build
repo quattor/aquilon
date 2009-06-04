@@ -52,7 +52,6 @@ RSYNC = /ms/dist/fsf/PROJ/rsync/2.6.6/bin/rsync
 PANC      = /ms/dev/elfms/panc/8.2.3/src/distro/bin/panc
 PANC_OPTS = -I $(CONFIG) \
             -I $(QROOT)/templates/$(DOMAIN) \
-            -I $(QROOT)/templates/$(DOMAIN)/aquilon \
             -I $(QROOT)/plenary \
             -I $(QROOT)/swrep \
 	    -I $(PROFILES) \

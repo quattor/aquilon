@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
@@ -94,6 +94,9 @@ if not config.has_option("unittest", "srcdir"):
 if coverage:
     config.set("unittest", "coverage", "True")
 
+# FIXME: Check to see if sys.executable (or maybe platform.python_version)
+# matches whatever is specified in the Makefile and warn if different.
+
 production_database = "NYPO_AQUILON"
 if (config.get("database", "vendor") == "oracle" and
         config.get("database", "server") == production_database):
@@ -139,11 +142,10 @@ for dir in dirs:
     except OSError, e:
         print >>sys.stderr, "Could not create %s: %s" % (dir, e)
 
-template_king_host = config.get("unittest", "template_king_host")
 # The template-king also gets synced as part of the broker tests,
 # but this makes it available for the initial database build.
 p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-    "%s:/var/quattor/template-king" % template_king_host,
+    config.get("unittest", "template_king_path"),
     # Minor hack... ignores config kingdir...
     config.get("broker", "quattordir")),
     stdout=1, stderr=2)

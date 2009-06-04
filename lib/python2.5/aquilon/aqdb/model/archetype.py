@@ -34,6 +34,8 @@ def populate(sess, *args, **kw):
     for a_name in ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost']:
         a = Archetype(name=a_name)
         sess.add(a)
+        if a_name in ['aquilon', 'vmhost']:
+            a.is_compileable = True
 
     try:
         sess.commit()

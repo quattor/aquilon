@@ -57,7 +57,7 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testverifyaddrequiredpersonality(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--name=unixeng-test"]
+                   "--personality=unixeng-test"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: chooser1", command)
         self.matchoutput(out, "Service: chooser2", command)
@@ -70,7 +70,7 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testverifyaddrequiredutsvc(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--name=compileserver"]
+                   "--personality=compileserver"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: utsvc", command)
 
@@ -81,7 +81,7 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def testverifyaddrequiredbadservice(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--name=badpersonality2"]
+                   "--personality=badpersonality2"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: badservice", command)
 

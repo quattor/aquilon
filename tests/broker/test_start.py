@@ -32,11 +32,13 @@ class TestBrokerStart(unittest.TestCase):
         # warning message it tickles you)
 
         config = Config()
-        twistd = os.path.join(config.get("broker", "srcdir"), "bin", "twistd")
+        twistd = os.path.join(config.get("broker", "srcdir"),
+                              "bin", "twistd.py")
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 
-        args = [twistd, "--pidfile", pidfile, "--logfile", logfile,
+        args = [sys.executable, twistd,
+                "--pidfile", pidfile, "--logfile", logfile,
                 "aqd", "--config", config.baseconfig]
 
         if config.has_option("unittest", "coverage"):
@@ -55,9 +57,8 @@ class TestBrokerStart(unittest.TestCase):
 
     def testrsynctemplateking(self):
         config = Config()
-        template_king_host = config.get("unittest", "template_king_host")
         p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-            "%s:/var/quattor/template-king" % template_king_host,
+            config.get("unittest", "template_king_path"),
             # Minor hack... ignores config kingdir...
             config.get("broker", "quattordir")),
             stdout=PIPE, stderr=PIPE)
