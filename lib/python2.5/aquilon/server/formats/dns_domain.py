@@ -30,7 +30,7 @@ class DNSDomainListFormatter(ListFormatter):
 
     protocol = "aqddnsdomains_pb2"
 
-    def format_proto(self, dns_domain_list):
+    def format_proto(self, dns_domain_list, skeleton=None):
         dns_domain_list_msg = \
                 self.loaded_protocols[self.protocol].DNSDomainList()
         for dns_domain in dns_domain_list:

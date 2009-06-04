@@ -1432,10 +1432,16 @@
   <command name="show_personality">
       Show personality details.  Specifying both name and archetype will
       uniquely identify a personality.
+
+      If the domain option is given that domain will be searched for
+      information about the personality's thresholds.
       <optgroup name="show_personality_opts" mandatory="True" fields="any">
          <option name="name" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
          <option name="archetype" type="string" conflicts="all">which archetype to use</option>
          <option name="all" type="boolean" conflicts="name archetype">all</option>
+      </optgroup>
+      <optgroup name="show_personality_optional" mandatory="False">
+         <option name="domain" type="string">Domain to check for threshold information</option>
       </optgroup>
       <transport method="get" path="personality" />
   </command>

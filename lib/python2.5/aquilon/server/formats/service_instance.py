@@ -26,9 +26,9 @@ class ServiceInstanceFormatter(ObjectFormatter):
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
-    def format_proto(self, si):
+    def format_proto(self, si, skeleton=None):
         silf = ServiceInstanceListFormatter()
-        return silf.format_proto([si])
+        return silf.format_proto([si], skeleton)
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
 
@@ -38,7 +38,7 @@ class ServiceInstanceList(list):
 
 class ServiceInstanceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
-    def format_proto(self, sil):
+    def format_proto(self, sil, skeleton=None):
         servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
         for si in sil:
             self.add_service_msg(servicelist_msg.services.add(), si.service, si)

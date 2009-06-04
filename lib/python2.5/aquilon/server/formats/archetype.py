@@ -21,6 +21,13 @@ class ArchetypeFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % archetype.comments)
         return "\n".join(details)
 
+    def format_proto(self, archetype, skeleton=None):
+        # No ArchetypeList object yet...
+        if not skeleton:
+            return
+        skeleton.name = str(archetype.name)
+        # FIXME: Implement required services
+
 ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()
 
 

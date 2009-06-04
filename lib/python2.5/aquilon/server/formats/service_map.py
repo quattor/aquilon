@@ -17,9 +17,9 @@ class ServiceMapFormatter(ObjectFormatter):
                 "Archetype: aquilon Service: %s Instance: %s Map: %s %s" % (
                 sm.service.name, sm.service_instance.name,
                 sm.location.location_type.capitalize(), sm.location.name)
-    def format_proto(self, sm):
+    def format_proto(self, sm, skeleton=None):
         smlf = ServiceMapListFormatter()
-        return smlf.format_proto([sm])
+        return smlf.format_proto([sm], skeleton)
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 
@@ -39,7 +39,7 @@ class ServiceMapList(list):
 
 class ServiceMapListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
-    def format_proto(self, sml):
+    def format_proto(self, sml, skeleton=None):
         servicemap_list_msg = self.loaded_protocols[self.protocol].ServiceMapList()
         for sm in sml:
             self.add_service_map_msg(servicemap_list_msg.servicemaps.add(), sm)

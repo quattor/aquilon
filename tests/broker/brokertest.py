@@ -340,6 +340,20 @@ class TestBrokerCommand(unittest.TestCase):
                                  (expect, received))
         return servicemaplist
 
+    def parse_personality_msg(self, msg, expect=None):
+        personalitylist = aqdsystems_pb2.PersonalityList()
+        personalitylist.ParseFromString(msg)
+        received = len(personalitylist.personalities)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No personalities listed in PersonalityList "
+                            "protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d personalities expected, got %d\n" %
+                                 (expect, received))
+        return personalitylist
+
     def gitenv(self, env=None):
         git_path = self.config.get("broker", "git_path")
         newenv = {}
