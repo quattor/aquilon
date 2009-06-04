@@ -89,6 +89,7 @@ CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
 CheckNet_module = /ms/dist/NetEng/modules/prod
 aurora_host_domain = ny-prod
 windows_host_domain = ny-prod
+panc_batch_size = 1000
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

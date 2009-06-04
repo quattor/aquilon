@@ -106,6 +106,8 @@ class TemplateDomain(object):
             args.append("TOOLDIR=%s"%config.get("broker", "compiletooldir"))
             args.append("QROOT=%s"%config.get("broker", "quattordir"))
             args.append("PANC=%s" % self.domain.compiler)
+            args.append("PANC_BATCH_SIZE=%s" %
+                        config.get("broker", "panc_batch_size"))
             if (only):
                 args.append("only")
                 args.append("HOST=%s"%only.fqdn)
