@@ -658,6 +658,10 @@
    <command name="add_interface">
       Add a new network interface to the database.
 
+      If adding an interface to virtual hardware, the --automac option
+      can be used to automatically generate a MAC address based on
+      the cluster vendor.
+
       To give an IP address to a host, provide it when using add_host.
 
       For chassis and tor_switches, the IP address is provided with this
@@ -673,7 +677,10 @@
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_interface_opts" mandatory="True" fields="all">
-         <option name="mac" type="string">MAC address</option>
+         <optgroup name="add_interface_mac" mandatory="True" fields="any">
+            <option name="mac" type="string" conflicts="automac">MAC address</option>
+            <option name="automac" type="boolean" conflicts="mac">Automatically generate MAC for virtual hardware</option>
+	 </optgroup>
          <option name="interface" type="string">Interface name</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
