@@ -180,6 +180,35 @@
       <transport method="get" path="find/host" />
    </command>
 
+   <command name="search_next">
+      Search for the next available number in a series.  If entries are
+      found in the database of the prefix followed by a number, the
+      numbers are sorted and the highest number plus one is returned.
+      If no entries are found, the command returns 1.
+
+      Use the --number flag to return just that number, otherwise
+      return the full name.
+
+      Examples:
+
+      aq search_next --machine evm
+
+      aq search_next --short igrid --dns_domain devin1.ms.com --number
+      <optgroup name="search_next_type" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="fqdn">Machine prefix to check</option>
+         <optgroup name="search_next_fqdn" fields="all">
+            <option name="short" type="string" conflicts="machine">FQDN prefix to check</option>
+            <option name="dns_domain" type="string" conflicts="machine">DNS domain for FQDN</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="search_system_prefs" mandatory="False">
+         <option name="number" type="boolean">show only the next number</option>
+         <option name="fullname" type="boolean">show the next available full name (default)</option>
+      </optgroup>
+      <transport method="get" trigger="short" path="find/next/system" />
+      <transport method="get" trigger="machine" path="find/next/machine" />
+   </command>
+
    <command name="compile">
     Compile anything that is out-of-date within a specified domain.
     <optgroup name="compile_input" mandatory="True" fields="all">
