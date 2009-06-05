@@ -1861,4 +1861,131 @@
       <transport method="delete" path="dns_domain/%(dns_domain)s" />
    </command>
 
+   <command name="add_metacluster">
+      Add a new metacluster.
+      <optgroup name="add_metacluster_req" mandatory="True" fields="all">
+         <option name="metacluster" type="string">Name of the new metacluster</option>
+      </optgroup>
+      <optgroup name="add_metacluster_options" mandatory="False">
+         <option name="max_members" type="string">Comments</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="show_metacluster">
+      Show details for a metacluster.
+      <optgroup name="show_metacluster_req" mandatory="True" fields="any">
+         <option name="metacluster" type="string">Name of the metacluster</option>
+         <option name="all" type="string">Show all</option>
+      </optgroup>
+      <transport method="get" path="metacluster" />
+      <transport method="get" trigger="metacluster" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="update_metacluster">
+      Update a metacluster.
+      <optgroup name="update_metacluster_req" mandatory="True" fields="all">
+         <option name="metacluster" type="string">Name of the metacluster</option>
+      </optgroup>
+      <optgroup name="update_metacluster_options" mandatory="False">
+         <option name="max_members" type="string">Comments</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="del_metacluster">
+      Delete the metacluster.
+      <optgroup name="del_metacluster_req" mandatory="True" fields="all">
+         <option name="metacluster" type="string">Name of the metacluster</option>
+      </optgroup>
+      <transport method="delete" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="add_esx_cluster">
+      Add a new ESX cluster.
+
+      Each ESX cluster must belong to a metacluster.
+
+      Two constraints must be defined.  The cluster has a location constraint.
+      All cluster vmhosts must be within the same location.  All of the
+      cluster's vmhosts must also have the same personality.
+
+      The max_members option can be set to define the maximum number of
+      vmhosts that can be members of the cluster.
+
+      The vm_to_host_ratio constrains the number of virtual machines
+      allowed on the cluster based on the number of vmhosts.
+      <optgroup name="add_esx_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the new esx_cluster</option>
+         <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
+         <optgroup name="add_cluster_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+	 <option name="archetype" type="string">Archetype name</option>
+	 <option name="personality" type="string">Personality name</option>
+      </optgroup>
+      <optgroup name="add_esx_cluster_options" mandatory="False">
+         <option name="max_members" type="string">Comments</option>
+         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="cluster/esx/%(cluster)s" />
+   </command>
+
+   <command name="show_esx_cluster">
+      Show details for an ESX cluster.
+      <optgroup name="show_cluster_req" mandatory="True" fields="any">
+         <option name="cluster" type="string">Name of the cluster</option>
+         <option name="all" type="string">Name of the cluster</option>
+      </optgroup>
+      <transport method="get" trigger="cluster" path="cluster/esx/%(cluster)s" />
+      <transport method="get" path="cluster/esx" />
+   </command>
+
+   <command name="update_esx_cluster">
+      Update an ESX cluster.
+
+      The cluster vmhost members are constrained to be in the same location
+      and have the same personality.  An attempt to update any constraint
+      that cannot be satisfied will fail.
+      <optgroup name="update_esx_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the ESX cluster</option>
+      </optgroup>
+      <optgroup name="update_esx_cluster_options" mandatory="False">
+         <option name="archetype" type="string">Archetype Name</option>
+         <option name="personality" type="string">Personality Name</option>
+         <option name="max_members" type="string">Max allowed vmhost members</option>
+         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="comments" type="string">Comments</option>
+         <optgroup name="update_cluster_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="cluster/esx/%(cluster)s" />
+   </command>
+
+   <command name="del_esx_cluster">
+      Delete the ESX cluster.
+      <optgroup name="del_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the cluster</option>
+      </optgroup>
+      <transport method="delete" path="cluster/esx/%(cluster)s" />
+   </command>
+
 </commandline>
