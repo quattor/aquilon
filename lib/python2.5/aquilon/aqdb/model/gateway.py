@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,21 +26,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-import os
-import ms.version
+""" Gateways for networks that appear in more than one physical location """
+from datetime import datetime
 
-#######
-# NEVER check in a version of this file to a for_next branch with 'dev'
-# in an addpkg call!!!
-#######
+from sqlalchemy import Column, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relation, backref
 
-ms.version.addpkg('sqlalchemy', '0.5.4')
+from aquilon.aqdb.column_types import IPV4
+from aquilon.aqdb.model import Base, Location, Network
 
-ms.version.addpkg('cx_Oracle','5.0.1-11.1.0.6')
 
-ms.version.addpkg('ibm_db','0.2.9-9.5.1')
+_TN = 'gateway'
 
-ms.version.addpkg('ipython','0.9.1')
+class Gateway(Base):
+    """ Gateways for networks that appear in more than one physical location """
+    __tablename__ = _TN
 
-ms.version.addpkg('nose','0.10.3')
+    network_id = Column(Integer, ForeignKey('network.id',
+                                            name='%s_net_fk'%(_TN),
+                                            ondelete='CASCADE'),
+                        primary_key=True)
 
+    location_id = Column(Integer, ForeignKey('location.id',
+                                             name='%s_location_fk'%(_TN),
+                                             ondelete='CASCADE'),
+                         primary_key=True)
+
+    ip = Column(IPV4, primary_key=True)
+
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+
+    network = relation(Network, backref='gateways') #cascade?
+    location = relation(Network, backref='locations') #cascade?
+
+gw = Gateway.__table__
+gw.primary_key.name = '%s_pk'%(_TN)

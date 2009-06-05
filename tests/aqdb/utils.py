@@ -27,24 +27,20 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" run load_all() from shutils and see to it that everything compiles as
-    a first pass to get us some code coverage """
+def load_classpath():
+    """ Sets up the class path for aquilon """
+    import os, sys
+    _DIR = os.path.dirname(os.path.realpath(__file__))
+    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
 
-import __init__ 
+    if _LIBDIR not in sys.path:
+        sys.path.insert(0,_LIBDIR)
 
-import aquilon.aqdb.depends
+    import aquilon.aqdb.depends
 
-class testCompile(object):
-
-    def testIncludes(self, *args, **kw):
-        import sqlalchemy
-        assert sqlalchemy.__version__
-
-    def testLoadAll(self, *args, **kw):
-        from aquilon.aqdb.utils.shutils import load_all
-        assert(load_all())
-
-if __name__ == "__main__":
-    import nose
-    nose.runmodule()
-
+def commit(sess):
+    try:
+        sess.commit()
+    except Exception,e:
+        sess.rollback()
+        raise e

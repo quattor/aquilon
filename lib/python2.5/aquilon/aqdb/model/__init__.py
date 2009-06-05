@@ -50,6 +50,7 @@ from aquilon.aqdb.model.search_list_item import SearchListItem
 #NETWORK
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.dns_domain import DnsDomain
+from aquilon.aqdb.model.gateway import Gateway
 
 #CONFIG
 from aquilon.aqdb.model.tld import Tld
@@ -70,7 +71,6 @@ from aquilon.aqdb.model.status import Status
 from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw
 from aquilon.aqdb.model.console_server_hw import ConsoleServerHw
-
 
 #SYSTEM
 from aquilon.aqdb.model.system import System
@@ -99,5 +99,9 @@ from aquilon.aqdb.model.service_list_item import ServiceListItem
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.personality_service_list_item import PersonalityServiceListItem
 
+#CLUSTER
+from aquilon.aqdb.model.cluster import (Cluster, EsxCluster, EsxClusterMember,
+                                        ClusterAlignedService, ClusterService,
+                                        EsxClusterVM)
 
-
+from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember

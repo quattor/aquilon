@@ -63,13 +63,16 @@ class Service(Base):
     name = Column(AqStr(64), nullable=False)
 
     cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
-                                             name='svc_cfg_pth_fk'),
+                                             name='svc_cfg_pth_fk',
+                                             ondelete='CASCADE'),
                          nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    cfg_path = relation(CfgPath, uselist=False, backref='service')
+    cfg_path = relation(CfgPath, uselist=False,
+                        backref=backref('service', cascade='all, delete-orphan'))
+
 
 service = Service.__table__
 table   = Service.__table__
@@ -83,6 +86,3 @@ service.append_constraint(
     UniqueConstraint('cfg_path_id', name='svc_template_uk'))
 
 table = service
-
-
-

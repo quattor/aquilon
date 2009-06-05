@@ -88,12 +88,7 @@ def populate(sess, **kw):
                         continue
                     created.append(j)
 
-        aurora_vendor = Vendor(name='aurora_vendor',
-                             comments='Placeholder vendor for Aurora hardware.')
-        sess.add(aurora_vendor)
-        created.append(aurora_vendor)
-
-        for v in ['bnt', 'cisco']:
+        for v in ['bnt', 'cisco', 'virtual', 'aurora_vendor']:
             if not v in created:
                 dbv = Vendor(name=v)
                 try:
@@ -112,7 +107,3 @@ def populate(sess, **kw):
 
         if 'log' in locals():
             log.INFO('created %s vendors'%(len(created)))
-
-
-
-

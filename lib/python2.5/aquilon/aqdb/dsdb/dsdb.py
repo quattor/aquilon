@@ -33,9 +33,8 @@ import os
 import sys
 import ms.version
 from copy import copy
-#from   ConfigParser import SafeConfigParser
 
-ms.version.addpkg('sybase', '0.38-py25', 'dist')
+ms.version.addpkg('sybase', '0.39-15.0.0.17')
 import Sybase
 
 from dispatch_table import dispatch_tbl as dt
@@ -61,19 +60,20 @@ class DsdbConnection(object):
 
         #FIXME: same as above: T/O restrictions
         krbusrs = 'daqscott, samsh'
-        #krbusrs = self.cfg.get('dsdb','krbusers').split(',')
         krbusrs = krbusrs.split(',')
         assert krbusrs
 
         self.fake = fake
 
+        self.syb = None
         if os.environ.get('USER') in krbusrs:
+            self.dsn = 'NYP_DSDB11'
             self._get_krb_cnxn()
-        else:
+
+        if not self.syb or not self.syb._is_connected:
             #TODO: pull password from afs
             self.syb = Sybase.connect(self.dsn, 'dsdb_guest', 'dsdb_guest',
-                                  'dsdb', datetime = 'auto',
-                                  auto_commit = '0')
+                                  'dsdb', auto_commit='0')
         assert self.syb._is_connected
 
         ###Impostor attrs only used in unit tests for data refresh
@@ -110,9 +110,6 @@ class DsdbConnection(object):
             return rs
         except Sybase.DatabaseError, e:
             print e
-            #raise Sybase.DatabaseError(inst)
-            #we're not raising this b/c it means you have
-            #to import Sybase everywhere... reconsider this
 
     #TODO: check for kw 'bldgs' as type list for networks by bldg
     #TODO: rename oper (operator? not quite. more like data_type)
@@ -157,7 +154,6 @@ class DsdbConnection(object):
         except Exception,e:
             print e
 
-    #TODO: when Borg, MEMOIZE
     def _get_principal(self):
         for line in open('/ms/dist/syb/dba/files/sgp.dat').xreadlines():
             svr, principal = line.split()
@@ -172,12 +168,16 @@ class DsdbConnection(object):
         principal = self._get_principal()
 
         self.syb = Sybase.connect(self.dsn, '', '', 'dsdb',
-                                      delay_connect=1, datetime='auto')
+                                      delay_connect=1)
 
         self.syb.set_property(Sybase.CS_SEC_NETWORKAUTH, Sybase.CS_TRUE)
         self.syb.set_property(Sybase.CS_SEC_SERVERPRINCIPAL,
                               self._get_principal())
-        self.syb.connect()
+        try:
+            self.syb.connect()
+        except Sybase.DatabaseError, e:
+            #swallow the error and fail back to non-kerberized
+            pass
 
     def get_network_by_sysloc(self,loc):
         """ append a sysloc to the base query, get networks"""
@@ -236,8 +236,8 @@ if __name__ == '__main__':
     ops = ('net_type','campus','campus_entries','country','city','building',
            'np_network')  #omitting 'bucket','network_full','net_ids'
 
-    for i in ops:
-        print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
+    #for i in ops:
+    #    print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
 
     host = 'blackcomb'
     print "getting host data for '%s'"%(host)
@@ -255,4 +255,3 @@ if __name__ == '__main__':
     #    print
 
     db.close()
-
