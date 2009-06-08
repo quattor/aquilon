@@ -98,33 +98,31 @@ def populate(sess, *args, **kw):
         for nm in admins:
             up=UserPrincipal(name = nm, realm = r,role = admin,
                              comments = 'AutoPopulated')
-            sess.save(up)
+            sess.add(up)
             sess.commit()
             assert(up)
 
         for nm in unixeng:
             up=UserPrincipal(name = nm, realm = r,role = eng,
                              comments = 'AutoPopulated')
-            sess.save(up)
+            sess.add(up)
             sess.commit()
             assert(up)
 
         for nm in operations:
             up=UserPrincipal(name = nm, realm = r, role = ops,
                              comments = 'AutoPopulated')
-            sess.save(up)
+            sess.add(up)
             sess.commit()
             assert(up)
 
         for nm in telco_eng:
             up = UserPrincipal(name = nm, realm = r, role = telco,
                                comments = 'AutoPopulated')
-            sess.save(up)
+            sess.add(up)
             sess.commit()
             assert(up)
 
         cnt = len(sess.query(UserPrincipal).all())
         assert(cnt > 0)
         log.debug('created %s users'%(cnt))
-
-

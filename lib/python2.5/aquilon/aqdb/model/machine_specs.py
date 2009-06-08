@@ -110,7 +110,7 @@ def populate(sess, *args, **kw):
                         cpu_quantity=cpu_quantity, memory=memory,
                         disk_type=dbdisk_type, disk_capacity=disk_capacity,
                         nic_count=nic_count)
-                sess.save(dbms)
+                sess.add(dbms)
             except Exception,e:
                 sess.rollback()
                 print 'Creating machine specs: %s' % e
@@ -121,5 +121,3 @@ def populate(sess, *args, **kw):
                 sess.rollback()
                 print 'Commiting ',e
                 continue
-
-
