@@ -1659,6 +1659,10 @@
       to be given to this command - the model info will be used as a default.
 
       However, if the model does not have defaults, they all need to be given.
+
+      If the hardware is virtual the --cluster option should be used to
+      indicate the location indirectly.  Whether or not hardware is
+      virtual is indicated by the machine type of the model.
       <optgroup name="add_machine_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine name</option>
          <option name="model" type="string">machine model</option>
@@ -1677,6 +1681,10 @@
          </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
+         <optgroup name="add_machine_cluster_opts" fields="all">
+            <option name="cluster" type="string" conflicts="chassis rack desk">Cluster name</option>
+            <option name="cluster_type" type="string" conflicts="chassis rack desk">Cluster Type (such as esx)</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">serial number</option>
