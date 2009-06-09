@@ -1700,18 +1700,20 @@
       </optgroup>
       <optgroup name="update_machine_opts" mandatory="False" fields="any">
          <option name="model" type="string">machine model</option>
-	 <option name="cpuname" type="string">cpu name</option>
-	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="string">cpu speed</option>
-	 <option name="cpucount" type="string">cpu count</option>
-	 <option name="memory" type="string">memory in MB</option>
+         <option name="cpuname" type="string">cpu name</option>
+         <option name="cpuvendor" type="string">cpu vendor</option>
+         <option name="cpuspeed" type="string">cpu speed</option>
+         <option name="cpucount" type="string">cpu count</option>
+         <option name="memory" type="string">memory in MB</option>
          <option name="chassis" type="string">chassis name</option>
          <option name="slot" type="string">chassis slot</option>
          <option name="clearchassis" type="boolean">remove chassis and slot information</option>
          <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
          <option name="rack" type="string">rack name</option>
          <option name="desk" type="string">desk name</option>
-	 <option name="serial" type="string">serial number</option>
+         <option name="serial" type="string">serial number</option>
+         <option name="cluster" type="string">Cluster name</option>
+         <option name="cluster_type" type="string">Cluster Type (such as esx)</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
       <transport method="post" path="machine/%(machine)s/command/update" />

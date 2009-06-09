@@ -48,7 +48,7 @@ class CommandUpdateMachine(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, machine, model, serial, chassis, slot,
-               clearchassis, multislot,
+               clearchassis, multislot, cluster, cluster_type,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                user, **arguments):
         dbmachine = get_machine(session, machine)
@@ -127,6 +127,26 @@ class CommandUpdateMachine(BrokerCommand):
         if serial:
             dbmachine.serial_no=serial
 
+        if cluster:
+            # FIXME: Only allow a cluster update if this hardware is
+            # already associated with a cluster.
+            if not cluster_type:
+                # FIXME: Default to the current cluster_type
+                cluster_type = 'esx'
+            dbcluster = Cluster.get_unique(session, name=cluster,
+                                           cluster_type=cluster_type)
+            if not dbcluster:
+                raise ArgumentError("Could not find %s cluster named '%s'" %
+                                    (cluster_type, cluster))
+            # FIXME: Check that the current cluster and the new cluster
+            # are in the same metacluster.
+            # FIXME: Set the (additional) appropriate link
+            # FIXME: Check that the vm_to_host_ratio has not been exceeded.
+            dbmachine.location = dbcluster.location
+        elif cluster_type:
+            raise ArgumentError("Cannot change cluster_type without "
+                                "specifying a new cluster.")
+
         session.add(dbmachine)
         session.flush()
         session.refresh(dbmachine)
@@ -140,6 +160,10 @@ class CommandUpdateMachine(BrokerCommand):
 
         if dbmachine.host:
             # XXX: May need to reconfigure.
+            pass
+
+        if cluster:
+            # Write out any plenary updates.
             pass
 
         return
