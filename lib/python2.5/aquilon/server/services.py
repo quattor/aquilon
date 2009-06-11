@@ -36,7 +36,7 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Tld, BuildItem, ServiceMap,
-                                 PersonalityServiceMap)
+                                PersonalityServiceMap, ClusterServiceBinding)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 
 
@@ -68,6 +68,7 @@ class Chooser(object):
         The instances_bound and instances_unbound lists are populated
         after chosen_services with the differences between chosen_services
         and original_service_instances.
+
         """
         self.dbhost = dbhost
         self.is_debug_enabled = debug
@@ -84,6 +85,17 @@ class Chooser(object):
             self.required_services.add(item.service)
         for item in self.dbhost.personality.service_list:
             self.required_services.add(item.service)
+        self.cluster_aligned_services = {}
+        # FIXME: backrefs are borked...
+        # if self.dbhost.cluster:
+            # for si in self.dbhost.cluster.service_instances:
+                # self.cluster_aligned_services[si.service] = si
+            # q = session.query(ClusterAlignedService)
+            # q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
+            # for item in q.all():
+                # if item.service not in self.cluster_aligned_services:
+                    # self.cluster_aligned_services[item.service] = None
+                # self.required_services.add(item.service)
         self.staging_services = {}
         """Stores interim service instance lists."""
         self.messages = []
@@ -96,6 +108,10 @@ class Chooser(object):
         """Set of service instances with a new client."""
         self.instances_unbound = set()
         """Set of service instances losing a client."""
+        self.cluster_instances_bound = set()
+        """Set of newly bound instances for cluster aligned services."""
+        self.cluster_instances_unbound = set()
+        """Set of instances unbound as cluster aligned services."""
         q = self.session.query(BuildItem).filter_by(host=self.dbhost)
         q = q.join('cfg_path').filter_by(tld=self.dbservice_tld)
         self.original_service_build_items = q.all()
@@ -149,6 +165,7 @@ class Chooser(object):
             self.find_service_instances(dbservice)
         self.check_errors()
         for dbservice in self.required_services:
+            self.choose_cluster_aligned(dbservice)
             self.choose_past_use(dbservice)
         # If this code needs to be made more efficient, this could
         # be refactored.  We don't always need count_servers()...
@@ -178,6 +195,7 @@ class Chooser(object):
             self.staging_services[service] = None
             self.find_service_instances(service)
         self.check_errors()
+        self.choose_cluster_aligned(service)
         self.choose_past_use(service)
         # If this code needs to be made more efficient, this could
         # be refactored.  We don't always need count_servers()...
@@ -198,7 +216,10 @@ class Chooser(object):
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the
         known maps."""
-        locations = [self.dbhost.location]
+        if dbservice in self.cluster_aligned_services:
+            locations = [self.dbhost.cluster.location_constraint]
+        else:
+            locations = [self.dbhost.location]
         while (locations[-1].parent is not None and
                locations[-1].parent != locations[-1]):
             locations.append(locations[-1].parent)
@@ -238,6 +259,32 @@ class Chooser(object):
             if self.is_debug_enabled:
                 raise ArgumentError("\n".join(self.debug_info))
             raise ArgumentError("\n".join(self.messages + self.errors))
+
+    def choose_cluster_aligned(self, dbservice):
+        if dbservice not in self.cluster_aligned_services:
+            return
+        if not self.cluster_aligned_services[dbservice]:
+            self.debug("No instance set for %s cluster %s service %s",
+                       self.dbhost.cluster.cluster_type,
+                       self.dbhost.cluster.name,
+                       dbservice.name)
+            return
+        if self.cluster_aligned_services[dbservice] not in \
+           self.staging_services[dbservice]:
+            self.debug("The %s cluster %s is set to use service %s instance "
+                       "%s, but that instance is not in a service map for %s.",
+                       self.dbhost.cluster.cluster_type,
+                       self.dbhost.cluster.name,
+                       dbservice.name,
+                       self.cluster_aligned_services[dbservice].name,
+                       self.dbhost.fqdn)
+            return
+        self.debug("Chose service %s instance %s because it is cluster "
+                   "aligned.", dbservice.name,
+                   self.cluster_aligned_services[dbservice].name)
+        self.staging_services[dbservice] = [
+            self.cluster_aligned_services[dbservice]]
+        return
 
     def choose_past_use(self, dbservice):
         """If more than one service instance was found in the maps,
@@ -385,6 +432,11 @@ class Chooser(object):
             if not self.chosen_services.get(service, None) or \
                self.chosen_services[service] != instance:
                 self.instances_unbound.add(instance)
+        for (service, instance) in self.cluster_aligned_services.items():
+            if not instance or instance != self.chosen_services[service]:
+                self.cluster_instances_bound.add(self.chosen_services[service])
+            if instance != self.chosen_services[service]:
+                self.cluster_instances_unbound.add(instance)
 
     def apply_changes(self):
         """Update the host object with pending changes."""
@@ -440,6 +492,18 @@ class Chooser(object):
             #   self.dbhost.templates[0].cfg_path.tld.type == 'os':
             #    self.dbhost.templates._reorder()
             self.session.add(self.dbhost)
+        for instance in self.cluster_instances_unbound:
+            dbcs = ClusterServiceBinding.get_unique(
+                cluster_id=self.dbhost.cluster.id,
+                service_instance_id=instance.id)
+            if dbcs:
+                self.session.remove(dbcs)
+        for instance in self.cluster_instances_bound:
+            # XXX: New binding should propogate out to other cluster
+            # members but currently does not.
+            dbcs = ClusterServiceBinding(cluster=self.dbhost.cluster,
+                                         service_instance=instance)
+            self.session.add(dbcs)
 
     def flush_changes(self):
         self.session.flush()
@@ -451,3 +515,10 @@ class Chooser(object):
                 plenary_info = PlenaryServiceInstanceServer(instance.service,
                                                             instance)
                 plenary_info.write(locked=locked)
+        # FIXME: If a service instance has been newly set for a cluster
+        # aligned service, do we need to write out any plenary files
+        # for this host's cluster?
+        if self.cluster_instances_bound:
+            pass
+
+

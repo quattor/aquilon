@@ -1998,4 +1998,112 @@
       <transport method="delete" path="cluster/esx/%(cluster)s" />
    </command>
 
+   <command name="rebind_metacluster">
+      Change metacluster bindings.
+
+      This will move the cluster into the named metacluster.
+      <optgroup name="rebind_client_opts" mandatory="True" fields="all">
+         <option name="metacluster" type="string">MetaCluster name</option>
+         <option name="cluster" type="string">Cluster name</option>
+         <option name="cluster_type" type="string">Service name</option>
+      </optgroup>
+      <transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster_type)s/%(cluster)s/rebind" />
+   </command>
+
+   <command name="bind_esx_cluster">
+      Bind a vmhost or a service instance to the named cluster.
+
+      If binding a vmhost that is already bound to a different cluster this
+      command will fail.
+
+      If binding a service instance for a service that is already bound to
+      a different instance this command will fail.
+      <optgroup name="bind_esx_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+         <optgroup name="bind_esx_cluster_object" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="service">Server name</option>
+            <optgroup name="bind_esx_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+      </optgroup>
+      <transport method="put" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
+      <transport method="put" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="rebind_esx_cluster">
+      Bind a vmhost or a service instance to the named cluster.
+
+      If binding a vmhost that is already bound to a different cluster that
+      binding will be removed.
+
+      If binding a service instance for a service that is already bound to
+      a different instance the old binding will be removed.
+      <optgroup name="rebind_esx_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+	 <optgroup name="rebind_esx_cluster_object" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="service">Server name</option>
+	    <optgroup name="rebind_esx_cluster_service" mandatory="True" fields="all">
+               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+      </optgroup>
+      <transport method="post" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
+      <transport method="post" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="unbind_esx_cluster">
+      Remove the binding of the vmhost or service instance from the named
+      cluster.
+      <optgroup name="unbind_esx_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+	 <optgroup name="unbind_esx_cluster_object" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="service">Server name</option>
+	    <optgroup name="unbind_esx_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+      </optgroup>
+      <transport method="delete" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
+      <transport method="delete" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="add_esx_cluster_aligned_service">
+      Mark a service as aligned for ESX clusters.  All members of a given
+      cluster will be required to use the same service instance for the
+      service.
+      <optgroup name="add_aligned_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="service/%(service)s/aligned_for/cluster_type/esx" />
+   </command>
+
+   <command name="show_cluster_type">
+      Show information about a cluster_type such as esx, including aligned
+      services.
+      <optgroup name="show_cluster_type_opts" mandatory="True" fields="any">
+         <option name="cluster_type" type="string">cluster_type name</option>
+         <option name="all" type="boolean" conflicts="cluster_type">Select all cluster types</option>
+      </optgroup>
+      <transport trigger="cluster_type" method="get" path="cluster_type/%(cluster_type)s" />
+      <transport method="get" path="cluster_type" />
+   </command>
+
+   <command name="del_esx_cluster_aligned_service">
+      Delete a service from the list of aligned services for the esx
+      cluster_type.  Cluster members which are already bound to a
+      service because it used to be aligned will be unmodified. If
+      you wish to unbind those clients, they must be reconfigured.
+      <optgroup name="del_aligned_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+      </optgroup>
+      <transport method="delete" path="service/%(service)s/aligned_for/cluster_type/esx" />
+   </command>
+
 </commandline>

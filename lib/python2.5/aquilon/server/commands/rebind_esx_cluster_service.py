@@ -26,39 +26,20 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrappers to make getting and using hosts simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.bind_esx_cluster_service import (
+    CommandBindESXClusterService)
+from aquilon.server.dbwrappers.host import hostname_to_host
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Host, DnsDomain
-from aquilon.server.dbwrappers.system import get_system
+
+class CommandRebindESXClusterService(CommandBindESXClusterService):
+
+    required_parameters = ["cluster", "service", "instance"]
+
+    def render(self, session, **arguments):
+        arguments["force"] = True
+        return CommandBindESXClusterService.render(self, session, **arguments)
 
 
-def hostname_to_host(session, hostname):
-    return get_system(session, hostname, Host, 'Host')
-
-def get_host_build_item(self, dbhost, dbservice):
-    for template in dbhost.templates:
-        si = template.cfg_path.svc_inst
-        if si and si.service == dbservice:
-            return template
-    return None
-
-def get_host_dependencies(session, dbhost):
-    """ returns a list of strings describing how a host is being used.
-    If the host has no dependencies, then an empty list is returned
-    """
-    ret = []
-    # XXX: Show any service instance which has dbhost as an element in host_list.hosts
-    if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
-       len(dbhost.cluster.machines) > \
-       dbhost.cluster.vm_to_host_ratio * (len(dbhost.cluster.hosts) - 1):
-           ret.append("Removing vmhost %s from %s cluster %s would exceed "
-                      "vm_to_host_ratio %s (%s VMs/%s hosts)" %
-                      (dbhost.fqdn, dbhost.cluster.cluster_type,
-                       dbhost.cluster.name, dbhost.cluster.vm_to_host_ratio,
-                       len(dbhost.cluster.machines),
-                       len(dbhost.cluster.hosts)))
-    return ret

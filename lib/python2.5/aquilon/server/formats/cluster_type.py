@@ -45,7 +45,7 @@ class ClusterTypeFormatter(ObjectFormatter):
     def format_raw(self, cluster_type, indent=""):
         details = [indent + "Cluster Type: %s" % cluster_type.cluster_type]
         for service in cluster_type.services:
-            details.append(self.redirect_raw(service, indent + "  "))
+            details.append(indent + "  Aligned Service: %s" % service.name)
         return "\n".join(details)
 
 ObjectFormatter.handlers[ClusterType] = ClusterTypeFormatter()
