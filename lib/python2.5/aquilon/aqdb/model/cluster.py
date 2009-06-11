@@ -29,8 +29,8 @@
 """ tables/classes applying to clusters """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence, Boolean,
-                        ForeignKey, UniqueConstraint)
+from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
+                        UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -77,10 +77,14 @@ class Cluster(Base):
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
 cluster = Cluster.__table__
-cluster.primary_key.name = '%s_pk'%(_TN)
+cluster.primary_key.name = '%s_pk'% (_TN)
 cluster.append_constraint(UniqueConstraint('name', 'cluster_type', name='%s_uk'%(_TN)))
 
 table = cluster #FIXME: remove the need for these
+
+def _esx_cluster_vm_by_vm(vm):
+    """ creator function for esx cluster vms"""
+    return EsxClusterVM(vm=vm)
 
 class EsxCluster(Cluster):
     """
@@ -92,12 +96,14 @@ class EsxCluster(Cluster):
     esx_cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
                                             name='esx_cluster_fk',
                                             ondelete='CASCADE'),
+                            #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
 
     vm_to_host_ratio = Column(Integer, default=16, nullable=True)
 
-    #mycluster = relation(Cluster, lazy=False, cascade='all', uselist=False)
-    vms = association_proxy('esx_cluster', 'machine')
+    vms = association_proxy('esx_cluster', 'vm', creator=_esx_cluster_vm_by_vm)
+
+    #TODO: proxy my metacluster as an attribute if I have one?
 
     def __init__(self, **kw):
         kw['max_members'] = 8
@@ -117,7 +123,7 @@ class EsxClusterMember(Base):
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
-    #VMHOSTS
+    #VMHOSTS only. TODO: validate host archetype?
     host_id = Column(Integer, ForeignKey('host.id',
                                          name='%s_host_fk'%(_ECM),
                                          ondelete='CASCADE'),
@@ -128,7 +134,6 @@ class EsxClusterMember(Base):
     cluster = relation(EsxCluster, uselist=False, lazy=False,
                        backref=backref('cluster', cascade='all, delete-orphan'))
 
-    #TODO: do I need this backref?
     host = relation(Host, lazy=False, cascade='all',
                     backref=backref('host', cascade='all, delete-orphan'))
 
@@ -137,20 +142,21 @@ class EsxClusterMember(Base):
         host = kw['host']
 
         if len(cl.members) == cl.max_members:
-            msg = '%s already at maximum capacity (%s)'%(cl.name, cl.max_members)
+            msg = '%s already at maximum capacity (%s)'% (cl.name,
+                                                          cl.max_members)
             raise ValueError(msg)
 
         if host.archetype.name != 'vmhost':
-            msg = "host %s must be archetype 'vmhost' (is %s)"%(host.fqdn,
+            msg = "host %s must be archetype 'vmhost' (is %s)"% (host.fqdn,
                                                                 host.archetype.name)
             raise ValueError(msg)
         #TODO: enforce cluster members are inside the location constraint?
         super(EsxClusterMember, self).__init__(**kw)
 
 ecm = EsxClusterMember.__table__
-ecm.primary_key.name = '%s_pk'%(_ECM)
+ecm.primary_key.name = '%s_pk'% (_ECM)
 
-_ECVM='esx_cluster_vm'
+_ECVM = 'esx_cluster_vm'
 class EsxClusterVM(Base):
     """ Binds virtual machines to EsxClusters """
     __tablename__ = _ECVM
@@ -173,6 +179,9 @@ class EsxClusterVM(Base):
     vm = relation(Machine, lazy=False, cascade='all',
                   backref=backref('vm', cascade='all, delete-orphan'))
 
+ecvm = EsxClusterVM.__table__
+ecvm.primary_key.name = '%s_pk'% (_ECVM)
+ecvm.append_constraint(UniqueConstraint('machine_id', name='%s_uk'%(_ECVM)))
 
 _CRS = 'cluster_aligned_service'
 _ABV = 'clstr_alnd_svc'
@@ -199,7 +208,7 @@ class ClusterAlignedService(Base):
     service = relation(Service, cascade='all', uselist=False)
 
 cas = ClusterAlignedService.__table__
-cas.primary_key.name='%s_pk'%(_ABV)
+cas.primary_key.name = '%s_pk'%(_ABV)
 
 _CS = 'cluster_service'
 _CAB = 'clstr_svc'

@@ -44,3 +44,10 @@ def commit(sess):
     except Exception,e:
         sess.rollback()
         raise e
+
+def add(sess, obj):
+    try:
+        sess.add(obj)
+    except Exception, e:
+         sess.rollback()
+         raise e

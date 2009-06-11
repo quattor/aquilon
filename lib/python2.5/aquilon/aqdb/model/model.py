@@ -98,7 +98,7 @@ def populate(sess, *args, **kw):
             ['cisco','ws-c2960-48tt-l','tor_switch'],
             ['aurora_vendor', 'aurora_chassis_model', 'aurora_chassis'],
             ['aurora_vendor', 'aurora_model', 'aurora_node'],
-            ['virtual', 'virtual', 'virtual_machine']]
+            ['virtual', 'vm', 'virtual_machine']]
 
         for i in f:
             m = Model(name = i[1],

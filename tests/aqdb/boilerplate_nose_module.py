@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009  Contributor
@@ -27,64 +27,32 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" tests create and delete of a machine through the session """
-import unittest
+
+""" DESCRIBE ME """
 from utils import load_classpath, add, commit
 
 load_classpath()
 
-import aquilon.aqdb.depends
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import Vendor, Model, Machine, Cpu, Rack
+from aquilon.aqdb.model import SOMETHING 
+
+from nose.tools import raises
 
 db = DbFactory()
 sess = db.Session()
-NAME = ''
-VENDOR='hp'
-MODEL='bl45p'
 
-def setUp():
+def clean_up():
+    pass
+
+def setup():
+    print 'set up'
+    clean_up()
+
+def teardown():
+    print 'tear down'
+    clean_up()
 
 
-    t = sess.query(Machine).filter_by(name = NAME).first()
-    if t is not None:
-        sess.delete(t)
-        sess.commit()
-
-def tearDown():
-    #TODO: this is a recursive definition. Fix it with a direct sql statement later on
-    if len(sess.query(Machine).filter_by(name = NAME).all()) > 0:
-        testDelMachine()
-
-def testInitMachine():
-    vnd = sess.query(Vendor).filter_by(name=VENDOR).one()
-    assert vnd, "Can't find vendor %s"%(VENDOR)
-
-    mdl  = sess.query(Model).filter_by(name=MODEL).one()
-    assert mdl, "Can't find model %s"%(MODEL)
-
-    proc = sess.query(Cpu).first()
-    assert proc, "Can't find a cpu"
-
-    rack = sess.query(Rack).first()
-    assert rack, "Can't find a rack"
-
-    NAME = rack.name + 'c1n3'
-    mchn = Machine(name=NAME, model=mdl, location=rack, cpu=proc)
-
-    add(sess, mchn)
-    commit(sess)
-
-    assert mchn, 'Commit machine failed'
-    print mchn
-
-def testDelMachine():
-    mchn = sess.query(Machine).filter_by(name = NAME).first()
-    if mchn:
-        s.delete(mchn)
-        commit(sess)
-
-        t = sess.query(Machine).filter_by(name = NAME).first()
-        assert t is None
-        print 'deleted machine'
-
+if __name__ == "__main__":
+    import nose
+    nose.runmodule()

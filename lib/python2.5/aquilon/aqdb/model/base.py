@@ -65,10 +65,10 @@ class Base(object):
         in the uniqueness constraint.  Note that there is no relational
         magic here.  If the column is an id, an id (not an object)
         must be passed in.
-        
+
         """
         if len(args) > 1:
-            raise InternalError("Must use keywork arguments for get_unique "
+            raise InternalError("Must use keyword arguments for get_unique "
                                 "with more than one key.")
         unique_constraints = []
         for constraint in cls.__table__.constraints:
@@ -137,5 +137,3 @@ def __init__(self, **kw):
             msg = "%r is an invalid argument for %s" %(k, type(self).__name__)
             raise TypeError(msg)
         setattr(self, k, kw[k])
-
-

@@ -43,21 +43,25 @@ class Gateway(Base):
     __tablename__ = _TN
 
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='%s_net_fk'%(_TN),
+                                            name='%s_net_fk'% (_TN),
                                             ondelete='CASCADE'),
+                        #if a network is deleted, it's gateways are deleted
                         primary_key=True)
 
     location_id = Column(Integer, ForeignKey('location.id',
-                                             name='%s_location_fk'%(_TN),
+                                             name='%s_location_fk'% (_TN),
                                              ondelete='CASCADE'),
+                         #if a location is deleted, so are it's gateways
                          primary_key=True)
 
     ip = Column(IPV4, primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    network = relation(Network, backref='gateways') #cascade?
-    location = relation(Network, backref='locations') #cascade?
+    network = relation(Network, uselist=False, backref=backref('gateways',
+                                                               cascade='all'))
+    location = relation(Location, backref=backref('locations',
+                                                  cascade='all'))
 
 gw = Gateway.__table__
-gw.primary_key.name = '%s_pk'%(_TN)
+gw.primary_key.name = '%s_pk'% (_TN)

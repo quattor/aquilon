@@ -39,8 +39,12 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base, Host, Network, Cluster
+from aquilon.aqdb.model import Base, Cluster
 from aquilon.aqdb.column_types.aqstr import AqStr
+
+def _metacluster_member_by_cluster(cl):
+    """ creator function for metacluster members """
+    return MetaClusterMember(cluster=cl)
 
 _MCT = 'metacluster'
 class MetaCluster(Base):
@@ -55,18 +59,19 @@ class MetaCluster(Base):
     name = Column(AqStr(64), nullable=False)
     #TODO: is this always to be nullable?
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='%s_network_fk'%(_MCT)),
+                                            name='%s_network_fk'% (_MCT)),
                         nullable=True)
     max_members = Column(Integer, default=2, nullable=False)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments      = Column(String(255))
 
-    members = association_proxy('metacluster', 'cluster')
-    #TODO: append function that checks if current members+1 >= max_members
+    members = association_proxy('metacluster', 'cluster',
+                                creator=_metacluster_member_by_cluster)
+    #TODO: test that append checks if current members+1 >= max_members: how?
 
-metacluster=MetaCluster.__table__
-metacluster.primary_key.name='%s_pk'%(_MCT)
-metacluster.append_constraint(UniqueConstraint('name', name='%s_uk'%(_MCT)))
+metacluster = MetaCluster.__table__
+metacluster.primary_key.name = '%s_pk'% (_MCT)
+metacluster.append_constraint(UniqueConstraint('name', name='%s_uk'% (_MCT)))
 
 
 _MCM = 'metacluster_member'
@@ -74,30 +79,41 @@ class MetaClusterMember(Base):
     __tablename__ = _MCM
 
     metacluster_id = Column(Integer, ForeignKey('metacluster.id',
-                                                name='%s_meta_fk'%(_MCM),
+                                                name='%s_meta_fk'% (_MCM),
                                                 ondelete='CASCADE'),
+                            #if a metacluser is delete so is the association
                             primary_key=True)
 
     cluster_id = Column(Integer, ForeignKey('clstr.id',
-                                            name='%s_clstr_fk'%(_MCM),
+                                            name='%s_clstr_fk'% (_MCM),
                                             ondelete='CASCADE'),
+                        #if a cluster is deleted, so is the association
                         primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
+    #need the cascade=all so that deletion propagates otherwise
+    #AssertionError: Dependency rule tried to blank-out primary key column
     metacluster = relation(MetaCluster, lazy=False, uselist=False,
-                            backref=backref('metacluster', cascade='all, delete-orphan'))
+                            backref=backref('metacluster', cascade='all'))
 
-    cluster = relation(Cluster, lazy=False, cascade='all',
-                       backref=backref('mc_cluster', cascade='all, delete-orphan'))
+    #do not have cascade='all' on the forward mapper here, else deletion of
+    #metaclusters causes deleteion of clusters
+    cluster = relation(Cluster, lazy=False, backref=backref('mc_cluster',
+                                                            cascade='all'))
 
     def __init__(self, **kw):
-        mc = kw['metacluster']
-        if len(mc.members) == mc.max_members:
-            msg = '%s already at maximum capacity (%s)'%(mc.name, mc.max_members)
-            raise ValueError(msg)
+        if kw.has_key('metacluster'):
+            #when we append to the association proxy, there's no metacluster arg
+            #which prevents this from being checked.
+            mc = kw['metacluster']
+            if len(mc.members) == mc.max_members:
+                msg = '%s already at maximum capacity (%s)'% (mc.name,
+                                                              mc.max_members)
+                raise ValueError(msg)
         super(MetaClusterMember, self).__init__(**kw)
 
 metamember = MetaClusterMember.__table__
-metamember.primary_key.name = '%s_pk'%(_MCM)
-metamember.append_constraint(UniqueConstraint('cluster_id', name='%s_uk'))
+metamember.primary_key.name = '%s_pk'% (_MCM)
+metamember.append_constraint(
+    UniqueConstraint('cluster_id', name='%s_uk'% (_MCM)))

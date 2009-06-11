@@ -49,17 +49,14 @@ sess = db.Session()
 
 CLUSTER_NAME = 'test_esx_cluster'
 META_NAME = 'test_meta_cluster'
-C2 = 'test_cluster2'
-C3 = 'test_cluster3'
+NUM_CLUSTERS = 30
 M2 = 'test_meta_cluster2'
 M3 = 'test_meta_cluster3'
 
 def clean_up():
-    del_meta_members()
     del_metas()
     del_clusters()
 
-#TODO: refactor into a single delete method
 def del_clusters():
     clist = sess.query(Cluster).all()
     if len(clist) > 0:
@@ -71,18 +68,12 @@ def del_clusters():
 def del_metas():
     mlist = sess.query(MetaCluster).all()
     if len(mlist) > 0:
+        print '%s clusters before deleting metas'%(sess.query(Cluster).count())
         for m in mlist:
             sess.delete(m)
         commit(sess)
-        print 'deleted metacluster'
-
-def del_meta_members():
-    mlist = sess.query(MetaClusterMember).all()
-    if len(mlist) > 0:
-        for m in mlist:
-            sess.delete(m)
-            commit(sess)
-        print 'deleted %s metacluster members'%(len(mlist))
+        print 'deleted %s metaclusters'%(len(mlist))
+        print '%s clusters left after deleting metas'%(sess.query(Cluster).count())
 
 def setup():
     print 'set up'
@@ -90,27 +81,39 @@ def setup():
 
 def teardown():
     print 'tear down'
-    #clean_up()
+    clean_up()
 
 
-def test_create_cluster():
+def test_create_clusters():
     np = sess.query(Building).filter_by(name='np').one()
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
 
-    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per)
-
-    sess.add(ec)
+    for i in xrange(NUM_CLUSTERS):
+        ec = EsxCluster(name='%s%s'%(CLUSTER_NAME,i),
+                        location_constraint=np,
+                        personality=per)
+        sess.add(ec)
     commit(sess)
 
-    assert ec
-    print ec
+    ecs = sess.query(EsxCluster).all()
+    assert len(ecs) is NUM_CLUSTERS
+    print ecs[0]
 
-    assert ec.max_members is 8
-    print 'esx cluster max members = %s'%(ec.max_members)
+    assert ecs[0].max_members is 8
+    print 'esx cluster max members = %s'%(ecs[0].max_members)
 
-def test_add_meta():
+
+def cluster_factory():
+    clusters = sess.query(EsxCluster).all()
+    size = len(clusters)
+    for cl in clusters:
+        yield cl
+
+cl_factory = cluster_factory()
+
+def test_create_metacluster():
     mc = MetaCluster(name=META_NAME)
     sess.add(mc)
     commit(sess)
@@ -121,7 +124,7 @@ def test_add_meta():
 
 def test_add_meta_member():
     mc = MetaCluster.get_by('name', META_NAME, sess)[0]
-    cl = Cluster.get_by('name', CLUSTER_NAME, sess)[0]
+    cl = cl_factory.next()
 
     mcm = MetaClusterMember(metacluster=mc, cluster=cl)
     sess.add(mcm)
@@ -133,20 +136,16 @@ def test_add_meta_member():
 
 @raises(ValueError)
 def test_add_too_many_metacluster_members():
-    mc = MetaCluster.get_by('name', META_NAME, sess)[0]
-    per = sess.query(Personality).select_from(
-            join(Archetype, Personality)).filter(
-            and_(Archetype.name=='windows', Personality.name=='generic')).one()
-    cl2 = EsxCluster(name=C2, personality=per)
-    cl3 = EsxCluster(name=C3, personality=per)
-
-    mcm2 = MetaClusterMember(metacluster=mc, cluster=cl2)
-    sess.add_all([cl2, cl3, mcm2])
-    commit(sess)
-
-    assert mcm2
+    cl2 = cl_factory.next()
+    cl3 = cl_factory.next()
     assert cl2
     assert cl3
+
+    mc = MetaCluster.get_unique(sess, META_NAME)
+    mcm2 = MetaClusterMember(metacluster=mc, cluster=cl2)
+    sess.add(mcm2)
+    commit(sess)
+    assert mcm2
 
     mcm3 = MetaClusterMember(metacluster=mc, cluster=cl3)
     sess.add(mcm3)
@@ -163,18 +162,33 @@ def test_two_metaclusters():
     assert m2
     assert m3
 
-    cl3 = EsxCluster.get_by('name', C3, sess)[0]
-    assert cl3
+    cl4 = cl_factory.next()
+    assert cl4
 
-    mcm1=MetaClusterMember(metacluster=m2, cluster=cl3)
+    mcm1=MetaClusterMember(metacluster=m2, cluster=cl4)
     sess.add(mcm1)
     commit(sess)
     assert mcm1
 
-    mcm2=MetaClusterMember(metacluster=m3, cluster=cl3)
+    mcm2=MetaClusterMember(metacluster=m3, cluster=cl4)
     sess.add(mcm1)
     commit(sess)
     assert mcm2
+
+
+def test_append():
+    mc=MetaCluster.get_unique(sess, M3)
+    assert len(mc.members) is 0
+    print '%s before append test has members %s'%(mc, mc.members)
+
+    cl5 = cl_factory.next()
+    assert cl5
+    print cl5
+
+    mc.members.append(cl5)
+    commit(sess)
+    assert len(mc.members) is 1
+    print 'members now %s'%(mc.members)
 
 if __name__ == "__main__":
     import nose
