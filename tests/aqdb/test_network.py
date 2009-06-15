@@ -28,63 +28,142 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ tests network """
-import __init__
-import unittest
+from utils import add, commit, load_classpath
+load_classpath()
 
 import aquilon.aqdb.depends
 
-from aquilon.aqdb.model import Network
-from aquilon.aqdb.db_factory  import db_factory
+from aquilon.aqdb.model import Network, Gateway, Location, Building
+from aquilon.aqdb.db_factory import DbFactory
 
-#class testNetwork(unittest.TestCase):
-class testNet():
-    def setUp(self, *args, **kw):
-        self.db = db_factory()
-        self.s = self.db.Session()
-        self.a = self.s.query(Network).first()
+from nose.tools import raises
 
-    def tearDown(self, *args, **kw):
-        pass
+db = DbFactory()
+sess = db.Session()
+net = sess.query(Network).first()
 
-    def testLocation(self):
-        assert(self.a.location)
+TEST_IP = '8.9.9.1'
+TEST_BCAST = '8.9.9.128'
+TEST_NAME = 'test_vpls_net'
 
-    def testAddresses(self):
-        assert(self.a.addresses())
+def setup():
+    print 'set up'
+    clean_up()
 
-    def testNetmask(self):
-        assert(self.a.netmask())
+def teardown():
+    print 'tear down'
+    #clean_up()
 
-    def testGateway(self):
-        assert(self.a.first_host())
+def clean_up():
+    del_vpls_net()
+    #explicitly not deleting gateways to test cascaded deletion in line
 
-    def testBroadcast(self):
-        assert(self.a.last_host())
+def del_vpls_net():
+    mynet = sess.query(Network).filter_by(name=TEST_NAME).all()
+    if mynet:
+        sess.query(Network).filter_by(name=TEST_NAME).delete()
+        print 'about to commit'
+        commit(sess)
+        print 'deleted %s test networks'%(len(mynet))
 
-    def testCidr(self):
-        assert(self.a.cidr)
+def test_location():
+    assert net.location
 
-    def testIp(self):
-        assert(self.a.ip)
+def test_addresses():
+    assert net.addresses()
 
-    def testName(self):
-        assert(self.a.name)
+def test_netmask():
+    assert net.netmask()
 
-    def testSide(self):
-        assert(self.a.side)
+def test_first_host():
+    assert net.first_host()
 
-    def testNetType(self):
-        assert(self.a.network_type)
+def test_no_gateway():
+    assert len(net.gateways) is 0
 
-    def runTest(self):
-        self.setUp()
-        self.testLocation()
-        self.testNetmask()
-        self.testGateway()
-        self.testBroadcast()
-        self.tearDown()
+def test_broadcast():
+    assert net.last_host()
+
+def test_cidr():
+    assert net.cidr
+
+def test_ip():
+    assert net.ip
+
+def test_name():
+    assert net.name
+
+def test_side():
+    assert net.side
+
+def test_type():
+    assert net.network_type
+
+def test_network_gateway_cascade_delete():
+    """ the test network is deleted at the begining and should cascade to the
+        gateways we created, leaving the table empty here. We can't query by
+        network (would presumably more accurate) it's already been wiped out """
+
+    gws = sess.query(Gateway).all()
+    if gws:
+        print 'found gateways %s'%(gws)
+    assert len(gws) is 0
+
+def test_create_vpls_network():
+    loc1 = Building.get_by('name', 'dd', sess)[0]
+
+    vpls_net1 = Network(name=TEST_NAME, location=loc1, ip=TEST_IP, cidr=25,
+                        network_type='stretch', mask=128, bcast=TEST_BCAST)
+    add(sess, vpls_net1)
+    commit(sess)
+
+    assert isinstance(vpls_net1, aquilon.aqdb.model.network.Network)
+    print vpls_net1
+
+def test_add_gateways():
+    vnet = sess.query(Network).filter_by(name=TEST_NAME).first()
+    assert vnet
+
+    loc1 = Building.get_by('name', 'dd', sess)[0]
+    assert loc1
+
+    loc2 = Building.get_by('name', 'ds', sess)[0]
+    assert loc2
+
+    gw1 = Gateway(network=vnet, location=loc1, ip='8.9.9.2')
+    gw2 = Gateway(network=vnet, location=loc2, ip='8.9.9.3')
+
+    add(sess, gw1)
+    add(sess, gw2)
+
+    commit(sess)
+    assert gw1
+    assert gw2
+
+    print gw1
+    print gw2
+    print vnet
+    print 'network has gateways %s'% (vnet.gateways)
+
+def test_plural_network_location():
+    vnet = sess.query(Network).filter_by(name=TEST_NAME).first()
+
+    assert len(vnet.locations) is 2
+    print 'network locations %s'% (vnet.locations)
+
+
+@raises(ValueError)
+def test_stretch_validator():
+    #TODO: construct a network instead of using the global 'net'
+    assert net.network_type != 'stretch'
+
+    loc = Building.get_by('name', 'dd', sess)[0]
+    assert loc
+
+    gw = Gateway(network=net, location=loc, ip='8.9.9.4')
+    add(sess, gw)
+    commit(sess)
 
 if __name__ == "__main__":
     import nose
     nose.runmodule()
-

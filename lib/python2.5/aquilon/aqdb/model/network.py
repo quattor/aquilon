@@ -39,13 +39,15 @@ from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
 from sqlalchemy.sql import and_
 from sqlalchemy.orm import relation
 
-
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.IPV4 import (IPV4, dq_to_int, get_bcast,
                                             int_to_dq)
 from aquilon.aqdb.model import Base, Location
 
+#used in locations, and lambda isn't as readable
+def _get_location(x):
+    return x.location
 
 #TODO: enum type for network_type, cidr
 class Network(Base):
@@ -96,6 +98,13 @@ class Network(Base):
 
     location = relation(Location, backref='networks')
 
+    @property
+    def locations(self):
+        if self.network_type == 'stretch':
+            return map(_get_location, self.gateways)
+        else:
+            return [self.location]
+
     def netmask(self):
         bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
         return inet_ntoa(pack('>I', bits))
@@ -118,9 +127,9 @@ class Network(Base):
         if self.name != self.ip:
             msg += '%s ip='% (self.name)
 
-        msg += '%s/%s (netmask=%s), type=%s, side=%s, located in %s>'% (self.ip,
+        msg += '%s/%s (netmask=%s), type=%s, side=%s, located in %r>'% (self.ip,
               self.cidr, _cidr_to_mask[self.cidr][0], self.network_type,
-              self.side, self.location.__repr__())
+              self.side, self.location)
         return msg
 
     #TODO: custom str

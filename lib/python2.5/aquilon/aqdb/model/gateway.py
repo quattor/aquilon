@@ -42,26 +42,44 @@ class Gateway(Base):
     """ Gateways for networks that appear in more than one physical location """
     __tablename__ = _TN
 
+    ip = Column(IPV4, primary_key=True)
+
     network_id = Column(Integer, ForeignKey('network.id',
                                             name='%s_net_fk'% (_TN),
                                             ondelete='CASCADE'),
                         #if a network is deleted, it's gateways are deleted
-                        primary_key=True)
+                        nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
                                              name='%s_location_fk'% (_TN),
                                              ondelete='CASCADE'),
                          #if a location is deleted, so are it's gateways
-                         primary_key=True)
-
-    ip = Column(IPV4, primary_key=True)
+                         nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    network = relation(Network, uselist=False, backref=backref('gateways',
-                                                               cascade='all'))
+    network = relation(Network, uselist=False,
+                       backref=backref('gateways',
+                                       cascade='all, delete-orphan'))
+
     location = relation(Location, backref=backref('locations',
                                                   cascade='all'))
+
+    def __init__(self, **kw):
+        if kw.has_key('network'):
+            net = kw['network']
+            if net.network_type != 'stretch':
+                msg = 'Network %s is type %s.'% (net.name, net.network_type)
+                msg += 'Only stretch networks can have gateways assigned'
+                raise ValueError(msg)
+        super(Gateway, self).__init__(**kw)
+
+
+    def __repr__(self):
+        return '<%s %s on Network %s/%s in %r>'%(self.__class__.__name__,
+                                                    self.ip, self.network.ip,
+                                                    self.network.cidr,
+                                                    self.location)
 
 gw = Gateway.__table__
 gw.primary_key.name = '%s_pk'% (_TN)
