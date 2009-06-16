@@ -100,8 +100,10 @@ from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.personality_service_list_item import PersonalityServiceListItem
 
 #CLUSTER
-from aquilon.aqdb.model.cluster import (Cluster, EsxCluster, EsxClusterMember,
-                                        ClusterAlignedService, ClusterService,
-                                        EsxClusterVM)
+from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
+                                        HostClusterMember,
+                                        MachineClusterMember,
+                                        ClusterAlignedService,
+                                        ClusterServiceBinding)
 
 from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember

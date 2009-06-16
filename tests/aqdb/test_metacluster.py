@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 
 """ tests create and delete of a machine through the session """
-from utils import load_classpath, commit
+from utils import load_classpath, add, commit
 
 load_classpath()
 
@@ -94,7 +94,7 @@ def test_create_clusters():
         ec = EsxCluster(name='%s%s'%(CLUSTER_NAME,i),
                         location_constraint=np,
                         personality=per)
-        sess.add(ec)
+        add(sess, ec)
     commit(sess)
 
     ecs = sess.query(EsxCluster).all()
@@ -115,7 +115,7 @@ cl_factory = cluster_factory()
 
 def test_create_metacluster():
     mc = MetaCluster(name=META_NAME)
-    sess.add(mc)
+    add(sess, mc)
     commit(sess)
 
     assert mc
@@ -123,16 +123,20 @@ def test_create_metacluster():
 
 
 def test_add_meta_member():
+    """ Test adding a cluster to a metacluster and cluster.metacluster """
     mc = MetaCluster.get_by('name', META_NAME, sess)[0]
     cl = cl_factory.next()
 
     mcm = MetaClusterMember(metacluster=mc, cluster=cl)
-    sess.add(mcm)
+    add(sess, mcm)
     commit(sess)
 
     assert mcm
     assert len(mc.members) is 1
     print 'metacluster members %s'%(mc.members)
+
+    assert cl.metacluster is mc
+    print cl.metacluster
 
 @raises(ValueError)
 def test_add_too_many_metacluster_members():
@@ -143,16 +147,16 @@ def test_add_too_many_metacluster_members():
 
     mc = MetaCluster.get_unique(sess, META_NAME)
     mcm2 = MetaClusterMember(metacluster=mc, cluster=cl2)
-    sess.add(mcm2)
+    add(sess, mcm2)
     commit(sess)
     assert mcm2
 
     mcm3 = MetaClusterMember(metacluster=mc, cluster=cl3)
-    sess.add(mcm3)
+    add(sess, mcm3)
     commit(sess)
     assert mcm3
 
-@raises(IntegrityError)
+@raises(IntegrityError, AssertionError)
 def test_two_metaclusters():
     """ Test unique constraint against cluster """
     m2 = MetaCluster(name=M2)
@@ -166,12 +170,12 @@ def test_two_metaclusters():
     assert cl4
 
     mcm1=MetaClusterMember(metacluster=m2, cluster=cl4)
-    sess.add(mcm1)
+    add(sess, mcm1)
     commit(sess)
     assert mcm1
 
     mcm2=MetaClusterMember(metacluster=m3, cluster=cl4)
-    sess.add(mcm1)
+    add(sess, mcm1)
     commit(sess)
     assert mcm2
 

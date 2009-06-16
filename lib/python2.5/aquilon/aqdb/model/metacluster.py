@@ -65,6 +65,8 @@ class MetaCluster(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments      = Column(String(255))
 
+    # FIXME: Missing relation to network...
+
     members = association_proxy('metacluster', 'cluster',
                                 creator=_metacluster_member_by_cluster)
     #TODO: test that append checks if current members+1 >= max_members: how?
@@ -99,7 +101,8 @@ class MetaClusterMember(Base):
 
     #do not have cascade='all' on the forward mapper here, else deletion of
     #metaclusters causes deleteion of clusters
-    cluster = relation(Cluster, lazy=False, backref=backref('mc_cluster',
+    cluster = relation(Cluster, lazy=False, backref=backref('_metacluster',
+                                                            uselist=False,
                                                             cascade='all'))
 
     def __init__(self, **kw):
@@ -117,3 +120,4 @@ metamember = MetaClusterMember.__table__
 metamember.primary_key.name = '%s_pk'% (_MCM)
 metamember.append_constraint(
     UniqueConstraint('cluster_id', name='%s_uk'% (_MCM)))
+Cluster.metacluster = association_proxy('_metacluster', 'metacluster')

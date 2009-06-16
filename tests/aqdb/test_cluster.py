@@ -36,9 +36,9 @@ load_classpath()
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import (Vendor, Model, Machine, Cpu, Building, Domain,
                                 DnsDomain, Status, Personality, Archetype, Host,
-                                Cluster, EsxCluster, EsxClusterMember, Service,
-                                ServiceInstance, Tld, CfgPath, ClusterService,
-                                ClusterAlignedService, EsxClusterVM)
+                                Cluster, EsxCluster, HostClusterMember, Service,
+                                ServiceInstance, Tld, CfgPath,
+                                MachineClusterMember)
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
@@ -62,6 +62,14 @@ def clean_up():
     del_machines()
     del_clusters()
 
+def setup():
+    print 'set up'
+    clean_up()
+
+def teardown():
+    print 'tear down'
+    clean_up()
+
 def del_machines():
     mach = sess.query(Machine).filter_by(name=MACHINE_NAME).first()
     if mach:
@@ -69,12 +77,12 @@ def del_machines():
         commit(sess)
         print 'deleted machine'
 
-    vms = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
-    if vms:
-        for vm in vms:
+    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    if machines:
+        for vm in machines:
             sess.delete(vm)
         commit(sess)
-        print 'deleted %s virtual machines'%(len(vms))
+        print 'deleted %s virtual machines'%(len(machines))
 
 def del_host():
     hst = sess.query(Host).filter_by(name=HOST_NAME).first()
@@ -92,19 +100,13 @@ def del_clusters():
         print 'deleted %s cluster(s)'%(len(clist))
 
 def del_cluster_member():
-    ech = sess.query(EsxClusterMember).filter(Host.name==HOST_NAME).first()
+    ech = sess.query(HostClusterMember).filter(Host.name==HOST_NAME).first()
     if ech:
         sess.delete(ech)
         commit(sess)
         print 'deleted cluster host'
 
-def setup():
-    print 'set up'
-    clean_up()
 
-def teardown():
-    print 'tear down'
-    clean_up()
 
 def test_create_machine():
     np = Building.get_by('name', 'np', sess)[0]
@@ -131,10 +133,10 @@ def test_create_vm():
         add(sess, vm)
     commit(sess)
 
-    vms = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
 
-    assert len(vms) is 30
-    print 'created %s vms'%(len(vms))
+    assert len(machines) is 30
+    print 'created %s machines'%(len(machines))
 
 
 def test_create_host():
@@ -160,7 +162,8 @@ def test_create_host():
     print vm_host
     assert(vm_host)
 
-def test_create_cluster():
+def test_create_esx_cluster():
+    """ tests the creation of an EsxCluster """
     np = sess.query(Building).filter_by(name='np').one()
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
@@ -174,54 +177,57 @@ def test_create_cluster():
     assert ec
     print ec
 
-    assert ec.max_members is 8
-    print 'esx cluster max members = %s'%(ec.max_members)
+    assert ec.max_hosts is 8
+    print 'esx cluster max members = %s'%(ec.max_hosts)
 
 def test_add_cluster_host():
+    """ test adding a host to the cluster """
     vm_host = Host.get_by('name', HOST_NAME, sess)[0]
     ec = EsxCluster.get_by('name', CLUSTER_NAME, sess)[0]
-    ech = EsxClusterMember(host=vm_host, cluster=ec)
+    hcm = HostClusterMember(host=vm_host, cluster=ec)
 
-    sess.add(ech)
+    sess.add(hcm)
     commit(sess)
 
-    assert ech
-    print ech
+    assert hcm
+    print hcm
 
-    assert ec.members
-    assert len(ec.members) is 1
-    print 'cluster members: %s'%(ec.members)
+    assert ec.hosts #host_members or hosts
+    assert len(ec.hosts) is 1
+    print 'cluster members: %s'%(ec.hosts)
 
-def test_add_vms():
-    a = sess.query(EsxClusterVM).all()
+def test_add_machines():
+    a = sess.query(MachineClusterMember).all()
     if a:
-        print '%s vms are already in existence'
+        print '%s machines are already in existence'
 
-    vms = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
     ec = EsxCluster.get_unique(sess, CLUSTER_NAME)
+    assert ec
 
-    for vm in vms[0:10]:
-        h = EsxClusterVM(esx_cluster=ec, vm=vm)
-        add(sess, h)
+    sess.autoflush=False
+    for vm in machines[0:10]:
+        mcm = MachineClusterMember(machine_cluster=ec, machine=vm)
+        add(sess, mcm)
     commit(sess)
+    sess.autoflush=True
 
-    assert len(ec.vms) is 10
-    print 'there are %s vms in the cluster: %s'%(len(ec.vms), ec.vms)
+    assert len(ec.machines) is 10
+    print 'there are %s machines in the cluster: %s'%(len(ec.machines), ec.machines)
 
 def test_vm_append():
-    vms = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
     ec = EsxCluster.get_unique(sess, CLUSTER_NAME)
+    assert ec
 
-    ec.vms.append(vms[12])
+    ec.machines.append(machines[12])
     commit(sess)
-    assert len(ec.vms) is 11
-    print 'now, there are %s vms in the cluster: %s'%(len(ec.vms), ec.vms)
+    assert len(ec.machines) is 11
+    print 'now, there are %s machines in the cluster: %s'%(len(ec.machines), ec.machines)
 
 #TODO: def too_many_cluster_members():
-
-#create 9 new vmhosts
-
 #TODO: esx cluster member table: test __init__ method for other invalid archetypes
+
 if __name__ == "__main__":
     import nose
     nose.runmodule()

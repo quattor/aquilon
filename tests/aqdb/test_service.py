@@ -29,14 +29,15 @@
 # TERMS THAT MAY APPLY.
 
 """ tests create and delete of a machine through the session """
-from utils import load_classpath, commit
+import sys
+from utils import load_classpath, commit, add
 
 load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import (Service, ServiceInstance, Tld, CfgPath, Cluster,
-                                ClusterService, ClusterAlignedService, Building,
-                                Personality, Archetype, EsxCluster)
+                                ClusterAlignedService, Building, Personality,
+                                Archetype, EsxCluster, ClusterServiceBinding)
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
@@ -51,6 +52,18 @@ CLUSTER_NAME = 'test_esx_cluster'
 SVC_NAME = 'test_esx_management'
 INST_NAME = 'test_esx_manager'
 
+def setup():
+    print 'set up'
+    clean_up()
+
+def teardown():
+    #if '--no_tear_down' in sys.argv:
+    #    print 'not cleaning up'
+    #    sys.exit()
+    #else:
+    print 'tear down'
+    clean_up()
+
 
 def clean_up():
     del_cluster_service()
@@ -59,14 +72,6 @@ def clean_up():
     del_svc()
     del_clusters()
     del_pths()
-
-#def show_cpath():
-#    a = sess.query(CfgPath).filter(
-#        and_(Tld.type=='service', CfgPath.relative_path==SVC_NAME)).first()
-#    if a:
-#        print 'cfg path query %s'%(a)
-#    else:
-#        print 'no cfg path'
 
 def del_pths():
     for i in [SVC_NAME, '%s/%s'%(SVC_NAME, INST_NAME)]:
@@ -105,7 +110,7 @@ def del_svc():
 
 
 def del_cluster_service():
-    sess.query(ClusterService).delete()
+    sess.query(ClusterServiceBinding).delete()
     commit(sess)
     print 'deleted cluster service binding'
 
@@ -113,15 +118,6 @@ def del_cluster_aligned_svc():
     sess.query(ClusterAlignedService).delete()
     commit(sess)
     print 'deleted cluster aligned service'
-
-
-def setup():
-    print 'set up'
-    clean_up()
-
-def teardown():
-    print 'tear down'
-    clean_up()
 
 
 def test_add_service():
@@ -178,8 +174,14 @@ def test_add_aligned_service():
         commit(sess)
 
     cas = ClusterAlignedService(cluster_type='esx', service=svc)
+    add(sess, cas)
+    commit(sess)
     assert cas
     print cas
+
+    ec = sess.query(EsxCluster).first()
+    print '%s has required services %s'% (ec.name, ec.required_services)
+    assert ec.required_services
 
 def test_cluster_bound_svc():
     si = sess.query(ServiceInstance).filter_by(name=INST_NAME).first()
@@ -195,9 +197,20 @@ def test_cluster_bound_svc():
         commit(sess)
 
     ec = Cluster.get_by('name', CLUSTER_NAME, sess)[0]
-    cs = ClusterService(cluster=ec, service_instance=si)
+    cs = ClusterServiceBinding(cluster=ec, service_instance=si)
     sess.add(cs)
     commit(sess)
 
     assert cs
     print cs
+
+def test_cluster_service_binding_assoc_proxy():
+    ec = Cluster.get_by('name', CLUSTER_NAME, sess)[0]
+    assert ec
+    print 'length of %s.service_bindings is %s'% (ec.name,
+                                                   len(ec.service_bindings))
+    assert len(ec.service_bindings) is 1
+
+if __name__ == "__main__":
+    import nose
+    nose.runmodule()

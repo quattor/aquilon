@@ -28,17 +28,21 @@
 # TERMS THAT MAY APPLY.
 """ tables/classes applying to clusters """
 from datetime import datetime
+from types import NoneType
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
 
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine)
 
+def _cluster_machine_by_machine(machine):
+    """ creator function for MachineClusterMembers """
+    return MachineClusterMember(machine=machine)
 
 #cluster is a reserved word in oracle
 _TN = 'clstr'
@@ -60,7 +64,8 @@ class Cluster(Base):
     location_constraint_id = Column(ForeignKey('location.id',
                                                name='clstr_loc_fk'))
 
-    max_members = Column(Integer, default=2, nullable=True) #TODO: have EsxCluster override default
+    #esx cluster __init__ method overrides this default
+    max_hosts = Column(Integer, default=2, nullable=True)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments      = Column(String(255))
 
@@ -71,8 +76,25 @@ class Cluster(Base):
     #TODO: backref?
     personality = relation(Personality, uselist=False, lazy=False)
 
-    members = association_proxy('cluster', 'host')
-    #TODO: an append that checks the max_members
+    #FIXME: Is it possible to have an append that checks the max_members?
+    hosts = association_proxy('cluster', 'host')
+    machines = association_proxy('_machine_cluster', 'machine',
+                                 creator=_cluster_machine_by_machine)
+
+    service_bindings = association_proxy('_cluster_svc_binding',
+                                         'service_instances')
+
+    #FIXME: only attach property if it exists. Currently it throws an error
+    # 'NoneType' object has no attribute 'metacluster' if you don't have one
+    #if isinstance(self._metacluster, NoneType) ?
+    #maybe in a reconstructor?
+    metacluster = association_proxy('_metacluster', 'metacluster')
+
+    #required services is a select on cluster_aligned services where cluster_type = my type
+    @property
+    def required_services(self):
+        return object_session(self).query(ClusterAlignedService).filter_by(
+            cluster_type = self.cluster_type).all()
 
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
@@ -82,9 +104,6 @@ cluster.append_constraint(UniqueConstraint('name', 'cluster_type', name='%s_uk'%
 
 table = cluster #FIXME: remove the need for these
 
-def _esx_cluster_vm_by_vm(vm):
-    """ creator function for esx cluster vms"""
-    return EsxClusterVM(vm=vm)
 
 class EsxCluster(Cluster):
     """
@@ -101,32 +120,31 @@ class EsxCluster(Cluster):
 
     vm_to_host_ratio = Column(Integer, default=16, nullable=True)
 
-    vms = association_proxy('esx_cluster', 'vm', creator=_esx_cluster_vm_by_vm)
 
-    #TODO: proxy my metacluster as an attribute if I have one?
 
     def __init__(self, **kw):
-        kw['max_members'] = 8
+        kw['max_hosts'] = 8
         super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__
 esx_cluster.primary_key.name = 'esx_%s_pk'
 
 
-_ECM = 'esx_cluster_member'
-class EsxClusterMember(Base):
+_HCM = 'host_cluster_member'
+class HostClusterMember(Base):
     """ Specific Class for EsxCluster vmhosts """
-    __tablename__ = _ECM
+    __tablename__ = _HCM
 
-    esx_cluster_id = Column(Integer, ForeignKey('esx_cluster.esx_cluster_id',
-                                                name='esx_cluster_cluster_fk',
+    cluster_id = Column(Integer, ForeignKey('%s.id'% (_TN),
+                                                name='hst_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
-                            primary_key=True)
+                        #if the cluster is deleted, so is membership
+                        primary_key=True)
 
-    #VMHOSTS only. TODO: validate host archetype?
     host_id = Column(Integer, ForeignKey('host.id',
-                                         name='%s_host_fk'%(_ECM),
+                                         name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
+                        #if the host is deleted, so is the membership
                         primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
@@ -135,53 +153,57 @@ class EsxClusterMember(Base):
                        backref=backref('cluster', cascade='all, delete-orphan'))
 
     host = relation(Host, lazy=False, cascade='all',
-                    backref=backref('host', cascade='all, delete-orphan'))
+                    backref=backref('_cluster', cascade='all, delete-orphan'))
 
     def __init__(self, **kw):
         cl = kw['cluster']
         host = kw['host']
 
-        if len(cl.members) == cl.max_members:
+        if len(cl.hosts) == cl.max_hosts:
             msg = '%s already at maximum capacity (%s)'% (cl.name,
-                                                          cl.max_members)
+                                                          cl.max_hosts)
             raise ValueError(msg)
 
-        if host.archetype.name != 'vmhost':
-            msg = "host %s must be archetype 'vmhost' (is %s)"% (host.fqdn,
-                                                                host.archetype.name)
-            raise ValueError(msg)
         #TODO: enforce cluster members are inside the location constraint?
-        super(EsxClusterMember, self).__init__(**kw)
+        super(HostClusterMember, self).__init__(**kw)
 
-ecm = EsxClusterMember.__table__
-ecm.primary_key.name = '%s_pk'% (_ECM)
+hcm = HostClusterMember.__table__
+hcm.primary_key.name = '%s_pk'% (_HCM)
 
-_ECVM = 'esx_cluster_vm'
-class EsxClusterVM(Base):
-    """ Binds virtual machines to EsxClusters """
-    __tablename__ = _ECVM
+Host.cluster = association_proxy('_cluster', 'cluster')
 
-    esx_cluster_id = Column(Integer, ForeignKey('esx_cluster.esx_cluster_id',
-                                                name='%s_cluster_fk'%(_ECVM),
+_MCM = 'machine_cluster_member'
+class MachineClusterMember(Base):
+    """ Binds machines into clusters """
+    __tablename__ = _MCM
+
+    cluster_id = Column(Integer, ForeignKey('%s.id'% (_TN),
+                                                name='mchn_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                            name='%s_machine_fk'%(_ECVM),
+                                            name='mchn_clstr_mmbr_mchn_fk',
                                             ondelete='CASCADE'),
                         primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    esx_cluster = relation(EsxCluster, uselist=False, lazy=False,
-                       backref=backref('esx_cluster', cascade='all, delete-orphan'))
+    #cluster already taken by HostClusterMember
+    machine_cluster = relation(Cluster, uselist=False, lazy=False,
+                       backref=backref('_machine_cluster',
+                                       cascade='all, delete-orphan'))
 
-    vm = relation(Machine, lazy=False, cascade='all',
-                  backref=backref('vm', cascade='all, delete-orphan'))
+    machine = relation(Machine, lazy=False, cascade='all',
+                  backref=backref('_cluster', uselist=False,
+                                  cascade='all, delete-orphan'))
 
-ecvm = EsxClusterVM.__table__
-ecvm.primary_key.name = '%s_pk'% (_ECVM)
-ecvm.append_constraint(UniqueConstraint('machine_id', name='%s_uk'%(_ECVM)))
+mcm = MachineClusterMember.__table__
+mcm.primary_key.name = '%s_pk'% (_MCM)
+mcm.append_constraint(UniqueConstraint('machine_id',
+                                       name='mchn_clstr_mmbr_uk'))
+
+Machine.cluster = association_proxy('_cluster', 'machine_cluster')
 
 _CRS = 'cluster_aligned_service'
 _ABV = 'clstr_alnd_svc'
@@ -198,7 +220,7 @@ class ClusterAlignedService(Base):
     service_id = Column(Integer, ForeignKey('service.id',
                                             name='%s_svc_fk'%(_ABV),
                                             ondelete='CASCADE'),
-                        nullable=False)
+                        primary_key=True)
 
     cluster_type = Column(AqStr(16), primary_key=True)
 
@@ -210,34 +232,47 @@ class ClusterAlignedService(Base):
 cas = ClusterAlignedService.__table__
 cas.primary_key.name = '%s_pk'%(_ABV)
 
-_CS = 'cluster_service'
-_CAB = 'clstr_svc'
-class ClusterService(Base):
+_CSB = 'cluster_service_binding'
+_CAB = 'clstr_svc_bndg'
+class ClusterServiceBinding(Base):
     """
         Makes bindings of service instances to clusters
     """
-    __tablename__ = _CS
+    __tablename__ = _CSB
     cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
                                             name='%s_cluster_fk'%(_CAB),
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    #cfg_path will die soon. using service instance here to ease later transition
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
                                                      name='%s_srv_inst_fk'%(_CAB)),
                                  primary_key=True)
-
+    #TODO: Boolean is_manual for manual choice?
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255))
 
-    #can't set the backref name to one that's already in use
     cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('thecluster', cascade='all, delete-orphan'))
+                       backref=backref('_cluster_svc_binding',
+                                       cascade='all, delete-orphan'))
 
-    service_instance = relation(ServiceInstance, lazy=False, backref='service_instance')
+    """
+        backref name != forward reference name intentional as it seems more
+        readable for the following reason:
+        If you instantiate a ClusterServiceBinding, you do it with
+                ClusterServiceBinding(cluster=foo, service_instance=bar)
+        But if you append to the association_proxy
+                cluster.service_bindings.append(svc_inst)
+    """
+    service_instance = relation(ServiceInstance, lazy=False,
+                                backref='service_instances')
 
+    """
+        cfg_path will die soon. using service instance here to
+        ease later transition.
+    """
     @property
     def cfg_path(self):
         return self.service_instance.cfg_path
 
-#should it check if its a required service?
+csb = ClusterServiceBinding.__table__
+csb.primary_key.name = '%s_pk'% (_CSB)

@@ -65,7 +65,9 @@ _long_nms['METACLUSTER_MEMBER'] = 'MTACLSTR_MBR'
 _long_nms['ESX_CLUSTER'] = 'ESX_CLSTR'
 _long_nms['ESX_CLUSTER_ID'] = 'ESX_CLSTR_ID'
 _long_nms['ESX_CLUSTER_MEMBER'] = 'ESX_CLSTR_MBR'
-
+_long_nms['CLUSTER_SERVICE_BINDING'] = 'CLSTR_SVC_BNDG'
+_long_nms['MACHINE_CLUSTER_MEMBER'] = 'MCHN_CLSTR_MMBR'
+_long_nms['HOST_CLUSTER_MEMBER'] = 'HOST_CLSTR_MMBR'
 
 def rename_sys_pks(db, *args, **kw):
     stmt = """
