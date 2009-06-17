@@ -443,6 +443,7 @@ class Chooser(object):
 
     def flush_changes(self):
         self.session.flush()
+        self.session.refresh(self.dbhost)
 
     def write_plenary_templates(self, locked=False):
         for instances in [self.instances_bound, self.instances_unbound]:
