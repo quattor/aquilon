@@ -81,7 +81,6 @@ class Cluster(Base):
                                    uselist=False,
                                    lazy=False)
 
-    #TODO: backref?
     personality = relation(Personality, uselist=False, lazy=False)
     domain = relation(Domain, uselist=False, lazy=False)
 
@@ -96,7 +95,6 @@ class Cluster(Base):
     _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
 
-    #required services is a select on cluster_aligned services where cluster_type = my type
     @property
     def required_services(self):
         return object_session(self).query(ClusterAlignedService).filter_by(
@@ -132,7 +130,7 @@ class EsxCluster(Cluster):
         super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__
-esx_cluster.primary_key.name = 'esx_%s_pk'
+esx_cluster.primary_key.name = 'esx_cluster_pk'
 
 
 _HCM = 'host_cluster_member'
@@ -250,7 +248,7 @@ class ClusterAlignedService(Base):
     #cascade deleted services to delete their being required to cluster_types
 
 cas = ClusterAlignedService.__table__
-cas.primary_key.name = '%s_pk'%(_ABV)
+cas.primary_key.name = '%s_pk'% (_ABV)
 
 _CSB = 'cluster_service_binding'
 _CAB = 'clstr_svc_bndg'
