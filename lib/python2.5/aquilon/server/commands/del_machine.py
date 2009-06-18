@@ -44,8 +44,9 @@ class CommandDelMachine(BrokerCommand):
     def render(self, session, machine, **arguments):
         dbmachine = get_machine(session, machine)
 
-        if dbmachine.model.machine_type not in [
-                'blade', 'rackmount', 'workstation', 'aurora_node']:
+        if dbmachine.model.machine_type not in ['blade', 'rackmount',
+                                                'workstation', 'aurora_node',
+                                                'virtual_machine']:
             raise ArgumentError("The del_machine command cannot delete machines of type '%(type)s'.  Try 'del %(type)s'." %
                     {"type": dbmachine.model.machine_type})
 
@@ -69,6 +70,8 @@ class CommandDelMachine(BrokerCommand):
             session.delete(disk)
         session.delete(dbmachine)
         plenary_info.remove()
+
+        # FIXME: May need to rewrite cluster plenary
         return
 
 
