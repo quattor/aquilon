@@ -78,7 +78,7 @@ class Cluster(Base):
 
     #FIXME: Is it possible to have an append that checks the max_members?
     hosts = association_proxy('cluster', 'host')
-    machines = association_proxy('_machine_cluster', 'machine',
+    machines = association_proxy('_machines', 'machine',
                                  creator=_cluster_machine_by_machine)
 
     service_bindings = association_proxy('_cluster_svc_binding',
@@ -153,7 +153,8 @@ class HostClusterMember(Base):
                        backref=backref('cluster', cascade='all, delete-orphan'))
 
     host = relation(Host, lazy=False, cascade='all',
-                    backref=backref('_cluster', cascade='all, delete-orphan'))
+                    backref=backref('_cluster', uselist=False,
+                                    cascade='all, delete-orphan'))
 
     def __init__(self, **kw):
         cl = kw['cluster']
@@ -189,9 +190,8 @@ class MachineClusterMember(Base):
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    #cluster already taken by HostClusterMember
-    machine_cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('_machine_cluster',
+    cluster = relation(Cluster, uselist=False, lazy=False,
+                       backref=backref('_machines',
                                        cascade='all, delete-orphan'))
 
     machine = relation(Machine, lazy=False, cascade='all',
@@ -203,7 +203,7 @@ mcm.primary_key.name = '%s_pk'% (_MCM)
 mcm.append_constraint(UniqueConstraint('machine_id',
                                        name='mchn_clstr_mmbr_uk'))
 
-Machine.cluster = association_proxy('_cluster', 'machine_cluster')
+Machine.cluster = association_proxy('_cluster', 'cluster')
 
 _CRS = 'cluster_aligned_service'
 _ABV = 'clstr_alnd_svc'

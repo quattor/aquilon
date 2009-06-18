@@ -184,7 +184,9 @@ def test_add_cluster_host():
     """ test adding a host to the cluster """
     vm_host = Host.get_by('name', HOST_NAME, sess)[0]
     ec = EsxCluster.get_by('name', CLUSTER_NAME, sess)[0]
+    sess.autoflush=False
     hcm = HostClusterMember(host=vm_host, cluster=ec)
+    sess.autoflush=True
 
     sess.add(hcm)
     commit(sess)
@@ -207,7 +209,7 @@ def test_add_machines():
 
     sess.autoflush=False
     for vm in machines[0:10]:
-        mcm = MachineClusterMember(machine_cluster=ec, machine=vm)
+        mcm = MachineClusterMember(cluster=ec, machine=vm)
         add(sess, mcm)
     commit(sess)
     sess.autoflush=True
