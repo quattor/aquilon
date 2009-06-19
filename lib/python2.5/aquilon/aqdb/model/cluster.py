@@ -40,15 +40,20 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine)
 
-def _cluster_machine_by_machine(machine):
-    """ creator function for MachineClusterMembers """
+def _cluster_machine_append(machine):
+    """ creator function for MachineClusterMember """
     return MachineClusterMember(machine=machine)
+
+def _cluster_host_append(host):
+    """ creator function for HostClusterMember """
+    return HostClusterMember(host=host)
 
 #cluster is a reserved word in oracle
 _TN = 'clstr'
 class Cluster(Base):
     """
         A group of two or more hosts for high availablility or grid capabilities
+        Location constraint is nullable as it may or may not be used
     """
     __tablename__ = _TN
 
@@ -77,9 +82,9 @@ class Cluster(Base):
     personality = relation(Personality, uselist=False, lazy=False)
 
     #FIXME: Is it possible to have an append that checks the max_members?
-    hosts = association_proxy('cluster', 'host')
+    hosts = association_proxy('_hosts', 'host', creator=_cluster_host_append)
     machines = association_proxy('_machines', 'machine',
-                                 creator=_cluster_machine_by_machine)
+                                 creator=_cluster_machine_append)
 
     service_bindings = association_proxy('_cluster_svc_binding',
                                          'service_instances')
@@ -100,7 +105,8 @@ class Cluster(Base):
 
 cluster = Cluster.__table__
 cluster.primary_key.name = '%s_pk'% (_TN)
-cluster.append_constraint(UniqueConstraint('name', 'cluster_type', name='%s_uk'%(_TN)))
+cluster.append_constraint(UniqueConstraint('name', 'cluster_type',
+                                           name='%s_uk'%(_TN)))
 
 table = cluster #FIXME: remove the need for these
 
@@ -149,27 +155,38 @@ class HostClusterMember(Base):
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    cluster = relation(EsxCluster, uselist=False, lazy=False,
-                       backref=backref('cluster', cascade='all, delete-orphan'))
+    """
+        Association Proxy and relation cascading:
+        We need cascade=all on backrefs so that deletion propagates to avoid
+        AssertionError: Dependency rule tried to blank-out primary key column on
+        deletion of the Cluster and it's links. On the contrary do not have
+        cascade='all' on the forward mapper here, else deletion of clusters
+        and their links also causes deleteion of hosts (BAD)
+    """
+    cluster = relation(Cluster, uselist=False, lazy=False,
+                       backref=backref('_hosts', cascade='all'))
 
-    host = relation(Host, lazy=False, cascade='all',
-                    backref=backref('_cluster', uselist=False,
-                                    cascade='all, delete-orphan'))
+    host = relation(Host, lazy=False,
+                    backref=backref('_cluster', uselist=False, cascade='all'))
 
     def __init__(self, **kw):
-        cl = kw['cluster']
-        host = kw['host']
-
-        if len(cl.hosts) == cl.max_hosts:
-            msg = '%s already at maximum capacity (%s)'% (cl.name,
+        if kw.has_key('cluster'):
+            """
+                when we append to the association proxy, there's no metacluster
+                argument which prevents this from being checked.
+            """
+            cl = kw['cluster']
+            if len(cl.hosts) == cl.max_hosts:
+                msg = '%s already at maximum capacity (%s)'% (cl.name,
                                                           cl.max_hosts)
-            raise ValueError(msg)
+                raise ValueError(msg)
 
         #TODO: enforce cluster members are inside the location constraint?
         super(HostClusterMember, self).__init__(**kw)
 
 hcm = HostClusterMember.__table__
 hcm.primary_key.name = '%s_pk'% (_HCM)
+hcm.append_constraint(UniqueConstraint('host_id', name='hst_clstr_mmbr_hst_uk'))
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
@@ -190,13 +207,14 @@ class MachineClusterMember(Base):
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
+    """ See comments for HostClusterMembers relations """
     cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('_machines',
-                                       cascade='all, delete-orphan'))
+                       backref=backref('_machines', cascade='all'))
 
-    machine = relation(Machine, lazy=False, cascade='all',
-                  backref=backref('_cluster', uselist=False,
-                                  cascade='all, delete-orphan'))
+    machine = relation(Machine, lazy=False,
+                  backref=backref('_cluster', uselist=False, cascade='all'))
+
+    #TODO: __init__ that checks the sanity of adding new machines to clusters
 
 mcm = MachineClusterMember.__table__
 mcm.primary_key.name = '%s_pk'% (_MCM)

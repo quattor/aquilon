@@ -54,10 +54,20 @@ VM_NAME = 'test_vm'
 MACHINE_NAME = 'test_esx_machine'
 HOST_NAME = 'test_esx_host'
 CLUSTER_NAME = 'test_esx_cluster'
+NUM_MACHINES = 30
+NUM_HOSTS = 30
 
+#TODO: clean_up with an argument of setup/teardown if setup and you delete,
+#      raise a warning that tear_down may not have worked as expected?
+
+#TODO: have del_cluster_member raise a warning or error that cascaded deletion
+#      doesn't work?
+
+#TODO: __init__ method check for valid/invalid archetypes/os/personality of
+#the host members per cluster_type???
 
 def clean_up():
-    del_host()
+    del_hosts()
     del_cluster_member() #if you delete the host, it should be handled...
     del_machines()
     del_clusters()
@@ -71,11 +81,13 @@ def teardown():
     clean_up()
 
 def del_machines():
-    mach = sess.query(Machine).filter_by(name=MACHINE_NAME).first()
-    if mach:
-        sess.delete(mach)
+    machines = sess.query(Machine).filter(
+        Machine.name.like(MACHINE_NAME+'%')).all()
+    if machines:
+        for machine in machines:
+            sess.delete(machine)
         commit(sess)
-        print 'deleted machine'
+        print 'deleted %s esx machines'%(len(machines))
 
     machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
     if machines:
@@ -84,12 +96,13 @@ def del_machines():
         commit(sess)
         print 'deleted %s virtual machines'%(len(machines))
 
-def del_host():
-    hst = sess.query(Host).filter_by(name=HOST_NAME).first()
-    if hst:
-        sess.delete(hst)
+def del_hosts():
+    hosts = sess.query(Host).filter(Host.name.like(HOST_NAME+'%')).all()
+    if hosts:
+        for host in hosts:
+            sess.delete(host)
         commit(sess)
-        print 'deleted host'
+        print 'deleted %s hosts'% (len(hosts))
 
 def del_clusters():
     clist = sess.query(Cluster).all()
@@ -106,28 +119,13 @@ def del_cluster_member():
         commit(sess)
         print 'deleted cluster host'
 
-
-
-def test_create_machine():
-    np = Building.get_by('name', 'np', sess)[0]
-    am = Model.get_by('name', 'vm', sess)[0]
-    a_cpu = Cpu.get_by('name', 'aurora_cpu', sess)[0]
-
-    vm_machine = Machine(name=MACHINE_NAME, location=np, model=am,
-                         cpu=a_cpu, cpu_quantity=8, memory=32768)
-    add(sess, vm_machine)
-    commit(sess)
-
-    print vm_machine
-    assert(vm_machine)
-
 def test_create_vm():
     vend = Vendor.get_unique(sess, 'virtual')
     mod = Model.get_unique(sess, 'vm', vendor_id=vend.id)
     proc = Cpu.get_unique(sess, 'virtual_cpu', vendor_id=vend.id, speed=0)
     np = Building.get_by('name', 'np', sess)[0]
 
-    for i in xrange(30):
+    for i in xrange(NUM_MACHINES):
         vm = Machine(name='%s%s'%(VM_NAME, i), location=np, model = mod,
                      cpu=proc, cpu_quantity=1, memory=4196)
         add(sess, vm)
@@ -135,11 +133,36 @@ def test_create_vm():
 
     machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
 
-    assert len(machines) is 30
+    assert len(machines) is NUM_MACHINES
     print 'created %s machines'%(len(machines))
 
+def test_create_machines_for_hosts():
+    np = Building.get_by('name', 'np', sess)[0]
+    am = Model.get_by('name', 'vm', sess)[0]
+    a_cpu = Cpu.get_by('name', 'aurora_cpu', sess)[0]
 
-def test_create_host():
+    for i in xrange(NUM_HOSTS):
+        machine = Machine(name='%s%s'% (MACHINE_NAME, i), location=np, model=am,
+                          cpu=a_cpu, cpu_quantity=8, memory=32768)
+        add(sess, machine)
+    commit(sess)
+
+    machines = sess.query(Machine).filter(
+        Machine.name.like(MACHINE_NAME+'%')).all()
+
+    assert len(machines) is NUM_MACHINES
+    print 'created %s esx machines'%(len(machines))
+
+def esx_machine_factory():
+    machines = sess.query(Machine).filter(
+        Machine.name.like(MACHINE_NAME+'%')).all()
+    size = len(machines)
+    for machine in machines:
+        yield machine
+
+m_factory = esx_machine_factory()
+
+def test_create_hosts():
     dmn = Domain.get_by('name', 'daqscott', sess)[0]
     dns_dmn = DnsDomain.get_by('name', 'one-nyp.ms.com', sess)[0]
     stat = Status.get_by('name', 'build', sess)[0]
@@ -148,19 +171,30 @@ def test_create_host():
         join(Personality, Archetype)).filter(
         and_(Archetype.name=='vmhost', Personality.name=='generic')).one()
 
-    vm_machine = Machine.get_by('name', MACHINE_NAME, sess)[0]
-    print vm_machine
-
     sess.autoflush=False
-    vm_host = Host(machine=vm_machine, name=HOST_NAME, dns_domain=dns_dmn,
+
+    for i in xrange(NUM_HOSTS):
+        machine = m_factory.next()
+        vm_host = Host(machine=machine, name='%s%s'% (HOST_NAME, i), dns_domain=dns_dmn,
                domain=dmn, personality=pers, status=stat)
-    sess.add(vm_host)
+        add(sess, vm_host)
+
     sess.autoflush=True
 
     commit(sess)
 
-    print vm_host
-    assert(vm_host)
+    hosts = sess.query(Host).filter(
+        Host.name.like(HOST_NAME+'%')).all()
+    assert len(hosts) is NUM_HOSTS
+    print 'created %s hosts'% (len(hosts))
+
+def host_factory():
+    hosts = sess.query(Host).filter(Host.name.like(HOST_NAME+'%')).all()
+    size = len(hosts)
+    for host in hosts:
+        yield host
+
+h_factory = host_factory()
 
 def test_create_esx_cluster():
     """ tests the creation of an EsxCluster """
@@ -171,7 +205,7 @@ def test_create_esx_cluster():
 
     ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per)
 
-    sess.add(ec)
+    add(sess, ec)
     commit(sess)
 
     assert ec
@@ -182,19 +216,20 @@ def test_create_esx_cluster():
 
 def test_add_cluster_host():
     """ test adding a host to the cluster """
-    vm_host = Host.get_by('name', HOST_NAME, sess)[0]
+    vm_host = h_factory.next()
     ec = EsxCluster.get_by('name', CLUSTER_NAME, sess)[0]
+
     sess.autoflush=False
     hcm = HostClusterMember(host=vm_host, cluster=ec)
     sess.autoflush=True
 
-    sess.add(hcm)
+    add(sess, hcm)
     commit(sess)
 
     assert hcm
     print hcm
 
-    assert ec.hosts #host_members or hosts
+    assert ec.hosts
     assert len(ec.hosts) is 1
     print 'cluster members: %s'%(ec.hosts)
 
@@ -225,10 +260,44 @@ def test_vm_append():
     ec.machines.append(machines[12])
     commit(sess)
     assert len(ec.machines) is 11
-    print 'now, there are %s machines in the cluster: %s'%(len(ec.machines), ec.machines)
+    print 'now, there are %s machines in the cluster: %s'% (len(ec.machines),
+                                                            ec.machines)
 
-#TODO: def too_many_cluster_members():
-#TODO: esx cluster member table: test __init__ method for other invalid archetypes
+@raises(IntegrityError, AssertionError)
+def test_host_in_two_clusters():
+    """
+        create 2 new clusters and add a host to both. check Host.cluster.
+    """
+    per = sess.query(Personality).select_from(
+            join(Archetype, Personality)).filter(
+            and_(Archetype.name=='windows', Personality.name=='generic')).one()
+
+    for i in xrange(3):
+        ec = EsxCluster(name='%s%s'% (CLUSTER_NAME, i), personality=per)
+        add(sess, ec)
+    commit(sess)
+
+    c1 = sess.query(EsxCluster).filter_by(name='%s1'% (CLUSTER_NAME)).one()
+    c2 = sess.query(EsxCluster).filter_by(name='%s2'% (CLUSTER_NAME)).one()
+
+    assert c1
+    assert c2
+    print 'clusters in host in 2 cluster test are %s and %s'% (c1, c2)
+
+    host = h_factory.next()
+
+
+    sess.autoflush=False
+    hcm1 = HostClusterMember(host=host, cluster=c1)
+    add(sess, hcm1)
+    commit(sess)
+    assert host in c1.hosts
+    print 'c1 hosts are %s'% (c1.hosts)
+
+    c2.hosts.append(host)
+    sess.autoflush=True
+    commit(sess)
+
 
 if __name__ == "__main__":
     import nose

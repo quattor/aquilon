@@ -35,8 +35,7 @@ load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import (Building, Personality, Archetype, Cluster,
-                                EsxCluster, EsxClusterMember, MetaCluster,
-                                MetaClusterMember)
+                                EsxCluster, MetaCluster, MetaClusterMember)
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
@@ -101,8 +100,8 @@ def test_create_clusters():
     assert len(ecs) is NUM_CLUSTERS
     print ecs[0]
 
-    assert ecs[0].max_members is 8
-    print 'esx cluster max members = %s'%(ecs[0].max_members)
+    assert ecs[0].max_hosts is 8
+    print 'esx cluster max hosts = %s'%(ecs[0].max_hosts)
 
 
 def cluster_factory():

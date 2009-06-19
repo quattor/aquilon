@@ -50,26 +50,24 @@ _MCT = 'metacluster'
 class MetaCluster(Base):
     """
         A metacluster is a grouping of two or more clusters grouped together for
-        wide-area failover scenarios (So far only for vmware based clusters)
+        wide-area failover scenarios (So far only for vmware based clusters).
+        Network is nullable for metaclusters that do not utilize IP failover.
     """
 
     __tablename__ = _MCT
 
     id = Column(Integer, Sequence('%s_seq'%(_MCT)), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    #TODO: is this always to be nullable?
     network_id = Column(Integer, ForeignKey('network.id',
-                                            name='%s_network_fk'% (_MCT)),
-                        nullable=True)
-    max_members = Column(Integer, default=2, nullable=False)
+                                            name='%s_network_fk'% (_MCT)))
+    max_clusters = Column(Integer, default=2, nullable=False)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments      = Column(String(255))
 
     # FIXME: Missing relation to network...
 
-    members = association_proxy('metacluster', 'cluster',
+    members = association_proxy('clusters', 'cluster',
                                 creator=_metacluster_member_by_cluster)
-    #TODO: test that append checks if current members+1 >= max_members: how?
 
 metacluster = MetaCluster.__table__
 metacluster.primary_key.name = '%s_pk'% (_MCT)
@@ -78,6 +76,7 @@ metacluster.append_constraint(UniqueConstraint('name', name='%s_uk'% (_MCT)))
 
 _MCM = 'metacluster_member'
 class MetaClusterMember(Base):
+    """ Binds clusters to metaclusters """
     __tablename__ = _MCM
 
     metacluster_id = Column(Integer, ForeignKey('metacluster.id',
@@ -94,25 +93,30 @@ class MetaClusterMember(Base):
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    #need the cascade=all so that deletion propagates otherwise
-    #AssertionError: Dependency rule tried to blank-out primary key column
-    metacluster = relation(MetaCluster, lazy=False, uselist=False,
-                            backref=backref('metacluster', cascade='all'))
+    """
+        Association Proxy and relation cascading:
+        We need cascade=all on backrefs so that deletion propagates to avoid
+        AssertionError: Dependency rule tried to blank-out primary key column on
+        deletion of the Metacluster and it's links. On the contrary do not have
+        cascade='all' on the forward mapper here, else deletion of metaclusters
+        and their links also causes deleteion of clusters (BAD)
+    """
 
-    #do not have cascade='all' on the forward mapper here, else deletion of
-    #metaclusters causes deleteion of clusters
-    cluster = relation(Cluster, lazy=False, backref=backref('_metacluster',
-                                                            uselist=False,
-                                                            cascade='all'))
+    metacluster = relation(MetaCluster, lazy=False, uselist=False,
+                            backref=backref('clusters', cascade='all'))
+
+    cluster = relation(Cluster, lazy=False,
+                       backref=backref('_metacluster', uselist=False,
+                                       cascade='all'))
 
     def __init__(self, **kw):
         if kw.has_key('metacluster'):
             #when we append to the association proxy, there's no metacluster arg
             #which prevents this from being checked.
             mc = kw['metacluster']
-            if len(mc.members) == mc.max_members:
+            if len(mc.members) == mc.max_clusters:
                 msg = '%s already at maximum capacity (%s)'% (mc.name,
-                                                              mc.max_members)
+                                                              mc.max_clusters)
                 raise ValueError(msg)
         super(MetaClusterMember, self).__init__(**kw)
 
@@ -120,4 +124,4 @@ metamember = MetaClusterMember.__table__
 metamember.primary_key.name = '%s_pk'% (_MCM)
 metamember.append_constraint(
     UniqueConstraint('cluster_id', name='%s_uk'% (_MCM)))
-Cluster.metacluster = association_proxy('_metacluster', 'metacluster')
+
