@@ -26,26 +26,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq search next --short`."""
+"""Contains the logic for `aq search next --cluster`."""
 
+
+import re
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import System
-from aquilon.server.dbwrappers.dns_domain import get_dns_domain
+from aquilon.aqdb.model import Cluster
 from aquilon.server.dbwrappers.search import search_next
 
 
-class CommandSearchNextShort(BrokerCommand):
+class CommandSearchNextCluster(BrokerCommand):
 
-    required_parameters = ['short', 'dns_domain']
+    required_parameters = ['cluster', 'cluster_type']
 
-    def render(self, session, short, dns_domain, number, fullname,
+    def render(self, session, cluster, cluster_type, number, fullname,
                **arguments):
-        dbdns_domain = get_dns_domain(session, dns_domain)
-        result = search_next(session=session, cls=System, attr=System.name,
-                             value=short, dns_domain=dbdns_domain)
+        result = search_next(session=session, cls=Cluster, attr=Cluster.name,
+                             value=cluster, cluster_type=cluster_type)
         if number:
             return str(result)
-        return "%s%d.%s" % (short, result, dbdns_domain.name)
+        return "%s%d" % (cluster, result)
 
 

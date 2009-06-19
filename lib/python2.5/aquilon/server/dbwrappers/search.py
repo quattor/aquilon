@@ -26,26 +26,25 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq search next --short`."""
+"""Provides the logic used by all the search_next commands."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import System
-from aquilon.server.dbwrappers.dns_domain import get_dns_domain
-from aquilon.server.dbwrappers.search import search_next
+import re
 
 
-class CommandSearchNextShort(BrokerCommand):
+int_re = re.compile(r'(\d+)')
 
-    required_parameters = ['short', 'dns_domain']
-
-    def render(self, session, short, dns_domain, number, fullname,
-               **arguments):
-        dbdns_domain = get_dns_domain(session, dns_domain)
-        result = search_next(session=session, cls=System, attr=System.name,
-                             value=short, dns_domain=dbdns_domain)
-        if number:
-            return str(result)
-        return "%s%d.%s" % (short, result, dbdns_domain.name)
+def search_next(session, cls, attr, value, **filters):
+    q = session.query(cls).filter(attr.startswith(value))
+    if filters:
+        q = q.filter_by(**filters)
+    found = 0
+    for item in q.all():
+        m = int_re.match(item.name[len(value):])
+        if m:
+            n = int(m.group(1))
+            if n > found:
+                found = n
+    return found + 1
 
 

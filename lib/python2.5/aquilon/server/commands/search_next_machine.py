@@ -29,29 +29,20 @@
 """Contains the logic for `aq search next --machine`."""
 
 
-import re
-
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Machine
+from aquilon.server.dbwrappers.search import search_next
 
-
-int_re = re.compile(r'(\d+)')
 
 class CommandSearchNextMachine(BrokerCommand):
 
     required_parameters = ['machine']
 
     def render(self, session, machine, number, fullname, **arguments):
-        q = session.query(Machine).filter(Machine.name.like(machine + '%'))
-        found = 0
-        for dbmachine in q.all():
-            m = int_re.match(dbmachine.name[len(machine):])
-            if m:
-                n = int(m.group(1))
-                if n > found:
-                    found = n
+        result = search_next(session=session, cls=Machine, attr=Machine.name,
+                             value=machine)
         if number:
-            return str(found + 1)
-        return "%s%d" % (machine, found + 1)
+            return str(result)
+        return "%s%d" % (machine, result)
 
 
