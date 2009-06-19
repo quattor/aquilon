@@ -287,6 +287,13 @@ class TestAddMachine(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Blade: ut9s03p%d" % port, command)
 
+    def testaddverarirack(self):
+        # number 100 is in use by the tor_switch.
+        for i in range(101, 150):
+            port = i - 100
+            self.noouttest(["add", "machine", "--machine", "ut10s04p%d" % port,
+                            "--rack", "ut10", "--model", "vb1205xm"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

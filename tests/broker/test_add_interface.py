@@ -277,6 +277,14 @@ class TestAddInterface(TestBrokerCommand):
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine, "--mac", hostmac])
 
+    def testaddverarirackinterfaces(self):
+        for i in range(101, 150):
+            hostmac = getattr(self, "hostmac%d" % i)
+            port = i - 100
+            machine = "ut10s04p%d" % port
+            self.noouttest(["add", "interface", "--interface", "eth0",
+                            "--machine", machine, "--mac", hostmac])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

@@ -121,6 +121,22 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: unmapped Instance: instance1", command)
 
+    def testdelesxlicense(self):
+        command = "del service --service esx_license"
+        self.noouttest(command.split(" "))
+
+    def testverifydelesxlicense(self):
+        command = "show service --service esx_license"
+        self.notfoundtest(command.split(" "))
+
+    def testdelesxmanagement(self):
+        command = "del service --service esx_management"
+        self.noouttest(command.split(" "))
+
+    def testverifydelesxmanagement(self):
+        command = "show service --service esx_management"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)

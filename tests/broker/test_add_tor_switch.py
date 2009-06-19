@@ -240,9 +240,22 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
                           "bnt", "rs g8000", "ut9", "g", "3")
 
-    def testrejectut01ga1s04(self):
+    def testaddut01ga1s04(self):
+        self.noouttest(["add", "tor_switch",
+            "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
+            "--building", "ut", "--rackid", "10",
+            "--rackrow", "g", "--rackcol", "4",
+            "--model", "rs g8000",
+            "--interface", "xge49",
+            "--mac", self.hostmac100, "--ip", self.hostip100])
+
+    def testverifyut01ga1s04(self):
+        self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
+                          "bnt", "rs g8000", "ut10", "g", "4")
+
+    def testrejectut01ga1s99(self):
         command = ["add", "tor_switch",
-                   "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
+                   "--tor_switch", "ut01ga1s99.aqd-unittest.ms.com",
                    "--building", "ut", "--rackid", "8",
                    "--rackrow", "g", "--rackcol", "2",
                    "--model", "rs g8000",
@@ -252,8 +265,8 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "Mac '%s' already in use" % self.hostmac14,
                          command)
 
-    def testverifyrejectut01ga1s04(self):
-        command = "show tor_switch --tor_switch ut01ga1s04.aqd-unittest.ms.com"
+    def testverifyrejectut01ga1s99(self):
+        command = "show tor_switch --tor_switch ut01ga1s99.aqd-unittest.ms.com"
         out = self.notfoundtest(command.split(" "))
 
 

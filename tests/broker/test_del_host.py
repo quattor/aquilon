@@ -134,6 +134,13 @@ class TestDelHost(TestBrokerCommand):
             command = ["del", "host", "--hostname", hostname]
             self.noouttest(command)
 
+    def testdelverarirackhosts(self):
+        servers = 0
+        for i in range(101, 110):
+            hostname = "evh%d.aqd-unittest.ms.com" % (i - 100)
+            command = ["del", "host", "--hostname", hostname]
+            self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

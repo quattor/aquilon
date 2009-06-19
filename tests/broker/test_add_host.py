@@ -166,6 +166,22 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)
 
+    def testpopulateverarirackhosts(self):
+        # This gives us evh1.aqd-unittest.ms.com through evh10
+        # and leaves the other 40 machines for future use.
+        # It also needs to run *after* the testadd* methods above
+        # as some of them rely on a clean IP space for testing the
+        # auto-allocation algorithms.
+        for i in range(101, 110):
+            port = i - 100
+            hostname = "evh%d.aqd-unittest.ms.com" % port
+            hostip = getattr(self, "hostip%d" % i)
+            command = ["add", "host", "--hostname", hostname,
+                       "--ipfromip", hostip, "--machine", "ut10s04p%d" % port,
+                       "--domain", "unittest", "--buildstatus", "build",
+                       "--archetype", "vmhost", "--personality", "esx_server"]
+            self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

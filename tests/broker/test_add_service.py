@@ -252,6 +252,24 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: unmapped", command)
 
+    def testaddesxlicense(self):
+        command = "add service --service esx_license"
+        self.noouttest(command.split(" "))
+
+    def testverifyesxlicense(self):
+        command = "show service --service esx_license"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: esx_license", command)
+
+    def testaddesxmanagement(self):
+        command = "add service --service esx_management"
+        self.noouttest(command.split(" "))
+
+    def testverifyesxmanagement(self):
+        command = "show service --service esx_management"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: esx_management", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

@@ -381,6 +381,10 @@ class TestAddPersonality(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "already exists", command)
 
+    def testaddesxserver(self):
+        command = "add personality --personality esx_server --archetype vmhost"
+        self.noouttest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)
