@@ -1898,7 +1898,7 @@
       Show details for a metacluster.
       <optgroup name="show_metacluster_req" mandatory="True" fields="any">
          <option name="metacluster" type="string">Name of the metacluster</option>
-         <option name="all" type="string">Show all</option>
+         <option name="all" type="boolean">Show all</option>
       </optgroup>
       <transport method="get" path="metacluster" />
       <transport method="get" trigger="metacluster" path="metacluster/%(metacluster)s" />

@@ -121,6 +121,7 @@ windows_host_domain = ny-prod
 panc_batch_size = 1000
 authorization_mailgroup = aqd-eng@morganstanley.com
 esx_cluster_max_members_default = 8
+esx_cluster_vm_to_host_ratio = 16
 metacluster_max_members_default = 32
 
 # This can be used for any components that use python logging

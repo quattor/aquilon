@@ -66,6 +66,10 @@ class CommandAddESXCluster(BrokerCommand):
             max_members = self.config.get("broker",
                                           "esx_cluster_max_members_default")
         max_members = force_int("max_members", max_members)
+
+        if vm_to_host_ratio is None:
+            vm_to_host_ratio = self.config.get("broker",
+                                               "esx_cluster_vm_to_host_ratio")
         vm_to_host_ratio = force_int("vm_to_host_ratio", vm_to_host_ratio)
 
         dbcluster = EsxCluster(name=cluster,

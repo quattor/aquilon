@@ -68,6 +68,7 @@ from test_add_rack import TestAddRack
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
+from test_add_metacluster import TestAddMetaCluster
 from test_add_tor_switch import TestAddTorSwitch
 from test_poll_tor_switch import TestPollTorSwitch
 from test_add_chassis import TestAddChassis
@@ -127,6 +128,7 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_tor_switch import TestDelTorSwitch
+from test_del_metacluster import TestDelMetaCluster
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_vendor import TestDelVendor
@@ -164,6 +166,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
+                TestAddMetaCluster,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
@@ -190,7 +193,9 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindServer, TestUnmapService,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelVendor,
+                TestDelTorSwitch,
+                TestDelMetaCluster,
+                TestDelModel, TestDelCpu, TestDelVendor,
                 TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
