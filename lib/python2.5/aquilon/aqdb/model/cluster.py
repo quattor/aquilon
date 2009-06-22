@@ -129,7 +129,8 @@ class EsxCluster(Cluster):
 
 
     def __init__(self, **kw):
-        kw['max_hosts'] = 8
+        if 'max_hosts' not in kw:
+            kw['max_hosts'] = 8
         super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__
