@@ -47,6 +47,7 @@ class CommandAddESXCluster(BrokerCommand):
     def render(self, session, cluster, metacluster, archetype, personality,
                max_members, vm_to_host_ratio, comments, **arguments):
         validate_basic("cluster", cluster)
+        cluster_type = 'esx'
 
         dblocation = get_location(session, **arguments)
         if not dblocation:
@@ -54,7 +55,8 @@ class CommandAddESXCluster(BrokerCommand):
 
         existing = EsxCluster.get_unique(session, cluster)
         if existing:
-            raise ArgumentError("cluster '%s' already exists" % cluster)
+            raise ArgumentError("%s cluster '%s' already exists" %
+                                (cluster_type, cluster))
 
         dbmetacluster = MetaCluster.get_unique(session, metacluster)
         if not dbmetacluster:

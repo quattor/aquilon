@@ -33,13 +33,16 @@ from aquilon.aqdb.model import Cluster, EsxCluster
 
 class ClusterFormatter(ObjectFormatter):
     def format_raw(self, cluster, indent=""):
-        details = [indent + "%s: %s" % (cluster.cluster_type, cluster.name)]
+        details = [indent + "%s cluster: %s" %
+                   (cluster.cluster_type, cluster.name)]
         if cluster.metacluster:
             details.append(indent + "  Metacluster: %s" %
                            cluster.metacluster.name)
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
+        details.append(indent + "  vm_to_host_ratio: %s" %
+                       cluster.vm_to_host_ratio)
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         if cluster.comments:
             details.append(indent + "  Comments: %s" % cluster.comments)

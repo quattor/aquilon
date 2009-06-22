@@ -1966,7 +1966,7 @@
       Show details for an ESX cluster.
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
          <option name="cluster" type="string">Name of the cluster</option>
-         <option name="all" type="string">Name of the cluster</option>
+         <option name="all" type="boolean">Name of the cluster</option>
       </optgroup>
       <transport method="get" trigger="cluster" path="cluster/esx/%(cluster)s" />
       <transport method="get" path="cluster/esx" />

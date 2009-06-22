@@ -32,6 +32,8 @@ from aquilon.server.broker import BrokerCommand, validate_basic, force_int
 from aquilon.aqdb.model import EsxCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.dbwrappers.personality import get_personality
+from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import (PlenaryCluster,
                                               PlenaryClusterClient,
                                               PlenaryClusterData,
@@ -46,17 +48,41 @@ class CommandUpdateESXCluster(BrokerCommand):
 
     def render(self, session, cluster, archetype, personality,
                max_members, vm_to_host_ratio, comments, **arguments):
+        cluster_type = 'esx'
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
         if not dbcluster:
             raise NotFoundException("cluster '%s' not found" % cluster)
 
         cluster_updated = False
+        location_changed = False
+        remove_plenaries = []
 
         dblocation = get_location(session, **arguments)
         if dblocation:
-            # FIXME: Need to check that cluster members have this location.
-            dbcluster.location = dblocation
-            cluster_updated = True
+            errors = []
+            for host in dbcluster.hosts:
+                if host.machine.location != dblocation and \
+                   dblocation not in host.machine.location.parents:
+                    errors.append("Host %s has location %s %s" % (host.fqdn,
+                        host.machine.location.location_type.capitalize(),
+                        host.machine.location.name))
+            if errors:
+                raise ArgumentError("Cannot set %s cluster %s location "
+                                    "constraint to %s %s: %s" %
+                                    (cluster_type, dbcluster.name,
+                                     dblocation.location_type.capitalize(),
+                                     dblocation.name, "\n".join(errors)))
+            if dbcluster.location_constraint != dblocation:
+                old = dbcluster.location_constraint
+                new = dblocation
+                # FIXME: Similar code should probably exist in update_machine
+                if old.hub != new.hub or old.building != new.building or \
+                   old.rack != new.rack:
+                    for machine in dbcluster.machines:
+                        remove_plenaries.append(PlenaryMachineInfo(machine))
+                dbcluster.location_constraint = dblocation
+                location_changed = True
+                cluster_updated = True
 
         if personality:
             if not archetype:
@@ -64,7 +90,7 @@ class CommandUpdateESXCluster(BrokerCommand):
             dbpersonality = get_personality(session, archetype, personality)
             # It would be nice to reconfigure all the hosts here.  That
             # would take some refactoring of the present code.
-            for dbhost in dbcluster.members:
+            for dbhost in dbcluster.hosts:
                 invalid_hosts = []
                 if dbhost.personality != dbpersonality:
                     invalid_hosts.append(dbhost)
@@ -78,16 +104,25 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         max_members = force_int("max_members", max_members)
         if max_members is not None:
-            if max_members < len(dbcluster.members):
+            if max_members < len(dbcluster.hosts):
                 raise ArgumentError("Could not set cluster max_members to %s "
                                     "as value already exceeded (%s)." %
-                                    (max_members, len(dbcluster.members)))
+                                    (max_members, len(dbcluster.hosts)))
             dbcluster.max_hosts = max_members
             cluster_updated = True
 
         vm_to_host_ratio = force_int("vm_to_host_ratio", vm_to_host_ratio)
         if vm_to_host_ratio is not None:
-            # FIXME: Enforce that this is not being exceeded.
+            if len(dbcluster.machines) > \
+               vm_to_host_ratio * len(dbcluster.hosts):
+                raise ArgumentError("Changing vm_to_host_ratio to %s "
+                                    "for %s cluster %s would not satisfy "
+                                    "current ratio of (%s VMs/%s hosts)" %
+                                    (vm_to_host_ratio,
+                                     dbcluster.cluster_type,
+                                     dbcluster.name,
+                                     len(dbcluster.machines),
+                                     len(dbcluster.hosts)))
             dbcluster.vm_to_host_ratio = vm_to_host_ratio
             cluster_updated = True
 
@@ -109,6 +144,13 @@ class CommandUpdateESXCluster(BrokerCommand):
             compileLock()
             for p in plenaries:
                 p.write(locked=True)
+            if location_changed:
+                for p in remove_plenaries:
+                    p.remove(locked=True)
+                for machine in dbcluster.machines:
+                    session.refresh(machine)
+                    p = PlenaryMachineInfo(machine)
+                    p.write(locked=True)
         finally:
             compileRelease()
 

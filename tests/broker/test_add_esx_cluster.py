@@ -1,0 +1,142 @@
+#!/usr/bin/env python2.5
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+#
+# Copyright (C) 2009  Contributor
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the EU DataGrid Software License.  You should
+# have received a copy of the license with this program, and the
+# license is published at
+# http://eu-datagrid.web.cern.ch/eu-datagrid/license.html.
+#
+# THE FOLLOWING DISCLAIMER APPLIES TO ALL SOFTWARE CODE AND OTHER
+# MATERIALS CONTRIBUTED IN CONNECTION WITH THIS PROGRAM.
+#
+# THIS SOFTWARE IS LICENSED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE AND ANY WARRANTY OF NON-INFRINGEMENT, ARE
+# DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+# OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. THIS
+# SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
+# THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
+# TERMS THAT MAY APPLY.
+"""Module for testing the add esx_cluster command."""
+
+import os
+import sys
+import unittest
+
+if __name__ == "__main__":
+    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    SRCDIR = os.path.join(BINDIR, "..", "..")
+    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+
+from brokertest import TestBrokerCommand
+
+
+class TestAddESXCluster(TestBrokerCommand):
+
+    def testaddutecl1(self):
+        command = ["add_esx_cluster", "--cluster=utecl1",
+                   "--metacluster=namc1", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+
+    def testverifyutecl1(self):
+        command = "show esx_cluster --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        default_max = self.config.get("broker",
+                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("broker",
+                                        "esx_cluster_vm_to_host_ratio")
+        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Max members: %s" % default_max, command)
+        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
+        self.matchclean(out, "Comments", command)
+
+    def testaddutecl2(self):
+        command = ["add_esx_cluster", "--cluster=utecl2",
+                   "--metacluster=namc1", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server",
+                   "--max_members=101", "--vm_to_host_ratio=102",
+                   "--comments=Another test ESX cluster"]
+        self.noouttest(command)
+
+    def testverifyutecl2(self):
+        command = "show esx_cluster --cluster utecl2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "esx cluster: utecl2", command)
+        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Max members: 101", command)
+        self.matchoutput(out, "vm_to_host_ratio: 102", command)
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
+        self.matchoutput(out, "Comments: Another test ESX cluster", command)
+
+    def testfailaddexisting(self):
+        command = ["add_esx_cluster", "--cluster=utecl1",
+                   "--metacluster=namc1", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "esx cluster 'utecl1' already exists", command)
+
+    def testfailmetaclusternotfound(self):
+        command = ["add_esx_cluster", "--cluster=utecl999",
+                   "--metacluster=metacluster-does-not-exist", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "metacluster 'metacluster-does-not-exist' not found",
+                         command)
+
+    def testverifyshowall(self):
+        command = "show esx_cluster --all"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "esx cluster: utecl2", command)
+
+    def testnotfoundesx_cluster(self):
+        command = "show esx_cluster --cluster esx_cluster-does-not-exist"
+        self.notfoundtest(command.split(" "))
+
+    def testaddutecl3(self):
+        command = ["add_esx_cluster", "--cluster=utecl3",
+                   "--metacluster=namc2", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+
+    def testverifyutecl3(self):
+        command = "show esx_cluster --cluster utecl3"
+        out = self.commandtest(command.split(" "))
+        default_max = self.config.get("broker",
+                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("broker",
+                                        "esx_cluster_vm_to_host_ratio")
+        self.matchoutput(out, "esx cluster: utecl3", command)
+        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Max members: %s" % default_max, command)
+        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
+        self.matchclean(out, "Comments", command)
+
+    # FIXME: Verify that plenary files have been created.
+
+
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddESXCluster)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
