@@ -105,7 +105,9 @@ class TestAddModel(TestBrokerCommand):
 
     def testaddutmedium(self):
         command = ["add_model", "--name=utmedium", "--vendor=utvendor",
-                   "--type=virtual_machine"]
+                   "--type=virtual_machine", "--cputype=xeon_2500",
+                   "--cpunum=1", "--mem=8192", "--disktype=sata",
+                   "--disksize=15", "--nics=1"]
         self.noouttest(command)
 
     def testverifyaddutmedium(self):

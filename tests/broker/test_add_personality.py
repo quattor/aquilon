@@ -385,6 +385,11 @@ class TestAddPersonality(TestBrokerCommand):
         command = "add personality --personality esx_server --archetype vmhost"
         self.noouttest(command.split(" "))
 
+    def testaddesxdesktop(self):
+        command = ["add_personality",
+                   "--personality=esx_desktop", "--archetype=vmhost"]
+        self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)
