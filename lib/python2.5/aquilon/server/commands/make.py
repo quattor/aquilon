@@ -92,6 +92,14 @@ class CommandMake(BrokerCommand):
                     arch = dbhost.archetype.name
 
                 dbpersonality = get_personality(session, arch, personality)
+                if dbhost.cluster and \
+                   dbhost.cluster.personality != dbpersonality:
+                    raise ArgumentError("Cannot change personality of host %s "
+                                        "while it is a member of "
+                                        "%s cluster %s" %
+                                        (dbhost.fqdn,
+                                         dbhost.cluster.cluster_type,
+                                         dbhost.cluster.name))
                 dbhost.personality = dbpersonality
 
             if not dbhost.archetype.is_compileable:
