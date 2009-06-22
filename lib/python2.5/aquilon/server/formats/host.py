@@ -39,6 +39,9 @@ class HostFormatter(ObjectFormatter):
         details = [ indent + "Hostname: %s" % host.fqdn ]
         if host.ip:
             details.append(indent + "  IP: %s" % host.ip)
+        if host.cluster:
+            details.append(indent + "  Member of %s cluster: %s"
+                    % (machine.cluster.cluster_type, machine.cluster.name))
         details.append(self.redirect_raw(host.machine, indent+"  "))
         details.append(self.redirect_raw(host.personality, indent+"  "))
         details.append(self.redirect_raw(host.archetype, indent+"  "))
