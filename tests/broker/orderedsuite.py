@@ -111,6 +111,7 @@ from test_show_fqdn import TestShowFqdn
 from test_search_hardware import TestSearchHardware
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
+from test_search_next import TestSearchNext
 from test_show_network import TestShowNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
@@ -195,6 +196,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchSystem, TestSearchHost,
+                TestSearchNext,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
                 TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
                 TestUpdateArchetype,
