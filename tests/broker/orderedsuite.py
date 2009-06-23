@@ -72,6 +72,7 @@ from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_esx_cluster_aligned_service import (
     TestAddESXClusterAlignedService)
+from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_add_tor_switch import TestAddTorSwitch
 from test_poll_tor_switch import TestPollTorSwitch
 from test_add_chassis import TestAddChassis
@@ -89,6 +90,7 @@ from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
 from test_bind_esx_cluster import TestBindESXCluster
+from test_add_virtual_hardware import TestAddVirtualHardware
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
@@ -127,6 +129,7 @@ from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
 from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
+from test_del_virtual_hardware import TestDelVirtualHardware
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
@@ -178,6 +181,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddESXClusterAlignedService,
+                TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
@@ -205,6 +209,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
+                TestDelVirtualHardware,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch,
