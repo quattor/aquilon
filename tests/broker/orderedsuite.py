@@ -70,6 +70,8 @@ from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
+from test_add_esx_cluster_aligned_service import (
+    TestAddESXClusterAlignedService)
 from test_add_tor_switch import TestAddTorSwitch
 from test_poll_tor_switch import TestPollTorSwitch
 from test_add_chassis import TestAddChassis
@@ -131,6 +133,8 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_tor_switch import TestDelTorSwitch
+from test_del_esx_cluster_aligned_service import (
+    TestDelESXClusterAlignedService)
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
 from test_del_model import TestDelModel
@@ -171,6 +175,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddMetaCluster, TestAddESXCluster,
+                TestAddESXClusterAlignedService,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
@@ -179,6 +184,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
                 TestMakeAquilon,
+                TestBindESXCluster, TestAddVirtualHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestFlush, TestCompile,
                 TestBindServer,
@@ -199,6 +205,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch,
+                TestDelESXClusterAlignedService,
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelModel, TestDelCpu, TestDelVendor,
                 TestDelRack,
