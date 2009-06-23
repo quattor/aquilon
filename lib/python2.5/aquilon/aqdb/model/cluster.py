@@ -87,7 +87,7 @@ class Cluster(Base):
                                  creator=_cluster_machine_append)
 
     service_bindings = association_proxy('_cluster_svc_binding',
-                                         'service_instances')
+                                         'service_instance')
 
     #FIXME: only attach property if it exists. Currently it throws an error
     # 'NoneType' object has no attribute 'metacluster' if you don't have one
