@@ -41,7 +41,7 @@ class HostFormatter(ObjectFormatter):
             details.append(indent + "  IP: %s" % host.ip)
         if host.cluster:
             details.append(indent + "  Member of %s cluster: %s"
-                    % (machine.cluster.cluster_type, machine.cluster.name))
+                    % (host.cluster.cluster_type, host.cluster.name))
         details.append(self.redirect_raw(host.machine, indent+"  "))
         details.append(self.redirect_raw(host.personality, indent+"  "))
         details.append(self.redirect_raw(host.archetype, indent+"  "))

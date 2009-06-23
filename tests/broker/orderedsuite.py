@@ -88,6 +88,7 @@ from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
+from test_bind_esx_cluster import TestBindESXCluster
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure

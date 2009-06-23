@@ -86,16 +86,15 @@ class Chooser(object):
         for item in self.dbhost.personality.service_list:
             self.required_services.add(item.service)
         self.cluster_aligned_services = {}
-        # FIXME: backrefs are borked...
-        # if self.dbhost.cluster:
-            # for si in self.dbhost.cluster.service_instances:
-                # self.cluster_aligned_services[si.service] = si
-            # q = session.query(ClusterAlignedService)
-            # q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
-            # for item in q.all():
-                # if item.service not in self.cluster_aligned_services:
-                    # self.cluster_aligned_services[item.service] = None
-                # self.required_services.add(item.service)
+        if self.dbhost.cluster:
+            for si in self.dbhost.cluster.service_bindings:
+                self.cluster_aligned_services[si.service] = si
+            q = session.query(ClusterAlignedService)
+            q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
+            for item in q.all():
+                if item.service not in self.cluster_aligned_services:
+                    self.cluster_aligned_services[item.service] = None
+                self.required_services.add(item.service)
         self.staging_services = {}
         """Stores interim service instance lists."""
         self.messages = []
