@@ -58,13 +58,9 @@ class MetaCluster(Base):
 
     id = Column(Integer, Sequence('%s_seq'%(_MCT)), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    network_id = Column(Integer, ForeignKey('network.id',
-                                            name='%s_network_fk'% (_MCT)))
     max_clusters = Column(Integer, default=2, nullable=False)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments      = Column(String(255))
-
-    # FIXME: Missing relation to network...
 
     members = association_proxy('clusters', 'cluster',
                                 creator=_metacluster_member_by_cluster)
@@ -124,4 +120,3 @@ metamember = MetaClusterMember.__table__
 metamember.primary_key.name = '%s_pk'% (_MCM)
 metamember.append_constraint(
     UniqueConstraint('cluster_id', name='%s_uk'% (_MCM)))
-

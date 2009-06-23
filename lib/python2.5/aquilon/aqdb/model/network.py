@@ -98,13 +98,6 @@ class Network(Base):
 
     location = relation(Location, backref='networks')
 
-    @property
-    def locations(self):
-        if self.network_type == 'stretch':
-            return map(_get_location, self.gateways)
-        else:
-            return [self.location]
-
     def netmask(self):
         bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
         return inet_ntoa(pack('>I', bits))

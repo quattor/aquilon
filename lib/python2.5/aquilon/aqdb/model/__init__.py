@@ -50,7 +50,6 @@ from aquilon.aqdb.model.search_list_item import SearchListItem
 #NETWORK
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.dns_domain import DnsDomain
-from aquilon.aqdb.model.gateway import Gateway
 
 #CONFIG
 from aquilon.aqdb.model.tld import Tld

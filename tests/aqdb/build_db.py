@@ -66,7 +66,7 @@ pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
                 'city', 'building', 'rack', 'desk', 'location_search_list',
                 'search_list_item']
 
-pkgs['net']  = ['dns_domain', 'network', 'gateway']
+pkgs['net']  = ['dns_domain', 'network']
 
 pkgs['cfg']  = ['archetype', 'personality','tld', 'cfg_path']
 
