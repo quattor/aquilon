@@ -130,6 +130,7 @@ from test_constraints_umask import TestUmaskConstraints
 from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
 from test_del_virtual_hardware import TestDelVirtualHardware
+from test_unbind_esx_cluster import TestUnbindESXCluster
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
@@ -209,7 +210,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
-                TestDelVirtualHardware,
+                TestDelVirtualHardware, TestUnbindESXCluster,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch,
