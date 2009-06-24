@@ -110,7 +110,7 @@ class MetaClusterMember(Base):
             #when we append to the association proxy, there's no metacluster arg
             #which prevents this from being checked.
             mc = kw['metacluster']
-            if len(mc.members) == mc.max_clusters:
+            if len(mc.members) >= mc.max_clusters:
                 msg = '%s already at maximum capacity (%s)'% (mc.name,
                                                               mc.max_clusters)
                 raise ValueError(msg)

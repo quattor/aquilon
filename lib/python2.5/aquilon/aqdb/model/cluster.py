@@ -171,7 +171,7 @@ class HostClusterMember(Base):
                 argument which prevents this from being checked.
             """
             cl = kw['cluster']
-            if len(cl.hosts) == cl.max_hosts:
+            if len(cl.hosts) >= cl.max_hosts:
                 msg = '%s already at maximum capacity (%s)'% (cl.name,
                                                           cl.max_hosts)
                 raise ValueError(msg)
