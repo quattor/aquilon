@@ -82,6 +82,14 @@ class TestAddAuroraHost(TestBrokerCommand):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
 
+    def testcatmachine(self):
+        command = "cat --machine %s" % self.aurora_without_node
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "Plenary file not available for "
+                         "aurora_node machines.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAuroraHost)
