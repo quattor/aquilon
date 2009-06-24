@@ -47,23 +47,28 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def testupdatenoop(self):
         default_max = self.config.get("broker",
                                       "esx_cluster_max_members_default")
-        self.noouttest(["update_esx_cluster", "--cluster=utecl3",
-                        "--max_members=%s" % default_max])
+        self.noouttest(["update_esx_cluster", "--cluster=utecl4",
+                        "--building=ut"])
 
     def testverifynoop(self):
-        command = "show esx_cluster --cluster utecl3"
+        command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
+        default_ratio = self.config.get("broker",
+                                        "esx_cluster_vm_to_host_ratio")
         default_max = self.config.get("broker",
                                       "esx_cluster_max_members_default")
-        self.matchoutput(out, "esx cluster: utecl3", command)
+        self.matchoutput(out, "esx cluster: utecl4", command)
+        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
+        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
         self.matchclean(out, "Comments", command)
 
     def testupdateutecl2(self):
         command = ["update_esx_cluster", "--cluster=utecl2",
                    "--max_members=97", "--vm_to_host_ratio=96",
-                   "--rack=ut3",
-                   "--archetype=vmhost", "--personality=esx_desktop",
                    "--comments", "ESX Cluster with a new comment"]
         self.noouttest(command)
 
@@ -72,12 +77,26 @@ class TestUpdateESXCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl2", command)
         self.matchoutput(out, "Metacluster: namc1", command)
-        self.matchoutput(out, "Rack: ut3", command)
+        self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 96", command)
-        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
+                         command)
+
+    def testupdateutecl3(self):
+        command = ["update_esx_cluster", "--cluster=utecl3",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+
+    def testverifyutecl3(self):
+        command = "show esx_cluster --cluster utecl3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "esx cluster: utecl3", command)
+        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
 
     def testupdateutecl1(self):
@@ -113,11 +132,17 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "would not satisfy current ratio", command)
 
     def testverifyutecl1(self):
+        default_max = self.config.get("broker",
+                                      "esx_cluster_max_members_default")
+        default_ratio = self.config.get("broker",
+                                        "esx_cluster_vm_to_host_ratio")
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: namc1", command)
         self.matchoutput(out, "Rack: ut10", command)
+        self.matchoutput(out, "Max members: %s" % default_max, command)
+        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
 

@@ -74,11 +74,26 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: 99", command)
         self.matchoutput(out, "Comments: MetaCluster with a comment", command)
 
+    def testaddnamc3(self):
+        command = ["add_metacluster", "--metacluster=namc3",
+                   "--max_members=0",
+                   "--comments", "MetaCluster with no members allowed"]
+        self.noouttest(command)
+
+    def testverifynamc3(self):
+        command = "show metacluster --metacluster namc3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "MetaCluster: namc3", command)
+        self.matchoutput(out, "Max members: 0", command)
+        self.matchoutput(out, "Comments: MetaCluster with no members allowed",
+                         command)
+
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: namc1", command)
         self.matchoutput(out, "MetaCluster: namc2", command)
+        self.matchoutput(out, "MetaCluster: namc3", command)
 
     def testnotfoundmetacluster(self):
         command = "show metacluster --metacluster metacluster-does-not-exist"

@@ -48,16 +48,24 @@ class TestDelMetaCluster(TestBrokerCommand):
         command = ["del_metacluster", "--metacluster=namc1"]
         self.noouttest(command)
 
-    def testdelnamc2(self):
-        command = ["del_metacluster", "--metacluster=namc2"]
-        self.noouttest(command)
-
     def testverifydelnamc1(self):
         command = ["show_metacluster", "--metacluster=namc1"]
         self.notfoundtest(command)
 
+    def testdelnamc2(self):
+        command = ["del_metacluster", "--metacluster=namc2"]
+        self.noouttest(command)
+
     def testverifydelnamc2(self):
         command = ["show_metacluster", "--metacluster=namc2"]
+        self.notfoundtest(command)
+
+    def testdelnamc3(self):
+        command = ["del_metacluster", "--metacluster=namc3"]
+        self.noouttest(command)
+
+    def testverifydelnamc3(self):
+        command = ["show_metacluster", "--metacluster=namc3"]
         self.notfoundtest(command)
 
     def testverifyall(self):

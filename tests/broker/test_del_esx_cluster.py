@@ -68,6 +68,14 @@ class TestDelESXCluster(TestBrokerCommand):
         command = ["show_esx_cluster", "--cluster=utecl3"]
         self.notfoundtest(command)
 
+    def testdelutecl4(self):
+        command = ["del_esx_cluster", "--cluster=utecl4"]
+        self.noouttest(command)
+
+    def testverifydelutecl4(self):
+        command = ["show_esx_cluster", "--cluster=utecl4"]
+        self.notfoundtest(command)
+
     def testverifyall(self):
         command = ["show_esx_cluster", "--all"]
         out = self.commandtest(command)

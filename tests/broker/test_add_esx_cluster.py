@@ -101,6 +101,21 @@ class TestAddESXCluster(TestBrokerCommand):
                          "metacluster 'metacluster-does-not-exist' not found",
                          command)
 
+    def testfailinvalidname(self):
+        command = ["add_esx_cluster", "--cluster=invalid?!?",
+                   "--metacluster=namc1", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'invalid?!?' is not a valid value for cluster",
+                         command)
+
+    def testfailnoroom(self):
+        command = ["add_esx_cluster", "--cluster=newcluster",
+                   "--metacluster=namc3", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "namc3 already at maximum capacity (0)", command)
+
     def testverifyshowall(self):
         command = "show esx_cluster --all"
         out = self.commandtest(command.split(" "))
@@ -113,6 +128,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testaddutecl3(self):
         command = ["add_esx_cluster", "--cluster=utecl3",
+                   "--max_members=0",
                    "--metacluster=namc2", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
@@ -120,11 +136,32 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl3(self):
         command = "show esx_cluster --cluster utecl3"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("broker",
-                                      "esx_cluster_max_members_default")
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
         self.matchoutput(out, "esx cluster: utecl3", command)
+        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Max members: 0", command)
+        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
+        self.matchclean(out, "Comments", command)
+
+    def testaddutecl4(self):
+        # Bog standard - used for some noop tests
+        command = ["add_esx_cluster", "--cluster=utecl4",
+                   "--metacluster=namc2", "--building=ut",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+
+    def testverifyutecl4(self):
+        command = "show esx_cluster --cluster utecl4"
+        out = self.commandtest(command.split(" "))
+        default_ratio = self.config.get("broker",
+                                        "esx_cluster_vm_to_host_ratio")
+        default_max = self.config.get("broker",
+                                      "esx_cluster_max_members_default")
+        self.matchoutput(out, "esx cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: namc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
