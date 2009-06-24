@@ -229,7 +229,7 @@ class TestBrokerCommand(unittest.TestCase):
                              (command, out))
             self.assertEqual(err.find("Not Found"), 0,
                              "STDERR for %s did not start with Not Found:"
-                             "\n@@@\n'%s'\n@@@\n" % (command, out))
+                             "\n@@@\n'%s'\n@@@\n" % (command, err))
         return err
 
     def badrequesttest(self, command, **kwargs):
