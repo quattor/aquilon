@@ -85,8 +85,8 @@ class CommandAddMachine(BrokerCommand):
             dbcluster = Cluster.get_unique(session, name=cluster,
                                            cluster_type=cluster_type)
             if not dbcluster:
-                return ArgumentError("%s cluster '%s' not found" %
-                                     (cluster_type, cluster))
+                raise ArgumentError("%s cluster '%s' not found" %
+                                    (cluster_type, cluster))
             if dbcluster.personality.archetype.name != 'vmhost':
                 raise ArgumentError("Can only add virtual machines to "
                                     "clusters with archetype vmhost.")

@@ -87,6 +87,44 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     # FIXME: Test that cluster plenaries were updated correctly.
 
+    # FIXME: Missing a test for add_interface non-esx automac.  (Might not
+    # be possible to test with the current command set.)
+    # FIXME: Missing a set of tests for add_interface to exercise the
+    # automac algorithm.
+
+    # FIXME: Missing a test for add_machine for a cluster without cluster_type.
+    # (May not be possible with the aq client.)
+
+    # Can't test this as there is no way to add a cluster without
+    # an archetype of vmhost - yet.
+#   def testfailaddnonvirtualcluster(self):
+#       command = ["add", "machine", "--machine", "ut9s03p51",
+#                  "--cluster", "utecl1", "--cluster_type", "esx",
+#                  "--model", "utmedium"]
+#       out = self.badrequesttest(command)
+#       self.matchoutput(out,
+#                        "Can only add virtual machines to "
+#                        "clusters with archetype vmhost.",
+#                        command)
+
+    def testfailaddmissingcluster(self):
+        command = ["add_machine", "--machine=ut9s03p51",
+                   "--cluster=cluster-does-not-exist", "--cluster_type=esx",
+                   "--model=utmedium"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "esx cluster 'cluster-does-not-exist' not found",
+                         command)
+
+    # FIXME: Add a test for add_machine that tries to use a non vmhost cluster.
+    # This may not be possible yet as only esx clusters can be created and aqdb
+    # constrains them to be vmhost.
+
+    # FIXME: Add a test for add_machine that tries to override the location
+    # of the cluster.
+
+    # FIXME: Add a test that tries to add a virtual_machine without attaching
+    # it to a cluster.
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVirtualHardware)
