@@ -59,6 +59,20 @@ class TestDelESXClusterAlignedService(TestBrokerCommand):
         self.matchoutput(out, "Cluster Type: esx", command)
         self.matchclean(out, "esx_management", command)
 
+    def testfailmissingservice(self):
+        command = ["del_esx_cluster_aligned_service",
+                   "--service=service-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Service 'service-does-not-exist' not found",
+                         command)
+
+    def testfailnotaligned(self):
+        command = ["del_esx_cluster_aligned_service",
+                   "--service=utsvc"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Could not find cluster aligned service",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
