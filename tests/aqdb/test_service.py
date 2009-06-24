@@ -30,6 +30,7 @@
 
 """ tests create and delete of a machine through the session """
 import sys
+import inspect
 from utils import load_classpath, commit, add
 
 load_classpath()
@@ -41,7 +42,7 @@ from aquilon.aqdb.model import (Service, ServiceInstance, Tld, CfgPath, Cluster,
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from nose.tools import raises
 
@@ -51,6 +52,9 @@ sess = db.Session()
 CLUSTER_NAME = 'test_esx_cluster'
 SVC_NAME = 'test_esx_management'
 INST_NAME = 'test_esx_manager'
+
+#for testing cascaded deletion
+SVC_2 = 'test_svc_delete_me'
 
 def setup():
     print 'set up'
@@ -140,6 +144,7 @@ def test_add_service():
     assert svc
 
 def test_create_cluster():
+    #TODO: make this a reusable function in test_cluster and import
     np = sess.query(Building).filter_by(name='np').one()
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
@@ -153,8 +158,6 @@ def test_create_cluster():
     assert ec
     print ec
 
-    assert ec.max_members is 8
-    print 'esx cluster max members = %s'%(ec.max_members)
 
 
 def test_add_aligned_service():
@@ -184,6 +187,7 @@ def test_add_aligned_service():
     assert ec.required_services
 
 def test_cluster_bound_svc():
+    """ test the creation of a cluster bound service """
     si = sess.query(ServiceInstance).filter_by(name=INST_NAME).first()
     if not si:
         print 'Creating test management instance'
@@ -205,11 +209,68 @@ def test_cluster_bound_svc():
     print cs
 
 def test_cluster_service_binding_assoc_proxy():
+    """ tests the association proxy on cluster to service works """
     ec = Cluster.get_by('name', CLUSTER_NAME, sess)[0]
     assert ec
     print 'length of %s.service_bindings is %s'% (ec.name,
                                                    len(ec.service_bindings))
     assert len(ec.service_bindings) is 1
+
+def test_cascaded_delete_1():
+    """ test that deleting service bindings don't delete services """
+    svc = sess.query(Service).filter_by(name=SVC_2).first()
+    if not svc:
+        print 'Creating service'
+        svc_tld = sess.query(Tld).filter_by(type='service').one()
+        cfg_pth = sess.query(CfgPath).filter(
+            and_(Tld.type=='service', CfgPath.relative_path==SVC_2)).first()
+
+        if not cfg_pth:
+            print 'creating cfg_path'
+            cfg_pth = CfgPath(tld=svc_tld,
+                              relative_path='%s'%(SVC_2))
+
+        svc=Service(name=SVC_2, cfg_path=cfg_pth)
+        sess.add_all([cfg_pth, svc])
+        commit(sess)
+
+    assert svc
+    print 'added throw away service %s'% (svc)
+
+    #make it a cluster aligned svc
+    cas = ClusterAlignedService(cluster_type='esx', service=svc)
+    add(sess, cas)
+    commit(sess)
+    assert cas, "No cluster aligned service in %s"% (inspect.stack()[1][3])
+
+    """
+        delete the cas, see if the service is still there. sess.refresh(obj)
+        will throw 'InvalidRequestError: Instance xxx is not persistent within
+        this Session' if it's been deleted
+    """
+    sess.delete(cas)
+    commit(sess)
+    sess.refresh(svc)
+    assert svc, "Service deleted when deleting the cluster aligned service"
+    print "still have %s"% (svc)
+
+@raises(InvalidRequestError)
+def test_cascaded_delete2():
+    """ deleting services deletes cluster aligned services """
+    svc = sess.query(Service).filter_by(name=SVC_2).first()
+    assert svc, "No throwawy service in %s"% (inspect.stack()[1][3])
+
+    #add cas, delete the service, make sure the CAS disappears
+    cas = ClusterAlignedService(cluster_type='esx', service=svc)
+    add(sess, cas)
+    commit(sess)
+    assert cas, "No cluster aligned service in %s"% (inspect.stack()[1][3])
+
+    sess.delete(svc)
+    commit(sess)
+    sess.refresh(cas)
+    sess.refresh(svc)
+
 
 if __name__ == "__main__":
     import nose

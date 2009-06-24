@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 """ tables/classes applying to clusters """
 from datetime import datetime
-from types import NoneType
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
@@ -89,10 +88,7 @@ class Cluster(Base):
     service_bindings = association_proxy('_cluster_svc_binding',
                                          'service_instance')
 
-    #FIXME: only attach property if it exists. Currently it throws an error
-    # 'NoneType' object has no attribute 'metacluster' if you don't have one
-    #if isinstance(self._metacluster, NoneType) ?
-    #maybe in a reconstructor?
+    _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
 
     #required services is a select on cluster_aligned services where cluster_type = my type
@@ -108,7 +104,7 @@ cluster.primary_key.name = '%s_pk'% (_TN)
 cluster.append_constraint(UniqueConstraint('name', 'cluster_type',
                                            name='%s_uk'%(_TN)))
 
-table = cluster #FIXME: remove the need for these
+table = cluster
 
 
 class EsxCluster(Cluster):
@@ -125,8 +121,6 @@ class EsxCluster(Cluster):
                             primary_key=True)
 
     vm_to_host_ratio = Column(Integer, default=16, nullable=True)
-
-
 
     def __init__(self, **kw):
         if 'max_hosts' not in kw:
@@ -215,7 +209,7 @@ class MachineClusterMember(Base):
     machine = relation(Machine, lazy=False,
                   backref=backref('_cluster', uselist=False, cascade='all'))
 
-    #TODO: __init__ that checks the sanity of adding new machines to clusters
+    #TODO: __init__ that checks the sanity of adding new machines to clusters?
 
 mcm = MachineClusterMember.__table__
 mcm.primary_key.name = '%s_pk'% (_MCM)
@@ -239,6 +233,7 @@ class ClusterAlignedService(Base):
     service_id = Column(Integer, ForeignKey('service.id',
                                             name='%s_svc_fk'%(_ABV),
                                             ondelete='CASCADE'),
+                        #if the service is deleted, delete the link?
                         primary_key=True)
 
     cluster_type = Column(AqStr(16), primary_key=True)
@@ -246,7 +241,9 @@ class ClusterAlignedService(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255))
 
-    service = relation(Service, cascade='all', uselist=False)
+    service = relation(Service, uselist=False, lazy=False,
+                       backref=backref('_clusters', cascade='all'))
+    #cascade deleted services to delete their being required to cluster_types
 
 cas = ClusterAlignedService.__table__
 cas.primary_key.name = '%s_pk'%(_ABV)
@@ -272,7 +269,7 @@ class ClusterServiceBinding(Base):
 
     cluster = relation(Cluster, uselist=False, lazy=False,
                        backref=backref('_cluster_svc_binding',
-                                       cascade='all, delete-orphan'))
+                                       cascade='all'))
 
     """
         backref name != forward reference name intentional as it seems more
