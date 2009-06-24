@@ -122,19 +122,19 @@ class TestSearchNext(TestBrokerCommand):
     def testclusterdefault(self):
         command = ["search_next", "--cluster=utecl", "--cluster_type=esx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utecl4", command)
+        self.matchoutput(out, "utecl5", command)
 
     def testclusterfullname(self):
         command = ["search_next", "--fullname",
                    "--cluster=utecl", "--cluster_type=esx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utecl4", command)
+        self.matchoutput(out, "utecl5", command)
 
     def testclusternumber(self):
         command = ["search_next", "--number",
                    "--cluster=utecl", "--cluster_type=esx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "4", command)
+        self.matchoutput(out, "5", command)
         self.matchclean(out, "utecl", command)
 
     def testclusterdefaultmissing(self):
@@ -158,17 +158,17 @@ class TestSearchNext(TestBrokerCommand):
     def testmetaclusterdefault(self):
         command = ["search_next", "--metacluster=namc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "namc3", command)
+        self.matchoutput(out, "namc4", command)
 
     def testmetaclusterfullname(self):
         command = ["search_next", "--fullname", "--metacluster=namc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "namc3", command)
+        self.matchoutput(out, "namc4", command)
 
     def testmetaclusternumber(self):
         command = ["search_next", "--number", "--metacluster=namc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "3", command)
+        self.matchoutput(out, "4", command)
         self.matchclean(out, "namc", command)
 
     def testmetaclusterdefaultmissing(self):
