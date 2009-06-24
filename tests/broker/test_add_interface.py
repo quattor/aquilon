@@ -285,6 +285,13 @@ class TestAddInterface(TestBrokerCommand):
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine, "--mac", hostmac])
 
+    # FIXME: Missing a test for an interface with comments.
+    # FIXME: Missing a test for adding an interface that already exists.
+    # FIXME: Missing a test for no mac or automac specified. (Might not
+    # be possible to test the broker side.)
+    # FIXME: Missing a test for a failed DSDB add_host.
+    # FIXME: Missing tests around Dell rename hack.
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)
