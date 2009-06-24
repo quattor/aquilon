@@ -2055,7 +2055,7 @@
          <option name="cluster" type="string">Cluster name</option>
 	 <optgroup name="rebind_esx_cluster_object" mandatory="True" fields="any">
             <option name="hostname" type="string" conflicts="service">Server name</option>
-	    <optgroup name="rebind_esx_cluster_service" mandatory="True" fields="all">
+	    <optgroup name="rebind_esx_cluster_service" fields="all">
                <option name="service" type="string" conflicts="hostname">Service name</option>
                <option name="instance" type="string">Service Instance</option>
             </optgroup>

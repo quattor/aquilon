@@ -66,7 +66,11 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                     (hostname, dbhost.cluster.cluster_type,
                                      dbhost.cluster.name))
             old_cluster = dbhost.cluster
-            old_cluster.members.remove(dbhost)
+            dbhcm = HostClusterMember.get_unique(session,
+                                                 cluster_id=old_cluster.id,
+                                                 host_id=dbhost.id)
+            session.delete(dbhcm)
+            session.flush()
             session.refresh(dbhost)
             session.refresh(old_cluster)
             if hasattr(old_cluster, 'vm_to_host_ratio') and \
@@ -81,6 +85,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                      len(old_cluster.machines),
                                      len(old_cluster.hosts)))
         if not dbhost.cluster:
+            # FIXME: Review this comment.
             # Checks for max_members and vmhost archetype happen in aqdb layer
             try:
                 dbhcm = HostClusterMember(cluster=dbcluster, host=dbhost)

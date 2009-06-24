@@ -43,16 +43,19 @@ from brokertest import TestBrokerCommand
 
 class TestBindESXCluster(TestBrokerCommand):
 
-    def testbindevh1(self):
-        self.noouttest(["bind_esx_cluster",
-                        "--hostname", "evh1.aqd-unittest.ms.com",
-                        "--cluster", "utecl1"])
+    def testbindutecl1(self):
+        for i in range(1, 5):
+            self.noouttest(["bind_esx_cluster",
+                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                            "--cluster", "utecl1"])
 
-    def testverifybindevh1(self):
-        command = "show host --hostname evh1.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: evh1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Member of esx cluster: utecl1", command)
+    def testverifybindutecl1(self):
+        for i in range(1, 5):
+            command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
+                             command)
+            self.matchoutput(out, "Member of esx cluster: utecl1", command)
 
     def testfailmissingcluster(self):
         command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
@@ -85,6 +88,16 @@ class TestBindESXCluster(TestBrokerCommand):
                    "--cluster", "utecl2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "is already bound", command)
+
+    def testfailmaxmembers(self):
+        command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "utecl3 already at maximum capacity (0)",
+                         command)
+
+    # FIXME: Add tests for binding a service instance.
 
     # FIXME: Also test plenary files.
 
