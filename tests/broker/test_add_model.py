@@ -116,6 +116,19 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
         self.matchoutput(out, "Type: virtual_machine", command)
 
+    def testfailauroranode(self):
+        command = ["add_model", "--name=invalid", "--vendor=aurora_vendor",
+                   "--type=aurora_node"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The model's machine type must be one of",
+                         command)
+
+    def testfailduplicate(self):
+        command = ["add_model", "--name=utblade", "--vendor=aurora_vendor",
+                   "--type=blade"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Specified model already exists", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)

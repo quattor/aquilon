@@ -56,7 +56,7 @@ class CommandAddModel(BrokerCommand):
         allowed_types = ["blade", "rackmount", "workstation", "tor_switch",
                          "chassis", "virtual_machine"]
         if type not in allowed_types:
-            raise ArgumentError("The model's machine type must one of %s" %
+            raise ArgumentError("The model's machine type must be one of %s" %
                                 allowed_types)
 
         if cputype:
