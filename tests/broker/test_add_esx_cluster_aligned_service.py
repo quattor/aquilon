@@ -66,6 +66,15 @@ class TestAddESXClusterAlignedService(TestBrokerCommand):
         self.matchoutput(out, "Cluster Type: esx", command)
         self.matchoutput(out, "Aligned Service: esx_management", command)
 
+    def testfailunknownclustertype(self):
+        command = ["show_cluster_type",
+                   "--cluster_type=cluster_type-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Cluster type 'cluster_type-does-not-exist' "
+                         "not found.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
