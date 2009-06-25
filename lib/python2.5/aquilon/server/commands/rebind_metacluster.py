@@ -30,7 +30,6 @@
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import MetaCluster, Cluster, MetaClusterMember
 
 
@@ -38,8 +37,7 @@ class CommandRebindMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster", "cluster", "cluster_type"]
 
-    def render(self, session, hostname, cluster, cluster_type, **arguments):
-        dbhost = hostname_to_host(session, hostname)
+    def render(self, session, metacluster, cluster, cluster_type, **arguments):
         dbcluster = Cluster.get_unique(session, cluster,
                                        cluster_type=cluster_type)
         if not dbcluster:
@@ -50,15 +48,19 @@ class CommandRebindMetaCluster(BrokerCommand):
             raise NotFoundException("MetaCluster '%s' not found." %
                                     metacluster)
         old_metacluster = None
-        if dbcluster.mc_cluster and dbcluster.mc_cluster != dbmetacluster:
-            old_metacluster = dbcluster.mc_cluster
+        if dbcluster.metacluster and dbcluster.metacluster != dbmetacluster:
+            if dbcluster.machines:
+                raise ArgumentError("Cannot move cluster to a new metacluster "
+                                    "while virtual machines are attached.")
+            old_metacluster = dbcluster.metacluster
             dbmcm = MetaClusterMember.get_unique(session,
                 metacluster_id=old_metacluster.id, cluster_id=dbcluster.id)
             session.delete(dbmcm)
             session.refresh(dbcluster)
             session.refresh(old_metacluster)
-        if not dbcluster.mc_cluster:
-            if len(dbmetacluster.members) == dbmetacluster.max_clusters:
+            session.refresh(dbmetacluster)
+        if not dbcluster.metacluster:
+            if len(dbmetacluster.members) >= dbmetacluster.max_clusters:
                 raise ArgumentError("MetaCluster '%s' already contains "
                                     "the maximum number of clusters (%s)." %
                                     (metacluster, dbmetacluster.max_clusters))

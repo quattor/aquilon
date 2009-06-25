@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving clusters."""
+"""Module for testing the rebind metacluster command."""
 
 import os
 import sys
@@ -41,29 +41,32 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestClusterConstraints(TestBrokerCommand):
+class TestRebindMetaCluster(TestBrokerCommand):
 
-    def testdelclusterwithmachines(self):
-        command = "del esx cluster --cluster utecl1"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Cluster still in use by virtual machines",
+    def testfailinvalidcluster(self):
+        command = ["rebind_metacluster", "--cluster=cluster-does-not-exist",
+                   "--cluster_type=esx", "--metacluster=namc1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "esx cluster 'cluster-does-not-exist' not found.",
                          command)
 
-    def testverifydelclusterwithmachines(self):
-        command = ["show_esx_cluster", "--cluster=utecl1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "esx cluster: utecl1", command)
+    def testfailinvalidmetacluster(self):
+        command = ["rebind_metacluster",
+                   "--cluster=utecl1", "--cluster_type=esx",
+                   "--metacluster=metacluster-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "MetaCluster 'metacluster-does-not-exist' not found.",
+                         command)
 
-    # FIXME: Add a test for deleting a cluster that has host members
-    # but no machines attached.
+    # FIXME: Test failure when target metacluster already maxed out.
+    # FIXME: Test success.
 
-    # FIXME: Add a test for unbinding a vmhost from a cluster where
-    # the vm_to_host_ratio would be exceeded.
-
-    # FIXME: Add a test for deleting a vmhost where the vm_to_host_ratio
-    # for the cluster would be exceeded.
+    # FIXME: Also test plenary files.
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindMetaCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
+

@@ -87,6 +87,8 @@ class TestUnbindESXCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "not bound to a cluster", command)
 
+    # FIXME: Add tests for the --service options.
+
     # FIXME: Also test plenary files.
 
 

@@ -91,6 +91,7 @@ from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
 from test_bind_esx_cluster import TestBindESXCluster
 from test_rebind_esx_cluster import TestRebindESXCluster
+from test_rebind_metacluster import TestRebindMetaCluster
 from test_add_virtual_hardware import TestAddVirtualHardware
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
@@ -109,6 +110,7 @@ from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
 from test_constraints_make import TestMakeConstraints
 from test_constraints_cluster import TestClusterConstraints
+from test_constraints_metacluster import TestMetaClusterConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_service_all import TestShowServiceAll
@@ -195,6 +197,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestServiceConstraints,
                 TestMakeAquilon,
                 TestBindESXCluster, TestRebindESXCluster,
+                TestRebindMetaCluster,
                 TestAddVirtualHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestFlush, TestCompile,
@@ -203,8 +206,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,
                 TestMachineConstraints, TestTorSwitchConstraints,
-                TestClusterConstraints,
                 TestMakeConstraints,
+                TestClusterConstraints, TestMetaClusterConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchSystem, TestSearchHost,

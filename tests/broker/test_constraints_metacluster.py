@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving clusters."""
+"""Module for testing constraints in commands involving metaclusters."""
 
 import os
 import sys
@@ -41,29 +41,15 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestClusterConstraints(TestBrokerCommand):
+class TestMetaClusterConstraints(TestBrokerCommand):
 
-    def testdelclusterwithmachines(self):
-        command = "del esx cluster --cluster utecl1"
+    def testdelmetaclusterwithclusters(self):
+        command = "del metacluster --metacluster namc1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Cluster still in use by virtual machines",
-                         command)
-
-    def testverifydelclusterwithmachines(self):
-        command = ["show_esx_cluster", "--cluster=utecl1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "esx cluster: utecl1", command)
-
-    # FIXME: Add a test for deleting a cluster that has host members
-    # but no machines attached.
-
-    # FIXME: Add a test for unbinding a vmhost from a cluster where
-    # the vm_to_host_ratio would be exceeded.
-
-    # FIXME: Add a test for deleting a vmhost where the vm_to_host_ratio
-    # for the cluster would be exceeded.
+        self.matchoutput(out, "Metacluster still in use by clusters", command)
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(
+        TestMetaClusterConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
