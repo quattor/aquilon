@@ -47,7 +47,7 @@ def _cluster_host_append(host):
     """ creator function for HostClusterMember """
     return HostClusterMember(host=host)
 
-#cluster is a reserved word in oracle
+#cluster is a reserved word in oracle and may not
 _TN = 'clstr'
 class Cluster(Base):
     """
@@ -62,11 +62,11 @@ class Cluster(Base):
 
     #Lack of cascaded deletion is intentional on personality
     personality_id = Column(Integer, ForeignKey('personality.id',
-                                                name='%s_prsnlty_fk'),
+                                                name='cluster_prsnlty_fk'),
                             nullable=False)
 
     location_constraint_id = Column(ForeignKey('location.id',
-                                               name='clstr_loc_fk'))
+                                               name='cluster_location_fk'))
 
     #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, default=2, nullable=True)
@@ -100,9 +100,9 @@ class Cluster(Base):
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
 cluster = Cluster.__table__
-cluster.primary_key.name = '%s_pk'% (_TN)
+cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', 'cluster_type',
-                                           name='%s_uk'%(_TN)))
+                                           name='cluster_uk'))
 
 table = cluster
 
@@ -181,7 +181,7 @@ class HostClusterMember(Base):
 
 hcm = HostClusterMember.__table__
 hcm.primary_key.name = '%s_pk'% (_HCM)
-hcm.append_constraint(UniqueConstraint('host_id', name='hst_clstr_mmbr_hst_uk'))
+hcm.append_constraint(UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
@@ -214,7 +214,7 @@ class MachineClusterMember(Base):
 mcm = MachineClusterMember.__table__
 mcm.primary_key.name = '%s_pk'% (_MCM)
 mcm.append_constraint(UniqueConstraint('machine_id',
-                                       name='mchn_clstr_mmbr_uk'))
+                                       name='machine_cluster_member_uk'))
 
 Machine.cluster = association_proxy('_cluster', 'cluster')
 
