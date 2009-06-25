@@ -213,7 +213,7 @@ class TestReconfigure(TestBrokerCommand):
         for service in ["chooser1", "chooser2", "chooser3"]:
             command = ["search_host", "--service", service,
                        "--hostname", "aquilon86.aqd-unittest.ms.com",
-                       "--personality", "inventory"]
+                       "--archetype", "aquilon", "--personality", "inventory"]
             out = self.commandtest(command)
             self.matchoutput(out, "aquilon86.aqd-unittest.ms.com")
 
@@ -276,6 +276,8 @@ class TestReconfigure(TestBrokerCommand):
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Creating service Chooser", command)
+
+    # FIXME: Test changing personality of a cluster member.
 
 
 if __name__=='__main__':
