@@ -45,7 +45,7 @@ _PRECEDENCE = 10
 class Role(Base):
     __tablename__ = 'role'
 
-    id = Column(Integer, Sequence('role_seq'), primary_key=True)
+    id = Column(Integer, Sequence('role_id_seq'), primary_key=True)
 
     name = Column(AqStr(32), nullable=False)
 
@@ -77,4 +77,3 @@ def populate(sess, *args, **kw):
     except Exception, e:
         sess.rollback()
         raise e
-
