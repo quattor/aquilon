@@ -125,6 +125,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
     # FIXME: Add a test that tries to add a virtual_machine without attaching
     # it to a cluster.
 
+    # FIXME: Add tests for update_machine.  (Or is that UpdateVirtualHardware?)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVirtualHardware)

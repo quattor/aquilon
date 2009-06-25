@@ -128,20 +128,41 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.serial_no=serial
 
         if cluster:
-            # FIXME: Only allow a cluster update if this hardware is
-            # already associated with a cluster.
+            if not dbmachine.cluster:
+                raise ArgumentError("Cannot add an existing machine to "
+                                    "a cluster.")
             if not cluster_type:
-                # FIXME: Default to the current cluster_type
-                cluster_type = 'esx'
+                cluster_type = dbmachine.cluster.cluster_type
             dbcluster = Cluster.get_unique(session, name=cluster,
                                            cluster_type=cluster_type)
             if not dbcluster:
                 raise ArgumentError("Could not find %s cluster named '%s'" %
                                     (cluster_type, cluster))
-            # FIXME: Check that the current cluster and the new cluster
-            # are in the same metacluster.
-            # FIXME: Set the (additional) appropriate link
-            # FIXME: Check that the vm_to_host_ratio has not been exceeded.
+            if dbcluster.metacluster != dbmachine.cluster.metacluster:
+                raise ArgumentError("Cannot move machine to a new "
+                                    "metacluster: Current metacluster %s "
+                                    "does not match new metacluster %s" %
+                                    (dbmachine.cluster.metacluster.name,
+                                     dbcluster.metacluster.name))
+            old_cluster = dbmachine.cluster
+            dbmcm = MachineClusterMember.get_unique(session,
+                cluster_id=dbmachine.cluster.id, machine_id=dbmachine.id)
+            session.remove(dbmcm)
+            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
+            session.add(dbmcm)
+            session.flush()
+            session.refresh(dbcluster)
+            session.refresh(old_cluster)
+            if hasattr(dbcluster, 'vm_to_host_ratio') and \
+               len(dbcluster.machines) > \
+               dbcluster.vm_to_host_ratio * len(dbcluster.hosts):
+                raise ArgumentError("Adding a virtual machine to "
+                                    "%s cluster %s would exceed "
+                                    "vm_to_host_ratio %s (%s VMs/%s hosts)" %
+                                    (dbcluster.cluster_type, dbcluster.name,
+                                     dbcluster.vm_to_host_ratio,
+                                     len(dbcluster.machines),
+                                     len(dbcluster.hosts)))
             dbmachine.location = dbcluster.location
         elif cluster_type:
             raise ArgumentError("Cannot change cluster_type without "
