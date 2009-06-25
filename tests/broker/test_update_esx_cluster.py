@@ -86,8 +86,11 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
 
     def testupdateutecl3(self):
+        # Testing both that an empty cluster can have its personality
+        # updated and that personality without archetype will assume
+        # the current archetype.
         command = ["update_esx_cluster", "--cluster=utecl3",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--personality=esx_desktop"]
         self.noouttest(command)
 
     def testverifyutecl3(self):
@@ -120,6 +123,17 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          "members of a different personality:",
                          command)
 
+    def testfailupdatearchetype(self):
+        # If personality is not specified the current personality name
+        # is assumed for the new archetype.
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--archetype=windows"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality esx_server in Archetype windows "
+                         "not found",
+                         command)
+
     def testfailupdatemaxmembers(self):
         command = ["update_esx_cluster", "--cluster=utecl1", "--max_members=0"]
         out = self.badrequesttest(command)
@@ -146,9 +160,15 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
 
+    def testfailmissingcluster(self):
+        command = ["update_esx_cluster", "--cluster=cluster-does-not-exist",
+                   "--comments=test should fail"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "cluster 'cluster-does-not-exist' not found",
+                         command)
+
     # FIXME: Need tests for plenary templates
     # FIXME: Include test that machine plenary moved correctly
-    # FIXME: Need tests for network
 
 
 if __name__=='__main__':

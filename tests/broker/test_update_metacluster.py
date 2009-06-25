@@ -73,8 +73,14 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Comments: MetaCluster with a new comment",
                          command)
 
+    def testfailmetaclustermissing(self):
+        command = "update metacluster --metacluster metacluster-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out,
+                         "metacluster 'metacluster-does-not-exist' not found",
+                         command)
+
     # FIXME: Need tests for plenary templates
-    # FIXME: Need tests for network
 
 
 if __name__=='__main__':

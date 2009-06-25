@@ -84,7 +84,9 @@ class CommandUpdateESXCluster(BrokerCommand):
                 location_changed = True
                 cluster_updated = True
 
-        if personality:
+        if personality or archetype:
+            if not personality:
+                personality = dbcluster.personality.name
             if not archetype:
                 archetype = dbcluster.personality.archetype.name
             dbpersonality = get_personality(session, archetype, personality)

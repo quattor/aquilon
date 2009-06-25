@@ -85,6 +85,8 @@ class TestDelESXCluster(TestBrokerCommand):
         command = ["del_esx_cluster", "--cluster=esx_cluster-does-not-exist"]
         self.notfoundtest(command)
 
+    # FIXME: Need a test for deleting a cluster that still has vmhosts.
+
     # FIXME: Verify that plenary files have been removed.
 
 

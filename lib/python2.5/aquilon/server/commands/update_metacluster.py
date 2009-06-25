@@ -49,20 +49,13 @@ class CommandUpdateMetaCluster(BrokerCommand):
         if not dbmetacluster:
             raise NotFoundException("metacluster '%s' not found" % metacluster)
 
-        metacluster_updated = False
-
         max_members = force_int("max_members", max_members)
         if max_members is not None:
             # FIXME: Enforce that this is not being exceeded.
             dbmetacluster.max_clusters = max_members
-            metacluster_updated = True
 
         if comments is not None:
             dbmetacluster.comments = comments
-            metacluster_updated = True
-
-        if not metacluster_updated:
-            return
 
         session.add(dbmetacluster)
         session.flush()
