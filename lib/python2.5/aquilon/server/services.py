@@ -36,7 +36,8 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Tld, BuildItem, ServiceMap,
-                                PersonalityServiceMap, ClusterServiceBinding)
+                                PersonalityServiceMap, ClusterServiceBinding,
+                                ClusterAlignedService)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 
 
@@ -89,7 +90,7 @@ class Chooser(object):
         if self.dbhost.cluster:
             for si in self.dbhost.cluster.service_bindings:
                 self.cluster_aligned_services[si.service] = si
-            q = session.query(ClusterAlignedService)
+            q = self.session.query(ClusterAlignedService)
             q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
             for item in q.all():
                 if item.service not in self.cluster_aligned_services:
