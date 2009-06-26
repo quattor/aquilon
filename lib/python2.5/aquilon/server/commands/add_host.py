@@ -67,11 +67,6 @@ class CommandAddHost(BrokerCommand):
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
 
-        if dbmachine.model.machine_type not in [
-                'blade', 'workstation', 'rackmount', 'aurora_node']:
-            raise ArgumentError("Machine is of type %s, and must be a blade, workstation, rackmount, or aurora_node to add a host." %
-                    (dbmachine.model.machine_type))
-
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):
             raise ArgumentError("Machines of aurora_node can only be added with archetype aurora")
