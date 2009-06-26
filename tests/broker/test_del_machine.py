@@ -123,8 +123,6 @@ class TestDelMachine(TestBrokerCommand):
             command = "show machine --machine ut10s04p%d" % port
             self.notfoundtest(command.split(" "))
 
-    # FIXME: Add a test for deleting an aurora node.  (Might need to happen
-    # in a constraint test for timing reasons.)
     # FIXME: Add a test for deleting a machine with only auxiliaries.
 
 
