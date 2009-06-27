@@ -36,6 +36,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.cluster import PlenaryClusterClientData
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster,
                                 MachineClusterMember)
 
@@ -134,6 +135,8 @@ class CommandAddMachine(BrokerCommand):
                                      dbcluster.vm_to_host_ratio,
                                      len(dbcluster.machines),
                                      len(dbcluster.hosts)))
+            plenary = PlenaryClusterClientData(dbcluster)
+            plenary.write()
 
         session.flush()
 

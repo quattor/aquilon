@@ -35,6 +35,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.cluster import PlenaryClusterClientData
 
 
 class CommandDelMachine(BrokerCommand):
@@ -65,7 +66,10 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
         plenary_info.remove()
 
-        # FIXME: May need to rewrite cluster plenary
+        if dbmachine.cluster:
+            plenary = PlenaryClusterClientData(dbmachine.cluster)
+            plenary.write()
+
         return
 
 

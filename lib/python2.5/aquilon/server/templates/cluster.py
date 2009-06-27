@@ -29,6 +29,7 @@
 
 
 from aquilon.server.templates.base import Plenary
+from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
 class PlenaryMetaCluster(Plenary):
@@ -87,8 +88,8 @@ class PlenaryMetaClusterClientData(Plenary):
         self.clients = [cluster.name for cluster in dbmetacluster.members]
 
     def body(self, lines):
-        # FIXME: Review and implement or remove.
-        lines.append("'clients' = list(" +
+        lines.append("'name' = '%s';" % self.name);
+        lines.append("'clusters' = list(" +
                      ", ".join([("'" + cluster + "'")
                                 for cluster in self.clients]) +
                      ");")
@@ -120,9 +121,7 @@ class PlenaryClusterClient(Plenary):
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        # FIXME: Review and implement or remove.
-        lines.append("include { "
-                     "'cluster/%(metacluster)s/%(name)s/clientdata' };" %
+        lines.append("'/system/cluster' = create('cluster/%(metacluster)s/%(name)s/clientdata');" %
                      self.__dict__)
 
 
@@ -144,21 +143,23 @@ class PlenaryClusterData(Plenary):
 class PlenaryClusterClientData(Plenary):
     def __init__(self, dbcluster):
         Plenary.__init__(self)
+        self.dbcluster = dbcluster
         self.name = dbcluster.name
         self.metacluster = dbcluster.metacluster.name
         self.plenary_core = "cluster/%(metacluster)s/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/clientdata" % self.__dict__
         self.template_type = 'structure'
         self.dir = self.config.get("broker", "plenarydir")
-        self.clients = [system.fqdn for system in dbcluster.hosts]
 
     def body(self, lines):
-        # FIXME: Review and implement or remove.
-        lines.append("include { 'cluster/%(metacluster)s/clientdata' };" %
+        lines.append("'name' = '%s';" % self.name)
+        lines.append("'metacluster' = create('cluster/%(metacluster)s/clientdata');" %
                      self.__dict__)
-        lines.append("");
-        lines.append("'clients' = list(" +
-                     ", ".join([("'" + fqdn + "'") for fqdn in self.clients]) +
-                     ");")
+        lines.append("'machines' = nlist(")
+        for machine in self.dbcluster.machines:
+            pmac = PlenaryMachineInfo(machine)
+            lines.append("    '%s', create('%s')," % (machine.name,
+                                                      pmac.plenary_template))
+        lines.append(");")
 
 

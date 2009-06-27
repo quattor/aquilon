@@ -33,7 +33,7 @@ from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError
 from aquilon.server.templates.base import Plenary
 from aquilon.server.templates.machine import PlenaryMachineInfo
-
+from aquilon.server.templates.cluster import PlenaryClusterClient
 
 class PlenaryHost(Plenary):
     def __init__(self, dbhost):
@@ -97,6 +97,10 @@ class PlenaryHost(Plenary):
         for provide in provides:
             templates.append(provide)
         templates.append(personality_template)
+        if self.dbhost.cluster:
+            clplenary = PlenaryClusterClient(self.dbhost.cluster)
+            templates.append(clplenary.plenary_template)
+
         templates.append("archetype/final")
 
         # Okay, here's the real content
@@ -122,6 +126,8 @@ class PlenaryHost(Plenary):
         #lines.append("'/system/function' = '%s';"%self.dbhost.business_function)
         lines.append("'/system/function' = 'grid';");
         lines.append("'/system/build' = '%s';"%self.dbhost.status)
+        if self.dbhost.cluster:
+            lines.append("'/system/cluster/name' = '%s';" % self.dbhost.cluster.name)
         lines.append("")
         for template in templates:
             lines.append("include { '%s' };" % template)
