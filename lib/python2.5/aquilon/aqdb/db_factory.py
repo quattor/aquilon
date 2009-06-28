@@ -31,19 +31,18 @@ from __future__ import with_statement
 
 import re
 import os
-import pwd
 import sys
 
 from getpass import getpass
 from StringIO import StringIO
 
-from aquilon.aqdb   import depends
+from aquilon.aqdb import depends
 from aquilon.config import Config
-from aquilon.utils  import confirm
+from aquilon.utils import confirm
 
-from sqlalchemy                  import MetaData, engine, create_engine, text
-from sqlalchemy.orm              import scoped_session, sessionmaker
-from sqlalchemy.exceptions       import SQLError, DatabaseError as SaDBError
+from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exceptions import SQLError, DatabaseError as SaDBError
 
 class DbFactory(object):
     __shared_state = {}
@@ -78,7 +77,7 @@ class DbFactory(object):
             if len(passwds) < 1:
                 passwds.append(
                     getpass(
-                        'Can not determine your password (%s).\nPassword:'%(
+                        'Can not determine your password (%s).\nPassword:'% (
                             self.dsn)))
             self.login(passwds)
 
@@ -89,9 +88,9 @@ class DbFactory(object):
 
             self.vendor = 'db2'
 
-            user=''
+            user = ''
             self.engine = create_engine(
-                'ibm_db_sa:///NYTD_AQUILON?UID=%s'%(user))
+                'ibm_db_sa:///NYTD_AQUILON?UID=%s'% (user))
             self.connection = self.engine.connect()
             self.engine.execute('set current schema AQUILON')
 
@@ -102,7 +101,7 @@ class DbFactory(object):
             self.vendor = 'sqlite'
         else:
             msg = "supported database datasources are db2, sqlite and oracle.\n"
-            msg += "yours is '%s' "%(self.dsn)
+            msg += "yours is '%s' "% (self.dsn)
             sys.stderr.write(msg)
             sys.exit(9)
 
@@ -119,13 +118,13 @@ class DbFactory(object):
     def session(self):
         return self.Session()
 
-    def login(self,passwds):
+    def login(self, passwds):
         errs = []
         pswd_re = re.compile('PASSWORD')
         dsn_copy = self.dsn
 
         for p in passwds:
-            self.dsn = re.sub(pswd_re,p,dsn_copy)
+            self.dsn = re.sub(pswd_re, p, dsn_copy)
 
             self.engine = create_engine(self.dsn)
 
@@ -134,12 +133,12 @@ class DbFactory(object):
                 return
             except SaDBError, e:
                 errs.append(e)
-                pass
+
         if len(errs) >= 1:
             raise errs.pop()
         else:
             #shouldn't get here
-            msg = 'unknown issue connecting to %s'%(self.dsn)
+            msg = 'unknown issue connecting to %s'% (self.dsn)
             raise SaDBError(msg)
 
     def _get_password_list(self):
@@ -159,16 +158,16 @@ class DbFactory(object):
                 f = open(passwd_file)
                 passwds = f.readlines()
                 if len(passwds) < 1:
-                    msg = "No lines in %s"%(passwd_file)
+                    msg = "No lines in %s"% (passwd_file)
                     raise ValueError(msg)
                 else:
                     return [passwd.strip() for passwd in passwds]
             # Fallback for testing when password file may not exist.
-            except IOError,e:
+            except IOError, e:
                 print e
                 return None
 
-    def safe_execute(self, stmt, *args, **kw):
+    def safe_execute(self, stmt, **kw):
         """ convenience wrapper """
 
         try:
@@ -197,7 +196,7 @@ class DbFactory(object):
         self.meta.create_all(mock_engine)
         if outfile:
             with open(outfile, 'w') as f:
-               f.write(self.buf.getvalue())
+                f.write(self.buf.getvalue())
         else:
             print >> sys.stderr, self.buf.getvalue()
     def get_tables(self):
@@ -205,21 +204,21 @@ class DbFactory(object):
         schema """
 
         if self.vendor is 'oracle':
-            sql='select table_name from user_tables'
+            sql = 'select table_name from user_tables'
             return [name for (name, ) in self.safe_execute(sql)]
 
     def get_sequences(self):
         """ return a list of the sequence names from the current databases
             public schema  """
 
-        sql='select sequence_name from user_sequences'
+        sql = 'select sequence_name from user_sequences'
         return [name for (name, ) in self.safe_execute(sql)]
 
     def drop_all_tables_and_sequences(self, no_confirm=False):
         """ MetaData.drop_all() doesn't play nice with db's that have sequences.
             you're alternative is to call this """
         if self.vendor is 'sqlite':
-            dbfile = config.get("database", "dbfile")
+            dbfile = self.config.get("database", "dbfile")
             if os.path.exists(dbfile):
                 os.unlink(dbfile)
 
@@ -227,7 +226,7 @@ class DbFactory(object):
             raise ValueError('can not drop %s databases'%(self.vendor))
 
         if is_prod_ora_instance(self.dsn):
-            msg('drop_all_tables not permitted on the production database')
+            msg = 'drop_all_tables not permitted on the production database'
             raise ValueError(msg)
 
         msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
@@ -247,7 +246,7 @@ class DbFactory(object):
 db_factory = DbFactory
 
 def is_prod_ora_instance(dsn):
-    prod_re = re.compile('@NYPO_AQUILON',re.IGNORECASE)
+    prod_re = re.compile('@NYPO_AQUILON', re.IGNORECASE)
     if prod_re.search(dsn):
         return True
     else:
