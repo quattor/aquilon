@@ -44,11 +44,13 @@ from brokertest import TestBrokerCommand
 class TestDelVirtualHardware(TestBrokerCommand):
 
     def testdelevm1(self):
-        self.noouttest(["del", "machine", "--machine", "evm1"])
+        for i in range(1, 10):
+            self.noouttest(["del", "machine", "--machine", "evm%s" % i])
 
     def testverifydelevm1(self):
-        command = "show machine --machine evm1"
-        self.notfoundtest(command.split(" "))
+        for i in range(1, 10):
+            command = "show machine --machine evm%s" %i
+            self.notfoundtest(command.split(" "))
 
     # FIXME: Test that cluster plenaries were updated correctly.
 

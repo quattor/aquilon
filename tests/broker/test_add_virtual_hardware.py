@@ -43,47 +43,54 @@ from brokertest import TestBrokerCommand
 
 class TestAddVirtualHardware(TestBrokerCommand):
 
-    def test_000_addevm1(self):
-        self.noouttest(["add", "machine", "--machine", "evm1",
-                        "--cluster", "utecl1", "--cluster_type", "esx",
-                        "--model", "utmedium"])
+    def test_000_addmachines(self):
+        for i in range(1, 10):
+            self.noouttest(["add", "machine", "--machine", "evm%s" % i,
+                            "--cluster", "utecl1", "--cluster_type", "esx",
+                            "--model", "utmedium"])
 
-    def test_100_addevm1interface(self):
-        self.noouttest(["add", "interface", "--machine", "evm1",
-                        "--interface", "eth0", "--automac"])
+    def test_100_addinterfaces(self):
+        for i in range(1, 10):
+            self.noouttest(["add", "interface", "--machine", "evm%s" % i,
+                            "--interface", "eth0", "--automac"])
 
-    def test_500_verifyaddevm1(self):
-        command = "show machine --machine evm1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Virtual_machine: evm1", command)
-        self.matchoutput(out, "Provided by esx cluster: utecl1", command)
-        self.matchoutput(out, "Building: ut", command)
-        self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
-        self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "Interface: eth0 00:50:56:01:00:00 boot=True",
-                         command)
+    def test_500_verifyaddmachines(self):
+        for i in range(1, 10):
+            command = "show machine --machine evm%s" % i
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Virtual_machine: evm%s" % i, command)
+            self.matchoutput(out, "Provided by esx cluster: utecl1", command)
+            self.matchoutput(out, "Building: ut", command)
+            self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
+            self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
+            self.matchoutput(out, "Memory: 8192 MB", command)
+            self.matchoutput(out,
+                             "Interface: eth0 00:50:56:01:00:%02x boot=True" %
+                             (i - 1),
+                             command)
 
-    # FIXME: Make sure any necessary cluster info appears here.
-    def test_500_verifycatevm1(self):
-        command = "cat --machine evm1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-            """"location" = "ut.ny.na";""",
-            command)
-        self.matchoutput(out,
-            """include { 'hardware/machine/utvendor/utmedium' };""",
-            command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2500"));""",
-            command)
-        self.matchoutput(out,
-                         """"cards/nic/eth0/hwaddr" = "00:50:56:01:00:00";""",
-                         command)
-        self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
+    def test_500_verifycatmachines(self):
+        for i in range(1, 10):
+            command = "cat --machine evm%s" % i
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+            self.matchoutput(out,
+                             """include { """
+                             """'hardware/machine/utvendor/utmedium' };""",
+                             command)
+            self.matchoutput(out,
+                             """"ram" = list(create("hardware/ram/generic", """
+                             """"size", 8192*MB));""",
+                             command)
+            self.matchoutput(out,
+                             """"cpu" = list(create("""
+                             """"hardware/cpu/intel/xeon_2500"));""",
+                             command)
+            self.matchoutput(out,
+                             """"cards/nic/eth0/hwaddr" """
+                             """= "00:50:56:01:00:%02x";""" % (i - 1),
+                             command)
+            self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
 
     # FIXME: Test that cluster plenaries were updated correctly.
 
