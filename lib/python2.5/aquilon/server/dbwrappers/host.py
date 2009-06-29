@@ -60,5 +60,5 @@ def get_host_dependencies(session, dbhost):
                       (dbhost.fqdn, dbhost.cluster.cluster_type,
                        dbhost.cluster.name, dbhost.cluster.vm_to_host_ratio,
                        len(dbhost.cluster.machines),
-                       len(dbhost.cluster.hosts)))
+                       len(dbhost.cluster.hosts) - 1))
     return ret
