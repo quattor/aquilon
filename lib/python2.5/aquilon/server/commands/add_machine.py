@@ -135,8 +135,6 @@ class CommandAddMachine(BrokerCommand):
                                      dbcluster.vm_to_host_ratio,
                                      len(dbcluster.machines),
                                      len(dbcluster.hosts)))
-            plenary = PlenaryClusterClientData(dbcluster)
-            plenary.write()
 
         session.flush()
 
@@ -148,6 +146,6 @@ class CommandAddMachine(BrokerCommand):
         plenary_info.write()
 
         if cluster:
-            # FIXME: Write out any relevant plenary files
-            pass
+            plenary = PlenaryClusterClientData(dbcluster)
+            plenary.write()
         return

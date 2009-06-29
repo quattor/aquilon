@@ -130,7 +130,8 @@ class CommandFlush(BrokerCommand):
                     plclus = PlenaryClusterClientData(clus)
                     plclus.write(locked=True)
                 except Exception, e:
-                    failed.append("cluster %s failed: %s" % (clus.name, e))
+                    failed.append("%s cluster %s failed: %s" %
+                                  (clus.cluster_type, clus.name, e))
 
             for clus in session.query(MetaCluster).all():
                 try:
@@ -144,7 +145,7 @@ class CommandFlush(BrokerCommand):
                     plclus = PlenaryMetaClusterClientData(clus)
                     plclus.write(locked=True)
                 except Exception, e:
-                    failed.append("cluster %s failed: %s" % (clus.name, e))
+                    failed.append("metacluster %s failed: %s" % (clus.name, e))
 
             log.msg("flushed %d/%d templates" % (total-len(failed), total))
             if failed:

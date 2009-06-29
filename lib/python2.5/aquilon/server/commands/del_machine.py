@@ -47,6 +47,7 @@ class CommandDelMachine(BrokerCommand):
 
         session.refresh(dbmachine)
         plenary_info = PlenaryMachineInfo(dbmachine)
+        dbcluster = dbmachine.cluster
 
         if dbmachine.host:
             raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
@@ -66,8 +67,8 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
         plenary_info.remove()
 
-        if dbmachine.cluster:
-            plenary = PlenaryClusterClientData(dbmachine.cluster)
+        if dbcluster:
+            plenary = PlenaryClusterClientData(dbcluster)
             plenary.write()
 
         return
