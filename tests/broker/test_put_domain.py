@@ -68,50 +68,54 @@ class TestPutDomain(TestBrokerCommand):
             self.scratchdir, "changetest1")))
 
     def testaddsiteut(self):
-        sitedir = os.path.join(self.scratchdir, "unittest", "aquilon",
-                "site", "americas", "ny", "ut")
-        if not os.path.exists(sitedir):
-            os.makedirs(sitedir)
-        template = os.path.join(sitedir, "config.tpl")
+        repodir = os.path.join(self.scratchdir, "unittest")
+        if os.path.exists(os.path.join(repodir, "site")):
+            sitedir = os.path.join(repodir, "site")
+        else:
+            sitedir = os.path.join(repodir, "aquilon", "site")
+        utdir = os.path.join(sitedir, "americas", "ny", "ut")
+        if not os.path.exists(utdir):
+            os.makedirs(utdir)
+        template = os.path.join(utdir, "config.tpl")
         f = open(template, 'w')
         try:
             f.writelines("template site/americas/ny/ut/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=sitedir)
+        self.gitcommand(["add", "config.tpl"], cwd=utdir)
         self.gitcommand(["commit", "-a", "-m", "added building ut"],
                 cwd=os.path.join(self.scratchdir, "unittest"))
 
     def testaddutsi1(self):
         """utsi1 = unit test service instance 1"""
-        sitedir = os.path.join(self.scratchdir, "unittest", "service",
+        svcdir = os.path.join(self.scratchdir, "unittest", "service",
                 "utsvc", "utsi1", "client")
-        if not os.path.exists(sitedir):
-            os.makedirs(sitedir)
-        template = os.path.join(sitedir, "config.tpl")
+        if not os.path.exists(svcdir):
+            os.makedirs(svcdir)
+        template = os.path.join(svcdir, "config.tpl")
         f = open(template, 'w')
         try:
             f.writelines("template service/utsvc/utsi1/client/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=sitedir)
+        self.gitcommand(["add", "config.tpl"], cwd=svcdir)
         self.gitcommand(["commit", "-a", "-m",
                 "added unit test service instance 1"],
                 cwd=os.path.join(self.scratchdir, "unittest"))
 
     def testaddutsi2(self):
         """utsi1 = unit test service instance 2"""
-        sitedir = os.path.join(self.scratchdir, "unittest", "service",
+        svcdir = os.path.join(self.scratchdir, "unittest", "service",
                 "utsvc", "utsi2", "client")
-        if not os.path.exists(sitedir):
-            os.makedirs(sitedir)
-        template = os.path.join(sitedir, "config.tpl")
+        if not os.path.exists(svcdir):
+            os.makedirs(svcdir)
+        template = os.path.join(svcdir, "config.tpl")
         f = open(template, 'w')
         try:
             f.writelines("template service/utsvc/utsi2/client/config;\n\n")
         finally:
             f.close()
-        self.gitcommand(["add", "config.tpl"], cwd=sitedir)
+        self.gitcommand(["add", "config.tpl"], cwd=svcdir)
         self.gitcommand(["commit", "-a", "-m",
                 "added unit test service instance 2"],
                 cwd=os.path.join(self.scratchdir, "unittest"))
@@ -146,9 +150,14 @@ class TestPutDomain(TestBrokerCommand):
         self.ignoreoutputtest(["put", "--domain", "unittest"],
                 env=self.gitenv(),
                 cwd=os.path.join(self.scratchdir, "unittest"))
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "unittest", "aquilon",
-            "site", "americas", "ny", "ut", "config.tpl")))
+        repodir = os.path.join(self.config.get("broker", "templatesdir"),
+                               "unittest")
+        if os.path.exists(os.path.join(repodir, "site")):
+            sitedir = os.path.join(repodir, "site")
+        else:
+            sitedir = os.path.join(repodir, "aquilon", "site")
+        self.assert_(os.path.exists(os.path.join(sitedir, "americas",
+                                                 "ny", "ut", "config.tpl")))
 
 
 if __name__=='__main__':
