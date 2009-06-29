@@ -90,17 +90,17 @@ class TestSearchNext(TestBrokerCommand):
     def testmachinedefault(self):
         command = ["search_next", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "evm2", command)
+        self.matchoutput(out, "evm10", command)
 
     def testmachinefullname(self):
         command = ["search_next", "--fullname", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "evm2", command)
+        self.matchoutput(out, "evm10", command)
 
     def testmachinenumber(self):
         command = ["search_next", "--number", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "2", command)
+        self.matchoutput(out, "10", command)
         self.matchclean(out, "evm", command)
 
     def testmachinedefaultmissing(self):
