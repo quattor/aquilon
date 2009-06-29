@@ -168,11 +168,21 @@ for dir in dirs:
 
 # The template-king also gets synced as part of the broker tests,
 # but this makes it available for the initial database build.
+# This syncs the *contents* of the remote "template-king" by
+# appending a slash, so the remote could be any path that rsync
+# can parse that leads to a git repository.
 p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-    config.get("unittest", "template_king_path"),
-    # Minor hack... ignores config kingdir...
-    config.get("broker", "quattordir")),
-    stdout=1, stderr=2)
+           "--exclude=.git/config",
+           os.path.join(config.get("unittest", "template_king_path"), ""),
+           config.get("broker", "kingdir")),
+          stdout=1, stderr=2)
+rc = p.wait()
+# FIXME: check rc
+# Need the actual king's config file for merges to work.
+p = Popen(("rsync", "-avP", "-e", "ssh",
+           config.get("unittest", "template_king_config"),
+           os.path.join(config.get("broker", "kingdir"), ".git")),
+          stdout=1, stderr=2)
 rc = p.wait()
 # FIXME: check rc
 

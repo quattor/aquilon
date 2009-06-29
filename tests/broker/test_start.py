@@ -81,16 +81,29 @@ class TestBrokerStart(unittest.TestCase):
 
     def testrsynctemplateking(self):
         config = Config()
+        # Duplicated from runtests.py
         p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-            config.get("unittest", "template_king_path"),
-            # Minor hack... ignores config kingdir...
-            config.get("broker", "quattordir")),
-            stdout=PIPE, stderr=PIPE)
+                   "--exclude=.git/config",
+                   os.path.join(config.get("unittest", "template_king_path"),
+                                ""),
+                   config.get("broker", "kingdir")),
+                  stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,
-                "Non-zero return code for rsync of template-king, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                % (out, err))
+                         "Non-zero return code for rsync of template-king, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (out, err))
+        p = Popen(("rsync", "-avP", "-e", "ssh",
+                   config.get("unittest", "template_king_config"),
+                   os.path.join(config.get("broker", "kingdir"), ".git")),
+                  stdout=1, stderr=2)
+        (out, err) = p.communicate()
+        # Ignore out/err unless we get a non-zero return code, then log it.
+        self.assertEqual(p.returncode, 0,
+                         "Non-zero return code for rsync of template-king, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (out, err))
         return
 
 
