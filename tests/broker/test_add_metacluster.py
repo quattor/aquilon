@@ -50,10 +50,13 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testverifynamc1(self):
         command = "show metacluster --metacluster namc1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("broker",
-                                      "metacluster_max_members_default")
+        default_members = self.config.get("broker",
+                                          "metacluster_max_members_default")
+        default_shares = self.config.get("broker",
+                                         "metacluster_max_shares_default")
         self.matchoutput(out, "MetaCluster: namc1", command)
-        self.matchoutput(out, "Max members: %s" % default_max, command)
+        self.matchoutput(out, "Max members: %s" % default_members, command)
+        self.matchoutput(out, "Max shares: %s" % default_shares, command)
         self.matchclean(out, "Comments", command)
 
     def testfailaddexisting(self):
@@ -63,7 +66,7 @@ class TestAddMetaCluster(TestBrokerCommand):
 
     def testaddnamc2(self):
         command = ["add_metacluster", "--metacluster=namc2",
-                   "--max_members=99",
+                   "--max_members=99", "--max_shares=89",
                    "--comments", "MetaCluster with a comment"]
         self.noouttest(command)
 
@@ -72,6 +75,7 @@ class TestAddMetaCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: namc2", command)
         self.matchoutput(out, "Max members: 99", command)
+        self.matchoutput(out, "Max shares: 89", command)
         self.matchoutput(out, "Comments: MetaCluster with a comment", command)
 
     def testaddnamc3(self):

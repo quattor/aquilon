@@ -61,7 +61,7 @@ class TestUpdateMetaCluster(TestBrokerCommand):
 
     def testupdatenamc2(self):
         command = ["update_metacluster", "--metacluster=namc2",
-                   "--max_members=98",
+                   "--max_members=98", "--max_shares=88",
                    "--comments", "MetaCluster with a new comment"]
         self.noouttest(command)
 
@@ -70,6 +70,7 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: namc2", command)
         self.matchoutput(out, "Max members: 98", command)
+        self.matchoutput(out, "Max shares: 88", command)
         self.matchoutput(out, "Comments: MetaCluster with a new comment",
                          command)
 
