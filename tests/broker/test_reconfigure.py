@@ -297,11 +297,15 @@ class TestReconfigure(TestBrokerCommand):
                        'Instance (\S+)', out)
         self.failUnless(m, "Aligned instance not found in output:\n%s" % out)
         instance = m.group(1)
-        command = "search host --service utecl1 --instance %s" % instance
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx2.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "esx3.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "esx4.aqd-unittest.ms.com", command)
+        # A better test might be to search for all hosts in the cluster
+        # and make sure they're all in this list.  That search command
+        # does not exist yet, though.
+        command = ["search_host", "--service=esx_management",
+                   "--instance=%s" % instance]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evh2.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh3.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh4.aqd-unittest.ms.com", command)
 
     def testreconfigureunboundvmhosts(self):
         # None of these should change since they have not been bound.
