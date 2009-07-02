@@ -435,7 +435,7 @@ class Chooser(object):
         for (service, instance) in self.cluster_aligned_services.items():
             if not instance or instance != self.chosen_services[service]:
                 self.cluster_instances_bound.add(self.chosen_services[service])
-            if instance != self.chosen_services[service]:
+            if instance and instance != self.chosen_services[service]:
                 self.cluster_instances_unbound.add(instance)
 
     def apply_changes(self):

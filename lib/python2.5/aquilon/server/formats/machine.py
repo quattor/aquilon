@@ -42,7 +42,7 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Allocated to host: %s [%s]"
                     % (machine.host.fqdn, machine.host.ip))
         if machine.cluster:
-            details.append(indent + "  Provided by %s cluster: %s"
+            details.append(indent + "  Hosted by %s cluster: %s"
                     % (machine.cluster.cluster_type, machine.cluster.name))
         for manager in machine.manager:
             details.append(indent + "  Manager: %s [%s]" % (manager.fqdn,

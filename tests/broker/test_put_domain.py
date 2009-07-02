@@ -146,6 +146,27 @@ class TestPutDomain(TestBrokerCommand):
                          "added personality utpersonality"],
                          cwd=os.path.join(self.scratchdir, "unittest"))
 
+    def testaddutmedium(self):
+        modeldir = os.path.join(self.scratchdir, "unittest", "hardware",
+                                "machine", "utvendor")
+        if not os.path.exists(modeldir):
+            os.makedirs(modeldir)
+        template = os.path.join(modeldir, "utmedium.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines(
+                """structure template hardware/machine/utvendor/utmedium;
+
+"manufacturer" = "utvendor";
+"model" = "utmedium";
+                """)
+        finally:
+            f.close()
+        self.gitcommand(["add", "utmedium.tpl"], cwd=modeldir)
+        self.gitcommand(["commit", "-a", "-m",
+                         "added model utmedium"],
+                         cwd=os.path.join(self.scratchdir, "unittest"))
+
     def testputunittestdomain(self):
         self.ignoreoutputtest(["put", "--domain", "unittest"],
                 env=self.gitenv(),

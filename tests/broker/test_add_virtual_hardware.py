@@ -50,16 +50,26 @@ class TestAddVirtualHardware(TestBrokerCommand):
                             "--model", "utmedium"])
 
     def test_100_addinterfaces(self):
-        for i in range(1, 10):
+        for i in range(1, 8):
             self.noouttest(["add", "interface", "--machine", "evm%s" % i,
                             "--interface", "eth0", "--automac"])
 
+    def test_110_addinterfaces(self):
+        self.noouttest(["add", "interface", "--machine", "evm9",
+                        "--interface", "eth0", "--mac", "00:50:56:3f:ff:ff"])
+
+    def test_120_addinterfaces(self):
+        # This should now fill in the 'hole' between 7 and 9
+        self.noouttest(["add", "interface", "--machine", "evm8",
+                        "--interface", "eth0", "--automac"])
+
     def test_500_verifyaddmachines(self):
-        for i in range(1, 10):
+        # Skipping evm9 since the mac is out of sequence
+        for i in range(1, 9):
             command = "show machine --machine evm%s" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Virtual_machine: evm%s" % i, command)
-            self.matchoutput(out, "Provided by esx cluster: utecl1", command)
+            self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
             self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
@@ -70,7 +80,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              command)
 
     def test_500_verifycatmachines(self):
-        for i in range(1, 10):
+        # Skipping evm9 since the mac is out of sequence
+        for i in range(1, 9):
             command = "cat --machine evm%s" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, """"location" = "ut.ny.na";""", command)
@@ -92,12 +103,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              command)
             self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
 
+    # FIXME: Add a test for creating an aquilon host out of a virtual
+    # machine.
+
     # FIXME: Test that cluster plenaries were updated correctly.
 
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)
-    # FIXME: Missing a set of tests for add_interface to exercise the
-    # automac algorithm.
 
     # FIXME: Missing a test for add_machine for a cluster without cluster_type.
     # (May not be possible with the aq client.)

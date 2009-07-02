@@ -32,6 +32,7 @@
 import os
 import sys
 import unittest
+import re
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -277,7 +278,44 @@ class TestReconfigure(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Creating service Chooser", command)
 
-    # FIXME: Test changing personality of a cluster member.
+    def testreconfigureboundvmhosts(self):
+        # This will exercise the cluster-aligned services code,
+        # which does not kick in at 'make' time because the hosts
+        # have not been bound to clusters yet.
+        for i in range(1, 5):
+            command = ["reconfigure",
+                       "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+            out = self.commandtest(command)
+
+    def testverifyalignedservice(self):
+        # Check that utecl1 is now aligned to a service and that
+        # all of its members are aligned to the same service.
+        # evh[234] should be bound to utecl1
+        command = "show esx cluster --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        m = re.search(r'Member Alignment: Service esx_management '
+                       'Instance (\S+)', out)
+        self.failUnless(m, "Aligned instance not found in output:\n%s" % out)
+        instance = m.group(1)
+        command = "search host --service utecl1 --instance %s" % instance
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "esx2.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "esx3.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "esx4.aqd-unittest.ms.com", command)
+
+    def testreconfigureunboundvmhosts(self):
+        # None of these should change since they have not been bound.
+        # This test isn't really necessary...
+        for i in range(5, 10):
+            command = ["reconfigure",
+                       "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+            self.noouttest(command)
+
+    def testfailchangeclustermemberpersonality(self):
+        command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--archetype", "aquilon", "--personality", "inventory"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "while it is a member", command)
 
 
 if __name__=='__main__':

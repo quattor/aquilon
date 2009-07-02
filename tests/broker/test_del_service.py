@@ -122,6 +122,10 @@ class TestDelService(TestBrokerCommand):
         self.matchclean(out, "Service: unmapped Instance: instance1", command)
 
     def testdelesxlicense(self):
+        command = "del service --service esx_license --instance ut.a"
+        self.noouttest(command.split(" "))
+        command = "del service --service esx_license --instance ut.b"
+        self.noouttest(command.split(" "))
         command = "del service --service esx_license"
         self.noouttest(command.split(" "))
 
@@ -130,6 +134,10 @@ class TestDelService(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelesxmanagement(self):
+        command = "del service --service esx_management --instance ut.a"
+        self.noouttest(command.split(" "))
+        command = "del service --service esx_management --instance ut.b"
+        self.noouttest(command.split(" "))
         command = "del service --service esx_management"
         self.noouttest(command.split(" "))
 

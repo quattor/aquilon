@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,12 +27,13 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the del os command."""
+"""Module for testing the make command."""
 
 
 import os
 import sys
 import unittest
+import re
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -42,34 +43,36 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelOS(TestBrokerCommand):
+class TestMake(TestBrokerCommand):
 
-    def testdelutos(self):
-        command = ["del_os", "--archetype=utarchetype1",
-                   "--os=utos", "--vers=1.0"]
-        self.noouttest(command)
+    def testmakevmhosts(self):
+        for i in range(1, 10):
+            command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                       "--os", "esxi/3.5", "--buildstatus", "build"]
+            out = self.commandtest(command)
+            self.matchoutput(out,
+                             "evh%s.aqd-unittest.ms.com adding binding for "
+                             "service dns instance nyinfratest" % i,
+                             command)
+            self.matchclean(out, "removing binding", command)
 
-    def testverifydelos(self):
-        command = "show os --os utos"
-        self.notfoundtest(command.split(" "))
+            self.assert_(os.path.exists(os.path.join(
+                self.config.get("broker", "profilesdir"),
+                "evh1.aqd-unittest.ms.com.xml")))
 
-    # If the add test for esxi/3.5 is removed, this should be removed
-    # as well.
-    def testdelesxi(self):
-        command = ["del_os", "--archetype=vmhost", "--os=esxi", "--vers=3.5"]
-        self.noouttest(command)
+            self.failUnless(os.path.exists(os.path.join(
+                self.config.get("broker", "builddir"),
+                "domains", "unittest", "profiles",
+                "evh1.aqd-unittest.ms.com.tpl")))
 
-    def testverifydelesxi(self):
-        command = "show os --os esxi"
-        self.notfoundtest(command.split(" "))
-
-    def testdelinvalid(self):
-        command = ["del_os", "--archetype=utarchetype1",
-                   "--os=os-does-not-exist", "--vers=1.0"]
-        self.notfoundtest(command)
+            servicedir = os.path.join(self.config.get("broker", "plenarydir"),
+                                      "servicedata")
+            results = self.grepcommand(["-rl", "evh%s.aqd-unittest.ms.com" % i,
+                                        servicedir])
+            self.failUnless(results, "No service plenary data that includes"
+                                     "evh%s.aqd-unittest.ms.com" % i)
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelOS)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
