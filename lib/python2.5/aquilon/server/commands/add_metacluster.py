@@ -42,7 +42,8 @@ class CommandAddMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, metacluster, max_members, comments, **arguments):
+    def render(self, session, metacluster, max_members, max_shares, comments,
+               **arguments):
         validate_basic("metacluster", metacluster)
 
         q = session.query(MetaCluster).filter_by(name=metacluster)
@@ -56,8 +57,13 @@ class CommandAddMetaCluster(BrokerCommand):
                                           "metacluster_max_members_default")
         max_members = force_int("max_members", max_members)
 
+        if not max_shares:
+            max_shares = self.config.get("broker",
+                                         "metacluster_max_shares_default")
+        max_shares = force_int("max_shares", max_shares)
+
         dbmetacluster = MetaCluster(name=metacluster, max_clusters=max_members,
-                                    comments=comments)
+                                    max_shares=max_shares, comments=comments)
         session.add(dbmetacluster)
 
         session.flush()

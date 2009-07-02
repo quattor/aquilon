@@ -43,7 +43,8 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
     required_parameters = [ "metacluster" ]
 
-    def render(self, session, metacluster, max_members, comments, **arguments):
+    def render(self, session, metacluster, max_members, max_shares, comments,
+               **arguments):
         q = session.query(MetaCluster).filter_by(name=metacluster)
         dbmetacluster = q.first()
         if not dbmetacluster:
@@ -53,6 +54,11 @@ class CommandUpdateMetaCluster(BrokerCommand):
         if max_members is not None:
             # FIXME: Enforce that this is not being exceeded.
             dbmetacluster.max_clusters = max_members
+
+        max_shares = force_int("max_shares", max_shares)
+        if max_shares is not None:
+            # FIXME: Enforce that this is not being exceeded.
+            dbmetacluster.max_shares = max_shares
 
         if comments is not None:
             dbmetacluster.comments = comments

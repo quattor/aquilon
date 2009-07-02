@@ -35,9 +35,7 @@ class MetaClusterFormatter(ObjectFormatter):
     def format_raw(self, metacluster, indent=""):
         details = [indent + "MetaCluster: %s" % metacluster.name]
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
-        #if metacluster.network:
-        #        details.append(indent + "  Network: %s [IP: %s]" %
-        #                   (metacluster.network.name, metacluster.network.ip))
+        details.append(indent + "  Max shares: %s" % metacluster.max_shares)
         if metacluster.comments:
             details.append(indent + "  Comments: %s" % metacluster.comments)
         # FIXME: Add members?

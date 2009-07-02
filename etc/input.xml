@@ -1889,6 +1889,7 @@
       </optgroup>
       <optgroup name="add_metacluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>
+         <option name="max_shares" type="string">Comments</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="metacluster/%(metacluster)s" />
@@ -1911,6 +1912,7 @@
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>
+         <option name="max_shares" type="string">Comments</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s" />
