@@ -70,6 +70,17 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.noouttest(["update_machine", "--machine", "evm9",
                         "--cluster", "utecl2", "--cluster_type", "esx"])
 
+    def test_300_failrebindhost(self):
+        # At this point evh1 is the only vmhost in utecl2...
+        command = ["rebind_esx_cluster", "--cluster=utecl1",
+                   "--host=evh1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "would exceed vm_to_host_ratio", command)
+
+    def test_300_failbindservice(self):
+        # FIXME: Lookup the current binding and try to rebind with a bind
+        pass
+
     def test_500_verifyaddmachines(self):
         # Skipping evm9 since the mac is out of sequence and different cluster
         for i in range(1, 9):
