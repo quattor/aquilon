@@ -36,7 +36,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import PlenaryClusterClientData
+from aquilon.server.templates.cluster import refresh_cluster_plenaries
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster,
                                 MachineClusterMember)
 
@@ -142,10 +142,13 @@ class CommandAddMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
+        session.refresh(dbmachine)
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
 
         if cluster:
-            plenary = PlenaryClusterClientData(dbcluster)
-            plenary.write()
+            session.refresh(dbmachine.cluster)
+            # If we allow shares to be specified at this point then
+            # may also need to write out the metacluster plenary...
+            refresh_cluster_plenaries(dbcluster)
         return

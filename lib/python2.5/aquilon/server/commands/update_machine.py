@@ -40,7 +40,10 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.model import Cpu, Chassis, ChassisSlot
+from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
+                                Cluster, MachineClusterMember)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -147,12 +150,17 @@ class CommandUpdateMachine(BrokerCommand):
             old_cluster = dbmachine.cluster
             dbmcm = MachineClusterMember.get_unique(session,
                 cluster_id=dbmachine.cluster.id, machine_id=dbmachine.id)
-            session.remove(dbmcm)
+            session.delete(dbmcm)
+            session.flush()
+            # Without these refreshes the MCM creation below fails...
+            # presumably because the old linkage is still cached somewhere?
+            session.refresh(dbmachine)
+            session.refresh(old_cluster)
             dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
             session.add(dbmcm)
             session.flush()
+            session.refresh(dbmachine)
             session.refresh(dbcluster)
-            session.refresh(old_cluster)
             if hasattr(dbcluster, 'vm_to_host_ratio') and \
                len(dbcluster.machines) > \
                dbcluster.vm_to_host_ratio * len(dbcluster.hosts):
@@ -163,7 +171,7 @@ class CommandUpdateMachine(BrokerCommand):
                                      dbcluster.vm_to_host_ratio,
                                      len(dbcluster.machines),
                                      len(dbcluster.hosts)))
-            dbmachine.location = dbcluster.location
+            dbmachine.location = dbcluster.location_constraint
         elif cluster_type:
             raise ArgumentError("Cannot change cluster_type without "
                                 "specifying a new cluster.")
@@ -176,16 +184,23 @@ class CommandUpdateMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
-        plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write()
+        try:
+            compileLock()
+            plenary_info = PlenaryMachineInfo(dbmachine)
+            plenary_info.write(locked=True)
 
-        if dbmachine.host:
-            # XXX: May need to reconfigure.
-            pass
+            if dbmachine.host:
+                # XXX: May need to reconfigure.
+                pass
 
-        if cluster:
-            # Write out any plenary updates.
-            pass
+            if cluster:
+                if old_cluster:
+                    session.refresh(old_cluster)
+                    refresh_cluster_plenaries(old_cluster, locked=True)
+                session.refresh(dbcluster)
+                refresh_cluster_plenaries(dbcluster, locked=True)
+        finally:
+            compileRelease()
 
         return
 
