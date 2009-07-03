@@ -33,35 +33,36 @@ from utils import load_classpath, add, commit
 
 load_classpath()
 
+from sqlalchemy import and_
+from sqlalchemy.orm import join
+
 import aquilon.aqdb.depends
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import Vendor, Model, Machine, Cpu, Rack
 
 db = DbFactory()
 sess = db.Session()
-NAME = ''
-VENDOR='hp'
+NAME = 'test_machine'
 MODEL='bl45p'
 
-def setUp():
+def cleanup():
+    delete_machines(sess, NAME)
+
+def setup():
+    print 'setup'
+    cleanup()
+
+def teardown():
+    print 'teardown'
+    cleanup()
 
 
-    t = sess.query(Machine).filter_by(name = NAME).first()
-    if t is not None:
-        sess.delete(t)
-        sess.commit()
+def create_machine(sess, name, model):
+    """ Shorthand to create machines created for the purposes of reuse
+        among all the various tests that require them """
 
-def tearDown():
-    #TODO: this is a recursive definition. Fix it with a direct sql statement later on
-    if len(sess.query(Machine).filter_by(name = NAME).all()) > 0:
-        testDelMachine()
-
-def testInitMachine():
-    vnd = sess.query(Vendor).filter_by(name=VENDOR).one()
-    assert vnd, "Can't find vendor %s"%(VENDOR)
-
-    mdl  = sess.query(Model).filter_by(name=MODEL).one()
-    assert mdl, "Can't find model %s"%(MODEL)
+    model = Model.get_by('name', model, sess)[0]
+    assert model, "Can't find model %s"%(model)
 
     proc = sess.query(Cpu).first()
     assert proc, "Can't find a cpu"
@@ -69,22 +70,34 @@ def testInitMachine():
     rack = sess.query(Rack).first()
     assert rack, "Can't find a rack"
 
-    NAME = rack.name + 'c1n3'
-    mchn = Machine(name=NAME, model=mdl, location=rack, cpu=proc)
-
+    mchn = Machine(name=name, model=model, location=rack, cpu=proc)
     add(sess, mchn)
     commit(sess)
 
+    return mchn
+
+def delete_machines(sess=sess, prefix=NAME):
+    """ deletes all machines with names like prefix% """
+
+    machines = sess.query(Machine).filter(Machine.name.like(prefix+'%')).all()
+    if machines:
+        for machine in machines:
+            sess.delete(machine)
+        commit(sess)
+        print 'deleted %s machines'%(len(machines))
+
+def test_create_machine():
+    """ test creating a machine """
+    mchn = create_machine(sess, NAME, MODEL)
     assert mchn, 'Commit machine failed'
     print mchn
 
-def testDelMachine():
+def test_del_machine():
     mchn = sess.query(Machine).filter_by(name = NAME).first()
     if mchn:
-        s.delete(mchn)
+        sess.delete(mchn)
         commit(sess)
 
         t = sess.query(Machine).filter_by(name = NAME).first()
         assert t is None
         print 'deleted machine'
-
