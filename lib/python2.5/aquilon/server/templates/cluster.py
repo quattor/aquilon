@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.templates.base import Plenary
+from aquilon.server.templates.base import Plenary, compileLock, compileRelease
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
@@ -161,5 +161,49 @@ class PlenaryClusterClientData(Plenary):
             lines.append("    '%s', create('%s')," % (machine.name,
                                                       pmac.plenary_template))
         lines.append(");")
+
+
+# The plenaries will only be written if they change.  Technically
+# using the refresh_* methods below would result in more work being done
+# here than necessary (in calculating all the plenary files) but it's
+# better than forgetting to update one of these.  Especially if the data
+# changes.
+def get_metacluster_plenaries(metacluster):
+    plenaries = []
+    for p in PlenaryMetaCluster, PlenaryMetaClusterClient, \
+             PlenaryMetaClusterData, PlenaryMetaClusterClientData:
+        plenaries.append(p(metacluster))
+    return plenaries
+
+def get_cluster_plenaries(cluster):
+    plenaries = []
+    for p in PlenaryCluster, PlenaryClusterClient, \
+             PlenaryClusterData, PlenaryClusterClientData:
+        plenaries.append(p(cluster))
+    return plenaries
+
+def refresh_metacluster_plenaries(metacluster, locked=True):
+    plenaries = get_metacluster_plenaries(metacluster)
+    try:
+        if not locked:
+            compileLock()
+        for p in plenaries:
+            p.write(locked=True)
+    finally:
+        if not locked:
+            compileRelease()
+    return
+
+def refresh_cluster_plenaries(cluster, locked=True):
+    plenaries = get_cluster_plenaries(cluster)
+    try:
+        if not locked:
+            compileLock()
+        for p in plenaries:
+            p.write(locked=True)
+    finally:
+        if not locked:
+            compileRelease()
+    return
 
 
