@@ -97,7 +97,24 @@ class TestBindESXCluster(TestBrokerCommand):
                          "utecl3 already at maximum capacity (0)",
                          command)
 
-    # FIXME: Add tests for binding a service instance.
+    def testfailbindservicemissingcluster(self):
+        command = ["bind_esx_cluster", "--cluster=cluster-does-not-exist",
+                   "--service=esx_management", "--instance=ut.a"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "esx cluster 'cluster-does-not-exist' not found.",
+                         command)
+
+    def testfailbindnonaligned(self):
+        command = ["bind_esx_cluster", "--cluster=utecl3",
+                   "--service=afs", "--instance=q.ny.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot bind a cluster to a service that "
+                         "is not cluster aligned.",
+                         command)
+
+    # FIXME: Add more tests for binding a service instance.
 
     # FIXME: Also test plenary files.
 
