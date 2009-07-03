@@ -32,6 +32,8 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import EsxCluster, HostClusterMember
+from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.cluster import refresh_cluster_plenaries
 
 
 class CommandUnbindESXClusterHostname(BrokerCommand):
@@ -69,7 +71,7 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
                                  len(dbcluster.machines),
                                  len(dbcluster.hosts)))
 
-        # FIXME: Rewrite/remove the appropriate plenary files
-        return
+        # XXX: Host plenary will be incorrect until it is reconfigured.
+        refresh_cluster_plenaries(dbcluster, locked=True)
 
 
