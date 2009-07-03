@@ -63,8 +63,15 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.noouttest(["add", "interface", "--machine", "evm8",
                         "--interface", "eth0", "--automac"])
 
+    def test_200_updatemachine(self):
+        # FIXME: Verify that plenary moved correctly.
+        # Before: file should be in machine/americas/ut/ut10
+        # After: file should be in machine/americas/ut/None
+        self.noouttest(["update_machine", "--machine", "evm9",
+                        "--cluster", "utecl2", "--cluster_type", "esx"])
+
     def test_500_verifyaddmachines(self):
-        # Skipping evm9 since the mac is out of sequence
+        # Skipping evm9 since the mac is out of sequence and different cluster
         for i in range(1, 9):
             command = "show machine --machine evm%s" % i
             out = self.commandtest(command.split(" "))
