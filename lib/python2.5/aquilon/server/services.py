@@ -39,6 +39,8 @@ from aquilon.aqdb.model import (Tld, BuildItem, ServiceMap,
                                 PersonalityServiceMap, ClusterServiceBinding,
                                 ClusterAlignedService)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
+from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.base import compileLock, compileRelease
 
 
 log = logging.getLogger('aquilon.server.services')
@@ -497,7 +499,7 @@ class Chooser(object):
                 cluster_id=self.dbhost.cluster.id,
                 service_instance_id=instance.id)
             if dbcs:
-                self.session.remove(dbcs)
+                self.session.delete(dbcs)
         for instance in self.cluster_instances_bound:
             # XXX: New binding should propogate out to other cluster
             # members but currently does not.
@@ -508,17 +510,22 @@ class Chooser(object):
     def flush_changes(self):
         self.session.flush()
         self.session.refresh(self.dbhost)
+        if self.dbhost.cluster:
+            self.session.refresh(self.dbhost.cluster)
 
     def write_plenary_templates(self, locked=False):
-        for instances in [self.instances_bound, self.instances_unbound]:
-            for instance in instances:
-                plenary_info = PlenaryServiceInstanceServer(instance.service,
-                                                            instance)
-                plenary_info.write(locked=locked)
-        # FIXME: If a service instance has been newly set for a cluster
-        # aligned service, do we need to write out any plenary files
-        # for this host's cluster?
-        if self.cluster_instances_bound:
-            pass
+        try:
+            if not locked:
+                compileLock()
+            for instances in [self.instances_bound, self.instances_unbound]:
+                for instance in instances:
+                    plenary = PlenaryServiceInstanceServer(instance.service,
+                                                           instance)
+                    plenary.write(locked=True)
+            if self.cluster_instances_bound:
+                refresh_cluster_plenaries(self.dbhost.cluster, locked=True)
+        finally:
+            if not locked:
+                compileRelease()
 
 
