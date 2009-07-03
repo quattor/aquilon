@@ -34,12 +34,8 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import (PlenaryCluster,
-                                              PlenaryClusterClient,
-                                              PlenaryClusterData,
-                                              PlenaryClusterClientData)
+from aquilon.server.templates.cluster import refresh_cluster_plenaries
 from aquilon.server.templates.base import compileLock, compileRelease
-from aquilon.server.templates.host import PlenaryHost
 
 
 class CommandUpdateESXCluster(BrokerCommand):
@@ -137,15 +133,11 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         session.add(dbcluster)
         session.flush()
-        # FIXME: May not need to re-write all the plenary templates.
-        plenaries = []
-        for p in PlenaryCluster, PlenaryClusterClient, PlenaryClusterData, \
-                 PlenaryClusterClientData:
-            plenaries.append(p(dbcluster))
+
+        session.refresh(dbcluster)
         try:
             compileLock()
-            for p in plenaries:
-                p.write(locked=True)
+            refresh_cluster_plenaries(dbcluster)
             if location_changed:
                 for p in remove_plenaries:
                     p.remove(locked=True)

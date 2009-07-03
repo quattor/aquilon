@@ -31,10 +31,8 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import EsxCluster
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.cluster import (PlenaryCluster,
-                                              PlenaryClusterClient,
-                                              PlenaryClusterData,
-                                              PlenaryClusterClientData)
+from aquilon.server.templates.cluster import (get_cluster_plenaries,
+                                              refresh_metacluster_plenaries)
 from aquilon.server.templates.base import compileLock, compileRelease
 
 
@@ -54,19 +52,18 @@ class CommandDelESXCluster(BrokerCommand):
             raise ArgumentError("Cluster still in use by vmhosts: %s" %
                                 ", ".join([h.fqdn
                                            for h in dbcluster.hosts]))
+        dbmetacluster = dbcluster.metacluster
+        plenaries = get_cluster_plenaries(dbcluster)
         session.delete(dbcluster)
 
         session.flush()
-        plenaries = []
-        # FIXME: Probably need to rewrite some/all of the MetaCluster
-        # plenary files.
-        for p in PlenaryCluster, PlenaryClusterClient, PlenaryClusterData, \
-                 PlenaryClusterClientData:
-            plenaries.append(p(dbcluster))
+
+        session.refresh(dbmetacluster)
         try:
             compileLock()
             for p in plenaries:
-                p.write(locked=True)
+                p.remove(locked=True)
+            refresh_metacluster_plenaries(dbmetacluster, locked=True)
         finally:
             compileRelease()
 

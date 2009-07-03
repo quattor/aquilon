@@ -32,11 +32,7 @@ from aquilon.server.broker import BrokerCommand, validate_basic, force_int
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.templates.cluster import (PlenaryMetaCluster,
-                                              PlenaryMetaClusterClient,
-                                              PlenaryMetaClusterData,
-                                              PlenaryMetaClusterClientData)
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.cluster import refresh_metacluster_plenaries
 
 
 class CommandUpdateMetaCluster(BrokerCommand):
@@ -65,17 +61,9 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
         session.add(dbmetacluster)
         session.flush()
-        # FIXME: May not need to re-write all the plenary templates.
-        plenaries = []
-        for p in PlenaryMetaCluster, PlenaryMetaClusterClient, \
-                 PlenaryMetaClusterData, PlenaryMetaClusterClientData:
-            plenaries.append(p(dbmetacluster))
-        try:
-            compileLock()
-            for p in plenaries:
-                p.write(locked=True)
-        finally:
-            compileRelease()
+
+        session.refresh(dbmetacluster)
+        refresh_metacluster_plenaries(dbmetacluster)
 
         return
 

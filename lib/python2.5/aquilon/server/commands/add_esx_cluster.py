@@ -33,10 +33,8 @@ from aquilon.aqdb.model import EsxCluster, MetaCluster, MetaClusterMember
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.server.templates.cluster import (PlenaryCluster,
-                                              PlenaryClusterClient,
-                                              PlenaryClusterData,
-                                              PlenaryClusterClientData)
+from aquilon.server.templates.cluster import (refresh_metacluster_plenaries,
+                                              refresh_cluster_plenaries)
 from aquilon.server.templates.base import compileLock, compileRelease
 
 
@@ -92,17 +90,12 @@ class CommandAddESXCluster(BrokerCommand):
 
         session.flush()
         session.refresh(dbcluster)
+        session.refresh(dbcluster.metacluster)
 
-        plenaries = []
-        # FIXME: Probably also need to re-write some/all of the MetaCluster
-        # plenary files.
-        for p in PlenaryCluster, PlenaryClusterClient, PlenaryClusterData, \
-                 PlenaryClusterClientData:
-            plenaries.append(p(dbcluster))
         try:
             compileLock()
-            for p in plenaries:
-                p.write(locked=True)
+            refresh_metacluster_plenaries(dbcluster.metacluster, locked=True)
+            refresh_cluster_plenaries(dbcluster, locked=True)
         finally:
             compileRelease()
 

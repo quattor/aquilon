@@ -31,11 +31,7 @@
 from aquilon.server.broker import BrokerCommand, validate_basic, force_int
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.templates.cluster import (PlenaryMetaCluster,
-                                              PlenaryMetaClusterClient,
-                                              PlenaryMetaClusterData,
-                                              PlenaryMetaClusterClientData)
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.cluster import refresh_metacluster_plenaries
 
 
 class CommandAddMetaCluster(BrokerCommand):
@@ -69,16 +65,7 @@ class CommandAddMetaCluster(BrokerCommand):
         session.flush()
         session.refresh(dbmetacluster)
 
-        plenaries = []
-        for p in PlenaryMetaCluster, PlenaryMetaClusterClient, \
-                 PlenaryMetaClusterData, PlenaryMetaClusterClientData:
-            plenaries.append(p(dbmetacluster))
-        try:
-            compileLock()
-            for p in plenaries:
-                p.write(locked=True)
-        finally:
-            compileRelease()
+        refresh_metacluster_plenaries(dbmetacluster)
 
         return
 
