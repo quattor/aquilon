@@ -33,6 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, ClusterServiceBinding
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.server.templates.cluster import refresh_cluster_plenaries
 
 
 class CommandUnbindESXClusterService(BrokerCommand):
@@ -59,9 +60,11 @@ class CommandUnbindESXClusterService(BrokerCommand):
                                 "binding while the cluster has members")
         session.delete(dbcsb)
 
-        dbsession.flush()
+        session.flush()
 
-        # FIXME: Rewrite/remove the appropriate plenary files
+        session.refresh(dbcluster)
+
+        refresh_cluster_plenaries(dbcluster)
         return
 
 
