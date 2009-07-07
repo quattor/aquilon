@@ -46,7 +46,7 @@ NAME = 'test_machine'
 MODEL='bl45p'
 
 def cleanup():
-    delete_machines(sess, NAME)
+    del_machines(sess, NAME)
 
 def setup():
     print 'setup'
@@ -57,9 +57,12 @@ def teardown():
     cleanup()
 
 
-def create_machine(sess, name, model):
+def add_machine(sess, name, model):
     """ Shorthand to create machines created for the purposes of reuse
         among all the various tests that require them """
+    mchn = sess.query(Machine).filter_by(name=name).first()
+    if mchn:
+        return mchn
 
     model = Model.get_by('name', model, sess)[0]
     assert model, "Can't find model %s"%(model)
@@ -76,7 +79,7 @@ def create_machine(sess, name, model):
 
     return mchn
 
-def delete_machines(sess=sess, prefix=NAME):
+def del_machines(sess=sess, prefix=NAME):
     """ deletes all machines with names like prefix% """
 
     machines = sess.query(Machine).filter(Machine.name.like(prefix+'%')).all()
@@ -86,9 +89,9 @@ def delete_machines(sess=sess, prefix=NAME):
         commit(sess)
         print 'deleted %s machines'%(len(machines))
 
-def test_create_machine():
+def test_add_machine():
     """ test creating a machine """
-    mchn = create_machine(sess, NAME, MODEL)
+    mchn = add_machine(sess, NAME, MODEL)
     assert mchn, 'Commit machine failed'
     print mchn
 

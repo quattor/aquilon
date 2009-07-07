@@ -68,6 +68,8 @@ _long_nms['ESX_CLUSTER_MEMBER'] = 'ESX_CLSTR_MBR'
 _long_nms['CLUSTER_SERVICE_BINDING'] = 'CLSTR_SVC_BNDG'
 _long_nms['MACHINE_CLUSTER_MEMBER'] = 'MCHN_CLSTR_MMBR'
 _long_nms['HOST_CLUSTER_MEMBER'] = 'HOST_CLSTR_MMBR'
+_long_nms['MACHINE_SPECS'] = 'MCHN_SPECS'
+_long_nms['CONTROLLER_TYPE'] = 'CNTRLR_TYPE'
 
 def rename_sys_pks(db, *args, **kw):
     stmt = """

@@ -72,16 +72,25 @@ def teardown():
 def clean_up():
     del_cluster_service()
     del_cluster_aligned_svc()
-    del_svc_inst()
-    del_svc(SVC_NAME)
+    del_service_instance(sess, INST_NAME)
+    del_service(sess, SVC_NAME)
     del_clusters()
     del_pths()
+
+
+def del_pth(sess, tld_name, pth):
+    cfg_path = sess.query(CfgPath).filter(and_(
+        Tld.type==tld_name, CfgPath.relative_path==pth)).first()
+    if cfg_path:
+        sess.delete(cfg_path)
+        print 'sess.delete(%s/%s)'% (tld_name, pth)
 
 def del_pths():
     for i in [SVC_NAME, '%s/%s'%(SVC_NAME, INST_NAME)]:
         a = sess.query(CfgPath).filter(and_(
             Tld.type=='service', CfgPath.relative_path==i)).first()
         if a:
+            print 'need to delete cfgpath %s'% (i)
             sess.delete(a)
             commit(sess)
 
@@ -100,18 +109,23 @@ def del_cluster_member():
         commit(sess)
         print 'deleted cluster host'
 
-def del_svc_inst():
-    sess.query(ServiceInstance).filter_by(name=INST_NAME).delete()
-    commit(sess)
-    print 'deleted management service instance'
+def del_service_instance(sess, name):
+    si = sess.query(ServiceInstance).filter_by(name=name).first()
+    if si:
+        pth_name = si.service.name + '/' + name
+        del_pth(sess, 'service', pth_name)
+        count = sess.query(ServiceInstance).filter_by(name=name).delete()
+        commit(sess)
+        print 'called del_service_instance(%s), deleted %s rows'% (name, count)
 
-def del_svc(name):
+def del_service(sess, name):
     ''' reusable service delete for other tests '''
     svc = sess.query(Service).filter_by(name=name).first()
     if svc:
-        sess.query(Service).filter_by(name=name).delete()
+        del_pth(sess, 'service', name)
+        count = sess.query(Service).filter_by(name=name).delete()
         commit(sess)
-        print 'deleted service %s'% (name)
+        print 'session.delete(%s) deleted %s rows'% (name, count)
 
 
 def del_cluster_service():
@@ -126,7 +140,7 @@ def del_cluster_aligned_svc():
 
 
 
-def add_service(name):
+def add_service(sess, name):
     ''' reusable add service code for other tests '''
     svc = sess.query(Service).filter_by(name=name).first()
     if not svc:
@@ -146,7 +160,7 @@ def add_service(name):
 def test_add_service():
     svc = sess.query(Service).filter_by(name=SVC_NAME).first()
     if not svc:
-        svc = add_service(SVC_NAME)
+        svc = add_service(sess, SVC_NAME)
         assert svc, 'service not created by %s'% (inspect.stack()[1][3])
         print svc
 
@@ -180,21 +194,28 @@ def test_add_aligned_service():
     print '%s has required services %s'% (ec.name, ec.required_services)
     assert ec.required_services
 
-def test_cluster_bound_svc():
-    """ test the creation of a cluster bound service """
-    si = sess.query(ServiceInstance).filter_by(name=INST_NAME).first()
+
+def add_service_instance(sess, service_name, name):
+    si = sess.query(ServiceInstance).filter_by(name=name).first()
     if not si:
-        print 'Creating test management instance'
+        print 'Creating %s instance %s '% (service_name, name)
         svc_tld = sess.query(Tld).filter_by(type='service').one()
         cp = CfgPath(tld=svc_tld,
-                     relative_path='%s/%s'%(SVC_NAME, INST_NAME))
-        svc = sess.query(Service).filter_by(name=SVC_NAME).one()
-        assert svc, 'No cluster management service in %s'% (
-            inspect.stack()[1][3])
+                     relative_path='%s/%s'%(service_name, name))
 
-        si = ServiceInstance(name=INST_NAME, service=svc, cfg_path=cp)
+        svc = sess.query(Service).filter_by(name=service_name).one()
+        assert svc, 'No %s service in %s'% (service_name, inspect.stack()[1][3])
+
+        si = ServiceInstance(name=name, service=svc, cfg_path=cp)
         sess.add_all([cp, si])
         commit(sess)
+        assert si, 'no service instance created by %s'% (inspect.stack()[1][3])
+    return si
+
+def test_cluster_bound_svc():
+    """ test the creation of a cluster bound service """
+    si = add_service_instance(sess, SVC_NAME, INST_NAME)
+    assert si, 'no service instance in %s'% (inspect.stack()[1][3])
 
     ec = Cluster.get_by('name', CLUSTER_NAME, sess)[0]
     cs = ClusterServiceBinding(cluster=ec, service_instance=si)
@@ -216,7 +237,7 @@ def test_cascaded_delete_1():
     """ test that deleting service bindings don't delete services """
 
     print 'Creating throwawy service'
-    svc = add_service(SVC_2)
+    svc = add_service(sess, SVC_2)
 
     assert svc, 'service not created by %s'% (inspect.stack()[1][3])
     print 'added throw away service %s'% (svc)

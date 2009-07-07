@@ -35,10 +35,11 @@ from datetime import datetime
 
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Base, Model, Vendor, Cpu, DiskType
-
+from aquilon.aqdb.model import Base, Model, Vendor, Cpu
+from aquilon.aqdb.model.disk import disk_types, controller_types
+from aquilon.aqdb.column_types import Enum
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
@@ -60,19 +61,18 @@ class MachineSpecs(Base):
     cpu_quantity = Column(Integer, nullable=False) #Constrain to below 512?
 
     memory = Column(Integer, nullable=False, default=0)
-    disk_type_id = Column(Integer, ForeignKey('disk_type.id',
-                                              name='mach_spec_disk_typ_fk'),
-                           nullable=False)
 
+    disk_type = Column(Enum(disk_types), nullable=False)
     disk_capacity = Column(Integer, nullable=False, default=36)
+    controller_type = Column(Enum(controller_types), nullable=False)
+
     nic_count = Column(Integer, nullable=False, default=2)
 
-    creation_date = deferred(Column('creation_date', DateTime, default=datetime.now))
-    comments = deferred(Column('comments', String(255), nullable=True))
+    creation_date = Column('creation_date', DateTime, default=datetime.now)
+    comments = Column('comments', String(255), nullable=True)
 
     model = relation(Model, backref=backref('machine_specs', uselist=False))
     cpu = relation(Cpu)
-    disk_type = relation(DiskType)
 
 
 machine_specs = MachineSpecs.__table__
@@ -80,7 +80,7 @@ machine_specs = MachineSpecs.__table__
 machine_specs.primary_key.name='machine_specs_pk'
 #for now, need a UK on model_id. WILL be a name AND a model_id as UK.
 machine_specs.append_constraint(
-    UniqueConstraint('model_id', name='machine_spec_model_id_uk'))
+    UniqueConstraint('model_id', name='machine_specs_model_uk'))
 
 table = machine_specs
 
@@ -103,13 +103,14 @@ def populate(sess, *args, **kw):
                 dbcpu = sess.query(Cpu).filter_by(name=ms[1]).one()
                 cpu_quantity = ms[2]
                 memory = ms[3]
-                dbdisk_type = sess.query(DiskType).filter_by(type=ms[4]).one()
+                disk_type = 'local'
+                controller_type = ms[4]
                 disk_capacity = ms[5]
                 nic_count = ms[6]
                 dbms = MachineSpecs(model=dbmodel, cpu=dbcpu,
                         cpu_quantity=cpu_quantity, memory=memory,
-                        disk_type=dbdisk_type, disk_capacity=disk_capacity,
-                        nic_count=nic_count)
+                        disk_type=disk_type, controller_type=controller_type,
+                        disk_capacity=disk_capacity, nic_count=nic_count)
                 sess.add(dbms)
             except Exception,e:
                 sess.rollback()
