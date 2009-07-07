@@ -122,19 +122,22 @@ class TemplateDomain(object):
             panc_env={"PATH":"%s:%s" % (config.get("broker", "javadir"),
                                         os_environ.get("PATH", ""))}
             
-            args = [ "/ms/dist/fsf/PROJ/make/prod/bin/gmake" ]
+            args = [config.get("broker", "ant")]
             args.append("-f")
-            args.append("%s/GNUmakefile.build" % config.get("broker", "compiletooldir"))
-            args.append("MAKE=%s -f %s"%(args[0], args[2]))
-            args.append("DOMAIN=%s"%self.domain.name)
-            args.append("TOOLDIR=%s"%config.get("broker", "compiletooldir"))
-            args.append("QROOT=%s"%config.get("broker", "quattordir"))
-            args.append("PANC=%s" % self.domain.compiler)
-            args.append("PANC_BATCH_SIZE=%s" %
+            args.append("%s/build.xml" % config.get("broker", "compiletooldir"))
+            args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
+            args.append("-Dpanc.jar=%s" % self.domain.compiler)
+            args.append("-Ddomain=%s" % self.domain.name)
+            args.append("-Dpanc.batch.size=%s" %
                         config.get("broker", "panc_batch_size"))
             if (only):
-                args.append("only")
-                args.append("HOST=%s"%only.fqdn)
+                # Use -Dforce.build=true?
+                args.append("-Dhost.profile=%s" % only.fqdn)
+                args.append("compile.host.profile")
+            else:
+                # Techinically this is the default, but being explicit
+                # doesn't hurt.
+                args.append("compile.domain.profiles")
 
             out = ''
             log.msg("starting compile")

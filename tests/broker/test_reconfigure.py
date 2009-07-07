@@ -104,8 +104,11 @@ class TestReconfigure(TestBrokerCommand):
 
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
-        self.noouttest(["reconfigure",
-            "--hostname", "unittest00.one-nyp.ms.com"])
+        command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "0/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"
@@ -179,7 +182,10 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--os", "linux/5.0-x86_64"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "1/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
 
     def testmissingpersonalitytemplate(self):
         command = ["reconfigure",
@@ -208,7 +214,10 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--keepbindings",
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "1/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
 
     def verifykeepbindings(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
