@@ -75,7 +75,7 @@ pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'interface', 'observed_mac', 'machine_specs', 'chassis_slot',
                 'console_server_hw', 'serial_cnxn']
 
-pkgs['sy']   = ['system', 'quattor_server', 'domain', 'host', 'build_item',
+pkgs['sy']   = ['system', 'domain', 'host', 'build_item',
                 'chassis', 'tor_switch', 'auxiliary', 'manager',
                 'console_server']
 
