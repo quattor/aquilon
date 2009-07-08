@@ -33,7 +33,6 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Disk
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
@@ -48,8 +47,7 @@ class CommandDelDisk(BrokerCommand):
         if disk:
             q = q.filter_by(device_name=disk)
         if type:
-            dbdisk_type = get_disk_type(session, type)
-            q = q.filter_by(disk_type=dbdisk_type)
+            q = q.filter_by(controller_type=type)
         if capacity:
             capacity = force_int("capacity", capacity)
             q = q.filter_by(capacity=capacity)
@@ -69,5 +67,3 @@ class CommandDelDisk(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
-
-

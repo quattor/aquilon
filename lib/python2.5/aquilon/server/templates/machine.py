@@ -52,7 +52,7 @@ class PlenaryMachineInfo(Plenary):
         #   self.hub = loc.hub.fullname.lower()
         #else:
         #   self.hub = None
-        
+
         # And a chassis location?
         if dbmachine.chassis_slot:
             slot = dbmachine.chassis_slot[0]
@@ -73,7 +73,7 @@ class PlenaryMachineInfo(Plenary):
                 dbmachine.cpu.vendor.name, dbmachine.cpu.name)
         harddisks = []
         for harddisk in dbmachine.disks:
-            relpath = "hardware/harddisk/generic/%s" % harddisk.disk_type.type
+            relpath = "hardware/harddisk/generic/%s" % harddisk.controller_type
             harddisks.append({"relpath":relpath, "capacity":harddisk.capacity,
                 "name":harddisk.device_name})
         self.harddisks = harddisks
@@ -133,7 +133,7 @@ class PlenaryMachineInfo(Plenary):
                 ['create("%(cpu_relpath)s")' % self.__dict__
                 for cpu_num in range(self.num_cpus)]) + ');')
         if self.harddisks:
-            lines.append('"harddisks" = nlist(' + 
+            lines.append('"harddisks" = nlist(' +
                     ", ".join(['"%(name)s", create("%(relpath)s", "capacity", %(capacity)d*GB)' %
                     hd for hd in self.harddisks]) +
                     ');\n')
@@ -151,5 +151,3 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('                           , "fqdn", "%(fqdn)s"' %
                              manager)
             lines.append('                     );')
-
-

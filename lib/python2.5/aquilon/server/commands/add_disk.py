@@ -34,8 +34,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.disk_type import get_disk_type
-from aquilon.aqdb.model import Disk
+from aquilon.aqdb.model import Disk, LocalDisk
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
@@ -52,9 +51,8 @@ class CommandAddDisk(BrokerCommand):
             raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))
 
         capacity = force_int("capacity", capacity)
-        dbdisk_type = get_disk_type(session, type)
-        dbdisk = Disk(machine=dbmachine, device_name=disk,
-                disk_type=dbdisk_type, capacity=capacity, comments=comments)
+        dbdisk = LocalDisk(machine=dbmachine, device_name=disk,
+                controller_type=type, capacity=capacity, comments=comments)
         try:
             session.add(dbdisk)
         except InvalidRequestError, e:
@@ -63,5 +61,3 @@ class CommandAddDisk(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
-
-

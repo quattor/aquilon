@@ -59,6 +59,7 @@ class Disk(Base):
                         nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
     machine = relation(Machine, backref=backref('disks', cascade='all'))
 

@@ -34,7 +34,6 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.server.dbwrappers.cpu import get_cpu
 from aquilon.aqdb.model import Model, MachineSpecs
 
@@ -73,10 +72,10 @@ class CommandAddModel(BrokerCommand):
             raise ArgumentError("Could not add model: %s" % e)
 
         if cputype:
-            dbdisk_type = get_disk_type(session, disktype)
             dbcpu = get_cpu(session, cputype)
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
-                    cpu_quantity=cpunum, memory=mem, disk_type=dbdisk_type,
-                    disk_capacity=disksize, nic_count=nics)
+                    cpu_quantity=cpunum, memory=mem, disk_type='local',
+                    controller_type=disktype, disk_capacity=disksize,
+                    nic_count=nics)
             session.add(dbmachine_specs)
         return
