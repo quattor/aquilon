@@ -48,7 +48,7 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, machine, model, serial, chassis, slot,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
-               cluster, cluster_type, user, **arguments):
+               cluster, user, **arguments):
         dblocation = get_location(session, **arguments)
         if chassis:
             dbchassis = get_system(session, chassis)
@@ -76,18 +76,11 @@ class CommandAddMachine(BrokerCommand):
                     {"type": dbmodel.machine_type})
 
         if cluster:
-            if not cluster_type:
-                # Maybe we can default cluster_type based on the model
-                # of virtual hardware...
-                raise ArgumentError("The --cluster argument also requires "
-                                    "--cluster_type")
             if dbmodel.machine_type != 'virtual_machine':
                 raise ArgumentError("Only virtual machines can have a cluster attribute.")
-            dbcluster = Cluster.get_unique(session, name=cluster,
-                                           cluster_type=cluster_type)
+            dbcluster = Cluster.get_unique(session, name=cluster)
             if not dbcluster:
-                raise ArgumentError("%s cluster '%s' not found" %
-                                    (cluster_type, cluster))
+                raise ArgumentError("Cluster '%s' not found" % cluster)
             if dbcluster.personality.archetype.name != 'vmhost':
                 raise ArgumentError("Can only add virtual machines to "
                                     "clusters with archetype vmhost.")

@@ -45,7 +45,7 @@ class TestClusterEarlyConstraints(TestBrokerCommand):
 
     def testaddvmwithoutvmhost(self):
         command = ["add_machine", "--machine=evm1", "--model=utmedium",
-                   "--cluster=utecl1", "--cluster_type=esx"]
+                   "--cluster=utecl1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "would exceed vm_to_host_ratio", command)
 

@@ -1732,7 +1732,6 @@
          <option name="desk" type="string">Desk name</option>
          <optgroup name="add_machine_cluster_opts" fields="all">
             <option name="cluster" type="string" conflicts="chassis rack desk">Cluster name</option>
-            <option name="cluster_type" type="string" conflicts="chassis rack desk">Cluster Type (such as esx)</option>
          </optgroup>
       </optgroup>
       <optgroup name="add_machine_optional">
@@ -1762,7 +1761,6 @@
          <option name="desk" type="string">desk name</option>
          <option name="serial" type="string">serial number</option>
          <option name="cluster" type="string">Cluster name</option>
-         <option name="cluster_type" type="string">Cluster Type (such as esx)</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
       <transport method="post" path="machine/%(machine)s/command/update" />

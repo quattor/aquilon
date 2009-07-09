@@ -46,8 +46,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_000_addmachines(self):
         for i in range(1, 10):
             self.noouttest(["add", "machine", "--machine", "evm%s" % i,
-                            "--cluster", "utecl1", "--cluster_type", "esx",
-                            "--model", "utmedium"])
+                            "--cluster", "utecl1", "--model", "utmedium"])
 
     def test_100_addinterfaces(self):
         for i in range(1, 8):
@@ -68,7 +67,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # Before: file should be in machine/americas/ut/ut10
         # After: file should be in machine/americas/ut/None
         self.noouttest(["update_machine", "--machine", "evm9",
-                        "--cluster", "utecl2", "--cluster_type", "esx"])
+                        "--cluster", "utecl2"])
 
     def test_300_failrebindhost(self):
         # At this point evh1 is the only vmhost in utecl2...
@@ -129,15 +128,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)
 
-    # FIXME: Missing a test for add_machine for a cluster without cluster_type.
-    # (May not be possible with the aq client.)
-
     # Can't test this as there is no way to add a cluster without
     # an archetype of vmhost - yet.
 #   def testfailaddnonvirtualcluster(self):
 #       command = ["add", "machine", "--machine", "ut9s03p51",
-#                  "--cluster", "utecl1", "--cluster_type", "esx",
-#                  "--model", "utmedium"]
+#                  "--cluster", "utecl1", "--model", "utmedium"]
 #       out = self.badrequesttest(command)
 #       self.matchoutput(out,
 #                        "Can only add virtual machines to "
@@ -146,10 +141,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def testfailaddmissingcluster(self):
         command = ["add_machine", "--machine=ut9s03p51",
-                   "--cluster=cluster-does-not-exist", "--cluster_type=esx",
-                   "--model=utmedium"]
+                   "--cluster=cluster-does-not-exist", "--model=utmedium"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "esx cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
                          command)
 
     # FIXME: Add a test for add_machine that tries to use a non vmhost cluster.
