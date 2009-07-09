@@ -29,9 +29,10 @@
 """Contains the logic for `aq search host`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import Host, CfgPath
+from aquilon.aqdb.model import Host, CfgPath, Cluster
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.domain import get_domain
 from aquilon.server.dbwrappers.status import get_status
@@ -52,7 +53,7 @@ class CommandSearchHost(BrokerCommand):
 
     def render(self, session, hostname, machine, domain, archetype,
                buildstatus, personality, os, service, instance,
-               model, vendor, serial,
+               model, vendor, serial, cluster,
                fullinfo, **arguments):
         if hostname:
             arguments['fqdn'] = hostname
@@ -126,4 +127,11 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
+        if cluster:
+            dbcluster = Cluster.get_unique(session, cluster)
+            if not dbcluster:
+                raise ArgumentError("Cluster '%s' not found." % cluster)
+            q = q.join('_cluster')
+            q = q.filter_by(cluster=dbcluster)
+            q = q.reset_joinpoint()
         return SimpleSystemList(q.all())

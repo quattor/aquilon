@@ -199,6 +199,7 @@
          <option name="model" type="string">machine model name</option>
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
+         <option name="cluster" type="string">cluster name</option>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="company" type="string">Company</option>
 	    <option name="hub" type="string">Hub</option>
