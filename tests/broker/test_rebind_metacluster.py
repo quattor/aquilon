@@ -45,15 +45,14 @@ class TestRebindMetaCluster(TestBrokerCommand):
 
     def testfailinvalidcluster(self):
         command = ["rebind_metacluster", "--cluster=cluster-does-not-exist",
-                   "--cluster_type=esx", "--metacluster=namc1"]
+                   "--metacluster=namc1"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "esx cluster 'cluster-does-not-exist' not found.",
+                         "Cluster 'cluster-does-not-exist' not found.",
                          command)
 
     def testfailinvalidmetacluster(self):
-        command = ["rebind_metacluster",
-                   "--cluster=utecl1", "--cluster_type=esx",
+        command = ["rebind_metacluster", "--cluster=utecl1",
                    "--metacluster=metacluster-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,

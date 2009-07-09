@@ -2055,9 +2055,8 @@
       <optgroup name="rebind_client_opts" mandatory="True" fields="all">
          <option name="metacluster" type="string">MetaCluster name</option>
          <option name="cluster" type="string">Cluster name</option>
-         <option name="cluster_type" type="string">Service name</option>
       </optgroup>
-      <transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster_type)s/%(cluster)s/rebind" />
+      <transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster)s/rebind" />
    </command>
 
    <command name="bind_esx_cluster">
