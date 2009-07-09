@@ -31,6 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Disk
+from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -47,6 +48,9 @@ class CommandDelDisk(BrokerCommand):
         if disk:
             q = q.filter_by(device_name=disk)
         if type:
+            if type not in controller_types:
+                raise ArgumentError("%s is not a valid controller type %s" %
+                                    (type, controller_types))
             q = q.filter_by(controller_type=type)
         if capacity:
             capacity = force_int("capacity", capacity)
