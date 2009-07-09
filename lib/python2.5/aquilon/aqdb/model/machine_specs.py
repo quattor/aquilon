@@ -62,9 +62,9 @@ class MachineSpecs(Base):
 
     memory = Column(Integer, nullable=False, default=0)
 
-    disk_type = Column(Enum(disk_types), nullable=False)
+    disk_type = Column(Enum(64, disk_types), nullable=False)
     disk_capacity = Column(Integer, nullable=False, default=36)
-    controller_type = Column(Enum(controller_types), nullable=False)
+    controller_type = Column(Enum(64, controller_types), nullable=False)
 
     nic_count = Column(Integer, nullable=False, default=2)
 

@@ -48,10 +48,10 @@ class Disk(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq'% (_TN)), primary_key=True)
-    disk_type = Column(Enum(disk_types), nullable=False)
+    disk_type = Column(Enum(64, disk_types), nullable=False)
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
-    controller_type = Column(Enum(controller_types), nullable=False)
+    controller_type = Column(Enum(64, controller_types), nullable=False)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
                                             name='disk_machine_fk',
@@ -63,7 +63,7 @@ class Disk(Base):
 
     machine = relation(Machine, backref=backref('disks', cascade='all'))
 
-    __mapper_args__ = {'polymorphic_on':disk_type}
+    __mapper_args__ = {'polymorphic_on': disk_type}
 
     def __repr__(self):
         return '%s <machine %s %s /dev/%s %s GB> '% (self.__class__.__name__,

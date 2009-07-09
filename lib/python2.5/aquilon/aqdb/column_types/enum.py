@@ -29,13 +29,12 @@
 """ A starting point for discriminator columns. A future version will
 dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
-
 import sqlalchemy
 
 class Enum(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.String
 
-    def __init__(self, values, empty_to_none=False, strict=False):
+    def __init__(self, size, values, empty_to_none=False, strict=False):
         """Emulate an Enum type.
 
         values:
@@ -55,10 +54,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
         self.strict = strict
         self.values = values[:]
 
-        # Set the column width to the longest string
-        size = max([len(v) for v in values if v is not None])
         super(Enum, self).__init__(size)
-
 
     def process_bind_param(self, value, dialect):
         if self.empty_to_none and value is '':
@@ -66,7 +62,6 @@ class Enum(sqlalchemy.types.TypeDecorator):
         if value not in self.values:
             raise ValueError('"%s" not in Enum.values' % value)
         return str(value).strip().lower()
-
 
     def process_result_value(self, value, dialect):
         if self.strict and value not in self.values:
@@ -78,7 +73,7 @@ def test_enum():
 
     t = Table('foo', MetaData('sqlite:///'),
               Column('id', Integer, primary_key=True),
-              Column('e', Enum(['foobar', 'baz', 'quux', None])))
+              Column('e', Enum(16, ['foobar', 'baz', 'quux', None])))
     t.create()
 
     t.insert().execute(e='foobar')
