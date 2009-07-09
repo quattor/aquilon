@@ -233,7 +233,7 @@
 
       aq search_next --short igrid --dns_domain devin1.ms.com --number
 
-      aq search_next --cluster_type esx --cluster ddecl
+      aq search_next --cluster ddecl
 
       aq search_next --metacluster namc
       <optgroup name="search_next_type" mandatory="True" fields="any">
@@ -242,10 +242,7 @@
             <option name="short" type="string" conflicts="machine cluster metacluster">FQDN prefix to check</option>
             <option name="dns_domain" type="string">DNS domain for FQDN</option>
          </optgroup>
-         <optgroup name="search_next_fqdn" fields="all">
-            <option name="cluster_type" type="string">Cluster type</option>
-            <option name="cluster" type="string" conflicts="machine short metacluster">Cluster prefix to check</option>
-         </optgroup>
+         <option name="cluster" type="string" conflicts="machine short metacluster">Cluster prefix to check</option>
          <option name="metacluster" type="string" conflicts="machine short cluster">Metacluster prefix to check</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">

@@ -38,12 +38,11 @@ from aquilon.server.dbwrappers.search import search_next
 
 class CommandSearchNextCluster(BrokerCommand):
 
-    required_parameters = ['cluster', 'cluster_type']
+    required_parameters = ['cluster']
 
-    def render(self, session, cluster, cluster_type, number, fullname,
-               **arguments):
+    def render(self, session, cluster, number, fullname, **arguments):
         result = search_next(session=session, cls=Cluster, attr=Cluster.name,
-                             value=cluster, cluster_type=cluster_type)
+                             value=cluster)
         if number:
             return str(result)
         return "%s%d" % (cluster, result)

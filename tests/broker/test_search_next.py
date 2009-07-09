@@ -120,37 +120,33 @@ class TestSearchNext(TestBrokerCommand):
         self.matchclean(out, "newseries", command)
 
     def testclusterdefault(self):
-        command = ["search_next", "--cluster=utecl", "--cluster_type=esx"]
+        command = ["search_next", "--cluster=utecl"]
         out = self.commandtest(command)
         self.matchoutput(out, "utecl5", command)
 
     def testclusterfullname(self):
-        command = ["search_next", "--fullname",
-                   "--cluster=utecl", "--cluster_type=esx"]
+        command = ["search_next", "--fullname", "--cluster=utecl"]
         out = self.commandtest(command)
         self.matchoutput(out, "utecl5", command)
 
     def testclusternumber(self):
-        command = ["search_next", "--number",
-                   "--cluster=utecl", "--cluster_type=esx"]
+        command = ["search_next", "--number", "--cluster=utecl"]
         out = self.commandtest(command)
         self.matchoutput(out, "5", command)
         self.matchclean(out, "utecl", command)
 
     def testclusterdefaultmissing(self):
-        command = ["search_next", "--cluster=newseries", "--cluster_type=esx"]
+        command = ["search_next", "--cluster=newseries"]
         out = self.commandtest(command)
         self.matchoutput(out, "newseries1", command)
 
     def testclusterfullnamemissing(self):
-        command = ["search_next", "--fullname",
-                   "--cluster=newseries", "--cluster_type=esx"]
+        command = ["search_next", "--fullname", "--cluster=newseries"]
         out = self.commandtest(command)
         self.matchoutput(out, "newseries1", command)
 
     def testclusternumbermissing(self):
-        command = ["search_next", "--number",
-                   "--cluster=newseries", "--cluster_type=esx"]
+        command = ["search_next", "--number", "--cluster=newseries"]
         out = self.commandtest(command)
         self.matchoutput(out, "1", command)
         self.matchclean(out, "newseries", command)
