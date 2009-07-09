@@ -70,10 +70,14 @@ class ServiceInstance(Base):
     cfg_path = relation(CfgPath, backref=backref('svc_inst', uselist=False,
                                                  cascade='all, delete-orphan'))
 
-    def _client_count(self):
+    @property
+    def cfg_path(self):
+        return 'service/%s/%s'% (self.service.name, self.name)
+
+    @property
+    def client_count(self):
         return object_session(self).query(BuildItem).filter_by(
             cfg_path = self.cfg_path).count()
-    client_count = property(_client_count)
 
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,

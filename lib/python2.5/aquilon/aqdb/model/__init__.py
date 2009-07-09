@@ -57,6 +57,7 @@ from aquilon.aqdb.model.tld import Tld
 from aquilon.aqdb.model.cfg_path import CfgPath
 from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.personality import Personality
+from aquilon.aqdb.model.operating_system import OperatingSystem
 
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor

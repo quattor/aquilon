@@ -68,7 +68,7 @@ pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
 
 pkgs['net']  = ['dns_domain', 'network']
 
-pkgs['cfg']  = ['archetype', 'personality','tld', 'cfg_path']
+pkgs['cfg']  = ['archetype', 'personality','tld', 'cfg_path', 'operating_system']
 
 pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
