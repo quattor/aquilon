@@ -48,7 +48,12 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
         max_members = force_int("max_members", max_members)
         if max_members is not None:
-            # FIXME: Enforce that this is not being exceeded.
+            if len(dbmetacluster.members) > max_members:
+                raise ArgumentError("metacluster %s already exceeds %s "
+                                    "max_members with %s clusters currently "
+                                    "bound" %
+                                    (dbmetacluster.name, max_members,
+                                     len(dbmetacluster.members)))
             dbmetacluster.max_clusters = max_members
 
         max_shares = force_int("max_shares", max_shares)
