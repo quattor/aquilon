@@ -118,6 +118,7 @@ from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
 from test_search_hardware import TestSearchHardware
+from test_search_machine import TestSearchMachine
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
 from test_search_next import TestSearchNext
@@ -211,7 +212,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestClusterConstraints, TestMetaClusterConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
-                TestSearchHardware, TestSearchSystem, TestSearchHost,
+                TestSearchHardware, TestSearchMachine,
+                TestSearchSystem, TestSearchHost,
                 TestSearchNext,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
                 TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
