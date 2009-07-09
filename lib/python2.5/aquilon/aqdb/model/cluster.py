@@ -101,8 +101,7 @@ class Cluster(Base):
 
 cluster = Cluster.__table__
 cluster.primary_key.name = 'cluster_pk'
-cluster.append_constraint(UniqueConstraint('name', 'cluster_type',
-                                           name='cluster_uk'))
+cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 
 table = cluster
 
