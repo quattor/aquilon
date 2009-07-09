@@ -32,14 +32,8 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, Machine, Domain, Cluster, MetaCluster
 from twisted.python import log
-from aquilon.server.templates.cluster import (PlenaryCluster,
-                                              PlenaryClusterClient,
-                                              PlenaryClusterData,
-                                              PlenaryClusterClientData,
-                                              PlenaryMetaCluster,
-                                              PlenaryMetaClusterClient,
-                                              PlenaryMetaClusterData,
-                                              PlenaryMetaClusterClientData)
+from aquilon.server.templates.cluster import (refresh_cluster_plenaries,
+                                              refresh_metacluster_plenaries)
 from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance,
                                               PlenaryServiceInstanceServer,
                                               PlenaryServiceClientDefault, PlenaryServiceServerDefault,
@@ -120,30 +114,14 @@ class CommandFlush(BrokerCommand):
 
             for clus in session.query(Cluster).all():
                 try:
-                    total += 4
-                    plclus = PlenaryCluster(clus)
-                    plclus.write(locked=True)
-                    plclus = PlenaryClusterClient(clus)
-                    plclus.write(locked=True)
-                    plclus = PlenaryClusterData(clus)
-                    plclus.write(locked=True)
-                    plclus = PlenaryClusterClientData(clus)
-                    plclus.write(locked=True)
+                    total += refresh_cluster_plenaries(clus, locked=True)
                 except Exception, e:
                     failed.append("%s cluster %s failed: %s" %
                                   (clus.cluster_type, clus.name, e))
 
             for clus in session.query(MetaCluster).all():
                 try:
-                    total += 4
-                    plclus = PlenaryMetaCluster(clus)
-                    plclus.write(locked=True)
-                    plclus = PlenaryMetaClusterClient(clus)
-                    plclus.write(locked=True)
-                    plclus = PlenaryMetaClusterData(clus)
-                    plclus.write(locked=True)
-                    plclus = PlenaryMetaClusterClientData(clus)
-                    plclus.write(locked=True)
+                    total += refresh_metacluster_plenaries(clus, locked=True)
                 except Exception, e:
                     failed.append("metacluster %s failed: %s" % (clus.name, e))
 

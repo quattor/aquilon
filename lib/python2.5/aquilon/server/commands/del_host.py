@@ -37,7 +37,8 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_dependencies)
 from aquilon.server.dbwrappers.service_instance import get_client_service_instances
-from aquilon.server.processes import (DSDBRunner, build_index)
+from aquilon.server.processes import DSDBRunner
+from aquilon.server.templates.index import build_index
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.base import (compileLock, compileRelease)

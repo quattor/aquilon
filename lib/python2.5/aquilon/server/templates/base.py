@@ -65,6 +65,17 @@ class Plenary(object):
         self.template_type = 'structure'
         self.servername = self.config.get("broker", "servername")
         
+    def body(self, lines):
+        """
+        The text of the template. By default, do nothing. A derived class can
+        override this to describe their own content. 
+        They should do this by appending strings (each string
+        referring to a separate line of text in the template) into the
+        array. The array will already contain the appropriate header line for the
+        template.
+        """
+        pass
+        
     def write(self, dir=None, user=None, locked=False, content=None):
         if dir is not None:
             self.dir = dir
@@ -76,8 +87,8 @@ class Plenary(object):
 
         if content is None:
             lines = []
-            type=self.template_type
-            if type is not None:
+            type = self.template_type
+            if type is not None and type is not "":
                 type = type + " "
             lines.append("%stemplate %s;" % (type, self.plenary_template))
             lines.append("")

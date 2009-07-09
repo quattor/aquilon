@@ -30,24 +30,21 @@
 
 
 import os
-from os import path as os_path, environ as os_environ
-from datetime import datetime
+from os import environ as os_environ
 
 from twisted.python import log
 
 from aquilon.config import Config
-from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 IncompleteError)
-from aquilon.server.processes import run_command, build_index
+from aquilon.exceptions_ import (ArgumentError, ProcessException)
+from aquilon.server.processes import run_command
+from aquilon.server.templates.index import build_index
 from aquilon.server.templates.base import compileLock, compileRelease
-from aquilon.server.templates.host import PlenaryHost
 
 
 class TemplateDomain(object):
 
     def __init__(self, dom):
         self.domain = dom
-        pass
 
     def directories(self):
         """Return a list of directories required for compiling this domain"""
@@ -113,11 +110,6 @@ class TemplateDomain(object):
                 hl = self.domain.hosts
             if (len(hl) == 0):
                 return 'no hosts: nothing to do'
-
-            domaindir = os_path.join(config.get("broker", "templatesdir"), self.domain.name)
-            includes = [domaindir,
-                        config.get("broker", "plenarydir"),
-                        config.get("broker", "swrepdir")]
 
             panc_env={"PATH":"%s:%s" % (config.get("broker", "javadir"),
                                         os_environ.get("PATH", ""))}

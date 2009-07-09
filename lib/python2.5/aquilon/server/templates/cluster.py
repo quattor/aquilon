@@ -36,38 +36,38 @@ class PlenaryMetaCluster(Plenary):
     def __init__(self, dbmetacluster):
         Plenary.__init__(self)
         self.name = dbmetacluster.name
-        self.plenary_core = "cluster/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
+        self.plenary_core = "metacluster"
+        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
         # FIXME: Review and implement or remove.
-        lines.append("include { 'cluster/%(name)s/data' };" %
+        lines.append("include { 'metacluster/%(name)s/data' };" %
                      self.__dict__)
 
 
 class PlenaryMetaClusterClient(Plenary):
+    """
+    A normal template included by cluster clients of a metacluster.
+    """
     def __init__(self, dbmetacluster):
         Plenary.__init__(self)
         self.name = dbmetacluster.name
-        self.plenary_core = "cluster/%(name)s" % self.__dict__
+        self.plenary_core = "metacluster/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/client" % self.__dict__
         self.template_type = ''
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        # FIXME: Review and implement or remove.
-        #lines.append("'/system/cluster/%(name)s' = "
-        #    "create('cluster/%(name)s/clientdata');" % self.__dict__)
-        lines.append("include { 'cluster/%(name)s/clientdata' };" %
-                     self.__dict__)
+        lines.append("'/system/metacluster' = "
+            "create('metacluster/%(name)s/clientdata');" % self.__dict__)
 
 
 class PlenaryMetaClusterData(Plenary):
     def __init__(self, dbmetacluster):
         Plenary.__init__(self)
         self.name = dbmetacluster.name
-        self.plenary_core = "cluster/%(name)s" % self.__dict__
+        self.plenary_core = "metacluster/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/data" % self.__dict__
         self.template_type = ''
         self.dir = self.config.get("broker", "plenarydir")
@@ -78,89 +78,78 @@ class PlenaryMetaClusterData(Plenary):
 
 
 class PlenaryMetaClusterClientData(Plenary):
+    """
+    A structure template that provides the name of the metacluster
+    and a list of clusters contained within the metacluster.
+    """
     def __init__(self, dbmetacluster):
         Plenary.__init__(self)
         self.name = dbmetacluster.name
-        self.plenary_core = "cluster/%(name)s" % self.__dict__
+        self.plenary_core = "metacluster/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/clientdata" % self.__dict__
         self.template_type = 'structure'
         self.dir = self.config.get("broker", "plenarydir")
         self.clients = [cluster.name for cluster in dbmetacluster.members]
 
     def body(self, lines):
-        lines.append("'name' = '%s';" % self.name);
+        lines.append("'name' = '%s';" % self.name)
         lines.append("'clusters' = list(" +
                      ", ".join([("'" + cluster + "'")
                                 for cluster in self.clients]) +
                      ");")
 
-
 class PlenaryCluster(Plenary):
+    """
+    A cluster has its own output profile, so the plenary cluster template
+    is an object template that includes the data about which machines
+    are contained inside the cluster (via an include of the clusterdata plenary)
+    """
     def __init__(self, dbcluster):
         Plenary.__init__(self)
-        self.name = dbcluster.name
-        self.metacluster = dbcluster.metacluster.name
-        self.plenary_core = "cluster/%(metacluster)s/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/config" % self.__dict__
-        self.dir = self.config.get("broker", "plenarydir")
-
-    def body(self, lines):
-        # FIXME: Review and implement or remove.
-        lines.append("include { 'cluster/%(metacluster)s/%(name)s/data' };" %
-                     self.__dict__)
-
-
-class PlenaryClusterClient(Plenary):
-    def __init__(self, dbcluster):
-        Plenary.__init__(self)
-        self.name = dbcluster.name
-        self.metacluster = dbcluster.metacluster.name
-        self.plenary_core = "cluster/%(metacluster)s/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/client" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
-
-    def body(self, lines):
-        lines.append("'/system/cluster' = create('cluster/%(metacluster)s/%(name)s/clientdata');" %
-                     self.__dict__)
-
-
-class PlenaryClusterData(Plenary):
-    def __init__(self, dbcluster):
-        Plenary.__init__(self)
-        self.name = dbcluster.name
-        self.metacluster = dbcluster.metacluster.name
-        self.plenary_core = "cluster/%(metacluster)s/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/data" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
-
-    def body(self, lines):
-        # FIXME: Review and implement or remove.
-        return
-
-
-class PlenaryClusterClientData(Plenary):
-    def __init__(self, dbcluster):
-        Plenary.__init__(self)
+        self.template_type = 'object'
         self.dbcluster = dbcluster
         self.name = dbcluster.name
-        self.metacluster = dbcluster.metacluster.name
-        self.plenary_core = "cluster/%(metacluster)s/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/clientdata" % self.__dict__
-        self.template_type = 'structure'
+        self.metacluster = "global"
+        if dbcluster.metacluster:
+            self.metacluster = dbcluster.metacluster.name
+        self.plenary_core = "cluster"
+        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
         self.dir = self.config.get("broker", "plenarydir")
 
     def body(self, lines):
-        lines.append("'name' = '%s';" % self.name)
-        lines.append("'metacluster' = create('cluster/%(metacluster)s/clientdata');" %
-                     self.__dict__)
-        lines.append("'machines' = nlist(")
+        fname = "body_%s" % self.dbcluster.cluster_type
+        if hasattr(self, fname):
+            getattr(self, fname)(lines)
+
+    def body_esx(self, lines):
+        lines.append("'/system/cluster/name' = '%s';" % self.name)
+        if self.metacluster:
+            lines.append("'/system/metacluster' = " + 
+                         "create('metacluster/%(metacluster)s/client');" %
+                         self.__dict__)
+        lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
             lines.append("    '%s', create('%s')," % (machine.name,
                                                       pmac.plenary_template))
         lines.append(");")
+                
+class PlenaryClusterClient(Plenary):
+    """
+    A host that is a member of a cluster will include the cluster client
+    plenary template. This just names the cluster and nothing more.
+    """
+    def __init__(self, dbcluster):
+        Plenary.__init__(self)
+        self.name = dbcluster.name
+        self.metacluster = dbcluster.metacluster.name
+        self.plenary_core = "cluster/%(name)s" % self.__dict__
+        self.plenary_template = "%(plenary_core)s/client" % self.__dict__
+        self.template_type = ''
+        self.dir = self.config.get("broker", "plenarydir")
+
+    def body(self, lines):
+        lines.append("'/system/cluster/name' = '%s';" % self.name)
 
 
 # The plenaries will only be written if they change.  Technically
@@ -177,33 +166,36 @@ def get_metacluster_plenaries(metacluster):
 
 def get_cluster_plenaries(cluster):
     plenaries = []
-    for p in PlenaryCluster, PlenaryClusterClient, \
-             PlenaryClusterData, PlenaryClusterClientData:
-        plenaries.append(p(cluster))
+    for plenary in PlenaryCluster, PlenaryClusterClient:
+        plenaries.append(plenary(cluster))
     return plenaries
 
 def refresh_metacluster_plenaries(metacluster, locked=True):
     plenaries = get_metacluster_plenaries(metacluster)
+    count = 0
     try:
         if not locked:
             compileLock()
         for p in plenaries:
             p.write(locked=True)
+            count = count + 1
     finally:
         if not locked:
             compileRelease()
-    return
+    return count
 
 def refresh_cluster_plenaries(cluster, locked=True):
     plenaries = get_cluster_plenaries(cluster)
+    count = 0
     try:
         if not locked:
             compileLock()
         for p in plenaries:
             p.write(locked=True)
+            count = count + 1
     finally:
         if not locked:
             compileRelease()
-    return
+    return count
 
 

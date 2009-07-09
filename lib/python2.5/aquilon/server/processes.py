@@ -37,27 +37,14 @@ the chain.
 
 from __future__ import with_statement
 import os
-import time
-import socket
 import re
-import xml.etree.ElementTree as ET
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
-
 from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
 from aquilon.config import Config
-from aquilon.server.dbwrappers.service import get_service
 
-
-CCM_NOTIF = 1
-CDB_NOTIF = 2
-
-notification_types = {
-        CCM_NOTIF : "ccm",
-        CDB_NOTIF : "cdb"
-}
 
 def run_command(args, env=None, path="."):
     '''
@@ -183,6 +170,7 @@ def write_file(filename, content, mode=None):
     finally:
         if os.path.exists(fpath):
             os.remove(fpath)
+            
 
 def read_file(path, filename):
     fullfile = os.path.join(path, filename)
@@ -225,101 +213,6 @@ def cache_version(config):
         log.msg("Could not run git describe to get version: %s" % e)
         config.set("broker", "version", "Unknown")
 
-# This functionality (build_index, send_notification) may be better
-# suited in a different module.  Here for now, though.
-def build_index(config, session, profilesdir):
-    ''' compare the mtimes of everything in profiledir against
-    and index file (profiles-info.xml). Produce a new index
-    and send out notifications to everything that's been updated
-    and to all subscribers of the index (bootservers currently)
-    '''
-
-    profile_index = "profiles-info.xml"
-
-    old_host_index = {}
-    index_path = os.path.join(profilesdir, profile_index)
-    if os.path.exists(index_path):
-        try:
-            tree = ET.parse(index_path)
-            for profile in tree.getiterator("profile"):
-                if (profile.text and profile.attrib.has_key("mtime")):
-                    host = profile.text.strip()
-                    if host:
-                        if host.endswith(".xml"):
-                            host = host[:-4]
-                        old_host_index[host] = int(profile.attrib["mtime"])
-                        #log.msg("Stored %d for %s" % (old_host_index[host],
-                        #    host))
-        except Exception, e:
-            log.msg("Error processing %s, continuing: %s" % (index_path, e))
-
-    host_index = {}
-    modified_index = {}
-    for profile in os.listdir(profilesdir):
-        if profile == profile_index:
-            continue
-        if not profile.endswith(".xml"):
-            continue
-        host = profile[:-4]
-        host_index[host] = os.path.getmtime(
-                os.path.join(profilesdir, profile))
-        #log.msg("Found profile for %s with mtime %d"
-        #        % (host, host_index[host]))
-        if (old_host_index.has_key(host)
-                and host_index[host] > old_host_index[host]):
-            #log.msg("xml for %s has a newer mtime, will notify" % host)
-            modified_index[host] = host_index[host]
-
-    content = []
-    content.append("<?xml version='1.0' encoding='utf-8'?>")
-    content.append("<profiles>")
-    for host, mtime in host_index.items():
-        content.append("<profile mtime='%d'>%s.xml</profile>"
-                % (mtime, host))
-    content.append("</profiles>")
-
-    write_file(index_path, "\n".join(content))
-
-    if config.has_option("broker", "server_notifications"):
-        service_modules = {}
-        for service in config.get("broker", "server_notifications").split():
-            if service.strip():
-                try:
-                    # service may be unknown
-                    srvinfo = get_service(session, service)
-                    for instance in srvinfo.instances:
-                        for sis in instance.servers:
-                            service_modules[sis.system.fqdn] = 1
-                except Exception, e:
-                    log.msg("failed to lookup up server module %s: %s" % (service, e))
-        send_notification(CDB_NOTIF, service_modules.keys())
-
-    if (config.has_option("broker", "client_notifications")
-        and config.getboolean("broker", "client_notifications")):
-        send_notification(CCM_NOTIF, modified_index.keys())
-
-def send_notification(type, machines):
-    '''send CDP notification messages to a list of hosts. This
-    are sent synchronously, but we don't wait (or care) for any
-    reply, so it shouldn't be a problem.
-    type should be CCM_NOTIF or CDB_NOTIF
-    '''
-    packet = notification_types[type] + "\0" + str(int(time.time()))
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    try:
-        port = socket.getservbyname("cdp")
-    except:
-        port = 7777
-
-    for host in machines:
-        try:
-            log.msg("Sending %s notification to %s"
-                    % (notification_types[type], host))
-            ip = socket.gethostbyname(host)
-            sock.sendto(packet, (ip, port))
-        except Exception, e:
-            log.msg("Error notifying %s: %s" % (host, e))
 
 
 class DSDBRunner(object):
@@ -342,7 +235,7 @@ class DSDBRunner(object):
     def add_host(self, dbinterface):
         if not dbinterface.system.ip:
             raise ArgumentError("No ip address found for '%s' to add to dsdb." %
-                                dbhost)
+                                dbinterface.system.fqdn)
         return self.add_host_details(dbinterface.system.fqdn,
                                      dbinterface.system.ip,
                                      dbinterface.name, dbinterface.mac)
