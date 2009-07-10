@@ -1187,10 +1187,13 @@
       templates, or to move a host back to a default production domain once
       testing has completed.
       <optgroup name="manage options" mandatory="True" fields="all">
-         <option name="hostname" type="string">Name of the host</option>
+         <optgroup name="host_or_cluster" fields="any" mandatory="True">
+            <option name="hostname" type="string">Name of the host to manage</option>
+            <option name="cluster" type="string">Name of the cluster to manage</option></optgroup>
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/manage" />
+      <transport method="post" path="domain/%(domain)s/command/manage_hostname" trigger="hostname" />
+      <transport method="post" trigger="cluster" path="domain/%(domain)s/command/manage_cluster" />
    </command>
 
    <command name="cat">
@@ -1944,17 +1947,18 @@
          <option name="cluster" type="string">Name of the new esx_cluster</option>
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
          <optgroup name="add_cluster_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
-	    <option name="hub" type="string">Hub</option>
-	    <option name="continent" type="string">Continent</option>
-	    <option name="country" type="string">Country</option>
-	    <option name="city" type="string">City</option>
-	    <option name="building" type="string">Building</option>
-	    <option name="rack" type="string">Rack</option>
-	    <option name="desk" type="string">Desk</option>
+            <option name="company" type="string">Company</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
          </optgroup>
-	 <option name="archetype" type="string">Archetype name</option>
-	 <option name="personality" type="string">Personality name</option>
+         <option name="archetype" type="string">Archetype name</option>
+         <option name="personality" type="string">Personality name</option>
+         <option name="domain" type="string">Name of template domain/sandbox</option>
       </optgroup>
       <optgroup name="add_esx_cluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>

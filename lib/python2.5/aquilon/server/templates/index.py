@@ -19,7 +19,7 @@ NOTIFICATION_TYPES = {
 def build_index(config, session, profilesdir, clientNotify=True):
     '''
     Create an index of what profiles are available
-    
+
     Compare the mtimes of everything in profiledir against
     an index file (profiles-info.xml). Produce a new index
     and send out notifications to "server modules" (as defined
@@ -27,11 +27,11 @@ def build_index(config, session, profilesdir, clientNotify=True):
     is True, then individual notifications are also sent
     to each host. If clientNotify is False, then the server modules
     will still be notified, but there is no processing of the
-    individual hosts. Note that the broker has a config option 
+    individual hosts. Note that the broker has a config option
     send_notifications, which if false will turn off notifications
-    unconditionally. Only if the broker config allows will the 
+    unconditionally. Only if the broker config allows will the
     clientNotify be checked.
-    
+
     '''
     profile_index = "profiles-info.xml"
 
@@ -119,7 +119,7 @@ def send_notification(ntype, machines):
             # This host is not known (yet), so we silently
             # discard the notification.
             pass
-            
+
         except Exception, e:
             log.msg("Error notifying %s: %s" % (host, e))
 

@@ -50,7 +50,7 @@ class CommandAddHost(BrokerCommand):
     required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     def render(self, session, hostname, machine, archetype, personality,
-               domain, buildstatus, user, skip_dsdb_check=False, **arguments):
+               domain, buildstatus, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:

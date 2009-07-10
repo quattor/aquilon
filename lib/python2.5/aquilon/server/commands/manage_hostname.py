@@ -26,19 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq manage`."""
 
 
-import os
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.processes import remove_file
 from aquilon.server.templates.base import compileLock, compileRelease
-from aquilon.exceptions_ import IncompleteError
+from aquilon.exceptions_ import IncompleteError, ArgumentError
 
-class CommandManage(BrokerCommand):
+class CommandManageHostname(BrokerCommand):
 
     required_parameters = ["domain", "hostname"]
 
@@ -47,25 +44,18 @@ class CommandManage(BrokerCommand):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         dbhost = hostname_to_host(session, hostname)
+        if dbhost.cluster:
+            raise ArgumentError("cluster nodes must be managed at the "
+                                "cluster level; this host is a member of the "
+                                "cluster " + dbhost.cluster.name)
 
         try:
             compileLock()
 
-            # Clean up any old files in the old domain
-            # Note, that these files may not exist if we've never compiled
-            # in the old domain, so we just try the lot.
+            # Remove old files, then update the domain, then re-write
+            # the plenaries.
             plenary = PlenaryHost(dbhost)
-            plenary.remove(locked=True)
-            plenary = None
-            qdir = self.config.get("broker", "quattordir")
-            domain = dbhost.domain.name
-            fqdn = dbhost.fqdn
-            f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml")
-            remove_file(f)
-            f = os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
-            remove_file(f)
-            f = os.path.join(qdir, "deps", domain, fqdn+".dep")
-            remove_file(f)
+            plenary.cleanup(hostname, dbhost.domain.name, locked=True)
 
             dbhost.domain = dbdomain
             session.add(dbhost)

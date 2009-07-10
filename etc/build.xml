@@ -33,12 +33,23 @@
 	<property name="swrep" location="${basedir}/swrep" />
 	<!-- templates/${domain} = domain template source repo -->
 	<property name="domain.templates" location="${basedir}/templates/${domain}" />
+
 	<!-- hosts/*.tpl = working host tpls, copied from source.profiles -->
 	<property name="global.profiles" location="${basedir}/hosts" />
 	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
 	<property name="compiled.profiles" location="${basedir}/build/xml/${domain}" />
 	<!-- web/htdocs/profiles = compiled profiles to be served to hosts -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
+
+	<!-- cfg/domains/$domain/clusters/*.tpl = input cluster profiles -->
+	<property name="source.clusters" location="${basedir}/cfg/domains/${domain}/clusters" />
+	<!-- clusters/*.tpl = working cluster tpls, copied from source.clusters -->
+	<property name="global.clusters" location="${basedir}/clusters" />
+	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
+	<property name="compiled.clusters" location="${basedir}/build/clusters/${domain}" />
+	<!-- web/htdocs/profiles = compiled profiles to be served to hosts -->
+	<property name="distributed.clusters" location="${basedir}/web/htdocs/clusters" />
+
 	<!--
 	Note that the old 'deps' directory was only needed for the
 	GNUMakefile.build and is no longer used.
@@ -46,12 +57,19 @@
 
 	<taskdef resource="org/quattor/ant/panc-ant.xml" classpath="${panc.jar}" />
 
-	<path id="pan.loadpath">
+	<path id="pan.hostloadpath">
 		<pathelement location="${domain.templates}" />
 		<pathelement location="${plenary}" />
 		<pathelement location="${swrep}" />
 		<pathelement location="${source.profiles}" />
 		<pathelement location="${global.profiles}" />
+	</path>
+
+	<path id="pan.clusterloadpath">
+		<pathelement location="${domain.templates}" />
+		<pathelement location="${plenary}" />
+		<pathelement location="${source.clusters}" />
+		<pathelement location="${global.clusters}" />
 	</path>
 
 	<!--
@@ -82,7 +100,7 @@
 
 	<target name="compile.host.profile" description="optimized for compiling a single profile" depends="-verify.host.profile,delete.host.dep">
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}">
-			<path refid="pan.loadpath" />
+			<path refid="pan.hostloadpath" />
 			<fileset dir="${source.profiles}" includes="${host.profile}.tpl" />
 		</panc>
 		<!-- Cache the valid profile in the global pool. -->
@@ -94,7 +112,7 @@
 	<target name="compile.domain.profiles" description="compile all hosts managed by a domain" depends="delete.domain.deps">
 		<fileset id="source.fileset" dir="${source.profiles}" includes="*.tpl" />
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}">
-			<path refid="pan.loadpath" />
+			<path refid="pan.hostloadpath" />
 			<fileset refid="source.fileset" />
 		</panc>
 		<!-- Cache all of these valid profiles in the global pool. -->
@@ -104,6 +122,22 @@
 		<!-- Copy any compiled profiles into the web directory.  -->
 		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}">
 			<fileset dir="${compiled.profiles}" includes="*.xml" />
+		</copy>
+	</target>
+
+	<target name="compile.domain.clusters" description="compile all clusters managed by a domain" depends="delete.domain.deps">
+		<fileset id="cluster.fileset" dir="${source.clusters}" includes="*.tpl" />
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.clusters}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}">
+			<path refid="pan.clusterloadpath" />
+			<fileset refid="cluster.fileset" />
+		</panc>
+		<!-- Cache all of these valid profiles in the global pool. -->
+		<copy todir="${global.clusters}" preservelastmodified="true" overwrite="${force.build}">
+			<fileset refid="cluster.fileset" />
+		</copy>
+		<!-- Copy any compiled profiles into the web directory.  -->
+		<copy todir="${distributed.clusters}" preservelastmodified="true" overwrite="${force.build}">
+			<fileset dir="${compiled.clusters}" includes="*.xml" />
 		</copy>
 	</target>
 </project>

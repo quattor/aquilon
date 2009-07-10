@@ -75,7 +75,7 @@ class PlenaryServiceServerDefault(Plenary):
     supplied to ensure correct compilation. This template
     defines configuration for servers only, but is applicable
     to all instances of the service.
-    """    
+    """
     def __init__(self, dbservice):
         Plenary.__init__(self)
         self.name = dbservice.name
@@ -144,7 +144,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     should typically be sufficient without override.
     This template defines configuration for clients only, and
     is specific to the instance.
-    """      
+    """
     def __init__(self, dbservice, dbinstance):
         Plenary.__init__(self)
         self.servers = dbinstance.servers

@@ -36,6 +36,7 @@ from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import (refresh_metacluster_plenaries,
                                               refresh_cluster_plenaries)
 from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.dbwrappers.domain import verify_domain
 
 
 class CommandAddESXCluster(BrokerCommand):
@@ -43,9 +44,17 @@ class CommandAddESXCluster(BrokerCommand):
     required_parameters = ["cluster", "metacluster"]
 
     def render(self, session, cluster, metacluster, archetype, personality,
-               max_members, vm_to_host_ratio, comments, **arguments):
+               max_members, vm_to_host_ratio, domain, comments, **arguments):
         validate_basic("cluster", cluster)
         cluster_type = 'esx'
+
+        if not domain:
+            # This block cannot be reached with the current client...
+            # domain must always be set.
+            domain = self.config.get("broker", "default_domain")
+
+        dbdomain = verify_domain(session, domain,
+                                 self.config.get("broker", "servername"))
 
         dblocation = get_location(session, **arguments)
         if not dblocation:
@@ -77,6 +86,7 @@ class CommandAddESXCluster(BrokerCommand):
                                personality=dbpersonality,
                                max_hosts=max_members,
                                vm_to_host_ratio=vm_to_host_ratio,
+                               domain=dbdomain,
                                comments=comments)
         session.add(dbcluster)
 

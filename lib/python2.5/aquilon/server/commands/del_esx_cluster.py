@@ -31,7 +31,7 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import EsxCluster
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.cluster import (get_cluster_plenaries,
+from aquilon.server.templates.cluster import (PlenaryCluster,
                                               refresh_metacluster_plenaries)
 from aquilon.server.templates.base import compileLock, compileRelease
 
@@ -53,7 +53,8 @@ class CommandDelESXCluster(BrokerCommand):
                                 ", ".join([h.fqdn
                                            for h in dbcluster.hosts]))
         dbmetacluster = dbcluster.metacluster
-        plenaries = get_cluster_plenaries(dbcluster)
+        plenary = PlenaryCluster(dbcluster)
+        domain = dbcluster.domain.name
         session.delete(dbcluster)
 
         session.flush()
@@ -61,8 +62,7 @@ class CommandDelESXCluster(BrokerCommand):
         session.refresh(dbmetacluster)
         try:
             compileLock()
-            for p in plenaries:
-                p.remove(locked=True)
+            plenary.cleanup(cluster, domain, locked=True)
             refresh_metacluster_plenaries(dbmetacluster, locked=True)
         finally:
             compileRelease()

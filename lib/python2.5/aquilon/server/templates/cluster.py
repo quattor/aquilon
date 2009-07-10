@@ -104,6 +104,7 @@ class PlenaryCluster(Plenary):
     is an object template that includes the data about which machines
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
+
     def __init__(self, dbcluster):
         Plenary.__init__(self)
         self.template_type = 'object'
@@ -112,9 +113,16 @@ class PlenaryCluster(Plenary):
         self.metacluster = "global"
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
-        self.plenary_core = "cluster"
-        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
-        self.dir = self.config.get("broker", "plenarydir")
+        self.plenary_core = ""
+        self.plenary_template = "%(name)s" % self.__dict__
+        self.dir = self.config.get("broker", "builddir") + \
+                    "/domains/%s/clusters" % dbcluster.domain.name
+
+    def cleanup(self, name, domain, locked=False):
+        Plenary.cleanup(self, name, domain, locked)
+        # And the other plenary files....
+        client = PlenaryClusterClient(self.dbcluster)
+        client.remove(None, locked)
 
     def body(self, lines):
         fname = "body_%s" % self.dbcluster.cluster_type
@@ -122,18 +130,24 @@ class PlenaryCluster(Plenary):
             getattr(self, fname)(lines)
 
     def body_esx(self, lines):
+        lines.append("include { 'pan/units' };")
+        lines.append("")
         lines.append("'/system/cluster/name' = '%s';" % self.name)
         if self.metacluster:
-            lines.append("'/system/metacluster' = " + 
-                         "create('metacluster/%(metacluster)s/client');" %
-                         self.__dict__)
+            lines.append("include { 'metacluster/%(metacluster)s/client' };"
+                         % self.__dict__)
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
             lines.append("    '%s', create('%s')," % (machine.name,
                                                       pmac.plenary_template))
         lines.append(");")
-                
+
+        for servinst in self.dbcluster.service_bindings:
+            lines.append("include { 'service/%s/%s/client/config' };" % \
+                         (servinst.service.name, servinst.name))
+
+
 class PlenaryClusterClient(Plenary):
     """
     A host that is a member of a cluster will include the cluster client

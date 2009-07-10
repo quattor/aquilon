@@ -63,19 +63,21 @@ class Plenary(object):
     def __init__(self):
         self.config = Config();
         self.template_type = 'structure'
+        self.plenary_template = None
+        self.plenary_core = None
         self.servername = self.config.get("broker", "servername")
         
     def body(self, lines):
         """
         The text of the template. By default, do nothing. A derived class can
-        override this to describe their own content. 
+        override this to describe their own content.
         They should do this by appending strings (each string
         referring to a separate line of text in the template) into the
         array. The array will already contain the appropriate header line for the
         template.
         """
         pass
-        
+
     def write(self, dir=None, user=None, locked=False, content=None):
         if dir is not None:
             self.dir = dir
@@ -120,8 +122,13 @@ class Plenary(object):
         return read_file(self.dir, self.plenary_template + ".tpl")
 
     def remove(self, dir=None, locked=False):
+        """
+        remove this plenary template
+        """
+
         if dir is not None:
             self.dir = dir
+
         plenary_file = os.path.join(self.dir, self.plenary_template + ".tpl")
         try:
             if (not locked):
@@ -131,5 +138,18 @@ class Plenary(object):
             if (not locked):
                 compileRelease()
         return
+
+    def cleanup(self, name, domain, locked=False):
+        """
+        remove all files related to an object template including
+        any intermediate build files
+        """
+
+        self.remove(None, locked)
+        qdir = self.config.get("broker", "quattordir")
+        xmlfile = os.path.join(qdir, "build", "xml", domain, name+".xml")
+        remove_file(xmlfile)
+        depfile = os.path.join(qdir, "build", "xml", domain, name+".xml.dep")
+        remove_file(depfile)
 
 

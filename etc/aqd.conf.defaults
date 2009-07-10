@@ -99,6 +99,7 @@ logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
 http_access_log = %(logdir)s/aqd_access.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
+clustersdir = %(quattordir)s/web/htdocs/clusters
 depsdir = %(quattordir)s/deps
 hostsdir = %(quattordir)s/hosts
 plenarydir = %(quattordir)s/plenary

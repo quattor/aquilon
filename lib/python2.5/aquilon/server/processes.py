@@ -38,6 +38,8 @@ the chain.
 from __future__ import with_statement
 import os
 import re
+import errno
+
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from twisted.python import log
@@ -170,7 +172,6 @@ def write_file(filename, content, mode=None):
     finally:
         if os.path.exists(fpath):
             os.remove(fpath)
-            
 
 def read_file(path, filename):
     fullfile = os.path.join(path, filename)
@@ -184,7 +185,8 @@ def remove_file(filename):
     try:
         os.remove(filename)
     except OSError, e:
-        log.msg("Could not remove file '%s': %s" % (filename, e))
+        if e.errno != errno.ENOENT:
+            log.msg("Could not remove file '%s': %s" % (filename, e))
 
 def cache_version(config):
     """Try to determine the broker version by examining the path
@@ -212,7 +214,6 @@ def cache_version(config):
     except ProcessException, e:
         log.msg("Could not run git describe to get version: %s" % e)
         config.set("broker", "version", "Unknown")
-
 
 
 class DSDBRunner(object):

@@ -46,6 +46,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testaddutecl1(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=namc1", "--building=ut",
+                   "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 
@@ -69,6 +70,7 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=utecl2",
                    "--metacluster=namc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server",
+                   "--domain=unittest",
                    "--max_members=101", "--vm_to_host_ratio=102",
                    "--comments=Another test ESX cluster"]
         self.noouttest(command)
@@ -88,12 +90,14 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=namc1", "--building=ut",
+                   "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "esx cluster 'utecl1' already exists", command)
 
     def testfailmetaclusternotfound(self):
         command = ["add_esx_cluster", "--cluster=utecl999",
+                   "--domain=unittest",
                    "--metacluster=metacluster-does-not-exist", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.notfoundtest(command)
@@ -103,6 +107,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testfailinvalidname(self):
         command = ["add_esx_cluster", "--cluster=invalid?!?",
+                   "--domain=unittest",
                    "--metacluster=namc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -111,6 +116,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testfailnoroom(self):
         command = ["add_esx_cluster", "--cluster=newcluster",
+                   "--domain=unittest",
                    "--metacluster=namc3", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -130,6 +136,7 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=utecl3",
                    "--max_members=0",
                    "--metacluster=namc2", "--building=ut",
+                   "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 
@@ -151,6 +158,7 @@ class TestAddESXCluster(TestBrokerCommand):
         # Bog standard - used for some noop tests
         command = ["add_esx_cluster", "--cluster=utecl4",
                    "--metacluster=namc2", "--building=ut",
+                   "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 

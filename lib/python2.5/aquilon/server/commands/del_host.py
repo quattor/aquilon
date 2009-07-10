@@ -35,9 +35,9 @@ from threading import Lock
 from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_dependencies)
-from aquilon.server.dbwrappers.service_instance import get_client_service_instances
-from aquilon.server.processes import DSDBRunner
+from aquilon.server.dbwrappers.host import (hostname_to_host,
+                                            get_host_dependencies)
+from aquilon.server.processes import (DSDBRunner, remove_file)
 from aquilon.server.templates.index import build_index
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
@@ -109,8 +109,10 @@ class CommandDelHost(BrokerCommand):
         if (delplenary):
             try:
                 compileLock()
-                ph.remove(locked=True)
+                ph.cleanup(fqdn, domain, locked=True)
+                # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
+                remove_file(os.path.join(profiles, fqdn+".xml"))
 
                 # Update any plenary client mappings
                 for si in bindings:
@@ -118,19 +120,6 @@ class CommandDelHost(BrokerCommand):
                     plenary_info = PlenaryServiceInstanceServer(si.service, si)
                     plenary_info.write(locked=True)
 
-                # subsidiary cleanup for hygiene
-                # (we don't actually care if these fail, since it doesn't break anything)
-                qdir = self.config.get("broker", "quattordir")
-                for file in [
-                    os.path.join(self.config.get("broker", "depsdir"), domain, fqdn+".dep"),
-                    os.path.join(profiles, fqdn+".xml"),
-                    os.path.join(qdir, "build", "xml", domain, fqdn+".xml"),
-                    os.path.join(qdir, "build", "xml", domain, fqdn+".xml.dep")
-                    ]:
-                    try:
-                        os.remove(file)
-                    except:
-                        pass
             finally:
                 compileRelease()
 

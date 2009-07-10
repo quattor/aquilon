@@ -37,7 +37,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
-                                ServiceInstance, Machine)
+                                ServiceInstance, Machine, Domain)
 
 def _cluster_machine_append(machine):
     """ creator function for MachineClusterMember """
@@ -65,6 +65,10 @@ class Cluster(Base):
                                                 name='cluster_prsnlty_fk'),
                             nullable=False)
 
+    domain_id = Column(Integer, ForeignKey('domain.id',
+                                           name='cluster_domain_fk'),
+                                           nullable=False)
+
     location_constraint_id = Column(ForeignKey('location.id',
                                                name='cluster_location_fk'))
 
@@ -79,6 +83,7 @@ class Cluster(Base):
 
     #TODO: backref?
     personality = relation(Personality, uselist=False, lazy=False)
+    domain = relation(Domain, uselist=False, lazy=False)
 
     #FIXME: Is it possible to have an append that checks the max_members?
     hosts = association_proxy('_hosts', 'host', creator=_cluster_host_append)

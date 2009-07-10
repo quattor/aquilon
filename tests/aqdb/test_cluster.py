@@ -198,12 +198,13 @@ h_factory = host_factory()
 
 def test_create_esx_cluster():
     """ tests the creation of an EsxCluster """
+    dmn = Domain.get_by('name', 'ny-prod', sess)[0]
     np = sess.query(Building).filter_by(name='np').one()
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
 
-    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per)
+    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per, domain=dmn)
 
     add(sess, ec)
     commit(sess)
