@@ -322,7 +322,10 @@ class TestReconfigure(TestBrokerCommand):
         for i in range(5, 10):
             command = ["reconfigure",
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            self.noouttest(command)
+            out = self.commandtest(command)
+            self.matchoutput(out, "0/1 object template", command)
+            self.matchclean(out, "removing binding", command)
+            self.matchclean(out, "adding binding", command)
 
     def testfailchangeclustermemberpersonality(self):
         command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
