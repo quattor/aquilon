@@ -181,8 +181,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmachine = prev.hardware_entity
         machine_plenary_info = PlenaryMachineInfo(prev.hardware_entity)
         pending_removals.append(machine_plenary_info)
-        for disk in dbmachine.disks:
-            session.delete(disk)
         session.delete(prev)
         session.delete(dbmachine)
         session.flush()
