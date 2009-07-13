@@ -16,6 +16,11 @@ NOTIFICATION_TYPES = {
         CDB_NOTIF : "cdb"
 }
 
+try:
+    CDPPORT = socket.getservbyname("cdp")
+except:
+    CDPPORT = 7777
+
 def build_index(config, session, profilesdir, clientNotify=True):
     '''
     Create an index of what profiles are available
@@ -42,35 +47,43 @@ def build_index(config, session, profilesdir, clientNotify=True):
             tree = ET.parse(index_path)
             for profile in tree.getiterator("profile"):
                 if (profile.text and profile.attrib.has_key("mtime")):
-                    object = profile.text.strip()
-                    if object:
-                        if object.endswith(".xml"):
-                            object = object[:-4]
-                        old_object_index[object] = int(profile.attrib["mtime"])
+                    obj = profile.text.strip()
+                    if obj:
+                        if obj.endswith(".xml"):
+                            obj = obj[:-4]
+                        old_object_index[obj] = int(profile.attrib["mtime"])
         except Exception, e:
             log.msg("Error processing %s, continuing: %s" % (index_path, e))
 
+    # object_index ties namespaced files to mtime
     object_index = {}
+    # modified_index stores the subset of namespaced names that
+    # have changed since the last index. The values are unused.
     modified_index = {}
-    for profile in os.listdir(profilesdir):
-        if profile == profile_index:
-            continue
-        if not profile.endswith(".xml"):
-            continue
-        object = profile[:-4]
-        object_index[object] = os.path.getmtime(
-                os.path.join(profilesdir, profile))
-        if (old_object_index.has_key(object)
-                and object_index[object] > old_object_index[object]):
-            #log.msg("xml for %s has a newer mtime, will notify" % host)
-            modified_index[object] = object_index[object]
 
+    for root, _dirs, files in os.walk(profilesdir):
+        for profile in files:
+            if profile == profile_index:
+                continue
+            if not profile.endswith(".xml"):
+                continue
+            obj = os.path.join(root, profile[:-4])
+            # Remove the common prefix: our profilesdir, so that the
+            # remaining object name is relative to that root (+1 in order
+            # to remove the slash separator)
+            obj = obj[len(profilesdir)+1:]
+            object_index[obj] = os.path.getmtime(
+                    os.path.join(root, profile))
+            if (old_object_index.has_key(obj) and
+                object_index[obj] > old_object_index[obj]):
+                modified_index[obj] = object_index[obj]
+ 
     content = []
     content.append("<?xml version='1.0' encoding='utf-8'?>")
     content.append("<profiles>")
-    for object, mtime in object_index.items():
+    for obj, mtime in object_index.items():
         content.append("<profile mtime='%d'>%s.xml</profile>"
-                % (mtime, object))
+                % (mtime, obj))
     content.append("</profiles>")
 
     write_file(index_path, "\n".join(content))
@@ -87,39 +100,46 @@ def build_index(config, session, profilesdir, clientNotify=True):
                             service_modules[sis.system.fqdn] = 1
                 except Exception, e:
                     log.msg("failed to lookup up server module %s: %s" % (service, e))
-        send_notification(CDB_NOTIF, service_modules.keys())
+        count = send_notification(CDB_NOTIF, service_modules.keys())
+        log.msg("sent %d server notifications" % count)
 
     if (config.has_option("broker", "client_notifications")
         and config.getboolean("broker", "client_notifications")
         and clientNotify):
-        send_notification(CCM_NOTIF, modified_index.keys())
+        count = send_notification(CCM_NOTIF, modified_index.keys())
+        log.msg("sent %d client notifications" % count)
 
-def send_notification(ntype, machines):
-    '''send CDP notification messages to a list of hosts. This
-    are sent synchronously, but we don't wait (or care) for any
-    reply, so it shouldn't be a problem.
-    type should be CCM_NOTIF or CDB_NOTIF
+def send_notification(ntype, modified):
+    '''send CDP notification messages to a list of hosts.
+
+    This are sent synchronously, but we don't wait (or care) for any
+    reply, so it shouldn't be a problem. type should be CCM_NOTIF or CDB_NOTIF.
+    'modified' is a dict of object names that may be namespaced. Object
+    names that cannot be looked up in DNS are silently ignored.
+    Returns the number of notifications that were sent.
     '''
-    packet = NOTIFICATION_TYPES[ntype] + "\0" + str(int(time.time()))
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    try:
-        port = socket.getservbyname("cdp")
-    except:
-        port = 7777
+    success = 0
+    for obj in modified:
+        # We need to clean the name, since it might
+        # be namespaced. This (in effect) globalizes
+        # all names. Perhaps we might want to do some
+        # checks based on the namespace. Not for now.
+        (_ns, _sep, host) = obj.rpartition('/')
 
-    for host in machines:
         try:
             ip = socket.gethostbyname(host)
-            log.msg("Sending %s notification to %s"
-                    % (NOTIFICATION_TYPES[ntype], host))
-            sock.sendto(packet, (ip, port))
+            packet = NOTIFICATION_TYPES[ntype] + "\0" + str(int(time.time()))
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.sendto(packet, (ip, CDPPORT))
+            success = success + 1
 
         except socket.gaierror:
-            # This host is not known (yet), so we silently
+            # This hostname is unknown, so we silently
             # discard the notification.
             pass
 
         except Exception, e:
             log.msg("Error notifying %s: %s" % (host, e))
 
+    return success
