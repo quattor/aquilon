@@ -29,7 +29,6 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 
-from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError
 from aquilon.server.templates.base import Plenary
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -85,7 +84,7 @@ class PlenaryHost(Plenary):
 
         provides = []
         for sis in self.dbhost.sislist:
-            provides.append(repr(sis.service_instance.cfg_path) + '/server/config');
+            provides.append(repr(sis.service_instance.cfg_path) + '/server/config')
 
         templates = []
         templates.append("archetype/base")
@@ -117,13 +116,9 @@ class PlenaryHost(Plenary):
             lines.append("'/system/network/default_gateway' = '%s';" %
                          default_gateway)
         lines.append("")
-        # XXX: The function should be the business function.
-        # XXX: maybe "function" could use "state" instead (since the QWG state is pretty
-        # XXX: close to what we want). Whatever. Anyhow, that needs a new column
-        # XXX: in the database. For now, we're just going to assume grid.
-        # XXX: Note that the personality template can override this anyhow. In fact,
-        # XXX: Maybe it should *only* be in the personality template. There's a thought....
-        #lines.append("'/system/function' = '%s';"%self.dbhost.business_function)
+        # We put in a default function: this will be overridden by the
+        # personality with a more suitable value, we just leave this here
+        # for paranoia's sake.
         lines.append("'/system/function' = 'grid';");
         lines.append("'/system/build' = '%s';"%self.dbhost.status)
         if self.dbhost.cluster:

@@ -30,7 +30,6 @@
 
 
 import os
-from datetime import datetime
 from threading import Lock
 
 from twisted.python import log
@@ -55,13 +54,13 @@ def compileLock():
     log.msg("aquired compile lock")
 
 def compileRelease():
-    log.msg("releasing compile lock");
-    compile_lock.release();
+    log.msg("releasing compile lock")
+    compile_lock.release()
 
 
 class Plenary(object):
     def __init__(self):
-        self.config = Config();
+        self.config = Config()
         self.template_type = 'structure'
         self.plenary_template = None
         self.plenary_core = None
@@ -83,7 +82,7 @@ class Plenary(object):
             self.dir = dir
         # user is simply left for compatibility: it's no longer used
         if (hasattr(self, "machine_type") and
-                self.machine_type == 'aurora_node'):
+                getattr(self, "machine_type") == 'aurora_node'):
             # Don't bother writing plenary files for dummy aurora hardware.
             return
 
