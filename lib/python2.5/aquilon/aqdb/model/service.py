@@ -47,9 +47,8 @@ from sqlalchemy import (Column,Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Base, Tld, CfgPath
+from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.exceptions_ import ArgumentError
 
 class Service(Base):
     """ SERVICE: composed of a simple name of a service consumable by
@@ -61,7 +60,9 @@ class Service(Base):
     id = Column(Integer, Sequence('service_id_seq'), primary_key=True)
 
     name = Column(AqStr(64), nullable=False)
+
     max_clients = Column(Integer, nullable=True) #null means 'no limit'
+
     cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
                                              name='svc_cfg_pth_fk',
                                              ondelete='CASCADE'),
@@ -70,19 +71,12 @@ class Service(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    cfg_path = relation(CfgPath, uselist=False,
-                        backref=backref('service', cascade='all, delete-orphan'))
-
+    @property
+    def cfg_path(self):
+        return 'service/%s'% (self.name)
 
 service = Service.__table__
 table   = Service.__table__
 
 service.primary_key.name='service_pk'
-
-service.append_constraint(
-    UniqueConstraint('name', name='svc_name_uk'))
-
-service.append_constraint(
-    UniqueConstraint('cfg_path_id', name='svc_template_uk'))
-
-table = service
+service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))

@@ -80,12 +80,16 @@ def populate(sess, *args, **kw):
     if len(sess.query(OperatingSystem).all()) > 0:
         return
 
-    aquilon = Archetype.get_unique(sess, 'aquilon')
+    aquilon = Archetype.get_by('name', 'aquilon', sess)[0]
     for ver in ['4.0.1-ia32', '4.0.1-x86_64', '5.0-x86_64']:
         os_obj = OperatingSystem(archetype=aquilon, name='linux', version=ver)
         sess.add(os_obj)
 
-    sess.commit()
+    try:
+        sess.commit()
+    except Exception, e:
+        sess.rollback()
+        raise e
 
     a = sess.query(OperatingSystem).first()
     assert a, "No operating system created by populate"

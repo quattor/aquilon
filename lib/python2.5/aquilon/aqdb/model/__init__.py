@@ -77,7 +77,6 @@ from aquilon.aqdb.model.console_server import ConsoleServer
 from aquilon.aqdb.model.manager import Manager
 from aquilon.aqdb.model.domain import Domain
 from aquilon.aqdb.model.host import Host
-from aquilon.aqdb.model.build_item import BuildItem
 from aquilon.aqdb.model.tor_switch import TorSwitch
 
 #HARDWARE/SYSTEM LINKAGES
@@ -108,3 +107,6 @@ from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
 
 from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember
 from aquilon.aqdb.model.machine_specs import MachineSpecs
+
+#build items link to service instances
+from aquilon.aqdb.model.build_item import BuildItem

@@ -34,13 +34,12 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref, object_session
 
-from aquilon.aqdb.model import Base, Service, CfgPath, BuildItem
+from aquilon.aqdb.model import Base, Service
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 
 _TN  = 'service_instance'
 _ABV = 'svc_inst'
-_PRECEDENCE = 200
 
 
 class ServiceInstance(Base):
@@ -57,7 +56,9 @@ class ServiceInstance(Base):
                         nullable=False)
 
     name = Column(AqStr(64), nullable=False)
+
     max_clients = Column(Integer, nullable=True) #null means 'no limit'
+
     cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
                                              name='%s_cfg_pth_fk'%_ABV,
                                              ondelete='CASCADE'),
@@ -67,8 +68,6 @@ class ServiceInstance(Base):
     comments = Column(String(255), nullable=True)
 
     service = relation(Service, uselist=False, backref='instances')
-    cfg_path = relation(CfgPath, backref=backref('svc_inst', uselist=False,
-                                                 cascade='all, delete-orphan'))
 
     @property
     def cfg_path(self):
@@ -87,7 +86,6 @@ service_instance = ServiceInstance.__table__
 table            = ServiceInstance.__table__
 
 table.info['abrev'] = _ABV
-table.info['precedence'] = _PRECEDENCE
 
 service_instance.primary_key.name='svc_inst_pk'
 service_instance.append_constraint(UniqueConstraint('service_id', 'name',

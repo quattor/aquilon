@@ -35,7 +35,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from aquilon.aqdb.model import Base, Host, CfgPath
+from aquilon.aqdb.model import Base, Host, CfgPath, ServiceInstance
 
 
 class BuildItem(Base):
@@ -58,12 +58,18 @@ class BuildItem(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
+    service_instance_id = Column(Integer,
+                                 ForeignKey('service_instance.id',
+                                            name='build_item_svc_inst_fk'),
+                                 nullable=False)
+
     # Having lazy=False here is essential.  This outer join saves
     # thousands of queries whenever finding clients of a service
     # instance.
     host = relation(Host, backref='build_items', lazy=False)
     #TODO: auto-updated "last_used" column?
     cfg_path = relation(CfgPath, uselist=False, backref='build_items')
+    service_instance = relation(ServiceInstance, uselist=False)
 
 
     def __repr__(self):
@@ -84,5 +90,3 @@ Host.templates = relation(BuildItem,
                          order_by=['build_item.position'])
 
 table = build_item
-
-

@@ -35,7 +35,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import (Base, System, Domain, Machine, Status,
-                                Personality)
+                                Personality, OperatingSystem)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 
@@ -70,10 +70,15 @@ class Host(System):
                                               name='host_status_fk'),
                           nullable=False)
 
+    operating_system_id = Column(Integer, ForeignKey('operating_system.id',
+                                                     name='host_os_fk'),
+                                 nullable=False)
+
     machine = relation(Machine, backref=backref('host', uselist=False))
     domain = relation(Domain, backref='hosts')
     personality = relation(Personality, backref='hosts')
     status = relation(Status, backref='hosts')
+    operating_system = relation(OperatingSystem, uselist=False, backref='hosts')
 
     """ The following relation is defined in BuildItem to avoid circular
     import dependencies. Perhaps it can be restated another way than
@@ -83,17 +88,18 @@ class Host(System):
                          collection_class = ordering_list('position'),
                          order_by = [BuildItem.__table__.c.position]) """
 
-    def _get_location(self):
+    #TODO: make thse synonyms?
+    @property
+    def location(self):
         return self.machine.location
-    location = property(_get_location) #TODO: make these synonms?
 
-    def _get_sysloc(self):
+    @property
+    def sysloc(self):
         return self.machine.location.sysloc()
-    sysloc = property(_get_sysloc)
 
-    def _get_archetype(self):
+    @property
+    def archetype(self):
         return self.personality.archetype
-    archetype = property(_get_archetype)
 
     def __repr__(self):
         return 'Host %s'%(self.name)
@@ -105,5 +111,3 @@ host.append_constraint(
     UniqueConstraint('machine_id', 'domain_id', name='host_machine_domain_uk'))
 
 table = host
-
-
