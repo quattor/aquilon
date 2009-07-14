@@ -30,8 +30,10 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, Machine, Domain, Cluster, MetaCluster
+from aquilon.aqdb.model import (Service, Machine, Domain, Personality,
+                                Cluster, MetaCluster)
 from twisted.python import log
+from aquilon.server.templates.personality import PlenaryPersonality
 from aquilon.server.templates.cluster import (refresh_cluster_plenaries,
                                               refresh_metacluster_plenaries)
 from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance,
@@ -83,6 +85,17 @@ class CommandFlush(BrokerCommand):
                     except Exception, e:
                         failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
                         continue
+
+            log.msg("flushing personalities")
+            for persona in session.query(Personality).all():
+                try:
+                    plenary_info = PlenaryPersonality(persona)
+                    plenary_info.write(locked=True)
+                    total += 1
+                except Exception, e:
+                    failed.append("personality %s failed: %s" %
+                                  (persona.name, e))
+                    continue
 
             log.msg("flushing machines")
             for machine in session.query(Machine).all():

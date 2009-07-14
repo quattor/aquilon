@@ -145,10 +145,11 @@ class Plenary(object):
         """
 
         self.remove(None, locked)
-        qdir = self.config.get("broker", "quattordir")
-        xmlfile = os.path.join(qdir, "build", "xml", domain, name+".xml")
-        remove_file(xmlfile)
-        depfile = os.path.join(qdir, "build", "xml", domain, name+".xml.dep")
-        remove_file(depfile)
+        if self.template_type == "object":
+            qdir = self.config.get("broker", "quattordir")
+            xmlfile = os.path.join(qdir, "build", "xml", domain, name+".xml")
+            remove_file(xmlfile)
+            depfile = os.path.join(qdir, "build", "xml", domain, name+".xml.dep")
+            remove_file(depfile)
 
 

@@ -134,22 +134,16 @@ class TemplateDomain(object):
             args.append("-Dpanc.jar=%s" % self.domain.compiler)
             args.append("-Ddomain=%s" % self.domain.name)
             args.append("-Ddistributed.profiles=%s" % config.get("broker", "profilesdir"))
-            args.append("-Ddistributed.clusters=%s" % config.get("broker", "clustersdir"))
             args.append("-Dpanc.batch.size=%s" %
                         config.get("broker", "panc_batch_size"))
             if (only):
                 # Use -Dforce.build=true?
-                if isinstance(only, Host):
-                    args.append("-Dhost.profile=%s" % only.fqdn)
-                    args.append("compile.host.profile")
-                elif isinstance(only, Cluster):
-                    args.append("-Dcluster.profile=%s" % only.cluster.name)
-                    args.append("compile.cluster.profile")
+                    args.append("-Dobject.profile=%s" % only.fqdn)
+                    args.append("compile.object.profile")
             else:
                 # Technically this is the default, but being explicit
                 # doesn't hurt.
                 args.append("compile.domain.profiles")
-                args.append("compile.domain.clusters")
 
             out = ''
             log.msg("starting compile")
@@ -164,8 +158,6 @@ class TemplateDomain(object):
                 compileRelease()
 
         build_index(config, session, config.get("broker", "profilesdir"))
-        build_index(config, session, config.get("broker", "clustersdir"),
-                    clientNotify=False)
         return out
 
 

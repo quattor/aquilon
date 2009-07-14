@@ -23,7 +23,7 @@
 		<istrue value="${force.build}" />
 	</condition>
 
-	<!-- Domain managing hosts to be compiled. -->
+	<!-- Domain managing objects to be compiled. -->
 	<property name="domain" value="ny-prod" />
 	<!-- cfg/domains/$domain/profiles/*.tpl = input host profiles -->
 	<property name="source.profiles" location="${basedir}/cfg/domains/${domain}/profiles" />
@@ -34,21 +34,12 @@
 	<!-- templates/${domain} = domain template source repo -->
 	<property name="domain.templates" location="${basedir}/templates/${domain}" />
 
-	<!-- hosts/*.tpl = working host tpls, copied from source.profiles -->
-	<property name="global.profiles" location="${basedir}/hosts" />
+	<!-- objects/*.tpl = working object tpls, copied from source.profiles -->
+	<property name="global.profiles" location="${basedir}/objects" />
 	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
 	<property name="compiled.profiles" location="${basedir}/build/xml/${domain}" />
-	<!-- web/htdocs/profiles = compiled profiles to be served to hosts -->
+	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
-
-	<!-- cfg/domains/$domain/clusters/*.tpl = input cluster profiles -->
-	<property name="source.clusters" location="${basedir}/cfg/domains/${domain}/clusters" />
-	<!-- clusters/*.tpl = working cluster tpls, copied from source.clusters -->
-	<property name="global.clusters" location="${basedir}/clusters" />
-	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
-	<property name="compiled.clusters" location="${basedir}/build/clusters/${domain}" />
-	<!-- web/htdocs/profiles = compiled profiles to be served to hosts -->
-	<property name="distributed.clusters" location="${basedir}/web/htdocs/clusters" />
 
 	<!--
 	Note that the old 'deps' directory was only needed for the
@@ -57,7 +48,7 @@
 
 	<taskdef resource="org/quattor/ant/panc-ant.xml" classpath="${panc.jar}" />
 
-	<path id="pan.hostloadpath">
+	<path id="pan.objectloadpath">
 		<pathelement location="${domain.templates}" />
 		<pathelement location="${plenary}" />
 		<pathelement location="${swrep}" />
@@ -77,42 +68,42 @@
 	set.  That property will only be set if force.build is set or if
 	it is set on the command line.
 	-->
-	<target name="delete.host.dep" description="remove host dep file" if="clean.dep.files">
-		<delete file="${compiled.profiles}/${host.profile}.xml.dep" failonerror="false" />
+	<target name="delete.object.dep" description="remove object dep file" if="clean.dep.files">
+		<delete file="${compiled.profiles}/${object.profile}.xml.dep" failonerror="false" />
 	</target>
 
-	<!-- See comment above delete.host.dep. -->
+	<!-- See comment above delete.object.dep. -->
 	<target name="delete.domain.deps" description="remove domain dep files" if="clean.dep.files">
 		<delete failonerror="false">
 			<fileset dir="${compiled.profiles}" includes="*.xml.dep" />
 		</delete>
 	</target>
 
-	<target name="-verify.host.profile">
-		<fail message="No host defined via the host.profile property"
-			unless="host.profile" />
-		<fail message="host.profile should be a hostname, not .tpl">
+	<target name="-verify.object.profile">
+		<fail message="No object defined via the object.profile property"
+			unless="object.profile" />
+		<fail message="object.profile should be a name, not .tpl">
 			<condition>
-				<matches pattern=".tpl$$" string="${host.profile}" />
+				<matches pattern=".tpl$$" string="${object.profile}" />
 			</condition>
 		</fail>
 	</target>
 
-	<target name="compile.host.profile" description="optimized for compiling a single profile" depends="-verify.host.profile,delete.host.dep">
+	<target name="compile.object.profile" description="optimized for compiling a single profile" depends="-verify.object.profile,delete.object.dep">
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}">
-			<path refid="pan.hostloadpath" />
-			<fileset dir="${source.profiles}" includes="${host.profile}.tpl" />
+			<path refid="pan.objectloadpath" />
+			<fileset dir="${source.profiles}" includes="${object.profile}.tpl" />
 		</panc>
 		<!-- Cache the valid profile in the global pool. -->
-		<copy file="${source.profiles}/${host.profile}.tpl" todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}" />
+		<copy file="${source.profiles}/${object.profile}.tpl" todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}" />
 		<!-- Copy the compiled profile into the web directory.  -->
-		<copy file="${compiled.profiles}/${host.profile}.xml" todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}" />
+		<copy file="${compiled.profiles}/${object.profile}.xml" todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}" />
 	</target>
 
-	<target name="compile.domain.profiles" description="compile all hosts managed by a domain" depends="delete.domain.deps">
-		<fileset id="source.fileset" dir="${source.profiles}" includes="*.tpl" />
+	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
+		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*.tpl" />
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}">
-			<path refid="pan.hostloadpath" />
+			<path refid="pan.objectloadpath" />
 			<fileset refid="source.fileset" />
 		</panc>
 		<!-- Cache all of these valid profiles in the global pool. -->
@@ -121,23 +112,8 @@
 		</copy>
 		<!-- Copy any compiled profiles into the web directory.  -->
 		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}">
-			<fileset dir="${compiled.profiles}" includes="*.xml" />
+			<fileset dir="${compiled.profiles}" includes="**/*.xml" />
 		</copy>
 	</target>
 
-	<target name="compile.domain.clusters" description="compile all clusters managed by a domain" depends="delete.domain.deps">
-		<fileset id="cluster.fileset" dir="${source.clusters}" includes="*.tpl" />
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.clusters}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}">
-			<path refid="pan.clusterloadpath" />
-			<fileset refid="cluster.fileset" />
-		</panc>
-		<!-- Cache all of these valid profiles in the global pool. -->
-		<copy todir="${global.clusters}" preservelastmodified="true" overwrite="${force.build}">
-			<fileset refid="cluster.fileset" />
-		</copy>
-		<!-- Copy any compiled profiles into the web directory.  -->
-		<copy todir="${distributed.clusters}" preservelastmodified="true" overwrite="${force.build}">
-			<fileset dir="${compiled.clusters}" includes="*.xml" />
-		</copy>
-	</target>
 </project>

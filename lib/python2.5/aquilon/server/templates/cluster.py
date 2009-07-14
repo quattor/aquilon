@@ -113,10 +113,10 @@ class PlenaryCluster(Plenary):
         self.metacluster = "global"
         if dbcluster.metacluster:
             self.metacluster = dbcluster.metacluster.name
-        self.plenary_core = ""
-        self.plenary_template = "%(name)s" % self.__dict__
+        self.plenary_core = "clusters"
+        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
         self.dir = self.config.get("broker", "builddir") + \
-                    "/domains/%s/clusters" % dbcluster.domain.name
+                    "/domains/%s/profiles" % dbcluster.domain.name
 
     def cleanup(self, name, domain, locked=False):
         Plenary.cleanup(self, name, domain, locked)

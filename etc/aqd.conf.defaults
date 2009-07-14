@@ -126,6 +126,8 @@ esx_cluster_vm_to_host_ratio = 16
 metacluster_max_members_default = 32
 metacluster_max_shares_default = 32
 ant = /ms/dist/ossjava/PROJ/ant/1.7.1/bin/ant
+namespaced_host_profiles = False
+flat_host_profiles = True
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
