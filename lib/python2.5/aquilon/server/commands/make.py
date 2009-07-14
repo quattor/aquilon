@@ -58,12 +58,7 @@ class CommandMake(BrokerCommand):
         try:
             compileLock()
             plenary_host = PlenaryHost(dbhost)
-
-            try:
-                old_content = plenary_host.read()
-            except IOError, e:
-                # Sigh, it's an IOError if the file doesn't exist.
-                old_content = None
+            plenary_host.stash()
 
             # Currently, for the Host to be created it *must* be associated with
             # a Machine already.  If that ever changes, need to check here and
@@ -128,15 +123,7 @@ class CommandMake(BrokerCommand):
             out = td.compile(session, only=dbhost, locked=True)
 
         except:
-            # If this was a change, then we need to revert the plenary,
-            # to avoid this domain being un-compilable in the future.
-            # If this was a new file, we can just remove the plenary.
-            if (old_content is None):
-                plenary_host.remove(locked=True)
-            else:
-                # this method corrupts the mtime, which will cause this
-                # host to be compiled next time from a normal "make".
-                plenary_host.write(locked=True, content=old_content)
+            plenary_host.restore_stash()
 
             # Black magic... sqlalchemy objects will re-vivify after a
             # rollback based on id.

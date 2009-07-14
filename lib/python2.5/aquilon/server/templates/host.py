@@ -54,6 +54,14 @@ class PlenaryHost(Plenary):
         if self.config.getboolean("broker", "flat_host_profiles"):
             self.plenaries.append(PlenaryToplevelHost(dbhost))
 
+    def stash(self):
+        for plen in self.plenaries:
+            plen.stash()
+
+    def restore_stash(self):
+        for plen in self.plenaries:
+            plen.restore_stash()
+
     def write(self, dir=None, user=None, locked=False, content=None):
         for plen in self.plenaries:
             plen.write(dir, user, locked, content)

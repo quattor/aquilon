@@ -65,7 +65,13 @@ class Plenary(object):
         self.plenary_template = None
         self.plenary_core = None
         self.servername = self.config.get("broker", "servername")
-        
+        # The following attributes are for stash/restore_stash
+        self.old_content = None
+        self.old_mtime = None
+
+    def pathname(self):
+        return os.path.join(self.dir, self.plenary_template + ".tpl")
+
     def body(self, lines):
         """
         The text of the template. By default, do nothing. A derived class can
@@ -97,11 +103,11 @@ class Plenary(object):
             content = "\n".join(lines)+"\n"
 
         plenary_path = os.path.join(self.dir, self.plenary_core)
-        plenary_file = os.path.join(self.dir, self.plenary_template) + ".tpl"
+        plenary_file = self.pathname()
         # optimise out the write (leaving the mtime good for make)
         # if nothing is actually changed
         if os.path.exists(plenary_file):
-            old = read_file(self.dir, self.plenary_template+".tpl")
+            old = self.read()
             if (old == content):
                 return
             
@@ -118,7 +124,7 @@ class Plenary(object):
     def read(self, dir=None):
         if dir is not None:
             self.dir = dir
-        return read_file(self.dir, self.plenary_template + ".tpl")
+        return read_file(self.dir, self.pathname())
 
     def remove(self, dir=None, locked=False):
         """
@@ -128,11 +134,10 @@ class Plenary(object):
         if dir is not None:
             self.dir = dir
 
-        plenary_file = os.path.join(self.dir, self.plenary_template + ".tpl")
         try:
             if (not locked):
                 compileLock()
-            remove_file(plenary_file)
+            remove_file(self.pathname())
         finally:
             if (not locked):
                 compileRelease()
@@ -143,7 +148,6 @@ class Plenary(object):
         remove all files related to an object template including
         any intermediate build files
         """
-
         self.remove(None, locked)
         if self.template_type == "object":
             qdir = self.config.get("broker", "quattordir")
@@ -152,4 +156,23 @@ class Plenary(object):
             depfile = os.path.join(qdir, "build", "xml", domain, name+".xml.dep")
             remove_file(depfile)
 
+    def stash(self):
+        """
+        record the state of the plenary, in order to later restore this state
+        """
+        try:
+            self.old_content = self.read()
+            self.old_mtime = os.stat(self.pathname()).st_atime
+        except IOError, e:
+            self.old_content = None
 
+    def restore_stash(self):
+        """
+        restore previous state of plenary
+        """
+        if (self.old_content is None):
+            self.remove(locked=True)
+        else:
+            self.write(locked=True, content=self.old_content)
+            atime = os.stat(self.pathname()).st_atime
+            os.utime(self.pathname(), (atime, self.old_mtime))

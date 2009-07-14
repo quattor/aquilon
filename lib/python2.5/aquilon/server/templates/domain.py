@@ -138,8 +138,8 @@ class TemplateDomain(object):
                         config.get("broker", "panc_batch_size"))
             if (only):
                 # Use -Dforce.build=true?
-                    args.append("-Dobject.profile=%s" % only.fqdn)
-                    args.append("compile.object.profile")
+                args.append("-Dobject.profile=%s" % only.fqdn)
+                args.append("compile.object.profile")
             else:
                 # Technically this is the default, but being explicit
                 # doesn't hurt.
