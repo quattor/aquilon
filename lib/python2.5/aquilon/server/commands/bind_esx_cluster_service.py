@@ -28,62 +28,42 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import Cluster
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import EsxCluster, ClusterAlignedService, ClusterServiceBinding
+from aquilon.server.services import Chooser
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.templates.cluster import PlenaryCluster
 
 
 class CommandBindESXClusterService(BrokerCommand):
 
     required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, cluster, service, instance, force=False,
+    def render(self, session, cluster, service, instance, debug, force=False,
                **arguments):
         cluster_type = 'esx'
-        dbservice = get_service(session, service)
-        dbinstance = get_service_instance(session, dbservice, instance)
-        dbcluster = EsxCluster.get_unique(session, cluster)
+        dbcluster = Cluster.get_unique(session,
+                                       name=cluster, cluster_type=cluster_type)
         if not dbcluster:
             raise NotFoundException("%s cluster '%s' not found." %
                                     (cluster_type, cluster))
-        dbcas = ClusterAlignedService.get_unique(session,
-                                                 service_id=dbservice.id,
-                                                 cluster_type=cluster_type)
-        if not dbcas:
-            raise ArgumentError("Cannot bind a cluster to a service that "
-                                "is not cluster aligned.")
+        dbservice = get_service(session, service)
+        chooser = Chooser(dbcluster, required_only=False, debug=debug)
+        if instance:
+            dbinstance = get_service_instance(session, dbservice, instance)
+            chooser.set_single(dbservice, dbinstance, force=force)
+        else:
+            chooser.set_single(dbservice, force=force)
 
-        q = session.query(ClusterServiceBinding).filter_by(cluster=dbcluster)
-        q = q.join('service_instance').filter_by(service=dbservice)
-        dbcsb = q.first()
-        if dbcsb:
-            if dbcsb.service_instance == dbinstance:
-                # Go ahead and rewrite the plenary.
-                pass
-            elif force:
-                session.delete(dbcsb)
-                dbcsb = None
-            else:
-                raise ArgumentError("Cannot bind %s cluster %s to service %s "
-                                    "instance %s: cluster already bound to "
-                                    "instance %s.  Use rebind to change." %
-                                    (cluster_type, dbcluster.name,
-                                     dbservice.name, dbinstance.name,
-                                     dbcsb.service_instance.name))
-        if not dbcsb:
-            dbcsb = ClusterServiceBinding(cluster=dbcluster,
-                                          service_instance=dbinstance)
-            session.add(dbcsb)
+        chooser.flush_changes()
+        chooser.write_plenary_templates(locked=False)
 
-        # XXX: This does not update the cluster members.
-        session.flush()
-
-        session.refresh(dbcluster)
-        plenary = PlenaryCluster(dbcluster)
-        plenary.write()
-        return
+        if chooser.debug_info:
+            # The output of bind client does not run through a formatter.
+            # Maybe it should.
+            return str("\n".join(chooser.debug_info))
+        return str("\n".join(chooser.messages))
 
 

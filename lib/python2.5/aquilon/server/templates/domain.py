@@ -90,7 +90,7 @@ class TemplateDomain(object):
         of blocking on the compile lock.
 
         If the 'only' parameter is provided, then it should be a
-        single host object and just that host will be compiled.
+        single object and just that profile will be compiled.
 
         May raise ArgumentError exception, else returns the standard
         output (as a string) of the compile
@@ -138,7 +138,7 @@ class TemplateDomain(object):
                         config.get("broker", "panc_batch_size"))
             if (only):
                 # Use -Dforce.build=true?
-                args.append("-Dobject.profile=%s" % only.fqdn)
+                args.append("-Dobject.profile=%s" % only)
                 args.append("compile.object.profile")
             else:
                 # Technically this is the default, but being explicit

@@ -34,25 +34,41 @@ from random import choice
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Tld, BuildItem, ServiceMap,
+from aquilon.exceptions_ import ArgumentError, InternalError, IncompleteError
+from aquilon.aqdb.model import (Host, Cluster, Tld, BuildItem, ServiceMap,
                                 PersonalityServiceMap, ClusterServiceBinding,
                                 ClusterAlignedService)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import compileLock, compileRelease
 
 
 log = logging.getLogger('aquilon.server.services')
 
 class Chooser(object):
-    """Choose services for a host."""
+    """Helper for choosing services for an object."""
 
-    def __init__(self, dbhost, required_only=False, debug=False):
-        """To clear out bindings that are not required, pass in
+    def __new__(cls, dbobj, *args, **kwargs):
+        if isinstance(dbobj, Host):
+            chooser = super(Chooser, HostChooser).__new__(HostChooser)
+        elif isinstance(dbobj, Cluster):
+            chooser = super(Chooser, ClusterChooser).__new__(ClusterChooser)
+        else:
+            # Just assume the consumer invoked the right subclass...
+            chooser = super(Chooser, cls).__new__(cls)
+        return chooser
+
+    # Technically apply_changes is a method, but whatever...
+    abstract_fields = ["description", "archetype", "personality", "location",
+                       "required_services", "original_service_instances",
+                       "apply_changes"]
+
+    def __init__(self, dbobj, required_only=False, debug=False):
+        """Initialize the chooser.
+
+        To clear out bindings that are not required, pass in
         required_only=True.
-
-        A compile lock should be held before creating this object.
 
         If the debug flag is set to True, debug output will be
         gathered in an array for later use by the calling code.
@@ -63,7 +79,7 @@ class Chooser(object):
         service instances) and finalized into chosen_services (dictionary
         of service to single service instance).
 
-        The original state of the host is held in the caches
+        The original state of the object is held in the caches
         original_service_build_items (list of build items, but only
         services) and original_service_instances (dictionary of
         service to single service instance).
@@ -72,32 +88,19 @@ class Chooser(object):
         after chosen_services with the differences between chosen_services
         and original_service_instances.
 
+        Subclasses should call this before starting their own
+        initialization.  At the very least, this must be called to use some
+        common methods, like debug() and error().
+
         """
-        self.dbhost = dbhost
+        self.dbobj = dbobj
+        self.session = object_session(dbobj)
         self.is_debug_enabled = debug
+        self.required_only = required_only
         self.debug_info = []
         """Store debug information."""
-        self.debug("Creating service Chooser for %s", self.dbhost.fqdn)
-        self.required_only = required_only
-        self.session = object_session(self.dbhost)
-        q = self.session.query(Tld).filter_by(type='service')
-        self.dbservice_tld = q.one()
-        self.required_services = set()
-        """Stores interim service instance lists."""
-        for item in self.dbhost.archetype.service_list:
-            self.required_services.add(item.service)
-        for item in self.dbhost.personality.service_list:
-            self.required_services.add(item.service)
-        self.cluster_aligned_services = {}
-        if self.dbhost.cluster:
-            for si in self.dbhost.cluster.service_bindings:
-                self.cluster_aligned_services[si.service] = si
-            q = self.session.query(ClusterAlignedService)
-            q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
-            for item in q.all():
-                if item.service not in self.cluster_aligned_services:
-                    self.cluster_aligned_services[item.service] = None
-                self.required_services.add(item.service)
+        self.description = self.generate_description()
+        self.debug("Creating service Chooser for %s", self.description)
         self.staging_services = {}
         """Stores interim service instance lists."""
         self.messages = []
@@ -110,30 +113,20 @@ class Chooser(object):
         """Set of service instances with a new client."""
         self.instances_unbound = set()
         """Set of service instances losing a client."""
-        self.cluster_instances_bound = set()
-        """Set of newly bound instances for cluster aligned services."""
-        self.cluster_instances_unbound = set()
-        """Set of instances unbound as cluster aligned services."""
-        q = self.session.query(BuildItem).filter_by(host=self.dbhost)
-        q = q.join('cfg_path').filter_by(tld=self.dbservice_tld)
-        self.original_service_build_items = q.all()
-        """Cache of the build_items related to services."""
-        self.original_service_instances = {}
-        """Cache of any already bound services (keys) and the instance
-        that was bound (values).
-        """
-        for dbbi in self.original_service_build_items:
-            if not dbbi.cfg_path.svc_inst:
-                self.error("Internal Error: Host %s bound to template %s "
-                           "which is missing a service instance aqdb entry." %
-                           (dbhost.fqdn, dbbi.cfg_path))
-                continue
-            self.original_service_instances[dbbi.cfg_path.svc_inst.service] = \
-                    dbbi.cfg_path.svc_inst
-            self.debug("%s original binding: %s",
-                       self.dbhost.fqdn, dbbi.cfg_path)
         self.chosen_services = {}
         """Track the chosen services."""
+        self.stashed = []
+        """Keep stashed plenaries for rollback purposes."""
+
+    def generate_description(self):
+        return str(self.dbobj)
+
+    def verify_init(self):
+        """This is more of a verify-and-finalize method..."""
+        for field in self.abstract_fields:
+            if not hasattr(self, field):
+                raise InternalError("%s provides no %s field" %
+                                    (type(self.dbobj), field))
         # This can be tweaked...
         if not self.required_only:
             for (service, instance) in self.original_service_instances.items():
@@ -162,6 +155,8 @@ class Chooser(object):
 
     def set_required(self):
         """Main entry point when setting the required services for a host."""
+        self.verify_init()
+        self.stash()
         self.debug("Setting required services")
         for dbservice in self.required_services:
             self.find_service_instances(dbservice)
@@ -177,6 +172,7 @@ class Chooser(object):
             self.reduce_service_instances(dbservice)
         self.finalize_service_instances()
         self.analyze_changes()
+        self.stash_services()
         self.apply_changes()
         self.check_errors()
 
@@ -188,6 +184,7 @@ class Chooser(object):
         bindings will be cleared.
 
         """
+        self.verify_init()
         if instance:
             self.debug("Setting service %s instance %s",
                        service.name, instance.name)
@@ -201,27 +198,24 @@ class Chooser(object):
         self.choose_past_use(service)
         # If this code needs to be made more efficient, this could
         # be refactored.  We don't always need count_servers()...
-        # In theory don't always need the loop above, either.
         self.count_servers()
         self.reduce_service_instances(service)
         self.finalize_service_instances()
         self.analyze_changes()
         if not force and self.instances_bound and self.instances_unbound:
             cfg_path = list(self.instances_unbound)[0].cfg_path
-            self.error("Host %s is already bound to %s, use unbind "
+            self.error("%s is already bound to %s, use unbind "
                        "to clear first or rebind to force." %
-                       (self.dbhost.fqdn, cfg_path.relative_path))
+                       (self.description, cfg_path.relative_path))
             self.check_errors()
+        self.stash_services()
         self.apply_changes()
         self.check_errors()
 
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the
         known maps."""
-        if dbservice in self.cluster_aligned_services:
-            locations = [self.dbhost.cluster.location_constraint]
-        else:
-            locations = [self.dbhost.location]
+        locations = [self.location]
         while (locations[-1].parent is not None and
                locations[-1].parent != locations[-1]):
             locations.append(locations[-1].parent)
@@ -230,13 +224,13 @@ class Chooser(object):
                 if service_map == PersonalityServiceMap:
                     self.debug("Checking personality %s %s service %s maps "
                                "for %s %s",
-                               self.dbhost.archetype.name,
-                               self.dbhost.personality.name,
+                               self.archetype.name,
+                               self.personality.name,
                                dbservice.name,
                                location.location_type.capitalize(),
                                location.name)
                     q = self.session.query(service_map)
-                    q = q.filter_by(personality=self.dbhost.personality)
+                    q = q.filter_by(personality=self.personality)
                 else:
                     self.debug("Checking service %s maps for %s %s",
                                dbservice.name,
@@ -254,7 +248,7 @@ class Chooser(object):
                     self.staging_services[dbservice] = instances
                     return
         self.error("Could not find a relevant service map for service %s "
-                   "on host %s", dbservice.name, self.dbhost.fqdn)
+                   "on %s", dbservice.name, self.description)
 
     def check_errors(self):
         if self.errors:
@@ -263,30 +257,8 @@ class Chooser(object):
             raise ArgumentError("\n".join(self.messages + self.errors))
 
     def choose_cluster_aligned(self, dbservice):
-        if dbservice not in self.cluster_aligned_services:
-            return
-        if not self.cluster_aligned_services[dbservice]:
-            self.debug("No instance set for %s cluster %s service %s",
-                       self.dbhost.cluster.cluster_type,
-                       self.dbhost.cluster.name,
-                       dbservice.name)
-            return
-        if self.cluster_aligned_services[dbservice] not in \
-           self.staging_services[dbservice]:
-            self.debug("The %s cluster %s is set to use service %s instance "
-                       "%s, but that instance is not in a service map for %s.",
-                       self.dbhost.cluster.cluster_type,
-                       self.dbhost.cluster.name,
-                       dbservice.name,
-                       self.cluster_aligned_services[dbservice].name,
-                       self.dbhost.fqdn)
-            return
-        self.debug("Chose service %s instance %s because it is cluster "
-                   "aligned.", dbservice.name,
-                   self.cluster_aligned_services[dbservice].name)
-        self.staging_services[dbservice] = [
-            self.cluster_aligned_services[dbservice]]
-        return
+        # Only implemented for hosts.
+        pass
 
     def choose_past_use(self, dbservice):
         """If more than one service instance was found in the maps,
@@ -434,11 +406,136 @@ class Chooser(object):
             if not self.chosen_services.get(service, None) or \
                self.chosen_services[service] != instance:
                 self.instances_unbound.add(instance)
-        for (service, instance) in self.cluster_aligned_services.items():
-            if not instance or instance != self.chosen_services[service]:
-                self.cluster_instances_bound.add(self.chosen_services[service])
-            if instance and instance != self.chosen_services[service]:
-                self.cluster_instances_unbound.add(instance)
+
+    def stash_services(self):
+        for instance in self.instances_bound.union(self.instances_unbound):
+            plenary = PlenaryServiceInstanceServer(instance.service, instance)
+            plenary.stash()
+            self.stashed.append(plenary)
+
+    def flush_changes(self):
+        self.session.flush()
+        self.session.refresh(self.dbobj)
+
+    def write_plenary_templates(self, locked=False):
+        try:
+            if not locked:
+                compileLock()
+            for instances in [self.instances_bound, self.instances_unbound]:
+                for instance in instances:
+                    plenary = PlenaryServiceInstanceServer(instance.service,
+                                                           instance)
+                    plenary.write(locked=True)
+            self.write_additional_templates(locked=True)
+        finally:
+            if not locked:
+                compileRelease()
+
+    def write_additional_templates(self, locked=False):
+        pass
+
+    def prestash_primary(self, plenary):
+        self.stashed.append(plenary)
+
+    def stash(self):
+        pass
+
+    def restore_stash(self):
+        for plenary in self.stashed:
+            plenary.restore_stash()
+
+
+class HostChooser(Chooser):
+    """Choose services for a host."""
+
+    def __init__(self, dbobj, *args, **kwargs):
+        """Provide initialization specific for host bindings."""
+        if not isinstance(dbobj, Host):
+            raise InternalError("HostChooser can only choose services for "
+                                "hosts, got %r (%s)" % (dbobj, type(dbobj)))
+        self.dbhost = dbobj
+        Chooser.__init__(self, dbobj, *args, **kwargs)
+        self.location = self.dbhost.location
+        self.archetype = self.dbhost.archetype
+        self.personality = self.dbhost.personality
+        self.required_services = set()
+        """Stores interim service instance lists."""
+        for item in self.archetype.service_list:
+            self.required_services.add(item.service)
+        for item in self.personality.service_list:
+            self.required_services.add(item.service)
+        self.dbservice_tld = Tld.get_unique(self.session, 'service')
+        if not self.dbservice_tld:
+            raise InternalError("No config path TLDs named 'service'.")
+        q = self.session.query(BuildItem).filter_by(host=self.dbhost)
+        q = q.join('cfg_path').filter_by(tld=self.dbservice_tld)
+        self.original_service_build_items = q.all()
+        """Cache of the build_items related to services."""
+        self.original_service_instances = {}
+        """Cache of any already bound services (keys) and the instance
+        that was bound (values).
+        """
+        for dbbi in self.original_service_build_items:
+            if not dbbi.cfg_path.svc_inst:
+                self.error("Internal Error: %s bound to template %s "
+                           "which is missing a service instance aqdb entry." %
+                           (self.description, dbbi.cfg_path))
+                continue
+            self.original_service_instances[dbbi.cfg_path.svc_inst.service] = \
+                    dbbi.cfg_path.svc_inst
+            self.debug("%s original binding: %s",
+                       self.description, dbbi.cfg_path)
+        self.cluster_aligned_services = {}
+        if self.dbhost.cluster:
+            # Note that cluster services are currently ignored unless
+            # they are otherwise required by the archetype/personality.
+            for si in self.dbhost.cluster.service_bindings:
+                self.cluster_aligned_services[si.service] = si
+            q = self.session.query(ClusterAlignedService)
+            q = q.filter_by(cluster_type=self.dbhost.cluster.cluster_type)
+            for item in q.all():
+                if item.service not in self.cluster_aligned_services:
+                    # Don't just error here because the error() call
+                    # has not yet been set up.  Will error out later.
+                    self.cluster_aligned_services[item.service] = None
+                # Went back and forth on this... deciding not to force
+                # an aligned service as required.  This should give
+                # flexibility for multiple services to be aligned for
+                # a cluster type without being forced on all the
+                # personalities.
+                #self.required_services.add(item.service)
+
+    def generate_description(self):
+        return "host %s" % self.dbhost.fqdn
+
+    def choose_cluster_aligned(self, dbservice):
+        if dbservice not in self.cluster_aligned_services:
+            return
+        if not self.cluster_aligned_services[dbservice]:
+            self.error("No instance set for %s cluster %s aligned service %s."
+                       "  Please run `make cluster --cluster %s` to resolve.",
+                       self.dbhost.cluster.cluster_type,
+                       self.dbhost.cluster.name,
+                       dbservice.name,
+                       self.dbhost.cluster.name)
+            return
+        # FIXME: Is this check necessary and/or desireable?
+        if self.cluster_aligned_services[dbservice] not in \
+           self.staging_services[dbservice]:
+            self.debug("The %s cluster %s is set to use service %s instance "
+                       "%s, but that instance is not in a service map for %s.",
+                       self.dbhost.cluster.cluster_type,
+                       self.dbhost.cluster.name,
+                       dbservice.name,
+                       self.cluster_aligned_services[dbservice].name,
+                       self.dbhost.fqdn)
+            return
+        self.debug("Chose service %s instance %s because it is cluster "
+                   "aligned.", dbservice.name,
+                   self.cluster_aligned_services[dbservice].name)
+        self.staging_services[dbservice] = [
+            self.cluster_aligned_services[dbservice]]
+        return
 
     def apply_changes(self):
         """Update the host object with pending changes."""
@@ -449,7 +546,7 @@ class Chooser(object):
                 max_position = bi.position
         for instance in self.instances_bound:
             self.info("%s adding binding for service %s instance %s",
-                       self.dbhost.fqdn,
+                       self.description,
                        instance.service.name, instance.name)
             if self.original_service_instances.get(instance.service, None):
                 previous = None
@@ -471,7 +568,7 @@ class Chooser(object):
             self.dbhost.templates.append(bi)
         for instance in self.instances_unbound:
             self.info("%s removing binding for service %s instance %s",
-                       self.dbhost.fqdn,
+                       self.description,
                        instance.service.name, instance.name)
             if self.chosen_services.get(instance.service, None):
                 # We have a replacement, no need to remove BuildItem
@@ -494,39 +591,104 @@ class Chooser(object):
             #   self.dbhost.templates[0].cfg_path.tld.type == 'os':
             #    self.dbhost.templates._reorder()
             self.session.add(self.dbhost)
-        for instance in self.cluster_instances_unbound:
+
+    def stash(self):
+        if not self.stashed:
+            plenary_host = PlenaryHost(self.dbhost)
+            plenary_host.stash()
+            self.stashed.append(plenary_host)
+
+    def write_additional_templates(self, locked=False):
+        plenary = PlenaryHost(self.dbhost)
+        try:
+            plenary.write(locked=locked)
+        except IncompleteError, e:
+            pass
+
+
+class ClusterChooser(Chooser):
+    """Choose services for a cluster."""
+
+    def __init__(self, dbobj, *args, **kwargs):
+        """Provide initialization specific for cluster bindings."""
+        if not isinstance(dbobj, Cluster):
+            raise InternalError("ClusterChooser can only choose services for "
+                                "clusters, got %r (%s)" % (dbobj, type(dbobj)))
+        self.dbcluster = dbobj
+        Chooser.__init__(self, dbobj, *args, **kwargs)
+        self.location = self.dbcluster.location_constraint
+        self.archetype = self.dbcluster.personality.archetype
+        self.personality = self.dbcluster.personality
+        self.required_services = set()
+        """Stores interim service instance lists."""
+        q = self.session.query(ClusterAlignedService)
+        q = q.filter_by(cluster_type=self.dbcluster.cluster_type)
+        for item in q.all():
+            self.required_services.add(item.service)
+        self.original_service_instances = {}
+        """Cache of any already bound services (keys) and the instance
+        that was bound (values).
+        """
+        for si in self.dbcluster.service_bindings:
+            self.original_service_instances[si.service] = si
+            self.debug("%s original binding: %s",
+                       self.description, si.cfg_path)
+
+    def generate_description(self):
+        return "%s cluster %s" % (self.dbcluster.cluster_type,
+                                  self.dbcluster.name)
+
+    def apply_changes(self):
+        """Update the cluster object with pending changes."""
+        for instance in self.instances_unbound:
+            self.info("%s removing binding for service %s instance %s",
+                       self.description,
+                       instance.service.name, instance.name)
             dbcs = ClusterServiceBinding.get_unique(
-                cluster_id=self.dbhost.cluster.id,
+                cluster_id=self.dbcluster.id,
                 service_instance_id=instance.id)
             if dbcs:
                 self.session.delete(dbcs)
-        for instance in self.cluster_instances_bound:
-            # XXX: New binding should propagate out to other cluster
-            # members but currently does not.
-            dbcs = ClusterServiceBinding(cluster=self.dbhost.cluster,
+            else:
+                self.error("Internal Error: Could not unbind "
+                           "service %s instance %s" %
+                           (instance.service.name, instance.name))
+        for instance in self.instances_bound:
+            self.info("%s adding binding for service %s instance %s",
+                       self.description,
+                       instance.service.name, instance.name)
+            dbcs = ClusterServiceBinding(cluster=self.dbcluster,
                                          service_instance=instance)
             self.session.add(dbcs)
+            self.flush_changes()
+            for h in self.dbcluster.hosts:
+                host_plenary = PlenaryHost(h)
+                host_plenary.stash()
+                self.stashed.append(host_plenary)
+                host_chooser = Chooser(dbhost, required_only=False,
+                                       debug=self.is_debug_enabled)
+                host_chooser.set_single(instance.service, instance, force=True)
+                host_chooser.flush_changes()
+                # FIXME: Merge host_chooser debug_info with self.debug_info?
+                # Note, host plenary will be written later.
+        if self.instances_bound or self.instances_unbound:
+            self.session.add(self.dbcluster)
 
-    def flush_changes(self):
-        self.session.flush()
-        self.session.refresh(self.dbhost)
-        if self.dbhost.cluster:
-            self.session.refresh(self.dbhost.cluster)
+    def stash(self):
+        if not self.stashed:
+            plenary_cluster = PlenaryCluster(self.dbcluster)
+            plenary_cluster.stash()
+            self.stashed.append(plenary_cluster)
 
-    def write_plenary_templates(self, locked=False):
-        try:
-            if not locked:
-                compileLock()
-            for instances in [self.instances_bound, self.instances_unbound]:
-                for instance in instances:
-                    plenary = PlenaryServiceInstanceServer(instance.service,
-                                                           instance)
-                    plenary.write(locked=True)
-            if self.cluster_instances_bound:
-                plenary = PlenaryCluster(self.dbhost.cluster)
-                plenary.write(locked=True)
-        finally:
-            if not locked:
-                compileRelease()
+    def write_additional_templates(self, locked=False):
+        plenary = PlenaryCluster(self.dbcluster)
+        plenary.write(locked=locked)
+        if self.instances_bound:
+            for h in self.dbcluster.hosts:
+                plenary = PlenaryHost(self.dbhost)
+                try:
+                    plenary.write(locked=locked)
+                except IncompleteError, e:
+                    pass
 
 

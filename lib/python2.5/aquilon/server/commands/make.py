@@ -53,7 +53,6 @@ class CommandMake(BrokerCommand):
         # which means that we will wait until any outstanding compiles
         # have completed before we start modifying files within template
         # domains.
-        old_content = None
         chooser = None
         try:
             compileLock()
@@ -112,24 +111,17 @@ class CommandMake(BrokerCommand):
                 chooser = Chooser(dbhost, required_only=False, debug=debug)
             else:
                 chooser = Chooser(dbhost, required_only=True, debug=debug)
+            chooser.prestash_primary(plenary_host)
             chooser.set_required()
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)
 
-            newplenary = PlenaryHost(dbhost)
-            newplenary.write(locked=True)
-
             td = TemplateDomain(dbhost.domain)
-            out = td.compile(session, only=dbhost, locked=True)
+            out = td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
-            plenary_host.restore_stash()
-
-            # Black magic... sqlalchemy objects will re-vivify after a
-            # rollback based on id.
             if chooser:
-                session.rollback()
-                chooser.write_plenary_templates(locked=True)
+                chooser.restore_stash()
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.

@@ -105,14 +105,15 @@ class TestBindESXCluster(TestBrokerCommand):
                          "esx cluster 'cluster-does-not-exist' not found.",
                          command)
 
-    def testfailbindnonaligned(self):
-        command = ["bind_esx_cluster", "--cluster=utecl3",
-                   "--service=afs", "--instance=q.ny.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Cannot bind a cluster to a service that "
-                         "is not cluster aligned.",
-                         command)
+    # FIXME: This is now allowed...
+    #def testfailbindnonaligned(self):
+    #   command = ["bind_esx_cluster", "--cluster=utecl3",
+    #              "--service=afs", "--instance=q.ny.ms.com"]
+    #   out = self.badrequesttest(command)
+    #   self.matchoutput(out,
+    #                    "Cannot bind a cluster to a service that "
+    #                    "is not cluster aligned.",
+    #                    command)
 
     # FIXME: Add more tests for binding a service instance.
 

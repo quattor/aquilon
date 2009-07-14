@@ -1700,6 +1700,26 @@
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
 
+   <command name="make_cluster">
+      Build a cluster configuration.  Any cluster aligned services which
+      are not bound will cause an implicit bind_cluster to occur.  Any
+      services that are not listed as aligned for the cluster type
+      are dropped unless the --keepbindings flag is specified.  The cluster
+      information will be compiled into a working configuration.  Any
+      errors in creating the configuration will be printed to the screen
+      and cause the command to fail.  If the configuration is successfully
+      created, then the new configuration may be "advertised" to the cluster
+      itself, to the data warehouse and to the bootservers, making the
+      cluster ready to build.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name to make</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
+      </optgroup>
+      <transport method="post" path="cluster/%(cluster)s/command/make" />
+   </command>
+
    <command name="add_machine">
       Create a new machine at a given location.
 

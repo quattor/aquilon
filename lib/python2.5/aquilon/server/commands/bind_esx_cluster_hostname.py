@@ -66,6 +66,8 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                     "'%s'." %
                                     (hostname, dbhost.cluster.cluster_type,
                                      dbhost.cluster.name))
+            # FIXME: Check that domains and service instances match.
+            # SI might be done with the chooser...
             old_cluster = dbhost.cluster
             dbhcm = HostClusterMember.get_unique(session,
                                                  cluster_id=old_cluster.id,
