@@ -30,12 +30,12 @@
 
 
 from aquilon.config import Config
-from aquilon.exceptions_ import IncompleteError, InternalError
-from aquilon.server.templates.base import Plenary
+from aquilon.exceptions_ import IncompleteError
+from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
 
-class PlenaryHost(Plenary):
+class PlenaryHost(PlenaryCollection):
     """
     A facade for Toplevel and Namespaced Hosts (below).
 
@@ -47,37 +47,12 @@ class PlenaryHost(Plenary):
       if host profiles should be put into a "flat" toplevel (non-namespaced)
     """
     def __init__(self, dbhost):
-        self.plenaries = []
+        PlenaryCollection.__init__(self)
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
             self.plenaries.append(PlenaryNamespacedHost(dbhost))
         if self.config.getboolean("broker", "flat_host_profiles"):
             self.plenaries.append(PlenaryToplevelHost(dbhost))
-
-    def stash(self):
-        for plen in self.plenaries:
-            plen.stash()
-
-    def restore_stash(self):
-        for plen in self.plenaries:
-            plen.restore_stash()
-
-    def write(self, dir=None, user=None, locked=False, content=None):
-        for plen in self.plenaries:
-            plen.write(dir, user, locked, content)
-
-    def remove(self, dir=None, locked=False):
-        for plen in self.plenaries:
-            plen.remove(dir, locked)
-
-    def cleanup(self, name, domain, locked=False):
-        for plen in self.plenaries:
-            plen.cleanup(name, domain, locked)
-
-    def read(self):
-        # This should never be called, but we put it here
-        # just in-case, since the base-class method is inappropriate.
-        raise InternalError
 
 
 class PlenaryToplevelHost(Plenary):

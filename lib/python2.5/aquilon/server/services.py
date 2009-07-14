@@ -39,7 +39,7 @@ from aquilon.aqdb.model import (Tld, BuildItem, ServiceMap,
                                 PersonalityServiceMap, ClusterServiceBinding,
                                 ClusterAlignedService)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
-from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.base import compileLock, compileRelease
 
 
@@ -501,7 +501,7 @@ class Chooser(object):
             if dbcs:
                 self.session.delete(dbcs)
         for instance in self.cluster_instances_bound:
-            # XXX: New binding should propogate out to other cluster
+            # XXX: New binding should propagate out to other cluster
             # members but currently does not.
             dbcs = ClusterServiceBinding(cluster=self.dbhost.cluster,
                                          service_instance=instance)
@@ -523,7 +523,8 @@ class Chooser(object):
                                                            instance)
                     plenary.write(locked=True)
             if self.cluster_instances_bound:
-                refresh_cluster_plenaries(self.dbhost.cluster, locked=True)
+                plenary = PlenaryCluster(self.dbhost.cluster)
+                plenary.write(locked=True)
         finally:
             if not locked:
                 compileRelease()

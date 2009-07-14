@@ -35,7 +35,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.cluster import PlenaryCluster
 
 
 class CommandDelMachine(BrokerCommand):
@@ -69,7 +69,8 @@ class CommandDelMachine(BrokerCommand):
 
         if dbcluster:
             session.refresh(dbcluster)
-            refresh_cluster_plenaries(dbcluster)
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write()
 
         return
 

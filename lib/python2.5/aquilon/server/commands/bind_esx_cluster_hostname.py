@@ -32,7 +32,7 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import EsxCluster, HostClusterMember
-from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.cluster import PlenaryCluster
 
 
 class CommandBindESXClusterHostname(BrokerCommand):
@@ -98,8 +98,8 @@ class CommandBindESXClusterHostname(BrokerCommand):
 
         session.flush()
         session.refresh(dbcluster)
-
-        refresh_cluster_plenaries(dbcluster)
+        plenary = PlenaryCluster(dbcluster)
+        plenary.write()
         return
 
 

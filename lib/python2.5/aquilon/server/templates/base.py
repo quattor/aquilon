@@ -33,7 +33,7 @@ import os
 from threading import Lock
 
 from twisted.python import log
-
+from aquilon.exceptions_ import InternalError
 from aquilon.config import Config
 from aquilon.server.processes import write_file, read_file, remove_file
 
@@ -84,13 +84,21 @@ class Plenary(object):
         pass
 
     def write(self, dir=None, user=None, locked=False, content=None):
+        """
+        write out the template.
+
+        Writes out the template. If the content is unchanged, then
+        the file will not be modified (preserving the mtime).
+        Returns the number of files that were written
+        """
+
         if dir is not None:
             self.dir = dir
         # user is simply left for compatibility: it's no longer used
         if (hasattr(self, "machine_type") and
                 getattr(self, "machine_type") == 'aurora_node'):
             # Don't bother writing plenary files for dummy aurora hardware.
-            return
+            return 0
 
         if content is None:
             lines = []
@@ -109,7 +117,7 @@ class Plenary(object):
         if os.path.exists(plenary_file):
             old = self.read()
             if (old == content):
-                return
+                return 0
             
         if (not locked):
             compileLock()
@@ -120,6 +128,8 @@ class Plenary(object):
         finally:
             if (not locked):
                 compileRelease()
+
+        return 1
 
     def read(self, dir=None):
         if dir is not None:
@@ -176,3 +186,40 @@ class Plenary(object):
             self.write(locked=True, content=self.old_content)
             atime = os.stat(self.pathname()).st_atime
             os.utime(self.pathname(), (atime, self.old_mtime))
+
+class PlenaryCollection():
+    """
+    A collection of plenary templates, presented behind a single
+    facade to make them appear as one template to the caller. To use,
+    subclass from this and append the real template objects into
+    self.plenaries.
+    """
+    def __init__(self):
+        self.plenaries = []
+
+    def stash(self):
+        for plen in self.plenaries:
+            plen.stash()
+
+    def restore_stash(self):
+        for plen in self.plenaries:
+            plen.restore_stash()
+
+    def write(self, dir=None, user=None, locked=False, content=None):
+        total = 0
+        for plen in self.plenaries:
+            total += plen.write(dir, user, locked, content)
+        return total
+
+    def remove(self, dir=None, locked=False):
+        for plen in self.plenaries:
+            plen.remove(dir, locked)
+
+    def cleanup(self, name, domain, locked=False):
+        for plen in self.plenaries:
+            plen.cleanup(name, domain, locked)
+
+    def read(self):
+        # This should never be called, but we put it here
+        # just in-case, since the base-class method is inappropriate.
+        raise InternalError

@@ -40,7 +40,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
                                 Cluster, MachineClusterMember)
@@ -190,9 +190,11 @@ class CommandUpdateMachine(BrokerCommand):
             if cluster:
                 if old_cluster:
                     session.refresh(old_cluster)
-                    refresh_cluster_plenaries(old_cluster, locked=True)
+                    plenary = PlenaryCluster(old_cluster)
+                    plenary.write(locked=True)
                 session.refresh(dbcluster)
-                refresh_cluster_plenaries(dbcluster, locked=True)
+                plenary = PlenaryCluster(dbcluster)
+                plenary.write(locked=True)
         finally:
             compileRelease()
 

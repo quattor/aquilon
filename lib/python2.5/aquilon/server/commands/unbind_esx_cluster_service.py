@@ -33,7 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, ClusterServiceBinding
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.cluster import PlenaryCluster
 
 
 class CommandUnbindESXClusterService(BrokerCommand):
@@ -64,7 +64,8 @@ class CommandUnbindESXClusterService(BrokerCommand):
 
         session.refresh(dbcluster)
 
-        refresh_cluster_plenaries(dbcluster)
+        plenary = PlenaryCluster(dbcluster)
+        plenary.write()
         return
 
 

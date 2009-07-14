@@ -31,8 +31,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.aqdb.model import Cluster
-from aquilon.server.templates.cluster import (PlenaryCluster,
-                                              refresh_cluster_plenaries)
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.exceptions_ import IncompleteError, NotFoundException
@@ -71,16 +70,16 @@ class CommandManageCluster(BrokerCommand):
             # to compile, however (esp. if there was no existing template), we
             # have to be aware that there might not be enough information yet
             # with which we can create a template
-            try:
-                refresh_cluster_plenaries(dbcluster, locked=True)
-                for host in dbcluster.hosts:
+            plenary = PlenaryCluster(dbcluster, locked=True)
+            plenary.write(locked=True)
+            for host in dbcluster.hosts:
+                try:
                     plenary = PlenaryHost(host)
                     plenary.write(locked=True)
-
-            except IncompleteError, e:
-                # This template cannot be written, we leave it alone
-                # It would be nice to flag the state in the the host?
-                pass
+                except IncompleteError, e:
+                    # This template cannot be written, we leave it alone
+                    # It would be nice to flag the state in the the host?
+                    pass
 
         finally:
             compileRelease()

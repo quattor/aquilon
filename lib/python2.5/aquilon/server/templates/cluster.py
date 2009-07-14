@@ -28,7 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.templates.base import Plenary, compileLock, compileRelease
+from aquilon.server.templates.base import (Plenary, PlenaryCollection,
+                                            compileLock, compileRelease)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
@@ -98,7 +99,18 @@ class PlenaryMetaClusterClientData(Plenary):
                                 for cluster in self.clients]) +
                      ");")
 
-class PlenaryCluster(Plenary):
+
+class PlenaryCluster(PlenaryCollection):
+    """
+    A facade for the variety of PlenaryCluster subsidiary files
+    """
+    def __init__(self, dbcluster):
+        PlenaryCollection.__init__(self)
+        self.plenaries.append(PlenaryClusterObject(dbcluster))
+        self.plenaries.append(PlenaryClusterClient(dbcluster))
+
+
+class PlenaryClusterObject(Plenary):
     """
     A cluster has its own output profile, so the plenary cluster template
     is an object template that includes the data about which machines
@@ -178,12 +190,6 @@ def get_metacluster_plenaries(metacluster):
         plenaries.append(p(metacluster))
     return plenaries
 
-def get_cluster_plenaries(cluster):
-    plenaries = []
-    for plenary in PlenaryCluster, PlenaryClusterClient:
-        plenaries.append(plenary(cluster))
-    return plenaries
-
 def refresh_metacluster_plenaries(metacluster, locked=True):
     plenaries = get_metacluster_plenaries(metacluster)
     count = 0
@@ -197,19 +203,3 @@ def refresh_metacluster_plenaries(metacluster, locked=True):
         if not locked:
             compileRelease()
     return count
-
-def refresh_cluster_plenaries(cluster, locked=True):
-    plenaries = get_cluster_plenaries(cluster)
-    count = 0
-    try:
-        if not locked:
-            compileLock()
-        for p in plenaries:
-            p.write(locked=True)
-            count = count + 1
-    finally:
-        if not locked:
-            compileRelease()
-    return count
-
-

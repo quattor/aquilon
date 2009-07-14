@@ -34,7 +34,7 @@ from aquilon.aqdb.model import (Service, Machine, Domain, Personality,
                                 Cluster, MetaCluster)
 from twisted.python import log
 from aquilon.server.templates.personality import PlenaryPersonality
-from aquilon.server.templates.cluster import (refresh_cluster_plenaries,
+from aquilon.server.templates.cluster import (PlenaryCluster,
                                               refresh_metacluster_plenaries)
 from aquilon.server.templates.service import (PlenaryService, PlenaryServiceInstance,
                                               PlenaryServiceInstanceServer,
@@ -60,28 +60,26 @@ class CommandFlush(BrokerCommand):
             log.msg("flushing services")
             for dbservice in session.query(Service).all():
                 try:
-                    total += 3
                     plenary_info = PlenaryService(dbservice)
-                    plenary_info.write(locked=True)
+                    total += plenary_info.write(locked=True)
                     plenary_info = PlenaryServiceClientDefault(dbservice)
-                    plenary_info.write(locked=True)
+                    total += plenary_info.write(locked=True)
                     plenary_info = PlenaryServiceServerDefault(dbservice)
-                    plenary_info.write(locked=True)
+                    total += plenary_info.write(locked=True)
                 except Exception, e:
                     failed.append("service %s failed: %s" % (dbservice.name, e))
                     continue
 
                 for dbinst in dbservice.instances:
                     try:
-                        total += 4
                         plenary_info = PlenaryServiceInstance(dbservice, dbinst)
-                        plenary_info.write(locked=True)
+                        total += plenary_info.write(locked=True)
                         plenary_info = PlenaryServiceInstanceServer(dbservice, dbinst)
-                        plenary_info.write(locked=True)
+                        total += plenary_info.write(locked=True)
                         plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbinst)
-                        plenary_info.write(locked=True)
+                        total += plenary_info.write(locked=True)
                         plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbinst)
-                        plenary_info.write(locked=True)
+                        total += plenary_info.write(locked=True)
                     except Exception, e:
                         failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
                         continue
@@ -90,8 +88,7 @@ class CommandFlush(BrokerCommand):
             for persona in session.query(Personality).all():
                 try:
                     plenary_info = PlenaryPersonality(persona)
-                    plenary_info.write(locked=True)
-                    total += 1
+                    total += plenary_info.write(locked=True)
                 except Exception, e:
                     failed.append("personality %s failed: %s" %
                                   (persona.name, e))
@@ -100,9 +97,8 @@ class CommandFlush(BrokerCommand):
             log.msg("flushing machines")
             for machine in session.query(Machine).all():
                 try:
-                    total += 1
                     plenary_info = PlenaryMachineInfo(machine)
-                    plenary_info.write(locked=True)
+                    total += plenary_info.write(locked=True)
                 except Exception, e:
                     label = machine.name
                     if machine.host:
@@ -116,9 +112,8 @@ class CommandFlush(BrokerCommand):
             for d in session.query(Domain).all():
                 for h in d.hosts:
                     try:
-                        total += 1
                         plenary_host = PlenaryHost(h)
-                        plenary_host.write(locked=True)
+                        total += plenary_host.write(locked=True)
                     except IncompleteError, e:
                         pass
                         #log.msg("Not flushing host: %s" % e)
@@ -127,7 +122,8 @@ class CommandFlush(BrokerCommand):
 
             for clus in session.query(Cluster).all():
                 try:
-                    total += refresh_cluster_plenaries(clus, locked=True)
+                    plenary = PlenaryCluster(clus)
+                    total += plenary.write(locked=True)
                 except Exception, e:
                     failed.append("%s cluster %s failed: %s" %
                                   (clus.cluster_type, clus.name, e))

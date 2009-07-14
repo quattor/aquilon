@@ -34,7 +34,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import (refresh_metacluster_plenaries,
-                                              refresh_cluster_plenaries)
+                                              PlenaryCluster)
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.dbwrappers.domain import verify_domain
 
@@ -105,7 +105,8 @@ class CommandAddESXCluster(BrokerCommand):
         try:
             compileLock()
             refresh_metacluster_plenaries(dbcluster.metacluster, locked=True)
-            refresh_cluster_plenaries(dbcluster, locked=True)
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write(locked=True)
         finally:
             compileRelease()
 

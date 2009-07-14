@@ -36,7 +36,7 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.cluster import refresh_cluster_plenaries
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster,
                                 MachineClusterMember)
 
@@ -143,5 +143,6 @@ class CommandAddMachine(BrokerCommand):
             session.refresh(dbmachine.cluster)
             # If we allow shares to be specified at this point then
             # may also need to write out the metacluster plenary...
-            refresh_cluster_plenaries(dbcluster)
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write()
         return

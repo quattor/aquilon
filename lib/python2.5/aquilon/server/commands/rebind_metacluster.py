@@ -32,7 +32,7 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import MetaCluster, Cluster, MetaClusterMember
 from aquilon.server.templates.cluster import (refresh_metacluster_plenaries,
-                                              refresh_cluster_plenaries)
+                                              PlenaryCluster)
 from aquilon.server.templates.base import compileLock, compileRelease
 
 
@@ -82,7 +82,8 @@ class CommandRebindMetaCluster(BrokerCommand):
             compileLock()
             refresh_metacluster_plenaries(dbmetacluster, locked=True)
             refresh_metacluster_plenaries(old_metacluster, locked=True)
-            refresh_cluster_plenaries(dbcluster, locked=True)
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write(locked=True)
         finally:
             compileRelease()
 

@@ -116,8 +116,8 @@ class CommandMake(BrokerCommand):
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)
 
-            plenary_host = PlenaryHost(dbhost)
-            plenary_host.write(locked=True)
+            newplenary = PlenaryHost(dbhost)
+            newplenary.write(locked=True)
 
             td = TemplateDomain(dbhost.domain)
             out = td.compile(session, only=dbhost, locked=True)
