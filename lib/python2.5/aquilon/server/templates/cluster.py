@@ -132,9 +132,6 @@ class PlenaryClusterObject(Plenary):
 
     def cleanup(self, name, domain, locked=False):
         Plenary.cleanup(self, name, domain, locked)
-        # And the other plenary files....
-        client = PlenaryClusterClient(self.dbcluster)
-        client.remove(None, locked)
 
     def body(self, lines):
         fname = "body_%s" % self.dbcluster.cluster_type
