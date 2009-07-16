@@ -75,8 +75,9 @@ def force_yes(msg):
         sys.exit(1)
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hdc:",
-                               ["help", "debug", "config=", "coverage"])
+    opts, args = getopt.getopt(sys.argv[1:], "hdc:vq",
+                               ["help", "debug", "config=", "coverage",
+                                "verbose", "quiet"])
 except getopt.GetoptError, e:
     print >>sys.stderr, str(e)
     usage()
@@ -84,6 +85,7 @@ except getopt.GetoptError, e:
 
 configfile = default_configfile
 coverage = False
+verbosity = 1
 for o, a in opts:
     if o in ("-h", "--help"):
         usage()
@@ -95,6 +97,10 @@ for o, a in opts:
         configfile = a
     elif o in ("--coverage"):
         coverage = True
+    elif o in ("-v", "--verbose"):
+        verbosity += 1
+    elif o in ("-q", "--quiet"):
+        verbosity -= 1
     else:
         assert False, "unhandled option"
 
@@ -197,12 +203,21 @@ rc = p.wait()
 
 
 class VerboseTextTestResult(unittest._TextTestResult):
+    def printResult(self, flavour, result):
+        (test, err) = result
+        self.stream.writeln()
+        self.stream.writeln(self.separator1)
+        self.stream.writeln("%s: %s" % (flavour, self.getDescription(test)))
+        self.stream.writeln(self.separator2)
+        self.stream.writeln("%s" % err)
+
     def addError(self, test, err):
-        unittest._TextTestResult.addError(self, test, err)
+        unittest.TestResult.addError(self, test, err)
+        self.printResult("ERROR", self.errors[-1])
 
     def addFailure(self, test, err):
-        unittest._TextTestResult.addFailure(self, test, err)
-        self.stream.writeln("%s" % self.failures[-1][1])
+        unittest.TestResult.addFailure(self, test, err)
+        self.printResult("FAIL", self.failures[-1])
 
 
 class VerboseTextTestRunner(unittest.TextTestRunner):
@@ -215,4 +230,4 @@ suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
-VerboseTextTestRunner(verbosity=2).run(suite)
+VerboseTextTestRunner(verbosity=verbosity).run(suite)
