@@ -13,6 +13,8 @@
 	<property name="panc.version" value="8.2.8-ms1" />
 	<property name="panc.batch.size" value="1000" />
 	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/common/lib/panc.jar" />
+	<property name="ant-contrib.version" value="1.0b2" />
+	<property name="ant-contrib.jar" location="/ms/dist/msjava/PROJ/ant-contrib/${ant-contrib.version}/common/lib/ant-contrib.jar" />
 	<property name="force.build" value="false" />
 
 	<!--
@@ -46,7 +48,10 @@
 	GNUMakefile.build and is no longer used.
 	-->
 
+	<!-- pulls in the panc task -->
 	<taskdef resource="org/quattor/ant/panc-ant.xml" classpath="${panc.jar}" />
+	<!-- pulls in the var and for tasks -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${ant-contrib.jar}" />
 
 	<path id="pan.objectloadpath">
 		<pathelement location="${domain.templates}" />
@@ -69,7 +74,15 @@
 	it is set on the command line.
 	-->
 	<target name="delete.object.dep" description="remove object dep file" if="clean.dep.files">
-		<delete file="${compiled.profiles}/${object.profile}.xml.dep" failonerror="false" />
+		<var name="delete.dep.includes" value="" />
+		<for list="${object.profile}" delimiter=" " param="profile">
+			<sequential>
+				<var name="delete.dep.includes" value="${compiled.includes} @{profile}.xml.dep" />
+			</sequential>
+		</for>
+		<delete failonerror="false">
+			<fileset dir="${compiled.profiles}" includes="${delete.dep.includes}" />
+		</delete>
 	</target>
 
 	<!-- See comment above delete.object.dep. -->
@@ -90,14 +103,26 @@
 	</target>
 
 	<target name="compile.object.profile" description="optimized for compiling a single profile" depends="-verify.object.profile,delete.object.dep">
+		<var name="source.includes" value="" />
+		<var name="compiled.includes" value="" />
+		<for list="${object.profile}" delimiter=" " param="profile">
+			<sequential>
+				<var name="source.includes" value="${source.includes} @{profile}.tpl" />
+				<var name="compiled.includes" value="${compiled.includes} @{profile}.xml" />
+			</sequential>
+		</for>
 		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}">
 			<path refid="pan.objectloadpath" />
-			<fileset dir="${source.profiles}" includes="${object.profile}.tpl" />
+			<fileset dir="${source.profiles}" includes="${source.includes}" />
 		</panc>
 		<!-- Cache the valid profile in the global pool. -->
-		<copy file="${source.profiles}/${object.profile}.tpl" todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}" />
+		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
+			<fileset dir="${source.profiles}" includes="${source.includes}" />
+		</copy>
 		<!-- Copy the compiled profile into the web directory.  -->
-		<copy file="${compiled.profiles}/${object.profile}.xml" todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}" />
+		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}" >
+			<fileset dir="${compiled.profiles}" includes="${compiled.includes}" />
+		</copy>
 	</target>
 
 	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
