@@ -37,9 +37,10 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         ForeignKey, UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm.session import object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base, Cluster
+from aquilon.aqdb.model import Base, Cluster, ServiceInstance
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 def _metacluster_member_by_cluster(cl):
@@ -65,6 +66,14 @@ class MetaCluster(Base):
 
     members = association_proxy('clusters', 'cluster',
                                 creator=_metacluster_member_by_cluster)
+
+    @property
+    def shares(self):
+        q = object_session(self).query(ServiceInstance)
+        q = q.join(['nas_disks', 'machine', '_cluster', 'cluster',
+                    '_metacluster'])
+        q = q.filter_by(metacluster=self)
+        return q.all()
 
 metacluster = MetaCluster.__table__
 metacluster.primary_key.name = '%s_pk'% (_MCT)
