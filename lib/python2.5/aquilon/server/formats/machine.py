@@ -73,8 +73,12 @@ class MachineFormatter(ObjectFormatter):
         if machine.serial_no:
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in machine.disks:
-            details.append(indent + "  Disk: %s %d GB %s"
-                    % (d.device_name, d.capacity, d.controller_type))
+            extra = d.disk_type
+            if d.disk_type == "nas":
+                extra = extra + " from " + d.service_instance.name
+            details.append(indent + "  Disk: %s %d GB %s (%s)"
+                    % (d.device_name, d.capacity, d.controller_type,
+                       extra))
         for i in machine.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:

@@ -29,29 +29,46 @@
 """Contains the logic for `aq add disk`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+import re
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from sqlalchemy.exceptions import InvalidRequestError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.aqdb.model import Disk, LocalDisk
+from aquilon.server.dbwrappers.service import get_service
+from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.aqdb.model import Disk, LocalDisk, NasDisk
 from aquilon.server.templates.machine import PlenaryMachineInfo
-
 
 class CommandAddDisk(BrokerCommand):
 
     required_parameters = ["machine", "disk", "type", "capacity"]
 
-    def render(self, session, machine, disk, type, capacity, comments,
-            user, **arguments):
+    def render(self, session, machine, disk, type, capacity, share, address,
+               comments, user, **arguments):
 
         dbmachine = get_machine(session, machine)
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
         if (len(d) != 0):
             raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))
 
+
         capacity = force_int("capacity", capacity)
-        dbdisk = LocalDisk(machine=dbmachine, device_name=disk,
+        if share:
+            dbservice = get_service(session, "nas_disk_share")
+            dbshare = get_service_instance(session, dbservice, share)
+            if not re.compile("\d+:\d+$").match(address):
+                raise ArgumentError("disk address '%s' is illegal: must be " \
+                                    "\d+:\d+ (e.g. 0:0)" % address)
+            dbdisk = NasDisk(machine=dbmachine,
+                             device_name=disk,
+                             controller_type=type,
+                             service_instance=dbshare,
+                             capacity=capacity,
+                             address=address,
+                             comments=comments)
+        else:
+            dbdisk = LocalDisk(machine=dbmachine, device_name=disk,
                 controller_type=type, capacity=capacity, comments=comments)
         try:
             session.add(dbdisk)

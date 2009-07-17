@@ -92,6 +92,14 @@ class NasDisk(Disk):
     __mapper_args__ = {'polymorphic_identity': 'nas'}
 
     """
+    We need to know the bus address of each disk.
+    This isn't really nullable, but single-table inheritance means
+    that the base class will end up with the column and the base class
+    wants it to be nullable. We enforce this via __init__ instead.
+    """
+    address = Column(AqStr(128), nullable=True)
+
+    """
         No cascade delete here: we want to restrict any attempt to delete
         any service instance that has client dependencies.
     """
@@ -103,6 +111,11 @@ class NasDisk(Disk):
 #    TODO: double check property values on forward and backrefs before commit
 #        cascade ops too
     service_instance = relation(ServiceInstance, backref='nas_disks')
+
+    def __init__(self, **kw):
+        if 'address' not in kw:
+            raise ValueError("address is mandatory for nas disks")
+        super(NasDisk, self).__init__(**kw)
 
     def __repr__(self):
         return '%s <machine %s %s /dev/%s %s GB provided by %s> '% (

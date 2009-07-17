@@ -71,12 +71,26 @@ class PlenaryMachineInfo(Plenary):
         self.num_cpus = dbmachine.cpu_quantity
         self.cpu_relpath = "hardware/cpu/%s/%s" % (
                 dbmachine.cpu.vendor.name, dbmachine.cpu.name)
-        harddisks = []
-        for harddisk in dbmachine.disks:
-            relpath = "hardware/harddisk/generic/%s" % harddisk.controller_type
-            harddisks.append({"relpath":relpath, "capacity":harddisk.capacity,
-                "name":harddisk.device_name})
-        self.harddisks = harddisks
+
+        self.disks = dict()
+        for disk in dbmachine.disks:
+            if disk.disk_type == 'local':
+                relpath = "hardware/harddisk/generic/%s" % disk.controller_type
+                self.disks[disk.device_name] = "create('%s', \n" \
+                    "                   'capacity', %d*GB)" % \
+                    (relpath, disk.capacity)
+            elif disk.disk_type == 'nas':
+                relpath = "servicedata/nas_disk_share/%s/nasinfo" % \
+                    disk.service_instance.name
+                diskpath = "%s/%s.vmdk" % (dbmachine.name, disk.device_name)
+                self.disks[disk.device_name] = "create('%s', \n"\
+                    "                   'capacity', %d*GB,\n" \
+                    "                   'interface', '%s',\n" \
+                    "                   'address', '%s',\n" \
+                    "                   'path', '%s')" % \
+                    (relpath, disk.capacity, disk.controller_type, \
+                     disk.address, diskpath)
+
         self.managers = []
         self.interfaces = []
         for interface in dbmachine.interfaces:
@@ -132,11 +146,12 @@ class PlenaryMachineInfo(Plenary):
         lines.append('"cpu" = list(' + ", \n             ".join(
                 ['create("%(cpu_relpath)s")' % self.__dict__
                 for cpu_num in range(self.num_cpus)]) + ');')
-        if self.harddisks:
-            lines.append('"harddisks" = nlist(' +
-                    ", ".join(['"%(name)s", create("%(relpath)s", "capacity", %(capacity)d*GB)' %
-                    hd for hd in self.harddisks]) +
-                    ');\n')
+
+        lines.append("'harddisks' = nlist(")
+        for dname in self.disks:
+            lines.append("    '%s', %s," % (dname, self.disks[dname]))
+        lines.append(");\n")
+
         for interface in self.interfaces:
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
                     % (interface['name'], interface['mac'].upper()))
