@@ -60,6 +60,16 @@ class CommandAddDisk(BrokerCommand):
             if not re.compile("\d+:\d+$").match(address):
                 raise ArgumentError("disk address '%s' is illegal: must be " \
                                     "\d+:\d+ (e.g. 0:0)" % address)
+            if dbmachine.cluster and dbmachine.cluster.metacluster:
+                dbmetacluster = dbmachine.cluster.metacluster
+                shares = dbmetacluster.shares
+                if dbshare not in shares and \
+                   len(shares) >= dbmetacluster.max_shares:
+                    raise ArgumentError("Adding a disk on a new share for %s "
+                                        "would exceed the metacluster's "
+                                        "max_shares (%s)" %
+                                        (dbmetacluster.name,
+                                         dbmetacluster.max_shares))
             dbdisk = NasDisk(machine=dbmachine,
                              device_name=disk,
                              controller_type=type,

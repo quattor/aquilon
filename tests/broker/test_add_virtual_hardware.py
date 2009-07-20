@@ -62,6 +62,30 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.noouttest(["add", "interface", "--machine", "evm8",
                         "--interface", "eth0", "--automac"])
 
+    def test_130_adddisks(self):
+        # The first 8 shares should work...
+        for i in range(1, 9):
+            self.noouttest(["add", "disk", "--machine", "evm%s" % i,
+                            "--disk", "sda", "--type", "sata",
+                            "--capacity", "15", "--share", "test_share_%s" % i,
+                            "--address", "0:0"])
+
+    def test_150_failaddillegaldisk(self):
+        command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
+                   "--type", "sata", "--capacity", "15",
+                   "--share", "test_share_9", "--address", "badaddress"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "disk address 'badaddress' is illegal", command)
+
+    def test_160_failaddmaxshares(self):
+        # Number 9 should trip the limit.
+        command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
+                   "--type", "sata", "--capacity", "15",
+                   "--share", "test_share_9", "--address", "0:0"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "would exceed the metacluster's max_shares",
+                         command)
+
     def test_200_updatemachine(self):
         # FIXME: Verify that plenary moved correctly.
         # Before: file should be in machine/americas/ut/ut10

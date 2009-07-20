@@ -280,6 +280,12 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: esx_management Instance: ut.b",
                          command)
 
+    def testaddnasshares(self):
+        # Creates shares test_share_1 through test_share_9
+        for i in range(1, 10):
+            self.noouttest(["add_service", "--service=nas_disk_share",
+                            "--instance=test_share_%s" % i])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

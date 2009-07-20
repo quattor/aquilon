@@ -145,6 +145,12 @@ class TestDelService(TestBrokerCommand):
         command = "show service --service esx_management"
         self.notfoundtest(command.split(" "))
 
+    def testdelnasshares(self):
+        for i in range(1, 10):
+            self.noouttest(["del_service", "--service=nas_disk_share",
+                            "--instance=test_share_%s" % i])
+        self.noouttest(["del_service", "--service=nas_disk_share"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)
