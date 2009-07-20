@@ -377,14 +377,15 @@
          <option name="machine" type="string">machine ID</option>
          <option name="disk" type="string">device name of the disk (like sda)</option>
          <option name="type" type="string">type of the disk</option>
-         <option name="capacity" type="string">capacity of the disk</option>
+         <option name="capacity" type="string">capacity of the disk (GB)</option>
       </optgroup>
-      <optgroup name="nas_opts" fields="all"><option name="share" type="string">share name (an instance of nas_disk_share service)</option>
-	<option name="address" type="string">bus address (e.g. 0:0)</option>
+      <optgroup name="nas_opts" fields="all">
+         <option name="share" type="string">share name (an instance of nas_disk_share service)</option>
+         <option name="address" type="string">bus address (e.g. 0:0)</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
-         </optgroup>
+      </optgroup>
       <transport method="put" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
 
