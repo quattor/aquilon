@@ -59,16 +59,11 @@ dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
 vendor = oracle
-vendor_version = 10.2.0.1.0
-vendor_home = /ms/dist/orcl/PROJ/product/%(vendor_version)s
 server = LNPO_AQUILON_NY
 dbuser = USER
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
 connect_str = %(dbuser)s/%(dbuser)s@%(server)s
 dumpfile = %(dbdir)s/%(dbuser)s.dmp
-export = %(vendor_home)s/bin/exp
-exportlog = %(dbdir)s/aqdb_export.log
-import = %(vendor_home)s/bin/imp
 password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
 password_file = %(password_base)s/%(environment)s/%(dbuser)s
 module = orcl/10.2.0.1.0
