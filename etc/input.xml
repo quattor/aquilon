@@ -674,8 +674,9 @@
          <option name="cputype" type="string">CPU type</option>
          <option name="cpunum" type="string">CPU count</option>
          <option name="mem" type="string">amount of installed memory</option>
-         <option name="disktype" type="string">installed disk type</option>
-         <option name="disksize" type="string">installed disk capacity</option>
+         <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
+         <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
+         <option name="disksize" type="string">installed disk capacity (GB)</option>
          <option name="nics" type="string">number of NIC interfaces</option>
       </optgroup>
       <optgroup name="optional_opts">

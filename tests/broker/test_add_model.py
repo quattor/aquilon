@@ -44,8 +44,11 @@ from brokertest import TestBrokerCommand
 class TestAddModel(TestBrokerCommand):
 
     def testadduttorswitch(self):
-        command = "add model --name uttorswitch --vendor hp --type tor_switch --cputype xeon_2500 --cpunum 1 --mem 8192 --disktype scsi --disksize 36 --nics 4"
-        self.noouttest(command.split(" "))
+        command = ["add_model", "--name=uttorswitch", "--vendor=hp",
+                   "--type=tor_switch", "--cputype=xeon_2500", "--cpunum=1",
+                   "--mem=8192", "--disktype=local", "--diskcontroller=scsi",
+                   "--disksize=36", "--nics=4"]
+        self.noouttest(command)
 
     def testverifyadduttorswitch(self):
         command = "show model --name uttorswitch"
@@ -106,8 +109,8 @@ class TestAddModel(TestBrokerCommand):
     def testaddutmedium(self):
         command = ["add_model", "--name=utmedium", "--vendor=utvendor",
                    "--type=virtual_machine", "--cputype=xeon_2500",
-                   "--cpunum=1", "--mem=8192", "--disktype=sata",
-                   "--disksize=15", "--nics=1"]
+                   "--cpunum=1", "--mem=8192", "--disktype=nas",
+                   "--diskcontroller=sata", "--disksize=15", "--nics=1"]
         self.noouttest(command)
 
     def testverifyaddutmedium(self):
