@@ -347,6 +347,18 @@ class TestBrokerCommand(unittest.TestCase):
                      "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
                      (command, s, out))
 
+    def searchoutput(self, out, r, command):
+        m = re.search(r, out)
+        self.failUnless(m,
+                        "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                        % (command, r, out))
+        return m
+
+    def searchclean(self, out, r, command):
+        self.failIf(re.search(r, out),
+                    "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
+                    (command, r, out))
+
     def parse_netlist_msg(self, msg, expect=None):
         netlist = aqdnetworks_pb2.NetworkList()
         netlist.ParseFromString(msg)
