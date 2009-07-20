@@ -56,9 +56,13 @@ class TestAddDisk(TestBrokerCommand):
     def testverifycatut3c5n10disk(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 68*GB), "sdb", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",
-                command)
+        self.searchoutput(out,
+                          r"'harddisks' = nlist\(\s*'sda', "
+                          r"create\('hardware/harddisk/generic/scsi',\s*"
+                          r"'capacity', 68\*GB\),\s*"
+                          r"'sdb', create\('hardware/harddisk/generic/scsi',"
+                          r"\s*'capacity', 34\*GB\),\s*\);",
+                          command)
 
     def testaddut3c1n3disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c1n3",
@@ -73,9 +77,13 @@ class TestAddDisk(TestBrokerCommand):
     def testverifycatut3c1n3disk(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                """"harddisks" = nlist("sda", create("hardware/harddisk/generic/scsi", "capacity", 68*GB), "sdb", create("hardware/harddisk/generic/scsi", "capacity", 34*GB));""",
-                command)
+        self.searchoutput(out,
+                          r"'harddisks' = nlist\(\s*'sda', "
+                          r"create\('hardware/harddisk/generic/scsi',\s*"
+                          r"'capacity', 68\*GB\),\s*"
+                          r"'sdb', create\('hardware/harddisk/generic/scsi',"
+                          r"\s*'capacity', 34\*GB\),\s*\);",
+                          command)
 
 
 if __name__=='__main__':
