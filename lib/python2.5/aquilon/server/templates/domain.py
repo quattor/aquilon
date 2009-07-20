@@ -129,11 +129,15 @@ class TemplateDomain(object):
             
             args = [config.get("broker", "ant")]
             args.append("-f")
-            args.append("%s/build.xml" % config.get("broker", "compiletooldir"))
+            args.append("%s/build.xml" %
+                        config.get("broker", "compiletooldir"))
             args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
             args.append("-Dpanc.jar=%s" % self.domain.compiler)
+            args.append("-Dpanc.formatter=%s" %
+                        config.get("broker", "panc_formatter"))
             args.append("-Ddomain=%s" % self.domain.name)
-            args.append("-Ddistributed.profiles=%s" % config.get("broker", "profilesdir"))
+            args.append("-Ddistributed.profiles=%s" %
+                        config.get("broker", "profilesdir"))
             args.append("-Dpanc.batch.size=%s" %
                         config.get("broker", "panc_batch_size"))
             if (only):

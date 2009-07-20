@@ -11,6 +11,7 @@
 	The panc.version line is not used if panc.jar is overridden.
 	-->
 	<property name="panc.version" value="8.2.8-ms1" />
+	<property name="panc.formatter" value="pan" />
 	<property name="panc.batch.size" value="1000" />
 	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/common/lib/panc.jar" />
 	<property name="ant-contrib.version" value="1.0b2" />
@@ -111,7 +112,7 @@
 				<var name="compiled.includes" value="${compiled.includes} @{profile}.xml" />
 			</sequential>
 		</for>
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}">
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}" formatter="${panc.formatter}">
 			<path refid="pan.objectloadpath" />
 			<fileset dir="${source.profiles}" includes="${source.includes}" />
 		</panc>
