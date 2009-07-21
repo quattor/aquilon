@@ -167,6 +167,31 @@ class TestPutDomain(TestBrokerCommand):
                          "added model utmedium"],
                          cwd=os.path.join(self.scratchdir, "unittest"))
 
+    def testaddnasshares(self):
+        for i in range (1, 10):
+            share = "test_share_%s" % i
+            nasdir = os.path.join(self.scratchdir, "unittest", "servicedata",
+                                  "nas_disk_share", share)
+            if not os.path.exists(nasdir):
+                os.makedirs(nasdir)
+            template = os.path.join(nasdir, "nasinfo.tpl")
+            f = open(template, 'w')
+            try:
+                structure = "servicedata/nas_disk_share/%s/nasinfo" % share
+                f.writelines([
+                    """structure template %s;
+
+'server' = 'nfsserver';
+'mount' = '/vol/diskgroup/pshare';
+'proto' = 'nfs';
+                    """ % structure])
+            finally:
+                f.close()
+            self.gitcommand(["add", "nasinfo.tpl"], cwd=nasdir)
+        self.gitcommand(["commit", "-a", "-m",
+                         "added nasinfo for shares"],
+                         cwd=os.path.join(self.scratchdir, "unittest"))
+
     def testputunittestdomain(self):
         self.ignoreoutputtest(["put", "--domain", "unittest"],
                 env=self.gitenv(),
