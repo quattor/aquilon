@@ -644,7 +644,7 @@ class ClusterChooser(Chooser):
             self.info("%s removing binding for service %s instance %s",
                        self.description,
                        instance.service.name, instance.name)
-            dbcs = ClusterServiceBinding.get_unique(
+            dbcs = ClusterServiceBinding.get_unique(self.session,
                 cluster_id=self.dbcluster.id,
                 service_instance_id=instance.id)
             if dbcs:
@@ -665,7 +665,7 @@ class ClusterChooser(Chooser):
                 host_plenary = PlenaryHost(h)
                 host_plenary.stash()
                 self.stashed.append(host_plenary)
-                host_chooser = Chooser(dbhost, required_only=False,
+                host_chooser = Chooser(h, required_only=False,
                                        debug=self.is_debug_enabled)
                 host_chooser.set_single(instance.service, instance, force=True)
                 host_chooser.flush_changes()
@@ -685,7 +685,7 @@ class ClusterChooser(Chooser):
         plenary.write(locked=locked)
         if self.instances_bound:
             for h in self.dbcluster.hosts:
-                plenary = PlenaryHost(self.dbhost)
+                plenary = PlenaryHost(h)
                 try:
                     plenary.write(locked=locked)
                 except IncompleteError, e:

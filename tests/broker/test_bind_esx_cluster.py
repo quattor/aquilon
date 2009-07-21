@@ -105,17 +105,57 @@ class TestBindESXCluster(TestBrokerCommand):
                          "esx cluster 'cluster-does-not-exist' not found.",
                          command)
 
-    # FIXME: This is now allowed...
-    #def testfailbindnonaligned(self):
-    #   command = ["bind_esx_cluster", "--cluster=utecl3",
-    #              "--service=afs", "--instance=q.ny.ms.com"]
-    #   out = self.badrequesttest(command)
-    #   self.matchoutput(out,
-    #                    "Cannot bind a cluster to a service that "
-    #                    "is not cluster aligned.",
-    #                    command)
+    def testfailbindservicenotrebind(self):
+        # Figure out which service the cluster is bound to and attempt change.
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        m = self.searchoutput(out,
+                              r'Member Alignment: Service esx_management '
+                              r'Instance (\S+)',
+                              command)
+        next = m.group(1) == 'ut.a' and 'ut.b' or 'ut.a'
+        command = ["bind_esx_cluster", "--cluster=utecl1",
+                   "--service=esx_management", "--instance=%s" % next]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "use unbind to clear first or rebind to force",
+                         command)
 
-    # FIXME: Add more tests for binding a service instance.
+    def testrebindservice(self):
+        # Figure out which service the cluster is bound to and attempt change.
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        m = self.searchoutput(out,
+                              r'Member Alignment: Service esx_management '
+                              r'Instance (\S+)',
+                              command)
+        next = m.group(1) == 'ut.a' and 'ut.b' or 'ut.a'
+
+        command = ["rebind_esx_cluster", "--cluster=utecl1",
+                   "--service=esx_management", "--instance=%s" % next]
+        # Do we need any checks on this output?
+        out = self.commandtest(command)
+
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Member Alignment: Service esx_management "
+                         "Instance %s" % next,
+                         command)
+
+        command = ["search_host", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        members = out.splitlines()
+        members.sort()
+        self.failUnless(members, "No hosts in output of %s." % command)
+
+        command = ["search_host", "--cluster=utecl1",
+                   "--service=esx_management", "--instance=%s" % next]
+        out = self.commandtest(command)
+        aligned = out.splitlines()
+        aligned.sort()
+        self.failUnlessEqual(members, aligned,
+                             "Not all cluster members (%s) are aligned (%s)." %
+                             (members, aligned))
 
     # FIXME: Also test plenary files.
 

@@ -33,6 +33,8 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import EsxCluster, HostClusterMember
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.services import Chooser
 
 
 class CommandBindESXClusterHostname(BrokerCommand):
@@ -66,8 +68,6 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                     "'%s'." %
                                     (hostname, dbhost.cluster.cluster_type,
                                      dbhost.cluster.name))
-            # FIXME: Check that domains and service instances match.
-            # SI might be done with the chooser...
             old_cluster = dbhost.cluster
             dbhcm = HostClusterMember.get_unique(session,
                                                  cluster_id=old_cluster.id,
@@ -87,21 +87,42 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                      old_cluster.vm_to_host_ratio,
                                      len(old_cluster.machines),
                                      len(old_cluster.hosts)))
+        chooser = None
         if not dbhost.cluster:
-            # FIXME: Review this comment.
-            # Checks for max_members and vmhost archetype happen in aqdb layer
+            if dbhost.domain != dbcluster.domain:
+                raise ArgumentError("Host %s domain %s does not match "
+                                    "%s cluster %s domain %s" %
+                                    (dbhost.fqdn, dbhost.domain.name,
+                                     dbcluster.cluster_type, dbcluster.name,
+                                     dbcluster.domain.name))
+            # Check for max_members happens in aqdb layer and can throw a VE
             try:
                 dbhcm = HostClusterMember(cluster=dbcluster, host=dbhost)
                 session.add(dbhcm)
             except ValueError, e:
                 raise ArgumentError(e.message)
+            session.flush()
+            session.refresh(dbhost)
+            # Enforce that service instances are set correctly for the
+            # new cluster association.
+            chooser = Chooser(dbhost)
+            chooser.set_required()
+            chooser.flush_changes()
         # If this host is already bound to the cluster,
         # rewrite the plenary anyway.
 
         session.flush()
         session.refresh(dbcluster)
-        plenary = PlenaryCluster(dbcluster)
-        plenary.write()
+        try:
+            compileLock()
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write(locked=True)
+            if chooser:
+                chooser.write_plenary_templates(locked=True)
+            # XXX: Why not just try a compile of the cluster here and
+            # rollback if needed?
+        finally:
+            compileRelease()
         return
 
 
