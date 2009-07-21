@@ -58,7 +58,12 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
         max_shares = force_int("max_shares", max_shares)
         if max_shares is not None:
-            # FIXME: Enforce that this is not being exceeded.
+            current_shares = len(dbmetacluster.shares)
+            if max_shares < current_shares:
+                raise ArgumentError("Cannot set max_shares to %s: Metacluster "
+                                    "%s has %s shares already attached." %
+                                    (max_shares, dbmetacluster.name,
+                                     current_shares))
             dbmetacluster.max_shares = max_shares
 
         if comments is not None:
