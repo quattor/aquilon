@@ -55,9 +55,10 @@ class CommandUnbindESXClusterService(BrokerCommand):
                                 "%s cluster %s." %
                                 (dbservice.name, dbinstance.name,
                                  cluster_type, dbcluster.name))
-        if dbcluster.members:
+        if dbservice in [cas.service for cas in dbcluster.required_services]:
             raise ArgumentError("Cannot remove cluster service instance "
-                                "binding while the cluster has members")
+                                "binding for %s cluster aligned service %s." %
+                                (dbcluster.cluster_type, dbservice.name))
         session.delete(dbcsb)
 
         session.flush()

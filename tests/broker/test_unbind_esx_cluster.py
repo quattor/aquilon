@@ -87,7 +87,51 @@ class TestUnbindESXCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "not bound to a cluster", command)
 
-    # FIXME: Add tests for the --service options.
+    def testfailservicemissingcluster(self):
+        command = ["unbind_esx_cluster", "--cluster", "cluster-does-not-exist",
+                   "--service=esx_management", "--instance=ut.a"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "esx cluster 'cluster-does-not-exist' not found.",
+                         command)
+
+    def testfailservicenotbound(self):
+        command = ["unbind_esx_cluster", "--cluster", "utecl1",
+                   "--service=utsvc", "--instance=utsi1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Service utsvc instance utsi1 is not bound to "
+                         "esx cluster utecl1",
+                         command)
+
+    def testfailunbindrequiredservice(self):
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        m = self.searchoutput(out,
+                              r'Member Alignment: Service esx_management '
+                              r'Instance (\S+)',
+                              command)
+        instance = m.group(1)
+
+        command = ["unbind_esx_cluster", "--cluster=utecl1",
+                   "--service=esx_management", "--instance=%s" % instance]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot remove cluster service instance binding for "
+                         "esx cluster aligned service esx_management.",
+                         command)
+
+    def testunbindservice(self):
+        # This also tests binding a non-aligned service...
+        # not sure if there should be a test of running make against a
+        # cluster (or a cluster with hosts) while bound to such a service...
+        command = ["bind_esx_cluster", "--cluster=utecl4",
+                   "--service=utsvc", "--instance=utsi1"]
+        out = self.commandtest(command)
+
+        command = ["unbind_esx_cluster", "--cluster=utecl4",
+                   "--service=utsvc", "--instance=utsi1"]
+        out = self.commandtest(command)
 
     # FIXME: Also test plenary files.
 
