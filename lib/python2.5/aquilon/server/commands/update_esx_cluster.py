@@ -33,7 +33,8 @@ from aquilon.aqdb.model import EsxCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.machine import (PlenaryMachineInfo,
+                                              machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.base import compileLock, compileRelease
 
@@ -69,11 +70,8 @@ class CommandUpdateESXCluster(BrokerCommand):
                                      dblocation.location_type.capitalize(),
                                      dblocation.name, "\n".join(errors)))
             if dbcluster.location_constraint != dblocation:
-                old = dbcluster.location_constraint
-                new = dblocation
-                # FIXME: Similar code should probably exist in update_machine
-                if old.hub != new.hub or old.building != new.building or \
-                   old.rack != new.rack:
+                if machine_plenary_will_move(old=dbcluster.location_constraint,
+                                             new=dblocation):
                     for machine in dbcluster.machines:
                         remove_plenaries.append(PlenaryMachineInfo(machine))
                 dbcluster.location_constraint = dblocation

@@ -33,14 +33,16 @@ from sqlalchemy.exceptions import InvalidRequestError
 from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
-                                 UnimplementedError)
+                                 UnimplementedError, IncompleteError)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.machine import (PlenaryMachineInfo,
+                                              machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
                                 Cluster, MachineClusterMember)
@@ -63,8 +65,12 @@ class CommandUpdateMachine(BrokerCommand):
             session.flush()
             session.refresh(dbmachine)
 
+        remove_plenary = None
         if chassis:
             dbchassis = get_system(session, chassis, Chassis, 'Chassis')
+            if machine_plenary_will_move(old=dbmachine.location,
+                                         new=dbchassis.chassis_hw.location):
+                remove_plenary = PlenaryMachineInfo(dbmachine)
             dbmachine.location = dbchassis.chassis_hw.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot information")
@@ -96,6 +102,9 @@ class CommandUpdateMachine(BrokerCommand):
                                             dbcl.location_type, dbcl.name))
                     else:
                         session.delete(dbslot)
+            if machine_plenary_will_move(old=dbmachine.location,
+                                         new=dblocation):
+                remove_plenary = PlenaryMachineInfo(dbmachine)
             dbmachine.location = dblocation
 
         if model:
@@ -180,8 +189,20 @@ class CommandUpdateMachine(BrokerCommand):
         # all the calls to the method.
         try:
             compileLock()
+
             plenary_info = PlenaryMachineInfo(dbmachine)
             plenary_info.write(locked=True)
+
+            if remove_plenary:
+                remove_plenary.remove(locked=True)
+                if dbmachine.host:
+                    # At least re-writing plenary with new machine pointer...
+                    # This is not necessary if reconfiguring below.
+                    try:
+                        plenary_host = PlenaryHost(dbmachine.host)
+                        plenary_host.write(locked=True)
+                    except IncompleteError, e:
+                        pass
 
             if dbmachine.host:
                 # XXX: May need to reconfigure.

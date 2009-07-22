@@ -109,6 +109,7 @@ class PlenaryMachineInfo(Plenary):
                 continue
         self.model_relpath = (
             "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
+        # If this changes need to update machine_plenary_will_move() to match.
         self.plenary_core = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
         self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
@@ -166,3 +167,13 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('                           , "fqdn", "%(fqdn)s"' %
                              manager)
             lines.append('                     );')
+
+
+def machine_plenary_will_move(old, new):
+    """Helper to see if updating a machine's location will move its plenary."""
+    if old.hub != new.hub or old.building != new.building or \
+       old.rack != new.rack:
+        return True
+    return False
+
+
