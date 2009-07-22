@@ -120,6 +120,14 @@ class TestBindESXCluster(TestBrokerCommand):
         self.matchoutput(out, "use unbind to clear first or rebind to force",
                          command)
 
+    def testfailunmadecluster(self):
+        command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Please run `make cluster --cluster utecl4`",
+                         command)
+
     def testrebindservice(self):
         # Figure out which service the cluster is bound to and attempt change.
         command = ["show_esx_cluster", "--cluster=utecl1"]
