@@ -27,11 +27,23 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from __future__ import with_statement
 
-from aquilon.server.templates.base import Plenary
+from aquilon.server.templates.base import Plenary, PlenaryCollection
+from aquilon.exceptions_ import NotFoundException
+
+class PlenaryService(PlenaryCollection):
+    """
+    A facade for the variety of PlenaryService subsidiary files
+    """
+    def __init__(self, dbservice):
+        PlenaryCollection.__init__(self)
+        self.plenaries.append(PlenaryServiceToplevel(dbservice))
+        self.plenaries.append(PlenaryServiceClientDefault(dbservice))
+        self.plenaries.append(PlenaryServiceServerDefault(dbservice))
 
 
-class PlenaryService(Plenary):
+class PlenaryServiceToplevel(Plenary):
     """
     The top-level service template does nothing. It is really
     a placeholder which can be overridden by the library
@@ -85,7 +97,26 @@ class PlenaryServiceServerDefault(Plenary):
         self.dir = self.config.get("broker", "plenarydir")
 
 
-class PlenaryServiceInstance(Plenary):
+class PlenaryServiceInstance(PlenaryCollection):
+    """
+    A facade for the variety of PlenaryServiceInstance subsidiary files
+    """
+    def __init__(self, dbservice, dbinstance):
+        PlenaryCollection.__init__(self)
+        self.plenaries.append(PlenaryServiceInstanceToplevel(dbservice,
+                                                             dbinstance))
+        self.plenaries.append(PlenaryServiceInstanceClientDefault(dbservice,
+                                                                  dbinstance))
+        self.plenaries.append(PlenaryServiceInstanceServer(dbservice,
+                                                           dbinstance))
+        self.plenaries.append(PlenaryServiceInstanceServerDefault(dbservice,
+                                                                  dbinstance))
+        if dbservice.name == 'nas_disk_share':
+            self.plenaries.append(PlenaryInstanceNasDiskShare(dbservice,
+                                                              dbinstance))
+
+
+class PlenaryServiceInstanceToplevel(Plenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the client.
@@ -109,6 +140,7 @@ class PlenaryServiceInstance(Plenary):
         lines.append("")
         lines.append("'instance' = '%(name)s';" % self.__dict__)
         lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.servers]) + ");")
+
 
 class PlenaryServiceInstanceServer(Plenary):
     """
@@ -181,4 +213,85 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     def body(self, lines):
         lines.append("'/system/provides/%(service)s' = create('servicedata/%(service)s/%(name)s/srvconfig');" % self.__dict__)
         lines.append("include { 'service/%(service)s/server/config' };"%self.__dict__)
+
+
+class PlenaryInstanceNasDiskShare(Plenary):
+    """
+    A service instance of the nas_disk_share type wants to have a
+    struct template that can be imported into the disk definition to get
+    sufficient information to be able to know whence to mount the disk.
+    This class needs to be in sync with the consumer PlenaryMachine
+    """
+    def __init__(self, dbservice, dbinstance):
+        Plenary.__init__(self)
+        self.service = dbservice.name
+        self.name = dbinstance.name
+        self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
+        self.plenary_template = self.plenary_core + "/nasinfo"
+        self.template_type = 'structure'
+        self.dir = self.config.get("broker", "plenarydir")
+        self.server = ""
+        self.mount = ""
+
+    def body(self, lines):
+        """
+        dynamically produce content of template, based on external lookup.
+        If the external lookup fails, this can raise a NotFoundException,
+        a ProcessException or an IOError
+        """
+        with open(self.config.get("broker", "sharedata")) as sharedata:
+            find_storage_data(sharedata, lambda inf: self.check_nas_line(inf))
+        if self.server == "":
+            # TODO: We should really invoke a realtime-check by running
+            # the command defined in the broker config. The output
+            # of "nasti show share --csv" is in CSV format (why it
+            # doesn't provide the same format as the dumpfile is
+            # beyond me). We need a CSV parser...
+            raise NotFoundException("share '%s' cannot be found in NAS maps" %
+                                    self.name)
+        lines.append("'server' = '%(server)s';" % self.__dict__)
+        lines.append("'mountpoint' = '%(mount)s';" % self.__dict__)
+
+    def check_nas_line(self, inf):
+        """
+        Search for the pshare info that refers to this plenary
+        """
+        # silently discard lines that don't have all of our reqd info.
+        for k in ["objtype", "pshare", "server", "dg"]:
+            if k not in inf:
+                return False
+
+        if inf["objtype"] == "pshare" and inf["pshare"] == self.name:
+            self.server = inf["server"]
+            self.mount = "/vol/%(dg)s/%(pshare)s" % (inf)
+            return True
+        else:
+            return False
+
+# This should come from some external API...?
+def find_storage_data(datafile, fn):
+    """
+    Scan a storeng-style data file, checking each line as we go
+
+    Storeng-style data files are blocks of data. Each block starts
+    with a comment describing the fields for all subsequent lines. A
+    block can start at any time. Fields are separated by '|'.
+    This function will invoke the function after parsing every data
+    line. The function will be called with a dict of the fields. If the
+    function returns True, then we stop scanning the file, else we continue
+    on until there is nothing left to parse.
+    """
+    for line in datafile:
+        line = line.rstrip()
+        if line[0] == '#':
+            # A header line
+            hdr = line[1:].split('|')
+        else:
+            fields = line.split('|')
+            if len(fields) == len(hdr): # silently ignore invalid lines
+                info = dict()
+                for i in range(0, len(hdr)):
+                    info[hdr[i]] = fields[i]
+                if (fn(info)):
+                    break
 

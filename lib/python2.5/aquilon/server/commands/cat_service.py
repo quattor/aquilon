@@ -31,7 +31,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
-from aquilon.server.templates.service import (PlenaryService,
+from aquilon.server.templates.service import (PlenaryServiceToplevel,
                                               PlenaryServiceClientDefault)
 
 
@@ -44,7 +44,7 @@ class CommandCatService(BrokerCommand):
         if default:
             plenary_info = PlenaryServiceClientDefault(dbservice)
         else:
-            plenary_info = PlenaryService(dbservice)
+            plenary_info = PlenaryServiceToplevel(dbservice)
         return plenary_info.read()
 
 

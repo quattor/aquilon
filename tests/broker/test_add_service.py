@@ -286,6 +286,15 @@ class TestAddService(TestBrokerCommand):
             self.noouttest(["add_service", "--service=nas_disk_share",
                             "--instance=test_share_%s" % i])
 
+    def testfailaddnasshare(self):
+        command = ["add_service", "--service=nas_disk_share",
+                   "--instance=share-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "share 'share-does-not-exist' cannot be found "
+                         "in NAS maps",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

@@ -33,12 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance, CfgPath, Tld
 from aquilon.server.templates.domain import (compileLock, compileRelease)
 from aquilon.server.templates.service import (PlenaryService,
-                                              PlenaryServiceInstance,
-                                              PlenaryServiceClientDefault,
-                                              PlenaryServiceServerDefault,
-                                              PlenaryServiceInstanceServer,
-                                              PlenaryServiceInstanceClientDefault,
-                                              PlenaryServiceInstanceServerDefault)
+                                              PlenaryServiceInstance)
 
 
 class CommandAddService(BrokerCommand):
@@ -47,7 +42,7 @@ class CommandAddService(BrokerCommand):
 
     def render(self, session, service, instance, comments, user, **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
-        compileLock();
+        compileLock()
         #TODO: if service rows in the database exist, but the plenary files
         #are not written out, it looks like a successful add, even though
         #it will fail.
@@ -81,12 +76,6 @@ class CommandAddService(BrokerCommand):
                 plenary_info = PlenaryService(dbservice)
                 plenary_info.write(locked=True)
 
-                # Create the default service client and server template
-                plenary_info = PlenaryServiceClientDefault(dbservice)
-                plenary_info.write(locked=True)
-                plenary_info = PlenaryServiceServerDefault(dbservice)
-                plenary_info.write(locked=True)
-
             if not instance:
                 return
 
@@ -106,14 +95,6 @@ class CommandAddService(BrokerCommand):
 
             # Create the servicedata template
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-            plenary_info.write(locked=True)
-            plenary_info = PlenaryServiceInstanceServer(dbservice, dbsi)
-            plenary_info.write(locked=True)
-
-            # Create the default service client and server template
-            plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
-            plenary_info.write(locked=True)
-            plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbsi)
             plenary_info.write(locked=True)
 
         finally:
