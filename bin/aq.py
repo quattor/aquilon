@@ -272,9 +272,12 @@ if __name__ == "__main__":
     else:
         default_aqport = "6900"
 
-    host = globalOptions.get('aqhost') or default_aqhost
-    port = globalOptions.get('aqport') or default_aqport
-    aquser = globalOptions.get('aquser') or default_aquser
+    host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
+            default_aqhost
+    port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
+            default_aqport
+    aquser = globalOptions.get('aquser') or os.environ.get('AQUSER', None) or \
+            default_aquser
 
     # Save these in case there are errors...
     globalOptions["aqhost"] = host
