@@ -306,7 +306,7 @@ if __name__ == "__main__":
 
     if transport.expect == 'command':
         if globalOptions.get('noexec'):
-            sys.stdout.write(pageData)
+            print pageData
         else:
             try:
                 proc = subprocess.Popen(pageData, shell = True, stdin = sys.stdin,
@@ -318,7 +318,10 @@ if __name__ == "__main__":
             exit_status = proc.wait()
 
     else:
-        #print pageData,
-        sys.stdout.write(pageData)
+        format = globalOptions.get("format", None)
+        if format == "proto":
+            sys.stdout.write(pageData)
+        elif pageData:
+            print pageData
 
     sys.exit(exit_status)
