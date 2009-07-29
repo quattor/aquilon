@@ -70,7 +70,7 @@ from aquilon.aqdb.model.chassis_hw import ChassisHw
 from aquilon.aqdb.model.console_server_hw import ConsoleServerHw
 
 #SYSTEM
-from aquilon.aqdb.model.system import System
+from aquilon.aqdb.model.system import System, DynamicStub
 from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.console_server import ConsoleServer
 from aquilon.aqdb.model.manager import Manager
@@ -84,7 +84,7 @@ from aquilon.aqdb.model.tor_switch import TorSwitch
 from aquilon.aqdb.model.observed_mac import ObservedMac
 from aquilon.aqdb.model.serial_cnxn  import SerialCnxn
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
-from aquilon.aqdb.model.interface    import Interface
+from aquilon.aqdb.model.interface import Interface
 from aquilon.aqdb.model.auxiliary import Auxiliary
 
 #SERVICE
