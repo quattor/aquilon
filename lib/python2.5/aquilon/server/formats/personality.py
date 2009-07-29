@@ -93,7 +93,7 @@ class PersonalityFormatter(ObjectFormatter):
         skeleton.name = str(personality.name)
         self.redirect_proto(personality.archetype, skeleton.archetype)
         # FIXME: Implement required services
-        if threshold:
+        if threshold is not None:
             skeleton.threshold = threshold
         return container
 
