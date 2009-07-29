@@ -82,8 +82,8 @@ def main(*args, **kw):
     s = db.Session()
 
     #left a hole in between for verbose=1. not sure we'll ever use it
-    if opts.verbose > 2:
-        Base.metadata.bind.echo = True
+    if opts.verbose > 1:
+        db.engine.echo = True
 
     ipshell()
 
