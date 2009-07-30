@@ -139,6 +139,16 @@ class TestBrokerCommand(unittest.TestCase):
                 p = "%s%s" % (h, n)
                 if self.config.has_option("unittest", p):
                     setattr(self, p, self.config.get("unittest", p))
+        if self.config.has_option("unittest", "dynamic_range_start"):
+            self.dynamic_range_start = self.config.get("unittest",
+                                                       "dynamic_range_start")
+        else:
+            self.dynamic_range_start = "8.8.6.10"
+        if self.config.has_option("unittest", "dynamic_range_end"):
+            self.dynamic_range_end = self.config.get("unittest",
+                                                     "dynamic_range_end")
+        else:
+            self.dynamic_range_end = "8.8.6.20"
 
     def tearDown(self):
         pass
