@@ -203,6 +203,19 @@ rc = p.wait()
 
 
 class VerboseTextTestResult(unittest._TextTestResult):
+    lastmodule = ""
+
+    def printModule(self, test):
+        if self.dots:
+            if test.__class__.__module__ != self.lastmodule:
+                self.lastmodule = test.__class__.__module__
+                self.stream.writeln("")
+                self.stream.write("%s" % self.lastmodule)
+
+    def addSuccess(self, test):
+        self.printModule(test)
+        unittest._TextTestResult.addSuccess(self, test)
+
     def printResult(self, flavour, result):
         (test, err) = result
         self.stream.writeln()
@@ -212,10 +225,14 @@ class VerboseTextTestResult(unittest._TextTestResult):
         self.stream.writeln("%s" % err)
 
     def addError(self, test, err):
+        self.printModule(test)
+        # Specifically skip over base class's implementation.
         unittest.TestResult.addError(self, test, err)
         self.printResult("ERROR", self.errors[-1])
 
     def addFailure(self, test, err):
+        self.printModule(test)
+        # Specifically skip over base class's implementation.
         unittest.TestResult.addFailure(self, test, err)
         self.printResult("FAIL", self.failures[-1])
 
