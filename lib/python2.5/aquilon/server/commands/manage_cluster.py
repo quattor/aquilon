@@ -70,7 +70,7 @@ class CommandManageCluster(BrokerCommand):
             # to compile, however (esp. if there was no existing template), we
             # have to be aware that there might not be enough information yet
             # with which we can create a template
-            plenary = PlenaryCluster(dbcluster, locked=True)
+            plenary = PlenaryCluster(dbcluster)
             plenary.write(locked=True)
             for host in dbcluster.hosts:
                 try:

@@ -44,7 +44,7 @@ class CommandMakeCluster(BrokerCommand):
     def render(self, session, cluster, keepbindings, debug, **arguments):
         dbcluster = Cluster.get_unique(session, cluster)
         if not dbcluster:
-            raise NotFoundException("Cluster '%s' not found.")
+            raise NotFoundException("Cluster '%s' not found." % cluster)
 
         chooser = None
         try:

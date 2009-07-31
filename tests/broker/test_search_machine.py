@@ -56,6 +56,89 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
                          command)
 
+    def testlocation(self):
+        # Should only show virtual machines, since all the physical machines
+        # are at the rack level and this search is exact.
+        command = "search machine --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evm", command)
+        self.matchclean(out, "ut", command)
+
+    def testfailcpucount(self):
+        command = "search machine --cpucount BAD"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Expected an integer for cpucount", command)
+
+    def testcpucount(self):
+        command = "search machine --cpucount 1"
+        out = self.commandtest(command.split(" "))
+        # Currently only virtual machines have 1 cpu in the tests...
+        for i in range(1, 10):
+            self.matchoutput(out, "evm%s" % i, command)
+        self.matchclean(out, "ut", command)
+
+    def testmemory(self):
+        command = "search machine --memory 8192"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut3c5n10", command)
+        self.matchoutput(out, "evm1", command)
+        # Has a different memory amount...
+        self.matchclean(out, "ut9s03p1", command)
+
+    def testfullinfo(self):
+        command = "search machine --name evm1 --fullinfo"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+        self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
+
+    def testexactcpu(self):
+        command = ["search_machine", "--cpuname=xeon_2500", "--cpuspeed=2500",
+                   "--cpuvendor=intel"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchoutput(out, "evm1", command)
+        # Has a different cpu...
+        self.matchclean(out, "ut3c5n10", command)
+
+    def testexactcpufailvendor(self):
+        command = ["search_machine", "--cpuname=xeon_2500", "--cpuspeed=2500",
+                   "--cpuvendor=vendor-does-not-exist"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found.",
+                         command)
+
+    def testfailexactcpu(self):
+        command = ["search_machine", "--cpuname=xeon_2500", "--cpuspeed=0",
+                   "--cpuvendor=intel"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "CPU vendor='intel' name='xeon_2500' speed='0' "
+                         "not found.",
+                         command)
+
+    def testparialcpufailvendor(self):
+        command = ["search_machine", "--cpuvendor=vendor-does-not-exist"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found.",
+                         command)
+
+    def testpartialcpu(self):
+        command = ["search_machine", "--cpuspeed=2500", "--cpuvendor=intel"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchoutput(out, "evm1", command)
+        # Has a different cpu...
+        self.matchclean(out, "ut3c5n10", command)
+
+    def testcpuname(self):
+        command = ["search_machine", "--cpuname=xeon_2500"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchoutput(out, "evm1", command)
+        # Has a different cpu...
+        self.matchclean(out, "ut3c5n10", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)

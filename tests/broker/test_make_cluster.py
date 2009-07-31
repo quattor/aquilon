@@ -83,6 +83,12 @@ class TestMakeCluster(TestBrokerCommand):
             "domains", "unittest", "profiles", "clusters",
             "utecl2.tpl")))
 
+    def testfailmissingcluster(self):
+        command = ["make_cluster", "--cluster=cluster-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeCluster)

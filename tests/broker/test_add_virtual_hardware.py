@@ -48,6 +48,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.noouttest(["add", "machine", "--machine", "evm%s" % i,
                             "--cluster", "utecl1", "--model", "utmedium"])
 
+    def test_010_failwithoutcluster(self):
+        command = ["add_machine", "--machine=evm999", "--rack=ut3",
+                   "--model=utmedium"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Virtual machines must be assigned to a cluster.",
+                         command)
+
     def test_100_addinterfaces(self):
         for i in range(1, 8):
             self.noouttest(["add", "interface", "--machine", "evm%s" % i,

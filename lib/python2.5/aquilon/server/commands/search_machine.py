@@ -41,13 +41,15 @@ class CommandSearchMachine(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, cpuname, cpuvendor, cpuspeed, cpucount, memory,
-               cluster, fullinfo, **arguments):
+    def render(self, session, name, cpuname, cpuvendor, cpuspeed, cpucount,
+               memory, cluster, fullinfo, **arguments):
         q = search_hardware_entity_query(session, Machine, **arguments)
+        if name:
+            q = q.filter_by(name=name)
         if cpuname and cpuvendor and cpuspeed:
             dbvendor = Vendor.get_unique(session, cpuvendor)
             if not dbvendor:
-                raise ArgumentError("Vendor '%s' not found.")
+                raise ArgumentError("Vendor '%s' not found." % cpuvendor)
             cpuspeed = force_int("cpuspeed", cpuspeed)
             dbcpu = Cpu.get_unique(session, vendor_id=dbvendor.id,
                                    name=cpuname, speed=cpuspeed)
@@ -61,7 +63,7 @@ class CommandSearchMachine(BrokerCommand):
             if cpuvendor:
                 dbvendor = Vendor.get_unique(session, cpuvendor)
                 if not dbvendor:
-                    raise ArgumentError("Vendor '%s' not found.")
+                    raise ArgumentError("Vendor '%s' not found." % cpuvendor)
                 q = q.filter_by(vendor=dbvendor)
             if cpuspeed:
                 cpuspeed = force_int("cpuspeed", cpuspeed)

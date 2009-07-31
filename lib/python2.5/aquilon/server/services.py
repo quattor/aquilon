@@ -519,10 +519,11 @@ class HostChooser(Chooser):
                        dbservice.name,
                        self.dbhost.cluster.name)
             return
-        # FIXME: Is this check necessary and/or desireable?
+        # This check is necessary to prevent bind_client from overriding
+        # the cluster's binding.  The error message will be misleading...
         if self.cluster_aligned_services[dbservice] not in \
            self.staging_services[dbservice]:
-            self.debug("The %s cluster %s is set to use service %s instance "
+            self.error("The %s cluster %s is set to use service %s instance "
                        "%s, but that instance is not in a service map for %s.",
                        self.dbhost.cluster.cluster_type,
                        self.dbhost.cluster.name,

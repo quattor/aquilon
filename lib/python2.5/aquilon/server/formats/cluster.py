@@ -44,6 +44,7 @@ class ClusterFormatter(ObjectFormatter):
         details.append(indent + "  vm_to_host_ratio: %s" %
                        cluster.vm_to_host_ratio)
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
+        details.append(self.redirect_raw(cluster.domain, indent + "  "))
         for dbsi in cluster.service_bindings:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %

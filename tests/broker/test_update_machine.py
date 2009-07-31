@@ -406,6 +406,24 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Slot: 5", command)
         self.matchclean(out, "Slot: 6", command)
 
+    def testfailmissingcluster(self):
+        command = ["update_machine", "--machine=evm1",
+                   "--cluster=cluster-does-not-exist"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Could not find cluster named "
+                         "'cluster-does-not-exist'",
+                         command)
+
+    def testfailchangemetacluster(self):
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot move machine to a new "
+                         "metacluster: Current metacluster namc1 "
+                         "does not match new metacluster namc2",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateMachine)

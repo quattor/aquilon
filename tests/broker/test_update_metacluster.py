@@ -81,6 +81,24 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          "metacluster 'metacluster-does-not-exist' not found",
                          command)
 
+    def testfailreducemaxmembers(self):
+        command = ["update_metacluster", "--metacluster=namc3",
+                   "--max_members=-1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "metacluster namc3 already exceeds -1 "
+                         "max_members with 0 clusters currently bound",
+                         command)
+
+    def testfailreducemaxshares(self):
+        command = ["update_metacluster", "--metacluster=namc1",
+                   "--max_shares=6"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot set max_shares to 6: Metacluster "
+                         "namc1 has 8 shares already attached.",
+                         command)
+
     # FIXME: Need tests for plenary templates
 
 

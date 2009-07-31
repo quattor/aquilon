@@ -50,6 +50,35 @@ class TestBindClientConstraints(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "is already bound", command)
 
+    def testfailbindclusteralignedservice(self):
+        # Figure out which service the cluster is bound to and attempt change.
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        m = self.searchoutput(out,
+                              r'Member Alignment: Service esx_management '
+                              r'Instance (\S+)',
+                              command)
+        instance = m.group(1)
+        # Grab a host from the cluster
+        command = ["search_host", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        m = self.searchoutput(out, r'(\S+)', command)
+        host = m.group(1)
+        # Sanity check that the host is currently aligned.
+        command = ["search_host", "--host=%s" % host,
+                   "--service=esx_management", "--instance=%s" % instance]
+        out = self.commandtest(command)
+        self.matchoutput(out, host, command)
+        # Now try to swap.
+        next = instance == 'ut.a' and 'ut.b' or 'ut.a'
+        command = ["bind_client", "--hostname=%s" % host,
+                   "--service=esx_management", "--instance=%s" % next]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The esx cluster utecl1 is set to use "
+                         "service esx_management instance %s" % instance,
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

@@ -331,7 +331,11 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
                    "--archetype", "aquilon", "--personality", "inventory"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "while it is a member", command)
+        self.matchoutput(out,
+                         "Cannot change personality of host "
+                         "evh1.aqd-unittest.ms.com while it is a member of "
+                         "esx cluster ",
+                         command)
 
 
 if __name__=='__main__':

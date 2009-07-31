@@ -64,6 +64,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
+        self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
     def testaddutecl2(self):
@@ -85,6 +86,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: 102", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
+        self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Comments: Another test ESX cluster", command)
 
     def testfailaddexisting(self):
@@ -152,6 +154,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
+        self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
     def testaddutecl4(self):
@@ -176,6 +179,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
+        self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
     # FIXME: Verify that plenary files have been created.

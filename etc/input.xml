@@ -131,6 +131,7 @@
       for a machine in a rack, and the rack is in the requested building,
       the search will not return the machine.
       <optgroup name="search_machine_opts" mandatory="True" fields="any">
+         <option name="name" type="string">machine name (exact)</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
          <option name="cpuspeed" type="string">cpu speed</option>
