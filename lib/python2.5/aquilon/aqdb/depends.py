@@ -34,7 +34,7 @@ import ms.version
 # in an addpkg call!!!
 #######
 
-ms.version.addpkg('sqlalchemy', '0.5.4')
+ms.version.addpkg('sqlalchemy', '0.5.5')
 
 ms.version.addpkg('cx_Oracle','5.0.1-11.1.0.6')
 
