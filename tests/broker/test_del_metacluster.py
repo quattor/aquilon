@@ -78,8 +78,6 @@ class TestDelMetaCluster(TestBrokerCommand):
                    "--metacluster=metacluster-does-not-exist"]
         self.notfoundtest(command)
 
-    # FIXME: Verify that plenary files have been removed.
-
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMetaCluster)

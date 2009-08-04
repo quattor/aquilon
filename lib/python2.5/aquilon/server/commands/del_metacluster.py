@@ -31,8 +31,6 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import MetaCluster
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.templates.cluster import get_metacluster_plenaries
-from aquilon.server.templates.base import compileLock, compileRelease
 
 
 class CommandDelMetaCluster(BrokerCommand):
@@ -49,16 +47,7 @@ class CommandDelMetaCluster(BrokerCommand):
             raise ArgumentError("Metacluster still in use by clusters: %s" %
                                 ", ".join([c.name
                                            for c in dbmetacluster.members]))
-        plenaries = get_metacluster_plenaries(dbmetacluster)
         session.delete(dbmetacluster)
-
-        session.flush()
-        try:
-            compileLock()
-            for p in plenaries:
-                p.remove(locked=True)
-        finally:
-            compileRelease()
 
         return
 

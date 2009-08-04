@@ -104,7 +104,10 @@ class TestAddMetaCluster(TestBrokerCommand):
         command = "show metacluster --metacluster metacluster-does-not-exist"
         self.notfoundtest(command.split(" "))
 
-    # FIXME: Verify that plenary files have been created.
+    def testfailglobal(self):
+        command = "add metacluster --metacluster global"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "name reserved", command)
 
 
 if __name__=='__main__':

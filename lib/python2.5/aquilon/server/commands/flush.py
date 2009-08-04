@@ -30,12 +30,10 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import (Service, Machine, Domain, Personality,
-                                Cluster, MetaCluster)
+from aquilon.aqdb.model import Service, Machine, Domain, Personality, Cluster
 from twisted.python import log
 from aquilon.server.templates.personality import PlenaryPersonality
-from aquilon.server.templates.cluster import (PlenaryCluster,
-                                              refresh_metacluster_plenaries)
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -114,12 +112,6 @@ class CommandFlush(BrokerCommand):
                 except Exception, e:
                     failed.append("%s cluster %s failed: %s" %
                                   (clus.cluster_type, clus.name, e))
-
-            for clus in session.query(MetaCluster).all():
-                try:
-                    total += refresh_metacluster_plenaries(clus, locked=True)
-                except Exception, e:
-                    failed.append("metacluster %s failed: %s" % (clus.name, e))
 
             log.msg("flushed %d/%d templates" % (total-len(failed), total))
             if failed:

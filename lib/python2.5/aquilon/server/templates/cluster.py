@@ -33,73 +33,6 @@ from aquilon.server.templates.base import (Plenary, PlenaryCollection,
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
-class PlenaryMetaCluster(Plenary):
-    def __init__(self, dbmetacluster):
-        Plenary.__init__(self)
-        self.name = dbmetacluster.name
-        self.plenary_core = "metacluster"
-        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
-        self.dir = self.config.get("broker", "plenarydir")
-
-    def body(self, lines):
-        # FIXME: Review and implement or remove.
-        lines.append("include { 'metacluster/%(name)s/data' };" %
-                     self.__dict__)
-
-
-class PlenaryMetaClusterClient(Plenary):
-    """
-    A normal template included by cluster clients of a metacluster.
-    """
-    def __init__(self, dbmetacluster):
-        Plenary.__init__(self)
-        self.name = dbmetacluster.name
-        self.plenary_core = "metacluster/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/client" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
-
-    def body(self, lines):
-        lines.append("'/system/metacluster' = "
-            "create('metacluster/%(name)s/clientdata');" % self.__dict__)
-
-
-class PlenaryMetaClusterData(Plenary):
-    def __init__(self, dbmetacluster):
-        Plenary.__init__(self)
-        self.name = dbmetacluster.name
-        self.plenary_core = "metacluster/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/data" % self.__dict__
-        self.template_type = ''
-        self.dir = self.config.get("broker", "plenarydir")
-
-    def body(self, lines):
-        # FIXME: Review and implement or remove.
-        return
-
-
-class PlenaryMetaClusterClientData(Plenary):
-    """
-    A structure template that provides the name of the metacluster
-    and a list of clusters contained within the metacluster.
-    """
-    def __init__(self, dbmetacluster):
-        Plenary.__init__(self)
-        self.name = dbmetacluster.name
-        self.plenary_core = "metacluster/%(name)s" % self.__dict__
-        self.plenary_template = "%(plenary_core)s/clientdata" % self.__dict__
-        self.template_type = 'structure'
-        self.dir = self.config.get("broker", "plenarydir")
-        self.clients = [cluster.name for cluster in dbmetacluster.members]
-
-    def body(self, lines):
-        lines.append("'name' = '%s';" % self.name)
-        lines.append("'clusters' = list(" +
-                     ", ".join([("'" + cluster + "'")
-                                for cluster in self.clients]) +
-                     ");")
-
-
 class PlenaryCluster(PlenaryCollection):
     """
     A facade for the variety of PlenaryCluster subsidiary files
@@ -143,8 +76,8 @@ class PlenaryClusterObject(Plenary):
         lines.append("")
         lines.append("'/system/cluster/name' = '%s';" % self.name)
         if self.metacluster:
-            lines.append("include { 'metacluster/%(metacluster)s/client' };"
-                         % self.__dict__)
+            lines.append("'/system/metacluster/name' = '%s';" %
+                         self.metacluster)
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
@@ -175,28 +108,3 @@ class PlenaryClusterClient(Plenary):
         lines.append("'/system/cluster/name' = '%s';" % self.name)
 
 
-# The plenaries will only be written if they change.  Technically
-# using the refresh_* methods below would result in more work being done
-# here than necessary (in calculating all the plenary files) but it's
-# better than forgetting to update one of these.  Especially if the data
-# changes.
-def get_metacluster_plenaries(metacluster):
-    plenaries = []
-    for p in PlenaryMetaCluster, PlenaryMetaClusterClient, \
-             PlenaryMetaClusterData, PlenaryMetaClusterClientData:
-        plenaries.append(p(metacluster))
-    return plenaries
-
-def refresh_metacluster_plenaries(metacluster, locked=True):
-    plenaries = get_metacluster_plenaries(metacluster)
-    count = 0
-    try:
-        if not locked:
-            compileLock()
-        for p in plenaries:
-            p.write(locked=True)
-            count = count + 1
-    finally:
-        if not locked:
-            compileRelease()
-    return count

@@ -31,7 +31,6 @@
 from aquilon.server.broker import BrokerCommand, validate_basic, force_int
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.templates.cluster import refresh_metacluster_plenaries
 
 
 class CommandAddMetaCluster(BrokerCommand):
@@ -41,9 +40,11 @@ class CommandAddMetaCluster(BrokerCommand):
     def render(self, session, metacluster, max_members, max_shares, comments,
                **arguments):
         validate_basic("metacluster", metacluster)
+        if metacluster.strip().lower() == 'global':
+            raise ArgumentError("Cannot create metacluster named 'global': "
+                                "name reserved.")
 
-        q = session.query(MetaCluster).filter_by(name=metacluster)
-        existing = q.first()
+        existing = MetaCluster.get_unique(session, metacluster)
         if existing:
             raise ArgumentError("metacluster '%s' already exists" %
                                 metacluster)
@@ -61,11 +62,6 @@ class CommandAddMetaCluster(BrokerCommand):
         dbmetacluster = MetaCluster(name=metacluster, max_clusters=max_members,
                                     max_shares=max_shares, comments=comments)
         session.add(dbmetacluster)
-
-        session.flush()
-        session.refresh(dbmetacluster)
-
-        refresh_metacluster_plenaries(dbmetacluster)
 
         return
 

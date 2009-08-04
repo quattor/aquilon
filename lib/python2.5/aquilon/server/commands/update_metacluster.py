@@ -32,7 +32,6 @@ from aquilon.server.broker import BrokerCommand, validate_basic, force_int
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.templates.cluster import refresh_metacluster_plenaries
 
 
 class CommandUpdateMetaCluster(BrokerCommand):
@@ -70,10 +69,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
             dbmetacluster.comments = comments
 
         session.add(dbmetacluster)
-        session.flush()
-
-        session.refresh(dbmetacluster)
-        refresh_metacluster_plenaries(dbmetacluster)
 
         return
 
