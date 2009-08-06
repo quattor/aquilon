@@ -48,7 +48,7 @@ class TestMake(TestBrokerCommand):
     def testmakevmhosts(self):
         for i in range(1, 10):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--os", "esxi/3.5", "--buildstatus", "build"]
+                       "--os", "esxi/4.0.0", "--buildstatus", "build"]
             out = self.commandtest(command)
             self.matchoutput(out,
                              "evh%s.aqd-unittest.ms.com adding binding for "

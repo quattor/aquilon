@@ -96,13 +96,13 @@ class TestAddOS(TestBrokerCommand):
     # as it will already exist.  That's fine - just kill these two
     # tests and the corresponding tests in test_del_os.
     def testaddesxi(self):
-        command = "add os --archetype vmhost --os esxi --vers 3.5"
+        command = "add os --archetype vmhost --os esxi --vers 4.0.0"
         self.noouttest(command.split(" "))
 
     def testverifyesxi(self):
-        command = "show os --archetype vmhost --os esxi --vers 3.5"
+        command = "show os --archetype vmhost --os esxi --vers 4.0.0"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: os/esxi/3.5", command)
+        self.matchoutput(out, "Template: os/esxi/4.0.0", command)
         self.matchclean(out, "linux", command)
 
 
