@@ -2149,9 +2149,10 @@
    </command>
 
    <command name="add_esx_cluster_aligned_service">
-      Mark a service as aligned for ESX clusters.  All members of a given
-      cluster will be required to use the same service instance for the
-      service.
+      Mark a service as aligned for ESX clusters.  All the members within an
+      ESX cluster will be required to use the same service instance for the
+      service.  Different ESX clusters can still have different service
+      instances for the service.
       <optgroup name="add_aligned_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
       </optgroup>
