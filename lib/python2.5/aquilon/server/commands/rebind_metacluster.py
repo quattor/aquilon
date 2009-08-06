@@ -60,10 +60,7 @@ class CommandRebindMetaCluster(BrokerCommand):
             session.refresh(old_metacluster)
             session.refresh(dbmetacluster)
         if not dbcluster.metacluster:
-            if len(dbmetacluster.members) >= dbmetacluster.max_clusters:
-                raise ArgumentError("MetaCluster '%s' already contains "
-                                    "the maximum number of clusters (%s)." %
-                                    (metacluster, dbmetacluster.max_clusters))
+            # MCM init checks that max_clusters is not being exceeded.
             try:
                 dbmcm = MetaClusterMember(metacluster=dbmetacluster,
                                           cluster=dbcluster)

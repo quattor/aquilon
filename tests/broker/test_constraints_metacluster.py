@@ -48,6 +48,15 @@ class TestMetaClusterConstraints(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Metacluster still in use by clusters", command)
 
+    def testfailrebindmetacluster(self):
+        command = ["rebind_metacluster", "--cluster=utecl1",
+                   "--metacluster=namc2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot move cluster to a new metacluster "
+                         "while virtual machines are attached.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

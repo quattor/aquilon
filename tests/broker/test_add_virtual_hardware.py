@@ -56,6 +56,23 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          "Virtual machines must be assigned to a cluster.",
                          command)
 
+    # The current client does not allow this test.
+#   def test_010_failbadlocation(self):
+#       command = ["add_machine", "--machine=evm999", "--rack=np997",
+#                  "--model=utmedium", "--cluster=utecl1"]
+#       out = self.badrequesttest(command)
+#       self.matchoutput(out,
+#                        "Cannot override cluster location building ut "
+#                        "with location rack np997",
+#                        command)
+
+    # Replacement for the test above.
+    def test_010_failbadlocation(self):
+        command = ["add_machine", "--machine=evm999", "--rack=np997",
+                   "--model=utmedium", "--cluster=utecl1"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out, "cluster conflicts with rack", command)
+
     def test_100_addinterfaces(self):
         for i in range(1, 8):
             self.noouttest(["add", "interface", "--machine", "evm%s" % i,
@@ -95,11 +112,16 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          command)
 
     def test_200_updatemachine(self):
-        # FIXME: Verify that plenary moved correctly.
-        # Before: file should be in machine/americas/ut/ut10
-        # After: file should be in machine/americas/ut/None
         self.noouttest(["update_machine", "--machine", "evm9",
                         "--cluster", "utecl2"])
+        oldpath = os.path.join(self.config.get("broker", "plenarydir"),
+                               "machine", "americas", "ut", "ut10", "evm9.tpl")
+        newpath = os.path.join(self.config.get("broker", "plenarydir"),
+                               "machine", "americas", "ut", "None", "evm9.tpl")
+        self.failIf(os.path.exists(oldpath),
+                    "Plenary file '%s' not removed." % oldpath)
+        self.failUnless(os.path.exists(newpath),
+                        "Plenary file '%s' not created." % newpath)
 
     def test_300_failrebindhost(self):
         # At this point evh1 is the only vmhost in utecl2...
@@ -107,10 +129,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--host=evh1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "would exceed vm_to_host_ratio", command)
-
-    def test_300_failbindservice(self):
-        # FIXME: Lookup the current binding and try to rebind with a bind
-        pass
 
     def test_500_verifyaddmachines(self):
         # Skipping evm9 since the mac is out of sequence and different cluster
@@ -155,7 +173,29 @@ class TestAddVirtualHardware(TestBrokerCommand):
     # FIXME: Add a test for creating an aquilon host out of a virtual
     # machine.
 
-    # FIXME: Test that cluster plenaries were updated correctly.
+    def test_500_verifycatcluster(self):
+        command = "cat --cluster=utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "object template clusters/utecl1;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/cluster/machines' = nlist(", command)
+        for i in range(1, 9):
+            machine = "evm%s" % i
+            self.matchoutput(out,
+                             "'%s', create('machine/americas/ut/None/%s')," %
+                             (machine, machine),
+                             command)
+        self.matchclean(out, "'evm9', create('machine/americas/ut/None/evm9'),",
+                        command)
+        self.searchoutput(out,
+                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"client/config' };",
+                          command)
+
+    def test_600_makecluster(self):
+        command = ["make_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
 
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)
@@ -182,13 +222,21 @@ class TestAddVirtualHardware(TestBrokerCommand):
     # This may not be possible yet as only esx clusters can be created and aqdb
     # constrains them to be vmhost.
 
-    # FIXME: Add a test for add_machine that tries to override the location
-    # of the cluster.
+    def testfailaddnonvirtual(self):
+        command = ["add_machine", "--machine=ut3c1n1", "--model=utmedium",
+                   "--chassis=ut3c1.aqd-unittest.ms.com", "--slot=1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Virtual machines must be assigned to a cluster.",
+                         command)
 
-    # FIXME: Add a test that tries to add a virtual_machine without attaching
-    # it to a cluster.
-
-    # FIXME: Add tests for update_machine.  (Or is that UpdateVirtualHardware?)
+    def testfailaddnoncluster(self):
+        command = ["add_machine", "--machine=ut3c1n1", "--cluster=utecl1",
+                   "--model=hs21-8853l5u"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Only virtual machines can have a cluster attribute.",
+                         command)
 
 
 if __name__=='__main__':

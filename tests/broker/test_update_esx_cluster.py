@@ -97,7 +97,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = "show esx_cluster --cluster utecl3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl3", command)
-        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Metacluster: namc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)

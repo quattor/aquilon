@@ -416,12 +416,27 @@ class TestUpdateMachine(TestBrokerCommand):
                          command)
 
     def testfailchangemetacluster(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl4"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot move machine to a new "
                          "metacluster: Current metacluster namc1 "
                          "does not match new metacluster namc2",
+                         command)
+
+    def testfailfullcluster(self):
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Adding a virtual machine to "
+                         "esx cluster utecl3 would exceed "
+                         "vm_to_host_ratio 16 (1 VMs/0 hosts)",
+                         command)
+
+    def testfailaddreadmachinetocluster(self):
+        command = ["update_machine", "--machine=ut9s03p19", "--cluster=utecl1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot add an existing machine to a cluster.",
                          command)
 
 

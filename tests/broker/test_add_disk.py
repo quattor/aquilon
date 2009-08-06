@@ -47,6 +47,15 @@ class TestAddDisk(TestBrokerCommand):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
             "--disk", "sdb", "--type", "scsi", "--capacity", "34"])
 
+    def testfailaddut3c5n10disk(self):
+        command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
+                   "--type=controller-does-not-exist", "--capacity=34"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "controller-does-not-exist is not a valid "
+                         "controller type",
+                         command)
+
     def testverifyaddut3c5n10disk(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))

@@ -52,7 +52,24 @@ class TestDelVirtualHardware(TestBrokerCommand):
             command = "show machine --machine evm%s" %i
             self.notfoundtest(command.split(" "))
 
-    # FIXME: Test that cluster plenaries were updated correctly.
+    # Hack... doing this test here for timing reasons...
+    def testverifydelclusterwithmachines(self):
+        command = "del esx cluster --cluster utecl1"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Cluster still in use by vmhosts", command)
+
+    def testverifycatcluster(self):
+        command = "cat --cluster=utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "object template clusters/utecl1;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.searchoutput(out,
+                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"client/config' };",
+                          command)
 
 
 if __name__=='__main__':

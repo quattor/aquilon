@@ -85,9 +85,18 @@ class TestDelESXCluster(TestBrokerCommand):
         command = ["del_esx_cluster", "--cluster=esx_cluster-does-not-exist"]
         self.notfoundtest(command)
 
-    # FIXME: Need a test for deleting a cluster that still has vmhosts.
-
-    # FIXME: Verify that plenary files have been removed.
+    def verifyplenaryclusterclient(self):
+        for i in range(1, 5):
+            cluster = "utecl%s" % i
+            plenary = os.path.join(self.config.get("broker", "plenarydir"),
+                                   "cluster", cluster, "client.tpl")
+            self.failIf(os.path.exists(plenary),
+                        "Plenary file '%s' still exists" % plenary)
+            plenary = os.path.join(self.config.get("broker", "builddir"),
+                                   "domains", "unittest", "profiles",
+                                   "clusters", "%s.tpl" % cluster)
+            self.failIf(os.path.exists(plenary),
+                        "Plenary file '%s' still exists" % plenary)
 
 
 if __name__=='__main__':

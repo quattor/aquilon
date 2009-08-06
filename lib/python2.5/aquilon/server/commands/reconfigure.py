@@ -85,6 +85,9 @@ class CommandReconfigure(CommandMake):
             if personality:
                 dbpersonality = get_personality(session, dbarchetype.name,
                                                 personality)
+                # This check was written blind... as of this being added
+                # we don't have any non-compilable archetypes that can be
+                # a part of a cluster.
                 if dbhost.cluster and \
                    dbhost.cluster.personality != dbpersonality:
                     raise ArgumentError("Cannot change personality of host %s "

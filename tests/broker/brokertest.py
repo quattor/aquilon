@@ -335,6 +335,7 @@ class TestBrokerCommand(unittest.TestCase):
                          (command, err))
         return err
 
+    # Test for conflicting or invalid aq client options.
     def badoptiontest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(p.returncode, 2,

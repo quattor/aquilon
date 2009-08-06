@@ -54,9 +54,6 @@ class TestClusterConstraints(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "esx cluster: utecl1", command)
 
-    # FIXME: Add a test for deleting a cluster that has host members
-    # but no machines attached.
-
     # FIXME: Add a test for unbinding a vmhost from a cluster where
     # the vm_to_host_ratio would be exceeded.
 

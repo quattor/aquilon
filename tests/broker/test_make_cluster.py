@@ -54,15 +54,26 @@ class TestMakeCluster(TestBrokerCommand):
                          command)
         self.matchclean(out, "removing binding", command)
 
-        # FIXME: Check this.
-        #self.assert_(os.path.exists(os.path.join(
-        #    self.config.get("broker", "profilesdir"), "clusters",
-        #    "utecl1.xml")))
+        self.assert_(os.path.exists(os.path.join(
+            self.config.get("broker", "clustersdir"), "utecl1.xml")))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
             "domains", "unittest", "profiles", "clusters",
             "utecl1.tpl")))
+
+    def testverifycatutecl1(self):
+        command = "cat --cluster=utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "object template clusters/utecl1;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.searchoutput(out,
+                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"client/config' };",
+                          command)
 
     def testmakeutecl2(self):
         command = ["make_cluster", "--cluster", "utecl2"]
@@ -73,15 +84,26 @@ class TestMakeCluster(TestBrokerCommand):
                          command)
         self.matchclean(out, "removing binding", command)
 
-        # FIXME: Check this.
-        #self.assert_(os.path.exists(os.path.join(
-        #    self.config.get("broker", "profilesdir"), "clusters",
-        #    "utecl1.xml")))
+        self.assert_(os.path.exists(os.path.join(
+            self.config.get("broker", "clustersdir"), "utecl2.xml")))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
             "domains", "unittest", "profiles", "clusters",
             "utecl2.tpl")))
+
+    def testverifycatutecl2(self):
+        command = "cat --cluster=utecl2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "object template clusters/utecl2;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl2';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.searchoutput(out,
+                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"client/config' };",
+                          command)
 
     def testfailmissingcluster(self):
         command = ["make_cluster", "--cluster=cluster-does-not-exist"]

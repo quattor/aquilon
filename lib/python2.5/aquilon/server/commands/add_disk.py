@@ -38,6 +38,7 @@ from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Disk, LocalDisk, NasDisk
+from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 class CommandAddDisk(BrokerCommand):
@@ -52,6 +53,9 @@ class CommandAddDisk(BrokerCommand):
         if (len(d) != 0):
             raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))
 
+        if type not in controller_types:
+            raise ArgumentError("%s is not a valid controller type %s" %
+                                (type, controller_types))
 
         capacity = force_int("capacity", capacity)
         if share:

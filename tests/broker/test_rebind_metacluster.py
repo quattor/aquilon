@@ -59,10 +59,25 @@ class TestRebindMetaCluster(TestBrokerCommand):
                          "MetaCluster 'metacluster-does-not-exist' not found.",
                          command)
 
-    # FIXME: Test failure when target metacluster already maxed out.
-    # FIXME: Test success.
+    def testfailfullmetacluster(self):
+        command = ["rebind_metacluster", "--cluster=utecl4",
+                   "--metacluster=namc3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "namc3 already at maximum capacity (0)", command)
 
-    # FIXME: Also test plenary files.
+    def testrebindutecl3(self):
+        command = ["rebind_metacluster", "--cluster=utecl3",
+                   "--metacluster=namc1"]
+        self.noouttest(command)
+
+    def testverifyrebindutecl3(self):
+        command = ["cat", "--cluster=utecl3"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "object template clusters/utecl3;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl3';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
 
 
 if __name__=='__main__':

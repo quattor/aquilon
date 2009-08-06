@@ -29,9 +29,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add esx_cluster command."""
 
+
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
+
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -67,6 +71,16 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
+    def testverifycatutecl1(self):
+        command = ["cat", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "object template clusters/utecl1;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.matchclean(out, "include { 'service", command)
+
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
                    "--metacluster=namc1", "--building=ut",
@@ -88,6 +102,16 @@ class TestAddESXCluster(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Comments: Another test ESX cluster", command)
+
+    def testverifycatutecl2(self):
+        command = ["cat", "--cluster=utecl2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "object template clusters/utecl2;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl2';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.matchclean(out, "include { 'service", command)
 
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
@@ -157,6 +181,16 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
+    def testverifycatutecl3(self):
+        command = ["cat", "--cluster=utecl3"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "object template clusters/utecl3;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl3';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc2';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.matchclean(out, "include { 'service", command)
+
     def testaddutecl4(self):
         # Bog standard - used for some noop tests
         command = ["add_esx_cluster", "--cluster=utecl4",
@@ -182,7 +216,32 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
-    # FIXME: Verify that plenary files have been created.
+    def testverifycatutecl4(self):
+        command = ["cat", "--cluster=utecl4"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "object template clusters/utecl4;", command)
+        self.matchoutput(out, "'/system/cluster/name' = 'utecl4';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'namc2';", command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+        self.matchclean(out, "include { 'service", command)
+
+    def testverifyplenaryclusterclient(self):
+        for i in range(1, 5):
+            cluster = "utecl%s" % i
+            plenary = os.path.join(self.config.get("broker", "plenarydir"),
+                                   "cluster", cluster, "client.tpl")
+            with open(plenary) as f:
+                contents = f.read()
+            self.matchoutput(contents,
+                             "'/system/cluster/name' = '%s';" % cluster,
+                             "read %s" % plenary)
+
+    def testfailcatmissingcluster(self):
+        command = "cat --cluster=cluster-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
+                         command)
 
 
 if __name__=='__main__':
