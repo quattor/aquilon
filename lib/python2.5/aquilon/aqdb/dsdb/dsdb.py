@@ -57,6 +57,7 @@ class DsdbConnection(object):
 
         self.syb = Sybase.connect(self.dsn, 'dsdb_guest', 'dsdb_guest',
                                   'dsdb', auto_commit = '0')
+        assert self.syb._is_connected
 
     def run_query(self,sql):
         """Runs query sql. Note use runSybaseProc to call a stored procedure.
@@ -96,7 +97,6 @@ class DsdbConnection(object):
             if not campus:
                 raise ValueError('buildings_by_campus requires campus kwarg')
             sql += "'%s'"% (campus)
-
         try:
             return self.run_query(sql).fetchall()
         except Exception,e:
@@ -150,4 +150,3 @@ if __name__ == '__main__':
 
 
     db.close()
-
