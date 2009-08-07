@@ -123,13 +123,15 @@ class CommandPollTorSwitch(BrokerCommand):
                 port = row.get(port_label, None)
                 if mac is None or port is None or \
                    len(mac) == 0 or len(port) == 0:
-                    log.msg("Invalid line of CheckNet output: %s" % row)
+                    log.msg("Missing value for mac or port in CheckNet "
+                            "output line #%d: %s" % (reader.line_num, row))
                     continue
                 try:
                     port_int = int(port)
                 except ValueError, e:
                     log.msg("Error parsing port number in CheckNet output "
-                            "line: %s error: %s" % (row, e))
+                            "line #%d: %s error: %s" %
+                            (reader.line_num, row, e))
                     continue
                 macports.append([mac, port_int])
 

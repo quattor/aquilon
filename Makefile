@@ -4,7 +4,7 @@ QACOMMENT = -comment cmrs=qa
 QCELLS = q.ny,q.ln,q.hk,q.tk
 TCM_COMMENT = "-comment tcm FILL IT IN NOW"
 PYTHON_DEFAULT = /usr/bin/env python2.5
-PYTHON=/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+PYTHON = /ms/dist/python/PROJ/core/2.5.4/bin/python
 
 MPR    := $(shell echo $(PWD) | awk -F/ '{print $$(NF-3), $$(NF-2), $$(NF-1)}')
 META   = $(word 1,$(MPR))

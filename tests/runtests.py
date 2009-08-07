@@ -29,10 +29,13 @@
 # TERMS THAT MAY APPLY.
 """This sets up and runs the broker unit tests."""
 
+from __future__ import with_statement
+
 import os
 import sys
 import getopt
 import unittest
+import re
 from subprocess import Popen
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
@@ -118,8 +121,21 @@ if not config.has_option("unittest", "srcdir"):
 if coverage:
     config.set("unittest", "coverage", "True")
 
-# FIXME: Check to see if sys.executable (or maybe platform.python_version)
-# matches whatever is specified in the Makefile and warn if different.
+makefile = os.path.join(SRCDIR, "Makefile")
+prod_python = None
+with open(makefile) as f:
+    prod_python_re = re.compile(r'^PYTHON\s*=\s*(.*?)\s*$')
+    for line in f.readlines():
+        m = prod_python_re.search(line)
+        if m:
+            prod_python = m.group(1)
+            break
+# Another approach would be to exec prod_python with
+# -c 'import platform; print platform.python_version()' and then compare
+# with the current running python_version.
+if prod_python and sys.executable.find(prod_python) < 0:
+    print "\n"
+    force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
 
 production_database = "NYPO_AQUILON"
 if (config.get("database", "vendor") == "oracle" and
