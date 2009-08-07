@@ -34,7 +34,6 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.server.dbwrappers.disk_type import get_disk_type
 from aquilon.server.dbwrappers.cpu import get_cpu
 from aquilon.aqdb.model import Model, MachineSpecs
 
@@ -44,8 +43,8 @@ class CommandAddModel(BrokerCommand):
     required_parameters = ["name", "vendor", "type"]
 
     def render(self, session, name, vendor, type,
-            cputype, cpunum, mem, disktype, disksize, nics,
-            comments, **arguments):
+               cputype, cpunum, mem, disktype, diskcontroller, disksize, nics,
+               comments, **arguments):
         dbmodel = session.query(Model).filter_by(name=name).first()
         if dbmodel is not None:
             raise ArgumentError('Specified model already exists')
@@ -53,9 +52,11 @@ class CommandAddModel(BrokerCommand):
 
         # Specifically not allowing new models to be added that are of
         # type aurora_node - that is only meant for the dummy aurora_model.
-        if type not in ["blade", "rackmount", "workstation", "tor_switch",
-                        "chassis"]:
-            raise ArgumentError("The model's machine type must be blade, rackmount, workstation, tor_switch, or chassis")
+        allowed_types = ["blade", "rackmount", "workstation", "tor_switch",
+                         "chassis", "virtual_machine"]
+        if type not in allowed_types:
+            raise ArgumentError("The model's machine type must be one of %s" %
+                                allowed_types)
 
         if cputype:
             mem = force_int("mem", mem)
@@ -65,16 +66,16 @@ class CommandAddModel(BrokerCommand):
 
         dbmodel = Model(name=name, vendor=dbvendor, machine_type=type,
                 comments=comments)
-        try:
-            session.add(dbmodel)
-        except InvalidRequestError, e:
-            raise ArgumentError("Could not add model: %s" % e)
+        session.add(dbmodel)
+        session.flush()
 
         if cputype:
-            dbdisk_type = get_disk_type(session, disktype)
             dbcpu = get_cpu(session, cputype)
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
-                    cpu_quantity=cpunum, memory=mem, disk_type=dbdisk_type,
-                    disk_capacity=disksize, nic_count=nics)
+                                           cpu_quantity=cpunum, memory=mem,
+                                           disk_type=disktype,
+                                           controller_type=diskcontroller,
+                                           disk_capacity=disksize,
+                                           nic_count=nics)
             session.add(dbmachine_specs)
         return

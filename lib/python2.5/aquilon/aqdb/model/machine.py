@@ -56,12 +56,12 @@ class Machine(HardwareEntity):
     cpu_id = Column(Integer, ForeignKey(
         'cpu.id', name='machine_cpu_fk'), nullable=False)
 
-    cpu_quantity = Column(Integer, nullable=False, default = 2) #constrain/smallint
+    cpu_quantity = Column(Integer, nullable=False, default=2) #constrain/smallint
 
-    memory = Column(Integer, nullable=False, default = 512)
+    memory = Column(Integer, nullable=False, default=512)
 
     hardware_entity = relation(HardwareEntity, uselist=False,
-                               backref='machine', passive_deletes=True)
+                               backref='machine')
 
     cpu = relation(Cpu, uselist=False)
 
@@ -85,5 +85,3 @@ table = machine
 #TODO:
 #   check if it exists in dbdb minfo, and get from there if it does
 #   and/or -dsdb option, and, make machine --like [other machine] + overrides
-
-

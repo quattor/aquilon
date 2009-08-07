@@ -28,85 +28,79 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ tests create and delete of a machine through the session """
-import sys
-import os
-
 import unittest
+from utils import load_classpath, add, commit
 
-if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..", "lib", "python2.5")
-    sys.path.insert(0, SRCDIR)
+load_classpath()
+
+from sqlalchemy import and_
+from sqlalchemy.orm import join
 
 import aquilon.aqdb.depends
-import aquilon.aqdb.db_factory         as aqdbf
-import aquilon.aqdb.utils.shutils      as shell
-import aquilon.aqdb.hw.vendor          as v
-import aquilon.aqdb.hw.model           as m
-import aquilon.aqdb.hw.machine         as mc
-import aquilon.aqdb.hw.cpu             as cpu
-import aquilon.aqdb.loc.rack           as rk
+from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.model import Vendor, Model, Machine, Cpu, Rack
 
-class testMachine(unittest.TestCase):
-    def setUp(self, vendor='hp', model='bl45p', *args, **kw):
+db = DbFactory()
+sess = db.Session()
+NAME = 'test_machine'
+MODEL='bl45p'
 
-        self.dbf = aqdbf.db_factory()
-        self.s   = self.dbf.Session()
+def cleanup():
+    del_machines(sess, NAME)
 
-        self.vnd = self.s.query(v.Vendor).filter_by(name=vendor).one()
-        assert self.vnd, "Can't find vendor %s"%(vendor)
+def setup():
+    print 'setup'
+    cleanup()
 
-        self.mdl  = self.s.query(m.Model).filter_by(name=model).one()
-        assert self.mdl, "Can't find model %s"%(model)
+def teardown():
+    print 'teardown'
+    cleanup()
 
-        self.proc = self.s.query(cpu.Cpu).first()
-        assert self.proc, "Can't find a cpu"
 
-        self.rack = self.s.query(rk.Rack).first()
-        assert self.rack, "Can't find a rack"
+def add_machine(sess, name, model):
+    """ Shorthand to create machines created for the purposes of reuse
+        among all the various tests that require them """
+    mchn = sess.query(Machine).filter_by(name=name).first()
+    if mchn:
+        return mchn
 
-        self.nm = self.rack.name + 'c1n3'
+    model = Model.get_by('name', model, sess)[0]
+    assert model, "Can't find model %s"%(model)
 
-        t = self.s.query(mc.Machine).filter_by(name = self.nm).first()
-        if t is not None:
-            self.s.delete(t)
-            self.s.commit()
+    proc = sess.query(Cpu).first()
+    assert proc, "Can't find a cpu"
 
-    def tearDown(self):
-        #TODO: this is a recursive definition. Fix it with a direct sql statement later on
-        if len(self.s.query(mc.Machine).filter_by(name = self.nm).all()) > 0:
-            self.testDelMachine()
+    rack = sess.query(Rack).first()
+    assert rack, "Can't find a rack"
 
-    def testInitMachine(self, *args, **kw):
+    mchn = Machine(name=name, model=model, location=rack, cpu=proc)
+    add(sess, mchn)
+    commit(sess)
 
-        mchn = mc.Machine(name = self.nm, model = self.mdl,
-                          location = self.rack, cpu = self.proc )
+    return mchn
 
-        try:
-            self.s.save(mchn)
-        except Exception, e:
-            print e
-            sys.exit(2)
+def del_machines(sess=sess, prefix=NAME):
+    """ deletes all machines with names like prefix% """
 
-        self.s.commit()
+    machines = sess.query(Machine).filter(Machine.name.like(prefix+'%')).all()
+    if machines:
+        for machine in machines:
+            sess.delete(machine)
+        commit(sess)
+        print 'deleted %s machines'%(len(machines))
 
-        assert mchn, 'Commit machine failed'
+def test_add_machine():
+    """ test creating a machine """
+    mchn = add_machine(sess, NAME, MODEL)
+    assert mchn, 'Commit machine failed'
+    print mchn
 
-    def testDelMachine(self):
-        mchn = self.s.query(mc.Machine).filter_by(name = self.nm).one()
+def test_del_machine():
+    mchn = sess.query(Machine).filter_by(name = NAME).first()
+    if mchn:
+        sess.delete(mchn)
+        commit(sess)
 
-        self.s.delete(mchn)
-        self.s.commit()
-
-        t = self.s.query(mc.Machine).filter_by(name = self.nm).first()
+        t = sess.query(Machine).filter_by(name = NAME).first()
         assert t is None
-
-    def runTest(self):
-        self.setUp()
-        self.testInitMachine()
-        self.testDelMachine()
-        self.tearDown()
-
-if __name__ == "__main__":
-    tm = testMachine()
-    tm.runTest()
+        print 'deleted machine'

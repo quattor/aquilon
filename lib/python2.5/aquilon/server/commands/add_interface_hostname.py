@@ -37,7 +37,7 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 
 class CommandAddInterfaceHostname(CommandAddInterfaceMachine):
 
-    required_parameters = ["hostname", "mac", "interface"]
+    required_parameters = ["hostname", "interface"]
 
     def render(self, session, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)

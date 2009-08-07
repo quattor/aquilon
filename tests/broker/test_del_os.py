@@ -49,6 +49,20 @@ class TestDelOS(TestBrokerCommand):
                    "--os=utos", "--vers=1.0"]
         self.noouttest(command)
 
+    def testverifydelos(self):
+        command = "show os --os utos"
+        self.notfoundtest(command.split(" "))
+
+    # If the add test for esxi/4.0.0 is removed, this should be removed
+    # as well.
+    def testdelesxi(self):
+        command = ["del_os", "--archetype=vmhost", "--os=esxi", "--vers=4.0.0"]
+        self.noouttest(command)
+
+    def testverifydelesxi(self):
+        command = "show os --os esxi"
+        self.notfoundtest(command.split(" "))
+
     def testdelinvalid(self):
         command = ["del_os", "--archetype=utarchetype1",
                    "--os=os-does-not-exist", "--vers=1.0"]

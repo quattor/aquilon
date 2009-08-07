@@ -30,9 +30,11 @@
 
 
 from twisted.python import log
+from sqlalchemy import String
+from sqlalchemy.sql.expression import asc, desc, bindparam
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 IncompleteError)
+                                 IncompleteError, UnimplementedError)
 from aquilon.aqdb.model import Interface, Machine, Manager
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
@@ -47,9 +49,10 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddInterfaceMachine(BrokerCommand):
 
-    required_parameters = ["interface", "machine", "mac"]
+    required_parameters = ["interface", "machine"]
 
-    def render(self, session, interface, machine, mac, comments, **arguments):
+    def render(self, session, interface, machine, mac, automac, comments,
+               **arguments):
         dbmachine = get_machine(session, machine)
         extra = {}
         if interface == 'eth0':
@@ -70,21 +73,20 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 itype = 'management'
                 break
 
-        if mac:
-            prev = session.query(Interface).filter_by(mac=mac).first()
         dbmanager = None
         pending_removals = []
-        if prev:
-            if prev.hardware_entity == dbmachine:
-                raise ArgumentError("machine %s already has an interface with mac %s" %
-                                    (dbmachine.name, mac))
+        if mac:
+            prev = session.query(Interface).filter_by(mac=mac).first()
+            if prev and prev.hardware_entity == dbmachine:
+                raise ArgumentError("machine %s already has an interface "
+                                    "with mac %s" % (dbmachine.name, mac))
             # Is the conflicting interface something that can be
             # removed?  It is if:
             # - we are currently attempting to add a management interface
             # - the old interface belongs to a machine
             # - the old interface is associated with a host
             # - that host was blindly created, and thus can be removed safely
-            if itype == 'management' and \
+            if prev and itype == 'management' and \
                prev.hardware_entity.hardware_entity_type == 'machine' and \
                prev.system and prev.system.system_type == 'host' and \
                prev.system.status.name == 'blind':
@@ -103,9 +105,13 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 # as it should be used...
                 dbmanager = self.add_manager(session, dbmachine, dummy_ip,
                                              old_network)
-            else:
+            elif prev:
                 msg = describe_interface(session, prev)
                 raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+        elif automac:
+            mac = self.generate_mac(session, dbmachine)
+        else:
+            raise ArgumentError("Interface requires a MAC address.")
 
         dbinterface = Interface(name=interface, hardware_entity=dbmachine,
                                 mac=mac, interface_type=itype, **extra)
@@ -175,8 +181,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmachine = prev.hardware_entity
         machine_plenary_info = PlenaryMachineInfo(prev.hardware_entity)
         pending_removals.append(machine_plenary_info)
-        for disk in dbmachine.disks:
-            session.delete(disk)
         session.delete(prev)
         session.delete(dbmachine)
         session.flush()
@@ -234,3 +238,94 @@ class CommandAddInterfaceMachine(BrokerCommand):
                             machine=dbmachine,
                             ip=old_ip, network=old_network)
         return dbmanager
+
+    def generate_mac(self, session, dbmachine):
+        """ Generate a mac address for virtual hardware.
+
+        Algorithm:
+
+        * Query for first mac address in aqdb starting with vendor prefix,
+          order by mac descending.
+        * If no address, or address less than prefix start, use prefix start.
+        * If the found address is not suffix end, increment by one and use it.
+        * If the address is suffix end, requery for the full list and scan
+          through for holes. Use the first hole.
+        * If no holes, error. [In this case, we're still not completely dead
+          in the water - the mac address would just need to be given manually.]
+
+        """
+        if dbmachine.model.machine_type != "virtual_machine":
+            raise ArgumentError("Can only automatically generate mac "
+                                "addresses for virtual hardware.")
+        if not dbmachine.cluster or dbmachine.cluster.cluster_type != 'esx':
+            raise UnimplementedError("MAC auto-generation has only been "
+                                     "enabled for ESX clusters.")
+        # FIXME: These values should probably be configurable.
+        mac_prefix_esx = "00:50:56"
+        mac_start_esx = "01:00:00"
+        mac_end_esx = "3f:ff:ff"
+        mac_prefix = mac_prefix_esx
+        mac_start = MACAddress(mac_prefix + ":" + mac_start_esx)
+        mac_end = MACAddress(mac_prefix + ":" + mac_end_esx)
+        q = session.query(Interface.mac)
+        # Need to explicitly bypass AqMac conversion here so that we
+        # do not get an error about the prefix being an invalid mac.
+        # This implies that the prefix must already be lower cased
+        # and include colons.
+        q = q.filter(Interface.mac.startswith(bindparam('prefix',
+                                                        type_=String)))
+        q = q.params(prefix=mac_prefix_esx)
+        # This query (with a different order_by) is used below.
+        mac = q.order_by(desc(Interface.mac)).first()
+        if not mac:
+            return mac_start.get_address()
+        highest_mac = MACAddress(mac[0])
+        if highest_mac < mac_start:
+            return mac_start.get_address()
+        if highest_mac < mac_end:
+            return highest_mac.next().get_address()
+        potential_hole = mac_start
+        for mac in q.order_by(asc(Interface.mac)).all():
+            current_mac = MACAddress(mac[0])
+            if current_mac < mac_start:
+                continue
+            if potential_hole < current_mac:
+                return potential_hole.get_address()
+            potential_hole = current_mac.next()
+        raise ArgumentError("All MAC addresses between %s and %s inclusive "
+                            "are currently in use." % (mac_start, mac_end))
+
+
+class MACAddress(object):
+    def __init__(self, address=None, value=None):
+        if address is not None:
+            if value is None:
+                value = long(address.replace(':', ''), 16)
+        elif value is None:
+            raise ValueError("Must specify either address or value")
+        self.address = address
+        self.value = value
+
+    def __cmp__(self, other):
+        return cmp(self.value, other.value)
+
+    def next(self):
+        next_value = self.value + 1
+        return MACAddress(value=next_value)
+
+    def get_address(self):
+        """Address is created as needed."""
+        if not self.address:
+            self.address = "%012x" % self.value
+        return self.address
+
+    def __str__(self):
+        a = self.get_address()
+        if a.find(':'):
+            return a
+        # This is almost perl-esque, ain't it?  Basically, stich a colon
+        # in between every two characters of the address.
+        return ":".join(["".join(t) for t in
+                         zip(a[0:len(a):2], a[1:len(a):2])])
+
+

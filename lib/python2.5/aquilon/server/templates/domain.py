@@ -30,24 +30,22 @@
 
 
 import os
-from os import path as os_path, environ as os_environ
-from datetime import datetime
+from os import environ as os_environ
 
 from twisted.python import log
 
 from aquilon.config import Config
-from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 IncompleteError)
-from aquilon.server.processes import run_command, build_index
+from aquilon.exceptions_ import (ArgumentError, ProcessException)
+from aquilon.server.processes import run_command
+from aquilon.server.templates.index import build_index
 from aquilon.server.templates.base import compileLock, compileRelease
-from aquilon.server.templates.host import PlenaryHost
+from aquilon.aqdb.model import Host, Cluster
 
 
 class TemplateDomain(object):
 
     def __init__(self, dom):
         self.domain = dom
-        pass
 
     def directories(self):
         """Return a list of directories required for compiling this domain"""
@@ -56,21 +54,33 @@ class TemplateDomain(object):
         dirs.append(os.path.join(config.get("broker", "templatesdir"),
                     self.domain.name))
 
-        dirs.append(os.path.join(config.get("broker", "quattordir"), 
-                                 "deps", 
+        dirs.append(os.path.join(config.get("broker", "quattordir"),
+                                 "deps",
                                  self.domain.name))
 
-        dirs.append(os.path.join(config.get("broker", "quattordir"), 
-                                 "cfg", 
+        dirs.append(os.path.join(config.get("broker", "quattordir"),
+                                 "cfg",
                                  "domains",
                                  self.domain.name))
               
-        dirs.append(os.path.join(config.get("broker", "quattordir"), 
-                                 "build", 
+        dirs.append(os.path.join(config.get("broker", "quattordir"),
+                                 "build",
                                  "xml",
+                                 self.domain.name))
+
+        dirs.append(os.path.join(config.get("broker", "quattordir"),
+                                 "build",
+                                 "clusters",
                                  self.domain.name))
         return dirs
 
+    def outputdirs(self):
+        """Returns a list of directories that should exist before compiling"""
+        config = Config()
+        dirs = []
+        dirs.append(config.get("broker", "profilesdir"))
+        dirs.append(config.get("broker", "clustersdir"))
+        return dirs
 
     def compile(self, session, only=None, locked=False):
         """The build directories are checked and constructed
@@ -80,7 +90,7 @@ class TemplateDomain(object):
         of blocking on the compile lock.
 
         If the 'only' parameter is provided, then it should be a
-        single host object and just that host will be compiled.
+        single object and just that profile will be compiled.
 
         May raise ArgumentError exception, else returns the standard
         output (as a string) of the compile
@@ -92,7 +102,7 @@ class TemplateDomain(object):
         config = Config()
         outputdir = config.get("broker", "profilesdir")
 
-        for d in self.directories():
+        for d in self.directories() + self.outputdirs():
             if not os.path.exists(d):
                 try:
                     log.msg("creating %s"%d)
@@ -100,7 +110,6 @@ class TemplateDomain(object):
                 except OSError, e:
                     raise ArgumentError("failed to mkdir %s: %s" % (d, e))
 
-        # Check that all host templates are up-to-date
         # XXX: This command could take many minutes, it'd be really
         # nice to be able to give progress messages to the user
         try:
@@ -108,46 +117,51 @@ class TemplateDomain(object):
                 compileLock()
 
             if (only):
-                hl = [ only ]
+                objectlist = [ only ]
             else:
-                hl = self.domain.hosts
-            if (len(hl) == 0):
+                objectlist = self.domain.hosts
+
+            if (len(objectlist) == 0):
                 return 'no hosts: nothing to do'
 
-            domaindir = os_path.join(config.get("broker", "templatesdir"), self.domain.name)
-            includes = [domaindir,
-                        config.get("broker", "plenarydir"),
-                        config.get("broker", "swrepdir")]
-
-            panc_env={"PATH":"%s:%s" % (config.get("broker", "javadir"),
-                                        os_environ.get("PATH", ""))}
+            panc_env = {"PATH":"%s:%s" % (config.get("broker", "javadir"),
+                                          os_environ.get("PATH", ""))}
             
-            args = [ "/ms/dist/fsf/PROJ/make/prod/bin/gmake" ]
+            args = [config.get("broker", "ant")]
             args.append("-f")
-            args.append("%s/GNUmakefile.build" % config.get("broker", "compiletooldir"))
-            args.append("MAKE=%s -f %s"%(args[0], args[2]))
-            args.append("DOMAIN=%s"%self.domain.name)
-            args.append("TOOLDIR=%s"%config.get("broker", "compiletooldir"))
-            args.append("QROOT=%s"%config.get("broker", "quattordir"))
-            args.append("PANC=%s" % self.domain.compiler)
-            args.append("PANC_BATCH_SIZE=%s" %
+            args.append("%s/build.xml" %
+                        config.get("broker", "compiletooldir"))
+            args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
+            args.append("-Dpanc.jar=%s" % self.domain.compiler)
+            args.append("-Dpanc.formatter=%s" %
+                        config.get("broker", "panc_formatter"))
+            args.append("-Ddomain=%s" % self.domain.name)
+            args.append("-Ddistributed.profiles=%s" %
+                        config.get("broker", "profilesdir"))
+            args.append("-Dpanc.batch.size=%s" %
                         config.get("broker", "panc_batch_size"))
             if (only):
-                args.append("only")
-                args.append("HOST=%s"%only.fqdn)
+                # Use -Dforce.build=true?
+                args.append("-Dobject.profile=%s" % only)
+                args.append("compile.object.profile")
+            else:
+                # Technically this is the default, but being explicit
+                # doesn't hurt.
+                args.append("compile.domain.profiles")
 
             out = ''
             log.msg("starting compile")
             try:
-                out = run_command(args, env=panc_env, path=config.get("broker", "quattordir"))
+                out = run_command(args, env=panc_env,
+                                  path=config.get("broker", "quattordir"))
             except ProcessException, e:
-                raise ArgumentError("\n%s%s"%(e.out,e.err))
+                raise ArgumentError("\n%s%s" % (e.out, e.err))
 
         finally:
             if (not locked):
                 compileRelease()
 
-        build_index(config, session, outputdir)
+        build_index(config, session, config.get("broker", "profilesdir"))
         return out
 
 

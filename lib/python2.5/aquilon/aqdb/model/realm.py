@@ -44,7 +44,7 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 class Realm(Base):
     __tablename__ = 'realm'
 
-    id = Column(Integer, Sequence('realm_seq'), primary_key=True)
+    id = Column(Integer, Sequence('realm_id_seq'), primary_key=True)
 
     name = Column(AqStr(32), nullable=False)
 
@@ -69,5 +69,3 @@ def populate(sess, *args, **kw):
         assert(r)
     else:
         return True
-
-

@@ -252,6 +252,49 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: unmapped", command)
 
+    def testaddesxlicense(self):
+        command = "add service --service esx_license --instance ut.a"
+        self.noouttest(command.split(" "))
+        command = "add service --service esx_license --instance ut.b"
+        self.noouttest(command.split(" "))
+
+    def testverifyesxlicense(self):
+        command = "show service --service esx_license"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: esx_license", command)
+        self.matchoutput(out, "Service: esx_license Instance: ut.a", command)
+        self.matchoutput(out, "Service: esx_license Instance: ut.b", command)
+
+    def testaddesxmanagement(self):
+        command = "add service --service esx_management --instance ut.a"
+        self.noouttest(command.split(" "))
+        command = "add service --service esx_management --instance ut.b"
+        self.noouttest(command.split(" "))
+
+    def testverifyesxmanagement(self):
+        command = "show service --service esx_management"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: esx_management", command)
+        self.matchoutput(out, "Service: esx_management Instance: ut.a",
+                         command)
+        self.matchoutput(out, "Service: esx_management Instance: ut.b",
+                         command)
+
+    def testaddnasshares(self):
+        # Creates shares test_share_1 through test_share_9
+        for i in range(1, 10):
+            self.noouttest(["add_service", "--service=nas_disk_share",
+                            "--instance=test_share_%s" % i])
+
+    def testfailaddnasshare(self):
+        command = ["add_service", "--service=nas_disk_share",
+                   "--instance=share-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "share 'share-does-not-exist' cannot be found "
+                         "in NAS maps",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)

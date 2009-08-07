@@ -78,8 +78,9 @@ def force_yes(msg):
         sys.exit(1)
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hdc:",
-                               ["help", "debug", "config=", "coverage"])
+    opts, args = getopt.getopt(sys.argv[1:], "hdc:vq",
+                               ["help", "debug", "config=", "coverage",
+                                "verbose", "quiet"])
 except getopt.GetoptError, e:
     print >>sys.stderr, str(e)
     usage()
@@ -87,6 +88,7 @@ except getopt.GetoptError, e:
 
 configfile = default_configfile
 coverage = False
+verbosity = 1
 for o, a in opts:
     if o in ("-h", "--help"):
         usage()
@@ -98,6 +100,10 @@ for o, a in opts:
         configfile = a
     elif o in ("--coverage"):
         coverage = True
+    elif o in ("-v", "--verbose"):
+        verbosity += 1
+    elif o in ("-q", "--quiet"):
+        verbosity -= 1
     else:
         assert False, "unhandled option"
 
@@ -184,11 +190,21 @@ for dir in dirs:
 
 # The template-king also gets synced as part of the broker tests,
 # but this makes it available for the initial database build.
+# This syncs the *contents* of the remote "template-king" by
+# appending a slash, so the remote could be any path that rsync
+# can parse that leads to a git repository.
 p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-    config.get("unittest", "template_king_path"),
-    # Minor hack... ignores config kingdir...
-    config.get("broker", "quattordir")),
-    stdout=1, stderr=2)
+           "--exclude=.git/config",
+           os.path.join(config.get("unittest", "template_king_path"), ""),
+           config.get("broker", "kingdir")),
+          stdout=1, stderr=2)
+rc = p.wait()
+# FIXME: check rc
+# Need the actual king's config file for merges to work.
+p = Popen(("rsync", "-avP", "-e", "ssh",
+           config.get("unittest", "template_king_config"),
+           os.path.join(config.get("broker", "kingdir"), ".git")),
+          stdout=1, stderr=2)
 rc = p.wait()
 # FIXME: check rc
 
@@ -203,12 +219,38 @@ rc = p.wait()
 
 
 class VerboseTextTestResult(unittest._TextTestResult):
+    lastmodule = ""
+
+    def printModule(self, test):
+        if self.dots:
+            if test.__class__.__module__ != self.lastmodule:
+                self.lastmodule = test.__class__.__module__
+                self.stream.writeln("")
+                self.stream.write("%s" % self.lastmodule)
+
+    def addSuccess(self, test):
+        self.printModule(test)
+        unittest._TextTestResult.addSuccess(self, test)
+
+    def printResult(self, flavour, result):
+        (test, err) = result
+        self.stream.writeln()
+        self.stream.writeln(self.separator1)
+        self.stream.writeln("%s: %s" % (flavour, self.getDescription(test)))
+        self.stream.writeln(self.separator2)
+        self.stream.writeln("%s" % err)
+
     def addError(self, test, err):
-        unittest._TextTestResult.addError(self, test, err)
+        self.printModule(test)
+        # Specifically skip over base class's implementation.
+        unittest.TestResult.addError(self, test, err)
+        self.printResult("ERROR", self.errors[-1])
 
     def addFailure(self, test, err):
-        unittest._TextTestResult.addFailure(self, test, err)
-        self.stream.writeln("%s" % self.failures[-1][1])
+        self.printModule(test)
+        # Specifically skip over base class's implementation.
+        unittest.TestResult.addFailure(self, test, err)
+        self.printResult("FAIL", self.failures[-1])
 
 
 class VerboseTextTestRunner(unittest.TextTestRunner):
@@ -221,4 +263,4 @@ suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite())
-VerboseTextTestRunner(verbosity=2).run(suite)
+VerboseTextTestRunner(verbosity=verbosity).run(suite)

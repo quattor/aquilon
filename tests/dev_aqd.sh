@@ -16,5 +16,5 @@ echo "  and rundir  = $RUNDIR"
 echo "  and dsn     = $DSN"
 echo
 
-exec python2.5 ../bin/twistd.py -no -l - --pidfile=$RUNDIR/aqd.pid aqd --config=$AQDCONF
+exec python2.5 ../bin/twistd.py -no -l - --pidfile=$RUNDIR/aqd.pid aqd --config=$AQDCONF "$@"
 

@@ -32,6 +32,7 @@
 import os
 import sys
 import unittest
+import re
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -103,8 +104,11 @@ class TestReconfigure(TestBrokerCommand):
 
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
-        self.noouttest(["reconfigure",
-            "--hostname", "unittest00.one-nyp.ms.com"])
+        command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "0/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"
@@ -178,7 +182,10 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--os", "linux/5.0-x86_64"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "1/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
 
     def testmissingpersonalitytemplate(self):
         command = ["reconfigure",
@@ -207,13 +214,16 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--keepbindings",
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "1/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
 
     def verifykeepbindings(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
             command = ["search_host", "--service", service,
                        "--hostname", "aquilon86.aqd-unittest.ms.com",
-                       "--personality", "inventory"]
+                       "--archetype", "aquilon", "--personality", "inventory"]
             out = self.commandtest(command)
             self.matchoutput(out, "aquilon86.aqd-unittest.ms.com")
 
@@ -276,6 +286,56 @@ class TestReconfigure(TestBrokerCommand):
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
         self.matchoutput(out, "Creating service Chooser", command)
+
+    def testreconfigureboundvmhosts(self):
+        # This will exercise the cluster-aligned services code,
+        # which does not kick in at 'make' time because the hosts
+        # have not been bound to clusters yet.
+        for i in range(1, 5):
+            command = ["reconfigure",
+                       "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+            out = self.commandtest(command)
+
+    def testverifyalignedservice(self):
+        # Check that utecl1 is now aligned to a service and that
+        # all of its members are aligned to the same service.
+        # evh[234] should be bound to utecl1
+        command = "show esx cluster --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        m = re.search(r'Member Alignment: Service esx_management '
+                       'Instance (\S+)', out)
+        self.failUnless(m, "Aligned instance not found in output:\n%s" % out)
+        instance = m.group(1)
+        # A better test might be to search for all hosts in the cluster
+        # and make sure they're all in this list.  That search command
+        # does not exist yet, though.
+        command = ["search_host", "--service=esx_management",
+                   "--instance=%s" % instance]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evh2.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh3.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh4.aqd-unittest.ms.com", command)
+
+    def testreconfigureunboundvmhosts(self):
+        # None of these should change since they have not been bound.
+        # This test isn't really necessary...
+        for i in range(5, 10):
+            command = ["reconfigure",
+                       "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+            out = self.commandtest(command)
+            self.matchoutput(out, "0/1 object template", command)
+            self.matchclean(out, "removing binding", command)
+            self.matchclean(out, "adding binding", command)
+
+    def testfailchangeclustermemberpersonality(self):
+        command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--archetype", "aquilon", "--personality", "inventory"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot change personality of host "
+                         "evh1.aqd-unittest.ms.com while it is a member of "
+                         "esx cluster ",
+                         command)
 
 
 if __name__=='__main__':

@@ -59,6 +59,15 @@ class TestDelModel(TestBrokerCommand):
         command = "show model --name utblade"
         self.notfoundtest(command.split(" "))
 
+    def testdelutmedium(self):
+        command = ["del_model", "--name=utmedium", "--vendor=utvendor",
+                   "--type=virtual_machine"]
+        self.noouttest(command)
+
+    def testverifydelutmedium(self):
+        command = "show model --name utmedium"
+        self.notfoundtest(command.split(" "))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)

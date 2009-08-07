@@ -219,7 +219,7 @@ class ObjectFormatter(object):
                     disk_msg = host_msg.machine.disks.add()
                     disk_msg.device_name = str(disk.device_name)
                     disk_msg.capacity = disk.capacity
-                    disk_msg.disk_type = str(disk.disk_type.type)
+                    disk_msg.disk_type = str(disk.controller_type)
             if hasattr(host.machine, "interfaces"):
                 for i in host.machine.interfaces:
                     int_msg = host_msg.machine.interfaces.add()

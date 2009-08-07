@@ -53,17 +53,11 @@ class CommandMake(BrokerCommand):
         # which means that we will wait until any outstanding compiles
         # have completed before we start modifying files within template
         # domains.
-        old_content = None
         chooser = None
         try:
             compileLock()
             plenary_host = PlenaryHost(dbhost)
-
-            try:
-                old_content = plenary_host.read()
-            except IOError, e:
-                # Sigh, it's an IOError if the file doesn't exist.
-                old_content = None
+            plenary_host.stash()
 
             # Currently, for the Host to be created it *must* be associated with
             # a Machine already.  If that ever changes, need to check here and
@@ -92,6 +86,14 @@ class CommandMake(BrokerCommand):
                     arch = dbhost.archetype.name
 
                 dbpersonality = get_personality(session, arch, personality)
+                if dbhost.cluster and \
+                   dbhost.cluster.personality != dbpersonality:
+                    raise ArgumentError("Cannot change personality of host %s "
+                                        "while it is a member of "
+                                        "%s cluster %s" %
+                                        (dbhost.fqdn,
+                                         dbhost.cluster.cluster_type,
+                                         dbhost.cluster.name))
                 dbhost.personality = dbpersonality
 
             if not dbhost.archetype.is_compileable:
@@ -109,32 +111,17 @@ class CommandMake(BrokerCommand):
                 chooser = Chooser(dbhost, required_only=False, debug=debug)
             else:
                 chooser = Chooser(dbhost, required_only=True, debug=debug)
+            chooser.prestash_primary(plenary_host)
             chooser.set_required()
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)
 
-            plenary_host = PlenaryHost(dbhost)
-            plenary_host.write(locked=True)
-
             td = TemplateDomain(dbhost.domain)
-            out = td.compile(session, only=dbhost, locked=True)
+            out = td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
-            # If this was a change, then we need to revert the plenary,
-            # to avoid this domain being un-compilable in the future.
-            # If this was a new file, we can just remove the plenary.
-            if (old_content is None):
-                plenary_host.remove(locked=True)
-            else:
-                # this method corrupts the mtime, which will cause this
-                # host to be compiled next time from a normal "make".
-                plenary_host.write(locked=True, content=old_content)
-
-            # Black magic... sqlalchemy objects will re-vivify after a
-            # rollback based on id.
             if chooser:
-                session.rollback()
-                chooser.write_plenary_templates(locked=True)
+                chooser.restore_stash()
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.

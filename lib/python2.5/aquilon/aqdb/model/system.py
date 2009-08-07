@@ -100,4 +100,20 @@ system.append_constraint(                    #systm_pt_uk means 'primary tuple'
 
 table = system
 
+class DynamicStub(System):
+    """
+        DynamicStub is a hack to handle stand alone dns records for dynamic
+        hosts prior to having a properly reworked set of tables for Dns
+        information. It should not be used by anything other than to create host
+        records for virtual machines using names similar to
+        'dynamic-1-2-3-4.subdomain.ms.com'
+    """
+    __tablename__ = 'dynamic_stub'
+    __mapper_args__ = {'polymorphic_identity':'dynamic_stub'}
 
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='dynamic_stub_system_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
+
+DynamicStub.__table__.primary_key.name='dynamic_stub_pk'

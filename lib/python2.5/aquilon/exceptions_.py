@@ -151,3 +151,11 @@ class PartialError(AquilonError):
         AquilonError.__init__(self, "\n".join(msg))
 
 
+class InternalError(AquilonError):
+    """Raised when an algorithm error or internal data corruption is seen.
+
+    These should only be raised from "can't happen" code and are
+    preferred over assertion errors.
+    """
+
+

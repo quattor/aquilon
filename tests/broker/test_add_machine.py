@@ -287,6 +287,24 @@ class TestAddMachine(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Blade: ut9s03p%d" % port, command)
 
+    def testaddverarirack(self):
+        # number 100 is in use by the tor_switch.
+        for i in range(101, 150):
+            port = i - 100
+            self.noouttest(["add", "machine", "--machine", "ut10s04p%d" % port,
+                            "--rack", "ut10", "--model", "vb1205xm"])
+
+    # FIXME: Missing a test for adding a macihne to a chassis where the
+    # fqdn given for the chassis isn't *actually* a chassis.
+    # FIXME: Missing a test for chassis without a slot.  (May not be possible
+    # with the aq client.)
+    # FIXME: Missing a test for a location that conflicts with chassis loc.
+    # FIXME: Missing a test for a slot without a chassis.  (May not be possible
+    # with the aq client.)
+    # FIXME: Add a test where the machine trying to be created already exists.
+
+    # Note: More regression tests are in the test_add_virtual_hardware module.
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)

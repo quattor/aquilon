@@ -31,11 +31,34 @@
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError
-from aquilon.server.templates.base import Plenary
+from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.cluster import PlenaryClusterClient
+
+class PlenaryHost(PlenaryCollection):
+    """
+    A facade for Toplevel and Namespaced Hosts (below).
+
+    This class creates either/both toplevel and namespaced host plenaries,
+    based on broker configuration:
+    namespaced_host_profiles (boolean):
+      if namespaced profiles should be generated
+    flat_host_profiles (boolean):
+      if host profiles should be put into a "flat" toplevel (non-namespaced)
+    """
+    def __init__(self, dbhost):
+        PlenaryCollection.__init__(self)
+        self.config = Config()
+        if self.config.getboolean("broker", "namespaced_host_profiles"):
+            self.plenaries.append(PlenaryNamespacedHost(dbhost))
+        if self.config.getboolean("broker", "flat_host_profiles"):
+            self.plenaries.append(PlenaryToplevelHost(dbhost))
 
 
-class PlenaryHost(Plenary):
+class PlenaryToplevelHost(Plenary):
+    """
+    A plenary template for a host, stored at the toplevel of the profiledir
+    """
     def __init__(self, dbhost):
         Plenary.__init__(self)
         self.name = dbhost.fqdn
@@ -85,7 +108,7 @@ class PlenaryHost(Plenary):
 
         provides = []
         for sis in self.dbhost.sislist:
-            provides.append(repr(sis.service_instance.cfg_path) + '/server/config');
+            provides.append(repr(sis.service_instance.cfg_path) + '/server/config')
 
         templates = []
         templates.append("archetype/base")
@@ -97,6 +120,10 @@ class PlenaryHost(Plenary):
         for provide in provides:
             templates.append(provide)
         templates.append(personality_template)
+        if self.dbhost.cluster:
+            clplenary = PlenaryClusterClient(self.dbhost.cluster)
+            templates.append(clplenary.plenary_template)
+
         templates.append("archetype/final")
 
         # Okay, here's the real content
@@ -113,20 +140,28 @@ class PlenaryHost(Plenary):
             lines.append("'/system/network/default_gateway' = '%s';" %
                          default_gateway)
         lines.append("")
-        # XXX: The function should be the business function.
-        # XXX: maybe "function" could use "state" instead (since the QWG state is pretty
-        # XXX: close to what we want). Whatever. Anyhow, that needs a new column
-        # XXX: in the database. For now, we're just going to assume grid.
-        # XXX: Note that the personality template can override this anyhow. In fact,
-        # XXX: Maybe it should *only* be in the personality template. There's a thought....
-        #lines.append("'/system/function' = '%s';"%self.dbhost.business_function)
+        # We put in a default function: this will be overridden by the
+        # personality with a more suitable value, we just leave this here
+        # for paranoia's sake.
         lines.append("'/system/function' = 'grid';");
         lines.append("'/system/build' = '%s';"%self.dbhost.status)
+        if self.dbhost.cluster:
+            lines.append("'/system/cluster/name' = '%s';" % self.dbhost.cluster.name)
         lines.append("")
         for template in templates:
             lines.append("include { '%s' };" % template)
         lines.append("")
 
         return
+
+class PlenaryNamespacedHost(PlenaryToplevelHost):
+    """
+    A plenary template describing a host, namespaced by DNS domain
+    """
+    def __init__(self, dbhost):
+        PlenaryToplevelHost.__init__(self, dbhost)
+        self.name = dbhost.fqdn
+        self.plenary_core = dbhost.dns_domain.name
+        self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
 
 

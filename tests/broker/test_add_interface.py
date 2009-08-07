@@ -142,6 +142,15 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Mac '%s' already in use: " % self.hostmac8,
                          command)
 
+    def testfailautomacwithreal(self):
+        command = ["add", "interface", "--interface", "eth1",
+                   "--automac", "--machine", "ut3c1n4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Can only automatically generate mac "
+                         "addresses for virtual hardware.",
+                         command)
+
     def testverifyaddut3c1n4interface(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
@@ -276,6 +285,24 @@ class TestAddInterface(TestBrokerCommand):
             machine = "ut9s03p%d" % port
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine, "--mac", hostmac])
+
+    def testaddverarirackinterfaces(self):
+        for i in range(101, 150):
+            hostmac = getattr(self, "hostmac%d" % i)
+            port = i - 100
+            machine = "ut10s04p%d" % port
+            self.noouttest(["add", "interface", "--interface", "eth0",
+                            "--machine", machine, "--mac", hostmac])
+
+    # FIXME: Missing a test for an interface with comments.
+    # FIXME: Missing a test for adding an interface that already exists.
+    # FIXME: Missing a test for no mac or automac specified. (Might not
+    # be possible to test the broker side.)
+    # FIXME: Missing a test for a failed DSDB add_host.
+    # FIXME: Missing tests around Dell rename hack.
+
+    # Note: additional tests (mostly for --automac) are in the
+    # test_add_virtual_hardware module.
 
 
 if __name__=='__main__':

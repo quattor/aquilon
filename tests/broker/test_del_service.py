@@ -121,6 +121,36 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: unmapped Instance: instance1", command)
 
+    def testdelesxlicense(self):
+        command = "del service --service esx_license --instance ut.a"
+        self.noouttest(command.split(" "))
+        command = "del service --service esx_license --instance ut.b"
+        self.noouttest(command.split(" "))
+        command = "del service --service esx_license"
+        self.noouttest(command.split(" "))
+
+    def testverifydelesxlicense(self):
+        command = "show service --service esx_license"
+        self.notfoundtest(command.split(" "))
+
+    def testdelesxmanagement(self):
+        command = "del service --service esx_management --instance ut.a"
+        self.noouttest(command.split(" "))
+        command = "del service --service esx_management --instance ut.b"
+        self.noouttest(command.split(" "))
+        command = "del service --service esx_management"
+        self.noouttest(command.split(" "))
+
+    def testverifydelesxmanagement(self):
+        command = "show service --service esx_management"
+        self.notfoundtest(command.split(" "))
+
+    def testdelnasshares(self):
+        for i in range(1, 10):
+            self.noouttest(["del_service", "--service=nas_disk_share",
+                            "--instance=test_share_%s" % i])
+        self.noouttest(["del_service", "--service=nas_disk_share"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)

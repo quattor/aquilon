@@ -195,6 +195,10 @@ def create_schema_graph(tables=None,
             graph.add_edge(graph_edge)
     return graph
 
+def create_dot_file(meta, image_name='/tmp/aqdb_schema.dot'):
+    graph = create_schema_graph(metadata=meta)
+    graph.write(image_name)
+
 def show_uml_graph(db,image_name='/tmp/aqdb_uml.png', *args, **kw):
     ios = cStringIO.StringIO(create_uml_graph(
         [class_mapper(c) for c in Base._decl_class_registry.itervalues()])).create_png()

@@ -35,6 +35,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.cluster import PlenaryCluster
 
 
 class CommandDelMachine(BrokerCommand):
@@ -44,13 +45,9 @@ class CommandDelMachine(BrokerCommand):
     def render(self, session, machine, **arguments):
         dbmachine = get_machine(session, machine)
 
-        if dbmachine.model.machine_type not in [
-                'blade', 'rackmount', 'workstation', 'aurora_node']:
-            raise ArgumentError("The del_machine command cannot delete machines of type '%(type)s'.  Try 'del %(type)s'." %
-                    {"type": dbmachine.model.machine_type})
-
         session.refresh(dbmachine)
         plenary_info = PlenaryMachineInfo(dbmachine)
+        dbcluster = dbmachine.cluster
 
         if dbmachine.host:
             raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
@@ -69,6 +66,12 @@ class CommandDelMachine(BrokerCommand):
             session.delete(disk)
         session.delete(dbmachine)
         plenary_info.remove()
+
+        if dbcluster:
+            session.refresh(dbcluster)
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write()
+
         return
 
 

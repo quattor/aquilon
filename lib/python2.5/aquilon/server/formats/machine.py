@@ -41,6 +41,9 @@ class MachineFormatter(ObjectFormatter):
         if machine.host:
             details.append(indent + "  Allocated to host: %s [%s]"
                     % (machine.host.fqdn, machine.host.ip))
+        if machine.cluster:
+            details.append(indent + "  Hosted by %s cluster: %s"
+                    % (machine.cluster.cluster_type, machine.cluster.name))
         for manager in machine.manager:
             details.append(indent + "  Manager: %s [%s]" % (manager.fqdn,
                                                             manager.ip))
@@ -70,8 +73,12 @@ class MachineFormatter(ObjectFormatter):
         if machine.serial_no:
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in machine.disks:
-            details.append(indent + "  Disk: %s %d GB %s"
-                    % (d.device_name, d.capacity, d.disk_type.type))
+            extra = d.disk_type
+            if d.disk_type == "nas":
+                extra = extra + " from " + d.service_instance.name
+            details.append(indent + "  Disk: %s %d GB %s (%s)"
+                    % (d.device_name, d.capacity, d.controller_type,
+                       extra))
         for i in machine.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
@@ -85,7 +92,7 @@ class MachineFormatter(ObjectFormatter):
     def format_csv(self, machine):
         """This was implemented specifically for tor_switch.  May need
         to check and do something different for other machine types.
-        
+
         """
         results = []
         details = [machine.name, machine.location.rack,
@@ -112,5 +119,3 @@ class SimpleMachineListFormatter(ObjectFormatter):
         return str("\n".join([indent + machine.name for machine in smlist]))
 
 ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
-
-

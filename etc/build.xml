@@ -1,0 +1,145 @@
+<project name="Template Build" default="compile.domain.profiles" basedir="/var/quattor">
+	<description>
+		Build quattor templates written in the pan language.
+	</description>
+
+	<!--
+	Note that ant properties are immutable - the expectation is
+	that panc.jar and basedir are set on the command line and then
+	these definitions will not change the values being passed in.
+
+	The panc.version line is not used if panc.jar is overridden.
+	-->
+	<property name="panc.version" value="8.2.8-ms1" />
+	<property name="panc.formatter" value="pan" />
+	<property name="panc.batch.size" value="1000" />
+	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/common/lib/panc.jar" />
+	<property name="ant-contrib.version" value="1.0b2" />
+	<property name="ant-contrib.jar" location="/ms/dist/msjava/PROJ/ant-contrib/${ant-contrib.version}/common/lib/ant-contrib.jar" />
+	<property name="force.build" value="false" />
+
+	<!--
+	Be careful of the clean.dep.files property... if it is set at
+	all (even to false) the dep files will be cleaned out.
+	-->
+	<condition property="clean.dep.files">
+		<istrue value="${force.build}" />
+	</condition>
+
+	<!-- Domain managing objects to be compiled. -->
+	<property name="domain" value="ny-prod" />
+	<!-- cfg/domains/$domain/profiles/*.tpl = input host profiles -->
+	<property name="source.profiles" location="${basedir}/cfg/domains/${domain}/profiles" />
+	<!-- plenary = 'complete' supplemental broker-generated templates -->
+	<property name="plenary" location="${basedir}/plenary" />
+	<!-- swrep = auto-generated templates for the rpms -->
+	<property name="swrep" location="${basedir}/swrep" />
+	<!-- templates/${domain} = domain template source repo -->
+	<property name="domain.templates" location="${basedir}/templates/${domain}" />
+
+	<!-- objects/*.tpl = working object tpls, copied from source.profiles -->
+	<property name="global.profiles" location="${basedir}/objects" />
+	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
+	<property name="compiled.profiles" location="${basedir}/build/xml/${domain}" />
+	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
+	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
+
+	<!--
+	Note that the old 'deps' directory was only needed for the
+	GNUMakefile.build and is no longer used.
+	-->
+
+	<!-- pulls in the panc task -->
+	<taskdef resource="org/quattor/ant/panc-ant.xml" classpath="${panc.jar}" />
+	<!-- pulls in the var and for tasks -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${ant-contrib.jar}" />
+
+	<path id="pan.objectloadpath">
+		<pathelement location="${domain.templates}" />
+		<pathelement location="${plenary}" />
+		<pathelement location="${swrep}" />
+		<pathelement location="${source.profiles}" />
+		<pathelement location="${global.profiles}" />
+	</path>
+
+	<path id="pan.clusterloadpath">
+		<pathelement location="${domain.templates}" />
+		<pathelement location="${plenary}" />
+		<pathelement location="${source.clusters}" />
+		<pathelement location="${global.clusters}" />
+	</path>
+
+	<!--
+	The delete.* targets will only execute if clean.dep.files has been
+	set.  That property will only be set if force.build is set or if
+	it is set on the command line.
+	-->
+	<target name="delete.object.dep" description="remove object dep file" if="clean.dep.files">
+		<var name="delete.dep.includes" value="" />
+		<for list="${object.profile}" delimiter=" " param="profile">
+			<sequential>
+				<var name="delete.dep.includes" value="${compiled.includes} @{profile}.xml.dep" />
+			</sequential>
+		</for>
+		<delete failonerror="false">
+			<fileset dir="${compiled.profiles}" includes="${delete.dep.includes}" />
+		</delete>
+	</target>
+
+	<!-- See comment above delete.object.dep. -->
+	<target name="delete.domain.deps" description="remove domain dep files" if="clean.dep.files">
+		<delete failonerror="false">
+			<fileset dir="${compiled.profiles}" includes="*.xml.dep" />
+		</delete>
+	</target>
+
+	<target name="-verify.object.profile">
+		<fail message="No object defined via the object.profile property"
+			unless="object.profile" />
+		<fail message="object.profile should be a name, not .tpl">
+			<condition>
+				<matches pattern=".tpl$$" string="${object.profile}" />
+			</condition>
+		</fail>
+	</target>
+
+	<target name="compile.object.profile" description="optimized for compiling a single profile" depends="-verify.object.profile,delete.object.dep">
+		<var name="source.includes" value="" />
+		<var name="compiled.includes" value="" />
+		<for list="${object.profile}" delimiter=" " param="profile">
+			<sequential>
+				<var name="source.includes" value="${source.includes} @{profile}.tpl" />
+				<var name="compiled.includes" value="${compiled.includes} @{profile}.xml" />
+			</sequential>
+		</for>
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}" formatter="${panc.formatter}">
+			<path refid="pan.objectloadpath" />
+			<fileset dir="${source.profiles}" includes="${source.includes}" />
+		</panc>
+		<!-- Cache the valid profile in the global pool. -->
+		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
+			<fileset dir="${source.profiles}" includes="${source.includes}" />
+		</copy>
+		<!-- Copy the compiled profile into the web directory.  -->
+		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}" >
+			<fileset dir="${compiled.profiles}" includes="${compiled.includes}" />
+		</copy>
+	</target>
+
+	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
+		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*.tpl" />
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}">
+			<path refid="pan.objectloadpath" />
+			<fileset refid="source.fileset" />
+		</panc>
+		<!-- Cache all of these valid profiles in the global pool. -->
+		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
+			<fileset refid="source.fileset" />
+		</copy>
+		<!-- Copy any compiled profiles into the web directory.  -->
+		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}">
+			<fileset dir="${compiled.profiles}" includes="**/*.xml" />
+		</copy>
+	</target>
+
+</project>

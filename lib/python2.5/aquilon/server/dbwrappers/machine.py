@@ -32,7 +32,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Cpu, Disk, Machine
+from aquilon.aqdb.model import Cpu, LocalDisk, Machine
 from aquilon.server.broker import force_int
 
 
@@ -103,9 +103,12 @@ def create_machine(session, machine, dblocation, dbmodel,
             cpu=dbcpu, cpu_quantity=cpucount, memory=memory, serial_no=serial)
     session.add(dbmachine)
 
-    if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node':
-        dbdisk = Disk(machine=dbmachine,
-                disk_type=dbmodel.machine_specs.disk_type,
+    if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node' \
+       and dbmodel.machine_specs.disk_type == 'local':
+        # FIXME: Look up an appropriate default device name based on
+        # controller_type.
+        dbdisk = LocalDisk(machine=dbmachine, device_name='sda',
+                controller_type=dbmodel.machine_specs.controller_type,
                 capacity=dbmodel.machine_specs.disk_capacity)
         session.add(dbdisk)
 

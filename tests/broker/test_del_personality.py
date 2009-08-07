@@ -81,6 +81,15 @@ class TestDelPersonality(TestBrokerCommand):
                    "--archetype=aquilon"]
         self.notfoundtest(command)
 
+    def testdelesxserver(self):
+        command = "del personality --personality esx_server --archetype vmhost"
+        self.noouttest(command.split(" "))
+
+    def testdelesxserver(self):
+        command = ["del_personality",
+                   "--personality=esx_desktop", "--archetype=vmhost"]
+        self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)

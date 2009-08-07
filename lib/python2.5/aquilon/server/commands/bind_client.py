@@ -54,16 +54,8 @@ class CommandBindClient(BrokerCommand):
         else:
             chooser.set_single(dbservice, force=force)
 
-        # FIXME: Get a single compileLock for here and below.
         chooser.flush_changes()
         chooser.write_plenary_templates(locked=False)
-
-        try:
-            plenary_host = PlenaryHost(dbhost)
-            plenary_host.write()
-        except IncompleteError, e:
-            # host has insufficient information to make a template with
-            pass
 
         if chooser.debug_info:
             # The output of bind client does not run through a formatter.

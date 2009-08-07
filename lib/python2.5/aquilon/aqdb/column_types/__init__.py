@@ -26,13 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-__all__ = (
-          'aqmac',
-          'aqstr',
-          'enum',
-          'IPV4',
-          )
-
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types.aqmac import AqMac
 from aquilon.aqdb.column_types.IPV4 import IPV4
+from aquilon.aqdb.column_types.enum import Enum

@@ -80,15 +80,15 @@ def populate(sess, *args, **kw):
         ops   = sess.query(Role).filter_by(name='operations').one()
         telco = sess.query(Role).filter_by(name='telco_eng').one()
 
-        admins  = ['cdb', 'njw', 'wesleyhe', 'daqscott', 'kgreen', 'benjones']
+        admins  = ['cdb', 'aqdqa', 'njw', 'wesleyhe', 'daqscott', 'kgreen',
+                   'benjones']
 
-        unixeng = ['cesarg', 'jasona', 'dankb', 'tonyc', 'goliaa', 'samsh',
-                   'hagberg', 'hookn', 'jelinker', 'kovacsk','lookerm', 'bet',
-                    'walkert', 'af', 'lillied']
+        unixeng = ['cesarg', 'jasona', 'dankb', 'goliaa', 'samsh', 'hagberg',
+                   'hookn', 'jelinker', 'kovacsk', 'lookerm', 'walkert', 'af',
+                   'lillied']
 
-        operations = ['nathand', 'premdasr', 'bestc', 'chawlav', 'wbarnes',
-                      'gleasob', 'lchun', 'peteryip', 'richmoj', 'hardyb',
-                      'martinva', 'andersme']
+        operations = ['premdasr', 'bestc', 'chawlav', 'wbarnes', 'gleasob',
+                      'lchun', 'peteryip', 'richmoj', 'hardyb', 'martinva']
 
         telco_eng = ['dalys', 'medinad', 'peikonb', 'kulawiak']
 

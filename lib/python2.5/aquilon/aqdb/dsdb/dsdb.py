@@ -85,9 +85,6 @@ class DsdbConnection(object):
             return rs
         except Sybase.DatabaseError, e:
             print e
-            #raise Sybase.DatabaseError(inst)
-            #we're not raising this b/c it means you have
-            #to import Sybase everywhere... reconsider this
 
     def dump(self, data_type, *args, **kw):
         sql = dt[data_type]
@@ -137,8 +134,8 @@ if __name__ == '__main__':
 
     ops = ('country','city') #a few ones for testing
 
-    for i in ops:
-        print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
+    #for i in ops:
+    #    print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
 
     host = 'cwipm1'
     print "getting host data for '%s'"%(host)

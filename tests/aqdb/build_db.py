@@ -80,7 +80,8 @@ pkgs['sy']   = ['system', 'domain', 'host', 'build_item',
                 'console_server']
 
 pkgs['svc']  = ['service', 'service_instance', 'service_instance_server',
-                'service_map', 'service_list_item', 'personality_service_list_item']
+                'service_map', 'service_list_item', 'cluster', 'metacluster',
+                'personality_service_list_item']
 
 order        = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 
@@ -210,5 +211,3 @@ def main(*args, **kw):
 
 if __name__ == '__main__':
     main(sys.argv)
-
-

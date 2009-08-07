@@ -197,6 +197,49 @@ class TestMapService(TestBrokerCommand):
                          "aquilon are not yet available",
                          command)
 
+    def testmapesx(self):
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_license", "--instance", "ut.a",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_license", "--instance", "ut.b",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_management", "--instance", "ut.a",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_management", "--instance", "ut.b",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+
+    def testverifymapesx(self):
+        command = ["show_map", "--archetype=vmhost",
+                   "--personality=esx_server", "--building=ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: vmhost Personality: esx_server "
+                         "Service: esx_license Instance: ut.a "
+                         "Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: vmhost Personality: esx_server "
+                         "Service: esx_license Instance: ut.b "
+                         "Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: vmhost Personality: esx_server "
+                         "Service: esx_management Instance: ut.a "
+                         "Map: Building ut",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: vmhost Personality: esx_server "
+                         "Service: esx_management Instance: ut.b "
+                         "Map: Building ut",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)

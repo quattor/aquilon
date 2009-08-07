@@ -27,24 +27,35 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" run load_all() from shutils and see to it that everything compiles as
-    a first pass to get us some code coverage """
+"""Module for testing constraints in the make command."""
 
-import __init__ 
 
-import aquilon.aqdb.depends
-
-class testCompile(object):
-
-    def testIncludes(self, *args, **kw):
-        import sqlalchemy
-        assert sqlalchemy.__version__
-
-    def testLoadAll(self, *args, **kw):
-        from aquilon.aqdb.utils.shutils import load_all
-        assert(load_all())
+import os
+import sys
+import unittest
+import re
 
 if __name__ == "__main__":
-    import nose
-    nose.runmodule()
+    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    SRCDIR = os.path.join(BINDIR, "..", "..")
+    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
+from brokertest import TestBrokerCommand
+
+
+class TestMakeConstraints(TestBrokerCommand):
+
+    def testfailchangepersonalityclusterhost(self):
+        # This is not a realistic OS for this archetype, but that's not
+        # what the test is checking...
+        command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--os", "linux/4.0.1-x86_64", "--buildstatus", "ready",
+                   "--archetype", "vmhost", "--personality", "esx_desktop"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot change personality of host", command)
+        self.matchoutput(out, "while it is a member of esx cluster", command)
+
+
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
+    unittest.TextTestRunner(verbosity=2).run(suite)

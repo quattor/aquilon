@@ -109,6 +109,34 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: badservice", command)
 
+    def testaddrequiredvmhost(self):
+        command = "add required service --service dns --archetype vmhost"
+        self.noouttest(command.split(" "))
+        command = "add required service --service ntp --archetype vmhost"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddrequiredvmhost(self):
+        command = "show archetype --archetype vmhost"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: dns", command)
+        self.matchoutput(out, "Service: ntp", command)
+        self.matchclean(out, "Service: afs", command)
+
+    def testaddrequiredesx(self):
+        command = ["add_required_service", "--service=esx_license",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+        command = ["add_required_service", "--service=esx_management",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+
+    def testverifyaddrequiredesx(self):
+        command = ["show_personality",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: esx_license", command)
+        self.matchoutput(out, "Service: esx_management", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)

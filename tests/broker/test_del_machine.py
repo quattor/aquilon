@@ -111,6 +111,20 @@ class TestDelMachine(TestBrokerCommand):
             command = "show machine --machine ut9s03p%d" % port
             self.notfoundtest(command.split(" "))
 
+    def testdelverarirack(self):
+        for i in range(101, 150):
+            port = i - 100
+            command = "del machine --machine ut10s04p%d" % port
+            self.noouttest(command.split(" "))
+
+    def testverifydelverarirack(self):
+        for i in range(101, 150):
+            port = i - 100
+            command = "show machine --machine ut10s04p%d" % port
+            self.notfoundtest(command.split(" "))
+
+    # FIXME: Add a test for deleting a machine with only auxiliaries.
+
 
 if __name__=='__main__':
     import aquilon.aqdb.depends

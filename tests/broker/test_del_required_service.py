@@ -98,6 +98,36 @@ class TestDelRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Service: badservice", command)
 
+    def testdelrequiredvmhost(self):
+        command = ["del_required_service",
+                   "--service=dns", "--archetype=vmhost"]
+        self.noouttest(command)
+        command = ["del_required_service",
+                   "--service=ntp", "--archetype=vmhost"]
+        self.noouttest(command)
+
+    def testverifydelrequiredvmhost(self):
+        command = "show archetype --archetype vmhost"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: afs", command)
+        self.matchclean(out, "Service: dns", command)
+        self.matchclean(out, "Service: ntp", command)
+
+    def testdelrequiredesx(self):
+        command = ["del_required_service", "--service=esx_license",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+        command = ["del_required_service", "--service=esx_management",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        self.noouttest(command)
+
+    def testverifydelrequiredvmhost(self):
+        command = ["show_personality",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Service: esx_license", command)
+        self.matchclean(out, "Service: esx_management", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRequiredService)

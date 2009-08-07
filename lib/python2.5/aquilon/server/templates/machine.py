@@ -52,7 +52,7 @@ class PlenaryMachineInfo(Plenary):
         #   self.hub = loc.hub.fullname.lower()
         #else:
         #   self.hub = None
-        
+
         # And a chassis location?
         if dbmachine.chassis_slot:
             slot = dbmachine.chassis_slot[0]
@@ -71,12 +71,26 @@ class PlenaryMachineInfo(Plenary):
         self.num_cpus = dbmachine.cpu_quantity
         self.cpu_relpath = "hardware/cpu/%s/%s" % (
                 dbmachine.cpu.vendor.name, dbmachine.cpu.name)
-        harddisks = []
-        for harddisk in dbmachine.disks:
-            relpath = "hardware/harddisk/generic/%s" % harddisk.disk_type.type
-            harddisks.append({"relpath":relpath, "capacity":harddisk.capacity,
-                "name":harddisk.device_name})
-        self.harddisks = harddisks
+
+        self.disks = dict()
+        for disk in dbmachine.disks:
+            if disk.disk_type == 'local':
+                relpath = "hardware/harddisk/generic/%s" % disk.controller_type
+                self.disks[disk.device_name] = "create('%s', \n" \
+                    "                   'capacity', %d*GB)" % \
+                    (relpath, disk.capacity)
+            elif disk.disk_type == 'nas':
+                relpath = "service/nas_disk_share/%s/client/nasinfo" % \
+                    disk.service_instance.name
+                diskpath = "%s/%s.vmdk" % (dbmachine.name, disk.device_name)
+                self.disks[disk.device_name] = "create('%s', \n"\
+                    "                   'capacity', %d*GB,\n" \
+                    "                   'interface', '%s',\n" \
+                    "                   'address', '%s',\n" \
+                    "                   'path', '%s')" % \
+                    (relpath, disk.capacity, disk.controller_type, \
+                     disk.address, diskpath)
+
         self.managers = []
         self.interfaces = []
         for interface in dbmachine.interfaces:
@@ -95,6 +109,7 @@ class PlenaryMachineInfo(Plenary):
                 continue
         self.model_relpath = (
             "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
+        # If this changes need to update machine_plenary_will_move() to match.
         self.plenary_core = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
         self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
@@ -132,11 +147,12 @@ class PlenaryMachineInfo(Plenary):
         lines.append('"cpu" = list(' + ", \n             ".join(
                 ['create("%(cpu_relpath)s")' % self.__dict__
                 for cpu_num in range(self.num_cpus)]) + ');')
-        if self.harddisks:
-            lines.append('"harddisks" = nlist(' + 
-                    ", ".join(['"%(name)s", create("%(relpath)s", "capacity", %(capacity)d*GB)' %
-                    hd for hd in self.harddisks]) +
-                    ');\n')
+
+        lines.append("'harddisks' = nlist(")
+        for dname in self.disks:
+            lines.append("    '%s', %s," % (dname, self.disks[dname]))
+        lines.append(");\n")
+
         for interface in self.interfaces:
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
                     % (interface['name'], interface['mac'].upper()))
@@ -151,5 +167,13 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('                           , "fqdn", "%(fqdn)s"' %
                              manager)
             lines.append('                     );')
+
+
+def machine_plenary_will_move(old, new):
+    """Helper to see if updating a machine's location will move its plenary."""
+    if old.hub != new.hub or old.building != new.building or \
+       old.rack != new.rack:
+        return True
+    return False
 
 

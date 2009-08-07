@@ -129,15 +129,26 @@ class TestBrokerCommand(unittest.TestCase):
         self.hostip17 = "8.8.4.9"
         self.hostmac17 = "02:02:08:08:04:09"
         # Just define a bunch of generic ones at once...
-        for n in range(50, 100):
+        # First 50 are for a rack of hp machines, next 50 are verari.
+        for n in range(50, 150):
             setattr(self, "hostip%d" % n, "8.8.5.%d" % (n-50))
             setattr(self, "hostmac%d" % n, "02:02:08:08:05:%02x" % (n-50))
         # Let config settings override any of the above.
-        for n in range(100):
+        for n in range(150):
             for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask"]:
                 p = "%s%s" % (h, n)
                 if self.config.has_option("unittest", p):
                     setattr(self, p, self.config.get("unittest", p))
+        if self.config.has_option("unittest", "dynamic_range_start"):
+            self.dynamic_range_start = self.config.get("unittest",
+                                                       "dynamic_range_start")
+        else:
+            self.dynamic_range_start = "8.8.6.10"
+        if self.config.has_option("unittest", "dynamic_range_end"):
+            self.dynamic_range_end = self.config.get("unittest",
+                                                     "dynamic_range_end")
+        else:
+            self.dynamic_range_end = "8.8.6.20"
 
     def tearDown(self):
         pass
@@ -228,7 +239,7 @@ class TestBrokerCommand(unittest.TestCase):
                              (command, out))
             self.assertEqual(err.find("Not Found"), 0,
                              "STDERR for %s did not start with Not Found:"
-                             "\n@@@\n'%s'\n@@@\n" % (command, out))
+                             "\n@@@\n'%s'\n@@@\n" % (command, err))
         return err
 
     def badrequesttest(self, command, **kwargs):
@@ -324,6 +335,7 @@ class TestBrokerCommand(unittest.TestCase):
                          (command, err))
         return err
 
+    # Test for conflicting or invalid aq client options.
     def badoptiontest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(p.returncode, 2,
@@ -345,6 +357,18 @@ class TestBrokerCommand(unittest.TestCase):
         self.assert_(out.find(s) < 0,
                      "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
                      (command, s, out))
+
+    def searchoutput(self, out, r, command):
+        m = re.search(r, out)
+        self.failUnless(m,
+                        "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                        % (command, r, out))
+        return m
+
+    def searchclean(self, out, r, command):
+        self.failIf(re.search(r, out),
+                    "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
+                    (command, r, out))
 
     def parse_netlist_msg(self, msg, expect=None):
         netlist = aqdnetworks_pb2.NetworkList()

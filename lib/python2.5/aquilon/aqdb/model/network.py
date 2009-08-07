@@ -30,23 +30,24 @@
     Aquilon. """
 
 from datetime import datetime
-from struct   import pack, unpack
-from socket   import inet_aton, inet_ntoa
+from struct import pack
+from socket import inet_ntoa
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
-                        CheckConstraint, UniqueConstraint, DateTime,
-                        ForeignKey, Boolean, insert, select, func )
+from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
+                        UniqueConstraint, ForeignKey, Boolean, select, func)
 
 from sqlalchemy.sql import and_
-from sqlalchemy.orm import relation, deferred, synonym
-
+from sqlalchemy.orm import relation
 
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.exceptions_             import ArgumentError
-from aquilon.aqdb.column_types.IPV4  import (IPV4, dq_to_int, get_bcast,
-                                             int_to_dq)
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.column_types.IPV4 import (IPV4, dq_to_int, get_bcast,
+                                            int_to_dq)
 from aquilon.aqdb.model import Base, Location
 
+#used in locations, and lambda isn't as readable
+def _get_location(x):
+    return x.location
 
 #TODO: enum type for network_type, cidr
 class Network(Base):
@@ -65,19 +66,19 @@ class Network(Base):
                      if you know the ip/netmask of the switch, you know the
                      network which it provides for, and the 5th and 6th address
                      are reserved for a dynamic pool for the switch on the net
-
-        *external/external_vendor
-        *heartbeat
-        *wan
-        *campus
+        *   stretch and vpls: networks that exist in more than one location
+        *   external/external_vendor
+        *   heartbeat
+        *   wan
+        *   campus
 """
 
     __tablename__ = 'network'
 
     id = Column(Integer, Sequence('network_id_seq'), primary_key=True)
 
-    location_id = Column('location_id', Integer, ForeignKey('location.id',
-                                                            name='network_loc_fk'),
+    location_id = Column('location_id', Integer,
+                         ForeignKey('location.id', name='network_loc_fk'),
                          nullable=False)
 
     network_type = Column(AqStr(32), nullable=False, default='unknown')
@@ -87,13 +88,13 @@ class Network(Base):
     ip = Column(IPV4, nullable=False)
     bcast = Column(IPV4, nullable=False)
     mask = Column(Integer, nullable=False) #TODO: ENUM!!!
-    side = Column(AqStr(4), nullable=True, default = 'a')
+    side = Column(AqStr(4), nullable=True, default='a')
 
     is_discoverable = Column(Boolean, nullable=False, default=False)
     is_discovered = Column(Boolean, nullable=False, default=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
     location = relation(Location, backref='networks')
 
@@ -114,23 +115,22 @@ class Network(Base):
         return [int_to_dq(i) for i in range(dq_to_int(self.ip),
                                             dq_to_int(self.bcast))]
     def __repr__(self):
-        s = '<Network '
+        msg = '<Network '
 
         if self.name != self.ip:
-            s += '%s ip='%(self.name)
+            msg += '%s ip='% (self.name)
 
-        s += '%s/%s (netmask=%s), type=%s, side=%s, located in %s>'%(self.ip,
+        msg += '%s/%s (netmask=%s), type=%s, side=%s, located in %r>'% (self.ip,
               self.cidr, _cidr_to_mask[self.cidr][0], self.network_type,
-              self.side, self.location.__repr__())
-        return s
+              self.side, self.location)
+        return msg
 
     #TODO: custom str
 
 network = Network.__table__
-network.primary_key.name='network_pk'
+network.primary_key.name = 'network_pk'
 
-network.append_constraint(
-    UniqueConstraint('ip', name='net_ip_uk'))
+network.append_constraint(UniqueConstraint('ip', name='net_ip_uk'))
 
 Index('net_loc_id_idx', network.c.location_id)
 
@@ -162,19 +162,19 @@ def get_net_id_from_ip(s, ip):
 #        d[row[0]] = row[1]
 #    return d
 
-def populate(s, *args, **kw):
-    #TODO:
-        #populate comments
-        #populate all non np/dd networks asynchronously
+def populate(sess, **kw):
+    """ populates networks from dsdb """
+    #TODO populate comments, have a full populate do the other
+    #    networks in an asynchronous manner while others run
 
-    if len(s.query(Network).limit(30).all()) < 1:
-        from building import Building
+    if len(sess.query(Network).limit(30).all()) < 1:
+        from aquilon.aqdb.model import Building
         import time
 
         log = kw['log']
         dsdb = kw['dsdb']
-        b_cache={}
-        count=0
+        b_cache = {}
+        count = 0
 
         if kw.pop('full', None):
             dump_action = 'network_full'
@@ -184,43 +184,42 @@ def populate(s, *args, **kw):
         log.debug('starting to import networks...')
         start = time.clock()
 
-        for b in s.query(Building.name, Building.id).all():
-            b_cache[b.name] = b.id
+        for bldg in sess.query(Building.name, Building.id).all():
+            b_cache[bldg.name] = bldg.id
 
         #type_cache = get_type_cache(dsdb)
 
         for (name, ip, mask, network_type, bldg_name,
              side) in dsdb.dump(dump_action):
 
-            kw = {}
+            kwargs = {}
             try:
-                kw['location_id'] = b_cache[bldg_name]
+                kwargs['location_id'] = b_cache[bldg_name]
             except KeyError:
-                log.error("Can't find building '%s'\n%s"%(bldg_name, row))
+                log.error("Can't find building '%s'"%(bldg_name))
                 continue
 
-            kw['name'] = name
-            kw['ip'] = ip
-            kw['mask'] = mask
-            kw['cidr'] = _mask_to_cidr[mask]
-            kw['bcast'] = get_bcast(ip, kw['cidr'])
+            kwargs['name'] = name
+            kwargs['ip'] = ip
+            kwargs['mask'] = mask
+            kwargs['cidr'] = _mask_to_cidr[mask]
+            kwargs['bcast'] = get_bcast(ip, kwargs['cidr'])
 
-            kw['network_type'] = network_type
+            kwargs['network_type'] = network_type
 
             if network_type == 'tor_net' or 'grid access':
-                kw['is_discoverable'] = True
+                kwargs['is_discoverable'] = True
 
             if side:
-                kw['side'] = side
+                kwargs['side'] = side
 
-            c=Network(**kw)
-            s.add(c)
+            net = Network(**kwargs)
+            sess.add(net)
             count += 1
             if count % 3000 == 0:
-                s.commit()
-                s.flush()
+                sess.commit()
 
-        s.commit()
+        sess.commit()
         stend = time.clock()
         thetime = stend - start
         log.info('created %s networks in %2f'%(count, thetime))
@@ -298,5 +297,3 @@ _cidr_to_mask = {
     1  : ['128.0.0.0', 2147483648],
     0  : ['0.0.0.0',   4294967296]
 }
-
-

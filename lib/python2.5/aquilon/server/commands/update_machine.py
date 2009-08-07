@@ -33,14 +33,19 @@ from sqlalchemy.exceptions import InvalidRequestError
 from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
-                                 UnimplementedError)
+                                 UnimplementedError, IncompleteError)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.model import Cpu, Chassis, ChassisSlot
+from aquilon.server.templates.machine import (PlenaryMachineInfo,
+                                              machine_plenary_will_move)
+from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
+                                Cluster, MachineClusterMember)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -48,7 +53,7 @@ class CommandUpdateMachine(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, machine, model, serial, chassis, slot,
-               clearchassis, multislot,
+               clearchassis, multislot, cluster,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                user, **arguments):
         dbmachine = get_machine(session, machine)
@@ -60,8 +65,12 @@ class CommandUpdateMachine(BrokerCommand):
             session.flush()
             session.refresh(dbmachine)
 
+        remove_plenary = None
         if chassis:
             dbchassis = get_system(session, chassis, Chassis, 'Chassis')
+            if machine_plenary_will_move(old=dbmachine.location,
+                                         new=dbchassis.chassis_hw.location):
+                remove_plenary = PlenaryMachineInfo(dbmachine)
             dbmachine.location = dbchassis.chassis_hw.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot information")
@@ -93,6 +102,9 @@ class CommandUpdateMachine(BrokerCommand):
                                             dbcl.location_type, dbcl.name))
                     else:
                         session.delete(dbslot)
+            if machine_plenary_will_move(old=dbmachine.location,
+                                         new=dblocation):
+                remove_plenary = PlenaryMachineInfo(dbmachine)
             dbmachine.location = dblocation
 
         if model:
@@ -127,6 +139,46 @@ class CommandUpdateMachine(BrokerCommand):
         if serial:
             dbmachine.serial_no=serial
 
+        if cluster:
+            if not dbmachine.cluster:
+                raise ArgumentError("Cannot add an existing machine to "
+                                    "a cluster.")
+            dbcluster = Cluster.get_unique(session, name=cluster)
+            if not dbcluster:
+                raise ArgumentError("Could not find cluster named '%s'" %
+                                    cluster)
+            if dbcluster.metacluster != dbmachine.cluster.metacluster:
+                raise ArgumentError("Cannot move machine to a new "
+                                    "metacluster: Current metacluster %s "
+                                    "does not match new metacluster %s" %
+                                    (dbmachine.cluster.metacluster.name,
+                                     dbcluster.metacluster.name))
+            old_cluster = dbmachine.cluster
+            dbmcm = MachineClusterMember.get_unique(session,
+                cluster_id=dbmachine.cluster.id, machine_id=dbmachine.id)
+            session.delete(dbmcm)
+            session.flush()
+            # Without these refreshes the MCM creation below fails...
+            # presumably because the old linkage is still cached somewhere?
+            session.refresh(dbmachine)
+            session.refresh(old_cluster)
+            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
+            session.add(dbmcm)
+            session.flush()
+            session.refresh(dbmachine)
+            session.refresh(dbcluster)
+            if hasattr(dbcluster, 'vm_to_host_ratio') and \
+               len(dbcluster.machines) > \
+               dbcluster.vm_to_host_ratio * len(dbcluster.hosts):
+                raise ArgumentError("Adding a virtual machine to "
+                                    "%s cluster %s would exceed "
+                                    "vm_to_host_ratio %s (%s VMs/%s hosts)" %
+                                    (dbcluster.cluster_type, dbcluster.name,
+                                     dbcluster.vm_to_host_ratio,
+                                     len(dbcluster.machines),
+                                     len(dbcluster.hosts)))
+            dbmachine.location = dbcluster.location_constraint
+
         session.add(dbmachine)
         session.flush()
         session.refresh(dbmachine)
@@ -135,12 +187,37 @@ class CommandUpdateMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
-        plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write()
+        try:
+            compileLock()
 
-        if dbmachine.host:
-            # XXX: May need to reconfigure.
-            pass
+            plenary_info = PlenaryMachineInfo(dbmachine)
+            plenary_info.write(locked=True)
+
+            if remove_plenary:
+                remove_plenary.remove(locked=True)
+                if dbmachine.host:
+                    # At least re-writing plenary with new machine pointer...
+                    # This is not necessary if reconfiguring below.
+                    try:
+                        plenary_host = PlenaryHost(dbmachine.host)
+                        plenary_host.write(locked=True)
+                    except IncompleteError, e:
+                        pass
+
+            if dbmachine.host:
+                # XXX: May need to reconfigure.
+                pass
+
+            if cluster:
+                if old_cluster:
+                    session.refresh(old_cluster)
+                    plenary = PlenaryCluster(old_cluster)
+                    plenary.write(locked=True)
+                session.refresh(dbcluster)
+                plenary = PlenaryCluster(dbcluster)
+                plenary.write(locked=True)
+        finally:
+            compileRelease()
 
         return
 

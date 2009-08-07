@@ -75,10 +75,12 @@ class TestCompile(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         # Currently assumes that there is only one client of utsi1.
         # The idea is to check that only that hosts that needed to
-        # be compiled actually were.
-        self.matchoutput(out, "Updated 1 XML dependencies", command)
-        self.matchoutput(out, "Updated 1 makefile dependencies", command)
-        self.matchoutput(out, "Updated 1 host XML configs", command)
+        # be compiled actually were. Note that clusters and other
+        # included profiles might get recompiled, so we need to adjust
+        # the number we're looking for based on everything. It might
+        # be better to look for the objects being processed and checking
+        # that the numbers a/b are different.
+        self.matchoutput(out, "5/5 compiled", command)
 
 
 if __name__=='__main__':

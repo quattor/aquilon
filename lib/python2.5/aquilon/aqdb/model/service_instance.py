@@ -59,14 +59,16 @@ class ServiceInstance(Base):
     name = Column(AqStr(64), nullable=False)
 
     cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
-                                             name='%s_cfg_pth_fk'%_ABV),
+                                             name='%s_cfg_pth_fk'%_ABV,
+                                             ondelete='CASCADE'),
                          nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
     service = relation(Service, uselist=False, backref='instances')
-    cfg_path = relation(CfgPath, backref=backref('svc_inst', uselist=False))
+    cfg_path = relation(CfgPath, backref=backref('svc_inst', uselist=False,
+                                                 cascade='all, delete-orphan'))
 
     def _client_count(self):
         return object_session(self).query(BuildItem).filter_by(
@@ -85,5 +87,3 @@ table.info['precedence'] = _PRECEDENCE
 
 service_instance.primary_key.name='svc_inst_pk'
 UniqueConstraint('service_id', 'name', name='svc_inst_server_uk')
-
-

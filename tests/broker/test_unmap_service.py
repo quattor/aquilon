@@ -153,6 +153,36 @@ class TestUnmapService(TestBrokerCommand):
                          "aquilon are not yet available",
                          command)
 
+    def testunmapesx(self):
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "esx_license", "--instance", "ut.a",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "esx_license", "--instance", "ut.b",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "esx_management", "--instance", "ut.a",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "esx_management", "--instance", "ut.b",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+
+    def testverifyunmapesx(self):
+        command = ["show_map", "--archetype=vmhost",
+                   "--personality=esx_server", "--building=ut"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Service: esx_license Instance: ut.a ", command)
+        self.matchclean(out, "Service: esx_license Instance: ut.b ", command)
+        self.matchclean(out, "Service: esx_management Instance: ut.a ",
+                        command)
+        self.matchclean(out, "Service: esx_management Instance: ut.b ",
+                        command)
+
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnmapService)
     unittest.TextTestRunner(verbosity=2).run(suite)

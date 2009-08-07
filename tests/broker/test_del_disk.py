@@ -69,6 +69,14 @@ class TestDelDisk(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, '"harddisks"', command)
 
+    def testfaildelunknowntype(self):
+        command = ["del", "disk", "--machine", "ut3c1n3",
+                   "--type", "type-does-not-exist"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "type-does-not-exist is not a valid controller type",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDisk)

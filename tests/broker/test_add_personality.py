@@ -97,6 +97,8 @@ class TestAddPersonality(TestBrokerCommand):
         self.matchoutput(out,
                          "Template: aurora/personality/generic/config.tpl",
                          command)
+        # Also expecting one of the personalities to have a non-zero threshold.
+        self.searchoutput(out, r'Threshold: \d+', command)
 
     def testverifyutpersonalitythreshold(self):
         command = ["show_personality", "--domain=unittest",
@@ -169,8 +171,8 @@ class TestAddPersonality(TestBrokerCommand):
                 archetypes[archetype][personality.name] = personality
             else:
                 archetypes[archetype] = {personality.name:personality}
-                if personality.threshold >= 0:
-                    found_threshold = True
+            if personality.threshold >= 0:
+                found_threshold = True
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
         self.failUnless("utpersonality" in archetypes["aquilon"],
@@ -209,8 +211,8 @@ class TestAddPersonality(TestBrokerCommand):
                 archetypes[archetype][personality.name] = personality
             else:
                 archetypes[archetype] = {personality.name:personality}
-                if personality.threshold >= 0:
-                    found_threshold = True
+            if personality.threshold >= 0:
+                found_threshold = True
         self.failUnless("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
         self.failUnless("utpersonality" in archetypes["aquilon"],
@@ -380,6 +382,15 @@ class TestAddPersonality(TestBrokerCommand):
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already exists", command)
+
+    def testaddesxserver(self):
+        command = "add personality --personality esx_server --archetype vmhost"
+        self.noouttest(command.split(" "))
+
+    def testaddesxdesktop(self):
+        command = ["add_personality",
+                   "--personality=esx_desktop", "--archetype=vmhost"]
+        self.noouttest(command)
 
 
 if __name__=='__main__':

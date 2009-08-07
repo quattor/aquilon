@@ -122,6 +122,44 @@
       <transport method="get" path="find/hardware" />
    </command>
 
+   <command name="search_machine">
+      Shows any information available for machine hardware.
+
+      (See search_hardware for a more general hardware search.)
+
+      Note that location searches are exact-only.  That is, if searching
+      for a machine in a rack, and the rack is in the requested building,
+      the search will not return the machine.
+      <optgroup name="search_machine_opts" mandatory="True" fields="any">
+         <option name="name" type="string">machine name (exact)</option>
+         <option name="cpuname" type="string">cpu name</option>
+         <option name="cpuvendor" type="string">cpu vendor</option>
+         <option name="cpuspeed" type="string">cpu speed</option>
+         <option name="cpucount" type="string">cpu count</option>
+         <option name="memory" type="string">memory in MB</option>
+         <option name="cluster" type="string">cluster name</option>
+         <option name="model" type="string">model name</option>
+         <option name="vendor" type="string">vendor name</option>
+         <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="serial" type="string">serial number</option>
+         <optgroup name="search_machine_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+         <option name="all" type="boolean">list all hardware</option>
+      </optgroup>
+      <optgroup name="search_system_prefs" mandatory="False">
+         <option name="fullinfo" type="boolean">show full information for the machine</option>
+      </optgroup>
+      <transport method="get" path="find/machine" />
+   </command>
+
    <command name="search_system">
       Shows any information available for the matching systems.  These
       could be hosts, top of rack switches, chassis, or any other system
@@ -162,6 +200,7 @@
          <option name="model" type="string">machine model name</option>
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
+         <option name="cluster" type="string">cluster name</option>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="company" type="string">Company</option>
 	    <option name="hub" type="string">Hub</option>
@@ -178,6 +217,43 @@
          <option name="fullinfo" type="boolean">show full information for the matching hosts</option>
       </optgroup>
       <transport method="get" path="find/host" />
+   </command>
+
+   <command name="search_next">
+      Search for the next available number in a series.  If entries are
+      found in the database of the prefix followed by a number, the
+      numbers are sorted and the highest number plus one is returned.
+      If no entries are found, the command returns 1.
+
+      Use the --number flag to return just that number, otherwise
+      return the full name.
+
+      Examples:
+
+      aq search_next --machine evm
+
+      aq search_next --short igrid --dns_domain devin1.ms.com --number
+
+      aq search_next --cluster ddecl
+
+      aq search_next --metacluster namc
+      <optgroup name="search_next_type" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="short cluster metacluster">Machine prefix to check</option>
+         <optgroup name="search_next_fqdn" fields="all">
+            <option name="short" type="string" conflicts="machine cluster metacluster">FQDN prefix to check</option>
+            <option name="dns_domain" type="string">DNS domain for FQDN</option>
+         </optgroup>
+         <option name="cluster" type="string" conflicts="machine short metacluster">Cluster prefix to check</option>
+         <option name="metacluster" type="string" conflicts="machine short cluster">Metacluster prefix to check</option>
+      </optgroup>
+      <optgroup name="search_system_prefs" mandatory="False">
+         <option name="number" type="boolean">show only the next number</option>
+         <option name="fullname" type="boolean">show the next available full name (default)</option>
+      </optgroup>
+      <transport method="get" trigger="short" path="find/next/system" />
+      <transport method="get" trigger="machine" path="find/next/machine" />
+      <transport method="get" trigger="cluster" path="find/next/cluster" />
+      <transport method="get" trigger="metacluster" path="find/next/metacluster" />
    </command>
 
    <command name="compile">
@@ -302,7 +378,11 @@
          <option name="machine" type="string">machine ID</option>
          <option name="disk" type="string">device name of the disk (like sda)</option>
          <option name="type" type="string">type of the disk</option>
-         <option name="capacity" type="string">capacity of the disk</option>
+         <option name="capacity" type="string">capacity of the disk (GB)</option>
+      </optgroup>
+      <optgroup name="nas_opts" fields="all">
+         <option name="share" type="string">share name (an instance of nas_disk_share service)</option>
+         <option name="address" type="string">bus address (e.g. 0:0)</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
@@ -595,8 +675,9 @@
          <option name="cputype" type="string">CPU type</option>
          <option name="cpunum" type="string">CPU count</option>
          <option name="mem" type="string">amount of installed memory</option>
-         <option name="disktype" type="string">installed disk type</option>
-         <option name="disksize" type="string">installed disk capacity</option>
+         <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
+         <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
+         <option name="disksize" type="string">installed disk capacity (GB)</option>
          <option name="nics" type="string">number of NIC interfaces</option>
       </optgroup>
       <optgroup name="optional_opts">
@@ -629,6 +710,10 @@
    <command name="add_interface">
       Add a new network interface to the database.
 
+      If adding an interface to virtual hardware, the --automac option
+      can be used to automatically generate a MAC address based on
+      the cluster vendor.
+
       To give an IP address to a host, provide it when using add_host.
 
       For chassis and tor_switches, the IP address is provided with this
@@ -644,7 +729,10 @@
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_interface_opts" mandatory="True" fields="all">
-         <option name="mac" type="string">MAC address</option>
+         <optgroup name="add_interface_mac" mandatory="True" fields="any">
+            <option name="mac" type="string" conflicts="automac">MAC address</option>
+            <option name="automac" type="boolean" conflicts="mac">Automatically generate MAC for virtual hardware</option>
+	 </optgroup>
          <option name="interface" type="string">Interface name</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
@@ -1140,10 +1228,13 @@
       templates, or to move a host back to a default production domain once
       testing has completed.
       <optgroup name="manage options" mandatory="True" fields="all">
-         <option name="hostname" type="string">Name of the host</option>
+         <optgroup name="host_or_cluster" fields="any" mandatory="True">
+            <option name="hostname" type="string">Name of the host to manage</option>
+            <option name="cluster" type="string">Name of the cluster to manage</option></optgroup>
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/manage" />
+      <transport method="post" path="domain/%(domain)s/command/manage_hostname" trigger="hostname" />
+      <transport method="post" trigger="cluster" path="domain/%(domain)s/command/manage_cluster" />
    </command>
 
    <command name="cat">
@@ -1151,16 +1242,18 @@
       given options.  All are exclusive, except --instance and/or --default
       also require --service.
       <optgroup name="cat options" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="machine service instance default">Name of the host</option>
-         <option name="machine" type="string" conflicts="hostname service instance default">Name of the machine</option>
-         <option name="service" type="string" conflicts="hostname machine">Name of the service</option>
-         <option name="instance" type="string" conflicts="hostname machine">Name of the service instance</option>
-	 <option name="default" type="boolean" conflicts="hostname machine">Get the default client config for the service/instance</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default">Name of the host</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default">Name of the machine</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default">Name of the machine</option>
+         <option name="service" type="string" conflicts="hostname machine cluster">Name of the service</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster">Name of the service instance</option>
+	 <option name="default" type="boolean" conflicts="hostname machine cluster">Get the default client config for the service/instance</option>
       </optgroup>
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
+      <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
    </command>
 
    <command name="sync">
@@ -1615,6 +1708,26 @@
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
 
+   <command name="make_cluster">
+      Build a cluster configuration.  Any cluster aligned services which
+      are not bound will cause an implicit bind_cluster to occur.  Any
+      services that are not listed as aligned for the cluster type
+      are dropped unless the --keepbindings flag is specified.  The cluster
+      information will be compiled into a working configuration.  Any
+      errors in creating the configuration will be printed to the screen
+      and cause the command to fail.  If the configuration is successfully
+      created, then the new configuration may be "advertised" to the cluster
+      itself, to the data warehouse and to the bootservers, making the
+      cluster ready to build.
+      <optgroup name="mandatory_options" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name to make</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
+      </optgroup>
+      <transport method="post" path="cluster/any/%(cluster)s/command/make" />
+   </command>
+
    <command name="add_machine">
       Create a new machine at a given location.
 
@@ -1623,6 +1736,10 @@
       to be given to this command - the model info will be used as a default.
 
       However, if the model does not have defaults, they all need to be given.
+
+      If the hardware is virtual the --cluster option should be used to
+      indicate the location indirectly.  Whether or not hardware is
+      virtual is indicated by the machine type of the model.
       <optgroup name="add_machine_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine name</option>
          <option name="model" type="string">machine model</option>
@@ -1641,6 +1758,9 @@
          </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
+         <optgroup name="add_machine_cluster_opts" fields="all">
+            <option name="cluster" type="string" conflicts="chassis rack desk">Cluster name</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">serial number</option>
@@ -1656,18 +1776,19 @@
       </optgroup>
       <optgroup name="update_machine_opts" mandatory="False" fields="any">
          <option name="model" type="string">machine model</option>
-	 <option name="cpuname" type="string">cpu name</option>
-	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="string">cpu speed</option>
-	 <option name="cpucount" type="string">cpu count</option>
-	 <option name="memory" type="string">memory in MB</option>
+         <option name="cpuname" type="string">cpu name</option>
+         <option name="cpuvendor" type="string">cpu vendor</option>
+         <option name="cpuspeed" type="string">cpu speed</option>
+         <option name="cpucount" type="string">cpu count</option>
+         <option name="memory" type="string">memory in MB</option>
          <option name="chassis" type="string">chassis name</option>
          <option name="slot" type="string">chassis slot</option>
          <option name="clearchassis" type="boolean">remove chassis and slot information</option>
          <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
          <option name="rack" type="string">rack name</option>
          <option name="desk" type="string">desk name</option>
-	 <option name="serial" type="string">serial number</option>
+         <option name="serial" type="string">serial number</option>
+         <option name="cluster" type="string">Cluster name</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
       <transport method="post" path="machine/%(machine)s/command/update" />
@@ -1688,7 +1809,7 @@
       </optgroup>
       <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />
-      <transport method="get" path="find/machine" />
+      <transport method="post" path="machine" />
    </command>
 
    <command name="del_machine">
@@ -1823,6 +1944,276 @@
          <option name="dns_domain" type="string">Name of the DNS domain</option>
       </optgroup>
       <transport method="delete" path="dns_domain/%(dns_domain)s" />
+   </command>
+
+   <command name="add_metacluster">
+      Add a new metacluster.
+      <optgroup name="add_metacluster_req" mandatory="True" fields="all">
+         <option name="metacluster" type="string">Name of the new metacluster</option>
+      </optgroup>
+      <optgroup name="add_metacluster_options" mandatory="False">
+         <option name="max_members" type="string">Comments</option>
+         <option name="max_shares" type="string">Comments</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="show_metacluster">
+      Show details for a metacluster.
+      <optgroup name="show_metacluster_req" mandatory="True" fields="any">
+         <option name="metacluster" type="string">Name of the metacluster</option>
+         <option name="all" type="boolean">Show all</option>
+      </optgroup>
+      <transport method="get" path="metacluster" />
+      <transport method="get" trigger="metacluster" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="update_metacluster">
+      Update a metacluster.
+      <optgroup name="update_metacluster_req" mandatory="True" fields="all">
+         <option name="metacluster" type="string">Name of the metacluster</option>
+      </optgroup>
+      <optgroup name="update_metacluster_options" mandatory="False">
+         <option name="max_members" type="string">Comments</option>
+         <option name="max_shares" type="string">Comments</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="del_metacluster">
+      Delete the metacluster.
+      <optgroup name="del_metacluster_req" mandatory="True" fields="all">
+         <option name="metacluster" type="string">Name of the metacluster</option>
+      </optgroup>
+      <transport method="delete" path="metacluster/%(metacluster)s" />
+   </command>
+
+   <command name="add_esx_cluster">
+      Add a new ESX cluster.
+
+      Each ESX cluster must belong to a metacluster.
+
+      Two constraints must be defined.  The cluster has a location constraint.
+      All cluster vmhosts must be within the same location.  All of the
+      cluster's vmhosts must also have the same personality.
+
+      The max_members option can be set to define the maximum number of
+      vmhosts that can be members of the cluster.
+
+      The vm_to_host_ratio constrains the number of virtual machines
+      allowed on the cluster based on the number of vmhosts.
+      <optgroup name="add_esx_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the new esx_cluster</option>
+         <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
+         <optgroup name="add_cluster_location_opts" fields="any">
+            <option name="company" type="string">Company</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+         <option name="archetype" type="string">Archetype name</option>
+         <option name="personality" type="string">Personality name</option>
+         <option name="domain" type="string">Name of template domain/sandbox</option>
+      </optgroup>
+      <optgroup name="add_esx_cluster_options" mandatory="False">
+         <option name="max_members" type="string">Comments</option>
+         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="cluster/esx/%(cluster)s" />
+   </command>
+
+   <command name="show_esx_cluster">
+      Show details for an ESX cluster.
+      <optgroup name="show_cluster_req" mandatory="True" fields="any">
+         <option name="cluster" type="string">Name of the cluster</option>
+         <option name="all" type="boolean">Name of the cluster</option>
+      </optgroup>
+      <transport method="get" trigger="cluster" path="cluster/esx/%(cluster)s" />
+      <transport method="get" path="cluster/esx" />
+   </command>
+
+   <command name="update_esx_cluster">
+      Update an ESX cluster.
+
+      The cluster vmhost members are constrained to be in the same location
+      and have the same personality.  An attempt to update any constraint
+      that cannot be satisfied will fail.
+      <optgroup name="update_esx_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the ESX cluster</option>
+      </optgroup>
+      <optgroup name="update_esx_cluster_options" mandatory="False">
+         <option name="archetype" type="string">Archetype Name</option>
+         <option name="personality" type="string">Personality Name</option>
+         <option name="max_members" type="string">Max allowed vmhost members</option>
+         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="comments" type="string">Comments</option>
+         <optgroup name="update_cluster_location_opts" fields="any">
+	    <option name="company" type="string">Company</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="cluster/esx/%(cluster)s" />
+   </command>
+
+   <command name="del_esx_cluster">
+      Delete the ESX cluster.
+      <optgroup name="del_cluster_req" mandatory="True" fields="all">
+         <option name="cluster" type="string">Name of the cluster</option>
+      </optgroup>
+      <transport method="delete" path="cluster/esx/%(cluster)s" />
+   </command>
+
+   <command name="rebind_metacluster">
+      Change metacluster bindings.
+
+      This will move the cluster into the named metacluster.
+      <optgroup name="rebind_client_opts" mandatory="True" fields="all">
+         <option name="metacluster" type="string">MetaCluster name</option>
+         <option name="cluster" type="string">Cluster name</option>
+      </optgroup>
+      <transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster)s/rebind" />
+   </command>
+
+   <command name="bind_esx_cluster">
+      Bind a vmhost or a service instance to the named cluster.
+
+      If binding a vmhost that is already bound to a different cluster this
+      command will fail.
+
+      If binding a service instance for a service that is already bound to
+      a different instance this command will fail.
+      <optgroup name="bind_esx_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+         <optgroup name="bind_esx_cluster_object" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="service">Server name</option>
+            <optgroup name="bind_esx_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+      </optgroup>
+      <transport method="put" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
+      <transport method="put" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="rebind_esx_cluster">
+      Bind a vmhost or a service instance to the named cluster.
+
+      If binding a vmhost that is already bound to a different cluster that
+      binding will be removed.
+
+      If binding a service instance for a service that is already bound to
+      a different instance the old binding will be removed.
+      <optgroup name="rebind_esx_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+	 <optgroup name="rebind_esx_cluster_object" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="service">Server name</option>
+	    <optgroup name="rebind_esx_cluster_service" fields="all">
+               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+      </optgroup>
+      <transport method="post" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
+      <transport method="post" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="unbind_esx_cluster">
+      Remove the binding of the vmhost or service instance from the named
+      cluster.
+      <optgroup name="unbind_esx_cluster_opts" mandatory="True" fields="all">
+         <option name="cluster" type="string">Cluster name</option>
+	 <optgroup name="unbind_esx_cluster_object" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="service">Server name</option>
+	    <optgroup name="unbind_esx_cluster_service" mandatory="False" fields="all">
+               <option name="service" type="string" conflicts="hostname">Service name</option>
+               <option name="instance" type="string">Service Instance</option>
+            </optgroup>
+         </optgroup>
+      </optgroup>
+      <transport method="delete" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
+      <transport method="delete" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="add_esx_cluster_aligned_service">
+      Mark a service as aligned for ESX clusters.  All the members within an
+      ESX cluster will be required to use the same service instance for the
+      service.  Different ESX clusters can still have different service
+      instances for the service.
+      <optgroup name="add_aligned_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="service/%(service)s/aligned_for/cluster_type/esx" />
+   </command>
+
+   <command name="show_cluster_type">
+      Show information about a cluster_type such as esx, including aligned
+      services.
+      <optgroup name="show_cluster_type_opts" mandatory="True" fields="any">
+         <option name="cluster_type" type="string">cluster_type name</option>
+         <option name="all" type="boolean" conflicts="cluster_type">Select all cluster types</option>
+      </optgroup>
+      <transport trigger="cluster_type" method="get" path="cluster_type/%(cluster_type)s" />
+      <transport method="get" path="cluster_type" />
+   </command>
+
+   <command name="del_esx_cluster_aligned_service">
+      Delete a service from the list of aligned services for the esx
+      cluster_type.  Cluster members which are already bound to a
+      service because it used to be aligned will be unmodified. If
+      you wish to unbind those clients, they must be reconfigured.
+      <optgroup name="del_aligned_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+      </optgroup>
+      <transport method="delete" path="service/%(service)s/aligned_for/cluster_type/esx" />
+   </command>
+
+   <command name="add_dynamic_range">
+      Add the allocated range of dynamic hosts.  The start and end
+      IP addresses are inclusive.  The IPs must be on the same network.
+      If there are any allocated systems already in the range the command
+      will fail.
+
+      For every IP address in the range a DNS entry will be generated of
+      the form: prefix-X-X-X-X.subdomain where the X's are the components
+      of the IP address.  The prefix defaults to the string 'dynamic'.
+      <optgroup name="add_dynamic_range_opts" mandatory="True" fields="all">
+         <option name="startip" type="string" mandatory="True">First IP address in the range to add</option>
+         <option name="endip" type="string" mandatory="True">Last IP address in the range to add</option>
+         <option name="dns_domain" type="string" mandatory="True">DNS domain to use for the generated names</option>
+      </optgroup>
+      <optgroup name="add_dynamic_range_opts" mandatory="False" fields="any">
+         <option name="prefix" type="string">Prefix to use for generated names, defaults to 'dynamic'</option>
+      </optgroup>
+      <transport method="put" path="dynamic_range/%(startip)s/%(endip)s" />
+   </command>
+
+   <command name="del_dynamic_range">
+      Delete the allocated range of dynamic hosts.  The start and end
+      IP addresses are inclusive.  The IPs must be on the same network.
+      If there are any allocated systems in the range that are not
+      dynamic the command will fail.
+      <optgroup name="del_dynamic_range_opts" mandatory="True" fields="all">
+         <option name="startip" type="string" mandatory="True">First IP address in the range to delete</option>
+         <option name="endip" type="string" mandatory="True">Last IP address in the range to delete</option>
+      </optgroup>
+      <transport method="delete" path="dynamic_range/%(startip)s/%(endip)s" />
    </command>
 
 </commandline>

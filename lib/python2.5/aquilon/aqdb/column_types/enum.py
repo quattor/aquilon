@@ -29,13 +29,12 @@
 """ A starting point for discriminator columns. A future version will
 dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
+import sqlalchemy
 
-from sqlalchemy import types, exceptions
+class Enum(sqlalchemy.types.TypeDecorator):
+    impl = sqlalchemy.types.String
 
-class Enum(types.TypeDecorator):
-    impl = types.Unicode
-
-    def __init__(self, values, empty_to_none=False, strict=False):
+    def __init__(self, size, values, empty_to_none=False, strict=False):
         """Emulate an Enum type.
 
         values:
@@ -50,28 +49,23 @@ class Enum(types.TypeDecorator):
         """
 
         if values is None or len(values) is 0:
-            raise exceptions.AssertionError('Enum requires a list of values')
+            raise ValueError('Enum requires a list of values')
         self.empty_to_none = empty_to_none
         self.strict = strict
         self.values = values[:]
 
-        # The length of the string/unicode column should be the longest string
-        # in values
-        size = max([len(v) for v in values if v is not None])
         super(Enum, self).__init__(size)
-
 
     def process_bind_param(self, value, dialect):
         if self.empty_to_none and value is '':
             value = None
         if value not in self.values:
-            raise exceptions.AssertionError('"%s" not in Enum.values' % value)
-        return value
-
+            raise ValueError('"%s" not in Enum.values' % value)
+        return str(value).strip().lower()
 
     def process_result_value(self, value, dialect):
         if self.strict and value not in self.values:
-            raise exceptions.AssertionError('"%s" not in Enum.values' % value)
+            raise ValueError('"%s" not in Enum.values' % value)
         return value
 
 def test_enum():
@@ -79,20 +73,21 @@ def test_enum():
 
     t = Table('foo', MetaData('sqlite:///'),
               Column('id', Integer, primary_key=True),
-              Column('e', Enum([u'foobar', u'baz', u'quux', None])))
+              Column('e', Enum(16, ['foobar', 'baz', 'quux', None])))
     t.create()
 
-    t.insert().execute(e=u'foobar')
-    t.insert().execute(e=u'baz')
-    t.insert().execute(e=u'quux')
+    t.insert().execute(e='foobar')
+    t.insert().execute(e='baz')
+    t.insert().execute(e='quux')
     t.insert().execute(e=None)
 
     try:
-        t.insert().execute(e=u'lala')
+        t.insert().execute(e='lala')
         assert False
-    except exceptions.AssertionError:
+    except ValueError:
         pass
 
     print list(t.select().execute())
 
-
+if __name__ == '__main__':
+    test_enum()

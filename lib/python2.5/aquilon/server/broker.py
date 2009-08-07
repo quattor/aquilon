@@ -29,6 +29,7 @@
 
 
 import os
+import re
 
 from sqlalchemy.sql import text
 from twisted.internet import defer
@@ -245,8 +246,19 @@ def force_int(label, value):
         return None
     try:
         result = int(value)
-    except Exception, e:
+    except ValueError, e:
         raise ArgumentError("Expected an integer for %s: %s" % (label, e))
     return result
+
+
+# This might belong somewhere else.  The functionality that uses this
+# might end up in aqdb (in a similar class as AqStr).
+basic_validation_re = re.compile('^[a-zA-Z0-9_.-]+$')
+"""Restriction for certain incoming labels beyond AqStr."""
+
+def validate_basic(label, value):
+    if not basic_validation_re.match(value):
+        raise ArgumentError("'%s' is not a valid value for %s" %
+                            (value, label))
 
 

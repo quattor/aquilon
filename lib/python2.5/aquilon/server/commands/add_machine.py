@@ -36,7 +36,9 @@ from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine, get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.model import Chassis, ChassisSlot
+from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster,
+                                MachineClusterMember)
 
 
 class CommandAddMachine(BrokerCommand):
@@ -45,8 +47,8 @@ class CommandAddMachine(BrokerCommand):
 
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, machine, model, serial, chassis, slot,
-            cpuname, cpuvendor, cpuspeed, cpucount, memory,
-            user, **arguments):
+               cpuname, cpuvendor, cpuspeed, cpucount, memory,
+               cluster, user, **arguments):
         dblocation = get_location(session, **arguments)
         if chassis:
             dbchassis = get_system(session, chassis)
@@ -69,10 +71,31 @@ class CommandAddMachine(BrokerCommand):
         dbmodel = get_model(session, model)
 
         if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
-                'aurora_node']:
+                                        'aurora_node', 'virtual_machine']:
             raise ArgumentError("The add_machine command cannot add machines of type '%(type)s'.  Try 'add %(type)s'." %
                     {"type": dbmodel.machine_type})
 
+        if cluster:
+            if dbmodel.machine_type != 'virtual_machine':
+                raise ArgumentError("Only virtual machines can have a cluster attribute.")
+            dbcluster = Cluster.get_unique(session, name=cluster)
+            if not dbcluster:
+                raise ArgumentError("Cluster '%s' not found" % cluster)
+            if dbcluster.personality.archetype.name != 'vmhost':
+                raise ArgumentError("Can only add virtual machines to "
+                                    "clusters with archetype vmhost.")
+            if dblocation and dbcluster.location_constraint != dblocation:
+                raise ArgumentError(
+                    "Cannot override cluster location %s %s "
+                    "with location %s %s" %
+                    (dbcluster.location_constraint.location_type,
+                     dbcluster.location_constraint.name,
+                     dblocation.location_type,
+                     dblocation.name))
+            dblocation = dbcluster.location_constraint
+        elif dbmodel.machine_type == 'virtual_machine':
+            raise ArgumentError("Virtual machines must be assigned to a "
+                                "cluster.")
 
         try:
             m = get_machine(session, machine)
@@ -83,17 +106,43 @@ class CommandAddMachine(BrokerCommand):
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
         if chassis:
+            # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,
                     slot_number=slot).first()
             if not dbslot:
                 dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
             dbslot.machine = dbmachine
             session.add(dbslot)
+        if cluster:
+            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
+            session.add(dbmcm)
+            session.flush()
+            session.refresh(dbcluster)
+            if hasattr(dbcluster, 'vm_to_host_ratio') and \
+               len(dbcluster.machines) > \
+               dbcluster.vm_to_host_ratio * len(dbcluster.hosts):
+                raise ArgumentError("Adding a virtual machine to "
+                                    "%s cluster %s would exceed "
+                                    "vm_to_host_ratio %s (%s VMs/%s hosts)" %
+                                    (dbcluster.cluster_type, dbcluster.name,
+                                     dbcluster.vm_to_host_ratio,
+                                     len(dbcluster.machines),
+                                     len(dbcluster.hosts)))
+
+        session.flush()
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
+        session.refresh(dbmachine)
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
+
+        if cluster:
+            session.refresh(dbmachine.cluster)
+            # If we allow shares to be specified at this point then
+            # may also need to write out the metacluster plenary...
+            plenary = PlenaryCluster(dbcluster)
+            plenary.write()
         return

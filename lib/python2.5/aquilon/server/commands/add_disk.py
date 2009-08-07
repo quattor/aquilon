@@ -29,32 +29,61 @@
 """Contains the logic for `aq add disk`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+import re
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from sqlalchemy.exceptions import InvalidRequestError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.disk_type import get_disk_type
-from aquilon.aqdb.model import Disk
+from aquilon.server.dbwrappers.service import get_service
+from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.aqdb.model import Disk, LocalDisk, NasDisk
+from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
-
 
 class CommandAddDisk(BrokerCommand):
 
     required_parameters = ["machine", "disk", "type", "capacity"]
 
-    def render(self, session, machine, disk, type, capacity, comments,
-            user, **arguments):
+    def render(self, session, machine, disk, type, capacity, share, address,
+               comments, user, **arguments):
 
         dbmachine = get_machine(session, machine)
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
         if (len(d) != 0):
             raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))
 
+        if type not in controller_types:
+            raise ArgumentError("%s is not a valid controller type %s" %
+                                (type, controller_types))
+
         capacity = force_int("capacity", capacity)
-        dbdisk_type = get_disk_type(session, type)
-        dbdisk = Disk(machine=dbmachine, device_name=disk,
-                disk_type=dbdisk_type, capacity=capacity, comments=comments)
+        if share:
+            dbservice = get_service(session, "nas_disk_share")
+            dbshare = get_service_instance(session, dbservice, share)
+            if not re.compile("\d+:\d+$").match(address):
+                raise ArgumentError("disk address '%s' is illegal: must be " \
+                                    "\d+:\d+ (e.g. 0:0)" % address)
+            if dbmachine.cluster and dbmachine.cluster.metacluster:
+                dbmetacluster = dbmachine.cluster.metacluster
+                shares = dbmetacluster.shares
+                if dbshare not in shares and \
+                   len(shares) >= dbmetacluster.max_shares:
+                    raise ArgumentError("Adding a disk on a new share for %s "
+                                        "would exceed the metacluster's "
+                                        "max_shares (%s)" %
+                                        (dbmetacluster.name,
+                                         dbmetacluster.max_shares))
+            dbdisk = NasDisk(machine=dbmachine,
+                             device_name=disk,
+                             controller_type=type,
+                             service_instance=dbshare,
+                             capacity=capacity,
+                             address=address,
+                             comments=comments)
+        else:
+            dbdisk = LocalDisk(machine=dbmachine, device_name=disk,
+                controller_type=type, capacity=capacity, comments=comments)
         try:
             session.add(dbdisk)
         except InvalidRequestError, e:
@@ -63,5 +92,3 @@ class CommandAddDisk(BrokerCommand):
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()
         return
-
-

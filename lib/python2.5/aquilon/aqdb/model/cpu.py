@@ -125,7 +125,9 @@ def populate(sess, *args, **kw):
             av = sess.query(Vendor).filter_by(name='aurora_vendor').one()
             a = Cpu(vendor=av, name='aurora_cpu', speed=0,
                     comments='Placeholder Aurora CPU type.')
-            sess.add(a)
+            vv = Vendor.get_unique(sess, 'virtual')
+            vc = Cpu(vendor=vv, name='virtual_cpu', speed=0)
+            sess.add_all([a, vc])
         except Exception, e:
             sess.rollback()
             log.error(str(e))
@@ -136,7 +138,8 @@ def populate(sess, *args, **kw):
             sess.rollback()
             log.error(str(e))
 
+
+
+
         cnt = len(sess.query(Cpu).all())
         log.debug('created %s cpus'%(cnt))
-
-

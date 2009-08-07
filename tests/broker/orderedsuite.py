@@ -68,6 +68,11 @@ from test_add_rack import TestAddRack
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
+from test_add_metacluster import TestAddMetaCluster
+from test_add_esx_cluster import TestAddESXCluster
+from test_add_esx_cluster_aligned_service import (
+    TestAddESXClusterAlignedService)
+from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_add_tor_switch import TestAddTorSwitch
 from test_poll_tor_switch import TestPollTorSwitch
 from test_add_chassis import TestAddChassis
@@ -80,10 +85,17 @@ from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
 from test_add_manager import TestAddManager
+from test_add_dynamic_range import TestAddDynamicRange
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
+from test_make import TestMake
+from test_make_cluster import TestMakeCluster
+from test_bind_esx_cluster import TestBindESXCluster
+from test_rebind_esx_cluster import TestRebindESXCluster
+from test_rebind_metacluster import TestRebindMetaCluster
+from test_add_virtual_hardware import TestAddVirtualHardware
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
@@ -99,14 +111,19 @@ from test_constraints_domain import TestDomainConstraints
 from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_tor_switch import TestTorSwitchConstraints
+from test_constraints_make import TestMakeConstraints
+from test_constraints_cluster import TestClusterConstraints
+from test_constraints_metacluster import TestMetaClusterConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
 from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
 from test_search_hardware import TestSearchHardware
+from test_search_machine import TestSearchMachine
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
+from test_search_next import TestSearchNext
 from test_show_network import TestShowNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
@@ -114,11 +131,16 @@ from test_update_machine import TestUpdateMachine
 from test_update_rack import TestUpdateRack
 from test_update_network import TestUpdateNetwork
 from test_update_archetype import TestUpdateArchetype
+from test_update_metacluster import TestUpdateMetaCluster
+from test_update_esx_cluster import TestUpdateESXCluster
 from test_pxeswitch import TestPxeswitch
 from test_manage import TestManage
 from test_constraints_umask import TestUmaskConstraints
 from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
+from test_del_virtual_hardware import TestDelVirtualHardware
+from test_unbind_esx_cluster import TestUnbindESXCluster
+from test_del_dynamic_range import TestDelDynamicRange
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
@@ -127,6 +149,10 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_tor_switch import TestDelTorSwitch
+from test_del_esx_cluster_aligned_service import (
+    TestDelESXClusterAlignedService)
+from test_del_esx_cluster import TestDelESXCluster
+from test_del_metacluster import TestDelMetaCluster
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_vendor import TestDelVendor
@@ -164,14 +190,21 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
+                TestAddMetaCluster, TestAddESXCluster,
+                TestAddESXClusterAlignedService,
+                TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager,
+                TestAddDynamicRange,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
-                TestMakeAquilon,
+                TestMakeAquilon, TestMake, TestMakeCluster,
+                TestBindESXCluster, TestRebindESXCluster,
+                TestRebindMetaCluster,
+                TestAddVirtualHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestFlush, TestCompile,
                 TestBindServer,
@@ -179,18 +212,28 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,
                 TestMachineConstraints, TestTorSwitchConstraints,
+                TestMakeConstraints,
+                TestClusterConstraints, TestMetaClusterConstraints,
                 TestShowHostIPList, TestShowHostMachineList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
-                TestSearchHardware, TestSearchSystem, TestSearchHost,
+                TestSearchHardware, TestSearchMachine,
+                TestSearchSystem, TestSearchHost,
+                TestSearchNext,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
                 TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
                 TestUpdateArchetype,
+                TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestPxeswitch, TestManage,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
+                TestDelVirtualHardware, TestUnbindESXCluster,
+                TestDelDynamicRange,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                TestDelTorSwitch, TestDelModel, TestDelCpu, TestDelVendor,
+                TestDelTorSwitch,
+                TestDelESXClusterAlignedService,
+                TestDelESXCluster, TestDelMetaCluster,
+                TestDelModel, TestDelCpu, TestDelVendor,
                 TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelPersonality, TestDelOS, TestDelArchetype,

@@ -50,7 +50,7 @@ class CommandAddHost(BrokerCommand):
     required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     def render(self, session, hostname, machine, archetype, personality,
-               domain, buildstatus, user, skip_dsdb_check=False, **arguments):
+               domain, buildstatus, skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:
@@ -66,11 +66,6 @@ class CommandAddHost(BrokerCommand):
             else:
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
-
-        if dbmachine.model.machine_type not in [
-                'blade', 'workstation', 'rackmount', 'aurora_node']:
-            raise ArgumentError("Machine is of type %s, and must be a blade, workstation, rackmount, or aurora_node to add a host." %
-                    (dbmachine.model.machine_type))
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):

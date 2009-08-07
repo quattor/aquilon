@@ -1,0 +1,17 @@
+#objtype|pool|status|comments|campus|usagetype
+pool|lnn30|P|OZ/OY LNB4 V3170 dedicated NFS ESX|ln|regular
+#objtype|server|status|comments|campus|pool|make
+server|lnn30f1|P||ln|lnn30|Netapp Filer V3170
+server|lnn30f2|P||ln|lnn30|Netapp Filer V3170
+#objtype|server/pshare|status|campus|pool|nt|nfs|size|notify|vshare|primary_pool|type|primary_server|dg|server|pshare
+pshare|lnn30f1/test_share_1|P|ln|lnn30|0|1|1228800||test_share_1||primary||lnn30f1v1|lnn30f1|test_share_1
+pshare|lnn30f1/test_share_2|P|ln|lnn30|0|1|1228800||test_share_2||primary||lnn30f1v1|lnn30f1|test_share_2
+pshare|lnn30f1/test_share_3|P|ln|lnn30|0|1|1228800||test_share_3||primary||lnn30f1v1|lnn30f1|test_share_3
+pshare|lnn30f1/test_share_4|P|ln|lnn30|0|1|1228800||test_share_4||primary||lnn30f1v1|lnn30f1|test_share_4
+pshare|lnn30f1/test_share_5|P|ln|lnn30|0|1|1228800||test_share_5||primary||lnn30f1v1|lnn30f1|test_share_5
+pshare|lnn30f1/test_share_6|P|ln|lnn30|0|1|1228800||test_share_6||primary||lnn30f1v1|lnn30f1|test_share_6
+pshare|lnn30f1/test_share_7|P|ln|lnn30|0|1|1228800||test_share_7||primary||lnn30f1v1|lnn30f1|test_share_7
+pshare|lnn30f1/test_share_8|P|ln|lnn30|0|1|1228800||test_share_8||primary||lnn30f1v1|lnn30f1|test_share_8
+pshare|lnn30f1/test_share_9|P|ln|lnn30|0|1|1228800||test_share_9||primary||lnn30f1v1|lnn30f1|test_share_9
+pshare|lnn30f1/test_share_10|P|ln|lnn30|0|1|1228800||test_share_10||primary||lnn30f1v1|lnn30f1|test_share_10
+# End of nasobjects.map

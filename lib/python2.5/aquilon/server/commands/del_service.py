@@ -31,16 +31,13 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.model import (ServiceInstance, ServiceMap,
                                  PersonalityServiceMap)
 from aquilon.server.templates.service import (PlenaryService,
-        PlenaryServiceClientDefault, PlenaryServiceServerDefault,
-        PlenaryServiceInstance, PlenaryServiceInstanceServer,
-        PlenaryServiceInstanceClientDefault,
-        PlenaryServiceInstanceServerDefault)
+                                              PlenaryServiceInstance)
 
 
 class CommandDelService(BrokerCommand):
@@ -60,13 +57,8 @@ class CommandDelService(BrokerCommand):
             plenary_info = PlenaryService(dbservice)
             plenary_info.remove()
 
-            plenary_info = PlenaryServiceClientDefault(dbservice)
-            plenary_info.remove()
-
-            plenary_info = PlenaryServiceServerDefault(dbservice)
-            plenary_info.remove()
-
             return
+
         dbsi = session.query(ServiceInstance).filter_by(
                 name=instance, service=dbservice).first()
 
@@ -88,15 +80,6 @@ class CommandDelService(BrokerCommand):
             session.flush()
 
             plenary_info = PlenaryServiceInstance(dbservice, dbsi)
-            plenary_info.remove()
-
-            plenary_info = PlenaryServiceInstanceServer(dbservice, dbsi)
-            plenary_info.remove()
-
-            plenary_info = PlenaryServiceInstanceClientDefault(dbservice, dbsi)
-            plenary_info.remove()
-
-            plenary_info = PlenaryServiceInstanceServerDefault(dbservice, dbsi)
             plenary_info.remove()
 
         # FIXME: Cascade to relevant objects...

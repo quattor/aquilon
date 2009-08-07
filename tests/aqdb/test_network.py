@@ -28,63 +28,61 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ tests network """
-import __init__
-import unittest
+from utils import add, commit, load_classpath
+load_classpath()
 
 import aquilon.aqdb.depends
 
-from aquilon.aqdb.model import Network
-from aquilon.aqdb.db_factory  import db_factory
+from aquilon.aqdb.model import Network, Location, Building
+from aquilon.aqdb.db_factory import DbFactory
 
-#class testNetwork(unittest.TestCase):
-class testNet():
-    def setUp(self, *args, **kw):
-        self.db = db_factory()
-        self.s = self.db.Session()
-        self.a = self.s.query(Network).first()
+from nose.tools import raises
 
-    def tearDown(self, *args, **kw):
-        pass
+db = DbFactory()
+sess = db.Session()
+net = sess.query(Network).first()
 
-    def testLocation(self):
-        assert(self.a.location)
+def setup():
+    print 'set up'
+    clean_up()
 
-    def testAddresses(self):
-        assert(self.a.addresses())
+def teardown():
+    print 'tear down'
+    clean_up()
 
-    def testNetmask(self):
-        assert(self.a.netmask())
+def clean_up():
+    pass
 
-    def testGateway(self):
-        assert(self.a.first_host())
+def test_location():
+    assert net.location
 
-    def testBroadcast(self):
-        assert(self.a.last_host())
+def test_addresses():
+    assert net.addresses()
 
-    def testCidr(self):
-        assert(self.a.cidr)
+def test_netmask():
+    assert net.netmask()
 
-    def testIp(self):
-        assert(self.a.ip)
+def test_first_host():
+    assert net.first_host()
 
-    def testName(self):
-        assert(self.a.name)
+def test_broadcast():
+    assert net.last_host()
 
-    def testSide(self):
-        assert(self.a.side)
+def test_cidr():
+    assert net.cidr
 
-    def testNetType(self):
-        assert(self.a.network_type)
+def test_ip():
+    assert net.ip
 
-    def runTest(self):
-        self.setUp()
-        self.testLocation()
-        self.testNetmask()
-        self.testGateway()
-        self.testBroadcast()
-        self.tearDown()
+def test_name():
+    assert net.name
+
+def test_side():
+    assert net.side
+
+def test_type():
+    assert net.network_type
 
 if __name__ == "__main__":
     import nose
     nose.runmodule()
-

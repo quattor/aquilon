@@ -63,17 +63,14 @@ from aquilon.aqdb.model.model import Model
 from aquilon.aqdb.model.hardware_entity import HardwareEntity
 from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
-from aquilon.aqdb.model.disk_type import DiskType
-from aquilon.aqdb.model.disk import Disk
-from aquilon.aqdb.model.machine_specs import MachineSpecs
+from aquilon.aqdb.model.disk_type import DiskType #TODO: DELETE
 from aquilon.aqdb.model.status import Status
 from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw
 from aquilon.aqdb.model.console_server_hw import ConsoleServerHw
 
-
 #SYSTEM
-from aquilon.aqdb.model.system import System
+from aquilon.aqdb.model.system import System, DynamicStub
 from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.console_server import ConsoleServer
 from aquilon.aqdb.model.manager import Manager
@@ -86,7 +83,7 @@ from aquilon.aqdb.model.tor_switch import TorSwitch
 from aquilon.aqdb.model.observed_mac import ObservedMac
 from aquilon.aqdb.model.serial_cnxn  import SerialCnxn
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
-from aquilon.aqdb.model.interface    import Interface
+from aquilon.aqdb.model.interface import Interface
 from aquilon.aqdb.model.auxiliary import Auxiliary
 
 #SERVICE
@@ -98,5 +95,15 @@ from aquilon.aqdb.model.service_list_item import ServiceListItem
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.personality_service_list_item import PersonalityServiceListItem
 
+#NasDisk depends on ServiceInstance
+from aquilon.aqdb.model.disk import Disk, LocalDisk, NasDisk
 
+#CLUSTER
+from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
+                                        HostClusterMember,
+                                        MachineClusterMember,
+                                        ClusterAlignedService,
+                                        ClusterServiceBinding)
 
+from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember
+from aquilon.aqdb.model.machine_specs import MachineSpecs

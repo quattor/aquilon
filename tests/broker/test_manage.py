@@ -63,6 +63,44 @@ class TestManage(TestBrokerCommand):
         self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Domain: changetest2", command)
 
+    def testfailmanagevmhost(self):
+        command = ["manage", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--domain", "changetest1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "cluster nodes must be managed at the cluster level",
+                         command)
+
+    def testmanagemissingcluster(self):
+        command = ["manage", "--cluster", "cluster-does-not-exist",
+                   "--domain", "changetest1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "cluster 'cluster-does-not-exist' not found",
+                         command)
+
+    def testmanagecluster(self):
+        command = ["manage", "--cluster", "utecl1", "--domain", "changetest1"]
+        self.noouttest(command)
+
+    def testverifymanagecluster(self):
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Domain: changetest1", command)
+
+        command = ["search_host", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        members = out.splitlines()
+        members.sort()
+        self.failUnless(members, "No hosts in output of %s." % command)
+
+        command = ["search_host", "--cluster=utecl1", "--domain=changetest1"]
+        out = self.commandtest(command)
+        aligned = out.splitlines()
+        aligned.sort()
+        self.failUnlessEqual(members, aligned,
+                             "Not all utecl1 cluster members (%s) are in "
+                             "domain changetest1 (%s)." % (members, aligned))
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

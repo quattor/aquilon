@@ -59,19 +59,14 @@ dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
 vendor = oracle
-vendor_version = 10.2.0.1.0
-vendor_home = /ms/dist/orcl/PROJ/product/%(vendor_version)s
 server = LNPO_AQUILON_NY
 dbuser = USER
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
 connect_str = %(dbuser)s/%(dbuser)s@%(server)s
 dumpfile = %(dbdir)s/%(dbuser)s.dmp
-export = %(vendor_home)s/bin/exp
-exportlog = %(dbdir)s/aqdb_export.log
-import = %(vendor_home)s/bin/imp
 password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
 password_file = %(password_base)s/%(environment)s/%(dbuser)s
-module = orcl/10.2.0.1.0
+module = orcl/client/11.1.0.6
 
 [database_sqlite]
 dbfile = %(dbdir)s/aquilon.db
@@ -99,6 +94,7 @@ logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
 http_access_log = %(logdir)s/aqd_access.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
+clustersdir = %(quattordir)s/web/htdocs/clusters
 depsdir = %(quattordir)s/deps
 hostsdir = %(quattordir)s/hosts
 plenarydir = %(quattordir)s/plenary
@@ -106,8 +102,8 @@ swrepdir = %(quattordir)s/swrep
 git_path = /ms/dist/fsf/PROJ/git/1.5.4.2/bin
 git = %(git_path)s/git
 dsdb = /ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb
-domain_default_panc = /ms/dist/elfms/PROJ/panc/8.2.3/bin/panc
-javadir = /ms/dist/msjava/PROJ/sunjdk/1.6.0_06/bin
+domain_default_panc = /ms/dist/elfms/PROJ/panc/8.2.8-ms1/lib/panc.jar
+javadir = /ms/dist/msjava/PROJ/sunjdk/1.6.0_14/bin
 knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
 installfe = /ms/dist/elfms/PROJ/aii/prod/sbin/aii-installfe
 sys_loc = /ms/dist/aurora/bin/sys_loc
@@ -116,10 +112,19 @@ server_notifications =
 client_notifications = yes
 CheckNet = /ms/dist/NetEng/bin/Cisco/CheckNet
 CheckNet_module = /ms/dist/NetEng/modules/prod
+sharedata = /ms/dist/storage/etc/nasobjects.map
 aurora_host_domain = ny-prod
 windows_host_domain = ny-prod
 panc_batch_size = 1000
+panc_formatter = pan
 authorization_mailgroup = aqd-eng@morganstanley.com
+esx_cluster_max_members_default = 8
+esx_cluster_vm_to_host_ratio = 16
+metacluster_max_members_default = 32
+metacluster_max_shares_default = 32
+ant = /ms/dist/ossjava/PROJ/ant/1.7.1/bin/ant
+namespaced_host_profiles = False
+flat_host_profiles = True
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

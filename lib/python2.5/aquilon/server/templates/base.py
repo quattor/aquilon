@@ -30,11 +30,10 @@
 
 
 import os
-from datetime import datetime
 from threading import Lock
 
 from twisted.python import log
-
+from aquilon.exceptions_ import InternalError
 from aquilon.config import Config
 from aquilon.server.processes import write_file, read_file, remove_file
 
@@ -55,29 +54,56 @@ def compileLock():
     log.msg("aquired compile lock")
 
 def compileRelease():
-    log.msg("releasing compile lock");
-    compile_lock.release();
+    log.msg("releasing compile lock")
+    compile_lock.release()
 
 
 class Plenary(object):
     def __init__(self):
-        self.config = Config();
+        self.config = Config()
         self.template_type = 'structure'
+        self.plenary_template = None
+        self.plenary_core = None
         self.servername = self.config.get("broker", "servername")
-        
+        # The following attributes are for stash/restore_stash
+        self.old_content = None
+        self.old_mtime = None
+
+    def pathname(self):
+        return os.path.join(self.dir, self.plenary_template + ".tpl")
+
+    def body(self, lines):
+        """
+        The text of the template. By default, do nothing. A derived class can
+        override this to describe their own content.
+        They should do this by appending strings (each string
+        referring to a separate line of text in the template) into the
+        array. The array will already contain the appropriate header line for the
+        template.
+        """
+        pass
+
     def write(self, dir=None, user=None, locked=False, content=None):
+        """
+        write out the template.
+
+        Writes out the template. If the content is unchanged, then
+        the file will not be modified (preserving the mtime).
+        Returns the number of files that were written
+        """
+
         if dir is not None:
             self.dir = dir
         # user is simply left for compatibility: it's no longer used
         if (hasattr(self, "machine_type") and
-                self.machine_type == 'aurora_node'):
+                getattr(self, "machine_type") == 'aurora_node'):
             # Don't bother writing plenary files for dummy aurora hardware.
-            return
+            return 0
 
         if content is None:
             lines = []
-            type=self.template_type
-            if type is not None:
+            type = self.template_type
+            if type is not None and type is not "":
                 type = type + " "
             lines.append("%stemplate %s;" % (type, self.plenary_template))
             lines.append("")
@@ -85,13 +111,13 @@ class Plenary(object):
             content = "\n".join(lines)+"\n"
 
         plenary_path = os.path.join(self.dir, self.plenary_core)
-        plenary_file = os.path.join(self.dir, self.plenary_template) + ".tpl"
+        plenary_file = self.pathname()
         # optimise out the write (leaving the mtime good for make)
         # if nothing is actually changed
         if os.path.exists(plenary_file):
-            old = read_file(self.dir, self.plenary_template+".tpl")
+            old = self.read()
             if (old == content):
-                return
+                return 0
             
         if (not locked):
             compileLock()
@@ -103,22 +129,97 @@ class Plenary(object):
             if (not locked):
                 compileRelease()
 
+        return 1
+
     def read(self, dir=None):
         if dir is not None:
             self.dir = dir
-        return read_file(self.dir, self.plenary_template + ".tpl")
+        return read_file(self.dir, self.pathname())
 
     def remove(self, dir=None, locked=False):
+        """
+        remove this plenary template
+        """
+
         if dir is not None:
             self.dir = dir
-        plenary_file = os.path.join(self.dir, self.plenary_template + ".tpl")
+
         try:
             if (not locked):
                 compileLock()
-            remove_file(plenary_file)
+            remove_file(self.pathname())
         finally:
             if (not locked):
                 compileRelease()
         return
 
+    def cleanup(self, name, domain, locked=False):
+        """
+        remove all files related to an object template including
+        any intermediate build files
+        """
+        self.remove(None, locked)
+        if self.template_type == "object":
+            qdir = self.config.get("broker", "quattordir")
+            xmlfile = os.path.join(qdir, "build", "xml", domain, name+".xml")
+            remove_file(xmlfile)
+            depfile = os.path.join(qdir, "build", "xml", domain, name+".xml.dep")
+            remove_file(depfile)
 
+    def stash(self):
+        """
+        record the state of the plenary, in order to later restore this state
+        """
+        try:
+            self.old_content = self.read()
+            self.old_mtime = os.stat(self.pathname()).st_atime
+        except IOError, e:
+            self.old_content = None
+
+    def restore_stash(self):
+        """
+        restore previous state of plenary
+        """
+        if (self.old_content is None):
+            self.remove(locked=True)
+        else:
+            self.write(locked=True, content=self.old_content)
+            atime = os.stat(self.pathname()).st_atime
+            os.utime(self.pathname(), (atime, self.old_mtime))
+
+class PlenaryCollection():
+    """
+    A collection of plenary templates, presented behind a single
+    facade to make them appear as one template to the caller. To use,
+    subclass from this and append the real template objects into
+    self.plenaries.
+    """
+    def __init__(self):
+        self.plenaries = []
+
+    def stash(self):
+        for plen in self.plenaries:
+            plen.stash()
+
+    def restore_stash(self):
+        for plen in self.plenaries:
+            plen.restore_stash()
+
+    def write(self, dir=None, user=None, locked=False, content=None):
+        total = 0
+        for plen in self.plenaries:
+            total += plen.write(dir, user, locked, content)
+        return total
+
+    def remove(self, dir=None, locked=False):
+        for plen in self.plenaries:
+            plen.remove(dir, locked)
+
+    def cleanup(self, name, domain, locked=False):
+        for plen in self.plenaries:
+            plen.cleanup(name, domain, locked)
+
+    def read(self):
+        # This should never be called, but we put it here
+        # just in-case, since the base-class method is inappropriate.
+        raise InternalError

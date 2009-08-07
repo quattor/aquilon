@@ -34,7 +34,7 @@ import ms.version
 # in an addpkg call!!!
 #######
 
-ms.version.addpkg('sqlalchemy', '0.5.0')
+ms.version.addpkg('sqlalchemy', '0.5.5')
 
 ms.version.addpkg('cx_Oracle','5.0.1-11.1.0.6')
 
@@ -42,5 +42,4 @@ ms.version.addpkg('ibm_db','0.2.9-9.5.1')
 
 ms.version.addpkg('ipython','0.9.1')
 
-ms.version.addpkg('nose','0.10.3')
-
+ms.version.addpkg('nose','0.11.0')

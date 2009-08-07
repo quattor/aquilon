@@ -314,6 +314,20 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Building 'building-does-not-exist' not found",
                          command)
 
+    def testclusteravailable(self):
+        command = "search host --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh2.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh3.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh4.aqd-unittest.ms.com", command)
+
+    def testclusterunavailable(self):
+        command = "search host --cluster cluster-does-not-exist"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
