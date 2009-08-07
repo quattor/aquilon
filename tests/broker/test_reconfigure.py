@@ -227,11 +227,48 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "removing binding for service chooser3", command)
         self.matchclean(out, "adding binding", command)
 
-    def verifyremovebindings(self):
+    def testverifyremovebindings(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
             command = ["search_host", "--service", service,
                        "--hostname", "aquilon87.aqd-unittest.ms.com"]
             self.noouttest(command)
+
+    def testverifyremovebindingscat(self):
+        command = "cat --hostname aquilon87.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "chooser1", command)
+        self.matchclean(out, "chooser2", command)
+        self.matchclean(out, "chooser3", command)
+        self.matchoutput(out,
+            """'/hardware' = create('machine/americas/ut/ut9/ut9s03p37');""",
+            command)
+        self.matchoutput(out,
+            """include { 'archetype/base' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'os/linux/4.0.1-x86_64/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'service/aqd/ny-prod/client/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'service/ntp/pa.ny.na/client/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'service/bootserver/np.test/client/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'service/afs/q.ny.ms.com/client/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'service/dns/nyinfratest/client/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'personality/inventory/config' };""",
+            command)
+        self.matchoutput(out,
+            """include { 'archetype/final' };""",
+            command)
 
     def testreconfiguredebug(self):
         command = ["reconfigure", "--debug",
