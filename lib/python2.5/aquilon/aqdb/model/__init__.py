@@ -77,7 +77,6 @@ from aquilon.aqdb.model.system import System
 from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.console_server import ConsoleServer
 from aquilon.aqdb.model.manager import Manager
-from aquilon.aqdb.model.quattor_server import QuattorServer
 from aquilon.aqdb.model.domain import Domain
 from aquilon.aqdb.model.host import Host
 from aquilon.aqdb.model.build_item import BuildItem

@@ -30,24 +30,22 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint)
+from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Base, DnsDomain, UserPrincipal, QuattorServer
+from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 
 class Domain(Base):
-    """ Domain is to be used as the top most level for path traversal of the SCM
-            Represents individual config repositories """
+    """
+        Domain is to be used as the top most level for path traversal of
+        the SCM. They represent individual configuration repositories.
+    """
     __tablename__ = 'domain'
     id = Column(Integer, Sequence('domain_id_seq'), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-
-    server_id = Column(Integer, ForeignKey('quattor_server.id',
-                                           name='domain_qs_fk'),
-                       nullable=False)
 
     compiler = Column(String(255), nullable=False,
                       default='/ms/dist/elfms/PROJ/panc/8.2.3/bin/panc')
@@ -56,11 +54,9 @@ class Domain(Base):
                                           name='domain_user_princ_fk'),
                       nullable=False)
 
-    creation_date = deferred(Column( DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column('comments', String(255), nullable=True))
+    creation_date = Column( DateTime, default=datetime.now, nullable=False)
+    comments = Column('comments', String(255), nullable=True)
 
-    server = relation(QuattorServer, backref='domains')
     owner = relation(UserPrincipal, uselist=False, backref='domain')
 
 domain = Domain.__table__
@@ -70,30 +66,15 @@ domain.append_constraint(UniqueConstraint('name',name='domain_uk'))
 table = domain
 
 def populate(sess, *args, **kw):
-
     if len(sess.query(Domain).all()) < 1:
-        qs = sess.query(QuattorServer).first()
-        assert(qs)
-
         cdb = sess.query(UserPrincipal).filter_by(name='cdb').one()
         assert(cdb)
 
-        daqscott = sess.query(UserPrincipal).filter_by(name='daqscott').one()
-        assert(daqscott)
-
-        q = Domain(name='daqscott', server = qs, owner = daqscott)
-
-        r = Domain(name='ny-prod', server = qs, owner = cdb,
+        r = Domain(name='ny-prod', owner=cdb,
                    comments='The NY regional production domain')
 
-        sess.add(q)
         sess.add(r)
         sess.commit()
 
         d=sess.query(Domain).first()
-        assert(d)
-
-
-
-
-
+        assert d, "No domains created by populate"

@@ -36,8 +36,6 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Domain
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
-from aquilon.server.dbwrappers.quattor_server import (
-        get_or_create_quattor_server)
 from aquilon.server.processes import run_command
 import re
 
@@ -50,8 +48,6 @@ class CommandAddDomain(BrokerCommand):
         if not dbuser:
             raise AuthorizationException("Cannot create a domain without"
                     + " an authenticated connection.")
-        dbquattor_server = get_or_create_quattor_server(session,
-                self.config.get("broker", "servername"))
 
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(domain)):
@@ -61,8 +57,7 @@ class CommandAddDomain(BrokerCommand):
         dbdomain = session.query(Domain).filter_by(name=domain).first()
         if not dbdomain:
             compiler = self.config.get("broker", "domain_default_panc")
-            dbdomain = Domain(name=domain, server=dbquattor_server,
-                              owner=dbuser, compiler=compiler)
+            dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler)
             session.add(dbdomain)
             session.flush()
             session.refresh(dbdomain)
@@ -78,5 +73,3 @@ class CommandAddDomain(BrokerCommand):
         # hook in git... just need to make sure it runs.
         run_command(["git-update-server-info"], env=git_env, path=domaindir)
         return
-
-

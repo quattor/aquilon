@@ -28,13 +28,10 @@
 # TERMS THAT MAY APPLY.
 """Wrapper to make getting a domain simpler."""
 
-
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Domain
-from aquilon.server.dbwrappers.quattor_server import (
-        get_or_create_quattor_server)
 
 
 def get_domain(session, domain):
@@ -46,10 +43,4 @@ def get_domain(session, domain):
 
 def verify_domain(session, domain, localhost):
     dbdomain = get_domain(session, domain)
-    dbquattor_server = get_or_create_quattor_server(session, localhost)
-    if dbquattor_server != dbdomain.server:
-        pass
-        #log.msg("FIXME: Should be redirecting this operation.")
     return dbdomain
-
-
