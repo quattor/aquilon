@@ -275,7 +275,7 @@ class TestReconfigure(TestBrokerCommand):
                    "--hostname", "aquilon88.aqd-unittest.ms.com",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Creating service Chooser", command)
+        self.matchoutput(out, "Creating service Chooser", command)
 
 
 if __name__=='__main__':
