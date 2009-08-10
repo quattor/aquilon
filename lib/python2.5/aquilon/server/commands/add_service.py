@@ -29,6 +29,7 @@
 """Contains the logic for `aq add service`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance, CfgPath, Tld
 from aquilon.server.templates.domain import (compileLock, compileRelease)
@@ -78,6 +79,11 @@ class CommandAddService(BrokerCommand):
 
             if not instance:
                 return
+
+            if ServiceInstance.get_unique(session, service_id=dbservice.id,
+                                          name=instance):
+                raise ArgumentError("Service %s instance %s already exists." %
+                                    (dbservice.name, instance))
 
             relative_path = "%s/%s" % (service, instance)
             dbcfg_path = session.query(CfgPath).filter_by(
