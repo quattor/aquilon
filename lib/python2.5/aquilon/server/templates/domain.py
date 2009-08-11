@@ -55,10 +55,6 @@ class TemplateDomain(object):
                     self.domain.name))
 
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "deps",
-                                 self.domain.name))
-
-        dirs.append(os.path.join(config.get("broker", "quattordir"),
                                  "cfg",
                                  "domains",
                                  self.domain.name))
@@ -68,10 +64,6 @@ class TemplateDomain(object):
                                  "xml",
                                  self.domain.name))
 
-        dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "build",
-                                 "clusters",
-                                 self.domain.name))
         return dirs
 
     def outputdirs(self):
@@ -79,7 +71,6 @@ class TemplateDomain(object):
         config = Config()
         dirs = []
         dirs.append(config.get("broker", "profilesdir"))
-        dirs.append(config.get("broker", "clustersdir"))
         return dirs
 
     def compile(self, session, only=None, locked=False):
