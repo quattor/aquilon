@@ -67,14 +67,16 @@ class PlenaryClusterObject(Plenary):
         Plenary.cleanup(self, name, domain, locked)
 
     def body(self, lines):
+        lines.append("include { 'pan/units' };")
+        lines.append("")
+        lines.append("'/system/cluster/name' = '%s';" % self.name)
+        lines.append("'/system/cluster/type' = '%s';" %
+                        self.dbcluster.cluster_type)
         fname = "body_%s" % self.dbcluster.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
 
     def body_esx(self, lines):
-        lines.append("include { 'pan/units' };")
-        lines.append("")
-        lines.append("'/system/cluster/name' = '%s';" % self.name)
         if self.metacluster:
             lines.append("'/system/metacluster/name' = '%s';" %
                          self.metacluster)
