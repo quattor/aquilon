@@ -55,7 +55,8 @@ class TestMakeCluster(TestBrokerCommand):
         self.matchclean(out, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "clustersdir"), "utecl1.xml")))
+            self.config.get("broker", "profilesdir"), "clusters",
+            "utecl1.xml")))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
@@ -85,7 +86,8 @@ class TestMakeCluster(TestBrokerCommand):
         self.matchclean(out, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "clustersdir"), "utecl2.xml")))
+            self.config.get("broker", "profilesdir"), "clusters",
+            "utecl2.xml")))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
