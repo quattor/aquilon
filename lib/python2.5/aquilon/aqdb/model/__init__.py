@@ -63,7 +63,6 @@ from aquilon.aqdb.model.model import Model
 from aquilon.aqdb.model.hardware_entity import HardwareEntity
 from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
-from aquilon.aqdb.model.disk_type import DiskType #TODO: DELETE
 from aquilon.aqdb.model.status import Status
 from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw

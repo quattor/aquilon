@@ -117,6 +117,8 @@ commit;
 ALTER TABLE "DISK" RENAME TO "OLD_DISK";
 commit;
 
+ALTER TABLE "DISK_TYPE" RENAME TO "OLD_DISK_TYPE";
+commit;
 --------------------------------------------------------
 --  DISK
 --------------------------------------------------------
@@ -158,7 +160,7 @@ INSERT INTO DISK (ID, DISK_TYPE, CAPACITY, DEVICE_NAME, CONTROLLER_TYPE,
                   MACHINE_ID, CREATION_DATE, SERVICE_INSTANCE_ID)
 (SELECT A.id, 'local', A.capacity, A.DEVICE_NAME, B.TYPE, A.machine_id,
         A.creation_date, NULL
-FROM OLD_DISK A, DISK_TYPE B
+FROM OLD_DISK A, OLD_DISK_TYPE B
 WHERE A.disk_type_id = B.id);
 
 commit;
