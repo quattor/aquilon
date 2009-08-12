@@ -54,7 +54,7 @@ class CommandMakeCluster(BrokerCommand):
                 raise ArgumentError("Cluster %s is not a compilable archetype "
                                     "(%s)" %
                                     (cluster,
-                                     dbhost.personality.archetype.name))
+                                     dbcluster.personality.archetype.name))
 
             session.flush()
 

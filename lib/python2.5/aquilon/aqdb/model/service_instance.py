@@ -86,4 +86,5 @@ table.info['abrev'] = _ABV
 table.info['precedence'] = _PRECEDENCE
 
 service_instance.primary_key.name='svc_inst_pk'
-UniqueConstraint('service_id', 'name', name='svc_inst_server_uk')
+service_instance.append_constraint(UniqueConstraint('service_id', 'name',
+                                                    name='svc_inst_uk'))
