@@ -13,7 +13,7 @@ if _LIBDIR not in sys.path:
     sys.path.insert(0, _LIBDIR)
 
 import aquilon.aqdb.depends
-from aquilon.aqdb.model import Host, ServiceInstance, OperatingSystem
+from aquilon.aqdb.model import Host, ServiceInstance, OperatingSystem, BuildItem
 from sqlalchemy import create_engine
 from sqlalchemy.orm import create_session
 
@@ -60,7 +60,7 @@ def enqueue_hosts(cstr, host_q, limit=None):
         host_q.put(row[0])
     sess.close()
 
-def work(cstr, host_q, os_cache, si_cache, commit_count=50):
+def work(cstr, host_q, os_cache, si_cache, commit_count=25):
     #1 commit per loop is a 5.5 minute execution time.
     #500 hosts per commit consistently yields deadlocks, so did 100
     sess = get_session(cstr)
@@ -85,6 +85,7 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=50):
 
                 if processed % commit_count == 0:
                     try:
+                        #print 'commiting at %s'% (processed)
                         sess.commit()
                     except Exception, e:
                         print e
@@ -127,6 +128,27 @@ class AqdbManager(SyncManager):
         for w in self.workers:
             w.terminate()
 
+        print 'completed parallelized work, completing schema migration'
+        sess = get_session(self._cstr)
+        # drop all os rows from build_items
+        stmt = '''delete from build_item where cfg_path_id in
+                  (select id from cfg_path where tld_id =
+                  (select id from tld where type='os'))'''
+        sess.execute(stmt)
+
+        #if there are no rows that have null service_instance_id, delete
+        #the cfg_path_id column.
+        count = sess.query(BuildItem).filter(
+            BuildItem.service_instance_id == None).count()
+        if count == 0:
+            print 'deleting the cfg_path_id column'
+            sess.execute('ALTER TABLE "BUILD_ITEM" DROP COLUMN "CFG_PATH_ID"')
+            #TODO: eliminate position as well?
+            #sess.execute('ALTER TABLE "BUILD_ITEM" DROP COLUMN "POSITION"')
+            #rebuild unique constraint
+        else:
+            print 'there are %s rows with no service instance ids'% (count)
+
     def stop(self):
         self.host_q.put(None)
         for w in self.workers:
@@ -146,20 +168,6 @@ if __name__ == '__main__':
     print 'execution time: %s seconds'% (int(end-start))
     sys.exit(0)
 
-
-#def process_host(host):
-#    for item in host.build_items:
-#        if item.cfg_path.tld.type == 'os':
-#
-#            print '%s %s'%(host.fqdn, item.cfg_path.relative_path.split('/'))
-            #object_session(self).query(Foo).filter_by(
-            #host.operating_system_id = os_cache[
-            #    item.cfg_path.relative_path.split('/')[1]]
-
-            #sess.delete(item)
-            #delete OS build items later in raw sql (performance)
-
-        #if item.cfg_path.tld.type == 'service':
-        #    item.service_instance_id = si_cache[str(item.cfg_path)]
-            #delete the cfg_path entry in the build item row
-        #    item.cfg_path=None
+#delete from build_item where cfg_path_id in
+#  (select id from cfg_path where tld_id = (select id from tld where type='os'));
+#commit;
