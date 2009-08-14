@@ -67,6 +67,12 @@ class PlenaryClusterObject(Plenary):
         Plenary.cleanup(self, name, domain, locked)
 
     def body(self, lines):
+        arcdir = self.dbcluster.personality.archetype.name
+        lines.append("# this is an %s cluster, so all templates "
+                     "should be sourced from there" % arcdir)
+        lines.append("variable LOADPATH = list('%s');" % arcdir)
+        lines.append("")
+
         lines.append("include { 'pan/units' };")
         lines.append("")
         lines.append("'/system/cluster/name' = '%s';" % self.name)
