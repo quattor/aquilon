@@ -128,7 +128,7 @@
 
 	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
 		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*.tpl" />
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}">
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}" formatter="${panc.formatter}">
 			<path refid="pan.objectloadpath" />
 			<fileset refid="source.fileset" />
 		</panc>
