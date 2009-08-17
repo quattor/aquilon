@@ -28,8 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.aqdb.model import OperatingSystem
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Tld, CfgPath
+from aquilon.server.dbwrappers.os import get_os_query
+from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.exceptions_ import ArgumentError
 import re
 
@@ -44,15 +46,21 @@ class CommandAddOS(BrokerCommand):
             raise ArgumentError("OS name '%s' is not valid" % osname)
         if not valid.match(version):
             raise ArgumentError("OS version '%s' is not valid" % version)
-        path = osname + "/" + version
-        dbtld = session.query(Tld).filter_by(type='os').first()
-        existing = session.query(CfgPath).filter_by(relative_path=path,
-                                                    tld=dbtld).first()
+
+        q = get_os_query(session, osname, version, archetype)
+        existing = q.all()
 
         if existing:
-            raise ArgumentError("OS version '%s' already exists" % path)
+            raise ArgumentError(
+                "%s version %s already exists in archetype %s" % (osname,
+                                                                  version,
+                                                                  archetype))
 
-        dbos = CfgPath(tld=dbtld, relative_path=path)
+        else:
+            dbarchetype=get_archetype(session, archetype)
+            dbos = OperatingSystem(name=osname, version=version,
+                                   archetype=dbarchetype)
+            #FIXME: why no comments?
+            session.add(dbos)
 
-        session.save(dbos)
         return

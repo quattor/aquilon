@@ -30,21 +30,15 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import CfgPath, Tld
+from aquilon.server.dbwrappers.os import get_os_query
 
 
 class CommandShowOS(BrokerCommand):
 
     def render(self, session, osname=None, version=None, archetype=None,
                **arguments):
-        dbtld = session.query(Tld).filter_by(type="os").first()
-        q = session.query(CfgPath).filter_by(tld=dbtld)
-        if version and osname:
-            q = q.filter_by(relative_path=osname + '/' + version)
-        elif osname:
-            q = q.filter(CfgPath.relative_path.like(osname + '/%'))
-        elif version:
-            q = q.filter(CfgPath.relative_path.like('%/' + version))
+
+        q = get_os_query(session, osname, version, archetype)
         oslist = q.all()
         if not oslist:
             raise NotFoundException("No matching operating system")

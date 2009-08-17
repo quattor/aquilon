@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,24 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" Operating System formatter """
 
 
+from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import OperatingSystem
-from aquilon.server.broker import BrokerCommand
-from aquilon.exceptions_ import NotFoundException
-from aquilon.server.dbwrappers.os import get_os
 
 
-class CommandDelOS(BrokerCommand):
+class OSFormatter(ObjectFormatter):
+    """ Operating System formatter """
+    def format_raw(self, os, indent=""):
+        return indent + "Template: %s/os/%s/%s/config.tpl" % (os.archetype.name,
+                                                              os.name,
+                                                              os.version)
 
-    required_parameters = ["osname", "version", "archetype"]
-
-    def render(self, session, osname, version, archetype, **arguments):
-        existing = get_os(session, osname, version, archetype)
-
-        if not existing:
-            raise NotFoundException("OS version '%s' is unknown" %
-                                    relative_path)
-        session.delete(existing)
-
-        return
+ObjectFormatter.handlers[OperatingSystem] = OSFormatter()

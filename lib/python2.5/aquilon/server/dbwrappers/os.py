@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,24 +26,43 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Wrapper to simplify os retreival"""
 
 
-from aquilon.aqdb.model import OperatingSystem
-from aquilon.server.broker import BrokerCommand
+from sqlalchemy.exceptions import InvalidRequestError
+
 from aquilon.exceptions_ import NotFoundException
-from aquilon.server.dbwrappers.os import get_os
+from aquilon.aqdb.model import OperatingSystem
+from aquilon.server.dbwrappers.archetype import get_archetype
 
+def get_os_query(session, osname=None, version=None, archetype=None):
+    """
+        Returns a convenient query object for Operating Systems
 
-class CommandDelOS(BrokerCommand):
+        Since get_os() wants to query with query().one() and show_os wants to
+        execute query().all(), this is here so we don't repeat code.
+    """
+    q = session.query(OperatingSystem)
 
-    required_parameters = ["osname", "version", "archetype"]
+    #FIX ME: Argument checking? what combinations are valid/invalid?
+    if archetype:
+        dbarchetype = get_archetype(session, archetype)
+        q = q.join('archetype').filter_by(name=archetype)
+        q = q.reset_joinpoint()
 
-    def render(self, session, osname, version, archetype, **arguments):
-        existing = get_os(session, osname, version, archetype)
+    if osname:
+        q = q.filter_by(name=osname)
 
-        if not existing:
-            raise NotFoundException("OS version '%s' is unknown" %
-                                    relative_path)
-        session.delete(existing)
+    if version:
+        q = q.filter_by(version=version)
 
-        return
+    return q
+
+def get_os(session, osname=None, version=None, archetype=None):
+    """
+        Find a unique OS.
+
+        As is the common case for most dbwrappers code.
+    """
+    q = get_os_query(session, osname, version, archetype)
+    return q.one()
