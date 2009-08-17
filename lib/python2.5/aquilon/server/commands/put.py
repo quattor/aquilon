@@ -63,10 +63,14 @@ class CommandPut(BrokerCommand):
                 env=git_env)
         except ProcessException, e:
             run_command(["git", "reset", "--hard"], env=git_env, path=domaindir)
-            run_command(["git-update-server-info"], path=domaindir, env=git_env)
             raise ArgumentError("\n%s%s" %(e.out,e.err))
         finally:
             remove_file(filename)
+            try:
+                run_command(["git-update-server-info"], path=domaindir,
+                            env=git_env)
+            except ProcessException, e2:
+                pass
         return
 
 
