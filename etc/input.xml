@@ -1146,7 +1146,7 @@
       host's bootserver.
       After a successful installation, the host will automatically pxeswitch
       itself back to local disk booting.
-      The --configure option forces a reset of the configuration files for this host on 
+      The --configure option forces a reset of the configuration files for this host on
       the bootserver.
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
@@ -1686,28 +1686,28 @@
   <command name="add_os">
       Create an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="os" type="string">The name of the operating system</option>
-         <option name="vers" type="string">The version of the operating system</option>
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="version" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being added to</option>
       </optgroup>
-      <transport method="put" path="os/%(os)s/%(vers)s/%(archetype)s" />
+      <transport method="put" path="os/%(osname)s/%(version)s/%(archetype)s" />
   </command>
 
   <command name="del_os">
       Delete an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="os" type="string">The name of the operating system</option>
-         <option name="vers" type="string">The version of the operating system</option>
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="version" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being deleted from</option>
       </optgroup>
-      <transport method="delete" path="os/%(os)s/%(vers)s/%(archetype)s" />
+      <transport method="delete" path="os/%(osname)s/%(version)s/%(archetype)s" />
   </command>
 
   <command name="show_os">
       Show an operating system definition.
       <optgroup name="show_os_opts" mandatory="True" fields="any">
-         <option name="os" type="string">The name of the operating system</option>
-         <option name="vers" type="string">The version of the operating system</option>
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="version" type="string">The version of the operating system</option>
          <option name="archetype" type="string">The archetype to search within</option>
          <option name="all" type="boolean">Show all operating systems</option>
       </optgroup>

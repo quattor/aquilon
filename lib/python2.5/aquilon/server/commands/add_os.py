@@ -27,26 +27,27 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, Tld, CfgPath
+from aquilon.aqdb.model import Tld, CfgPath
 from aquilon.exceptions_ import ArgumentError
 import re
 
+
 class CommandAddOS(BrokerCommand):
 
-    required_parameters = [ "os", "vers", "archetype" ]
+    required_parameters = [ "osname", "version", "archetype" ]
 
-    def render(self, session, os, vers, archetype, **arguments):
+    def render(self, session, osname, version, archetype, **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(os)):
-            raise ArgumentError("OS name '%s' is not valid" % os)
-        if not valid.match(vers):
-            raise ArgumentError("OS version '%s' is not valid" % vers)
-
-        path = os + "/" + vers
-
+        if (not valid.match(osname)):
+            raise ArgumentError("OS name '%s' is not valid" % osname)
+        if not valid.match(version):
+            raise ArgumentError("OS version '%s' is not valid" % version)
+        path = osname + "/" + version
         dbtld = session.query(Tld).filter_by(type='os').first()
-        existing = session.query(CfgPath).filter_by(relative_path=path, tld=dbtld).first()
+        existing = session.query(CfgPath).filter_by(relative_path=path,
+                                                    tld=dbtld).first()
 
         if existing:
             raise ArgumentError("OS version '%s' already exists" % path)

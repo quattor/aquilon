@@ -35,18 +35,17 @@ from aquilon.aqdb.model import CfgPath, Tld
 
 class CommandShowOS(BrokerCommand):
 
-    def render(self, session, os, vers, archetype, **arguments):
+    def render(self, session, osname=None, version=None, archetype=None,
+               **arguments):
         dbtld = session.query(Tld).filter_by(type="os").first()
         q = session.query(CfgPath).filter_by(tld=dbtld)
-        if vers and os:
-            q = q.filter_by(relative_path=os + '/' + vers)
-        elif os:
-            q = q.filter(CfgPath.relative_path.like(os + '/%'))
-        elif vers:
-            q = q.filter(CfgPath.relative_path.like('%/' + vers))
+        if version and osname:
+            q = q.filter_by(relative_path=osname + '/' + version)
+        elif osname:
+            q = q.filter(CfgPath.relative_path.like(osname + '/%'))
+        elif version:
+            q = q.filter(CfgPath.relative_path.like('%/' + version))
         oslist = q.all()
         if not oslist:
             raise NotFoundException("No matching operating system")
         return oslist
-
-
