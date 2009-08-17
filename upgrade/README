@@ -1,1 +1,4 @@
-this is a stub
+Put schema migrations for whatever branch into this_branch. 
+
+When we figure out what release it's going into, move it
+into there and leave it there.
