@@ -31,11 +31,12 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import OperatingSystem
 from aquilon.server.dbwrappers.archetype import get_archetype
 
-def get_os_query(session, osname=None, version=None, archetype=None):
+def get_os_query(session, osname=None, version=None, archetype=None,
+                 dbarchetype=None):
     """
         Returns a convenient query object for Operating Systems
 
@@ -45,10 +46,20 @@ def get_os_query(session, osname=None, version=None, archetype=None):
     q = session.query(OperatingSystem)
 
     #FIX ME: Argument checking? what combinations are valid/invalid?
-    if archetype:
+    #FIX ME: if osname and version are mandatory remove the default values
+
+    #if we get a dbarchetype, use that, ignore archetype
+    if dbarchetype:
+        q.filter_by(archetype=dbarchetype)
+    elif archetype:
         dbarchetype = get_archetype(session, archetype)
         q = q.join('archetype').filter_by(name=archetype)
         q = q.reset_joinpoint()
+    else:
+        #FIX_ME will the user see dbarchetype and be confused? It's really
+        #internal only. Perhaps I'm checking too much now?
+        msg = 'One of archetype or dbarchetype must be supplied'
+        raise ArgumentError(msg)
 
     if osname:
         q = q.filter_by(name=osname)
@@ -58,11 +69,11 @@ def get_os_query(session, osname=None, version=None, archetype=None):
 
     return q
 
-def get_os(session, osname=None, version=None, archetype=None):
+def get_os(session, osname=None, version=None, archetype=None, dbarchetype=None):
     """
         Find a unique OS.
 
         As is the common case for most dbwrappers code.
     """
-    q = get_os_query(session, osname, version, archetype)
+    q = get_os_query(session, osname, version, archetype, dbarchetype)
     return q.one()

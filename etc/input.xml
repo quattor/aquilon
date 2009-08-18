@@ -435,6 +435,8 @@
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <option name="osname" type="string">Operating system (e.g. linux)</option>
+         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -468,6 +470,8 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <option name="osname" type="string">Operating system (e.g. linux)</option>
+         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>

@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
+from aquilon.server.dbwrappers.os import get_os
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
@@ -48,10 +49,11 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddHost(BrokerCommand):
 
-    required_parameters = ["hostname", "machine", "archetype", "domain"]
+    required_parameters = ["hostname", "machine", "archetype", "domain",
+                           "osname", "osversion"]
 
     def render(self, session, hostname, machine, archetype, personality,
-               domain, buildstatus, comments, skip_dsdb_check=False,
+               domain, buildstatus, osname, osversion, skip_dsdb_check=False,
                **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
@@ -61,13 +63,15 @@ class CommandAddHost(BrokerCommand):
             dbstatus = get_status(session, "build")
         dbmachine = get_machine(session, machine)
 
+        dbarchetype = get_archetype(session, archetype)
         if not personality:
-            dbarchetype = get_archetype(session, archetype)
             if dbarchetype.name == 'aquilon':
                 personality = 'inventory'
             else:
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
+
+        dbos = get_os(session, osname, osversion, None, dbarchetype)
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):
@@ -108,9 +112,14 @@ class CommandAddHost(BrokerCommand):
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
+<<<<<<< HEAD
                       mac=mac, ip=ip, network=dbnetwork, comments=comments,
                       name=short, dns_domain=dbdns_domain,
                       personality=dbpersonality)
+=======
+                mac=mac, ip=ip, network=dbnetwork, operating_system=dbos,
+                name=short, dns_domain=dbdns_domain, personality=dbpersonality)
+>>>>>>> a877403... port commands add_*host. osname and version required for all
         session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost
