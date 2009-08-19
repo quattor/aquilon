@@ -60,7 +60,7 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testfailaddexisting(self):
         command = "add metacluster --metacluster namc1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "metacluster 'namc1' already exists", command)
+        self.matchoutput(out, "Metacluster 'namc1' already exists", command)
 
     def testaddnamc2(self):
         command = ["add_metacluster", "--metacluster=namc2",

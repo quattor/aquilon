@@ -44,10 +44,7 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("Cannot create metacluster named 'global': "
                                 "name reserved.")
 
-        existing = MetaCluster.get_unique(session, metacluster)
-        if existing:
-            raise ArgumentError("metacluster '%s' already exists" %
-                                metacluster)
+        MetaCluster.get_unique(session, metacluster, preclude=True)
 
         if not max_members:
             max_members = self.config.get("broker",

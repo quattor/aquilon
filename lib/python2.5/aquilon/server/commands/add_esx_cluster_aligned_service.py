@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ClusterAlignedService
 
@@ -39,9 +38,7 @@ class CommandAddESXClusterAlignedService(BrokerCommand):
 
     def render(self, session, service, comments, **arguments):
         cluster_type = 'esx'
-        dbservice = Service.get_unique(session, name=service)
-        if not dbservice:
-            raise NotFoundException("Service '%s' not found" % service)
+        dbservice = Service.get_unique(session, name=service, compel=True)
         dbcas = ClusterAlignedService(service=dbservice,
                                       cluster_type=cluster_type,
                                       comments=comments)
