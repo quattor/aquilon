@@ -57,6 +57,7 @@ class System(Base):
         of 'host' as we've used it in our discussions and designs thus far.
     """
     __tablename__ = 'system'
+    _instance_label = 'fqdn'
 
     id = Column(Integer, Sequence('SYSTEM_SEQ'), primary_key=True)
 

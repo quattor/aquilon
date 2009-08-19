@@ -44,6 +44,7 @@ class ServiceListItem(Base):
         to get a host up and running...that's what these represent. """
 
     __tablename__ = 'service_list_item'
+    _class_label = 'Required Service'
 
     id = Column(Integer, Sequence('service_list_item_id_seq'),
                            primary_key=True)
