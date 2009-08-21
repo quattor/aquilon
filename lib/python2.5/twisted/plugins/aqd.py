@@ -78,6 +78,12 @@ def log_module_load(cmd, mod):
         log.msg("Failed loading module %s, return code %d and stderr '%s'." %
                 (mod, e.exitcode, e.stderr))
 
+# Fix a deprecation warning in twisted 8.2.0 - mode should not be passed
+def _parseUNIX(factory, address, mode='666', backlog=50, lockfile=True):
+    return ((address, factory), {'backlog': int(backlog),
+                                 'wantPID': bool(int(lockfile))})
+strports._funcs["unix"] = _parseUNIX
+
 
 class AQDMaker(object):
     implements(IServiceMaker, IPlugin)
@@ -132,14 +138,18 @@ class AQDMaker(object):
         restServer.set_umask()
         reactor.addSystemEventTrigger('after', 'startup', restServer.set_umask)
 
+        sockdir = config.get("broker", "sockdir")
+        if not os.path.exists(sockdir):
+            os.makedirs(sockdir, 0700)
+        os.chmod(sockdir, 0700)
+
         if options["usesock"]:
-            return strports.service("unix:%s/aqdsock:mode=600"
-                    % config.get("broker", "basedir"), openSite)
+            return strports.service("unix:%s/aqdsock" % sockdir, openSite)
 
         if options["noauth"]:
             return strports.service(config.get("broker", "openport"), openSite)
 
-        sockname = os.path.join(config.get("broker", "rundir"), "kncsock")
+        sockname = os.path.join(sockdir, "kncsock")
         if os.path.exists(sockname):
             try:
                 log.msg("Attempting to remove old socket '%s'" % sockname)
@@ -184,7 +194,7 @@ class AQDMaker(object):
             reactor.addSystemEventTrigger('after', 'startup', start_coverage)
             reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
-        unixsocket = "unix:%s:mode=600" % sockname
+        unixsocket = "unix:%s" % sockname
         kncSite = KNCSite( restServer )
 
         # Not sure if we want to do this... if not, can just go back to

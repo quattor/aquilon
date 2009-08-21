@@ -2,12 +2,14 @@
 
 # Twisted, the Framework of Your Internet
 # Copyright (c) 2001-2004 Twisted Matrix Laboratories.
+# Copyright (c) 2008,2009  Contributor
 # See LICENSE for details.
 
 # This is an (almost) completely new version of the script from
 # the original twisted distributed.
-# hacked to understand the MS layout.
-# It was then enhanced (marked with comments below) to handle 8.1.0.
+# It was hacked to understand the MS layout.
+# It was then enhanced (marked with comments below) to handle 8.1.0
+# and again for 8.2.0.
 
 import sys, os
 sys.path.append( os.path.join(
@@ -18,32 +20,58 @@ import aquilon.server.depends
 import aquilon.aqdb.depends
 
 from twisted.scripts import twistd
+from twisted.python import log, logfile
 
 # This bit is taken from the twisted.application.app... we
 # really want logging to start up before the app does.  This may need
-# to be revisited on future twisted upgrades.  The below is a clone
-# of 8.1.0, except that startLogging has been broken up to increase
-# the rotate length and moved one line earlier to start before the app.
+# to be revisited on future twisted upgrades.  It did change going from
+# 8.1.0 -> 8.2.0.  The below is based on 8.2.0.  The difference is that
+# self.logger.start() is exploded to remove the requirement that the
+# application exists and the application created afterwards.
 def updated_application_run(self):
     """
     Run the application.
     """
     self.preApplication()
-    observer = self.getLogObserver()
-    # Serious hack... should create hooks to make this sane.
-    if hasattr(observer, 'im_self') and hasattr(observer.im_self, 'write') \
-       and hasattr(observer.im_self.write, 'im_self') \
-       and hasattr(observer.im_self.write.im_self, 'rotateLength'):
-        # When logging to a file, observer is a FileLogObserver's emit
-        # method.  So im_self gets us the FLO.  The write attribute
-        # has been aliased from the FileLog's write attribute, so *that*
-        # im_self gets us the FileLog.  Then we can set rotateLength.  Whew!
-        observer.im_self.write.im_self.rotateLength = 10000000
-    self.startLogging(observer)
+
+    # Instead of calling AppLogger.start() via self.logger.start(),
+    # which requires the application to have been created, just do what
+    # start() would do.
+    # The first thing start() does is set its _observer to the return
+    # value of _getLogObserver() which returns a FileLog that is hard-
+    # coded to set a log rotation of 1 MB.  While we're here anyway,
+    # overriding that as well to remove the rotation size.  We rotate
+    # logs with an external logrotate command that sends SIGUSR1 to
+    # tell the broker to reopen the log file.
+    if self.logger._logfilename == '-' or not self.logger._logfilename:
+        logFile = sys.stdout
+    else:
+        logFile = logfile.LogFile.fromFullPath(self.logger._logfilename,
+                                               rotateLength=0)
+        try:
+            import signal
+        except ImportError:
+            pass
+        else:
+            # Override if signal is set to None or SIG_DFL (0)
+            if not signal.getsignal(signal.SIGUSR1):
+                def restartLog(signal, frame):
+                    logFile.flush()
+                    try:
+                        logFile.close()
+                    except:
+                        pass
+                    logFile._openFile()
+                signal.signal(signal.SIGUSR1, restartLog)
+    self.logger._observer = log.FileLogObserver(logFile).emit
+    log.startLoggingWithObserver(self.logger._observer)
+    self.logger._initialLog()
+
     self.application = self.createOrGetApplication()
     self.postApplication()
+    self.logger.stop()
 
-# Install the updated method.  Again, may be 8.1.0 specific, and relies
+# Install the updated method.  Again, may break on upgrades and relies
 # on the internals of twisted.scripts.twistd.
 twistd._SomeApplicationRunner.run = updated_application_run
 

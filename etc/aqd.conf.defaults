@@ -90,6 +90,7 @@ compiletooldir = %(srcdir)s/etc
 kingdir = %(quattordir)s/template-king
 templatesdir = %(quattordir)s/templates
 rundir = %(quattordir)s/run
+sockdir = %(rundir)s/sockets
 logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
 http_access_log = %(logdir)s/aqd_access.log
