@@ -56,8 +56,6 @@ class CommandMakeCluster(BrokerCommand):
                                     (cluster,
                                      dbcluster.personality.archetype.name))
 
-            session.flush()
-
             if keepbindings:
                 required_only = False
             else:

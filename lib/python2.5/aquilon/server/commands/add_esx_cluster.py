@@ -100,12 +100,8 @@ class CommandAddESXCluster(BrokerCommand):
         session.flush()
         session.refresh(dbcluster)
 
-        try:
-            compileLock()
-            plenary = PlenaryCluster(dbcluster)
-            plenary.write(locked=True)
-        finally:
-            compileRelease()
+        plenary = PlenaryCluster(dbcluster)
+        plenary.write()
 
         return
 

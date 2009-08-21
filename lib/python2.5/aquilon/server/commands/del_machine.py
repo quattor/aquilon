@@ -34,6 +34,7 @@ from twisted.python import log
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
 
@@ -45,8 +46,7 @@ class CommandDelMachine(BrokerCommand):
     def render(self, session, machine, **arguments):
         dbmachine = get_machine(session, machine)
 
-        session.refresh(dbmachine)
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_machine = PlenaryMachineInfo(dbmachine)
         dbcluster = dbmachine.cluster
 
         if dbmachine.host:
@@ -65,12 +65,23 @@ class CommandDelMachine(BrokerCommand):
                     (dbmachine.name, disk.device_name))
             session.delete(disk)
         session.delete(dbmachine)
-        plenary_info.remove()
+        session.flush()
 
         if dbcluster:
-            session.refresh(dbcluster)
-            plenary = PlenaryCluster(dbcluster)
-            plenary.write()
+            plenary_cluster = PlenaryCluster(dbcluster)
+        try:
+            compileLock()
+            plenary_machine.stash()
+            if dbcluster:
+                plenary_cluster.write(locked=True)
+            plenary_machine.remove(locked=True)
+        except:
+            plenary_machine.restore_stash()
+            if dbcluster:
+                plenary_cluster.restore_stash()
+            raise
+        finally:
+            compileRelease()
 
         return
 

@@ -37,7 +37,7 @@ from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-
+from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import PlenaryServiceInstance
 
 
@@ -61,10 +61,11 @@ class CommandUnbindServer(BrokerCommand):
                 if item.system == dbsystem:
                     session.delete(item)
         session.flush()
+
+        plenaries = PlenaryCollection()
         for dbinstance in dbinstances:
-            session.refresh(dbinstance)
-            plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
-            plenary_info.write()
+            plenaries.append(PlenaryServiceInstance(dbservice, dbinstance))
+        plenaries.write()
 
         # XXX: Need to recompile...
         return

@@ -106,10 +106,12 @@ class CommandDelHost(BrokerCommand):
             delhost_lock.release()
 
         # Only if we got here with no exceptions do we clean the template
+        # Trying to clean up after any errors here is really difficult
+        # since the changes to dsdb have already been made.
         if (delplenary):
             try:
                 compileLock()
-                ph.cleanup(fqdn, domain, locked=True)
+                ph.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
                 remove_file(os.path.join(profiles, fqdn+".xml"))

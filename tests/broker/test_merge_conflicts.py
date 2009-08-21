@@ -29,6 +29,8 @@
 # TERMS THAT MAY APPLY.
 """Module for testing that we handle merge conflicts properly"""
 
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
@@ -168,7 +170,35 @@ class TestMergeConflicts(TestBrokerCommand):
         self.ignoreoutputtest(command.split(" "),
                 cwd=os.path.join(self.scratchdir, "changetest4"))
 
+    def test_009_prepchangetest3domain(self):
+        # Make a change directly on the server that will conflict
+        # with an incoming change.
+        # This sets up an unsuccessful put.
+        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
+                                 "changetest3")
+        template = os.path.join(domaindir, "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
+            contents = f.readlines()
+        contents.append("#Added by server-side byprepchangetest3domain\n")
+        with open(template, 'w') as f:
+            f.writelines(contents)
+        self.gitcommand(["commit", "-a", "-m",
+                         "added prepchangetest3domain comment"],
+                        cwd=domaindir)
+
+        domaindir = os.path.join(self.scratchdir, "changetest3")
+        template = os.path.join(domaindir, "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
+            contents = f.readlines()
+        contents.append("#Added by shadow-side prepchangetest3domain\n")
+        with open(template, 'w') as f:
+            f.writelines(contents)
+        self.gitcommand(["commit", "-a", "-m",
+                         "added prepchangetest3domain comment"],
+                        cwd=domaindir)
+
     def test_009_prepchangetest4domain(self):
+        # Fix up the domain and get it ready for a successful put.
         command = "merge changetest4"
         err = self.gitcommand_expectfailure(command.split(" "),
                 cwd=os.path.join(self.scratchdir, "changetest4"))
@@ -192,6 +222,23 @@ class TestMergeConflicts(TestBrokerCommand):
             f.close()
         self.gitcommand(["commit", "-a", "-m", "added changetest4 comment"],
                 cwd=os.path.join(self.scratchdir, "changetest4"))
+
+    def test_010_putchangetest3domain(self):
+        shadow = os.path.join(self.scratchdir, "changetest3")
+        command = ["put", "--domain=changetest3"]
+        # Can't just use self.badrequesttest() because we need to ignore
+        # the output on stdout and deal with mixed output on stderr.
+        (p, out, err) = self.runcommand(command, env=self.gitenv(), cwd=shadow)
+        self.assertEqual(p.returncode, 4,
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 4, out, err))
+        self.matchoutput(err, "Bad Request", command)
+        self.matchoutput(err, "Merge conflict", command)
+        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
+                                 "changetest3")
+        self.check_git_merge_health(domaindir)
 
     def test_010_putchangetest4domain(self):
         self.ignoreoutputtest(["put", "--domain", "changetest4"],

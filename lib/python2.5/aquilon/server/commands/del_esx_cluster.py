@@ -32,7 +32,6 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import EsxCluster
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.base import compileLock, compileRelease
 
 
 class CommandDelESXCluster(BrokerCommand):
@@ -58,11 +57,7 @@ class CommandDelESXCluster(BrokerCommand):
 
         session.flush()
 
-        try:
-            compileLock()
-            plenary.cleanup(cluster, domain, locked=True)
-        finally:
-            compileRelease()
+        plenary.cleanup(domain)
 
         return
 

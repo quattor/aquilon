@@ -34,6 +34,7 @@ import os
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.server.dbwrappers.domain import verify_domain
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.processes import run_command
 
 
@@ -50,6 +51,7 @@ class CommandSync(BrokerCommand):
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
             os.environ.get("PATH", ""))}
         try:
+            compileLock()
             run_command(["git", "checkout", "master"], path=domaindir, env=git_env)
             run_command(["git", "pull"], path=domaindir, env=git_env)
         except ProcessException, e:
@@ -63,7 +65,10 @@ class CommandSync(BrokerCommand):
                 Please checkout master and re-run aq_sync for your domain and
                 resolve the conflict locally before re-attempting to deploy.
             ''' %(e.out,e.err))
-        run_command(["git-update-server-info"], path=domaindir, env=git_env)
+        finally:
+            run_command(["git-update-server-info"],
+                        path=domaindir, env=git_env)
+            compileRelease()
         remote_command = """env PATH="%s:$PATH" NO_PROXY=* git pull""" % (
                 self.config.get("broker", "git_path"))
         return str(remote_command)

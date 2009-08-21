@@ -42,6 +42,7 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Host
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.processes import DSDBRunner
 
 
@@ -111,21 +112,30 @@ class CommandAddHost(BrokerCommand):
         session.flush()
         session.refresh(dbhost)
 
-        dsdb_runner = DSDBRunner()
-        if dbhost.archetype.name == 'aurora':
-            # For aurora, check that DSDB has a record of the host.
-            if not skip_dsdb_check:
-                try:
-                    fields = dsdb_runner.show_host(hostname)
-                except ProcessException, e:
-                    raise ArgumentError("Could not find host in dsdb: %s" % e)
-        else:
-            # For anything else, reserve the name and IP in DSDB.
-            try:
-                dsdb_runner.add_host(dbinterface)
-            except ProcessException, e:
-                raise ArgumentError("Could not add host to dsdb: %s" % e)
-
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write()
+
+        try:
+            compileLock()
+            plenary_info.write(locked=True)
+
+            dsdb_runner = DSDBRunner()
+            if dbhost.archetype.name == 'aurora':
+                # For aurora, check that DSDB has a record of the host.
+                if not skip_dsdb_check:
+                    try:
+                        fields = dsdb_runner.show_host(hostname)
+                    except ProcessException, e:
+                        raise ArgumentError("Could not find host in dsdb: %s" % e)
+            else:
+                # For anything else, reserve the name and IP in DSDB.
+                try:
+                    dsdb_runner.add_host(dbinterface)
+                except ProcessException, e:
+                    raise ArgumentError("Could not add host to dsdb: %s" % e)
+        except:
+            plenary_info.restore_stash()
+            raise
+        finally:
+            compileRelease()
+
         return

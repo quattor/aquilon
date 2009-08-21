@@ -283,7 +283,7 @@ class TestMakeAquilon(TestBrokerCommand):
                                   "servicedata")
         results = self.grepcommand(["-rl", "aquilon93.aqd-unittest.ms.com",
                                     servicedir])
-        self.failIf(results, "Found service plenary data that includes"
+        self.failIf(results, "Found service plenary data that includes "
                              "aquilon93.aqd-unittest.ms.com")
 
     def testfailwindows(self):

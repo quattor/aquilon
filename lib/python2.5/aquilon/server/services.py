@@ -41,7 +41,8 @@ from aquilon.aqdb.model import (Host, Cluster, Tld, BuildItem, ServiceMap,
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.base import (compileLock, compileRelease,
+                                           PlenaryCollection)
 
 
 log = logging.getLogger('aquilon.server.services')
@@ -115,7 +116,7 @@ class Chooser(object):
         """Set of service instances losing a client."""
         self.chosen_services = {}
         """Track the chosen services."""
-        self.stashed = []
+        self.plenaries = PlenaryCollection()
         """Keep stashed plenaries for rollback purposes."""
 
     def generate_description(self):
@@ -156,7 +157,7 @@ class Chooser(object):
     def set_required(self):
         """Main entry point when setting the required services for a host."""
         self.verify_init()
-        self.stash()
+        self.prestash_primary()
         self.debug("Setting required services")
         for dbservice in self.required_services:
             self.find_service_instances(dbservice)
@@ -185,6 +186,7 @@ class Chooser(object):
 
         """
         self.verify_init()
+        self.prestash_primary()
         if instance:
             self.debug("Setting service %s instance %s",
                        service.name, instance.name)
@@ -411,38 +413,19 @@ class Chooser(object):
         for instance in self.instances_bound.union(self.instances_unbound):
             plenary = PlenaryServiceInstanceServer(instance.service, instance)
             plenary.stash()
-            self.stashed.append(plenary)
+            self.plenaries.append(plenary)
 
     def flush_changes(self):
         self.session.flush()
-        self.session.refresh(self.dbobj)
 
     def write_plenary_templates(self, locked=False):
-        try:
-            if not locked:
-                compileLock()
-            for instances in [self.instances_bound, self.instances_unbound]:
-                for instance in instances:
-                    plenary = PlenaryServiceInstanceServer(instance.service,
-                                                           instance)
-                    plenary.write(locked=True)
-            self.write_additional_templates(locked=True)
-        finally:
-            if not locked:
-                compileRelease()
+        self.plenaries.write(locked=locked)
 
-    def write_additional_templates(self, locked=False):
-        pass
-
-    def prestash_primary(self, plenary):
-        self.stashed.append(plenary)
-
-    def stash(self):
+    def prestash_primary(self):
         pass
 
     def restore_stash(self):
-        for plenary in self.stashed:
-            plenary.restore_stash()
+        self.plenaries.restore_stash()
 
 
 class HostChooser(Chooser):
@@ -593,18 +576,10 @@ class HostChooser(Chooser):
             #    self.dbhost.templates._reorder()
             self.session.add(self.dbhost)
 
-    def stash(self):
-        if not self.stashed:
-            plenary_host = PlenaryHost(self.dbhost)
-            plenary_host.stash()
-            self.stashed.append(plenary_host)
-
-    def write_additional_templates(self, locked=False):
-        plenary = PlenaryHost(self.dbhost)
-        try:
-            plenary.write(locked=locked)
-        except IncompleteError, e:
-            pass
+    def prestash_primary(self):
+        plenary_host = PlenaryHost(self.dbhost)
+        plenary_host.stash()
+        self.plenaries.append(plenary_host)
 
 
 class ClusterChooser(Chooser):
@@ -665,7 +640,7 @@ class ClusterChooser(Chooser):
             for h in self.dbcluster.hosts:
                 host_plenary = PlenaryHost(h)
                 host_plenary.stash()
-                self.stashed.append(host_plenary)
+                self.plenaries.append(host_plenary)
                 host_chooser = Chooser(h, required_only=False,
                                        debug=self.is_debug_enabled)
                 host_chooser.set_single(instance.service, instance, force=True)
@@ -675,21 +650,9 @@ class ClusterChooser(Chooser):
         if self.instances_bound or self.instances_unbound:
             self.session.add(self.dbcluster)
 
-    def stash(self):
-        if not self.stashed:
-            plenary_cluster = PlenaryCluster(self.dbcluster)
-            plenary_cluster.stash()
-            self.stashed.append(plenary_cluster)
-
-    def write_additional_templates(self, locked=False):
-        plenary = PlenaryCluster(self.dbcluster)
-        plenary.write(locked=locked)
-        if self.instances_bound:
-            for h in self.dbcluster.hosts:
-                plenary = PlenaryHost(h)
-                try:
-                    plenary.write(locked=locked)
-                except IncompleteError, e:
-                    pass
+    def prestash_primary(self):
+        plenary_cluster = PlenaryCluster(self.dbcluster)
+        plenary_cluster.stash()
+        self.plenaries.append(plenary_cluster)
 
 

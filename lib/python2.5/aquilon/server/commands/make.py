@@ -56,8 +56,6 @@ class CommandMake(BrokerCommand):
         chooser = None
         try:
             compileLock()
-            plenary_host = PlenaryHost(dbhost)
-            plenary_host.stash()
 
             # Currently, for the Host to be created it *must* be associated with
             # a Machine already.  If that ever changes, need to check here and
@@ -111,7 +109,6 @@ class CommandMake(BrokerCommand):
                 chooser = Chooser(dbhost, required_only=False, debug=debug)
             else:
                 chooser = Chooser(dbhost, required_only=True, debug=debug)
-            chooser.prestash_primary(plenary_host)
             chooser.set_required()
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)

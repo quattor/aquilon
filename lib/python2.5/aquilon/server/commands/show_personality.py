@@ -65,6 +65,9 @@ class CommandShowPersonality(BrokerCommand):
             results.extend(q.all())
             return results
         for dbpersonality in q.all():
+            # In theory the results here could be inconsistent if the
+            # domain is being written to.  In practice... it's not worth
+            # taking out the compile lock to ensure consistency.
             threshold = self.get_threshold(dbpersonality, dbdomain)
             results.append(ThresholdedPersonality(dbpersonality, threshold))
         return results

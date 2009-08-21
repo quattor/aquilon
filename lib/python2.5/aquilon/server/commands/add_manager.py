@@ -38,6 +38,7 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  describe_interface)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Interface, Manager
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 
@@ -112,14 +113,21 @@ class CommandAddManager(BrokerCommand):
         session.refresh(dbmachine)
         session.refresh(dbmanager)
 
-        dsdb_runner = DSDBRunner()
-        try:
-            dsdb_runner.add_host(dbinterface)
-        except ProcessException, e:
-            raise ArgumentError("Could not add host to dsdb: %s" % e)
-
         plenary_info = PlenaryMachineInfo(dbmachine)
-        plenary_info.write()
+        try:
+            compileLock()
+            plenary_info.write(locked=True)
+
+            dsdb_runner = DSDBRunner()
+            try:
+                dsdb_runner.add_host(dbinterface)
+            except ProcessException, e:
+                raise ArgumentError("Could not add host to dsdb: %s" % e)
+        except:
+            plenary_info.restore_stash()
+            raise
+        finally:
+            compileRelease()
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

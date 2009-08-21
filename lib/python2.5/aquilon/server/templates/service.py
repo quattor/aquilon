@@ -54,7 +54,7 @@ class PlenaryServiceToplevel(Plenary):
     to all instances.
     """
     def __init__(self, dbservice):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbservice)
         self.name = dbservice.name
         self.plenary_core = "servicedata/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
@@ -71,7 +71,7 @@ class PlenaryServiceClientDefault(Plenary):
     to all instances of the service.
     """
     def __init__(self, dbservice):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbservice)
         self.name = dbservice.name
         self.plenary_core = "service/%(name)s/client" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
@@ -89,7 +89,7 @@ class PlenaryServiceServerDefault(Plenary):
     to all instances of the service.
     """
     def __init__(self, dbservice):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbservice)
         self.name = dbservice.name
         self.plenary_core = "service/%(name)s/server" % self.__dict__
         self.plenary_template = "%(plenary_core)s/config" % self.__dict__
@@ -126,8 +126,8 @@ class PlenaryServiceInstanceToplevel(Plenary):
     servers and the instance name)
     """
     def __init__(self, dbservice, dbinstance):
-        Plenary.__init__(self)
-        self.servers = dbinstance.servers
+        Plenary.__init__(self, dbinstance)
+        self.dbinstance = dbinstance
         self.service = dbservice.name
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
@@ -139,7 +139,7 @@ class PlenaryServiceInstanceToplevel(Plenary):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
         lines.append("")
         lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.servers]) + ");")
+        lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.dbinstance.servers]) + ");")
 
 
 class PlenaryServiceInstanceServer(Plenary):
@@ -152,10 +152,9 @@ class PlenaryServiceInstanceServer(Plenary):
     of clients and the instance name)
     """
     def __init__(self, dbservice, dbinstance):
-        Plenary.__init__(self)
-        self.servers = dbinstance.servers
+        Plenary.__init__(self, dbinstance)
+        self.dbinstance = dbinstance
         self.service = dbservice.name
-        self.path    = dbinstance.cfg_path
         self.name = dbinstance.name
         self.plenary_core = "servicedata/%(service)s/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/srvconfig"
@@ -164,7 +163,7 @@ class PlenaryServiceInstanceServer(Plenary):
 
     def body(self, lines):
         lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'clients' = list(" + ", ".join([("'" + client.host.fqdn + "'") for client in self.path.build_items]) + ");")
+        lines.append("'clients' = list(" + ", ".join([("'" + client.host.fqdn + "'") for client in self.dbinstance.cfg_path.build_items]) + ");")
 
 
 class PlenaryServiceInstanceClientDefault(Plenary):
@@ -178,8 +177,7 @@ class PlenaryServiceInstanceClientDefault(Plenary):
     is specific to the instance.
     """
     def __init__(self, dbservice, dbinstance):
-        Plenary.__init__(self)
-        self.servers = dbinstance.servers
+        Plenary.__init__(self, dbinstance)
         self.service = dbservice.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__
@@ -201,8 +199,7 @@ class PlenaryServiceInstanceServerDefault(Plenary):
     only and is specific to the service instance.
     """
     def __init__(self, dbservice, dbinstance):
-        Plenary.__init__(self)
-        self.servers = dbinstance.servers
+        Plenary.__init__(self, dbinstance)
         self.service = dbservice.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/server" % self.__dict__
@@ -223,7 +220,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
     This class needs to be in sync with the consumer PlenaryMachine
     """
     def __init__(self, dbservice, dbinstance):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbinstance)
         self.service = dbservice.name
         self.name = dbinstance.name
         self.plenary_core = "service/%(service)s/%(name)s/client" % self.__dict__

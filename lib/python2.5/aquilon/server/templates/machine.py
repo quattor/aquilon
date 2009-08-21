@@ -34,7 +34,10 @@ from aquilon.server.templates.base import Plenary
 
 class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbmachine)
+        self.dbmachine = dbmachine
+        self.machine = dbmachine.name
+
         loc = dbmachine.location
         self.hub = loc.hub.fullname.lower()
         self.building = loc.building.name
@@ -52,63 +55,8 @@ class PlenaryMachineInfo(Plenary):
         #   self.hub = loc.hub.fullname.lower()
         #else:
         #   self.hub = None
-
-        # And a chassis location?
-        if dbmachine.chassis_slot:
-            slot = dbmachine.chassis_slot[0]
-            self.chassis = slot.chassis.fqdn
-            self.slot = slot.slot_number
-        else:
-            self.chassis = None
-
         self.sysloc = loc.sysloc()
-        self.machine = dbmachine.name
-        self.model = dbmachine.model.name
-        self.machine_type = dbmachine.model.machine_type
-        self.vendor = dbmachine.model.vendor.name
-        self.serial = dbmachine.serial_no
-        self.ram = dbmachine.memory
-        self.num_cpus = dbmachine.cpu_quantity
-        self.cpu_relpath = "hardware/cpu/%s/%s" % (
-                dbmachine.cpu.vendor.name, dbmachine.cpu.name)
 
-        self.disks = dict()
-        for disk in dbmachine.disks:
-            if disk.disk_type == 'local':
-                relpath = "hardware/harddisk/generic/%s" % disk.controller_type
-                self.disks[disk.device_name] = "create('%s', \n" \
-                    "                   'capacity', %d*GB)" % \
-                    (relpath, disk.capacity)
-            elif disk.disk_type == 'nas':
-                relpath = "service/nas_disk_share/%s/client/nasinfo" % \
-                    disk.service_instance.name
-                diskpath = "%s/%s.vmdk" % (dbmachine.name, disk.device_name)
-                self.disks[disk.device_name] = "create('%s', \n"\
-                    "                   'capacity', %d*GB,\n" \
-                    "                   'interface', '%s',\n" \
-                    "                   'address', '%s',\n" \
-                    "                   'path', '%s')" % \
-                    (relpath, disk.capacity, disk.controller_type, \
-                     disk.address, diskpath)
-
-        self.managers = []
-        self.interfaces = []
-        for interface in dbmachine.interfaces:
-            if interface.interface_type == 'public':
-                self.interfaces.append({"name":interface.name,
-                                        "mac":interface.mac,
-                                        "boot":interface.bootable})
-                continue
-            if interface.interface_type == 'management':
-                manager = {"type":interface.name, "mac":interface.mac,
-                           "ip":None, "fqdn":None}
-                if interface.system:
-                    manager["ip"] = interface.system.ip
-                    manager["fqdn"] = interface.system.fqdn
-                self.managers.append(manager)
-                continue
-        self.model_relpath = (
-            "hardware/machine/%(vendor)s/%(model)s" % self.__dict__)
         # If this changes need to update machine_plenary_will_move() to match.
         self.plenary_core = (
                 "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__)
@@ -127,9 +75,12 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('"rack/column" = "%(rackcol)s";' % self.__dict__)
 
         # And a chassis location?
-        if self.chassis:
-            lines.append('"chassis" = "%s";'%self.chassis)
-            lines.append('"slot" = %d;'%self.slot)
+        if self.dbmachine.chassis_slot:
+            slot = self.dbmachine.chassis_slot[0]
+            self.chassis = slot.chassis.fqdn
+            self.slot = slot.slot_number
+            lines.append('"chassis" = "%s";' % slot.chassis.fqdn)
+            lines.append('"slot" = %d;' % slot.slot_number)
 
         #if self.hub:
         #    lines.append('"sysloc/hub" = "%s";' % self.hub)
@@ -138,28 +89,65 @@ class PlenaryMachineInfo(Plenary):
 
         # Now describe the hardware
         lines.append("")
-        if self.serial:
-            lines.append('"serialnumber" = "%(serial)s";\n' % self.__dict__)
+        if self.dbmachine.serial_no:
+            lines.append('"serialnumber" = "%s";\n' % self.dbmachine.serial_no)
         lines.append('"nodename" = "%(machine)s";' % self.__dict__)
-        lines.append("include { '%(model_relpath)s' };\n" % self.__dict__)
-        lines.append('"ram" = list(create("hardware/ram/generic", "size", %(ram)d*MB));'
-                % self.__dict__)
+        lines.append("include { 'hardware/machine/%s/%s' };\n" %
+                     (self.dbmachine.model.vendor.name,
+                      self.dbmachine.model.name))
+        lines.append('"ram" = list(create("hardware/ram/generic", '
+                     '"size", %d*MB));' % self.dbmachine.memory)
         lines.append('"cpu" = list(' + ", \n             ".join(
-                ['create("%(cpu_relpath)s")' % self.__dict__
-                for cpu_num in range(self.num_cpus)]) + ');')
+                ['create("hardware/cpu/%s/%s")' %
+                 (self.dbmachine.cpu.vendor.name, self.dbmachine.cpu.name)
+                for cpu_num in range(self.dbmachine.cpu_quantity)]) + ');')
 
         lines.append("'harddisks' = nlist(")
-        for dname in self.disks:
-            lines.append("    '%s', %s," % (dname, self.disks[dname]))
+        for disk in self.dbmachine.disks:
+            if disk.disk_type == 'local':
+                relpath = "hardware/harddisk/generic/%s" % disk.controller_type
+                disk_dev_info = "create('%s', \n" \
+                    "                   'capacity', %d*GB)" % \
+                    (relpath, disk.capacity)
+            elif disk.disk_type == 'nas':
+                relpath = "service/nas_disk_share/%s/client/nasinfo" % \
+                    disk.service_instance.name
+                diskpath = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                disk_dev_info = "create('%s', \n" \
+                    "                   'capacity', %d*GB,\n" \
+                    "                   'interface', '%s',\n" \
+                    "                   'address', '%s',\n" \
+                    "                   'path', '%s')" % \
+                    (relpath, disk.capacity, disk.controller_type, \
+                     disk.address, diskpath)
+            lines.append("    '%s', %s," % (disk.device_name, disk_dev_info))
         lines.append(");\n")
 
-        for interface in self.interfaces:
+        managers = []
+        interfaces = []
+        for interface in self.dbmachine.interfaces:
+            if interface.interface_type == 'public':
+                interfaces.append({"name":interface.name,
+                                        "mac":interface.mac,
+                                        "boot":interface.bootable})
+                continue
+            if interface.interface_type == 'management':
+                manager = {"type":interface.name, "mac":interface.mac,
+                           "ip":None, "fqdn":None}
+                if interface.system:
+                    manager["ip"] = interface.system.ip
+                    manager["fqdn"] = interface.system.fqdn
+                managers.append(manager)
+                continue
+
+        for interface in interfaces:
             lines.append('"cards/nic/%s/hwaddr" = "%s";'
                     % (interface['name'], interface['mac'].upper()))
             if interface['boot']:
                 lines.append('"cards/nic/%s/boot" = %s;'
                         % (interface['name'], str(interface['boot']).lower()))
-        for manager in self.managers:
+
+        for manager in managers:
             lines.append('"console/%(type)s" = nlist(' % manager)
             lines.append('                           "hwaddr", "%(mac)s"' %
                          manager)
@@ -167,6 +155,12 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('                           , "fqdn", "%(fqdn)s"' %
                              manager)
             lines.append('                     );')
+
+    def write(self, *args, **kwargs):
+        # Don't bother writing plenary files for dummy aurora hardware.
+        if self.dbmachine.model.machine_type == 'aurora_node':
+            return 0
+        return Plenary.write(self, *args, **kwargs)
 
 
 def machine_plenary_will_move(old, new):

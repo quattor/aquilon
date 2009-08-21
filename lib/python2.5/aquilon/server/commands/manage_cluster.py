@@ -33,7 +33,8 @@ from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.base import (compileLock, compileRelease,
+                                           PlenaryCollection)
 from aquilon.exceptions_ import IncompleteError, NotFoundException
 
 class CommandManageCluster(BrokerCommand):
@@ -48,39 +49,26 @@ class CommandManageCluster(BrokerCommand):
         if not dbcluster:
             raise NotFoundException("cluster '%s' not found" % cluster)
 
+        old_domain = dbcluster.domain.name
+        plenaries = PlenaryCollection()
+        plenaries.append(PlenaryCluster(dbcluster))
+        dbcluster.domain = dbdomain
+        session.add(dbcluster)
+        for dbhost in dbcluster.hosts:
+            plenaries.append(PlenaryHost(dbhost))
+            dbhost.domain = dbdomain
+            session.add(dbhost)
+
+        session.flush()
+
         try:
             compileLock()
-
-            plenary = PlenaryCluster(dbcluster)
-            plenary.cleanup(dbcluster.name, dbcluster.domain.name,
-                            locked=True)
-
-            for host in dbcluster.hosts:
-                plenary = PlenaryHost(host)
-                plenary.cleanup(host.fqdn, domain, locked=True)
-                host.domain = dbdomain
-                session.add(host)
-
-            plenary = None
-
-            dbcluster.domain = dbdomain
-            session.add(dbcluster)
-
-            # Now we recreate the plenary to ensure that the domain is ready
-            # to compile, however (esp. if there was no existing template), we
-            # have to be aware that there might not be enough information yet
-            # with which we can create a template
-            plenary = PlenaryCluster(dbcluster)
-            plenary.write(locked=True)
-            for host in dbcluster.hosts:
-                try:
-                    plenary = PlenaryHost(host)
-                    plenary.write(locked=True)
-                except IncompleteError, e:
-                    # This template cannot be written, we leave it alone
-                    # It would be nice to flag the state in the the host?
-                    pass
-
+            plenaries.stash()
+            plenaries.cleanup(old_domain, locked=True)
+            plenaries.write(locked=True)
+        except:
+            plenaries.restore_stash()
+            raise
         finally:
             compileRelease()
 

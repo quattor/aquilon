@@ -54,18 +54,28 @@ class PlenaryHost(PlenaryCollection):
         if self.config.getboolean("broker", "flat_host_profiles"):
             self.plenaries.append(PlenaryToplevelHost(dbhost))
 
+    def write(self, dir=None, user=None, locked=False, content=None):
+        # Standard PlenaryCollection swallows IncompleteError.  If/when
+        # the Host plenaries no longer raise that error this override
+        # should be removed.
+        total = 0
+        for plenary in self.plenaries:
+            total += plenary.write(dir=dir, user=user, locked=locked,
+                                   content=content)
+        return total
+
 
 class PlenaryToplevelHost(Plenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
     def __init__(self, dbhost):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbhost)
+        self.dbhost = dbhost
         self.name = dbhost.fqdn
         self.plenary_core = ""
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
-        self.dbhost = dbhost
         self.dir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%dbhost.domain.name
 
     def body(self, lines):

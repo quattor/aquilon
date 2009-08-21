@@ -36,6 +36,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
+from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.host import PlenaryHost
 
@@ -60,21 +61,10 @@ class CommandUnbindClient(BrokerCommand):
             si = dbtemplate.cfg_path.svc_inst
             session.delete(dbtemplate)
             session.flush()
-            # Odd... the flush() doesn't seem to be clearing out
-            # dbhost.templates...
-            session.refresh(dbhost)
 
-            try:
-                plenary_info = PlenaryHost(dbhost)
-                plenary_info.write()
-            except IncompleteError, e:
-                log.debug("Failed to write plenary: %s", e)
-                # This template cannot be written, we leave it alone
-                # It would be nice to flag the state in the the host?
-                pass
+            plenaries = PlenaryCollection()
+            plenaries.append(PlenaryHost(dbhost))
+            plenaries.append(PlenaryServiceInstanceServer(dbservice, si))
+            plenaries.write()
 
-            plenary_info = PlenaryServiceInstanceServer(dbservice, si)
-            plenary_info.write()
-
-        session.refresh(dbhost)
         return

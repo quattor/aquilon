@@ -36,6 +36,7 @@ from base64 import b64decode
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.server.dbwrappers.domain import verify_domain
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.processes import write_file, remove_file, run_command
 
 
@@ -57,6 +58,7 @@ class CommandPut(BrokerCommand):
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
             os.environ.get("PATH", ""))}
         try:
+            compileLock()
             run_command(["git", "bundle", "verify", filename], path=domaindir,
                 env=git_env)
             run_command(["git", "pull", filename, "HEAD"], path=domaindir,
@@ -66,6 +68,7 @@ class CommandPut(BrokerCommand):
             run_command(["git-update-server-info"], path=domaindir, env=git_env)
             raise ArgumentError("\n%s%s" %(e.out,e.err))
         finally:
+            compileRelease()
             remove_file(filename)
         return
 

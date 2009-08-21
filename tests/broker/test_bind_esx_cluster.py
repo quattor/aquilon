@@ -49,6 +49,11 @@ class TestBindESXCluster(TestBrokerCommand):
                             "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                             "--cluster", "utecl1"])
 
+    def testduplicatebindutecl1(self):
+        self.noouttest(["bind_esx_cluster",
+                        "--hostname", "evh1.aqd-unittest.ms.com",
+                        "--cluster", "utecl1"])
+
     def testverifybindutecl1(self):
         for i in range(1, 5):
             command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
