@@ -7,15 +7,20 @@ from multiprocessing.managers import SyncManager
 
 _HOME = os.path.expanduser('~daqscott')
 _HOMELIB = os.path.join(_HOME, 'lib', 'python2.6')
-_LIBDIR = os.path.join(_HOME, 'git', 'aqd', 'lib', 'python2.5')
 
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
+#Can't do depends since no py26 IBM...
+import ms.version
+ms.version.addpkg('sqlalchemy', '0.5.5')
+ms.version.addpkg('cx_Oracle','5.0.1-11.1.0.6')
 
-import aquilon.aqdb.depends
-from aquilon.aqdb.model import Host, ServiceInstance, OperatingSystem, BuildItem
 from sqlalchemy import create_engine
 from sqlalchemy.orm import create_session
+
+#we import these relative to the local path since we need a weird set of
+#dependencies: we need build_item to have the transient column of cfg_path_id, etc.
+from aquilon.aqdb.model import Host, ServiceInstance, BuildItem, OperatingSystem
+
+from pprint import pprint
 
 def get_session(cstr):
     engine = create_engine(cstr)
@@ -34,8 +39,8 @@ def get_os_cache(cstr):
     sess = get_session(cstr)
     os_cache = {}
     for os in sess.query(OperatingSystem):
-        if os.name == 'linux':
-            os_cache[os.version] = os.id
+        key = '%s/%s'% (os.name, os.version)
+        os_cache[key] = os.id
     sess.close()
     del(sess)
     return os_cache
@@ -71,21 +76,24 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
         host = sess.query(Host).get(host_id)
 
         processed += 1
-        if host.build_items and host.archetype.name == 'aquilon':
+        if host.build_items and (host.archetype.name == 'aquilon' or
+                                 host.archetype.name =='vmhost') :
             for item in host.build_items:
                 if item.cfg_path.tld.type == 'os':
-                    ver = item.cfg_path.relative_path.split('/')[1]
-                    host.operating_system_id = os_cache[ver]
+                    #ver = item.cfg_path.relative_path.split('/')[1]
+                    host.operating_system_id = os_cache[item.cfg_path.relative_path]
 
                 elif item.cfg_path.tld.type == 'service':
-                    item.service_instance_id = si_cache[str(item.cfg_path)]
+                    if si_cache[str(item.cfg_path)]:
+                        item.service_instance_id = si_cache[str(item.cfg_path)]
+                    else:
+                        print 'No service instance for %s'% (item.cfg_path)
                 else:
                     print 'build item %s has no useable cfg_path'% (item.id)
         #TODO: else: do something for windows/aurora hosts
 
                 if processed % commit_count == 0:
                     try:
-                        #print 'commiting at %s'% (processed)
                         sess.commit()
                     except Exception, e:
                         print e
@@ -103,6 +111,8 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
 
 class AqdbManager(SyncManager):
     def __init__(self, timeout=120):
+        #FIXME: replace with production instance
+        # have it error out with a helpful message
         self._cstr = 'oracle://daqscott:vau849tt@LNTO_AQUILON_NY'
         self.timeout = timeout
         self.NUMBER_OF_PROCESSES = 4
@@ -141,13 +151,20 @@ class AqdbManager(SyncManager):
         count = sess.query(BuildItem).filter(
             BuildItem.service_instance_id == None).count()
         if count == 0:
-            print 'deleting the cfg_path_id column'
-            sess.execute('ALTER TABLE "BUILD_ITEM" DROP COLUMN "CFG_PATH_ID"')
-            #TODO: eliminate position as well?
-            #sess.execute('ALTER TABLE "BUILD_ITEM" DROP COLUMN "POSITION"')
-            #rebuild unique constraint
+            print 'completing schema migration'
+
+            stmnts = ['ALTER TABLE "BUILD_ITEM" DROP COLUMN "CFG_PATH_ID"',
+                      'ALTER TABLE "BUILD_ITEM" ADD CONSTRAINT "BUILD_ITEM_UK" UNIQUE ("HOST_ID", "SERVICE_INSTANCE_ID")',
+                      'ALTER TABLE "BUILD_ITEM" DROP CONSTRAINT "HOST_POSITION_UK"',
+                      'ALTER TABLE "BUILD_ITEM" DROP COLUMN "POSITION"',]
+
+            for s in stmnts:
+                sess.execute(s)
         else:
             print 'there are %s rows with no service instance ids'% (count)
+            for item in sess.query(BuildItem).filter(
+                BuildItem.service_instance_id == None).all():
+                print '%s %s'% (item.host.name, item.cfg_path)
 
     def stop(self):
         self.host_q.put(None)
@@ -159,13 +176,14 @@ class AqdbManager(SyncManager):
 
 
 if __name__ == '__main__':
-    m = AqdbManager()
-
     start = time.time()
-    m.start()
-    end = time.time()
 
+    m = AqdbManager()
+    m.start()
+
+    end = time.time()
     print 'execution time: %s seconds'% (int(end-start))
+
     sys.exit(0)
 
 #delete from build_item where cfg_path_id in
