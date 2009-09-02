@@ -38,7 +38,7 @@ ms.version.addpkg('sqlalchemy', '0.5.5')
 
 ms.version.addpkg('cx_Oracle','5.0.1-11.1.0.6')
 
-ms.version.addpkg('ibm_db','0.2.9-9.5.1')
+ms.version.addpkg('ibm_db','0.6.0-9.5.2')
 
 ms.version.addpkg('ipython','0.9.1')
 
