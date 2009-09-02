@@ -61,9 +61,12 @@ class CommandDelMachine(BrokerCommand):
                     (dbmachine.name, iface.name, iface.mac, iface.bootable))
             session.delete(iface)
         for disk in dbmachine.disks:
-            log.msg("Before deleting machine '%s', removing disk '%s'" %
+            # Rely on cascade delete to remove the disks.  The Oracle driver
+            # can handle the additional/explicit delete request but the
+            # sqlite driver can't.
+            log.msg("While deleting machine '%s' will remove disk '%s'" %
                     (dbmachine.name, disk.device_name))
-            session.delete(disk)
+            #session.delete(disk)
         session.delete(dbmachine)
         session.flush()
 
