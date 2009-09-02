@@ -35,9 +35,10 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from aquilon.aqdb.model import Base, Host, CfgPath, ServiceInstance
+from aquilon.aqdb.model import Base, Host, ServiceInstance
 
-
+#TODO: auto-updated "last_used" column?
+#TODO: uselist=False for host, lazy=False for service_instance?
 class BuildItem(Base):
     """ Identifies the build process of a given Host.
         Parent of 'build_element' """
@@ -50,40 +51,31 @@ class BuildItem(Base):
                                                      name='build_item_host_fk'),
                       nullable=False)
 
-    cfg_path_id = Column(Integer, ForeignKey(
-        'cfg_path.id', name='build_item_cfg_path_fk'), nullable=False)
-
-    position = Column(Integer, nullable=False)
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
-
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
+
     # Having lazy=False here is essential.  This outer join saves
     # thousands of queries whenever finding clients of a service
     # instance.
     host = relation(Host, backref='build_items', lazy=False)
-    #TODO: auto-updated "last_used" column?
-    cfg_path = relation(CfgPath, uselist=False, backref='build_items')
     service_instance = relation(ServiceInstance, uselist=False)
 
 
     def __repr__(self):
-        return '%s: %s'%(self.host.name,self.cfg_path)
+        return '%s: %s'%(self.host.name,self.service_instance.cfg_path)
 
 build_item = BuildItem.__table__
 
 build_item.primary_key.name='build_item_pk'
 
 build_item.append_constraint(
-    UniqueConstraint('host_id', 'cfg_path_id', name='host_tmplt_uk'))
-
-build_item.append_constraint(
-    UniqueConstraint('host_id', 'position', name='host_position_uk'))
+    UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
 
 Host.templates = relation(BuildItem,
                          collection_class=ordering_list('position'),
