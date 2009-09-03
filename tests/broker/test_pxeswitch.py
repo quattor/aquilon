@@ -56,8 +56,18 @@ class TestPxeswitch(TestBrokerCommand):
 
     def testinstallunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --install"
+        # This relies on the tests being configured to use /bin/echo instead
+        # of the actual aii-installfe.  It would be better to have a fake
+        # version of aii-installfe that returned output closer to the real
+        # one.
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "--install", command)
+        sshdir = self.config.get("broker", "installfe_sshdir")
+        self.matchoutput(out, "--sshdir %s" % sshdir, command)
+        user = self.config.get("broker", "installfe_user")
+        self.matchoutput(out,
+                         "--servers %s@server9.aqd-unittest.ms.com" % user,
+                         command)
 
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
