@@ -69,10 +69,15 @@ class TestPxeswitch(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "--status", command)
 
-    def testinstallunittest02(self):
+    def testfirmwareunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "--firmware", command)
+
+    def testconfigureunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --configure"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "--configure", command)
 
 
 if __name__=='__main__':

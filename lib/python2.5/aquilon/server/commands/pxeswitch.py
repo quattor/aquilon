@@ -43,7 +43,7 @@ class CommandPxeswitch(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, hostname, install, localboot, status, firmware,
-               **arguments):
+               configure, **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = get_service(session, "bootserver")
