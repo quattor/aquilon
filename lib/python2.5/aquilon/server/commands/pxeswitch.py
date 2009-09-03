@@ -70,14 +70,13 @@ class CommandPxeswitch(BrokerCommand):
 
         args.append(dbhost.fqdn)
 
-        # possibly make "cdb" and "sshdir" from config?
         args.append("--cfgfile")
         args.append("/dev/null")
         args.append("--servers")
-        user = self.config.get("broker", "user")
+        user = self.config.get("broker", "installfe_user")
         args.append(" ".join(["%s@%s"%(user,s) for s in servers]))
         args.append("--sshdir")
-        args.append("/ms/dist/sec/PROJ/openssh/prod/bin")
+        args.append(self.config.get("broker", "installfe_sshdir"))
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log"%logdir)
