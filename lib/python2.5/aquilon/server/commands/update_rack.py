@@ -34,7 +34,7 @@ from aquilon.aqdb.model import Machine
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.base import PlenaryCollection
 
 
 class CommandUpdateRack(BrokerCommand):
@@ -58,21 +58,20 @@ class CommandUpdateRack(BrokerCommand):
             dbrack.comments = comments
 
         session.flush()
+
         # This cheats, assuming:
         # - only the plenary for machines includes rack information
         # - all machines we care about will have a location of rack
         # The first one should remain valid for awhile.  The second
         # should be fixed once we can easily do searches for any
         # location attribute (as opposed to just the direct link).
+        plenaries = PlenaryCollection()
         machines = session.query(Machine).filter_by(location=dbrack).all()
-        compileLock()
         for dbmachine in machines:
-            plenary = PlenaryMachineInfo(dbmachine)
-            plenary.write(locked=True)
+            plenaries.append(PlenaryMachineInfo(dbmachine))
+        plenaries.write()
 
         # XXX: Reconfigure/compile here?
-
-        compileRelease()
 
         return
 

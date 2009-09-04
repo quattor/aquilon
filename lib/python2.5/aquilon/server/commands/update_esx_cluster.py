@@ -36,7 +36,8 @@ from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.base import (compileLock, compileRelease,
+                                           PlenaryCollection)
 
 
 class CommandUpdateESXCluster(BrokerCommand):
@@ -52,7 +53,8 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         cluster_updated = False
         location_changed = False
-        remove_plenaries = []
+        remove_plenaries = PlenaryCollection()
+        plenaries = PlenaryCollection()
 
         dblocation = get_location(session, **arguments)
         if dblocation:
@@ -72,8 +74,13 @@ class CommandUpdateESXCluster(BrokerCommand):
             if dbcluster.location_constraint != dblocation:
                 if machine_plenary_will_move(old=dbcluster.location_constraint,
                                              new=dblocation):
-                    for machine in dbcluster.machines:
-                        remove_plenaries.append(PlenaryMachineInfo(machine))
+                    for dbmachine in dbcluster.machines:
+                        # This plenary will have a path to the old location.
+                        remove_plenaries.append(PlenaryMachineInfo(dbmachine))
+                        dbmachine.location = dblocation
+                        session.add(dbmachine)
+                        # This plenary will have a path to the new location.
+                        plenaries.append(PlenaryMachineInfo(dbmachine))
                 dbcluster.location_constraint = dblocation
                 location_changed = True
                 cluster_updated = True
@@ -132,18 +139,16 @@ class CommandUpdateESXCluster(BrokerCommand):
         session.add(dbcluster)
         session.flush()
 
-        session.refresh(dbcluster)
+        plenaries.append(PlenaryCluster(dbcluster))
         try:
             compileLock()
-            plenary = PlenaryCluster(dbcluster)
-            plenary.write(locked=True)
-            if location_changed:
-                for p in remove_plenaries:
-                    p.remove(locked=True)
-                for machine in dbcluster.machines:
-                    session.refresh(machine)
-                    p = PlenaryMachineInfo(machine)
-                    p.write(locked=True)
+            remove_plenaries.stash()
+            plenaries.write(locked=True)
+            remove_plenaries.remove(locked=True)
+        except:
+            remove_plenaries.restore_stash()
+            plenaries.restore_stash()
+            raise
         finally:
             compileRelease()
 

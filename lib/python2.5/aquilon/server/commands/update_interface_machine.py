@@ -33,6 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_tor_offsets)
 from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -100,17 +101,23 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             session.refresh(dbinterface.system)
         newinfo = self.snapshot(dbinterface)
 
-        if (dbinterface.system and not
-                (dbinterface.system.system_type == 'host' and
-                 dbinterface.system.archetype.name == 'aurora')):
-            # This relies on *not* being able to set the boot flag
-            # (directly) to false.
-            dsdb_runner = DSDBRunner()
-            dsdb_runner.update_host(dbinterface, oldinfo)
+        plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
+        try:
+            compileLock()
+            plenary_info.write(locked=True)
 
-        if isinstance(dbinterface.hardware_entity, Machine):
-            plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
-            plenary_info.write()
+            if (dbinterface.system and \
+                not (dbinterface.system.system_type == 'host' and
+                     dbinterface.system.archetype.name == 'aurora')):
+                # This relies on *not* being able to set the boot flag
+                # (directly) to false.
+                dsdb_runner = DSDBRunner()
+                dsdb_runner.update_host(dbinterface, oldinfo)
+        except:
+            plenary_info.restore_stash()
+            raise
+        finally:
+            compileRelease()
         return
 
     def snapshot(self, dbinterface):

@@ -43,7 +43,8 @@ from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.base import (compileLock, compileRelease,
+                                           PlenaryCollection)
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
                                 Cluster, MachineClusterMember)
 
@@ -57,6 +58,7 @@ class CommandUpdateMachine(BrokerCommand):
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                user, **arguments):
         dbmachine = get_machine(session, machine)
+        plenaries = PlenaryCollection()
 
         if clearchassis:
             for dbslot in dbmachine.chassis_slot:
@@ -65,12 +67,12 @@ class CommandUpdateMachine(BrokerCommand):
             session.flush()
             session.refresh(dbmachine)
 
-        remove_plenary = None
+        remove_plenaries = PlenaryCollection()
         if chassis:
             dbchassis = get_system(session, chassis, Chassis, 'Chassis')
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dbchassis.chassis_hw.location):
-                remove_plenary = PlenaryMachineInfo(dbmachine)
+                remove_plenaries.append(PlenaryMachineInfo(dbmachine))
             dbmachine.location = dbchassis.chassis_hw.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot information")
@@ -104,7 +106,7 @@ class CommandUpdateMachine(BrokerCommand):
                         session.delete(dbslot)
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dblocation):
-                remove_plenary = PlenaryMachineInfo(dbmachine)
+                remove_plenaries.append(PlenaryMachineInfo(dbmachine))
             dbmachine.location = dblocation
 
         if model:
@@ -178,44 +180,32 @@ class CommandUpdateMachine(BrokerCommand):
                                      len(dbcluster.machines),
                                      len(dbcluster.hosts)))
             dbmachine.location = dbcluster.location_constraint
+            plenaries.append(PlenaryCluster(old_cluster))
+            plenaries.append(PlenaryCluster(dbcluster))
 
         session.add(dbmachine)
         session.flush()
-        session.refresh(dbmachine)
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
+        plenaries.append(PlenaryMachineInfo(dbmachine))
+        if remove_plenaries.plenaries and dbmachine.host:
+            plenaries.append(PlenaryHost(dbmachine.host))
         try:
             compileLock()
-
-            plenary_info = PlenaryMachineInfo(dbmachine)
-            plenary_info.write(locked=True)
-
-            if remove_plenary:
-                remove_plenary.remove(locked=True)
-                if dbmachine.host:
-                    # At least re-writing plenary with new machine pointer...
-                    # This is not necessary if reconfiguring below.
-                    try:
-                        plenary_host = PlenaryHost(dbmachine.host)
-                        plenary_host.write(locked=True)
-                    except IncompleteError, e:
-                        pass
+            remove_plenaries.stash()
+            plenaries.write(locked=True)
+            remove_plenaries.remove(locked=True)
 
             if dbmachine.host:
                 # XXX: May need to reconfigure.
                 pass
-
-            if cluster:
-                if old_cluster:
-                    session.refresh(old_cluster)
-                    plenary = PlenaryCluster(old_cluster)
-                    plenary.write(locked=True)
-                session.refresh(dbcluster)
-                plenary = PlenaryCluster(dbcluster)
-                plenary.write(locked=True)
+        except:
+            plenaries.restore_stash()
+            remove_plenaries.restore_stash()
+            raise
         finally:
             compileRelease()
 

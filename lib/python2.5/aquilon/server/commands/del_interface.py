@@ -46,7 +46,6 @@ class CommandDelInterface(BrokerCommand):
             raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
         session.delete(dbinterface)
         session.flush()
-        session.refresh(dbmachine)
 
         plenary_info = PlenaryMachineInfo(dbmachine)
         plenary_info.write()

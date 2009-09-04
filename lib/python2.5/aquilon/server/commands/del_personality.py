@@ -49,8 +49,8 @@ class CommandDelPersonality(BrokerCommand):
 
         # All clear
         plenary = PlenaryPersonality(dbpersona)
+        session.delete(dbpersona)
         session.flush()
         plenary.remove()
 
-        session.delete(dbpersona)
         return

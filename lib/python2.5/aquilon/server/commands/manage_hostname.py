@@ -28,12 +28,15 @@
 # TERMS THAT MAY APPLY.
 
 
+from twisted.python import log
+
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.exceptions_ import IncompleteError, ArgumentError
+
 
 class CommandManageHostname(BrokerCommand):
 
@@ -49,29 +52,32 @@ class CommandManageHostname(BrokerCommand):
                                 "cluster level; this host is a member of the "
                                 "cluster " + dbhost.cluster.name)
 
+        plenary_host = PlenaryHost(dbhost)
+        old_domain = dbhost.domain.name
+
+        dbhost.domain = dbdomain
+        session.add(dbhost)
+        session.flush()
+
         try:
             compileLock()
-
-            # Remove old files, then update the domain, then re-write
-            # the plenaries.
-            plenary = PlenaryHost(dbhost)
-            plenary.cleanup(hostname, dbhost.domain.name, locked=True)
-
-            dbhost.domain = dbdomain
-            session.add(dbhost)
+            plenary_host.cleanup(old_domain, locked=True)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
             # have to be aware that there might not be enough information yet
             # with which we can create a template
             try:
-                plenary = PlenaryHost(dbhost)
-                plenary.write(locked=True)
+                plenary_host.write(locked=True)
             except IncompleteError, e:
                 # This template cannot be written, we leave it alone
                 # It would be nice to flag the state in the the host?
                 pass
-
+        except:
+            # This will not restore the cleaned up files.  That's OK.
+            # They will be recreated as needed.
+            plenary_host.restore_stash()
+            raise
         finally:
             compileRelease()
 

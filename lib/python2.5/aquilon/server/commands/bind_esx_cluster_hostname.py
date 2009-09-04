@@ -33,7 +33,6 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import EsxCluster, HostClusterMember
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.services import Chooser
 
 
@@ -113,16 +112,15 @@ class CommandBindESXClusterHostname(BrokerCommand):
 
         session.flush()
         session.refresh(dbcluster)
-        try:
-            compileLock()
+
+        # XXX: Why not just try a compile of the cluster here and
+        # rollback if needed?
+        if chooser:
+            chooser.write_plenary_templates()
+        else:
             plenary = PlenaryCluster(dbcluster)
-            plenary.write(locked=True)
-            if chooser:
-                chooser.write_plenary_templates(locked=True)
-            # XXX: Why not just try a compile of the cluster here and
-            # rollback if needed?
-        finally:
-            compileRelease()
+            plenary.write()
+
         return
 
 

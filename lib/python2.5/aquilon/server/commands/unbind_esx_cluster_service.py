@@ -63,8 +63,6 @@ class CommandUnbindESXClusterService(BrokerCommand):
 
         session.flush()
 
-        session.refresh(dbcluster)
-
         plenary = PlenaryCluster(dbcluster)
         plenary.write()
         return

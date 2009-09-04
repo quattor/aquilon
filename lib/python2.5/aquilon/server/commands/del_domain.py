@@ -35,6 +35,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import remove_dir
+from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.domain import TemplateDomain
 
 
@@ -55,8 +56,12 @@ class CommandDelDomain(BrokerCommand):
         session.delete(dbdomain)
 
         domain = TemplateDomain(dbdomain)
-        for dir in domain.directories():
-            remove_dir(dir)
+        try:
+            compileLock()
+            for dir in domain.directories():
+                remove_dir(dir)
+        finally:
+            compileRelease()
 
         return
 

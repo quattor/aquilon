@@ -41,7 +41,8 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.interface import describe_interface
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.base import (compileLock, compileRelease,
+                                           PlenaryCollection)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.processes import DSDBRunner
@@ -74,7 +75,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 break
 
         dbmanager = None
-        pending_removals = []
+        pending_removals = PlenaryCollection()
         if mac:
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev and prev.hardware_entity == dbmachine:
@@ -140,23 +141,21 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 session.refresh(dbinterface)
                 session.refresh(dbmachine)
 
+        plenaries = PlenaryCollection()
+        plenaries.append(PlenaryMachineInfo(dbmachine))
+        if pending_removals and dbmachine.host:
+            # Not an exact test, but the file won't be re-written
+            # if the contents are the same so calling too often is
+            # not a major expense.
+            plenaries.append(PlenaryHost(dbmachine.host))
         try:
             compileLock()
-            plenary_info = PlenaryMachineInfo(dbmachine)
-            plenary_info.write(locked=True)
-
-            for old_plenary_info in pending_removals:
-                old_plenary_info.remove(locked=True)
-                plenary_info.remove(locked=True)
-            if pending_removals and dbmachine.host:
-                # Not an exact test, but the file won't be re-written
-                # if the contents are the same so calling too often is
-                # not a major expense.
-                try:
-                    plenary_info = PlenaryHost(dbmachine.host)
-                    plenary_info.write(locked=True)
-                except IncompleteError, e:
-                    pass
+            pending_removals.stash()
+            plenaries.write(locked=True)
+            pending_removals.remove(locked=True)
+        except Exception, e:
+            plenaries.restore_stash()
+            pending_removals.restore_stash()
         finally:
             compileRelease()
 

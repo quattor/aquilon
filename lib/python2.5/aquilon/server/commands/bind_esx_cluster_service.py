@@ -58,7 +58,7 @@ class CommandBindESXClusterService(BrokerCommand):
             chooser.set_single(dbservice, force=force)
 
         chooser.flush_changes()
-        chooser.write_plenary_templates(locked=False)
+        chooser.write_plenary_templates()
 
         if chooser.debug_info:
             # The output of bind client does not run through a formatter.

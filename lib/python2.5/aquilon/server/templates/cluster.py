@@ -51,7 +51,7 @@ class PlenaryClusterObject(Plenary):
     """
 
     def __init__(self, dbcluster):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbcluster)
         self.template_type = 'object'
         self.dbcluster = dbcluster
         self.name = dbcluster.name
@@ -62,9 +62,6 @@ class PlenaryClusterObject(Plenary):
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
         self.dir = self.config.get("broker", "builddir") + \
                     "/domains/%s/profiles" % dbcluster.domain.name
-
-    def cleanup(self, name, domain, locked=False):
-        Plenary.cleanup(self, name, domain, locked)
 
     def body(self, lines):
         arcdir = self.dbcluster.personality.archetype.name
@@ -108,9 +105,8 @@ class PlenaryClusterClient(Plenary):
     plenary template. This just names the cluster and nothing more.
     """
     def __init__(self, dbcluster):
-        Plenary.__init__(self)
+        Plenary.__init__(self, dbcluster)
         self.name = dbcluster.name
-        self.metacluster = dbcluster.metacluster.name
         self.plenary_core = "cluster/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/client" % self.__dict__
         self.template_type = ''

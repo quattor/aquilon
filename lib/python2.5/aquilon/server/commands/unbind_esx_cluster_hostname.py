@@ -34,6 +34,7 @@ from aquilon.exceptions_ import (NotFoundException,
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import EsxCluster, HostClusterMember
+from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.cluster import PlenaryCluster
 
@@ -73,15 +74,9 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
                                  len(dbcluster.machines),
                                  len(dbcluster.hosts)))
 
-        try:
-            plenary = PlenaryHost(dbhost)
-            plenary.write()
-        except IncompleteError, e:
-            # It's possible that the host is incomplete (it's never been
-            # configured), in which case, it's reasonable to not rewrite
-            # the plenary.
-            pass
-        plenary = PlenaryCluster(dbcluster)
-        plenary.write()
+        plenaries = PlenaryCollection()
+        plenaries.append(PlenaryHost(dbhost))
+        plenaries.append(PlenaryCluster(dbcluster))
+        plenaries.write()
 
 

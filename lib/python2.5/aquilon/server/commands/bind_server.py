@@ -49,7 +49,6 @@ class CommandBindServer(BrokerCommand):
         dbsystem = get_system(session, hostname)
         dbservice = get_service(session, service)
         dbinstance = get_service_instance(session, dbservice, instance)
-        session.refresh(dbinstance)
         for dbserver in dbinstance.servers:
             if dbserver.system.id == dbsystem.id:
                 # FIXME: This should just be a warning.  There is currently

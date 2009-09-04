@@ -439,6 +439,28 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Cannot add an existing machine to a cluster.",
                          command)
 
+    # These tests would be nice, but twisted just ignores the permission
+    # on the files since we're still the owner.  Which is good, but means
+    # the recovery routines can't be easily tested.
+#   def testfailbrokenplenary(self):
+#       template = os.path.join(self.config.get("broker", "plenarydir"),
+#                               "machine", "americas", "ut", "ut9",
+#                               "ut9s03p20.tpl")
+#       os.chmod(template, 0000)
+#       command = ["update_machine", "--machine=ut9s03p20", "--serial=20"]
+#       out = self.badrequesttest(command)
+#       self.matchoutput(out, "FIXME", command)
+
+#   def testverifyfailbrokenplenary(self):
+#       # Fixing the previous breakage... not actually necessary for this test.
+#       template = os.path.join(self.config.get("broker", "plenarydir"),
+#                               "machine", "americas", "ut", "ut9",
+#                               "ut9s03p20.tpl")
+#       os.chmod(template, 0644)
+#       command = ["show_machine", "--machine=ut9s03p20"]
+#       out = self.commandtest(command)
+#       self.matchclean(out, "Serial", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateMachine)
