@@ -106,14 +106,14 @@ class DbFactory(object):
             sys.exit(9)
 
 
-        assert(self.dsn, 'No dsn in DbFactory.__init__')
-        assert(self.engine, 'No engine in DbFactory.__init__')
+        assert self.dsn, 'No dsn in DbFactory.__init__'
+        assert self.engine, 'No engine in DbFactory.__init__'
 
         self.meta   = MetaData(self.engine)
-        assert(self.meta)
+        assert self.meta
 
         self.Session = scoped_session(sessionmaker(bind=self.engine))
-        assert(self.Session)
+        assert self.Session
 
     def session(self):
         return self.Session()
@@ -263,5 +263,3 @@ def is_prod(dsn):
         return True
     else:
         return False
-
-
