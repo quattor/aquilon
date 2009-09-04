@@ -34,7 +34,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DynamicStub, System, DnsDomain
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.column_types.IPV4 import dq_to_int, int_to_dq
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 
 
 class CommandAddDynamicRange(BrokerCommand):
@@ -50,9 +50,7 @@ class CommandAddDynamicRange(BrokerCommand):
             raise ArgumentError("IPs '%s' (%s) and '%s' (%s) must be on the "
                                 "same subnet" %
                                 (startip, startnet.ip, endip, endnet.ip))
-        dbdns_domain = DnsDomain.get_unique(session, dns_domain)
-        if not dbdns_domain:
-            raise NotFoundException("DNS Domain '%s' not found" % dns_domain)
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         q = session.query(System)
         q = q.filter(System.ip >= startip)
         q = q.filter(System.ip <= endip)

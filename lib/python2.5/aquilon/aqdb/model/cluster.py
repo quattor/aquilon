@@ -115,6 +115,7 @@ class EsxCluster(Cluster):
     """
     __tablename__ = 'esx_cluster'
     __mapper_args__ = {'polymorphic_identity': 'esx'}
+    _class_label = 'ESX Cluster'
 
     esx_cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
                                             name='esx_cluster_fk',

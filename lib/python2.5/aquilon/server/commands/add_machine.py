@@ -78,9 +78,8 @@ class CommandAddMachine(BrokerCommand):
         if cluster:
             if dbmodel.machine_type != 'virtual_machine':
                 raise ArgumentError("Only virtual machines can have a cluster attribute.")
-            dbcluster = Cluster.get_unique(session, name=cluster)
-            if not dbcluster:
-                raise ArgumentError("Cluster '%s' not found" % cluster)
+            dbcluster = Cluster.get_unique(session, cluster,
+                                           compel=ArgumentError)
             if dbcluster.personality.archetype.name != 'vmhost':
                 raise ArgumentError("Can only add virtual machines to "
                                     "clusters with archetype vmhost.")

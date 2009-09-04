@@ -29,8 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand, validate_basic, force_int
-from aquilon.aqdb.model import EsxCluster, MetaCluster, MetaClusterMember
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
+                                MetaClusterMember)
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -59,14 +60,10 @@ class CommandAddESXCluster(BrokerCommand):
         if not dblocation:
             raise ArgumentError("cluster requires a location constraint")
 
-        existing = EsxCluster.get_unique(session, cluster)
-        if existing:
-            raise ArgumentError("%s cluster '%s' already exists" %
-                                (cluster_type, cluster))
+        Cluster.get_unique(session, cluster, preclude=True)
 
-        dbmetacluster = MetaCluster.get_unique(session, metacluster)
-        if not dbmetacluster:
-            raise NotFoundException("metacluster '%s' not found" % metacluster)
+        dbmetacluster = MetaCluster.get_unique(session, metacluster,
+                                               compel=True)
 
         dbpersonality = get_personality(session, archetype, personality)
 

@@ -46,6 +46,7 @@ _TN = 'dns_domain'
 class DnsDomain(Base):
     """ For Dns Domain names """
     __tablename__  = _TN
+    _class_label = 'DNS Domain'
 
     id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
     name = Column(AqStr(32), nullable=False)

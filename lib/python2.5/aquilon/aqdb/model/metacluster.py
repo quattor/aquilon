@@ -56,6 +56,7 @@ class MetaCluster(Base):
     """
 
     __tablename__ = _MCT
+    _class_label = "Metacluster"
 
     id = Column(Integer, Sequence('%s_seq'%(_MCT)), primary_key=True)
     name = Column(AqStr(64), nullable=False)

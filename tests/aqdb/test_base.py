@@ -34,7 +34,7 @@ from utils import load_classpath, add, commit
 load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import EsxCluster, Archetype, Personality
+from aquilon.aqdb.model import EsxCluster, Archetype, Personality, Domain
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
@@ -69,8 +69,9 @@ def create_cluster():
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
+    domain = sess.query(Domain).filter_by(name='ny-prod').first()
 
-    ec = EsxCluster(name=CLUSTER_NAME, personality=per)
+    ec = EsxCluster(name=CLUSTER_NAME, personality=per, domain=domain)
     add(sess,ec)
     commit(sess)
 
