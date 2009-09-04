@@ -29,9 +29,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the put domain command."""
 
+
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
+from subprocess import Popen
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -66,6 +70,23 @@ class TestPutDomain(TestBrokerCommand):
                 cwd=os.path.join(self.scratchdir, "changetest1"))
         self.assert_(os.path.exists(os.path.join(
             self.scratchdir, "changetest1")))
+
+    def testverifychangetest1(self):
+        p = Popen(("/bin/rm", "-rf",
+                   os.path.join(self.scratchdir, "changetest1")),
+                  stdout=1, stderr=2)
+        rc = p.wait()
+        self.ignoreoutputtest(["get", "--domain", "changetest1"],
+                              cwd=self.scratchdir)
+        self.failUnless(os.path.exists(os.path.join(self.scratchdir,
+                                                    "changetest1")))
+        template = os.path.join(self.scratchdir, "changetest1", "aquilon",
+                                "archetype", "base.tpl")
+        self.failUnless(os.path.exists(template),
+                        "aq get did not retrive '%s'" % template)
+        with open(template) as f:
+            contents = f.readlines()
+        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
 
     def testaddsiteut(self):
         repodir = os.path.join(self.scratchdir, "unittest")
