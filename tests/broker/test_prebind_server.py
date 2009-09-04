@@ -54,6 +54,16 @@ class TestPrebindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: nyaqd1.ms.com", command)
 
+    def testbindbootserver(self):
+        self.noouttest(["bind_server",
+                        "--hostname=server9.aqd-unittest.ms.com",
+                        "--service=bootserver", "--instance=np.test"])
+
+    def testverifybindutsi1(self):
+        command = "show service --service bootserver --instance np.test"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: server9.aqd-unittest.ms.com", command)
+
     def testbindchooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
             for (s, n) in [(1, 'a'), (2, 'b'), (3, 'c')]:
