@@ -32,11 +32,10 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, Index)
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, deferred, object_session
 
-from aquilon.aqdb.model import Base, Service
+from aquilon.aqdb.model import Base, Service, Host
 from aquilon.aqdb.column_types.aqstr import AqStr
-
 
 _TN  = 'service_instance'
 _ABV = 'svc_inst'
@@ -67,7 +66,7 @@ class ServiceInstance(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    service = relation(Service, uselist=False, backref='instances')
+    service = relation(Service, lazy=False, uselist=False, backref='instances')
 
     @property
     def cfg_path(self):
@@ -75,8 +74,11 @@ class ServiceInstance(Base):
 
     @property
     def client_count(self):
-        return object_session(self).query(BuildItem).filter_by(
-            cfg_path = self.cfg_path).count()
+        return len(self.clients)
+
+    @property
+    def clients(self):
+        return [item.host.fqdn for item in self.build_items]
 
     def __repr__(self):
         return '(%s) %s %s'%(self.__class__.__name__ ,
@@ -90,3 +92,48 @@ table.info['abrev'] = _ABV
 service_instance.primary_key.name='svc_inst_pk'
 service_instance.append_constraint(UniqueConstraint('service_id', 'name',
                                                     name='svc_inst_uk'))
+
+#TODO: auto-updated "last_used" column?
+class BuildItem(Base):
+    """ Identifies the build process of a given Host.
+        Parent of 'build_element' """
+    __tablename__ = 'build_item'
+
+    id = Column(Integer, Sequence('build_item_id_seq'), primary_key=True)
+
+    host_id = Column('host_id', Integer, ForeignKey('host.id',
+                                                     ondelete='CASCADE',
+                                                     name='build_item_host_fk'),
+                      nullable=False)
+
+    service_instance_id = Column(Integer,
+                                 ForeignKey('service_instance.id',
+                                            name='build_item_svc_inst_fk'),
+                                 nullable=False)
+
+    creation_date = deferred(Column(DateTime,
+                                    default=datetime.now, nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
+
+    # Having lazy=False here is essential.  This outer join saves
+    # thousands of queries whenever finding clients of a service
+    # instance.
+    host = relation(Host, backref='build_items', uselist=False, lazy=False)
+    service_instance = relation(ServiceInstance, backref='build_items',
+                                lazy=False)
+
+    @property
+    def cfg_path(self):
+        return self.service_instance.cfg_path
+
+    def __repr__(self):
+        return '%s: %s'%(self.host.name,self.service_instance.cfg_path)
+
+build_item = BuildItem.__table__
+
+build_item.primary_key.name='build_item_pk'
+
+build_item.append_constraint(
+    UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
+
+Host.templates = relation(BuildItem)

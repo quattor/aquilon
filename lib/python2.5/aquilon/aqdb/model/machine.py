@@ -37,7 +37,7 @@ from sqlalchemy.orm  import relation, deferred, backref
 
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-from aquilon.aqdb.model import Cpu, CfgPath, HardwareEntity
+from aquilon.aqdb.model import Cpu, HardwareEntity
 
 #TODO: use selection of the machine specs to dynamically populate default
 #     values for all of the attrs where its possible

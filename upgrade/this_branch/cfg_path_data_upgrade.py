@@ -156,7 +156,9 @@ class AqdbManager(SyncManager):
             stmnts = ['ALTER TABLE "BUILD_ITEM" DROP COLUMN "CFG_PATH_ID"',
                       'ALTER TABLE "BUILD_ITEM" ADD CONSTRAINT "BUILD_ITEM_UK" UNIQUE ("HOST_ID", "SERVICE_INSTANCE_ID")',
                       'ALTER TABLE "BUILD_ITEM" DROP CONSTRAINT "HOST_POSITION_UK"',
-                      'ALTER TABLE "BUILD_ITEM" DROP COLUMN "POSITION"',]
+                      'ALTER TABLE "BUILD_ITEM" DROP COLUMN "POSITION"',
+                      'ALTER TABLE "SERVICE" DROP COLUMN "CFG_PATH_ID"',
+                      'ALTER TABLE "SERVICE_INSTANCE" DROP COLUMN "CFG_PATH_ID"']
 
             for s in stmnts:
                 sess.execute(s)

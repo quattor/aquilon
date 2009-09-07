@@ -55,7 +55,9 @@ class OperatingSystem(Base):
 
     archetype = relation(Archetype, backref='os', uselist=False)
 
-    #cfg_path = os/name/version
+    @property
+    def cfg_path(self):
+        return 'os/%s/%s'% (self.name, self.version)
 
     def __repr__(self):
         s = ("<"+self.__class__.__name__ + " "+ self.name +
