@@ -116,6 +116,7 @@ from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
 from test_show_hostiplist import TestShowHostIPList
 from test_show_hostmachinelist import TestShowHostMachineList
+from test_show_machinemaclist import TestShowMachineMacList
 from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
@@ -214,7 +215,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMachineConstraints, TestTorSwitchConstraints,
                 TestMakeConstraints,
                 TestClusterConstraints, TestMetaClusterConstraints,
-                TestShowHostIPList, TestShowHostMachineList,
+                TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchMachine,
                 TestSearchSystem, TestSearchHost,
