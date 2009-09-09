@@ -196,7 +196,8 @@
          <option name="networkip" type="string">Network IP address</option>
          <option name="mac" type="string">primary mac address</option>
          <option name="personality" type="string">personality</option>
-         <option name="os" type="string">os</option>
+         <option name="osname" type="string">osname</option>
+         <option name="osversion" type="string">osversion</option>
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="model" type="string">machine model name</option>
@@ -1760,9 +1761,9 @@
       put the host into "install" mode of pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
-         <option name="os" type="string">OS to assign to host</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="os" type="string">OS to assign to host</option>
          <option name="archetype" type="string">Archetype of the host (defaults to aquilon)</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
@@ -1785,9 +1786,9 @@
       put the host into "install" mode of pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
-         <option name="os" type="string">OS to assign to host</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="os" type="string">OS to assign to host</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>

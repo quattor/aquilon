@@ -32,14 +32,13 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import Host, CfgPath, Cluster
+from aquilon.aqdb.model import Host, Cluster
 from aquilon.server.dbwrappers.system import search_system_query
-from aquilon.server.dbwrappers.domain import get_domain
+from aquilon.server.dbwrappers.os import get_os
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.location import get_location
@@ -52,9 +51,8 @@ class CommandSearchHost(BrokerCommand):
     required_parameters = []
 
     def render(self, session, hostname, machine, domain, archetype,
-               buildstatus, personality, os, service, instance,
-               model, vendor, serial, cluster,
-               fullinfo, **arguments):
+               buildstatus, personality, osname, osversion, service, instance,
+               model, vendor, serial, cluster, fullinfo, **arguments):
         if hostname:
             arguments['fqdn'] = hostname
         q = search_system_query(session, Host, **arguments)
@@ -79,33 +77,38 @@ class CommandSearchHost(BrokerCommand):
         if buildstatus:
             dbbuildstatus = get_status(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
-        if os:
-            dbos = get_cfg_path(session, "os", os)
-            q = q.join('build_items').filter_by(cfg_path=dbos)
+
+        #TODO: double check we have dbarchetype at this point or cross archetype?
+        if osname and osversion:
+            dbos = get_os(session, osname, osversion, None, dbarchetype)
+            q = q.join('operating_system').filter_by(operating_system=dbos)
             q = q.reset_joinpoint()
+        #TODO: elif osname (version agnostic)
+        #TODO: elif osversion: error
         if service:
             dbservice = get_service(session, service)
             if instance:
                 dbsi = get_service_instance(session, dbservice, instance)
                 q = q.join('build_items')
-                q = q.filter_by(cfg_path=dbsi.cfg_path)
+                q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
-            else:
-                q = q.join('build_items')
-                path_query = dbservice.cfg_path.relative_path + '/%'
-                q = q.filter(CfgPath.relative_path.like(path_query))
-                q = q.reset_joinpoint()
-                q = q.join(['build_items', 'cfg_path'])
-                q = q.filter_by(tld=dbservice.cfg_path.tld)
-                q = q.reset_joinpoint()
-        elif instance:
-            q = q.join('build_items')
-            path_query = '%/' + instance.lower().strip()
-            q = q.filter(CfgPath.relative_path.like(path_query))
-            q = q.reset_joinpoint()
-            q = q.join(['build_items', 'cfg_path', 'tld'])
-            q = q.filter_by(type='service')
-            q = q.reset_joinpoint()
+            #TODO: DOUBLE CHECK WITH WES THAT WE DON' T NEED IT
+            #else:
+            #    q = q.join('build_items')
+            #    path_query = dbservice.cfg_path.relative_path + '/%'
+            #    q = q.filter(CfgPath.relative_path.like(path_query))
+            #    q = q.reset_joinpoint()
+            #    q = q.join(['build_items', 'cfg_path'])
+            #    q = q.filter_by(tld=dbservice.cfg_path.tld)
+            #    q = q.reset_joinpoint()
+        #elif instance:
+        #    q = q.join('build_items')
+        #    path_query = '%/' + instance.lower().strip()
+        #    q = q.filter(CfgPath.relative_path.like(path_query))
+        #    q = q.reset_joinpoint()
+        #    q = q.join(['build_items', 'cfg_path', 'tld'])
+        #    q = q.filter_by(type='service')
+        #    q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.join(['machine'])
