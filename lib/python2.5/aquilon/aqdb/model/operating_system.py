@@ -87,6 +87,25 @@ def populate(sess, *args, **kw):
         os_obj = OperatingSystem(archetype=aquilon, name='linux', version=ver)
         sess.add(os_obj)
 
+    aurora = Archetype.get_unique(sess, 'aurora')
+    for ver in ['3.0.3-ia32','3.0.3-amd64', '4.0.1-ia32', '4.0.1-x86_64',
+                '4.0.2-ia32', '4.0.2-x86_64', '5.0-x86_64', 'generic']:
+        os_obj = OperatingSystem(archetype=aurora, name='linux', version=ver)
+        sess.add(os_obj)
+
+    win = Archetype.get_unique(sess, 'windows')
+    win_obj=OperatingSystem(archetype=win, name='windows', version='generic')
+    sess.add(win_obj)
+
+    #TODO: there are unit tests which add esx 4.0.0... discuss the
+    #inconsistency
+
+    pserver = Archetype.get_unique(sess, 'pserver')
+    assert pserver, "can't find archetype 'pserver' in os.populate"
+    os_obj = OperatingSystem(archetype=pserver, name='ontap',
+                             version = '7.3.1p2d20')
+    sess.add(os_obj)
+
     try:
         sess.commit()
     except Exception, e:
