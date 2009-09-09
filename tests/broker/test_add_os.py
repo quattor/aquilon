@@ -47,7 +47,7 @@ class TestAddOS(TestBrokerCommand):
     def testaddexisting(self):
         command = "add os --archetype aquilon --os linux --vers 4.0.1-x86_64"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "OS version 'linux/4.0.1-x86_64' already exists",
+        self.matchoutput(out, "OS 'linux' version '4.0.1-x86_64' already exists",
                          command)
 
     def testaddbadname(self):
@@ -67,29 +67,30 @@ class TestAddOS(TestBrokerCommand):
     def testverifyutos(self):
         command = "show os --archetype utarchetype1 --os utos --vers 1.0"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: os/utos/1.0", command)
+        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyosonly(self):
-        command = "show os --os utos"
+        command = "show os --os utos --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: os/utos/1.0", command)
+        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyversonly(self):
-        command = "show os --vers 1.0"
+        command = "show os --vers 1.0 --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: os/utos/1.0", command)
+        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyall(self):
-        command = "show os --all"
+        #TODO: is this ok or do we need archetype agnostic?
+        command = "show os --all --archetype aquilon"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: os/utos/1.0", command)
-        self.matchoutput(out, "Template: os/linux/4.0.1-x86_64", command)
+        #self.matchoutput(out, "Template: os/utos/1.0", command)
+        self.matchoutput(out, "Template: aquilon/os/linux/4.0.1-x86_64", command)
 
     def testshownotfound(self):
-        command = "show os --os os-does-not-exist"
+        command = "show os --os os-does-not-exist --vers foobar --archetype aquilon"
         self.notfoundtest(command.split(" "))
 
     # If we ever re-do the populate for OS this will probably break
@@ -102,11 +103,10 @@ class TestAddOS(TestBrokerCommand):
     def testverifyesxi(self):
         command = "show os --archetype vmhost --os esxi --vers 4.0.0"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: os/esxi/4.0.0", command)
+        self.matchoutput(out, "Template: vmhost/os/esxi/4.0.0", command)
         self.matchclean(out, "linux", command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

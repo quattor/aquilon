@@ -52,7 +52,7 @@ class CommandAddOS(BrokerCommand):
 
         if existing:
             raise ArgumentError(
-                "%s version %s already exists in archetype %s" % (osname,
+                "OS '%s' version '%s' already exists in archetype %s" % (osname,
                                                                   version,
                                                                   archetype))
 
