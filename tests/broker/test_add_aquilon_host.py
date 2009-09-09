@@ -48,6 +48,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest00.one-nyp.ms.com",
                         "--ip", self.net.unknown[0].usable[2].ip,
                         "--machine", "ut3c1n3", "--domain", "unittest",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "inventory"])
 
     def testverifyaddunittest00(self):
@@ -79,6 +80,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest12.aqd-unittest.ms.com",
                         "--ip", self.net.unknown[0].usable[7].ip,
                         "--buildstatus", "blind",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--machine", "ut3s01p1a", "--domain", "unittest"])
 
     def testverifyaddunittest12(self):
@@ -100,6 +102,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--ip", self.net.unknown[0].usable[8].ip,
                         "--buildstatus", "blind",
                         "--machine", "ut3s01p1b", "--domain", "unittest",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "compileserver"])
 
     def testverifyaddunittest13(self):
