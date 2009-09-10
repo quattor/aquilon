@@ -71,9 +71,7 @@ class CommandAddHost(BrokerCommand):
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
 
-        print "get_one_os(s, '%s', '%s', '%s')"% (osname, osversion, dbarchetype.name)
         dbos = get_one_os(session, osname, osversion, dbarchetype.name)
-        print 'got %s'% (dbos)
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):

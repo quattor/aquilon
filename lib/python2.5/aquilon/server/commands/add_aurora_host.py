@@ -145,8 +145,6 @@ class CommandAddAuroraHost(CommandAddHost):
         if osversion is None:
             osversion = 'generic'
 
-        print 'I have osname %s and osversion %s'% (osname, osversion)
-
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session
         kwargs['hostname'] = fqdn
