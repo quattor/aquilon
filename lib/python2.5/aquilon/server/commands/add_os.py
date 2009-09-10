@@ -30,35 +30,38 @@
 
 from aquilon.aqdb.model import OperatingSystem
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.os import get_os_query
+from aquilon.server.dbwrappers.os import get_many_os
 from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 import re
 
 
 class CommandAddOS(BrokerCommand):
 
-    required_parameters = [ "osname", "version", "archetype" ]
+    required_parameters = [ "osname", "osversion", "archetype" ]
 
-    def render(self, session, osname, version, archetype, **arguments):
+    def render(self, session, osname, osversion, archetype, **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(osname)):
             raise ArgumentError("OS name '%s' is not valid" % osname)
-        if not valid.match(version):
-            raise ArgumentError("OS version '%s' is not valid" % version)
+        if not valid.match(osversion):
+            raise ArgumentError("OS version '%s' is not valid" % osversion)
 
-        q = get_os_query(session, osname, version, archetype)
-        existing = q.all()
+        try:
+            existing = get_many_os(session, osname, osversion, archetype)
+        except NotFoundException:
+            #We hope not to find it
+            pass
 
         if existing:
             raise ArgumentError(
                 "OS '%s' version '%s' already exists in archetype %s" % (osname,
-                                                                  version,
+                                                                  osversion,
                                                                   archetype))
 
         else:
             dbarchetype=get_archetype(session, archetype)
-            dbos = OperatingSystem(name=osname, version=version,
+            dbos = OperatingSystem(name=osname, version=osversion,
                                    archetype=dbarchetype)
             #FIXME: why no comments?
             session.add(dbos)

@@ -502,6 +502,9 @@
       lowest:         Use lowest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
+
+      Currently operating system name/version is windows/generic for all windows
+      machines since they are the only versions in the database.
       <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
@@ -527,6 +530,8 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
       </optgroup>
       <optgroup name="optional_opts">
+        <option name="osname" type="string">Operating system: defaults to linux, no solaris (yet)</option>
+         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64. Defaults to 'generic')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="aurora_host/%(hostname)s" />
@@ -1692,27 +1697,27 @@
       Create an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="osname" type="string">The name of the operating system</option>
-         <option name="version" type="string">The version of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being added to</option>
       </optgroup>
-      <transport method="put" path="os/%(osname)s/%(version)s/%(archetype)s" />
+      <transport method="put" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
   </command>
 
   <command name="del_os">
       Delete an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="osname" type="string">The name of the operating system</option>
-         <option name="version" type="string">The version of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being deleted from</option>
       </optgroup>
-      <transport method="delete" path="os/%(osname)s/%(version)s/%(archetype)s" />
+      <transport method="delete" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
   </command>
 
   <command name="show_os">
       Show an operating system definition.
       <optgroup name="show_os_opts" mandatory="True" fields="any">
          <option name="osname" type="string">The name of the operating system</option>
-         <option name="version" type="string">The version of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">The archetype to search within</option>
          <option name="all" type="boolean">Show all operating systems</option>
       </optgroup>
