@@ -31,7 +31,6 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
@@ -43,7 +42,7 @@ from aquilon.server.services import Chooser
 
 class CommandMake(BrokerCommand):
 
-    required_parameters = ["hostname", "os"]
+    required_parameters = ["hostname"]
 
     def render(self, session, hostname, os, archetype, personality,
                buildstatus, debug, **arguments):
@@ -61,23 +60,7 @@ class CommandMake(BrokerCommand):
             # a Machine already.  If that ever changes, need to check here and
             # bail if dbhost.machine does not exist.
 
-            # Need to get all the BuildItem objects for this host.
-            # They should include:
-            # - exactly one OS
-            # And may include:
-            # - many services
-
-            if os:
-                dbos = get_cfg_path(session, "os", os)
-                dbos_bi = session.query(BuildItem).filter_by(host=dbhost).join(
-                    'cfg_path').filter_by(tld=dbos.tld).first()
-                if dbos_bi:
-                    dbos_bi.cfg_path = dbos
-                else:
-                    # FIXME: This could fail if there is already an item at 0
-                    dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
-                session.add(dbos_bi)
-
+            # Need to get all the BuildItem/Service instance objects
             if personality:
                 arch = archetype
                 if not arch:
@@ -117,8 +100,8 @@ class CommandMake(BrokerCommand):
             out = td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
-            if chooser:
-                chooser.restore_stash()
+            #if chooser:
+                #chooser.restore_stash()
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
@@ -136,5 +119,3 @@ class CommandMake(BrokerCommand):
         if chooser and chooser.debug_info:
             return str("\n".join(chooser.debug_info + out_array))
         return str("\n".join(chooser.messages + out_array))
-
-

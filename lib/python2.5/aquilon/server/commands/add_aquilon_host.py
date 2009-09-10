@@ -35,9 +35,10 @@ from aquilon.server.commands.add_host import CommandAddHost
 
 class CommandAddAquilonHost(CommandAddHost):
 
-    required_parameters = ["hostname", "machine", "domain" "osname", "osversion"]
+    required_parameters = ["hostname", "machine", "domain", "osversion"]
 
     def render(self, *args, **kwargs):
         # The superclass already contains the logic to handle this case.
         kwargs['archetype'] = 'aquilon'
+        kwargs['osname'] = 'linux'
         return CommandAddHost.render(self, *args, **kwargs)

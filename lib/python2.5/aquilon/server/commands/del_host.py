@@ -82,8 +82,9 @@ class CommandDelHost(BrokerCommand):
             ip = dbhost.ip
 
             for binding in dbhost.templates:
-                if (binding.cfg_path.svc_inst):
-                    bindings.append(binding.cfg_path.svc_inst)
+                ### WARNING ###
+                if (binding.service_instance):
+                    bindings.append(binding.service_instance)
                 log.msg("Before deleting host '%s', removing binding '%s'"
                         % (fqdn, binding.cfg_path))
                 session.delete(binding)

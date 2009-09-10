@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
-from aquilon.server.dbwrappers.os import get_os
+from aquilon.server.dbwrappers.os import get_one_os
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
@@ -71,7 +71,9 @@ class CommandAddHost(BrokerCommand):
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
 
-        dbos = get_os(session, osname, osversion, None, dbarchetype)
+        print "get_one_os(s, '%s', '%s', '%s')"% (osname, osversion, dbarchetype.name)
+        dbos = get_one_os(session, osname, osversion, dbarchetype.name)
+        print 'got %s'% (dbos)
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):

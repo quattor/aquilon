@@ -36,6 +36,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
+from aquilon.server.dbwrappers.os import get_one_os
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw,
                                  ChassisSlot, Machine, DnsDomain)
@@ -51,7 +52,7 @@ class CommandAddAuroraHost(CommandAddHost):
     sys_loc_re = re.compile(
             r'^[-\.\w]+\s*(?:[-\.\w]*\.)?(\w+)\.(\w+)\.(\w+)\b$', re.M)
 
-    def render(self, session, hostname, *args, **kwargs):
+    def render(self, session, hostname, osname, osversion, *args, **kwargs):
         # Pull relevant info out of dsdb...
         dsdb_runner = DSDBRunner()
         try:
@@ -139,10 +140,19 @@ class CommandAddAuroraHost(CommandAddHost):
         # FIXME: Pull this from somewhere.
         buildstatus = 'ready'
 
+        if osname is None:
+            osname = 'linux'
+        if osversion is None:
+            osversion = 'generic'
+
+        print 'I have osname %s and osversion %s'% (osname, osversion)
+
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session
         kwargs['hostname'] = fqdn
         kwargs['archetype'] = 'aurora'
+        kwargs['osname'] = osname
+        kwargs['osversion'] = osversion
         kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
         kwargs['machine'] = dbmachine.name

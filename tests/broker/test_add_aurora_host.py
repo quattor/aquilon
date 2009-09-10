@@ -45,7 +45,8 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddaurorawithnode(self):
         self.noouttest(["add", "aurora", "host",
-            "--hostname", self.aurora_with_node])
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--hostname", self.aurora_with_node])
 
     def testverifyaddaurorawithnode(self):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
@@ -61,7 +62,8 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddaurorawithoutnode(self):
         self.noouttest(["add", "aurora", "host",
-            "--hostname", self.aurora_without_node])
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                        "--hostname", self.aurora_without_node])
 
     def testverifyaddaurorawithoutnode(self):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
@@ -76,7 +78,8 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Status: ready", command)
 
     def testaddnyaqd1(self):
-        self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1"])
+        self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64"])
 
     def testverifyaddnyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"
@@ -94,4 +97,3 @@ class TestAddAuroraHost(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAuroraHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
