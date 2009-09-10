@@ -53,15 +53,17 @@ class OperatingSystem(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    archetype = relation(Archetype, backref='os', uselist=False)
+    archetype = relation(Archetype, backref='os', uselist=False, lazy=False)
 
     @property
     def cfg_path(self):
         return 'os/%s/%s'% (self.name, self.version)
 
     def __repr__(self):
-        s = ("<"+self.__class__.__name__ + " "+ self.name +
-             " " + self.version + " " + str(self.archetype) +'>')
+        s = ("<"+self.__class__.__name__ +
+             " name="+ self.name +
+             " version=" + self.version +
+             " archetype=" + str(self.archetype) + '>')
         return s
 
     @classmethod
