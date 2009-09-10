@@ -45,39 +45,39 @@ from brokertest import TestBrokerCommand
 class TestAddOS(TestBrokerCommand):
 
     def testaddexisting(self):
-        command = "add os --archetype aquilon --os linux --vers 4.0.1-x86_64"
+        command = "add os --archetype aquilon --osname linux --osversion 4.0.1-x86_64"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "OS 'linux' version '4.0.1-x86_64' already exists",
                          command)
 
     def testaddbadname(self):
-        command = "add os --archetype aquilon --os oops@! --vers 1.0"
+        command = "add os --archetype aquilon --osname oops@! --osversion 1.0"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "OS name 'oops@!' is not valid", command)
 
     def testaddbadversion(self):
-        command = "add os --archetype aquilon --os newos --vers oops@!"
+        command = "add os --archetype aquilon --osname newos --osversion oops@!"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "OS version 'oops@!' is not valid", command)
 
     def testaddutos(self):
-        command = "add os --archetype utarchetype1 --os utos --vers 1.0"
+        command = "add os --archetype utarchetype1 --osname utos --osversion 1.0"
         self.noouttest(command.split(" "))
 
     def testverifyutos(self):
-        command = "show os --archetype utarchetype1 --os utos --vers 1.0"
+        command = "show os --archetype utarchetype1 --osname utos --osversion 1.0"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyosonly(self):
-        command = "show os --os utos --archetype utarchetype1"
+        command = "show os --osname utos --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
 
     def testverifyversonly(self):
-        command = "show os --vers 1.0 --archetype utarchetype1"
+        command = "show os --osversion 1.0 --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchclean(out, "linux", command)
@@ -90,18 +90,18 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Template: aquilon/os/linux/4.0.1-x86_64", command)
 
     def testshownotfound(self):
-        command = "show os --os os-does-not-exist --vers foobar --archetype aquilon"
+        command = "show os --osname os-does-not-exist --osversion foobar --archetype aquilon"
         self.notfoundtest(command.split(" "))
 
     # If we ever re-do the populate for OS this will probably break
     # as it will already exist.  That's fine - just kill these two
     # tests and the corresponding tests in test_del_os.
     def testaddesxi(self):
-        command = "add os --archetype vmhost --os esxi --vers 4.0.0"
+        command = "add os --archetype vmhost --osname esxi --osversion 4.0.0"
         self.noouttest(command.split(" "))
 
     def testverifyesxi(self):
-        command = "show os --archetype vmhost --os esxi --vers 4.0.0"
+        command = "show os --archetype vmhost --osname esxi --osversion 4.0.0"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: vmhost/os/esxi/4.0.0", command)
         self.matchclean(out, "linux", command)

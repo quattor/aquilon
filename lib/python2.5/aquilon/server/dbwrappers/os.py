@@ -36,32 +36,59 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import OperatingSystem, Archetype
 from aquilon.server.dbwrappers.archetype import get_archetype
 
-def get_os_query(session, osname, osversion, archetype=None, dbarchetype=None):
+def get_many_os(session, osname=None, osversion=None, archetype=None,
+                dbarchetype=None):
     """
         Returns a convenient query object for Operating Systems
 
-        Since get_os() wants to query with query().one() and show_os wants to
-        execute query().all(), this is here so we don't repeat code.
+        Used when you expect an unknown sized list of operating systems
     """
+    #if archetype is None and dbarchetype is None:
+    #    msg = 'No usable archetype parameter'
+    #    return ArgumentError(msg)
+    print "get_many_os(s, '%s', '%s', '%s', '%s')"% (osname, osversion,
+                                                     archetype, dbarchetype)
+    q = session.query(OperatingSystem)
+
+    if osname:
+        q = q.filter_by(name=osname)
+
+    if osversion:
+        q = q.filter_by(version=osversion)
 
     if archetype:
-            dbarchetype = get_archetype(session, archetype)
+        #dbarchetype = get_archetype(session, archetype)
+        q = q.join('archetype').filter_by(name=archetype)
+        q = q.reset_joinpoint()
 
-    q = session.query(OperatingSystem).select_from(
-        join(OperatingSystem, Archetype)).filter(
-            and_(
-                OperatingSystem.name=='linux',
-                OperatingSystem.version=='generic',
-                Archetype.name=='aurora'))
+    elif dbarchetype:
+        q.filter_by(archetype=dbarchetype)
 
-    return q
+    return q.all()
 
 
-def get_os(session, osname, version, archetype=None, dbarchetype=None):
+def get_one_os(session, osname, osversion, archetype=None, dbarchetype=None):
     """
         Find a unique OS.
 
         As is the common case for most dbwrappers code.
     """
-    q = get_os_query(session, osname, version, archetype, dbarchetype)
+
+    name = None
+    if archetype:
+        name = archetype
+    if dbarchetype:
+        name = dbarchetype.name
+
+    if name is None:
+        msg = 'Can not determine archetype '
+        return ArgumentError(msg)
+
+    q = session.query(OperatingSystem).select_from(
+        join(OperatingSystem, Archetype)).filter(
+            and_(
+                OperatingSystem.name==osname,
+                OperatingSystem.version==osversion,
+                Archetype.name==name))
+
     return q.one()
