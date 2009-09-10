@@ -45,6 +45,7 @@ class HostFormatter(ObjectFormatter):
         details.append(self.redirect_raw(host.machine, indent+"  "))
         details.append(self.redirect_raw(host.personality, indent+"  "))
         details.append(self.redirect_raw(host.archetype, indent+"  "))
+        details.append(self.redirect_raw(host.operating_system, indent+"  "))
         details.append(self.redirect_raw(host.domain, indent+"  "))
         details.append(self.redirect_raw(host.status, indent+"  "))
         #FIX ME: This is not the right way to do it, confused at the moment
