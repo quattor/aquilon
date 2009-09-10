@@ -26,50 +26,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to simplify os retreival"""
+""" Wrapper to simplify os retreival """
 
-
+from sqlalchemy.orm import join
+from sqlalchemy.sql import and_
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import OperatingSystem
+from aquilon.aqdb.model import OperatingSystem, Archetype
 from aquilon.server.dbwrappers.archetype import get_archetype
 
-def get_os_query(session, osname=None, version=None, archetype=None,
-                 dbarchetype=None):
+def get_os_query(session, osname, osversion, archetype=None, dbarchetype=None):
     """
         Returns a convenient query object for Operating Systems
 
         Since get_os() wants to query with query().one() and show_os wants to
         execute query().all(), this is here so we don't repeat code.
     """
-    q = session.query(OperatingSystem)
 
-    #FIX ME: Argument checking? what combinations are valid/invalid?
-    #FIX ME: if osname and version are mandatory remove the default values
+    if archetype:
+            dbarchetype = get_archetype(session, archetype)
 
-    #if we get a dbarchetype, use that, ignore archetype
-    if dbarchetype:
-        q.filter_by(archetype=dbarchetype)
-    elif archetype:
-        dbarchetype = get_archetype(session, archetype)
-        q = q.join('archetype').filter_by(name=archetype)
-        q = q.reset_joinpoint()
-    else:
-        #FIX_ME will the user see dbarchetype and be confused? It's really
-        #internal only. Perhaps I'm checking too much now?
-        msg = 'One of archetype or dbarchetype must be supplied'
-        raise ArgumentError(msg)
-
-    if osname:
-        q = q.filter_by(name=osname)
-
-    if version:
-        q = q.filter_by(version=version)
+    q = session.query(OperatingSystem).select_from(
+        join(OperatingSystem, Archetype)).filter(
+            and_(
+                OperatingSystem.name=='linux',
+                OperatingSystem.version=='generic',
+                Archetype.name=='aurora'))
 
     return q
 
-def get_os(session, osname=None, version=None, archetype=None, dbarchetype=None):
+
+def get_os(session, osname, version, archetype=None, dbarchetype=None):
     """
         Find a unique OS.
 
