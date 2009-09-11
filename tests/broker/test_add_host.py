@@ -49,7 +49,7 @@ class TestAddHost(TestBrokerCommand):
                         "--ip", self.net.unknown[0].usable[0].ip,
                         "--machine", "ut3c5n10", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
-                        "--osname", "linux", "--osversion", "5.0-x86_64",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "compileserver"])
 
     def testverifyaddunittest02(self):
@@ -93,7 +93,7 @@ class TestAddHost(TestBrokerCommand):
             "--hostname", "unittest15.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--ipalgorithm", "max",
-            "--osname", "linux", "--osversion", "5.0-x86_64",
+            "--osname", "linux", "--osversion", "4.0.1-x86_64",
             "--machine", "ut8s02p1", "--domain", "unittest",
             "--buildstatus", "build", "--archetype", "aquilon"])
 
@@ -113,7 +113,7 @@ class TestAddHost(TestBrokerCommand):
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
-                   "--osname", "linux", "--osversion", "5.0-x86_64",
+                   "--osname", "linux", "--osversion", "4.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "No remaining IPs found on network", command)
@@ -125,7 +125,7 @@ class TestAddHost(TestBrokerCommand):
                         "--ipalgorithm", "lowest",
                         "--machine", "ut8s02p2", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
-                        "--osname", "linux", "--osversion", "5.0-x86_64",
+                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "compileserver"])
 
     def testverifyunittest16(self):
@@ -142,7 +142,7 @@ class TestAddHost(TestBrokerCommand):
             "--hostname", "unittest17.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--machine", "ut8s02p3", "--domain", "unittest",
-            "--osname", "linux", "--osversion", "5.0-x86_64",
+            "--osname", "linux", "--osversion", "4.0.1-x86_64",
             "--buildstatus", "build", "--archetype", "aquilon"])
 
     def testverifyunittest17(self):
@@ -172,7 +172,7 @@ class TestAddHost(TestBrokerCommand):
                        "--ip", self.net.tor_net[1].usable[port].ip,
                        "--machine", "ut9s03p%d" % port,
                        "--domain", "unittest", "--buildstatus", "build",
-                       "--osname", "linux", "--osversion", "5.0-x86_64",
+                       "--osname", "linux", "--osversion", "4.0.1-x86_64",
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)
 
