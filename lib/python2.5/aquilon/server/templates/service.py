@@ -163,7 +163,12 @@ class PlenaryServiceInstanceServer(Plenary):
 
     def body(self, lines):
         lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'clients' = list(" + ", ".join([("'" + client.host.fqdn + "'") for client in self.dbinstance.cfg_path.build_items]) + ");")
+        lines.append(
+            "'clients' = list(" + ", ".join(
+                [("'" + client + "'")
+                    for client in self.dbinstance.clients]) + ");")
+
+
 
 
 class PlenaryServiceInstanceClientDefault(Plenary):
@@ -291,4 +296,3 @@ def find_storage_data(datafile, fn):
                     info[hdr[i]] = fields[i]
                 if (fn(info)):
                     break
-
