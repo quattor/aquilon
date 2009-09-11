@@ -51,7 +51,7 @@ class CommandPxeswitch(BrokerCommand):
         if not bootbi:
             raise ArgumentError("host has no bootserver")
         # for that instance, find what servers are bound to it.
-        servers = [s.system.fqdn for s in bootbi.cfg_path.svc_inst.servers]
+        servers = [s.system.fqdn for s in bootbi.service_instance.servers]
 
         command = self.config.get("broker", "installfe")
         args = [command]
@@ -81,5 +81,3 @@ class CommandPxeswitch(BrokerCommand):
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log"%logdir)
         return run_command(args)
-
-
