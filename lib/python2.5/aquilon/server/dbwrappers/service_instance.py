@@ -47,5 +47,5 @@ def get_service_instance(session, dbservice, instance):
 def get_client_service_instances(session, dbclient):
     service_instances = []
     builditems = session.query(BuildItem).filter_by(host=dbclient).all()
-    service_instances = [bi.cfg_path.svc_inst for bi in builditems]
+    service_instances = [bi.service_instance for bi in builditems]
     return service_instances
