@@ -83,10 +83,9 @@ class TestAddOS(TestBrokerCommand):
         self.matchclean(out, "linux", command)
 
     def testverifyall(self):
-        #TODO: is this ok or do we need archetype agnostic?
-        command = "show os --all --archetype aquilon"
+        command = "show os --all"
         out = self.commandtest(command.split(" "))
-        #self.matchoutput(out, "Template: os/utos/1.0", command)
+        self.matchoutput(out, "Template: utarchetype1/os/utos/1.0", command)
         self.matchoutput(out, "Template: aquilon/os/linux/4.0.1-x86_64", command)
 
     def testshownotfound(self):
