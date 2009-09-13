@@ -100,8 +100,8 @@ class CommandMake(BrokerCommand):
             out = td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
-            #if chooser:
-                #chooser.restore_stash()
+            if chooser:
+                chooser.restore_stash()
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
