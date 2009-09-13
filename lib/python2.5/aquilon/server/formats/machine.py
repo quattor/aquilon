@@ -119,3 +119,14 @@ class SimpleMachineListFormatter(ObjectFormatter):
         return str("\n".join([indent + machine.name for machine in smlist]))
 
 ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
+
+class MachineMacList(list):
+    """ Holds MAC, machine-name [, hostname] """
+    pass
+
+
+class MachineMacListFormatter(ObjectFormatter):
+    def format_csv(self, hilist):
+        return str("\n".join([",".join(entry) for entry in hilist]))
+
+ObjectFormatter.handlers[MachineMacList] = MachineMacListFormatter()
