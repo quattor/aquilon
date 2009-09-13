@@ -87,6 +87,9 @@ class PlenaryClusterObject(Plenary):
         if self.metacluster:
             lines.append("'/system/metacluster/name' = '%s';" %
                          self.metacluster)
+        campus = self.dbcluster.location_constraint.campus
+        if campus:
+            lines.append("'/system/cluster/campus' = '%s';" % campus.name)
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
