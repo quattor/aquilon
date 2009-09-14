@@ -111,6 +111,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "would exceed the metacluster's max_shares",
                          command)
 
+    def test_190_verifyadddisk(self):
+        command = ["show_metacluster", "--metacluster=namc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "MetaCluster: namc1", command)
+        for i in range(1, 9):
+            self.matchoutput(out, "Share: test_share_%s" % i, command)
+        self.matchclean(out, "Share: test_share_9", command)
+
     def test_200_updatemachine(self):
         self.noouttest(["update_machine", "--machine", "evm9",
                         "--cluster", "utecl2"])

@@ -36,9 +36,13 @@ class MetaClusterFormatter(ObjectFormatter):
         details = [indent + "MetaCluster: %s" % metacluster.name]
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
         details.append(indent + "  Max shares: %s" % metacluster.max_shares)
+        for cluster in metacluster.members:
+            details.append(indent + "  Member: %s cluster %s" %
+                           (cluster.cluster_type, cluster.name))
+        for share in metacluster.shares:
+            details.append(indent + "  Share: %s" % share.name)
         if metacluster.comments:
             details.append(indent + "  Comments: %s" % metacluster.comments)
-        # FIXME: Add members?
         return "\n".join(details)
 
 ObjectFormatter.handlers[MetaCluster] = MetaClusterFormatter()

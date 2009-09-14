@@ -154,6 +154,14 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "esx cluster: utecl1", command)
         self.matchoutput(out, "esx cluster: utecl2", command)
 
+    def testverifyshowmetacluster(self):
+        command = "show metacluster --metacluster namc1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "MetaCluster: namc1", command)
+        self.matchoutput(out, "Member: esx cluster utecl1", command)
+        self.matchoutput(out, "Member: esx cluster utecl2", command)
+        self.matchclean(out, "Member: esx cluster utecl3", command)
+
     def testnotfoundesx_cluster(self):
         command = "show esx_cluster --cluster esx_cluster-does-not-exist"
         self.notfoundtest(command.split(" "))
