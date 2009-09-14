@@ -22,6 +22,9 @@ from aquilon.aqdb.model import Host, ServiceInstance, BuildItem, OperatingSystem
 
 from pprint import pprint
 
+#TODO: make this run the sql script, and have another at finish?
+#TODO: confirm the database your updating?
+
 def get_session(cstr):
     engine = create_engine(cstr)
     connection = engine.connect()
@@ -35,7 +38,7 @@ def time_dec(func):
         return res
     return wrapper
 
-def get_os_cache(cstr):
+def get_one_os_cache(cstr):
     sess = get_session(cstr)
     os_cache = {}
     for os in sess.query(OperatingSystem):
@@ -76,11 +79,11 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
         host = sess.query(Host).get(host_id)
 
         processed += 1
+        #fix this for aurora + windows
         if host.build_items and (host.archetype.name == 'aquilon' or
                                  host.archetype.name =='vmhost') :
             for item in host.build_items:
                 if item.cfg_path.tld.type == 'os':
-                    #ver = item.cfg_path.relative_path.split('/')[1]
                     host.operating_system_id = os_cache[item.cfg_path.relative_path]
 
                 elif item.cfg_path.tld.type == 'service':
@@ -117,9 +120,10 @@ class AqdbManager(SyncManager):
         self.timeout = timeout
         self.NUMBER_OF_PROCESSES = 4
         self.host_q = Queue()
+        self.is_incomplete = True #flag for loop
 
         self.si_cache = get_si_cache(self._cstr)
-        self.os_cache = get_os_cache(self._cstr)
+        self.os_cache = get_one_os_cache(self._cstr)
 
     def start(self):
         print "starting %d workers" % self.NUMBER_OF_PROCESSES
@@ -162,11 +166,15 @@ class AqdbManager(SyncManager):
 
             for s in stmnts:
                 sess.execute(s)
+            self.is_incomplete = True
+            print 'Complete!'
         else:
             print 'there are %s rows with no service instance ids'% (count)
             for item in sess.query(BuildItem).filter(
                 BuildItem.service_instance_id == None).all():
                 print '%s %s'% (item.host.name, item.cfg_path)
+            print 'I should be trying again now...'
+
 
     def stop(self):
         self.host_q.put(None)
@@ -181,9 +189,12 @@ if __name__ == '__main__':
     start = time.time()
 
     m = AqdbManager()
+
+    #while m.is_incomplete:
     m.start()
 
     end = time.time()
+    #m.stop()
     print 'execution time: %s seconds'% (int(end-start))
 
     sys.exit(0)
