@@ -34,7 +34,8 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import Host, Cluster
 from aquilon.server.dbwrappers.system import search_system_query
-from aquilon.server.dbwrappers.os import get_os
+from aquilon.server.dbwrappers.domain import get_domain
+from aquilon.server.dbwrappers.os import get_one_os
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
@@ -80,9 +81,9 @@ class CommandSearchHost(BrokerCommand):
 
         #TODO: double check we have dbarchetype at this point or cross archetype?
         if osname and osversion:
-            dbos = get_os(session, osname, osversion, None, dbarchetype)
-            q = q.join('operating_system').filter_by(operating_system=dbos)
-            q = q.reset_joinpoint()
+            dbos = get_one_os(session, osname, osversion, None, dbarchetype)
+            q = q.filter_by(operating_system=dbos)
+            #q = q.reset_joinpoint()
         #TODO: elif osname (version agnostic)
         #TODO: elif osversion: error
         if service:
@@ -92,7 +93,8 @@ class CommandSearchHost(BrokerCommand):
                 q = q.join('build_items')
                 q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
-            #TODO: DOUBLE CHECK WITH WES THAT WE DON' T NEED IT
+            #TODO: DOUBLE CHECK WITH WES THAT WE DON'T NEED IT
+            # we'd need the 'brainfreeze' extenstion to search by cfg_path now.
             #else:
             #    q = q.join('build_items')
             #    path_query = dbservice.cfg_path.relative_path + '/%'
