@@ -66,6 +66,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -98,6 +99,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
         self.matchoutput(out, "vm_to_host_ratio: 102", command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -184,6 +186,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 0", command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -219,6 +222,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)

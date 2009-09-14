@@ -73,6 +73,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "cluster conflicts with rack", command)
 
+    def test_090_verifyaddmachines(self):
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "Virtual Machine count: 9", command)
+
     def test_100_addinterfaces(self):
         for i in range(1, 8):
             self.noouttest(["add", "interface", "--machine", "evm%s" % i,
