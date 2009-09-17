@@ -35,12 +35,13 @@ from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
-                                 City, Building, Rack, Desk)
+                                Campus, City, Building, Room, Rack, Desk)
 
 # FIXME: This probably belongs in location.py
 # It's also broken, as campus is not strictly between country and city.
+# The list of imports above needs to include all of these entries.
 const.location_types = ("company", "hub", "continent", "country", "campus",
-                        "city", "building", "rack", "desk")
+                        "city", "building", "room", "rack", "desk")
 
 
 class CommandAddLocation(BrokerCommand):

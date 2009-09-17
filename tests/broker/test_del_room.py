@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,32 +27,40 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a location simpler."""
+"""Module for testing the del room command."""
+
+import os
+import sys
+import unittest
+
+if __name__ == "__main__":
+    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    SRCDIR = os.path.join(BINDIR, "..", "..")
+    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+
+from brokertest import TestBrokerCommand
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+class TestDelRoom(TestBrokerCommand):
 
-from aquilon import const
-from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Location
+    def testdelutroom1(self):
+        command = "del room --name utroom1"
+        self.noouttest(command.split(" "))
+
+    def testdelutroom2(self):
+        command = "del room --name utroom2"
+        self.noouttest(command.split(" "))
+
+    def testverifydelutroom1(self):
+        command = "show room --name utroom1"
+        self.notfoundtest(command.split(" "))
+
+    def testverifydelutroom2(self):
+        command = "show room --name utroom2"
+        self.notfoundtest(command.split(" "))
 
 
-def get_location(session, **kwargs):
-    """Somewhat sophisticated getter for any of the location types."""
-    location_type = None
-    #TODO: remove dependency on const and pull types from an ordered query
-    for lt in const.location_types:
-        if kwargs.get(lt):
-            if location_type:
-                raise ArgumentError("Single location can not be both %s and %s"
-                        % (lt, location_type))
-            location_type = lt
-    if not location_type:
-        return None
-    try:
-        dblocation = session.query(Location).filter_by(
-                name=kwargs[location_type], location_type=location_type).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("%s '%s' not found: %s"
-                % (location_type.capitalize(), kwargs[location_type], e))
-    return dblocation
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRoom)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+

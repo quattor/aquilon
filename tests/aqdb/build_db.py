@@ -63,8 +63,8 @@ pkgs         = {}
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
 pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-                'city', 'building', 'rack', 'desk', 'location_search_list',
-                'search_list_item']
+                'city', 'building', 'room', 'rack', 'desk',
+                'location_search_list', 'search_list_item']
 
 pkgs['net']  = ['dns_domain', 'network']
 

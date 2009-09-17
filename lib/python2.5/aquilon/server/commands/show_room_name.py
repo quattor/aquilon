@@ -26,32 +26,19 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a location simpler."""
+"""Contains the logic for `aq show room --name`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon import const
-from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Location
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-def get_location(session, **kwargs):
-    """Somewhat sophisticated getter for any of the location types."""
-    location_type = None
-    #TODO: remove dependency on const and pull types from an ordered query
-    for lt in const.location_types:
-        if kwargs.get(lt):
-            if location_type:
-                raise ArgumentError("Single location can not be both %s and %s"
-                        % (lt, location_type))
-            location_type = lt
-    if not location_type:
-        return None
-    try:
-        dblocation = session.query(Location).filter_by(
-                name=kwargs[location_type], location_type=location_type).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("%s '%s' not found: %s"
-                % (location_type.capitalize(), kwargs[location_type], e))
-    return dblocation
+class CommandShowRoomName(CommandShowLocationType):
+
+    required_parameters = ["name"]
+
+    def render(self, session, name, **arguments):
+        return CommandShowLocationType.render(self, session=session, name=name,
+                                              type='room', **arguments)
+
+

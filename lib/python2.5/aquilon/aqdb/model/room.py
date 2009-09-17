@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,32 +26,43 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a location simpler."""
+""" Room is a subclass of Location """
+from sqlalchemy import Column, Integer, ForeignKey
 
-
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon import const
-from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Location
 
 
-def get_location(session, **kwargs):
-    """Somewhat sophisticated getter for any of the location types."""
-    location_type = None
-    #TODO: remove dependency on const and pull types from an ordered query
-    for lt in const.location_types:
-        if kwargs.get(lt):
-            if location_type:
-                raise ArgumentError("Single location can not be both %s and %s"
-                        % (lt, location_type))
-            location_type = lt
-    if not location_type:
-        return None
-    try:
-        dblocation = session.query(Location).filter_by(
-                name=kwargs[location_type], location_type=location_type).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("%s '%s' not found: %s"
-                % (location_type.capitalize(), kwargs[location_type], e))
-    return dblocation
+class Room(Location):
+    """ Room is a subtype of location """
+    __tablename__ = 'room'
+    __mapper_args__ = {'polymorphic_identity' : 'room'}
+
+    id = Column(Integer, ForeignKey('location.id',
+                                    name='room_loc_fk',
+                                    ondelete='CASCADE'),
+                primary_key=True)
+
+room = Room.__table__
+room.primary_key.name = 'room_pk'
+
+table = room
+
+def populate(sess, *args, **kwargs):
+    """Populate skeleton database with some room information."""
+
+    if len(sess.query(Room).all()) > 0:
+        return
+
+    from aquilon.aqdb.model import Building
+
+    log = kwargs['log']
+    assert log, "no log in kwargs for Room.populate()"
+
+    devin1 = Building.get_unique(sess, 'dd')
+    if devin1:
+        pod3 = Room(name='ddroom3', fullname='Devin Pod 3', parent=devin1)
+        sess.add(pod3)
+    sess.commit()
+    log.debug('created %s room(s)' % (len(sess.query(Room).all())))
+
+

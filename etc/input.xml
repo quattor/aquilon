@@ -111,6 +111,7 @@
 	    <option name="country" type="string">Country</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -149,6 +150,7 @@
 	    <option name="country" type="string">Country</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -208,6 +210,7 @@
 	    <option name="country" type="string">Country</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -296,6 +299,7 @@
             <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -775,6 +779,7 @@
 	    <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
 	</optgroup>
@@ -806,6 +811,7 @@
 	    <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
 	</optgroup>
@@ -1032,6 +1038,7 @@
         <option name="campus" type="string">Campus</option>
         <option name="city" type="string">City</option>
         <option name="building" type="string">Building</option>
+        <option name="room" type="string">Room</option>
         <option name="rack" type="string">Rack</option>
         <option name="desk" type="string">Desk</option>
       </optgroup>
@@ -1053,6 +1060,7 @@
             <option name="campus" type="string">Campus</option>
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -1080,6 +1088,7 @@
          <option name="campus" type="string">Campus</option>
          <option name="city" type="string">City</option>
          <option name="building" type="string">Building</option>
+         <option name="room" type="string">Room</option>
          <option name="rack" type="string">Rack</option>
          <option name="desk" type="string">Desk</option>
       </optgroup>
@@ -1348,15 +1357,19 @@
       See also add_location.
       <optgroup name="add_rack_input" mandatory="True" fields="all">
          <option name="rackid" type="string">Name of the new rack, or just the id number</option>
-         <option name="building" type="string">Name of the building that houses the rack</option>
          <option name="row" type="string">Row of the tile location (letters only)</option>
          <option name="column" type="string">Column of the tile location (numbers only)</option>
+         <optgroup name="add_rack_parent" mandatory="True" fields="any">
+            <option name="building" type="string" conflicts="room">Name of the building that houses the rack</option>
+            <option name="room" type="string" conflicts="building">Name of the room that houses the rack</option>
+         </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_rack/%(building)s/%(rackid)s" />
+      <transport method="put" path="location/add_rack_to_building/%(building)s/%(rackid)s" />
+      <transport method="put" trigger="room" path="location/add_rack_to_room/%(room)s/%(rackid)s" />
    </command>
 
    <command name="update_rack">
@@ -1419,6 +1432,37 @@
          <option name="name" type="string">building name</option>
       </optgroup>
       <transport method="delete" path="location/building/%(name)s" />
+   </command>
+
+   <command name="add_room">
+      Add a new room to the database. See also add_location.
+      <optgroup name="add_room_input" mandatory="True" fields="all">
+         <option name="name" type="string">Name of the new room</option>
+         <option name="building" type="string">Name of the building that contains the room</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_room/%(building)s/%(name)s" />
+   </command>
+
+   <command name="show_room">
+      Show the room list, or details about a particular room.
+      <optgroup name="show_room_opts" mandatory="True" fields="any">
+         <option name="name" type="string">room name</option>
+         <option name="all" type="boolean">show all</option>
+      </optgroup>
+      <transport method="get" path="location/room" />
+      <transport trigger="name" method="get" path="location/room/%(name)s" />
+   </command>
+
+   <command name="del_room">
+      Delete a room. See also del_location.
+      <optgroup name="del_room_opts" mandatory="True" fields="all">
+         <option name="name" type="string">room name</option>
+      </optgroup>
+      <transport method="delete" path="location/room/%(name)s" />
    </command>
 
    <command name="show_campus">
@@ -1846,10 +1890,13 @@
       <optgroup name="add_tor_switch_location" mandatory="True" fields="any">
          <option name="rack" type="string" conflicts="building">Rack name</option>
          <optgroup name="add_tor_switch_new_rack" fields="all">
-            <option name="building" type="string" conflicts="rack">Building</option>
             <option name="rackid" type="string" conflicts="rack">Rack id/number</option>
             <option name="rackrow" type="string" conflicts="rack">Rack Row (letters only)</option>
             <option name="rackcolumn" type="string" conflicts="rack">Rack Column (numbers only)</option>
+            <optgroup name="add_tor_switch_rack_parent" fields="any">
+               <option name="building" type="string" conflicts="rack room">Building</option>
+               <option name="room" type="string" conflicts="rack building">Room</option>
+            </optgroup>
          </optgroup>
       </optgroup>
       <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">
@@ -2019,6 +2066,7 @@
             <option name="country" type="string">Country</option>
             <option name="city" type="string">City</option>
             <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
@@ -2066,6 +2114,7 @@
 	    <option name="country" type="string">Country</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>

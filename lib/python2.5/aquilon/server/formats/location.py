@@ -33,7 +33,7 @@ from inspect import isclass
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
-                                 Campus, City, Building, Rack, Desk)
+                                Campus, City, Building, Room, Rack, Desk)
 
 
 class LocationFormatter(ObjectFormatter):
