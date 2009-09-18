@@ -102,7 +102,7 @@ class CommandAddAuxiliary(BrokerCommand):
                                 "--ipfromip, --ipfromsystem, --autoip "
                                 "parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
+        restrict_tor_offsets(dbnetwork, ip)
 
         dbauxiliary = Auxiliary(name=short, dns_domain=dbdns_domain,
                                 machine=dbmachine,

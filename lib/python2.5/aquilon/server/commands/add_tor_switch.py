@@ -91,7 +91,7 @@ class CommandAddTorSwitch(BrokerCommand):
 
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
-            restrict_tor_offsets(session, dbnetwork, ip)
+            restrict_tor_offsets(dbnetwork, ip)
             dbtor_switch.mac = mac
             dbtor_switch.ip = ip
             dbtor_switch.network = dbnetwork

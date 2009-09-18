@@ -82,7 +82,7 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
                                 "the --ip, --ipfromip, --ipfromsystem, "
                                 "--autoip parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
+        restrict_tor_offsets(dbnetwork, ip)
         dbtor_switch.ip = ip
         dbtor_switch.network = dbnetwork
         dbtor_switch.mac = mac

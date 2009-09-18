@@ -115,6 +115,19 @@ class TestAddDynamicRange(TestBrokerCommand):
                    "--dns_domain=aqd-unittest.ms.com"]
         self.noouttest(command)
 
+    def testfailaddrestricted(self):
+        command = ["add_dynamic_range",
+                   "--startip=%s" % self.net.tor_net2[1].reserved[0].ip,
+                   "--endip=%s" % self.net.tor_net2[1].reserved[1].ip,
+                   "--dns_domain=aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The IP address %s is reserved for dynamic "
+                         "dhcp for a tor_switch on subnet %s" %
+                         (self.net.tor_net2[1].reserved[0].ip,
+                          self.net.tor_net2[1].ip),
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDynamicRange)

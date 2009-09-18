@@ -82,7 +82,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
                                 "the --ip, --ipfromip, --ipfromsystem, "
                                 "--autoip parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
+        restrict_tor_offsets(dbnetwork, ip)
         dbchassis.ip = ip
         dbchassis.network = dbnetwork
         dbchassis.mac = mac
