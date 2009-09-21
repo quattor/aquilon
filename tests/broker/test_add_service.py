@@ -92,10 +92,19 @@ class TestAddService(TestBrokerCommand):
         command = "add service --service aqd --instance ny-prod"
         self.noouttest(command.split(" "))
 
-    def testverifyaddntpinstance(self):
+    def testverifyaddaqdinstance(self):
         command = "show service --service aqd"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: aqd Instance: ny-prod", command)
+
+    def testaddlemoninstance(self):
+        command = "add service --service lemon --instance ny-prod"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddlemoninstance(self):
+        command = "show service --service lemon"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: lemon Instance: ny-prod", command)
 
     def testaddutsi1instance(self):
         command = "add service --service utsvc --instance utsi1"

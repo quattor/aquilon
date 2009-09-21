@@ -55,6 +55,10 @@ class TestDelRequiredService(TestBrokerCommand):
         command = "del required service --service aqd --archetype aquilon"
         self.noouttest(command.split(" "))
 
+    def testdelrequiredlemon(self):
+        command = "del required service --service lemon --archetype aquilon"
+        self.noouttest(command.split(" "))
+
     def testdelrequiredntp(self):
         command = "del required service --service ntp --archetype aquilon"
         self.noouttest(command.split(" "))
@@ -72,6 +76,7 @@ class TestDelRequiredService(TestBrokerCommand):
         self.matchclean(out, "Service: bootserver", command)
         self.matchclean(out, "Service: dns", command)
         self.matchclean(out, "Service: ntp", command)
+        self.matchclean(out, "Service: lemon", command)
 
     def testdelrequiredpersonality(self):
         for service in ["chooser1", "chooser2", "chooser3"]:

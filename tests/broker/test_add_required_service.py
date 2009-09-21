@@ -64,6 +64,10 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--service=bootserver", "--archetype=aquilon"]
         self.noouttest(command)
 
+    def testaddrequiredlemon(self):
+        command = "add required service --service lemon --archetype aquilon"
+        self.noouttest(command.split(" "))
+
     def testverifyaddrequiredservices(self):
         command = "show archetype --archetype aquilon"
         out = self.commandtest(command.split(" "))
@@ -72,6 +76,7 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver", command)
         self.matchoutput(out, "Service: dns", command)
         self.matchoutput(out, "Service: ntp", command)
+        self.matchoutput(out, "Service: lemon", command)
 
     def testaddrequiredpersonality(self):
         for service in ["chooser1", "chooser2", "chooser3"]:

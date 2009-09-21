@@ -104,6 +104,15 @@ class TestUnbindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Server: nyaqd1.ms.com", command)
 
+    def testunbindlemon(self):
+        self.noouttest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
+                        "--service", "lemon", "--all"])
+
+    def testverifyunbindlemon(self):
+        command = "show service --service lemon"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Server: nyaqd1.ms.com", command)
+
     def testunbindbootserver(self):
         self.noouttest(["unbind_server",
                         "--hostname=server9.aqd-unittest.ms.com",

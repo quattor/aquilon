@@ -82,6 +82,19 @@ class TestMapService(TestBrokerCommand):
                          "Instance: ny-prod Map: Campus ny",
                          command)
 
+    def testmaplemon(self):
+        self.noouttest(["map", "service", "--campus", "ny",
+                        "--service", "lemon", "--instance", "ny-prod"])
+
+    def testverifymaplemon(self):
+        command = ["show_map", "--archetype=aquilon",
+                   "--service=lemon", "--instance=ny-prod", "--campus=ny"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Service: lemon "
+                         "Instance: ny-prod Map: Campus ny",
+                         command)
+
     def testmapbootserver(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "bootserver", "--instance", "np.test"])
