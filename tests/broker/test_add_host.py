@@ -46,7 +46,7 @@ class TestAddHost(TestBrokerCommand):
     def testaddunittest02(self):
         self.noouttest(["add", "host",
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--ip", self.hostip0,
+                        "--ip", self.net.unknown[0].usable[0].ip,
                         "--machine", "ut3c5n10", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
                         "--personality", "compileserver"])
@@ -55,7 +55,8 @@ class TestAddHost(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.hostip0, command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[0].ip,
+                         command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: compileserver", command)
@@ -99,13 +100,14 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest15.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.hostip15, command)
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[1].ip,
+                         command)
         self.matchoutput(out, "Personality: inventory", command)
 
     def testaddunittest16bad(self):
         command = ["add", "host",
                    "--hostname", "unittest16.aqd-unittest.ms.com",
-                   "--ipfromip", self.hostip14,
+                   "--ipfromip", self.net.tor_net2[1].usable[-1].ip,
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
@@ -116,7 +118,7 @@ class TestAddHost(TestBrokerCommand):
     def testaddunittest16good(self):
         self.noouttest(["add", "host",
                         "--hostname", "unittest16.aqd-unittest.ms.com",
-                        "--ipfromip", self.hostip14,
+                        "--ipfromip", self.net.tor_net[0].usable[0].ip,
                         "--ipalgorithm", "lowest",
                         "--machine", "ut8s02p2", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
@@ -127,7 +129,8 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest16.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.hostip16, command)
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[2].ip,
+                         command)
         self.matchoutput(out, "Personality: compileserver", command)
 
     def testaddunittest17(self):
@@ -142,7 +145,8 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.hostip17, command)
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3].ip,
+                         command)
         self.matchoutput(out, "Personality: inventory", command)
 
     def testpopulatehprackhosts(self):
@@ -159,9 +163,9 @@ class TestAddHost(TestBrokerCommand):
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             port = i - 50
-            hostip = getattr(self, "hostip%d" % i)
             command = ["add", "host", "--hostname", hostname,
-                       "--ipfromip", hostip, "--machine", "ut9s03p%d" % port,
+                       "--ip", self.net.tor_net[1].usable[port].ip,
+                       "--machine", "ut9s03p%d" % port,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)
@@ -169,15 +173,12 @@ class TestAddHost(TestBrokerCommand):
     def testpopulateverarirackhosts(self):
         # This gives us evh1.aqd-unittest.ms.com through evh10
         # and leaves the other 40 machines for future use.
-        # It also needs to run *after* the testadd* methods above
-        # as some of them rely on a clean IP space for testing the
-        # auto-allocation algorithms.
         for i in range(101, 110):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
-            hostip = getattr(self, "hostip%d" % i)
             command = ["add", "host", "--hostname", hostname,
-                       "--ipfromip", hostip, "--machine", "ut10s04p%d" % port,
+                       "--ip", self.net.tor_net[2].usable[port].ip,
+                       "--machine", "ut10s04p%d" % port,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--archetype", "vmhost", "--personality", "esx_server"]
             self.noouttest(command)

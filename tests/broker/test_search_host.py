@@ -133,16 +133,16 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testipavailable(self):
-        command = "search host --ip %s" % self.hostip2
+        command = "search host --ip %s" % self.net.unknown[0].usable[2].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testipunavailable(self):
-        command = "search host --ip 4.2.2.4"
+        command = "search host --ip 199.98.16.4"
         self.noouttest(command.split(" "))
 
     def testnetworkipavailable(self):
-        command = "search host --networkip 8.8.4.0"
+        command = "search host --networkip %s" % self.net.unknown[0].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00-e1.one-nyp.ms.com", command)
@@ -152,16 +152,18 @@ class TestSearchHost(TestBrokerCommand):
         self.matchclean(out, "unittest02rsa.one-nyp.ms.com", command)
 
     def testnetworkipunavailable(self):
-        command = "search host --ip 4.2.2.0"
-        self.noouttest(command.split(" "))
+        command = "search host --networkip 199.98.16.0"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Network with address 199.98.16.0 not found",
+                         command)
 
     def testmacavailable(self):
-        command = "search host --mac %s" % self.hostmac2
+        command = "search host --mac %s" % self.net.unknown[0].usable[2].mac
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testmacunavailable(self):
-        command = "search host --mac 02:02:02:02:02:02"
+        command = "search host --mac 02:02:c7:62:10:04"
         self.noouttest(command.split(" "))
 
     def testall(self):

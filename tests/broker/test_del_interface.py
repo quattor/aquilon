@@ -52,7 +52,8 @@ class TestDelInterface(TestBrokerCommand):
             "--machine", "ut3c1n3"])
 
     def testdelut3c1n3eth1(self):
-        self.noouttest(["del", "interface", "--mac", self.hostmac3.upper()])
+        self.noouttest(["del", "interface",
+                        "--mac", self.net.unknown[0].usable[3].mac.upper()])
 
     def testverifydelut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
@@ -63,17 +64,15 @@ class TestDelInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out,
-                """"cards/nic/eth0/hwdelr" = "%s";""" % self.hostmac2.upper(),
-                command)
+                        """"cards/nic/eth0/hwdelr" = "%s";""" %
+                        self.net.unknown[0].usable[2].mac.upper(),
+                        command)
+        self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
         self.matchclean(out,
-                """"cards/nic/eth0/boot" = true;""",
-                command)
-        self.matchclean(out,
-                """"cards/nic/eth1/hwdelr" = "%s";""" % self.hostmac3.upper(),
-                command)
-        self.matchclean(out,
-                """"cards/nic/eth1/boot" = true;""",
-                command)
+                        """"cards/nic/eth1/hwdelr" = "%s";""" %
+                        self.net.unknown[0].usable[3].mac.upper(),
+                        command)
+        self.matchclean(out, """"cards/nic/eth1/boot" = true;""", command)
 
 
 if __name__=='__main__':

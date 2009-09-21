@@ -47,14 +47,18 @@ class TestShowHostIPList(TestBrokerCommand):
         command = "show hostiplist"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "unittest02.one-nyp.ms.com,%s,\n" % self.hostip0,
+                         "unittest02.one-nyp.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[0].ip,
                          command)
         self.matchoutput(out,
-                         "unittest00.one-nyp.ms.com,%s,\n" % self.hostip2,
+                         "unittest00.one-nyp.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[2].ip,
                          command)
         self.matchoutput(out,
-                         "unittest00-e1.one-nyp.ms.com,%s,unittest00.one-nyp.ms.com" %
-                         self.hostip3, command)
+                         "unittest00-e1.one-nyp.ms.com,%s,"
+                         "unittest00.one-nyp.ms.com" %
+                         self.net.unknown[0].usable[3].ip,
+                         command)
         self.matchclean(out, self.aurora_with_node, command)
         self.matchclean(out, self.aurora_without_node, command)
         self.matchclean(out, "nyaqd1", command)
@@ -63,16 +67,20 @@ class TestShowHostIPList(TestBrokerCommand):
         command = "show hostiplist --archetype aquilon"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "unittest02.one-nyp.ms.com,%s,\n" % self.hostip0,
+                         "unittest02.one-nyp.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[0].ip,
                          command)
         self.matchoutput(out,
-                         "unittest00.one-nyp.ms.com,%s,\n" % self.hostip2,
+                         "unittest00.one-nyp.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[2].ip,
                          command)
         # FIXME: Arguably, this shouldn't be included.  Right now,
         # archetype is a noop.
         self.matchoutput(out,
-                         "unittest00-e1.one-nyp.ms.com,%s,unittest00.one-nyp.ms.com" %
-                         self.hostip3, command)
+                         "unittest00-e1.one-nyp.ms.com,%s,"
+                         "unittest00.one-nyp.ms.com" %
+                         self.net.unknown[0].usable[3].ip,
+                         command)
         self.matchclean(out, self.aurora_with_node, command)
         self.matchclean(out, self.aurora_without_node, command)
         self.matchclean(out, "nyaqd1", command)

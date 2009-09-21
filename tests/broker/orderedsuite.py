@@ -68,6 +68,7 @@ from test_add_rack import TestAddRack
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
+from test_add_network import TestAddNetwork
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_esx_cluster_aligned_service import (
@@ -79,13 +80,13 @@ from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
+from test_add_dynamic_range import TestAddDynamicRange
 from test_add_host import TestAddHost
 from test_add_aquilon_host import TestAddAquilonHost
 from test_add_windows_host import TestAddWindowsHost
 from test_add_aurora_host import TestAddAuroraHost
 from test_add_auxiliary import TestAddAuxiliary
 from test_add_manager import TestAddManager
-from test_add_dynamic_range import TestAddDynamicRange
 from test_map_service import TestMapService
 from test_bind_client import TestBindClient
 from test_prebind_server import TestPrebindServer
@@ -125,7 +126,6 @@ from test_search_machine import TestSearchMachine
 from test_search_system import TestSearchSystem
 from test_search_host import TestSearchHost
 from test_search_next import TestSearchNext
-from test_show_network import TestShowNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
@@ -154,6 +154,7 @@ from test_del_esx_cluster_aligned_service import (
     TestDelESXClusterAlignedService)
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
+from test_del_network import TestDelNetwork
 from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_vendor import TestDelVendor
@@ -191,15 +192,15 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
+                TestAddNetwork,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddESXClusterAlignedService,
                 TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
-                TestAddHost,
+                TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager,
-                TestAddDynamicRange,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
                 TestMakeAquilon, TestMake, TestMakeCluster,
@@ -221,7 +222,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchSystem, TestSearchHost,
                 TestSearchNext,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
-                TestShowNetwork, TestRefreshNetwork, TestUpdateNetwork,
+                TestRefreshNetwork, TestUpdateNetwork,
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestPxeswitch, TestManage,
@@ -234,6 +235,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelTorSwitch,
                 TestDelESXClusterAlignedService,
                 TestDelESXCluster, TestDelMetaCluster,
+                TestDelNetwork,
                 TestDelModel, TestDelCpu, TestDelVendor,
                 TestDelRack,
                 TestDelBuilding, TestDelRequiredService, TestDelService,

@@ -44,29 +44,33 @@ from brokertest import TestBrokerCommand
 class TestAddAuxiliary(TestBrokerCommand):
 
     def testaddunittest00e1(self):
-        self.noouttest(["add", "auxiliary", "--ip", self.hostip3,
-            "--auxiliary", "unittest00-e1.one-nyp.ms.com",
-            "--machine", "ut3c1n3", "--interface", "eth1"])
+        self.noouttest(["add", "auxiliary",
+                        "--ip", self.net.unknown[0].usable[3].ip,
+                        "--auxiliary", "unittest00-e1.one-nyp.ms.com",
+                        "--machine", "ut3c1n3", "--interface", "eth1"])
 
     def testverifyaddunittest00e1(self):
         command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Auxiliary: unittest00-e1.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.hostip3, command)
-        self.matchoutput(out, "MAC: %s" % self.hostmac3, command)
-        self.matchoutput(out, "Interface: eth1 %s boot=False" % self.hostmac3,
+        self.matchoutput(out, "Auxiliary: unittest00-e1.one-nyp.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[3].ip,
+                         command)
+        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[3].mac,
+                         command)
+        self.matchoutput(out,
+                         "Interface: eth1 %s boot=False" %
+                         self.net.unknown[0].usable[3].mac,
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testrejectut3c1n4eth1(self):
-        # This is an old (relatively) well known DNS server sitting out
-        # on the net that will probably never be controlled by the Firm.
-        # It should not appear in our network table, and thus should
-        # trigger a bad request here.
+        # This is an IP address outside of the Firm.  It should not appear
+        # in the network table and thus should trigger a bad request here.
         command = ["add", "auxiliary",
-            "--auxiliary", "unittest01-e1.one-nyp.ms.com",
-            "--machine", "ut3c1n4", "--mac", "02:02:04:02:02:04",
-            "--interface", "eth1", "--ip", "4.2.2.4"]
+                   "--auxiliary", "unittest01-e1.one-nyp.ms.com",
+                   "--machine", "ut3c1n4", "--mac", "02:02:c7:62:10:04",
+                   "--interface", "eth1", "--ip", "199.98.16.4"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not determine network", command)
 
@@ -78,12 +82,11 @@ class TestAddAuxiliary(TestBrokerCommand):
     def testrejectsixthip(self):
         # This tests that the sixth ip offset on a tor_switch network
         # gets rejected.
-        # FIXME: Hard-coded.  Assumes the 8.8.4.0 subnet, since all
-        # the tests are using 8.8.[4567].* ips.
         command = ["add", "auxiliary",
-            "--auxiliary", "unittest01-e1.one-nyp.ms.com",
-            "--machine", "ut3c1n4", "--mac", "02:02:08:08:04:06",
-            "--interface", "eth2", "--ip", "8.8.4.6"]
+                   "--auxiliary", "unittest01-e1.one-nyp.ms.com",
+                   "--machine", "ut3c1n4", "--interface", "eth2",
+                   "--mac", self.net.tor_net[0].reserved[0].mac,
+                   "--ip", self.net.tor_net[0].reserved[0].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "reserved for dynamic dhcp", command)
 
@@ -95,12 +98,11 @@ class TestAddAuxiliary(TestBrokerCommand):
     def testrejectseventhip(self):
         # This tests that the seventh ip offset on a tor_switch network
         # gets rejected.
-        # FIXME: Hard-coded.  Assumes the 8.8.4.0 subnet, since all
-        # the tests are using 8.8.[4567].* ips.
         command = ["add", "auxiliary",
-            "--auxiliary", "unittest01-e1.one-nyp.ms.com",
-            "--machine", "ut3c1n4", "--mac", "02:02:08:08:04:07",
-            "--interface", "eth3", "--ip", "8.8.4.7"]
+                   "--auxiliary", "unittest01-e1.one-nyp.ms.com",
+                   "--machine", "ut3c1n4", "--interface", "eth3",
+                   "--mac", self.net.tor_net[0].reserved[1].mac,
+                   "--ip", self.net.tor_net[0].reserved[1].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "reserved for dynamic dhcp", command)
 
@@ -111,11 +113,14 @@ class TestAddAuxiliary(TestBrokerCommand):
 
     def testrejectmacinuse(self):
         command = ["add", "auxiliary",
-            "--auxiliary", "unittest01-e4.one-nyp.ms.com",
-            "--machine", "ut3c1n4", "--mac", self.hostmac4,
-            "--interface", "eth4", "--ip", "8.8.4.7"]
+                   "--auxiliary", "unittest01-e4.one-nyp.ms.com",
+                   "--machine", "ut3c1n4", "--interface", "eth4",
+                   "--mac", self.net.tor_net[0].usable[0].mac,
+                   "--ip", self.net.tor_net[0].usable[0].ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Mac '%s' already in use" % self.hostmac4,
+        self.matchoutput(out,
+                         "Mac '%s' already in use" %
+                         self.net.tor_net[0].usable[0].mac,
                          command)
 
     def testverifyrejectseventhip(self):

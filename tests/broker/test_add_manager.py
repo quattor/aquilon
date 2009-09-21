@@ -46,16 +46,21 @@ class TestAddManager(TestBrokerCommand):
     # Note: If changing this, also change testverifyshowmissingmanager
     # in test_add_aquilon_host.py.
     def testaddunittest00r(self):
-        self.noouttest(["add", "manager", "--ip", self.hostip10,
-            "--hostname", "unittest00.one-nyp.ms.com"])
+        self.noouttest(["add", "manager",
+                        "--ip", self.net.unknown[0].usable[4].ip,
+                        "--hostname", "unittest00.one-nyp.ms.com"])
 
     def testverifyaddunittest00r(self):
         command = "show manager --manager unittest00r.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Manager: unittest00r.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.hostip10, command)
-        self.matchoutput(out, "MAC: %s" % self.hostmac10, command)
-        self.matchoutput(out, "Interface: bmc %s boot=False" % self.hostmac10,
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[4].ip,
+                         command)
+        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[4].mac,
+                         command)
+        self.matchoutput(out,
+                         "Interface: bmc %s boot=False" %
+                         self.net.unknown[0].usable[4].mac,
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
@@ -64,31 +69,38 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Manager: unittest00r.one-nyp.ms.com [%s]" %
-                         self.hostip10,
+                         self.net.unknown[0].usable[4].ip,
                          command)
 
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, """"console/bmc" = nlist(""", command)
-        self.matchoutput(out, '"hwaddr", "%s"' % self.hostmac10.lower(),
+        self.matchoutput(out,
+                         '"hwaddr", "%s"' %
+                         self.net.unknown[0].usable[4].mac.lower(),
                          command)
         self.matchoutput(out, '"fqdn", "%s"' % "unittest00r.one-nyp.ms.com",
                          command)
 
     def testaddunittest02rsa(self):
-        self.noouttest(["add", "manager", "--ip", self.hostip11,
-            "--hostname", "unittest02.one-nyp.ms.com",
-            "--manager", "unittest02rsa.one-nyp.ms.com",
-            "--interface", "ilo", "--mac", self.hostmac11])
+        self.noouttest(["add", "manager", "--interface", "ilo",
+                        "--ip", self.net.unknown[0].usable[9].ip,
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--manager", "unittest02rsa.one-nyp.ms.com",
+                        "--mac", self.net.unknown[0].usable[9].mac])
 
     def testverifyaddunittest02rsa(self):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Manager: unittest02rsa.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.hostip11, command)
-        self.matchoutput(out, "MAC: %s" % self.hostmac11, command)
-        self.matchoutput(out, "Interface: ilo %s boot=False" % self.hostmac11,
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[9].ip,
+                         command)
+        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[9].mac,
+                         command)
+        self.matchoutput(out,
+                         "Interface: ilo %s boot=False" %
+                         self.net.unknown[0].usable[9].mac,
                          command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
 
@@ -97,23 +109,26 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
-                         self.hostip11,
+                         self.net.unknown[0].usable[9].ip,
                          command)
 
     def testaddbadunittest12bmc(self):
         command = ["add", "interface", "--interface", "bmc",
-                        "--hostname", "unittest12.aqd-unittest.ms.com",
-                        "--mac", self.hostmac12]
+                   "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--mac", self.net.unknown[0].usable[7].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already has an interface with mac", command)
 
     def testfailaddunittest12bmc(self):
-        command = ["add", "manager", "--ip", self.hostip10,
+        command = ["add", "manager", "--ip", self.net.unknown[0].usable[0].ip,
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--manager", "unittest02ipmi.one-nyp.ms.com",
-                   "--interface", "ipmi", "--mac", self.hostmac10]
+                   "--interface", "ipmi",
+                   "--mac", self.net.unknown[0].usable[0].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Mac '%s' already in use" % self.hostmac10,
+        self.matchoutput(out,
+                         "Mac '%s' already in use" %
+                         self.net.unknown[0].usable[0].mac,
                          command)
 
     # Taking advantage of the fact that this runs after add_machine
@@ -122,7 +137,7 @@ class TestAddManager(TestBrokerCommand):
     def testaddunittest12bmc(self):
         self.noouttest(["add", "interface", "--interface", "bmc",
                         "--hostname", "unittest12.aqd-unittest.ms.com",
-                        "--mac", self.hostmac13])
+                        "--mac", self.net.unknown[0].usable[8].mac])
 
     def testverifyunittest13removed(self):
         command = "show host --hostname unittest13.one-nyp.ms.com"
@@ -142,17 +157,18 @@ class TestAddManager(TestBrokerCommand):
     def testverifyunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "IP: %s" % self.hostip12, command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[7].ip,
+                         command)
         self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out,
                          "Manager: unittest12r.aqd-unittest.ms.com [%s]" %
-                         self.hostip13,
+                         self.net.unknown[0].usable[8].ip,
                          command)
         self.matchoutput(out, "Interface: eth0 %s boot=True" %
-                         self.hostmac12.lower(), command)
+                         self.net.unknown[0].usable[7].mac.lower(), command)
         self.matchoutput(out, "Interface: bmc %s boot=False" %
-                         self.hostmac13.lower(), command)
+                         self.net.unknown[0].usable[8].mac.lower(), command)
 
 
 if __name__=='__main__':

@@ -45,16 +45,19 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateut3c5n10eth0mac(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
-            "--machine", "ut3c5n10", "--mac", self.hostmac6])
+                        "--machine", "ut3c5n10",
+                        "--mac", self.net.unknown[0].usable[11].mac])
 
     def testupdateut3c5n10eth0ip(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
-            "--machine", "ut3c5n10", "--ip", self.hostip6])
+                        "--machine", "ut3c5n10",
+                        "--ip", self.net.unknown[0].usable[11].ip])
 
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
-            "--hostname", "unittest02.one-nyp.ms.com", "--mac", self.hostmac7,
-            "--ip", self.hostip7, "--boot"])
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--mac", self.net.unknown[0].usable[12].mac,
+                        "--ip", self.net.unknown[0].usable[12].ip, "--boot"])
 
     def testupdateut3c5n10eth2(self):
         self.badrequesttest(["update", "interface", "--interface", "eth2",
@@ -66,26 +69,28 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c5n10", command)
         # FIXME: This is currently not working, command nees rethinking.
         #self.matchoutput(out, "IP: %s" % self.hostip7, command)
-        self.matchoutput(out, "Interface: eth0 %s boot=False" %
-                         self.hostmac6.lower(), command)
-        self.matchoutput(out, "Interface: eth1 %s boot=True" %
-                         self.hostmac7.lower(), command)
+        self.matchoutput(out,
+                         "Interface: eth0 %s boot=False" %
+                         self.net.unknown[0].usable[11].mac.lower(),
+                         command)
+        self.matchoutput(out,
+                         "Interface: eth1 %s boot=True" %
+                         self.net.unknown[0].usable[12].mac.lower(),
+                         command)
 
     def testverifycatut3c5n10interfaces(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                """"cards/nic/eth0/hwaddr" = "%s";""" % self.hostmac6.upper(),
-                command)
-        self.matchclean(out,
-                """"cards/nic/eth0/boot" = true;""",
-                command)
+                         """"cards/nic/eth0/hwaddr" = "%s";""" %
+                         self.net.unknown[0].usable[11].mac.upper(),
+                         command)
+        self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
         self.matchoutput(out,
-                """"cards/nic/eth1/hwaddr" = "%s";""" % self.hostmac7.upper(),
-                command)
-        self.matchoutput(out,
-                """"cards/nic/eth1/boot" = true;""",
-                command)
+                         """"cards/nic/eth1/hwaddr" = "%s";""" %
+                         self.net.unknown[0].usable[12].mac.upper(),
+                         command)
+        self.matchoutput(out, """"cards/nic/eth1/boot" = true;""", command)
 
 
 if __name__=='__main__':

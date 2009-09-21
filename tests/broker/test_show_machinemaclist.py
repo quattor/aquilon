@@ -45,7 +45,10 @@ class TestShowMachineMacList(TestBrokerCommand):
     def testshowmachinemaclist(self):
         command = "show machinemaclist"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, self.hostmac2.lower() + ",ut3c1n3,unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out,
+                         self.net.unknown[0].usable[2].mac.lower() +
+                         ",ut3c1n3,unittest00.one-nyp.ms.com",
+                         command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachineMacList)
