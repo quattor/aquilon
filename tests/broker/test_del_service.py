@@ -70,6 +70,15 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: bootserver Instance: np.test", command)
 
+    def testdellemoninstance(self):
+        command = "del service --service lemon --instance ny-prod"
+        self.noouttest(command.split(" "))
+
+    def testverifydellemoninstance(self):
+        command = "show service --service lemon"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Service: lemon Instance: ny-prod", command)
+
     def testdeldnsinstance(self):
         command = "del service --service dns --instance nyinfratest"
         self.noouttest(command.split(" "))

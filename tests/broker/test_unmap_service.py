@@ -73,6 +73,16 @@ class TestUnmapService(TestBrokerCommand):
                    "--service=aqd", "--instance=ny-prod", "--campus=ny"]
         self.notfoundtest(command)
 
+    def testunmaplemon(self):
+        self.noouttest(["unmap", "service", "--campus", "ny",
+                        "--service", "lemon", "--instance", "ny-prod",
+                        "--archetype", "aquilon"])
+
+    def testverifyunmaplemon(self):
+        command = ["show_map", "--archetype=aquilon",
+                   "--service=lemon", "--instance=ny-prod", "--campus=ny"]
+        self.notfoundtest(command)
+
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "bootserver", "--instance", "np.test",

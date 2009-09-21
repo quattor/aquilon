@@ -49,8 +49,17 @@ class TestPrebindServer(TestBrokerCommand):
             "--hostname", "nyaqd1.ms.com",
             "--service", "aqd", "--instance", "ny-prod"])
 
-    def testverifybindutsi1(self):
+    def testverifybindaqd(self):
         command = "show service --service aqd --instance ny-prod"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
+
+    def testbindlemonserver(self):
+        self.noouttest(["bind", "server", "--hostname", "nyaqd1.ms.com",
+                        "--service", "lemon", "--instance", "ny-prod"])
+
+    def testverifybindlemon(self):
+        command = "show service --service lemon --instance ny-prod"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: nyaqd1.ms.com", command)
 
@@ -59,7 +68,7 @@ class TestPrebindServer(TestBrokerCommand):
                         "--hostname=server9.aqd-unittest.ms.com",
                         "--service=bootserver", "--instance=np.test"])
 
-    def testverifybindutsi1(self):
+    def testverifybindbootserver(self):
         command = "show service --service bootserver --instance np.test"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: server9.aqd-unittest.ms.com", command)
