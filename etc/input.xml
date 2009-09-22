@@ -760,33 +760,35 @@
    </command>
 
    <command name="add_network">
-     Define a new network.
+      Define a new network.
 
-     Specify the network either by name or ip/mask of the network.
-     <optgroup name="add_network_mandatory" mandatory="True" fields="all">
-	<option name="network" type="string">Network name</option>
-	<option name="ip" type="string">Network IP address</option>
-	<option name="mask" type="string">Network IP mask</option>
-	<optgroup name="update_network_location_opts" mandatory="True" fields="any">
+      Specify both a name for the network and its ip and mask.  For mask,
+      use 1 for a /32, 2 for a /31, 4 for a /30, 8 for a /29, 16 for a /28,
+      32 for a /27, 64 for a /26, 128 for a /25, etc.
+      <optgroup name="add_network_mandatory" mandatory="True" fields="all">
+         <option name="network" type="string">Network name</option>
+         <option name="ip" type="string">Network IP address</option>
+         <option name="mask" type="string">Network IP mask</option>
+         <optgroup name="update_network_location_opts" mandatory="True" fields="any">
             <option name="company" type="string">Company</option>
-	    <option name="hub" type="string">Hub</option>
-	    <option name="continent" type="string">Continent</option>
-	    <option name="country" type="string">Country</option>
-	    <option name="campus" type="string">Campus</option>
-	    <option name="city" type="string">City</option>
-	    <option name="building" type="string">Building</option>
-	    <option name="rack" type="string">Rack</option>
-	    <option name="desk" type="string">Desk</option>
-	</optgroup>
-     </optgroup>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
 
-     <optgroup name="add_network_modifiers" mandatory="False" fields="any">
-	<option name="discoverable" type="string">Set network(s) updateable</option>
-	<option name="discovered" type="string">Set network(s) updated</option>
-	<option name="type" type="string">Network type, defaults to 'unknown'</option>
-	<option name="side" type="string">Network side, defaults to 'a'</option>
-    </optgroup>
-     <transport method="put" path="network" />
+      <optgroup name="add_network_modifiers" mandatory="False" fields="any">
+         <option name="discoverable" type="string">Set network(s) updateable</option>
+         <option name="discovered" type="string">Set network(s) updated</option>
+         <option name="type" type="string">Network type, defaults to 'unknown'</option>
+         <option name="side" type="string">Network side, defaults to 'a'</option>
+      </optgroup>
+      <transport method="put" path="network/%(ip)s" />
    </command>
 
    <command name="update_network">
