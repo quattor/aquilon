@@ -31,7 +31,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException)
-from aquilon.server.broker import BrokerCommand
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model.network import Network, _mask_to_cidr, get_bcast
@@ -73,6 +73,9 @@ class CommandAddNetwork(BrokerCommand):
                 discoverable = "n"
             else:
                 raise ArgumentError('Did not recognise supplied argument to discoverable flag: "%s"' % discoverable)
+
+        # This *really* needs better documentation...
+        mask = force_int("mask", mask)
 
         # Okay, all looks good, let's create the network
         c = _mask_to_cidr[mask]
