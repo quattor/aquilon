@@ -791,6 +791,16 @@
       <transport method="put" path="network/%(ip)s" />
    </command>
 
+   <command name="del_network">
+      Remove a network definition.
+
+      Specify the network by its IP.
+      <optgroup name="del_network_mandatory" mandatory="True" fields="all">
+         <option name="ip" type="string">Network IP address</option>
+      </optgroup>
+      <transport method="delete" path="network/%(ip)s" />
+   </command>
+
    <command name="update_network">
      Update information about the specified network or networks.
 
