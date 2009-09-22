@@ -35,6 +35,7 @@ from aquilon.aqdb.model import DynamicStub, System, DnsDomain
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.column_types.IPV4 import dq_to_int, int_to_dq
 from aquilon.exceptions_ import ArgumentError
+from aquilon.server.dbwrappers.interface import restrict_tor_offsets
 
 
 class CommandAddDynamicRange(BrokerCommand):
@@ -66,6 +67,7 @@ class CommandAddDynamicRange(BrokerCommand):
         endint = dq_to_int(endip)
         for ipint in range(startint, endint + 1):
             ip = int_to_dq(ipint)
+            restrict_tor_offsets(startnet, ip)
             name = "%s-%s" % (prefix, ip.replace('.', '-'))
             dbdynamic_stub = DynamicStub(name=name, dns_domain=dbdns_domain,
                                          ip=ip, network=startnet)
