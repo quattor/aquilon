@@ -31,15 +31,19 @@
     
 """
 
+import sys
+# Need at least this version for zope.interface > 3.3.0 and the
+# default for python 2.5.4 is ms.version 1.5-py25.
+# Should be no harm for users without /ms/dist as python ignores
+# invalid path entries.
+sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
 
 import ms.version
 
 ms.version.addpkg('setuptools', '0.6c8-py25')
 ms.version.addpkg('protoc', 'prod', meta='aquilon')
-# The ms.version code has a problem finding the 3.4.1-py25 package...
-# falling back to 3.3.0 for now.
-ms.version.addpkg('zope.interface', '3.3.0', 'dist')
-ms.version.addpkg('twisted', '8.1.0', 'dist')
+ms.version.addpkg('zope.interface', '3.5.2', 'dist')
+ms.version.addpkg('twisted', '8.2.0-ms1', 'dist')
 ms.version.addpkg('ms.modulecmd', '1.0.1', 'dist')
 ms.version.addpkg('coverage', '2.80', 'dist')
 
