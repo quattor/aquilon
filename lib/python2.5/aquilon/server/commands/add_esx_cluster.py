@@ -35,7 +35,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.dbwrappers.domain import verify_domain
 
 
@@ -59,6 +58,8 @@ class CommandAddESXCluster(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if not dblocation:
             raise ArgumentError("cluster requires a location constraint")
+        if not dblocation.campus:
+            raise ArgumentError("location '%s' is not within a campus" %dblocation.name)
 
         Cluster.get_unique(session, cluster, preclude=True)
 
