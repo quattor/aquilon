@@ -123,6 +123,14 @@ class TestAddESXCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster 'utecl1' already exists", command)
 
+    def testfailaddnoncampus(self):
+        command = ["add_esx_cluster", "--cluster=uteclfail",
+                   "--metacluster=namc1", "--country=us",
+                   "--domain=unittest",
+                   "--archetype=vmhost", "--personality=esx_server"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "location 'us' is not within a campus", command)
+
     def testfailmetaclusternotfound(self):
         command = ["add_esx_cluster", "--cluster=utecl999",
                    "--domain=unittest",
