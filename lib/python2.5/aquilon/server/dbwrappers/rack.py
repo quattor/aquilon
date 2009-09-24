@@ -35,9 +35,12 @@ from aquilon.server.broker import force_int
 from aquilon.server.dbwrappers.location import get_location
 
 
-def get_or_create_rack(session, rackid, building, rackrow, rackcolumn,
-        fullname=None, comments=None):
-    dbbuilding = get_location(session, building=building)
+def get_or_create_rack(session, rackid, rackrow, rackcolumn,
+                       building=None, room=None, fullname=None, comments=None):
+    dblocation = get_location(session, building=building, room=room)
+    if not dblocation or not dblocation.building:
+        raise ArgumentError("No parent (building or room) given for rack.")
+    dbbuilding = dblocation.building
     if rackcolumn is not None:
         rackcolumn = force_int("rackcolumn", rackcolumn)
     if rackrow is not None:
@@ -64,7 +67,7 @@ def get_or_create_rack(session, rackid, building, rackrow, rackcolumn,
 
     if fullname is None:
         fullname = rack
-    dbrack = Rack(name=rack, fullname=fullname, parent=dbbuilding,
-            rack_row=rackrow, rack_column=rackcolumn, comments=comments)
+    dbrack = Rack(name=rack, fullname=fullname, parent=dblocation,
+                  rack_row=rackrow, rack_column=rackcolumn, comments=comments)
     session.add(dbrack)
     return dbrack

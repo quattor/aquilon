@@ -64,6 +64,7 @@ from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_add_required_service import TestAddRequiredService
 from test_add_building import TestAddBuilding
+from test_add_room import TestAddRoom
 from test_add_rack import TestAddRack
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
@@ -158,6 +159,7 @@ from test_del_model import TestDelModel
 from test_del_cpu import TestDelCpu
 from test_del_vendor import TestDelVendor
 from test_del_rack import TestDelRack
+from test_del_room import TestDelRoom
 from test_del_building import TestDelBuilding
 from test_del_required_service import TestDelRequiredService
 from test_del_service import TestDelService
@@ -190,6 +192,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestAddRequiredService, TestAddBuilding,
+                TestAddRoom,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddESXClusterAlignedService,
@@ -235,7 +238,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelESXClusterAlignedService,
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelModel, TestDelCpu, TestDelVendor,
-                TestDelRack,
+                TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
                 TestDelDomain, TestDelDnsDomain,

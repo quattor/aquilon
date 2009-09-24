@@ -38,8 +38,7 @@ from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
                                                  describe_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.aqdb.model import (TorSwitch, TorSwitchHw, Interface,
-                                 HardwareEntity, Rack)
+from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -47,13 +46,12 @@ class CommandAddTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch", "model"]
 
-    def render(self, session,
-            tor_switch, model,
-            rack, building, rackid, rackrow, rackcolumn,
-            interface, mac, ip,
-            cpuname, cpuvendor, cpuspeed, cpucount, memory,
-            serial,
-            user, **arguments):
+    def render(self, session, tor_switch, model,
+               rack, building, room, rackid, rackrow, rackcolumn,
+               interface, mac, ip,
+               cpuname, cpuvendor, cpuspeed, cpucount, memory,
+               serial,
+               user, **arguments):
         dbmodel = get_model(session, model)
 
         if dbmodel.machine_type not in ['tor_switch']:
@@ -62,13 +60,18 @@ class CommandAddTorSwitch(BrokerCommand):
 
         if rack:
             dblocation = get_location(session, rack=rack)
-        elif (building and rackid is not None and
-                rackrow and rackcolumn is not None):
+        elif ((building or room) and rackid is not None and
+              rackrow and rackcolumn is not None):
             dblocation = get_or_create_rack(session, rackid=rackid,
-                    building=building, rackrow=rackrow, rackcolumn=rackcolumn,
-                    comments="Created for tor_switch %s" % tor_switch)
+                                            rackrow=rackrow,
+                                            rackcolumn=rackcolumn,
+                                            building=building, room=room,
+                                            comments="Created for tor_switch "
+                                                     "%s" % tor_switch)
         else:
-            raise ArgumentError("Need to specify an existing --rack or provide --building, --rackid, --rackrow and --rackcolumn")
+            raise ArgumentError("Need to specify an existing --rack or "
+                                "provide --rackid, --rackrow and --rackcolumn "
+                                "along with --building or --room")
 
         (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                              tor_switch)

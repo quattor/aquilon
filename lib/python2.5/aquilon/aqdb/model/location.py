@@ -116,6 +116,10 @@ class Location(Base):
         return self.p_dict.get('building', None)
     building = property(_building)
 
+    def _room(self):
+        return self.p_dict.get('room', None)
+    room = property(_room)
+
     def _rack(self):
         return self.p_dict.get('rack', None)
     rack = property(_rack)
@@ -130,9 +134,11 @@ class Location(Base):
             self.sublocations[node] = node
 
     def sysloc(self):
-        if str(self.location_type) in ['building', 'rack', 'chassis', 'desk']:
-            return str('.'.join([str(self.p_dict[item]) for item in
-                ['building', 'city', 'continent']]))
+        components = ['building', 'city', 'continent']
+        for component in components:
+            if component not in self.p_dict:
+                return None
+        return str('.'.join([str(self.p_dict[item]) for item in components]))
 
     def _children(self):
         s = text("""select * from location

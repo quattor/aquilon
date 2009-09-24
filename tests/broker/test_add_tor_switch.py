@@ -230,7 +230,7 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testaddut01ga1s03(self):
         self.noouttest(["add", "tor_switch",
             "--tor_switch", "ut01ga1s03.aqd-unittest.ms.com",
-            "--building", "ut", "--rackid", "9",
+            "--room", "utroom2", "--rackid", "9",
             "--rackrow", "g", "--rackcol", "3",
             "--model", "rs g8000",
             "--interface", "xge49",

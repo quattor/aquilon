@@ -39,9 +39,9 @@ class CommandAddRack(BrokerCommand):
 
     def render(self, session, rackid, building, row, column, fullname,
             comments, **arguments):
-        dbrack = get_or_create_rack(session=session, rackid=rackid,
-                building=building, rackrow=row, rackcolumn=column,
-                fullname=fullname, comments=comments)
+        get_or_create_rack(session=session, rackid=rackid, rackrow=row,
+                           rackcolumn=column, building=building,
+                           fullname=fullname, comments=comments)
         return
 
 
