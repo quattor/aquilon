@@ -59,6 +59,9 @@ class CommandUpdateESXCluster(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if dblocation:
             errors = []
+            if not dblocation.campus:
+                errors.append("location %s '%s' is not within a campus" %
+                              (dblocation.location_type, dblocation.name))
             for host in dbcluster.hosts:
                 if host.machine.location != dblocation and \
                    dblocation not in host.machine.location.parents:
