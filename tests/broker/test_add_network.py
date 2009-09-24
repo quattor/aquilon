@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the show service --all command."""
+"""Module for testing the add_network command."""
 
 import os
 import sys
@@ -41,23 +41,42 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestShowNetwork(TestBrokerCommand):
+class TestAddNetwork(TestBrokerCommand):
+
+    def testaddnetwork(self):
+        for network in self.net.all:
+            command = ["add_network", "--network=%s" % network.ip,
+                       "--ip=%s" % network.ip, "--mask=%s" % network.mask,
+                       "--building=ut", "--type=%s" % network.nettype]
+            self.noouttest(command)
 
     def testshownetwork(self):
-        # We're only showing the networks for a building because for global the test would fail!
-        command = "show network --building np"
+        for network in self.net.all:
+            command = "show network --ip %s" % network.ip
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Network: %s" % network.ip, command)
+            self.matchoutput(out, "IP: %s" % network.ip, command)
+            self.matchoutput(out, "Netmask: %s" % network.netmask, command)
+            self.matchoutput(out, "Sysloc: ut.ny.na", command)
+            self.matchoutput(out, "Country: us", command)
+            self.matchoutput(out, "Side: a", command)
+            self.matchoutput(out, "Network Type: %s" % network.nettype,
+                             command)
+            self.matchoutput(out, "Discoverable: False", command)
+            self.matchoutput(out, "Discovered: False", command)
+
+    def testshownetworkbuilding(self):
+        command = "show_network --building ut"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Network", command)
-        self.matchoutput(out, "np06ba6s45_netapp", command)
-        self.matchoutput(out, "10.184.78.224", command)
-        self.matchoutput(out, "np.ny.na", command)
+        for network in self.net.all:
+            self.matchoutput(out, network.ip, command)
 
     def testshownetworkproto(self):
-        command = "show network --building np --format proto"
+        command = "show network --building ut --format proto"
         out = self.commandtest(command.split(" "))
         self.parse_netlist_msg(out)
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowNetwork)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

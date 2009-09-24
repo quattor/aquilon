@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the add windows host command."""
+"""Module for testing the del_network command."""
 
 import os
 import sys
@@ -41,27 +41,25 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestAddWindowsHost(TestBrokerCommand):
+class TestDelNetwork(TestBrokerCommand):
 
-    def testaddunittest01(self):
-        self.noouttest(["add", "windows", "host",
-                        "--hostname", "unittest01.one-nyp.ms.com",
-                        "--ip", self.net.unknown[0].usable[10].ip,
-                        "--machine", "ut3c1n4"])
+    def testdelnetwork(self):
+        for network in self.net.all:
+            command = ["del_network", "--ip=%s" % network.ip]
+            self.noouttest(command)
 
-    def testverifyaddunittest01(self):
-        command = "show host --hostname unittest01.one-nyp.ms.com"
+    def testshownetwork(self):
+        for network in self.net.all:
+            command = "show network --ip %s" % network.ip
+            out = self.notfoundtest(command.split(" "))
+
+    def testshownetworkproto(self):
+        command = "show network --building ut --format proto"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[10].ip,
-                         command)
-        self.matchoutput(out, "Blade: ut3c1n4", command)
-        self.matchoutput(out, "Archetype: windows", command)
-        self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ny-prod", command)
-        self.matchoutput(out, "Build Status: build", command)
+        self.parse_netlist_msg(out, expect=0)
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddWindowsHost)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
+

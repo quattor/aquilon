@@ -143,26 +143,35 @@ class TestAddTorSwitch(TestBrokerCommand):
     # Test adding a switch, creating a new rack, and adding an IP.
     def testaddnp999gd1r01(self):
         self.noouttest(["add", "tor_switch",
-            "--tor_switch", "np999gd1r01.aqd-unittest.ms.com",
-            "--building", "np", "--rackid", "999",
-            "--rackrow", "zz", "--rackcol", "11",
-            "--model", "rs g8000",
-            "--interface", "xge49",
-            "--mac", self.hostmac5, "--ip", self.hostip5])
+                        "--tor_switch", "np999gd1r01.aqd-unittest.ms.com",
+                        "--building", "np", "--rackid", "999",
+                        "--rackrow", "zz", "--rackcol", "11",
+                        "--model", "rs g8000", "--interface", "xge49",
+                        "--mac", self.net.tor_net[5].usable[0].mac,
+                        "--ip", self.net.tor_net[5].usable[0].ip])
 
     def testverifynp999gd1r01(self):
         (out, command) = self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
                                            "bnt", "rs g8000",
                                            "np999", "zz", "11")
-        self.matchoutput(out, "IP: %s" % self.hostip5, command)
-        self.matchoutput(out, "Interface: xge49 %s boot=False" %
-                         self.hostmac5, command)
+        self.matchoutput(out,
+                         "IP: %s" % self.net.tor_net[5].usable[0].ip,
+                         command)
+        self.matchoutput(out,
+                         "Interface: xge49 %s boot=False" %
+                         self.net.tor_net[5].usable[0].mac,
+                         command)
 
     def testverifyaddnp999gd1r01csv(self):
-        command = "show tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com --format=csv"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com,np999,np,bnt,rs g8000,,xge49,%s,%s" %
-                (self.hostmac5, self.hostip5), command)
+        command = ["show_tor_switch", "--format=csv",
+                   "--tor_switch=np999gd1r01.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "np999gd1r01.aqd-unittest.ms.com,np999,np,"
+                         "bnt,rs g8000,,xge49,%s,%s" %
+                         (self.net.tor_net[5].usable[0].mac,
+                          self.net.tor_net[5].usable[0].ip),
+                         command)
 
     def testverifyshowtorswitchrack(self):
         command = "show tor_switch --rack np999"
@@ -216,12 +225,12 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga1s02(self):
         self.noouttest(["add", "tor_switch",
-            "--tor_switch", "ut01ga1s02.aqd-unittest.ms.com",
-            "--building", "ut", "--rackid", "8",
-            "--rackrow", "g", "--rackcol", "2",
-            "--model", "rs g8000",
-            "--interface", "xge49",
-            "--mac", self.hostmac14, "--ip", self.hostip14])
+                        "--tor_switch", "ut01ga1s02.aqd-unittest.ms.com",
+                        "--building", "ut", "--rackid", "8",
+                        "--rackrow", "g", "--rackcol", "2",
+                        "--model", "rs g8000", "--interface", "xge49",
+                        "--mac", self.net.tor_net[0].usable[0].mac,
+                        "--ip", self.net.tor_net[0].usable[0].ip])
 
     def testverifyut01ga1s02(self):
         self.verifyswitch("ut01ga1s02.aqd-unittest.ms.com",
@@ -229,12 +238,12 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga1s03(self):
         self.noouttest(["add", "tor_switch",
-            "--tor_switch", "ut01ga1s03.aqd-unittest.ms.com",
-            "--room", "utroom2", "--rackid", "9",
-            "--rackrow", "g", "--rackcol", "3",
-            "--model", "rs g8000",
-            "--interface", "xge49",
-            "--mac", self.hostmac50, "--ip", self.hostip50])
+                        "--tor_switch", "ut01ga1s03.aqd-unittest.ms.com",
+                        "--room", "utroom2", "--rackid", "9",
+                        "--rackrow", "g", "--rackcol", "3",
+                        "--model", "rs g8000", "--interface", "xge49",
+                        "--mac", self.net.tor_net[1].usable[0].mac,
+                        "--ip", self.net.tor_net[1].usable[0].ip])
 
     def testverifyut01ga1s03(self):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
@@ -242,12 +251,12 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga1s04(self):
         self.noouttest(["add", "tor_switch",
-            "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
-            "--building", "ut", "--rackid", "10",
-            "--rackrow", "g", "--rackcol", "4",
-            "--model", "rs g8000",
-            "--interface", "xge49",
-            "--mac", self.hostmac100, "--ip", self.hostip100])
+                        "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
+                        "--building", "ut", "--rackid", "10",
+                        "--rackrow", "g", "--rackcol", "4",
+                        "--model", "rs g8000", "--interface", "xge49",
+                        "--mac", self.net.tor_net[2].usable[0].mac,
+                        "--ip", self.net.tor_net[2].usable[0].ip])
 
     def testverifyut01ga1s04(self):
         self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
@@ -260,9 +269,12 @@ class TestAddTorSwitch(TestBrokerCommand):
                    "--rackrow", "g", "--rackcol", "2",
                    "--model", "rs g8000",
                    "--interface", "xge49",
-                   "--mac", self.hostmac14, "--ip", self.hostip14]
+                   "--mac", self.net.tor_net[0].usable[0].mac,
+                   "--ip", self.net.tor_net[0].usable[0].ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Mac '%s' already in use" % self.hostmac14,
+        self.matchoutput(out,
+                         "Mac '%s' already in use" %
+                         self.net.tor_net[0].usable[0].mac,
                          command)
 
     def testverifyrejectut01ga1s99(self):

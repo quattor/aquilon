@@ -45,15 +45,17 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest00(self):
         self.noouttest(["add", "aquilon", "host",
-            "--hostname", "unittest00.one-nyp.ms.com", "--ip", self.hostip2,
-            "--machine", "ut3c1n3", "--domain", "unittest",
-            "--personality", "inventory"])
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--ip", self.net.unknown[0].usable[2].ip,
+                        "--machine", "ut3c1n3", "--domain", "unittest",
+                        "--personality", "inventory"])
 
     def testverifyaddunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.hostip2, command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[2].ip,
+                         command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: inventory", command)
@@ -74,16 +76,18 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest12(self):
         self.noouttest(["add", "aquilon", "host",
-            "--hostname", "unittest12.aqd-unittest.ms.com",
-            "--ip", self.hostip12, "--buildstatus", "blind",
-            "--machine", "ut3s01p1a", "--domain", "unittest"])
+                        "--hostname", "unittest12.aqd-unittest.ms.com",
+                        "--ip", self.net.unknown[0].usable[7].ip,
+                        "--buildstatus", "blind",
+                        "--machine", "ut3s01p1a", "--domain", "unittest"])
 
     def testverifyaddunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.hostip12, command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[7].ip,
+                         command)
         self.matchoutput(out, "Rackmount: ut3s01p1a", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: inventory", command)
@@ -92,17 +96,19 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest13(self):
         self.noouttest(["add", "aquilon", "host",
-            "--hostname", "unittest13.aqd-unittest.ms.com",
-            "--ip", self.hostip13, "--buildstatus", "blind",
-            "--machine", "ut3s01p1b", "--domain", "unittest",
-            "--personality", "compileserver"])
+                        "--hostname", "unittest13.aqd-unittest.ms.com",
+                        "--ip", self.net.unknown[0].usable[8].ip,
+                        "--buildstatus", "blind",
+                        "--machine", "ut3s01p1b", "--domain", "unittest",
+                        "--personality", "compileserver"])
 
     def testverifyaddunittest13(self):
         command = "show host --hostname unittest13.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest13.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.hostip13, command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[8].ip,
+                         command)
         self.matchoutput(out, "Rackmount: ut3s01p1b", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: compileserver", command)

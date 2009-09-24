@@ -32,15 +32,14 @@ To an extent, this has become a dumping ground for any common ip methods.
 
 """
 
-from twisted.python import log
+
 from sqlalchemy.exceptions import InvalidRequestError
-from sqlalchemy.sql.expression import asc, desc
+from sqlalchemy.sql.expression import desc
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.IPV4 import dq_to_int
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import (Interface, Machine, ObservedMac, TorSwitch,
-                                 System)
+from aquilon.aqdb.model import Interface, Machine, ObservedMac, System
 from aquilon.server.dbwrappers.system import get_system
 
 
@@ -56,29 +55,38 @@ def get_interface(session, interface, machine, mac, ip):
         q = q.filter_by(mac=mac)
     if ip:
         q = q.filter_by(ip=ip)
-        pass
 
     try:
         dbinterface = q.one()
     except InvalidRequestError, e:
-        raise ArgumentError("Interface not found, make sure it has been specified uniquely: %s" % e)
+        raise ArgumentError("Interface not found, make sure it has been "
+                            "specified uniquely: %s" % e)
     return dbinterface
 
-def restrict_tor_offsets(session, dbnetwork, ip):
+def restrict_tor_offsets(dbnetwork, ip):
     if ip is None:
         # Simple passthrough to make calling logic easier.
         return
     if dbnetwork.mask < 8:
         # This network doesn't have enough addresses, the test is irrelevant.
         return
-    dbtor_switch = session.query(TorSwitch).filter_by(network=dbnetwork).first()
-    if not dbtor_switch:
+
+    if dbnetwork.network_type == 'tor_net':
+        offsets = [6, 7]
+    elif dbnetwork.network_type == 'tor_net2':
+        offsets = [7, 8]
+    else:
         return
+
     netip = dq_to_int(dbnetwork.ip)
     thisip = dq_to_int(ip)
-    if thisip == (netip + 6) or thisip == (netip + 7):
-        raise ArgumentError("The IP address %s is reserved for dynamic dhcp on subnet %s by tor_switch %s." %
-                (ip, dbnetwork.ip, dbtor_switch.fqdn))
+
+    for offset in offsets:
+        if thisip == netip + offset:
+            raise ArgumentError("The IP address %s is reserved for dynamic "
+                                "dhcp for a tor_switch on subnet %s" %
+                                (ip, dbnetwork.ip))
+    return
 
 def generate_ip(session, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None,
@@ -105,7 +113,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         q = q.order_by(desc(ObservedMac.last_seen))
         dbsystem = q.first()
         if not dbsystem:
-            raise ArgumentError("No switch found in the discovery table for mac %s" % dbinterface.mac)
+            raise ArgumentError("No switch found in the discovery table for "
+                                "mac %s" % dbinterface.mac)
     if ipfromsystem:
         if ipfromip:
             raise ArgumentError("Cannot specify both --ipfromsystem and "
@@ -123,14 +132,17 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         if not dbnetwork:
             raise ArgumentError("Could not determine network to use for"
                                 "%s" % dbsystem.fqdn)
-    start = 2
-    if dbnetwork.network_type == 'tor_net' or \
-       session.query(TorSwitch).filter_by(network=dbnetwork).first():
-       #(dbsystem and isinstance(dbsystem, TorSwitch)):
+
+    if dbnetwork.network_type == 'tor_net':
         start = 8
+    elif dbnetwork.network_type == 'tor_net2':
+        start = 9
+    else:
+        start = 2
     # Not sure what to do about networks like /32 and /31...
     if dbnetwork.mask < start:
         start = 0
+
     pool = dbnetwork.addresses()
     if ipalgorithm is None or ipalgorithm == 'lowest':
         for ip in pool[start:]:

@@ -100,7 +100,7 @@ class CommandAddManager(BrokerCommand):
                                 "--ipfromip, --ipfromsystem, --autoip "
                                 "parameters")
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
+        restrict_tor_offsets(dbnetwork, ip)
 
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,
                             machine=dbmachine, ip=ip, network=dbnetwork,

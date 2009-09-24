@@ -46,59 +46,70 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testdeldifferentnetworks(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.dynamic_range_start,
-                   "--endip=8.8.12.1"]
+                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
+                   "--endip=%s" % self.net.tor_net2[1].usable[2].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
-    # These rely on hostip1 never having been used...
+    # These rely on the ip never having been used...
     def testdelnothingfound(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.hostip1, "--endip=%s" % self.hostip1]
+                   "--startip=%s" % self.net.tor_net2[0].usable[-2].ip,
+                   "--endip=%s" % self.net.tor_net2[0].usable[-1].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Nothing found in range", command)
 
     def testdelnostart(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.hostip1, "--endip=%s" % self.hostip2]
+                   "--startip=%s" % self.net.tor_net2[0].usable[1].ip,
+                   "--endip=%s" % self.net.tor_net2[0].usable[-3].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "No system found with IP address '%s'" % self.hostip1,
+                         "No system found with IP address '%s'" %
+                         self.net.tor_net2[0].usable[1].ip,
                          command)
 
     def testdelnoend(self):
-        # Through an odd twist, hostip16 is an earlier IP than 1...
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.hostip16, "--endip=%s" % self.hostip1]
+                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
+                   "--endip=%s" % self.net.tor_net2[0].usable[-2].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "No system found with IP address '%s'" % self.hostip1,
+                         "No system found with IP address '%s'" %
+                         self.net.tor_net2[0].usable[-2].ip,
                          command)
 
     def testdelnotdynamic(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.hostip12,
-                   "--endip=%s" % self.hostip13]
+                   "--startip=%s" % self.net.unknown[0].usable[7].ip,
+                   "--endip=%s" % self.net.unknown[0].usable[8].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The range contains non-dynamic systems",
                          command)
         self.matchoutput(out,
-                         "unittest12.aqd-unittest.ms.com (%s)" % self.hostip12,
+                         "unittest12.aqd-unittest.ms.com (%s)" %
+                         self.net.unknown[0].usable[7].ip,
                          command)
         self.matchoutput(out,
                          "unittest12r.aqd-unittest.ms.com (%s)" %
-                         self.hostip13,
+                         self.net.unknown[0].usable[8].ip,
                          command)
 
     def testdelrange(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.dynamic_range_start,
-                   "--endip=%s" % self.dynamic_range_end]
+                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
+                   "--endip=%s" % self.net.tor_net2[0].usable[-3].ip]
         self.noouttest(command)
 
     def testverifydelrange(self):
         command = "search_system --type=dynamic_stub"
         self.noouttest(command.split(" "))
+
+    def testdelendingrange(self):
+        command = ["del_dynamic_range",
+                   "--startip=%s" % self.net.tor_net2[1].usable[-1].ip,
+                   "--endip=%s" % self.net.tor_net2[1].usable[-1].ip]
+        self.noouttest(command)
 
 
 if __name__=='__main__':

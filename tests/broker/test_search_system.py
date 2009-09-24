@@ -100,19 +100,17 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
     def testipavailable(self):
-        command = "search system --ip %s" % self.hostip2
+        command = "search system --ip %s" % self.net.unknown[0].usable[2].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testipunavailable(self):
-        command = "search system --ip 4.2.2.4"
+        command = "search system --ip 199.98.16.4"
         self.noouttest(command.split(" "))
 
     def testnetworkipavailable(self):
-        command = "search system --networkip 8.8.4.0"
+        command = "search system --networkip %s" % self.net.unknown[0].ip
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
@@ -122,16 +120,18 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
 
     def testnetworkipunavailable(self):
-        command = "search system --ip 4.2.2.0"
-        self.noouttest(command.split(" "))
+        command = "search system --networkip 199.98.16.0"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Network with address 199.98.16.0 not found",
+                         command)
 
     def testmacavailable(self):
-        command = "search system --mac %s" % self.hostmac2
+        command = "search system --mac %s" % self.net.unknown[0].usable[2].mac
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testmacunavailable(self):
-        command = "search system --mac 02:02:02:02:02:02"
+        command = "search system --mac 02:02:c7:62:10:04"
         self.noouttest(command.split(" "))
 
     def testall(self):

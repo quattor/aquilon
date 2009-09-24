@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,29 +27,18 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-import os
-import sys
-import unittest
 
-if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
-
-from brokertest import TestBrokerCommand
+from aquilon.server.broker import BrokerCommand
+from aquilon.aqdb.model.network import Network
 
 
-class TestShowMachineMacList(TestBrokerCommand):
+class CommandDelNetwork(BrokerCommand):
 
-    def testshowmachinemaclist(self):
-        command = "show machinemaclist"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         self.net.unknown[0].usable[2].mac.lower() +
-                         ",ut3c1n3,unittest00.one-nyp.ms.com",
-                         command)
+    required_parameters = ["ip"]
 
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachineMacList)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    def render(self, session, ip, **arguments):
+        dbnetwork = Network.get_unique(session, ip, compel=True)
+        session.delete(dbnetwork)
+        return
+
 

@@ -45,6 +45,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
         self.config = Config()
+        self.net = DummyNetworks()
 
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
@@ -80,75 +81,6 @@ class TestBrokerCommand(unittest.TestCase):
                     "aurora_without_node")
         else:
             self.aurora_without_node = "pissp1"
-        self.hostip0 = "8.8.4.251"
-        self.netmask0 = "255.255.252.0"
-        self.broadcast0 = "8.8.7.255"
-        self.gateway0 = "8.8.4.1"
-        self.hostmac0 = "02:02:08:08:04:fb"
-        self.hostip1 = "8.8.4.252"
-        self.hostmac1 = "02:02:08:08:04:fc"
-        self.hostip2 = "8.8.4.253"
-        self.netmask2 = "255.255.252.0"
-        self.broadcast2 = "8.8.7.255"
-        self.gateway2 = "8.8.4.1"
-        self.hostmac2 = "02:02:08:08:04:fd"
-        self.hostip3 = "8.8.4.254"
-        self.netmask3 = "255.255.252.0"
-        self.broadcast3 = "8.8.7.255"
-        self.gateway3 = "8.8.4.1"
-        self.hostmac3 = "02:02:08:08:04:fe"
-        self.hostip4 = "8.8.5.251"
-        self.hostmac4 = "02:02:08:08:05:fb"
-        self.hostip5 = "8.8.5.252"
-        self.hostmac5 = "02:02:08:08:05:fc"
-        self.hostip6 = "8.8.5.253"
-        self.hostmac6 = "02:02:08:08:05:fd"
-        self.hostip7 = "8.8.5.254"
-        self.hostmac7 = "02:02:08:08:05:fe"
-        self.hostip8 = "8.8.6.251"
-        self.hostmac8 = "02:02:08:08:06:fb"
-        self.hostip9 = "8.8.6.252"
-        self.hostmac9 = "02:02:08:08:06:fc"
-        self.hostip10 = "8.8.6.253"
-        self.hostmac10 = "02:02:08:08:06:fd"
-        self.hostip11 = "8.8.6.254"
-        self.hostmac11 = "02:02:08:08:06:ff"
-        self.hostip12 = "8.8.7.251"
-        self.hostmac12 = "02:02:08:08:07:fb"
-        self.hostip13 = "8.8.7.252"
-        self.hostmac13 = "02:02:08:08:07:fc"
-        # This one is special, needs to be second-to-last on the subnet
-        self.hostip14 = "8.8.7.253"
-        self.hostmac14 = "02:02:08:08:07:fd"
-        # This one is special, needs to be last on the subnet before broadcast
-        self.hostip15 = "8.8.7.254"
-        self.hostmac15 = "02:02:08:08:07:fe"
-        # This one may be special... first 'available' on the subnet
-        self.hostip16 = "8.8.4.8"
-        self.hostmac16 = "02:02:08:08:04:08"
-        self.hostip17 = "8.8.4.9"
-        self.hostmac17 = "02:02:08:08:04:09"
-        # Just define a bunch of generic ones at once...
-        # First 50 are for a rack of hp machines, next 50 are verari.
-        for n in range(50, 150):
-            setattr(self, "hostip%d" % n, "8.8.5.%d" % (n-50))
-            setattr(self, "hostmac%d" % n, "02:02:08:08:05:%02x" % (n-50))
-        # Let config settings override any of the above.
-        for n in range(150):
-            for h in ["hostip", "hostmac", "broadcast", "gateway", "netmask"]:
-                p = "%s%s" % (h, n)
-                if self.config.has_option("unittest", p):
-                    setattr(self, p, self.config.get("unittest", p))
-        if self.config.has_option("unittest", "dynamic_range_start"):
-            self.dynamic_range_start = self.config.get("unittest",
-                                                       "dynamic_range_start")
-        else:
-            self.dynamic_range_start = "8.8.6.10"
-        if self.config.has_option("unittest", "dynamic_range_end"):
-            self.dynamic_range_end = self.config.get("unittest",
-                                                     "dynamic_range_end")
-        else:
-            self.dynamic_range_end = "8.8.6.20"
 
     def tearDown(self):
         pass
@@ -524,3 +456,78 @@ class TestBrokerCommand(unittest.TestCase):
                   % (command, out, err))
 
 
+class DummyIP(object):
+    def __init__(self, parts):
+        self.ip = ".".join([str(i) for i in parts])
+        self.mac = "02:02:%02x:%02x:%02x:%02x" % parts
+
+
+class NetworkInfo(object):
+    def __init__(self, ip, mask, nettype):
+        # Currently only good for mask in [64, 128].
+        self.ip = ip
+        self.mask = mask
+        self.nettype = nettype
+        parts = ip.split(".")
+        gateway = [int(i) for i in parts]
+        broadcast = gateway[:]
+        gateway[3] += 1
+        broadcast[3] = broadcast[3] + mask - 1
+        # Assumes gateway is first and broadcast is last.
+        self.gateway = ".".join([str(i) for i in gateway])
+        self.broadcast = ".".join([str(i) for i in broadcast])
+
+        if self.mask == 64:
+            self.netmask = "255.255.255.192"
+        elif self.mask == 128:
+            self.netmask = "255.255.255.128"
+
+        if nettype == 'tor_net':
+            offsets = [6, 7]
+        elif nettype == 'tor_net2':
+            offsets = [7, 8]
+        else:
+            offsets = []
+
+        self.usable = list()
+        self.reserved = list()
+        usable_start = gateway[3] + 1
+        for offset in offsets:
+            reserved = gateway[:]
+            reserved[3] = gateway[3] - 1 + offset
+            usable_start = reserved[3] + 1
+            self.reserved.append(DummyIP(tuple(reserved)))
+        for i in range(usable_start, broadcast[3]):
+            newip = gateway[:]
+            newip[3] = i
+            self.usable.append(DummyIP(tuple(newip)))
+
+
+class DummyNetworks(object):
+    # Borg
+    __shared_state = {}
+
+    def __init__(self, *args, **kwargs):
+        self.__dict__ = self.__shared_state
+        if getattr(self, "unknown", None):
+            return
+        object.__init__(self, *args, **kwargs)
+        self.unknown = list()
+        self.tor_net = list()
+        self.tor_net2 = list()
+        self.all = list()
+        self.unknown.append(NetworkInfo("4.2.1.0", 64, "unknown"))
+        self.unknown.append(NetworkInfo("4.2.1.64", 64, "unknown"))
+        self.tor_net.append(NetworkInfo("4.2.1.128", 64, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.1.192", 64, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.0", 64, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.64", 64, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.128", 64, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.192", 64, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.3.0", 128, "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.3.128", 128, "tor_net"))
+        self.tor_net2.append(NetworkInfo("4.2.4.0", 128, "tor_net2"))
+        self.tor_net2.append(NetworkInfo("4.2.4.128", 128, "tor_net2"))
+        self.all.extend(self.unknown)
+        self.all.extend(self.tor_net)
+        self.all.extend(self.tor_net2)

@@ -99,7 +99,7 @@ class CommandAddHost(BrokerCommand):
         # the next two.
         ip = generate_ip(session, dbinterface, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(session, dbnetwork, ip)
+        restrict_tor_offsets(dbnetwork, ip)
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,

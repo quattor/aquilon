@@ -75,7 +75,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.system.mac = mac
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
-            restrict_tor_offsets(session, dbnetwork, ip)
+            restrict_tor_offsets(dbnetwork, ip)
             if dbinterface.system:
                 dbinterface.system.ip = ip
                 dbinterface.system.network = dbnetwork
