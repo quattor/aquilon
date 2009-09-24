@@ -73,6 +73,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "cluster conflicts with rack", command)
 
+    def test_090_verifyaddmachines(self):
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "Virtual Machine count: 9", command)
+
     def test_100_addinterfaces(self):
         for i in range(1, 8):
             self.noouttest(["add", "interface", "--machine", "evm%s" % i,
@@ -110,6 +116,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "would exceed the metacluster's max_shares",
                          command)
+
+    def test_190_verifyadddisk(self):
+        command = ["show_metacluster", "--metacluster=namc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "MetaCluster: namc1", command)
+        for i in range(1, 9):
+            self.matchoutput(out, "Share: test_share_%s" % i, command)
+        self.matchclean(out, "Share: test_share_9", command)
 
     def test_200_updatemachine(self):
         self.noouttest(["update_machine", "--machine", "evm9",

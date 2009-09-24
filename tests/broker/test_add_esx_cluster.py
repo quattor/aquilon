@@ -66,6 +66,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -98,6 +99,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
         self.matchoutput(out, "vm_to_host_ratio: 102", command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -154,6 +156,14 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "esx cluster: utecl1", command)
         self.matchoutput(out, "esx cluster: utecl2", command)
 
+    def testverifyshowmetacluster(self):
+        command = "show metacluster --metacluster namc1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "MetaCluster: namc1", command)
+        self.matchoutput(out, "Member: esx cluster utecl1", command)
+        self.matchoutput(out, "Member: esx cluster utecl2", command)
+        self.matchclean(out, "Member: esx cluster utecl3", command)
+
     def testnotfoundesx_cluster(self):
         command = "show esx_cluster --cluster esx_cluster-does-not-exist"
         self.notfoundtest(command.split(" "))
@@ -176,6 +186,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 0", command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -211,6 +222,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)

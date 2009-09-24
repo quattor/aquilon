@@ -41,18 +41,21 @@ class ClusterFormatter(ObjectFormatter):
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
-        details.append(indent + "  vm_to_host_ratio: %s" %
-                       cluster.vm_to_host_ratio)
+        if hasattr(cluster, "vm_to_host_ratio"):
+            details.append(indent + "  vm_to_host_ratio: %s" %
+                           cluster.vm_to_host_ratio)
+            details.append(indent + "  Virtual Machine count: %s" %
+                           len(cluster.machines))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         details.append(self.redirect_raw(cluster.domain, indent + "  "))
         for dbsi in cluster.service_bindings:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %
                            (dbsi.service.name, dbsi.name))
+        for host in cluster.hosts:
+            details.append(indent + "  Member: %s" % host.fqdn)
         if cluster.comments:
             details.append(indent + "  Comments: %s" % cluster.comments)
-        # FIXME: Add members?
-        # FIXME: Add count of virtual machines?
         return "\n".join(details)
 
 ObjectFormatter.handlers[Cluster] = ClusterFormatter()

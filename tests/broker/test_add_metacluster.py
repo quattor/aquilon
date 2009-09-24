@@ -56,6 +56,8 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: %s" % default_members, command)
         self.matchoutput(out, "Max shares: 8", command)
         self.matchclean(out, "Comments", command)
+        self.matchclean(out, "Member:", command)
+        self.matchclean(out, "Share:", command)
 
     def testfailaddexisting(self):
         command = "add metacluster --metacluster namc1"

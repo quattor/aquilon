@@ -61,6 +61,12 @@ class TestBindESXCluster(TestBrokerCommand):
             self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
                              command)
             self.matchoutput(out, "Member of esx cluster: utecl1", command)
+        command = "show esx cluster --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "esx cluster: utecl1", command)
+        for i in range(1, 5):
+            self.matchoutput(out, "Member: evh%s.aqd-unittest.ms.com" %i,
+                             command)
 
     def testfailmissingcluster(self):
         command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
