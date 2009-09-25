@@ -27,12 +27,9 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.aqdb.model import OperatingSystem
+from aquilon.aqdb.model import OperatingSystem, Archetype
 from aquilon.server.broker import BrokerCommand
-from aquilon.exceptions_ import NotFoundException
-from aquilon.server.dbwrappers.os import get_one_os
 
 
 class CommandDelOS(BrokerCommand):
@@ -40,11 +37,11 @@ class CommandDelOS(BrokerCommand):
     required_parameters = ["osname", "osversion", "archetype"]
 
     def render(self, session, osname, osversion, archetype, **arguments):
-
-        try:
-            existing = get_one_os(session, osname, osversion, archetype)
-        except NoResultFound:
-            raise NotFoundException("OS version not found")
-        session.delete(existing)
-
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        dbos = OperatingSystem.get_unique(session, name=osname,
+                                          version=osversion,
+                                          archetype=dbarchetype, compel=True)
+        session.delete(dbos)
         return
+
+

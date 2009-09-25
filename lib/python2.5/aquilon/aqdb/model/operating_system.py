@@ -43,6 +43,7 @@ _ABV = 'os'
 class OperatingSystem(Base):
     """ Operating Systems """
     __tablename__  = _TN
+    _class_label = 'Operating System'
 
     id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
     name = Column(AqStr(32), nullable=False)

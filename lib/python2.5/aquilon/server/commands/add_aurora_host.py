@@ -36,7 +36,6 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.server.dbwrappers.os import get_one_os
 from aquilon.server.dbwrappers.model import get_model
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw,
                                  ChassisSlot, Machine, DnsDomain)

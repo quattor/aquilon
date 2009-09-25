@@ -1700,6 +1700,9 @@
          <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being added to</option>
       </optgroup>
+      <optgroup name="add_os_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
       <transport method="put" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
   </command>
 

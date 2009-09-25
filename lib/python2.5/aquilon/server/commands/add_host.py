@@ -32,7 +32,6 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
-from aquilon.server.dbwrappers.os import get_one_os
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
@@ -41,7 +40,7 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Host
+from aquilon.aqdb.model import Host, OperatingSystem
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.processes import DSDBRunner
@@ -71,7 +70,9 @@ class CommandAddHost(BrokerCommand):
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
 
-        dbos = get_one_os(session, osname, osversion, dbarchetype.name)
+        dbos = OperatingSystem.get_unique(session, name=osname,
+                                          version=osversion,
+                                          archetype=dbarchetype, compel=True)
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):

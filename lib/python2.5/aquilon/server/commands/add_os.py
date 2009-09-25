@@ -28,42 +28,32 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.aqdb.model import OperatingSystem
+from aquilon.aqdb.model import OperatingSystem, Archetype
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.os import get_many_os
-from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 import re
 
 
 class CommandAddOS(BrokerCommand):
 
-    required_parameters = [ "osname", "osversion", "archetype" ]
+    required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, osname, osversion, archetype, **arguments):
+    def render(self, session, osname, osversion, archetype, comments,
+               **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(osname)):
             raise ArgumentError("OS name '%s' is not valid" % osname)
         if not valid.match(osversion):
             raise ArgumentError("OS version '%s' is not valid" % osversion)
 
-        try:
-            existing = get_many_os(session, osname, osversion, archetype)
-        except NotFoundException:
-            #We hope not to find it
-            pass
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        OperatingSystem.get_unique(session, name=osname, version=osversion,
+                                   archetype=dbarchetype, preclude=True)
 
-        if existing:
-            raise ArgumentError(
-                "OS '%s' version '%s' already exists in archetype %s" % (osname,
-                                                                  osversion,
-                                                                  archetype))
-
-        else:
-            dbarchetype=get_archetype(session, archetype)
-            dbos = OperatingSystem(name=osname, version=osversion,
-                                   archetype=dbarchetype)
-            #FIXME: why no comments?
-            session.add(dbos)
+        dbos = OperatingSystem(name=osname, version=osversion,
+                               archetype=dbarchetype, comments=comments)
+        session.add(dbos)
 
         return
+
+
