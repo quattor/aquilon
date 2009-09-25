@@ -32,14 +32,12 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import Host, Cluster
+from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
+                                OperatingSystem)
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.domain import get_domain
-from aquilon.server.dbwrappers.os import get_one_os
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.location import get_location
@@ -64,14 +62,19 @@ class CommandSearchHost(BrokerCommand):
             dbdomain = get_domain(session, domain)
             q = q.filter_by(domain=dbdomain)
 
+        if archetype:
+            # Added to the searches as appropriate below.
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if personality and archetype:
-            dbpersonality = get_personality(session, archetype, personality)
+            dbpersonality = Personality.get_unique(session,
+                                                   archetype=dbarchetype,
+                                                   name=personality,
+                                                   compel=True)
             q = q.filter_by(personality=dbpersonality)
         elif personality:
             q = q.join('personality').filter_by(name=personality)
             q = q.reset_joinpoint()
         elif archetype:
-            dbarchetype = get_archetype(session, archetype)
             q = q.join('personality').filter_by(archetype=dbarchetype)
             q = q.reset_joinpoint()
 
@@ -79,13 +82,21 @@ class CommandSearchHost(BrokerCommand):
             dbbuildstatus = get_status(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
 
-        #TODO: double check we have dbarchetype at this point or cross archetype?
-        if osname and osversion:
-            dbos = get_one_os(session, osname, osversion, None, dbarchetype)
+        if osname and osversion and archetype:
+            # archetype was already resolved above
+            dbos = OperatingSystem.get_unique(session, name=osname,
+                                              version=osversion,
+                                              archetype=dbarchetype,
+                                              compel=True)
             q = q.filter_by(operating_system=dbos)
-            #q = q.reset_joinpoint()
-        #TODO: elif osname (version agnostic)
-        #TODO: elif osversion: error
+        elif osname or osversion:
+            q = q.join('operating_system')
+            if osname:
+                q = q.filter_by(name=osname)
+            if osversion:
+                q = q.filter_by(version=osversion)
+            q = q.reset_joinpoint()
+
         if service:
             dbservice = get_service(session, service)
             if instance:
@@ -93,24 +104,15 @@ class CommandSearchHost(BrokerCommand):
                 q = q.join('build_items')
                 q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
-            #TODO: DOUBLE CHECK WITH WES THAT WE DON'T NEED IT
-            # we'd need the 'brainfreeze' extenstion to search by cfg_path now.
-            #else:
-            #    q = q.join('build_items')
-            #    path_query = dbservice.cfg_path.relative_path + '/%'
-            #    q = q.filter(CfgPath.relative_path.like(path_query))
-            #    q = q.reset_joinpoint()
-            #    q = q.join(['build_items', 'cfg_path'])
-            #    q = q.filter_by(tld=dbservice.cfg_path.tld)
-            #    q = q.reset_joinpoint()
-        #elif instance:
-        #    q = q.join('build_items')
-        #    path_query = '%/' + instance.lower().strip()
-        #    q = q.filter(CfgPath.relative_path.like(path_query))
-        #    q = q.reset_joinpoint()
-        #    q = q.join(['build_items', 'cfg_path', 'tld'])
-        #    q = q.filter_by(type='service')
-        #    q = q.reset_joinpoint()
+            else:
+                q = q.join('build_items', 'service_instance')
+                q = q.filter_by(service=dbservice)
+                q = q.reset_joinpoint()
+        elif instance:
+            q = q.join(['build_items', 'service_instance'])
+            q = q.filter_by(name=instance)
+            q = q.reset_joinpoint()
+
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.join(['machine'])
