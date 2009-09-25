@@ -163,12 +163,10 @@ class PlenaryServiceInstanceServer(Plenary):
 
     def body(self, lines):
         lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append(
-            "'clients' = list(" + ", ".join(
-                [("'" + client + "'")
-                    for client in self.dbinstance.clients]) + ");")
-
-
+        lines.append("'clients' = list(" +
+                     ", ".join(["'%s'" % client
+                                for client in self.dbinstance.clients]) +
+                     ");")
 
 
 class PlenaryServiceInstanceClientDefault(Plenary):
