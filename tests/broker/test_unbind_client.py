@@ -68,11 +68,10 @@ class TestUnbindClient(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "unmapped", command)
 
-#FIXME: is this relevant anymore? (same for others below
-#    def test_200_verify_bind_cat_unbuilt(self):
-#        command = ["cat", "--hostname=aquilon94.aqd-unittest.ms.com"]
-#        out = self.internalerrortest(command)
-#        self.matchoutput(out, "No such file or directory", command)
+    def test_200_verify_bind_cat_unbuilt(self):
+        command = ["cat", "--hostname=aquilon94.aqd-unittest.ms.com"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "No such file or directory", command)
 
     def test_300_unbind_unmapped(self):
         command = ["unbind_client", "--hostname=unittest02.one-nyp.ms.com",
@@ -89,20 +88,20 @@ class TestUnbindClient(TestBrokerCommand):
                    "--service=unmapped"]
         self.noouttest(command)
 
-#    def test_400_verify_unbind_search_unbuilt(self):
-#        command = ["search_host", "--hostname=aquilon94.aqd-unittest.ms.com",
-#                   "--service=unmapped"]
-#        self.noouttest(command)
+    def test_400_verify_unbind_search_unbuilt(self):
+        command = ["search_host", "--hostname=aquilon94.aqd-unittest.ms.com",
+                   "--service=unmapped"]
+        self.noouttest(command)
 
     def test_400_verify_unbind_cat(self):
         command = ["cat", "--hostname=unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "unmapped", command)
 
-#    def test_400_verify_unbind_cat_unbuilt(self):
-#        command = ["cat", "--hostname=aquilon94.aqd-unittest.ms.com"]
-#        out = self.internalerrortest(command)
-#        self.matchoutput(out, "No such file or directory", command)
+    def test_400_verify_unbind_cat_unbuilt(self):
+        command = ["cat", "--hostname=aquilon94.aqd-unittest.ms.com"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "No such file or directory", command)
 
     def testrejectunbindrequired(self):
         command = "unbind client --hostname unittest02.one-nyp.ms.com --service afs"
