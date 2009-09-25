@@ -48,9 +48,8 @@ class HostFormatter(ObjectFormatter):
         details.append(self.redirect_raw(host.operating_system, indent+"  "))
         details.append(self.redirect_raw(host.domain, indent+"  "))
         details.append(self.redirect_raw(host.status, indent+"  "))
-        #FIX ME: This is not the right way to do it, confused at the moment
         for build_item in host.templates:
-            details.append(self.redirect_raw(build_item.cfg_path, indent+"  Template: "))
+            details.append(indent + "  Template: %s" % build_item.cfg_path)
         if host.comments:
             details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)
