@@ -92,19 +92,6 @@ class TestAddOS(TestBrokerCommand):
         command = "show os --osname os-does-not-exist --osversion foobar --archetype aquilon"
         self.notfoundtest(command.split(" "))
 
-    # If we ever re-do the populate for OS this will probably break
-    # as it will already exist.  That's fine - just kill these two
-    # tests and the corresponding tests in test_del_os.
-    def testaddesxi(self):
-        command = "add os --archetype vmhost --osname esxi --osversion 4.0.0"
-        self.noouttest(command.split(" "))
-
-    def testverifyesxi(self):
-        command = "show os --archetype vmhost --osname esxi --osversion 4.0.0"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: vmhost/os/esxi/4.0.0", command)
-        self.matchclean(out, "linux", command)
-
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)

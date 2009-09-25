@@ -99,8 +99,10 @@ def populate(sess, *args, **kw):
     win_obj=OperatingSystem(archetype=win, name='windows', version='generic')
     sess.add(win_obj)
 
-    #TODO: there are unit tests which add esx 4.0.0... discuss the
-    #inconsistency
+    vmhost = Archetype.get_unique(sess, 'vmhost')
+    for ver in ['4.0.0']:
+        os_obj = OperatingSystem(archetype=vmhost, name='esxi', version=ver)
+        sess.add(os_obj)
 
     pserver = Archetype.get_unique(sess, 'pserver')
     assert pserver, "can't find archetype 'pserver' in os.populate"
