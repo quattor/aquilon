@@ -169,7 +169,7 @@ for label in ["quattordir", "kingdir", "swrepdir", ]:
 
 dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
 for label in ["templatesdir", "rundir", "logdir", "profilesdir",
-        "depsdir", "hostsdir", "plenarydir", ]:
+              "depsdir", "hostsdir", "plenarydir", "builddir"]:
     dirs.append(config.get("broker", label))
 
 if configfile != default_configfile:
