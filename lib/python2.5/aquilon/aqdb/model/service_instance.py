@@ -115,12 +115,8 @@ class BuildItem(Base):
                                     default=datetime.now, nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    # Having lazy=False here is essential.  This outer join saves
-    # thousands of queries whenever finding clients of a service
-    # instance.
-    host = relation(Host, backref='build_items', uselist=False, lazy=False)
-    service_instance = relation(ServiceInstance, backref='build_items',
-                                lazy=False)
+    host = relation(Host, backref='build_items', uselist=False)
+    service_instance = relation(ServiceInstance, backref='build_items')
 
     @property
     def cfg_path(self):
