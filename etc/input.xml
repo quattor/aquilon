@@ -530,7 +530,7 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
       </optgroup>
       <optgroup name="optional_opts">
-        <option name="osname" type="string">Operating system: defaults to linux, no solaris (yet)</option>
+         <option name="osname" type="string">Operating system: defaults to linux, no solaris (yet)</option>
          <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64. Defaults to 'generic')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
