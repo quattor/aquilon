@@ -40,5 +40,4 @@ class CommandAddAquilonHost(CommandAddHost):
     def render(self, *args, **kwargs):
         # The superclass already contains the logic to handle this case.
         kwargs['archetype'] = 'aquilon'
-        kwargs['osname'] = 'linux'
         return CommandAddHost.render(self, *args, **kwargs)
