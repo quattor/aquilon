@@ -74,7 +74,7 @@ class ServiceInstance(Base):
 
     @property
     def client_count(self):
-        return len(self.clients)
+        return len(self.build_items)
 
     @property
     def clients(self):
