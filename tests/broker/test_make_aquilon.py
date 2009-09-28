@@ -307,13 +307,6 @@ class TestMakeAquilon(TestBrokerCommand):
         self.failIf(results, "Found service plenary data that includes "
                              "aquilon93.aqd-unittest.ms.com")
 
-    def testfailwindows(self):
-        command = ["make", "aquilon",
-                   "--hostname", "unittest01.one-nyp.ms.com",
-                   "--os", "linux/4.0.1-x86_64"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "is not a compilable archetype", command)
-
     # Turns out this test is completely bogus.  There is a sequence of
     # binding that would allow a client to bind to ut.a on chooser1
     # without needing to be bound to ut.a on chooser2 or chooser3.  The

@@ -44,8 +44,8 @@ class CommandReconfigure(CommandMake):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, os, archetype, personality,
-               buildstatus, **arguments):
+    def render(self, session, hostname, archetype, personality, buildstatus,
+               osname, osversion, os, **arguments):
         """There is some duplication here with make.
 
         It seemed to be the cleanest way to allow hosts with non-compileable
@@ -66,7 +66,7 @@ class CommandReconfigure(CommandMake):
 
         if dbarchetype.is_compileable:
             # Check if make_aquilon has run.  (This is a lame check -
-            # should really check to see if OS is set.)
+            # should really check for required services.)
             # If the error is not raised, we fall through to the end
             # of the method where MakeAquilon is called.
             builditem = session.query(BuildItem).filter_by(host=dbhost).first()
@@ -75,10 +75,7 @@ class CommandReconfigure(CommandMake):
                                     "Run 'make' first." % hostname)
         # The rest of these conditionals currently apply to all
         # non-aquilon hosts.
-        elif os:
-            raise ArgumentError("Can only set os for compileable archetypes "
-                                "like aquilon.")
-        elif buildstatus or personality:
+        elif buildstatus or personality or osname or osversion or os:
             if buildstatus:
                 dbstatus = get_status(session, buildstatus)
                 dbhost.status = dbstatus
@@ -97,14 +94,18 @@ class CommandReconfigure(CommandMake):
                                          dbhost.cluster.cluster_type,
                                          dbhost.cluster.name))
                 dbhost.personality = dbpersonality
+            if osname or osversion or os:
+                dbos = self.get_os(session, dbhost, osname, osversion, os)
+                if dbos:
+                    dbhost.operating_system = dbos
             session.add(dbhost)
             return
         else:
             raise ArgumentError("Nothing to do.")
 
         return CommandMake.render(self, session=session, hostname=hostname,
-                                  os=os, archetype=archetype,
-                                  personality=personality,
+                                  archetype=archetype, personality=personality,
+                                  osname=osname, osversion=osversion, os=os,
                                   buildstatus=buildstatus, **arguments)
 
 

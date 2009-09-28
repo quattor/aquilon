@@ -183,12 +183,14 @@ class TestReconfigure(TestBrokerCommand):
                    "--personality", "desktop"]
         self.noouttest(command)
 
-    def testreconfigurewindowsos(self):
-        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-                   "--os", "linux/4.0.1-x86_64"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Can only set os for compileable archetypes",
-                         command)
+# This test needs to adapt to become a test that changes the OS on a
+# non-compilable archetype.
+#   def testreconfigurewindowsos(self):
+#       command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+#                  "--os", "linux/4.0.1-x86_64"]
+#       err = self.badrequesttest(command)
+#       self.matchoutput(err, "Can only set os for compileable archetypes",
+#                        command)
 
     def testverifyreconfigurewindows(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"

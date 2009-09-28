@@ -1188,11 +1188,13 @@
          <option name="hostname" type="string">Host name</option>
       </optgroup>
       <optgroup name="reconfigure_optional" mandatory="False">
-         <option name="os" type="string">OS to assign to host</option>
+         <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+         <option name="osversion" type="string">version of the OS</option>
          <option name="archetype" type="string">Archetype of the personality</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -1771,11 +1773,13 @@
          <option name="hostname" type="string">Host name to make</option>
       </optgroup>
       <optgroup name="optional_opts">
-         <option name="os" type="string">OS to assign to host</option>
+         <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+         <option name="osversion" type="string">version of the OS</option>
          <option name="archetype" type="string">Archetype of the host (defaults to aquilon)</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
@@ -1796,10 +1800,12 @@
          <option name="hostname" type="string">Host name to make</option>
       </optgroup>
       <optgroup name="optional_opts">
-         <option name="os" type="string">OS to assign to host</option>
+         <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+         <option name="osversion" type="string">version of the OS</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>
