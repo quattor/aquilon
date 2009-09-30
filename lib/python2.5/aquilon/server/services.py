@@ -455,11 +455,6 @@ class HostChooser(Chooser):
         that was bound (values).
         """
         for dbbi in self.original_service_build_items:
-            if not dbbi.service_instance:
-                self.error("Internal Error: %s bound to template %s "
-                           "which is missing a service instance aqdb entry." %
-                           (self.description, dbbi.service_instance.cfg_path))
-                continue
             self.original_service_instances[dbbi.service_instance.service] = \
                     dbbi.service_instance
             self.debug("%s original binding: %s",
