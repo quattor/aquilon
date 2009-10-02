@@ -84,7 +84,11 @@ def populate(sess, *args, **kw):
                           #audit_info = kw['audit_info'])
                           comments='HA domain')
 
-        for i in (ms, onyp, devin1, theha):
+        msad = DnsDomain(name='msad.ms.com',
+                         #audit_info = kw['audit_info'])
+                         comments='DNS Domain used by Windows hosts')
+
+        for i in (ms, onyp, devin1, theha, msad):
             sess.add(i)
 
         try:
