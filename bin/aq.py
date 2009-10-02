@@ -35,21 +35,25 @@ connect directly.
 
 '''
 
+
 import sys
 import os
 import urllib
 import re
-# Using this for gethostname for now...
 import subprocess
 import socket
 import httplib
+import uuid
+from time import sleep
+from threading import Thread
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 sys.path.append(os.path.join(BINDIR, "..", "lib", "python2.5"))
 
-import aquilon.client.knchttp
-
+from aquilon.client.knchttp import KNCHTTPConnection
+from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
+
 
 class RESTResource(object):
     def __init__(self, httpconnection, uri):
@@ -143,6 +147,71 @@ class CustomAction(object):
             os.unlink(filename)
 
 
+class StatusThread(Thread):
+    def __init__(self, host, port, authuser, requestid=None, auditid=None,
+                 debug=False, outstream=sys.stderr, **kwargs):
+        self.host = host
+        self.port = port
+        self.authuser = authuser
+        self.requestid = requestid
+        self.auditid = auditid
+        self.finished = False
+        self.debug = debug
+        self.response_status = None
+        self.retry = 5
+        self.outstream = outstream
+        Thread.__init__(self)
+
+    def run(self):
+        try:
+            self.show_request()
+        except:
+            # Weird stuff can happen in threads.  Just ignore it.
+            pass
+
+    def show_request(self):
+        # Delay before attempting to retrive status messages.
+        # We want to give the main thread a chance to compose and send the
+        # original request before we send the status request.
+        sleep(.1)
+        #print >>sys.stderr, "Attempting status connection..."
+        if self.authuser:
+            sconn = KNCHTTPConnection(self.host, self.port, self.authuser)
+        else:
+            sconn = ChunkedHTTPConnection(self.host, self.port)
+        parameters = ""
+        if self.debug:
+            parameters = "?debug=True"
+        if self.auditid:
+            uri = "/status/auditid/%s%s" % (self.auditid, parameters)
+        else:
+            uri = "/status/requestid/%s%s" % (self.requestid, parameters)
+        RESTResource(sconn, uri).get()
+        # handle failed requests
+        res = sconn.getresponse()
+        self.response_status = res.status
+        if res.status == httplib.NOT_FOUND and not self.finished and \
+           self.retry > 0:
+            self.retry -= 1
+            # Maybe the command has not gotten to the server yet... retry.
+            return self.show_request()
+
+        if res.status != httplib.OK:
+            if self.debug:
+                print >>sys.stderr, "%s: %s" % (httplib.responses[res.status],
+                                                res.read())
+            if self.retry <= 0:
+                print >>sys.stderr, \
+                        "Client status messages disabled, retries exceeded."
+            return
+
+        while res.fp:
+            pageData = res.read_chunk()
+            if pageData:
+                print >>self.outstream, pageData
+        return
+
+
 def quoteOptions(options):
     return "&".join([ urllib.quote(k) + "=" + urllib.quote(v) for k, v in options.iteritems() ])
 
@@ -201,6 +270,8 @@ if __name__ == "__main__":
     # to include... for now it's just debug.
     if globalOptions.get("debug", None):
         commandOptions["debug"] = str(globalOptions["debug"])
+    if command != "show_request" and not globalOptions.get("quiet"):
+        commandOptions["requestid"] = str(uuid.uuid1())
 
     # Quote options so that they can be safely included in the URI
     cleanOptions = {}
@@ -230,11 +301,12 @@ if __name__ == "__main__":
         else:
             uri = uri + extension
 
+    authuser = not(globalOptions.get('noauth')) and aquser or None
     # create HTTP connection object adhering to the command line request
-    if globalOptions.get('noauth'):
-        conn = httplib.HTTPConnection(host, port)
+    if authuser:
+        conn = KNCHTTPConnection(host, port, authuser)
     else:
-        conn = aquilon.client.knchttp.KNCHTTPConnection(host, port, aquser)
+        conn = ChunkedHTTPConnection(host, port)
 
     if globalOptions.get('debug'):
         conn.set_debuglevel(10)
@@ -243,6 +315,21 @@ if __name__ == "__main__":
     if transport.custom:
         action = CustomAction(transport.custom)
         action.run(commandOptions)
+
+    status_thread = None
+    # Kick off a thread to (potentially) get status...
+    if command == "show_request" or not globalOptions.get("quiet"):
+        status_thread = StatusThread(host, port, authuser, **commandOptions)
+        status_thread.start()
+
+    if command == "show_request":
+        status_thread.outstream = sys.stdout
+        status_thread.join()
+        if not status_thread.response_status or \
+           status_thread.response_status == httplib.OK:
+            sys.exit(0)
+        else:
+            sys.exit(status_thread.response_status / 100)
 
     try:
         if transport.method == 'get' or transport.method == 'delete':
@@ -286,13 +373,6 @@ if __name__ == "__main__":
 
         # handle failed requests
         res = conn.getresponse()
-        if res.status != httplib.OK:
-            print >>sys.stderr, "%s: %s" % (
-                httplib.responses.get(res.status, res.status), res.read())
-            sys.exit(res.status / 100)
-
-        # get data otherwise
-        pageData = res.read()
 
     except (httplib.HTTPException, socket.error), e:
         msg = conn.getError()
@@ -303,6 +383,19 @@ if __name__ == "__main__":
         else:
             print >>sys.stderr, "Error: %s: %s" % (repr(e), msg)
         sys.exit(1)
+
+    if status_thread:
+        # Re-join the thread here before printing data.
+        # Hard-coded timeout of 10 seconds to wait for info, otherwise it
+        # is silently dropped.
+        status_thread.join(10)
+
+    pageData = res.read()
+
+    if res.status != httplib.OK:
+        print >>sys.stderr, "%s: %s" % (
+            httplib.responses.get(res.status, res.status), pageData)
+        sys.exit(res.status / 100)
 
     exit_status = 0
 

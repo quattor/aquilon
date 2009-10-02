@@ -180,9 +180,13 @@ class ResponsePage(resource.Resource):
         As a hack, debug is always allowed as an argument.  Should
         maybe have a flag on global options in input.xml for this.
 
+        As a separate hack, requestid is always allowed as an
+        argument.  This allows for status/update requests by the
+        client before the command returns.
+
         """
 
-        required_map = {"debug": False}
+        required_map = {"debug": False, "requestid": False}
         for arg in optional or []:
             required_map[arg] = False
         for arg in required or []:

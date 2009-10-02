@@ -3,11 +3,14 @@
    %prog command [subcommand] options
    <command name="*">
       <optgroup name="all commands">
-         <option name="verbose" short="v" type="boolean" conflicts="silent">
-            Verbose mode, generate a lot of output
+         <option name="verbose" short="v" type="boolean" conflicts="quiet">
+            Verbose mode.  Contact the broker for out of band status messages
+            about the request while it is being processed.  These messages
+            are printed on stderr.  This is the default.
          </option>
-         <option name="silent" short="s" type="boolean" conflicts="verbose">
-            Silent mode, generate little output
+         <option name="quiet" short="q" type="boolean" conflicts="verbose">
+            Turn off verbose mode.  Do not make a secondary request to
+            the broker for out of band status messages.
          </option>
          <option name="debug" short="d" type="boolean" conflicts="">
             Generate debug statements sent to stderr.  Some commands may
