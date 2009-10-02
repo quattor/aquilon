@@ -39,6 +39,8 @@ from twisted.python import log
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.server.authorization import AuthorizationBroker
+from aquilon.server.messages import StatusCatalog
+from aquilon.server.logger import RequestLogger
 from aquilon.aqdb.db_factory import db_factory
 from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.dbwrappers.user_principal import (
@@ -118,6 +120,7 @@ class BrokerCommand(object):
         self.config = Config()
         self.az = AuthorizationBroker()
         self.formatter = ResponseFormatter()
+        self.catalog = StatusCatalog()
         # Force the instance to have local copies of the class defaults...
         # This allows resources.py to modify instances without worrying
         # about inheritance issues (classes sharing required or optional
@@ -168,14 +171,17 @@ class BrokerCommand(object):
             principal = request.channel.getPrincipal()
             kwargs["user"] = principal
             if not self.requires_transaction and not self.requires_azcheck:
-                self._audit(*args, **kwargs)
-                # These five lines are duped below... seemed like the
-                # simplest way to code this method.
-                retval = command(*args, **kwargs)
-                if self.requires_format:
-                    style = kwargs.get("style", None)
-                    return self.formatter.format(style, retval, request)
-                return retval
+                self._add_logger(args, kwargs)
+                try:
+                    # These five lines are duped below... seemed like the
+                    # simplest way to code this method.
+                    retval = command(*args, **kwargs)
+                    if self.requires_format:
+                        style = kwargs.get("style", None)
+                        return self.formatter.format(style, retval, request)
+                    return retval
+                finally:
+                    self._remove_status(kwargs)
             if not "session" in kwargs:
                 kwargs["session"] = self.dbf.session()
             session = kwargs["session"]
@@ -183,7 +189,7 @@ class BrokerCommand(object):
                 dbuser = get_or_create_user_principal(session, principal,
                                                       commitoncreate=True)
                 kwargs["dbuser"] = dbuser
-                self._audit(*args, **kwargs)
+                self._add_logger(args, kwargs)
                 if self.requires_azcheck:
                     self.az.check(principal=principal, dbuser=dbuser,
                                   action=self.action, resource=request.path)
@@ -208,6 +214,7 @@ class BrokerCommand(object):
                 # Obliterating the scoped_session - next call to session()
                 # will create a new one.
                 self.dbf.Session.remove()
+                self._remove_status(kwargs)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__
         updated_render.__doc__ = command.__doc__
@@ -219,7 +226,13 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
+    def _add_audit_id(self, request):
+        global audit_id
+        audit_id += 1
+        request.aq_audit_id = audit_id
+
     def _audit(self, *args, **kwargs):
+        logger = kwargs.pop('logger')
         session = kwargs.pop('session', None)
         request = kwargs.pop('request')
         user = kwargs.pop('user', None)
@@ -232,11 +245,41 @@ class BrokerCommand(object):
         kwargs_str = str(kwargs)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
-        global audit_id
-        audit_id += 1
-        request.aq_audit_id = audit_id
-        log.msg('Incoming command #%d from user=%s aq %s with arguments %s' %
-                (request.aq_audit_id, user, self.command, kwargs_str))
+        extra = ""
+        if args:
+            extra = "and unnamed arguments %s" % args
+        logger.info("Incoming command #%d from user=%s aq %s "
+                    "with arguments %s%s",
+                    request.aq_audit_id, user, self.command, kwargs_str, extra)
+
+    # This helper needs to modify the command_arguments dictionary
+    # in-place.  The ** operator should not be used when calling or
+    # in the definition.
+    def _add_logger(self, command_args, command_kwargs):
+        request = command_kwargs.get("request")
+        self._add_audit_id(request)
+        if self.command == "show_request":
+            status = self.catalog.get_request_status(
+                auditid=command_kwargs.get("auditid", None),
+                requestid=command_kwargs.get("requestid", None))
+        else:
+            status = self.catalog.create_request_status(
+                auditid=request.aq_audit_id,
+                requestid=command_kwargs.get("requestid", None))
+        logger = RequestLogger(status=status, module_logger=self.module_logger)
+        command_kwargs["logger"] = logger
+        self._audit(*command_args, **command_kwargs)
+
+    def _remove_status(self, command_kwargs):
+        logger = command_kwargs.get("logger", None)
+        if logger:
+            if self.command == "show_request":
+                # Clear the requestid dictionary.
+                logger.remove_status_by_requestid(self.catalog)
+            else:
+                # Clear the auditid dictionary.
+                logger.debug("Server finishing request.")
+                logger.remove_status_by_auditid(self.catalog)
 
 
 # FIXME: This utility method may be better suited elsewhere.

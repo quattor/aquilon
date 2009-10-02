@@ -41,6 +41,7 @@
 
 
 import os
+import logging
 from traceback import format_exc
 from inspect import isclass
 
@@ -75,6 +76,8 @@ for f in os.listdir(_thisdir):
                 continue
             if issubclass(item, BrokerCommand):
                 mymodule.broker_command = item()
+                mymodule.broker_command.module_logger = \
+                        logging.getLogger(modulename)
                 __all__.append(moduleshort)
                 break
 
