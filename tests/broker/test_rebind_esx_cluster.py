@@ -43,8 +43,7 @@ from brokertest import TestBrokerCommand
 
 class TestRebindESXCluster(TestBrokerCommand):
 
-    # FIXME: Need to test both valid (vm_to_host_ratio remains good)
-    # and invalid.
+    # Failure test is in add_virtual_hardware.
     def testrebindevh1(self):
         self.noouttest(["rebind_esx_cluster",
                         "--hostname", "evh1.aqd-unittest.ms.com",

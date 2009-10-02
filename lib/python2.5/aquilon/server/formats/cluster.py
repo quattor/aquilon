@@ -42,8 +42,10 @@ class ClusterFormatter(ObjectFormatter):
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
         if hasattr(cluster, "vm_to_host_ratio"):
-            details.append(indent + "  vm_to_host_ratio: %s" %
+            details.append(indent + "  Max vm_to_host_ratio: %s" %
                            cluster.vm_to_host_ratio)
+            details.append(indent + "  Current vm_to_host_ratio: %s:%s" %
+                           (len(cluster.machines), len(cluster.hosts)))
             details.append(indent + "  Virtual Machine count: %s" %
                            len(cluster.machines))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))

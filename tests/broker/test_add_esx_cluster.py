@@ -87,7 +87,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--metacluster=namc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server",
                    "--domain=unittest",
-                   "--max_members=101", "--vm_to_host_ratio=102",
+                   "--max_members=101", "--vm_to_host_ratio=1:2",
                    "--comments=Another test ESX cluster"]
         self.noouttest(command)
 
@@ -98,7 +98,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: namc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
-        self.matchoutput(out, "vm_to_host_ratio: 102", command)
+        self.matchoutput(out, "vm_to_host_ratio: 1:2", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)

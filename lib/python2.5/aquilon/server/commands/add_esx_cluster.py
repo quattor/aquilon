@@ -28,7 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, validate_basic, force_int
+from aquilon.server.broker import (BrokerCommand, validate_basic,
+                                   force_int, force_ratio)
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
                                 MetaClusterMember)
 from aquilon.exceptions_ import ArgumentError
@@ -76,13 +77,14 @@ class CommandAddESXCluster(BrokerCommand):
         if vm_to_host_ratio is None:
             vm_to_host_ratio = self.config.get("broker",
                                                "esx_cluster_vm_to_host_ratio")
-        vm_to_host_ratio = force_int("vm_to_host_ratio", vm_to_host_ratio)
+        (vm_count, host_count) = force_ratio("vm_to_host_ratio",
+                                             vm_to_host_ratio)
 
         dbcluster = EsxCluster(name=cluster,
                                location_constraint=dblocation,
                                personality=dbpersonality,
                                max_hosts=max_members,
-                               vm_to_host_ratio=vm_to_host_ratio,
+                               vm_count=vm_count, host_count=host_count,
                                domain=dbdomain,
                                comments=comments)
         session.add(dbcluster)

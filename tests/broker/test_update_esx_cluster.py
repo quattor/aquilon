@@ -68,7 +68,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
     def testupdateutecl2(self):
         command = ["update_esx_cluster", "--cluster=utecl2",
-                   "--max_members=97", "--vm_to_host_ratio=96",
+                   "--max_members=97", "--vm_to_host_ratio=5:2",
                    "--comments", "ESX Cluster with a new comment"]
         self.noouttest(command)
 
@@ -79,7 +79,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: namc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
-        self.matchoutput(out, "vm_to_host_ratio: 96", command)
+        self.matchoutput(out, "vm_to_host_ratio: 5:2", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
@@ -148,6 +148,12 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def testfailupdateratio(self):
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--vm_to_host_ratio=0"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "would not satisfy current ratio", command)
+
+    def testfailupdaterealratio(self):
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--vm_to_host_ratio=2:1000"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "would not satisfy current ratio", command)
 
