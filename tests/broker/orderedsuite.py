@@ -62,6 +62,7 @@ from test_add_archetype import TestAddArchetype
 from test_add_os import TestAddOS
 from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
+from test_update_service import TestUpdateService
 from test_add_required_service import TestAddRequiredService
 from test_add_building import TestAddBuilding
 from test_add_room import TestAddRoom
@@ -192,8 +193,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
-                TestAddService, TestAddRequiredService, TestAddBuilding,
-                TestAddRoom,
+                TestAddService, TestUpdateService, TestAddRequiredService,
+                TestAddBuilding, TestAddRoom,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddNetwork,
                 TestAddMetaCluster, TestAddESXCluster,

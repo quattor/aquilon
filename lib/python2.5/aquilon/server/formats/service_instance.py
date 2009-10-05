@@ -46,6 +46,14 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Service Map: %s %s" %
                     (map.location.location_type.capitalize(),
                     map.location.name))
+        max_clients = si.max_clients
+        if max_clients is None:
+            if si.service.max_clients is None:
+                max_clients = "Default (Unlimited)"
+            else:
+                max_clients = "Default (%s)" % si.service.max_clients
+        details.append(indent + "  Maximum Client Count: %s" %
+                       max_clients)
         details.append(indent + "  Client Count: %d" % si.client_count)
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
