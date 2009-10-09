@@ -339,7 +339,7 @@ class TestReconfigure(TestBrokerCommand):
     def testreconfigureunboundvmhosts(self):
         # None of these should change since they have not been bound.
         # This test isn't really necessary...
-        for i in range(5, 10):
+        for i in range(6, 10):
             command = ["reconfigure",
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
             out = self.commandtest(command)

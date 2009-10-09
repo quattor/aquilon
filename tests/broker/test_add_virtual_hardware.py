@@ -138,9 +138,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
                         "Plenary file '%s' not created." % newpath)
 
     def test_300_failrebindhost(self):
-        # At this point evh1 is the only vmhost in utecl2...
         command = ["rebind_esx_cluster", "--cluster=utecl1",
                    "--host=evh1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "would exceed vm_to_host_ratio", command)
+
+    def test_310_failrebindmachine(self):
+        command = ["update_machine", "--machine", "evm1",
+                   "--cluster", "utecl2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "would exceed vm_to_host_ratio", command)
 

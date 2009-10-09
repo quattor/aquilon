@@ -430,7 +430,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out,
                          "Adding a virtual machine to "
                          "esx cluster utecl3 would exceed "
-                         "vm_to_host_ratio 16 (1 VMs/0 hosts)",
+                         "vm_to_host_ratio 16:1 (1 VMs:0 hosts)",
                          command)
 
     def testfailaddreadmachinetocluster(self):

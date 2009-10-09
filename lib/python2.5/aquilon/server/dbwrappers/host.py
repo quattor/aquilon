@@ -53,10 +53,10 @@ def get_host_dependencies(session, dbhost):
     ret = []
     # XXX: Show any service instance which has dbhost as an element in host_list.hosts
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
-       len(dbhost.cluster.machines) > \
-       dbhost.cluster.vm_to_host_ratio * (len(dbhost.cluster.hosts) - 1):
+       dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
+       dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):
            ret.append("Removing vmhost %s from %s cluster %s would exceed "
-                      "vm_to_host_ratio %s (%s VMs/%s hosts)" %
+                      "vm_to_host_ratio %s (%s VMs:%s hosts)" %
                       (dbhost.fqdn, dbhost.cluster.cluster_type,
                        dbhost.cluster.name, dbhost.cluster.vm_to_host_ratio,
                        len(dbhost.cluster.machines),

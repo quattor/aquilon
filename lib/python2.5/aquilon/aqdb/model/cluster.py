@@ -123,7 +123,13 @@ class EsxCluster(Cluster):
                             #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
 
-    vm_to_host_ratio = Column(Integer, default=16, nullable=True)
+    #vm_to_host_ratio = Column(Integer, default=16, nullable=True)
+    vm_count = Column(Integer, default=16, nullable=True)
+    host_count = Column(Integer, default=1, nullable=False)
+
+    @property
+    def vm_to_host_ratio(self):
+        return '%s:%s'% (self.vm_count, self.host_count)
 
     def __init__(self, **kw):
         if 'max_hosts' not in kw:

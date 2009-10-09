@@ -170,11 +170,11 @@ class CommandUpdateMachine(BrokerCommand):
             session.refresh(dbmachine)
             session.refresh(dbcluster)
             if hasattr(dbcluster, 'vm_to_host_ratio') and \
-               len(dbcluster.machines) > \
-               dbcluster.vm_to_host_ratio * len(dbcluster.hosts):
+               dbcluster.host_count * len(dbcluster.machines) > \
+               dbcluster.vm_count * len(dbcluster.hosts):
                 raise ArgumentError("Adding a virtual machine to "
                                     "%s cluster %s would exceed "
-                                    "vm_to_host_ratio %s (%s VMs/%s hosts)" %
+                                    "vm_to_host_ratio %s (%s VMs:%s hosts)" %
                                     (dbcluster.cluster_type, dbcluster.name,
                                      dbcluster.vm_to_host_ratio,
                                      len(dbcluster.machines),

@@ -53,19 +53,20 @@ class TestUnbindESXCluster(TestBrokerCommand):
                          "esx cluster 'utecl2', not ESX cluster 'utecl1'.",
                          command)
 
-    def testunbindevh1(self):
-        self.noouttest(["unbind_esx_cluster",
-                        "--hostname", "evh1.aqd-unittest.ms.com",
-                        "--cluster", "utecl2"])
-
-    def testunbindhosts(self):
+    def testunbindutecl1(self):
         for i in range(2, 5):
             self.noouttest(["unbind_esx_cluster",
                             "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                             "--cluster", "utecl1"])
 
+    def testunbindutecl2(self):
+        for i in [1, 5]:
+            self.noouttest(["unbind_esx_cluster",
+                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                            "--cluster", "utecl2"])
+
     def testverifyunbindhosts(self):
-        for i in range(1, 5):
+        for i in range(1, 6):
             command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,

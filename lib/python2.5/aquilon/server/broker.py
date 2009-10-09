@@ -250,6 +250,22 @@ def force_int(label, value):
         raise ArgumentError("Expected an integer for %s: %s" % (label, e))
     return result
 
+ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
+
+# FIXME: This utility method may be better suited elsewhere.
+def force_ratio(label, value):
+    """Utility method to force incoming values to int ratio and wrap errors."""
+    if value is None:
+        return (None, None)
+    m = ratio_re.search(value)
+    if not m:
+        raise ArgumentError("Expected a ratio like 1:2 for %s but got '%s'" %
+                            (label, value))
+    (left, right) = m.groups()
+    if right is None:
+        right = 1
+    return (int(left), int(right))
+
 
 # This might belong somewhere else.  The functionality that uses this
 # might end up in aqdb (in a similar class as AqStr).

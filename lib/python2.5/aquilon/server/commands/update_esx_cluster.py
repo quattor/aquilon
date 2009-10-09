@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand, force_int, force_ratio
 from aquilon.aqdb.model import EsxCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
@@ -117,19 +117,21 @@ class CommandUpdateESXCluster(BrokerCommand):
             dbcluster.max_hosts = max_members
             cluster_updated = True
 
-        vm_to_host_ratio = force_int("vm_to_host_ratio", vm_to_host_ratio)
-        if vm_to_host_ratio is not None:
-            if len(dbcluster.machines) > \
-               vm_to_host_ratio * len(dbcluster.hosts):
+        (vm_count, host_count) = force_ratio("vm_to_host_ratio",
+                                             vm_to_host_ratio)
+        if vm_count is not None:
+            if host_count * len(dbcluster.machines) > \
+               vm_count * len(dbcluster.hosts):
                 raise ArgumentError("Changing vm_to_host_ratio to %s "
                                     "for %s cluster %s would not satisfy "
-                                    "current ratio of (%s VMs/%s hosts)" %
+                                    "current ratio of (%s VMs:%s hosts)" %
                                     (vm_to_host_ratio,
                                      dbcluster.cluster_type,
                                      dbcluster.name,
                                      len(dbcluster.machines),
                                      len(dbcluster.hosts)))
-            dbcluster.vm_to_host_ratio = vm_to_host_ratio
+            dbcluster.vm_count = vm_count
+            dbcluster.host_count = host_count
             cluster_updated = True
 
         if comments is not None:
