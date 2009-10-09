@@ -111,10 +111,11 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         q = session.query(ObservedMac)
         q = q.filter_by(mac_address=dbinterface.mac)
         q = q.order_by(desc(ObservedMac.last_seen))
-        dbsystem = q.first()
-        if not dbsystem:
+        dbom = q.first()
+        if not dbom:
             raise ArgumentError("No switch found in the discovery table for "
                                 "mac %s" % dbinterface.mac)
+        dbsystem = dbom.switch
     if ipfromsystem:
         if ipfromip:
             raise ArgumentError("Cannot specify both --ipfromsystem and "
