@@ -905,6 +905,26 @@
       <transport method="get" path="service" />
    </command>
 
+   <command name="update_service">
+      Update the maximum client count for a service or service instance.
+
+      The maximum client count for a service instance will default to
+      the value set for the service.  The maximum client count for a
+      service defaults to unlimited.
+      <optgroup name="update_service_opts" mandatory="True" fields="all">
+         <option name="service" type="string" mandatory="True">service name</option>
+         <optgroup name="update_service_count" mandatory="True" fields="any">
+            <option name="max_clients" type="string" conflicts="default">Maximum number of client bindings for an instance</option>
+            <option name="default" type="boolean" conflicts="max_clients">Restore default setting</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="instance" type="string">Instance name</option>
+      </optgroup>
+      <transport method="post" path="service/%(service)s" />
+      <transport trigger="instance" method="post" path="service/%(service)s/instance/%(instance)s" />
+   </command>
+
    <command name="del_service">
       Delete a service. The command will fail if any servers or clients are marked
       as being bound to any of the instances of the service.

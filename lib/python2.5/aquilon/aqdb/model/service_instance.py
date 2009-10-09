@@ -57,7 +57,7 @@ class ServiceInstance(Base):
                         nullable=False)
 
     name = Column(AqStr(64), nullable=False)
-
+    max_clients = Column(Integer, nullable=True) #null means 'no limit'
     cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
                                              name='%s_cfg_pth_fk'%_ABV,
                                              ondelete='CASCADE'),

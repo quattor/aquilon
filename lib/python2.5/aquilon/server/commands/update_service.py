@@ -26,46 +26,39 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Service formatter."""
+"""Contains the logic for `aq update service`."""
 
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.server.formats.list import ListFormatter
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.aqdb.model import Service
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.templates.service import (PlenaryService,
+                                              PlenaryServiceInstance)
 
 
-class ServiceFormatter(ObjectFormatter):
-    def format_raw(self, service, indent=""):
-        details = [indent + "Service: %s" % service.name]
-        details.append(self.redirect_raw(service.cfg_path, indent+"  "))
-        max_clients = service.max_clients
-        if max_clients is None:
-            max_clients = "Unlimited"
-        details.append(indent + "  Default Maximum Client Count: %s" %
-                       max_clients)
-        if service.comments:
-            details.append(indent + "  Comments: %s" % service.comments)
-        for instance in service.instances:
-            details.append(self.redirect_raw(instance, indent+"  "))
-        return "\n".join(details)
-    def format_proto(self, service, skeleton=None):
-        slf = ServiceListFormatter()
-        return slf.format_proto([service], skeleton)
+class CommandAddService(BrokerCommand):
 
-ObjectFormatter.handlers[Service] = ServiceFormatter()
+    required_parameters = ["service"]
 
-class ServiceList(list):
-    """Class to hold a list of services to be formatted"""
-    pass
+    def render(self, session, service, max_clients, default, **arguments):
+        dbservice = Service.get_unique(session, name=service, compel=True)
+        if default:
+            dbservice.max_clients = None
+        elif max_clients:
+            dbservice.max_clients = force_int("max_clients", max_clients)
+        else:
+            raise ArgumentError("Missing --max_clients or --default argument "
+                                "to update service %s." % dbservice.name)
+        session.add(dbservice)
+        session.flush()
 
-class ServiceListFormatter(ListFormatter):
-    protocol = "aqdservices_pb2"
-    def format_proto(self, sl, skeleton=None):
-        servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
-        for service in sl:
-            self.add_service_msg(servicelist_msg.services.add(), service)
-        return servicelist_msg.SerializeToString()
+        plenaries = PlenaryCollection()
+        plenaries.append(PlenaryService(dbservice))
+        for dbinstance in dbservice.instances:
+            plenaries.append(PlenaryServiceInstance(dbservice, dbinstance))
+        plenaries.write()
 
-ObjectFormatter.handlers[ServiceList] = ServiceListFormatter()
+        return
 
 
