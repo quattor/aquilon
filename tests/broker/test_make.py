@@ -49,12 +49,12 @@ class TestMake(TestBrokerCommand):
         for i in range(1, 10):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                        "--os", "esxi/4.0.0", "--buildstatus", "build"]
-            out = self.commandtest(command)
-            self.matchoutput(out,
+            (out, err) = self.successtest(command)
+            self.matchoutput(err,
                              "evh%s.aqd-unittest.ms.com adding binding for "
                              "service dns instance nyinfratest" % i,
                              command)
-            self.matchclean(out, "removing binding", command)
+            self.matchclean(err, "removing binding", command)
 
             self.assert_(os.path.exists(os.path.join(
                 self.config.get("broker", "profilesdir"),

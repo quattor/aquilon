@@ -45,9 +45,9 @@ class TestRebindESXCluster(TestBrokerCommand):
 
     # Failure test is in add_virtual_hardware.
     def testrebindevh1(self):
-        self.noouttest(["rebind_esx_cluster",
-                        "--hostname", "evh1.aqd-unittest.ms.com",
-                        "--cluster", "utecl2"])
+        self.successtest(["rebind_esx_cluster",
+                          "--hostname", "evh1.aqd-unittest.ms.com",
+                          "--cluster", "utecl2"])
 
     def testverifyrebindevh1(self):
         command = "show host --hostname evh1.aqd-unittest.ms.com"

@@ -181,20 +181,14 @@ class TestBrokerCommand(unittest.TestCase):
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
                          "\nSTDERR:\n@@@\n'%s'\n@@@" %
                          (command, p.returncode, 4, out, err))
-        if "--debug" in command:
-            # Looser requirement when there's debug output involved...
-            self.failUnless(err.find("Bad Request") >= 0,
-                            "STDERR for %s did not include Bad Request:"
-                            "\n@@@\n'%s'\n@@@\n" %
-                            (command, err))
-        else:
+        self.failUnless(err.find("Bad Request") >= 0,
+                        "STDERR for %s did not include Bad Request:"
+                        "\n@@@\n'%s'\n@@@\n" %
+                        (command, err))
+        if "--debug" not in command:
             self.assertEqual(out, "",
                              "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                              (command, out))
-            self.assertEqual(err.find("Bad Request"), 0,
-                             "STDERR for %s did not start with Bad Request:"
-                             "\n@@@\n'%s'\n@@@\n" %
-                             (command, err))
         return err
 
     def unauthorizedtest(self, command, **kwargs):
@@ -221,17 +215,10 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(out, "",
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))
-        if "--debug" in command:
-            # Looser requirement when there's debug output involved...
-            self.failUnless(err.find("Unauthorized") >= 0,
-                            "STDERR for %s did not include Unauthorized:"
-                            "\n@@@\n'%s'\n@@@\n" %
-                            (command, err))
-        else:
-            self.assertEqual(err.find("Unauthorized"), 0,
-                             "STDERR for %s did not start with Unauthorized:"
-                             "\n@@@\n'%s'\n@@@\n" %
-                             (command, err))
+        self.failUnless(err.find("Unauthorized:") >= 0,
+                        "STDERR for %s did not include Unauthorized:"
+                        "\n@@@\n'%s'\n@@@\n" %
+                        (command, err))
         self.matchoutput(err, "Unauthorized anonymous access attempt", command)
         return err
 

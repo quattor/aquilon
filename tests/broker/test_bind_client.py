@@ -55,8 +55,8 @@ class TestBindClient(TestBrokerCommand):
     def testbindafs(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "afs", "--instance", "q.ny.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service afs instance q.ny.ms.com",
                          command)
@@ -69,8 +69,8 @@ class TestBindClient(TestBrokerCommand):
     def testbinddns(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "dns", "--instance", "nyinfratest"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service dns instance nyinfratest",
                          command)
@@ -78,8 +78,8 @@ class TestBindClient(TestBrokerCommand):
     def testbindutsi1(self):
         command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi1"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service utsvc instance utsi1",
                          command)
@@ -94,7 +94,7 @@ class TestBindClient(TestBrokerCommand):
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
         (out, err) = self.successtest(command)
-        self.matchoutput(out, "Creating service Chooser", command)
+        self.matchoutput(err, "Creating service Chooser", command)
 
     def testverifybindutsi2(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -109,8 +109,8 @@ class TestBindClient(TestBrokerCommand):
     def testbindbootserver(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "bootserver", "--instance", "np.test"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service bootserver instance np.test",
                          command)
@@ -123,8 +123,8 @@ class TestBindClient(TestBrokerCommand):
     def testbindntp(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "ntp", "--instance", "pa.ny.na"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service ntp instance pa.ny.na",
                          command)
@@ -141,8 +141,8 @@ class TestBindClient(TestBrokerCommand):
     def testbindautobootserver(self):
         command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "bootserver"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service bootserver instance np.test",
                          command)
@@ -155,8 +155,8 @@ class TestBindClient(TestBrokerCommand):
     def testbindautontp(self):
         command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "ntp"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service ntp instance pa.ny.na",
                          command)

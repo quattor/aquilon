@@ -41,7 +41,7 @@ class CommandBindESXClusterService(BrokerCommand):
 
     required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, cluster, service, instance, debug, force=False,
+    def render(self, session, logger, cluster, service, instance, force=False,
                **arguments):
         cluster_type = 'esx'
         dbcluster = Cluster.get_unique(session,
@@ -50,7 +50,7 @@ class CommandBindESXClusterService(BrokerCommand):
             raise NotFoundException("%s cluster '%s' not found." %
                                     (cluster_type, cluster))
         dbservice = get_service(session, service)
-        chooser = Chooser(dbcluster, required_only=False, debug=debug)
+        chooser = Chooser(dbcluster, logger=logger, required_only=False)
         if instance:
             dbinstance = get_service_instance(session, dbservice, instance)
             chooser.set_single(dbservice, dbinstance, force=force)
@@ -60,10 +60,6 @@ class CommandBindESXClusterService(BrokerCommand):
         chooser.flush_changes()
         chooser.write_plenary_templates()
 
-        if chooser.debug_info:
-            # The output of bind client does not run through a formatter.
-            # Maybe it should.
-            return str("\n".join(chooser.debug_info))
-        return str("\n".join(chooser.messages))
+        return
 
 

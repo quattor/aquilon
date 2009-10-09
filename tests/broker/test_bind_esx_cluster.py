@@ -45,9 +45,9 @@ class TestBindESXCluster(TestBrokerCommand):
 
     def testbindutecl1(self):
         for i in range(1, 5):
-            self.noouttest(["bind_esx_cluster",
-                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                            "--cluster", "utecl1"])
+            self.successtest(["bind_esx_cluster",
+                              "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                              "--cluster", "utecl1"])
 
     def testbindutecl2(self):
         # test_rebind_esx_cluster will also bind evh1 to utecl2.
@@ -57,9 +57,9 @@ class TestBindESXCluster(TestBrokerCommand):
                             "--cluster", "utecl2"])
 
     def testduplicatebindutecl1(self):
-        self.noouttest(["bind_esx_cluster",
-                        "--hostname", "evh1.aqd-unittest.ms.com",
-                        "--cluster", "utecl1"])
+        self.successtest(["bind_esx_cluster",
+                          "--hostname", "evh1.aqd-unittest.ms.com",
+                          "--cluster", "utecl1"])
 
     def testverifybindutecl1(self):
         for i in range(1, 5):
@@ -159,7 +159,7 @@ class TestBindESXCluster(TestBrokerCommand):
         command = ["rebind_esx_cluster", "--cluster=utecl1",
                    "--service=esx_management", "--instance=%s" % next]
         # Do we need any checks on this output?
-        out = self.commandtest(command)
+        (out, err) = self.successtest(command)
 
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)

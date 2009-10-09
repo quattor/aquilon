@@ -50,12 +50,12 @@ class TestMakeAquilon(TestBrokerCommand):
         command = ["make", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--os", "linux/4.0.1-x86_64"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service aqd instance ny-prod",
                          command)
-        self.matchclean(out, "removing binding", command)
+        self.matchclean(err, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
@@ -119,20 +119,20 @@ class TestMakeAquilon(TestBrokerCommand):
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "blind", "--personality", "compileserver",
                    "--os", "linux/4.0.1-x86_64"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service aqd instance ny-prod",
                          command)
-        self.matchoutput(out,
+        self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service dns instance nyinfratest",
                          command)
-        self.matchoutput(out,
+        self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service afs instance q.ny.ms.com",
                          command)
-        self.matchclean(out, "removing binding", command)
+        self.matchclean(err, "removing binding", command)
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest00.one-nyp.ms.com.xml")))
@@ -246,18 +246,18 @@ class TestMakeAquilon(TestBrokerCommand):
             hostname = "aquilon%d.aqd-unittest.ms.com" % i
             command = ["make", "aquilon", "--hostname", hostname,
                        "--os", "linux/4.0.1-x86_64"]
-            out = self.commandtest(command)
-            self.matchoutput(out, "%s adding binding" % hostname, command)
-            self.matchclean(out, "removing binding", command)
+            (out, err) = self.successtest(command)
+            self.matchoutput(err, "%s adding binding" % hostname, command)
+            self.matchclean(err, "removing binding", command)
 
     def testmakerhel5(self):
         for i in range(66, 71):
             hostname = "aquilon%d.aqd-unittest.ms.com" % i
             command = ["make", "aquilon", "--hostname", hostname,
                        "--os", "linux/5.0-x86_64"]
-            out = self.commandtest(command)
-            self.matchoutput(out, "%s adding binding" % hostname, command)
-            self.matchclean(out, "removing binding", command)
+            (out, err) = self.successtest(command)
+            self.matchoutput(err, "%s adding binding" % hostname, command)
+            self.matchclean(err, "removing binding", command)
 
     def testmakehpunixeng(self):
         for i in range(81, 91):
@@ -265,12 +265,12 @@ class TestMakeAquilon(TestBrokerCommand):
             command = ["make", "aquilon", "--hostname", hostname,
                        "--personality", "unixeng-test",
                        "--os", "linux/4.0.1-x86_64"]
-            out = self.commandtest(command)
-            self.matchoutput(out, "%s adding binding" % hostname, command)
-            self.matchoutput(out, "service chooser1", command)
-            self.matchoutput(out, "service chooser2", command)
-            self.matchoutput(out, "service chooser3", command)
-            self.matchclean(out, "removing binding", command)
+            (out, err) = self.successtest(command)
+            self.matchoutput(err, "%s adding binding" % hostname, command)
+            self.matchoutput(err, "service chooser1", command)
+            self.matchoutput(err, "service chooser2", command)
+            self.matchoutput(err, "service chooser3", command)
+            self.matchclean(err, "removing binding", command)
 
     def testmissingrequiredservice(self):
         command = ["make", "aquilon",

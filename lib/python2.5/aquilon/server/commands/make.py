@@ -45,8 +45,8 @@ class CommandMake(BrokerCommand):
 
     required_parameters = ["hostname", "os"]
 
-    def render(self, session, hostname, os, archetype, personality,
-               buildstatus, debug, **arguments):
+    def render(self, session, logger, hostname, os, archetype, personality,
+               buildstatus, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # We grab a template compile lock over this whole operation,
@@ -106,9 +106,9 @@ class CommandMake(BrokerCommand):
             session.flush()
 
             if arguments.get("keepbindings", None):
-                chooser = Chooser(dbhost, required_only=False, debug=debug)
+                chooser = Chooser(dbhost, logger=logger, required_only=False)
             else:
-                chooser = Chooser(dbhost, required_only=True, debug=debug)
+                chooser = Chooser(dbhost, logger=logger, required_only=True)
             chooser.set_required()
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)
@@ -123,18 +123,11 @@ class CommandMake(BrokerCommand):
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
 
-            # Error will not include any debug output...
             raise
 
         finally:
             compileRelease()
 
-        # If out is empty, make sure we use an empty list to prevent
-        # an extra newline below.
-        out_array = out and [out] or []
-        # This command does not use a formatter.  Maybe it should.
-        if chooser and chooser.debug_info:
-            return str("\n".join(chooser.debug_info + out_array))
-        return str("\n".join(chooser.messages + out_array))
+        return str(out)
 
 

@@ -53,12 +53,12 @@ class TestReconfigure(TestBrokerCommand):
     def testreconfigureunittest02(self):
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
                    "--buildstatus", "ready"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service afs instance q.ny.ms.com",
                          command)
-        self.matchoutput(out,
+        self.matchoutput(err,
                          "unittest02.one-nyp.ms.com removing binding for "
                          "service afs instance q.ln.ms.com",
                          command)
@@ -112,10 +112,10 @@ class TestReconfigure(TestBrokerCommand):
     # These settings have not changed - the command should still succeed.
     def testreconfigureunittest00(self):
         command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
-        out = self.commandtest(command)
+        (out, err) = self.successtest(command)
         self.matchoutput(out, "0/1 object template", command)
-        self.matchclean(out, "removing binding", command)
-        self.matchclean(out, "adding binding", command)
+        self.matchclean(err, "removing binding", command)
+        self.matchclean(err, "adding binding", command)
 
     def testverifycatunittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"
@@ -202,10 +202,10 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--os", "linux/5.0-x86_64"]
-        out = self.commandtest(command)
+        (out, err) = self.successtest(command)
         self.matchoutput(out, "1/1 object template", command)
-        self.matchclean(out, "removing binding", command)
-        self.matchclean(out, "adding binding", command)
+        self.matchclean(err, "removing binding", command)
+        self.matchclean(err, "adding binding", command)
 
     def testmissingpersonalitytemplate(self):
         command = ["reconfigure",
@@ -234,10 +234,10 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure", "--keepbindings",
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        out = self.commandtest(command)
+        (out, err) = self.successtest(command)
         self.matchoutput(out, "1/1 object template", command)
-        self.matchclean(out, "removing binding", command)
-        self.matchclean(out, "adding binding", command)
+        self.matchclean(err, "removing binding", command)
+        self.matchclean(err, "adding binding", command)
 
     def verifykeepbindings(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -251,11 +251,11 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure",
                    "--hostname", "aquilon87.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "removing binding for service chooser1", command)
-        self.matchoutput(out, "removing binding for service chooser2", command)
-        self.matchoutput(out, "removing binding for service chooser3", command)
-        self.matchclean(out, "adding binding", command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "removing binding for service chooser1", command)
+        self.matchoutput(err, "removing binding for service chooser2", command)
+        self.matchoutput(err, "removing binding for service chooser3", command)
+        self.matchclean(err, "adding binding", command)
 
     def testverifyremovebindings(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -305,7 +305,7 @@ class TestReconfigure(TestBrokerCommand):
                    "--hostname", "aquilon88.aqd-unittest.ms.com",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchoutput(out, "Creating service Chooser", command)
+        self.matchoutput(err, "Creating service Chooser", command)
 
     def testreconfigureboundvmhosts(self):
         # This will exercise the cluster-aligned services code,
@@ -314,7 +314,7 @@ class TestReconfigure(TestBrokerCommand):
         for i in range(1, 5):
             command = ["reconfigure",
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            out = self.commandtest(command)
+            (out, err) = self.successtest(command)
 
     def testverifyalignedservice(self):
         # Check that utecl1 is now aligned to a service and that
@@ -342,10 +342,10 @@ class TestReconfigure(TestBrokerCommand):
         for i in range(6, 10):
             command = ["reconfigure",
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            out = self.commandtest(command)
+            (out, err) = self.successtest(command)
             self.matchoutput(out, "0/1 object template", command)
-            self.matchclean(out, "removing binding", command)
-            self.matchclean(out, "adding binding", command)
+            self.matchclean(err, "removing binding", command)
+            self.matchclean(err, "adding binding", command)
 
     def testfailchangeclustermemberpersonality(self):
         command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",
