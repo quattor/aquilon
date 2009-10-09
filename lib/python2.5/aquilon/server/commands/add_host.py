@@ -51,7 +51,8 @@ class CommandAddHost(BrokerCommand):
     required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     def render(self, session, hostname, machine, archetype, personality,
-               domain, buildstatus, skip_dsdb_check=False, **arguments):
+               domain, buildstatus, comments, skip_dsdb_check=False,
+               **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:
@@ -81,7 +82,9 @@ class CommandAddHost(BrokerCommand):
         mac = None
         if dbpersonality.archetype.name != 'aurora':
             # Any host being added to DSDB will need a valid primary interface.
-            if not dbmachine.interfaces:
+            # XXX: This check for msad is horrible... look to get rid of it
+            # when system and interface tables are restructured.
+            if not dbmachine.interfaces and dbdns_domain.name != 'msad.ms.com':
                 raise ArgumentError("Machine '%s' has no interfaces." % machine)
             for interface in dbmachine.interfaces:
                 if interface.interface_type != 'public':
@@ -91,8 +94,10 @@ class CommandAddHost(BrokerCommand):
                         # FIXME: Is this actually a problem?
                         raise ArgumentError("Multiple public interfaces on machine '%s' are marked bootable" % machine)
                     dbinterface = interface
-            mac = dbinterface.mac
-            if not dbinterface:
+            if dbinterface:
+                mac = dbinterface.mac
+            # XXX: Another horrible check here...
+            if not dbinterface and dbdns_domain.name != 'msad.ms.com':
                 raise ArgumentError("Machine '%s' requires a bootable interface." % machine)
 
         # This method is allowed to return None, which will pass through
@@ -103,8 +108,9 @@ class CommandAddHost(BrokerCommand):
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
-                mac=mac, ip=ip, network=dbnetwork,
-                name=short, dns_domain=dbdns_domain, personality=dbpersonality)
+                      mac=mac, ip=ip, network=dbnetwork, comments=comments,
+                      name=short, dns_domain=dbdns_domain,
+                      personality=dbpersonality)
         session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost
@@ -118,6 +124,9 @@ class CommandAddHost(BrokerCommand):
             compileLock()
             plenary_info.write(locked=True)
 
+            # XXX: This (and some of the code above) is horrible.  There
+            # should be a generic/configurable hook here that could kick
+            # in based on archetype and/or domain.
             dsdb_runner = DSDBRunner()
             if dbhost.archetype.name == 'aurora':
                 # For aurora, check that DSDB has a record of the host.
@@ -126,6 +135,10 @@ class CommandAddHost(BrokerCommand):
                         fields = dsdb_runner.show_host(hostname)
                     except ProcessException, e:
                         raise ArgumentError("Could not find host in dsdb: %s" % e)
+            elif dbdns_domain.name == 'msad.ms.com':
+                # We should probably check that the host is valid in the
+                # appropriate system...
+                pass
             else:
                 # For anything else, reserve the name and IP in DSDB.
                 try:

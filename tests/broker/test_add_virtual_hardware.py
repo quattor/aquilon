@@ -216,6 +216,18 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["make_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
 
+    def test_700_add_windows(self):
+        command = ["add_windows_host", "--hostname=aqddesk1.msad.ms.com",
+                   "--machine=evm1", "--comments=Windows Virtual Desktop"]
+        self.noouttest(command)
+
+    def test_800_verify_windows(self):
+        command = "show host --hostname aqddesk1.msad.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: aqddesk1.msad.ms.com", command)
+        self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
+
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)
 

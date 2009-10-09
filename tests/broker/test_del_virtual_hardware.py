@@ -43,22 +43,42 @@ from brokertest import TestBrokerCommand
 
 class TestDelVirtualHardware(TestBrokerCommand):
 
-    def testdelevm1(self):
+    def test_200_del_windows_hosts(self):
+        command = "del_host --hostname aqddesk1.msad.ms.com"
+        self.noouttest(command.split(" "))
+
+    def test_300_readd_windows_host(self):
+        command = ["add_windows_host", "--hostname=aqdtop1.msad.ms.com",
+                   "--machine=evm1", "--comments=Windows Virtual Desktop"]
+        self.noouttest(command)
+
+    def test_400_reverify_windows_host(self):
+        command = "show host --hostname aqdtop1.msad.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: aqdtop1.msad.ms.com", command)
+        self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
+
+    def test_500_redel_windows_hosts(self):
+        command = "del_host --hostname aqdtop1.msad.ms.com"
+        self.noouttest(command.split(" "))
+
+    def test_700_delmachines(self):
         for i in range(1, 10):
             self.noouttest(["del", "machine", "--machine", "evm%s" % i])
 
-    def testverifydelevm1(self):
+    def test_800_verifydelmachines(self):
         for i in range(1, 10):
             command = "show machine --machine evm%s" %i
             self.notfoundtest(command.split(" "))
 
     # Hack... doing this test here for timing reasons...
-    def testverifydelclusterwithmachines(self):
+    def test_900_verifydelclusterwithmachines(self):
         command = "del esx cluster --cluster utecl1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Cluster still in use by vmhosts", command)
 
-    def testverifycatcluster(self):
+    def test_800_verifycatcluster(self):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)

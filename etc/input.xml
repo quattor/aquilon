@@ -479,6 +479,7 @@
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
          <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
@@ -499,17 +500,18 @@
       <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
-         <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
-            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
-            <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-         </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.  Currently defaults to 'generic'.</option>
          <option name="comments" type="string">Comments</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <optgroup name="add_host_ip_opts" mandatory="False" fields="any">
+            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+            <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
+            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         </optgroup>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
    </command>
