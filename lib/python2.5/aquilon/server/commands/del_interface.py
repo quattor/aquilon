@@ -39,7 +39,8 @@ class CommandDelInterface(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, interface, machine, mac, ip, user, **arguments):
+    def render(self, session, logger, interface, machine, mac, ip, user,
+               **arguments):
         dbinterface = get_interface(session, interface, machine, mac, ip)
         dbmachine = dbinterface.hardware_entity
         if dbmachine.host and dbinterface.bootable:
@@ -47,7 +48,7 @@ class CommandDelInterface(BrokerCommand):
         session.delete(dbinterface)
         session.flush()
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
         return
 

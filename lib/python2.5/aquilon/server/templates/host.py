@@ -29,11 +29,15 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 
+import logging
+
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
+
+LOGGER = logging.getLogger('aquilon.server.templates.host')
 
 class PlenaryHost(PlenaryCollection):
     """
@@ -46,13 +50,13 @@ class PlenaryHost(PlenaryCollection):
     flat_host_profiles (boolean):
       if host profiles should be put into a "flat" toplevel (non-namespaced)
     """
-    def __init__(self, dbhost):
-        PlenaryCollection.__init__(self)
+    def __init__(self, dbhost, logger=LOGGER):
+        PlenaryCollection.__init__(self, logger=logger)
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
-            self.plenaries.append(PlenaryNamespacedHost(dbhost))
+            self.plenaries.append(PlenaryNamespacedHost(dbhost, logger=logger))
         if self.config.getboolean("broker", "flat_host_profiles"):
-            self.plenaries.append(PlenaryToplevelHost(dbhost))
+            self.plenaries.append(PlenaryToplevelHost(dbhost, logger=logger))
 
     def write(self, dir=None, user=None, locked=False, content=None):
         # Standard PlenaryCollection swallows IncompleteError.  If/when
@@ -69,8 +73,8 @@ class PlenaryToplevelHost(Plenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
-    def __init__(self, dbhost):
-        Plenary.__init__(self, dbhost)
+    def __init__(self, dbhost, logger=LOGGER):
+        Plenary.__init__(self, dbhost, logger=logger)
         self.dbhost = dbhost
         self.name = dbhost.fqdn
         self.plenary_core = ""
@@ -168,8 +172,8 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     """
     A plenary template describing a host, namespaced by DNS domain
     """
-    def __init__(self, dbhost):
-        PlenaryToplevelHost.__init__(self, dbhost)
+    def __init__(self, dbhost, logger=LOGGER):
+        PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
         self.name = dbhost.fqdn
         self.plenary_core = dbhost.dns_domain.name
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__

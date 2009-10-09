@@ -44,7 +44,7 @@ class CommandUpdateESXCluster(BrokerCommand):
 
     required_parameters = [ "cluster" ]
 
-    def render(self, session, cluster, archetype, personality,
+    def render(self, session, logger, cluster, archetype, personality,
                max_members, vm_to_host_ratio, comments, **arguments):
         cluster_type = 'esx'
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
@@ -53,8 +53,8 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         cluster_updated = False
         location_changed = False
-        remove_plenaries = PlenaryCollection()
-        plenaries = PlenaryCollection()
+        remove_plenaries = PlenaryCollection(logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
 
         dblocation = get_location(session, **arguments)
         if dblocation:
@@ -79,11 +79,13 @@ class CommandUpdateESXCluster(BrokerCommand):
                                              new=dblocation):
                     for dbmachine in dbcluster.machines:
                         # This plenary will have a path to the old location.
-                        remove_plenaries.append(PlenaryMachineInfo(dbmachine))
+                        plenary = PlenaryMachineInfo(dbmachine, logger=logger)
+                        remove_plenaries.append(plenary)
                         dbmachine.location = dblocation
                         session.add(dbmachine)
                         # This plenary will have a path to the new location.
-                        plenaries.append(PlenaryMachineInfo(dbmachine))
+                        plenaries.append(PlenaryMachineInfo(dbmachine,
+                                                            logger=logger))
                 dbcluster.location_constraint = dblocation
                 location_changed = True
                 cluster_updated = True
@@ -144,9 +146,9 @@ class CommandUpdateESXCluster(BrokerCommand):
         session.add(dbcluster)
         session.flush()
 
-        plenaries.append(PlenaryCluster(dbcluster))
+        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
         try:
-            compileLock()
+            compileLock(logger=logger)
             remove_plenaries.stash()
             plenaries.write(locked=True)
             remove_plenaries.remove(locked=True)
@@ -155,7 +157,7 @@ class CommandUpdateESXCluster(BrokerCommand):
             plenaries.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 

@@ -32,7 +32,6 @@
 import os
 
 from threading import Lock
-from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
@@ -50,7 +49,7 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, user, **arguments):
+    def render(self, session, logger, hostname, user, **arguments):
         # removing the plenary host requires a compile lock, however
         # we want to avoid deadlock by the fact that we're messing
         # with two locks here, so we want to be careful. We grab the
@@ -62,14 +61,15 @@ class CommandDelHost(BrokerCommand):
         # db information) after we've released the delhost lock.
         delplenary = False
 
-        log.msg("Aquiring lock to attempt to delete %s" % hostname)
+        logger.client_info("Acquiring lock to attempt to delete %s" % hostname)
         delhost_lock.acquire()
         bindings = [] # Any service bindings that we need to clean up afterwards
         try:
-            log.msg("Aquired lock, attempting to delete %s" % hostname)
+            logger.client_info("Acquired lock, attempting to delete %s" %
+                               hostname)
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
-            ph = PlenaryHost(dbhost)
+            ph = PlenaryHost(dbhost, logger=logger)
             domain = dbhost.domain.name
             fqdn   = dbhost.fqdn
             deps = get_host_dependencies(session, dbhost)
@@ -84,8 +84,8 @@ class CommandDelHost(BrokerCommand):
             for binding in dbhost.templates:
                 if (binding.cfg_path.svc_inst):
                     bindings.append(binding.cfg_path.svc_inst)
-                log.msg("Before deleting host '%s', removing binding '%s'"
-                        % (fqdn, binding.cfg_path))
+                logger.info("Before deleting host '%s', removing binding '%s'"
+                            % (fqdn, binding.cfg_path))
                 session.delete(binding)
 
             session.delete(dbhost)
@@ -102,7 +102,8 @@ class CommandDelHost(BrokerCommand):
 
             session.refresh(dbmachine)
         finally:
-            log.msg("Released lock from attempt to delete %s" % hostname)
+            logger.client_info("Released lock from attempt to delete %s" %
+                               hostname)
             delhost_lock.release()
 
         # Only if we got here with no exceptions do we clean the template
@@ -110,7 +111,7 @@ class CommandDelHost(BrokerCommand):
         # since the changes to dsdb have already been made.
         if (delplenary):
             try:
-                compileLock()
+                compileLock(logger=logger)
                 ph.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
@@ -118,13 +119,15 @@ class CommandDelHost(BrokerCommand):
 
                 # Update any plenary client mappings
                 for si in bindings:
-                    log.msg("removing plenary from binding for %s"%si.cfg_path)
-                    plenary_info = PlenaryServiceInstanceServer(si.service, si)
+                    logger.info("removing plenary from binding for %s" %
+                                si.cfg_path)
+                    plenary_info = PlenaryServiceInstanceServer(si.service, si,
+                                                                logger=logger)
                     plenary_info.write(locked=True)
 
             finally:
-                compileRelease()
+                compileRelease(logger=logger)
 
-            build_index(self.config, session, profiles)
+            build_index(self.config, session, profiles, logger=logger)
 
         return

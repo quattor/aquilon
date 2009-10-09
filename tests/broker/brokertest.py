@@ -114,6 +114,10 @@ class TestBrokerCommand(unittest.TestCase):
         (out, err) = p.communicate()
         # Strip any msversion dev warnings out of STDERR
         err = self.msversion_dev_re.sub('', err)
+        # Lock messages are pretty common...
+        err = err.replace('requesting compile lock\n', '')
+        err = err.replace('acquired compile lock\n', '')
+        err = err.replace('releasing compile lock\n', '')
         return (p, out, err)
 
     def successtest(self, command, **kwargs):
@@ -125,11 +129,20 @@ class TestBrokerCommand(unittest.TestCase):
                          % (command, out, err))
         return (out, err)
 
+    def assertEmptyStream(self, name, contents, command):
+        self.assertEqual(contents, "",
+                         "%s for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                         % (name, command, contents))
+
+    def assertEmptyErr(self, contents, command):
+        self.assertEmptyStream("STDERR", contents, command)
+
+    def assertEmptyOut(self, contents, command):
+        self.assertEmptyStream("STDOUT", contents, command)
+
     def commandtest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
-        self.assertEqual(err, "",
-                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, err))
+        self.assertEmptyErr(err, command)
         self.assertEqual(p.returncode, 0,
                 "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\n"
                 % (command, out))

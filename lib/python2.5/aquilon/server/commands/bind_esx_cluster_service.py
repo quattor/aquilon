@@ -32,7 +32,6 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.services import Chooser
-from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 

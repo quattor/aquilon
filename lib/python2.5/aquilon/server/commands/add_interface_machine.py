@@ -29,7 +29,6 @@
 """Contains the logic for `aq add interface --machine`."""
 
 
-from twisted.python import log
 from sqlalchemy import String
 from sqlalchemy.sql.expression import asc, desc, bindparam
 
@@ -52,8 +51,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, interface, machine, mac, automac, comments,
-               **arguments):
+    def render(self, session, logger, interface, machine, mac, automac,
+               comments, **arguments):
         dbmachine = get_machine(session, machine)
         extra = {}
         if interface == 'eth0':
@@ -96,16 +95,16 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 dummy_machine = prev.hardware_entity
                 dummy_ip = prev.system.ip
                 old_network = prev.system.network
-                self.remove_prev(session, prev, pending_removals)
+                self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
                 self.remove_dsdb(dummy_ip)
-                self.consolidate_names(session, dbmachine, dummy_machine.name,
-                                       pending_removals)
+                self.consolidate_names(session, logger, dbmachine,
+                                       dummy_machine.name, pending_removals)
                 # It seems like a shame to throw away the IP address that
                 # had been allocated for the blind host.  Try to use it
                 # as it should be used...
-                dbmanager = self.add_manager(session, dbmachine, dummy_ip,
-                                             old_network)
+                dbmanager = self.add_manager(session, logger, dbmachine,
+                                             dummy_ip, old_network)
             elif prev:
                 msg = describe_interface(session, prev)
                 raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
@@ -132,8 +131,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
-                log.msg("Could not reserve IP %s for %s in dsdb: %s" %
-                        (dbmanager.ip, dbmanager.fqdn, e))
+                logger.client_info("Could not reserve IP %s for %s in dsdb: "
+                                   "%s" % (dbmanager.ip, dbmanager.fqdn, e))
                 dbinterface.system = None
                 session.add(dbinterface)
                 session.remove(dbmanager)
@@ -141,15 +140,15 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 session.refresh(dbinterface)
                 session.refresh(dbmachine)
 
-        plenaries = PlenaryCollection()
-        plenaries.append(PlenaryMachineInfo(dbmachine))
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
         if pending_removals and dbmachine.host:
             # Not an exact test, but the file won't be re-written
             # if the contents are the same so calling too often is
             # not a major expense.
-            plenaries.append(PlenaryHost(dbmachine.host))
+            plenaries.append(PlenaryHost(dbmachine.host, logger=logger))
         try:
-            compileLock()
+            compileLock(logger=logger)
             pending_removals.stash()
             plenaries.write(locked=True)
             pending_removals.remove(locked=True)
@@ -157,7 +156,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             plenaries.restore_stash()
             pending_removals.restore_stash()
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         if dbmachine.host:
             # FIXME: reconfigure host
@@ -165,20 +164,22 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         return
 
-    def remove_prev(self, session, prev, pending_removals):
+    def remove_prev(self, session, logger, prev, pending_removals):
         """Remove the interface 'prev' and its host and machine."""
         # This should probably be re-factored to call code used elsewhere.
         # The below seems too simple to warrant that, though...
-        log.msg("Removing blind host '%s', machine '%s', and interface '%s'" %
-                (prev.system.fqdn, prev.hardware_entity.name, prev.name))
-        host_plenary_info = PlenaryHost(prev.system)
+        logger.info("Removing blind host '%s', machine '%s', "
+                    "and interface '%s'" %
+                    (prev.system.fqdn, prev.hardware_entity.name, prev.name))
+        host_plenary_info = PlenaryHost(prev.system, logger=logger)
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
         # plenarys and dependency files.
         pending_removals.append(host_plenary_info)
         session.delete(prev.system)
         dbmachine = prev.hardware_entity
-        machine_plenary_info = PlenaryMachineInfo(prev.hardware_entity)
+        machine_plenary_info = PlenaryMachineInfo(prev.hardware_entity,
+                                                  logger=logger)
         pending_removals.append(machine_plenary_info)
         session.delete(prev)
         session.delete(dbmachine)
@@ -194,35 +195,40 @@ class CommandAddInterfaceMachine(BrokerCommand):
             raise ArgumentError("Could not remove host entry with ip %s from dsdb: %s" %
                                 (old_ip, e))
 
-    def consolidate_names(self, session, dbmachine, dummy_machine_name,
+    def consolidate_names(self, session, logger, dbmachine, dummy_machine_name,
                           pending_removals):
         short = dbmachine.name[:-1]
         if short != dummy_machine_name[:-1]:
-            log.msg("Not altering name of machine '%s', name of machine being removed '%s' is too different" %
-                    (dbmachine.name, dummy_machine_name))
+            logger.client_info("Not altering name of machine '%s', name of "
+                               "machine being removed '%s' is too different" %
+                               (dbmachine.name, dummy_machine_name))
             return
         if not dbmachine.name[-1].isalpha():
-            log.msg("Not altering name of machine '%s', name does not end with a letter." %
-                    dbmachine.name)
+            logger.client_info("Not altering name of machine '%s', name does "
+                               "not end with a letter." % dbmachine.name)
             return
         if session.query(Machine).filter_by(name=short).first():
-            log.msg("Not altering name of machine '%s', target name '%s' is already in use" %
-                    (dbmachine.name, short))
+            logger.client_info("Not altering name of machine '%s', target "
+                               "name '%s' is already in use" %
+                               (dbmachine.name, short))
             return
-        log.msg("Renaming machine '%s' as '%s'" % (dbmachine.name, short))
-        pending_removals.append(PlenaryMachineInfo(dbmachine))
+        logger.client_info("Renaming machine '%s' as '%s'" %
+                           (dbmachine.name, short))
+        pending_removals.append(PlenaryMachineInfo(dbmachine, logger=logger))
         dbmachine.name = short
         session.add(dbmachine)
         session.flush()
 
-    def add_manager(self, session, dbmachine, old_ip, old_network):
+    def add_manager(self, session, logger, dbmachine, old_ip, old_network):
         if not old_ip:
-            log.msg("No IP available for system being removed, not auto-creating manager for %s" %
-                    dbmachine.name)
+            logger.client_info("No IP available for system being removed, "
+                               "not auto-creating manager for %s" %
+                               dbmachine.name)
             return
         if not dbmachine.host:
-            log.msg("Machine %s is not linked to a host, not auto-creating manager for %s with IP %s" %
-                    (dbmachine.name, old_ip))
+            logger.client_info("Machine %s is not linked to a host, not "
+                               "auto-creating manager for %s with IP %s" %
+                               (dbmachine.name, old_ip))
             return
         dbhost = dbmachine.host
         manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
@@ -230,8 +236,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
             (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                                  manager)
         except ArgumentError, e:
-            log.msg("Could not create manager with name %s and ip %s for machine %s: %s" %
-                    (manager, old_ip, dbmachine.name, e))
+            logger.client_info("Could not create manager with name %s and "
+                               "ip %s for machine %s: %s" %
+                               (manager, old_ip, dbmachine.name, e))
             return
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,
                             machine=dbmachine,

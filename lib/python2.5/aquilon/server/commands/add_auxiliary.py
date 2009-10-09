@@ -48,8 +48,8 @@ class CommandAddAuxiliary(BrokerCommand):
 
     required_parameters = ["auxiliary"]
 
-    def render(self, session, hostname, machine, auxiliary, interface,
-            mac, comments, user, **arguments):
+    def render(self, session, logger, hostname, machine, auxiliary, interface,
+               mac, comments, user, **arguments):
         if machine:
             dbmachine = get_machine(session, machine)
         if hostname:
@@ -116,9 +116,9 @@ class CommandAddAuxiliary(BrokerCommand):
         session.refresh(dbmachine)
         session.refresh(dbauxiliary)
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenary_info.write(locked=True)
 
             dsdb_runner = DSDBRunner()
@@ -130,7 +130,7 @@ class CommandAddAuxiliary(BrokerCommand):
             plenary_info.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

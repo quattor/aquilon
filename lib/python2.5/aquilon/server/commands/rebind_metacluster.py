@@ -38,7 +38,7 @@ class CommandRebindMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster", "cluster"]
 
-    def render(self, session, metacluster, cluster, **arguments):
+    def render(self, session, logger, metacluster, cluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster)
         if not dbcluster:
             raise NotFoundException("Cluster '%s' not found." % cluster)
@@ -71,7 +71,7 @@ class CommandRebindMetaCluster(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenaryCluster(dbcluster)
+        plenary = PlenaryCluster(dbcluster, logger=logger)
         plenary.write()
 
         return

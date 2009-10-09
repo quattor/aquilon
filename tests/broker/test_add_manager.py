@@ -135,9 +135,12 @@ class TestAddManager(TestBrokerCommand):
     # and add_host, and that this *should* create a manager
     # Lots of verifications steps for this single test...
     def testaddunittest12bmc(self):
-        self.noouttest(["add", "interface", "--interface", "bmc",
-                        "--hostname", "unittest12.aqd-unittest.ms.com",
-                        "--mac", self.net.unknown[0].usable[8].mac])
+        command = ["add", "interface", "--interface", "bmc",
+                   "--hostname", "unittest12.aqd-unittest.ms.com",
+                   "--mac", self.net.unknown[0].usable[8].mac]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Renaming machine 'ut3s01p1a' as 'ut3s01p1'",
+                         command)
 
     def testverifyunittest13removed(self):
         command = "show host --hostname unittest13.one-nyp.ms.com"

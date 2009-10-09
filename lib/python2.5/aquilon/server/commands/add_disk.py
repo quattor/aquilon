@@ -45,8 +45,8 @@ class CommandAddDisk(BrokerCommand):
 
     required_parameters = ["machine", "disk", "type", "capacity"]
 
-    def render(self, session, machine, disk, type, capacity, share, address,
-               comments, user, **arguments):
+    def render(self, session, logger, machine, disk, type, capacity, share,
+               address, comments, user, **arguments):
 
         dbmachine = get_machine(session, machine)
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
@@ -89,6 +89,6 @@ class CommandAddDisk(BrokerCommand):
         except InvalidRequestError, e:
             raise ArgumentError("Could not add disk: %s" % e)
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
         return

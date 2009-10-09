@@ -43,8 +43,9 @@ class CommandAddESXCluster(BrokerCommand):
 
     required_parameters = ["cluster", "metacluster"]
 
-    def render(self, session, cluster, metacluster, archetype, personality,
-               max_members, vm_to_host_ratio, domain, comments, **arguments):
+    def render(self, session, logger, cluster, metacluster, archetype,
+               personality, max_members, vm_to_host_ratio, domain, comments,
+               **arguments):
         validate_basic("cluster", cluster)
         cluster_type = 'esx'
 
@@ -100,7 +101,7 @@ class CommandAddESXCluster(BrokerCommand):
         session.flush()
         session.refresh(dbcluster)
 
-        plenary = PlenaryCluster(dbcluster)
+        plenary = PlenaryCluster(dbcluster, logger=logger)
         plenary.write()
 
         return

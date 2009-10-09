@@ -31,13 +31,14 @@
 
 import os
 from threading import Lock
+import logging
 
-from twisted.python import log
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.server.processes import write_file, read_file, remove_file
+from aquilon.server.logger import CLIENT_INFO
 
 
 # We have a global compile lock.
@@ -49,21 +50,23 @@ from aquilon.server.processes import write_file, read_file, remove_file
 #    in progress
 
 compile_lock = Lock()
+LOGGER = logging.getLogger('aquilon.server.templates.base')
 
-def compileLock():
-    log.msg("requesting compile lock")
+def compileLock(logger=LOGGER):
+    logger.log(CLIENT_INFO, "requesting compile lock")
     compile_lock.acquire()
-    log.msg("aquired compile lock")
+    logger.log(CLIENT_INFO, "acquired compile lock")
 
-def compileRelease():
-    log.msg("releasing compile lock")
+def compileRelease(logger=LOGGER):
+    logger.log(CLIENT_INFO, "releasing compile lock")
     compile_lock.release()
 
 
 class Plenary(object):
-    def __init__(self, dbobj=None):
+    def __init__(self, dbobj=None, logger=LOGGER):
         self.config = Config()
         self.dbobj = dbobj
+        self.logger = logger
         self.template_type = 'structure'
         self.plenary_template = None
         self.plenary_core = None
@@ -238,8 +241,8 @@ class Plenary(object):
 
         """
         if not self.stashed:
-            log.msg("Attempt to restore plenary '%s' "
-                    "without having saved state." % self.pathname())
+            self.logger.info("Attempt to restore plenary '%s' "
+                             "without having saved state." % self.pathname())
             return
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
@@ -271,8 +274,9 @@ class PlenaryCollection(object):
     group that needs to be written.
 
     """
-    def __init__(self):
+    def __init__(self, logger=LOGGER):
         self.plenaries = []
+        self.logger = logger
 
     def stash(self):
         for plen in self.plenaries:
@@ -346,6 +350,7 @@ class PlenaryCollection(object):
         raise InternalError
 
     def append(self, plenary):
+        plenary.logger = self.logger
         self.plenaries.append(plenary)
 
     def refresh(self):

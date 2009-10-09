@@ -43,7 +43,7 @@ class CommandDelDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, domain, **arguments):
+    def render(self, session, logger, domain, **arguments):
         # FIXME: This will fail if the domain does not exist.  We might
         # want to allow the directory to be deleted anyway, assuming it
         # is a valid domain name and az_check passes.
@@ -55,13 +55,13 @@ class CommandDelDomain(BrokerCommand):
                     % dbdomain.name)
         session.delete(dbdomain)
 
-        domain = TemplateDomain(dbdomain)
+        domain = TemplateDomain(dbdomain, logger=logger)
         try:
-            compileLock()
+            compileLock(logger=logger)
             for dir in domain.directories():
                 remove_dir(dir)
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 

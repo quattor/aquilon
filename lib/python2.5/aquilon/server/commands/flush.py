@@ -31,7 +31,6 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, Machine, Domain, Personality, Cluster
-from twisted.python import log
 from aquilon.server.templates.personality import PlenaryPersonality
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.service import (PlenaryService,
@@ -44,15 +43,15 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 
 class CommandFlush(BrokerCommand):
 
-    def render(self, session, user, **arguments):
+    def render(self, session, logger, user, **arguments):
         success = []
         failed = []
         written = 0
 
         try:
-            compileLock()
+            compileLock(logger=logger)
 
-            log.msg("flushing services")
+            logger.client_info("flushing services")
             for dbservice in session.query(Service).all():
                 try:
                     plenary_info = PlenaryService(dbservice)
@@ -69,7 +68,7 @@ class CommandFlush(BrokerCommand):
                         failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
                         continue
 
-            log.msg("flushing personalities")
+            logger.client_info("flushing personalities")
             for persona in session.query(Personality).all():
                 try:
                     plenary_info = PlenaryPersonality(persona)
@@ -79,7 +78,7 @@ class CommandFlush(BrokerCommand):
                                   (persona.name, e))
                     continue
 
-            log.msg("flushing machines")
+            logger.client_info("flushing machines")
             for machine in session.query(Machine).all():
                 try:
                     plenary_info = PlenaryMachineInfo(machine)
@@ -94,7 +93,7 @@ class CommandFlush(BrokerCommand):
 
             # what about the plenary hosts within domains... do we want those too?
             # let's say yes for now...
-            log.msg("flushing hosts")
+            logger.client_info("flushing hosts")
             for d in session.query(Domain).all():
                 for h in d.hosts:
                     try:
@@ -102,11 +101,11 @@ class CommandFlush(BrokerCommand):
                         written += plenary_host.write(locked=True)
                     except IncompleteError, e:
                         pass
-                        #log.msg("Not flushing host: %s" % e)
+                        #logger.client_info("Not flushing host: %s" % e)
                     except Exception, e:
                         failed.append("host %s in domain %s failed: %s" %(h.fqdn,d.name,e))
 
-            log.msg("flushing clusters")
+            logger.client_info("flushing clusters")
             for clus in session.query(Cluster).all():
                 try:
                     plenary = PlenaryCluster(clus)
@@ -118,12 +117,12 @@ class CommandFlush(BrokerCommand):
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this
             # count and should be reasonably close... :)
-            log.msg("flushed %d/%d templates" %
-                    (written, written + len(failed)))
+            logger.client_info("flushed %d/%d templates" %
+                               (written, written + len(failed)))
             if failed:
                 raise PartialError(success, failed)
 
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return

@@ -41,8 +41,7 @@ from aquilon.aqdb.model import (Host, Cluster, Tld, BuildItem, ServiceMap,
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import (compileLock, compileRelease,
-                                           PlenaryCollection)
+from aquilon.server.templates.base import PlenaryCollection
 
 
 class Chooser(object):
@@ -106,7 +105,7 @@ class Chooser(object):
         """Set of service instances losing a client."""
         self.chosen_services = {}
         """Track the chosen services."""
-        self.plenaries = PlenaryCollection()
+        self.plenaries = PlenaryCollection(logger=self.logger)
         """Keep stashed plenaries for rollback purposes."""
 
     def generate_description(self):
@@ -389,7 +388,8 @@ class Chooser(object):
 
     def stash_services(self):
         for instance in self.instances_bound.union(self.instances_unbound):
-            plenary = PlenaryServiceInstanceServer(instance.service, instance)
+            plenary = PlenaryServiceInstanceServer(instance.service, instance,
+                                                   logger=self.logger)
             plenary.stash()
             self.plenaries.append(plenary)
 
@@ -558,7 +558,7 @@ class HostChooser(Chooser):
             self.session.add(self.dbhost)
 
     def prestash_primary(self):
-        plenary_host = PlenaryHost(self.dbhost)
+        plenary_host = PlenaryHost(self.dbhost, logger=self.logger)
         plenary_host.stash()
         self.plenaries.append(plenary_host)
 
@@ -621,7 +621,7 @@ class ClusterChooser(Chooser):
             self.session.add(dbcs)
             self.flush_changes()
             for h in self.dbcluster.hosts:
-                host_plenary = PlenaryHost(h)
+                host_plenary = PlenaryHost(h, logger=self.logger)
                 host_plenary.stash()
                 self.plenaries.append(host_plenary)
                 host_chooser = Chooser(h, logger=self.logger,
@@ -633,7 +633,7 @@ class ClusterChooser(Chooser):
             self.session.add(self.dbcluster)
 
     def prestash_primary(self):
-        plenary_cluster = PlenaryCluster(self.dbcluster)
+        plenary_cluster = PlenaryCluster(self.dbcluster, logger=self.logger)
         plenary_cluster.stash()
         self.plenaries.append(plenary_cluster)
 

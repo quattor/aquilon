@@ -214,7 +214,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_600_makecluster(self):
         command = ["make_cluster", "--cluster=utecl1"]
-        out = self.commandtest(command)
+        (out, err) = self.successtest(command)
 
     def test_700_add_windows(self):
         command = ["add_windows_host", "--hostname=aqddesk1.msad.ms.com",

@@ -48,7 +48,7 @@ class CommandMakeCluster(BrokerCommand):
 
         chooser = None
         try:
-            compileLock()
+            compileLock(logger=logger)
 
             if not dbcluster.personality.archetype.is_compileable:
                 raise ArgumentError("Cluster %s is not a compilable archetype "
@@ -70,7 +70,7 @@ class CommandMakeCluster(BrokerCommand):
             for h in dbcluster.hosts:
                 profile_list.append(h.fqdn)
 
-            td = TemplateDomain(dbcluster.domain)
+            td = TemplateDomain(dbcluster.domain, logger=logger)
             out = td.compile(session, only=" ".join(profile_list), locked=True)
 
         except:
@@ -83,7 +83,7 @@ class CommandMakeCluster(BrokerCommand):
             raise
 
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return str(out)
 

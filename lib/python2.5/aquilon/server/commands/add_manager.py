@@ -47,8 +47,8 @@ class CommandAddManager(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, manager, interface, mac, comments,
-               user, **arguments):
+    def render(self, session, logger, hostname, manager, interface, mac,
+               comments, user, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.machine
 
@@ -113,9 +113,9 @@ class CommandAddManager(BrokerCommand):
         session.refresh(dbmachine)
         session.refresh(dbmanager)
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenary_info.write(locked=True)
 
             dsdb_runner = DSDBRunner()
@@ -127,7 +127,7 @@ class CommandAddManager(BrokerCommand):
             plenary_info.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

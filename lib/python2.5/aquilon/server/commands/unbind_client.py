@@ -29,8 +29,6 @@
 """Contains the logic for `aq unbind client`."""
 
 
-import logging
-
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
@@ -40,14 +38,12 @@ from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.host import PlenaryHost
 
-log = logging.getLogger('aquilon.server.commands.unbind_client')
-
 
 class CommandUnbindClient(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, hostname, service, **arguments):
+    def render(self, session, logger, hostname, service, **arguments):
         dbhost = hostname_to_host(session, hostname)
         for item in (dbhost.archetype.service_list +
                      dbhost.personality.service_list):
@@ -57,14 +53,15 @@ class CommandUnbindClient(BrokerCommand):
         dbservice = get_service(session, service)
         dbtemplate = get_host_build_item(session, dbhost, dbservice)
         if dbtemplate:
-            log.debug("Removing client binding")
+            logger.info("Removing client binding")
             si = dbtemplate.cfg_path.svc_inst
             session.delete(dbtemplate)
             session.flush()
 
-            plenaries = PlenaryCollection()
-            plenaries.append(PlenaryHost(dbhost))
-            plenaries.append(PlenaryServiceInstanceServer(dbservice, si))
+            plenaries = PlenaryCollection(logger=logger)
+            plenaries.append(PlenaryHost(dbhost, logger=logger))
+            plenaries.append(PlenaryServiceInstanceServer(dbservice, si,
+                                                          logger=logger))
             plenaries.write()
 
         return

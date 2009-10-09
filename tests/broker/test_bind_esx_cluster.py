@@ -52,9 +52,9 @@ class TestBindESXCluster(TestBrokerCommand):
     def testbindutecl2(self):
         # test_rebind_esx_cluster will also bind evh1 to utecl2.
         for i in [5]:
-            self.noouttest(["bind_esx_cluster",
-                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                            "--cluster", "utecl2"])
+            self.successtest(["bind_esx_cluster",
+                              "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                              "--cluster", "utecl2"])
 
     def testduplicatebindutecl1(self):
         self.successtest(["bind_esx_cluster",

@@ -55,7 +55,7 @@ class CommandMake(BrokerCommand):
         # domains.
         chooser = None
         try:
-            compileLock()
+            compileLock(logger=logger)
 
             # Currently, for the Host to be created it *must* be associated with
             # a Machine already.  If that ever changes, need to check here and
@@ -113,7 +113,7 @@ class CommandMake(BrokerCommand):
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)
 
-            td = TemplateDomain(dbhost.domain)
+            td = TemplateDomain(dbhost.domain, logger=logger)
             out = td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
@@ -126,7 +126,7 @@ class CommandMake(BrokerCommand):
             raise
 
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return str(out)
 

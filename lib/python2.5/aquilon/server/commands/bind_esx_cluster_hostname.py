@@ -119,7 +119,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
         if chooser:
             chooser.write_plenary_templates()
         else:
-            plenary = PlenaryCluster(dbcluster)
+            plenary = PlenaryCluster(dbcluster, logger=logger)
             plenary.write()
 
         return

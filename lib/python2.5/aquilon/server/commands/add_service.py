@@ -41,7 +41,8 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, service, instance, comments, **arguments):
+    def render(self, session, logger, service, instance, comments,
+               **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
         if not dbservice:
             # FIXME: Could have better error handling
@@ -55,8 +56,8 @@ class CommandAddService(BrokerCommand):
             dbservice = Service(name=service, cfg_path=dbcfg_path)
             session.add(dbservice)
 
-        plenaries = PlenaryCollection()
-        plenaries.append(PlenaryService(dbservice))
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryService(dbservice, logger=logger))
 
         if not instance:
             session.flush()
@@ -82,7 +83,8 @@ class CommandAddService(BrokerCommand):
 
         # By definition, we don't need to then recompile, since nothing
         # can be using this service yet.
-        plenaries.append(PlenaryServiceInstance(dbservice, dbsi))
+        plenaries.append(PlenaryServiceInstance(dbservice, dbsi,
+                                                logger=logger))
         plenaries.write()
 
         return

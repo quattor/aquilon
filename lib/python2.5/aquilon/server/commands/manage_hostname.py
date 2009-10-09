@@ -28,8 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-from twisted.python import log
-
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -42,7 +40,7 @@ class CommandManageHostname(BrokerCommand):
 
     required_parameters = ["domain", "hostname"]
 
-    def render(self, session, domain, hostname, **arguments):
+    def render(self, session, logger, domain, hostname, **arguments):
         # FIXME: Need to verify that this server handles this domain?
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
@@ -52,7 +50,7 @@ class CommandManageHostname(BrokerCommand):
                                 "cluster level; this host is a member of the "
                                 "cluster " + dbhost.cluster.name)
 
-        plenary_host = PlenaryHost(dbhost)
+        plenary_host = PlenaryHost(dbhost, logger=logger)
         old_domain = dbhost.domain.name
 
         dbhost.domain = dbdomain
@@ -60,7 +58,7 @@ class CommandManageHostname(BrokerCommand):
         session.flush()
 
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenary_host.cleanup(old_domain, locked=True)
 
             # Now we recreate the plenary to ensure that the domain is ready
@@ -79,7 +77,7 @@ class CommandManageHostname(BrokerCommand):
             plenary_host.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 

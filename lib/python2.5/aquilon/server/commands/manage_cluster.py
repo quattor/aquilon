@@ -41,7 +41,7 @@ class CommandManageCluster(BrokerCommand):
 
     required_parameters = ["domain", "cluster"]
 
-    def render(self, session, domain, cluster, **arguments):
+    def render(self, session, logger, domain, cluster, **arguments):
         # FIXME: Need to verify that this server handles this domain?
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
@@ -50,19 +50,19 @@ class CommandManageCluster(BrokerCommand):
             raise NotFoundException("cluster '%s' not found" % cluster)
 
         old_domain = dbcluster.domain.name
-        plenaries = PlenaryCollection()
-        plenaries.append(PlenaryCluster(dbcluster))
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
         dbcluster.domain = dbdomain
         session.add(dbcluster)
         for dbhost in dbcluster.hosts:
-            plenaries.append(PlenaryHost(dbhost))
+            plenaries.append(PlenaryHost(dbhost, logger=logger))
             dbhost.domain = dbdomain
             session.add(dbhost)
 
         session.flush()
 
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenaries.stash()
             plenaries.cleanup(old_domain, locked=True)
             plenaries.write(locked=True)
@@ -70,7 +70,7 @@ class CommandManageCluster(BrokerCommand):
             plenaries.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 

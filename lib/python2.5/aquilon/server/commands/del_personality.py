@@ -39,7 +39,7 @@ class CommandDelPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, personality, archetype, **arguments):
+    def render(self, session, logger, personality, archetype, **arguments):
         dbpersona = get_personality(session, archetype, personality)
 
         # Check dependencies
@@ -48,7 +48,7 @@ class CommandDelPersonality(BrokerCommand):
             raise ArgumentError("personality '%s' is in use and cannot be deleted" % personality)
 
         # All clear
-        plenary = PlenaryPersonality(dbpersona)
+        plenary = PlenaryPersonality(dbpersona, logger=logger)
         session.delete(dbpersona)
         session.flush()
         plenary.remove()
