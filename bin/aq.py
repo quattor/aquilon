@@ -245,7 +245,7 @@ if __name__ == "__main__":
         action.run(commandOptions)
 
     try:
-        if transport.method == 'get':
+        if transport.method == 'get' or transport.method == 'delete':
             # Fun hackery here to get optional parameters into the path...
             # First, figure out what was already included in the path,
             # looking for %(var)s.
@@ -265,7 +265,10 @@ if __name__ == "__main__":
                     uri = uri + '&' + quoteOptions(remainder)
                 else:
                     uri = uri + '?' + quoteOptions(remainder)
-            res = RESTResource(conn, uri).get()
+            if transport.method == 'get':
+                RESTResource(conn, uri).get()
+            elif transport.method == 'delete':
+                RESTResource(conn, uri).delete()
 
         elif transport.method == 'put':
             # FIXME: This will need to be more complicated.
@@ -273,10 +276,6 @@ if __name__ == "__main__":
             putData = urllib.urlencode(commandOptions)
             mimeType = 'application/x-www-form-urlencoded'
             RESTResource(conn, uri).put(putData, mimeType)
-
-        elif transport.method == 'delete':
-            # Again, all command line options should be in the URI already.
-            RESTResource(conn, uri).delete()
 
         elif transport.method == 'post':
             RESTResource(conn, uri).post(**commandOptions)
