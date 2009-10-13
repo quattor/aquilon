@@ -112,7 +112,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                      dbinterface.system.archetype.name == 'aurora')):
                 # This relies on *not* being able to set the boot flag
                 # (directly) to false.
-                dsdb_runner = DSDBRunner()
+                dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbinterface, oldinfo)
         except:
             plenary_info.restore_stash()

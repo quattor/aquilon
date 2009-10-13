@@ -141,7 +141,7 @@ class Plenary(object):
                 return 0
             if not os.path.exists(plenary_path):
                 os.makedirs(plenary_path)
-            write_file(plenary_file, content)
+            write_file(plenary_file, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -159,7 +159,8 @@ class Plenary(object):
         if dir is not None:
             self.dir = dir
         # FIXME: Dupes some logic from pathname()
-        return read_file(self.dir, self.plenary_template + ".tpl")
+        return read_file(self.dir, self.plenary_template + ".tpl",
+                         logger=self.logger)
 
     def remove(self, dir=None, locked=False):
         """
@@ -173,7 +174,7 @@ class Plenary(object):
             if (not locked):
                 compileLock()
             self.stash()
-            remove_file(self.pathname())
+            remove_file(self.pathname(), logger=self.logger)
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
@@ -195,10 +196,10 @@ class Plenary(object):
                 qdir = self.config.get("broker", "quattordir")
                 xmlfile = os.path.join(qdir, "build", "xml", domain,
                                        self.name + ".xml")
-                remove_file(xmlfile)
+                remove_file(xmlfile, logger=self.logger)
                 depfile = os.path.join(qdir, "build", "xml", domain,
                                        self.name + ".xml.dep")
-                remove_file(depfile)
+                remove_file(depfile, logger=self.logger)
         except:
             if not locked:
                 self.restore_stash()

@@ -144,7 +144,7 @@ class TemplateDomain(object):
             out = ''
             self.logger.info("starting compile")
             try:
-                out = run_command(args, env=panc_env,
+                out = run_command(args, env=panc_env, logger=self.logger,
                                   path=config.get("broker", "quattordir"))
             except ProcessException, e:
                 raise ArgumentError("\n%s%s" % (e.out, e.err))

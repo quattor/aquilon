@@ -47,7 +47,7 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
 
     required_parameters = ["interface", "tor_switch", "mac"]
 
-    def render(self, session, interface, tor_switch, mac, comments, user,
+    def render(self, session, logger, interface, tor_switch, mac, comments,
                **arguments):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
 
@@ -94,7 +94,7 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         session.refresh(dbinterface)
         session.refresh(dbtor_switch)
 
-        dsdb_runner = DSDBRunner()
+        dsdb_runner = DSDBRunner(logger=logger)
         try:
             dsdb_runner.add_host(dbinterface)
         except ProcessException, e:

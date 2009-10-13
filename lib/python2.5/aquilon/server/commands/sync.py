@@ -42,7 +42,7 @@ class CommandSync(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, domain, **arguments):
+    def render(self, session, logger, domain, **arguments):
         # Verify that it exists before attempting the sync.
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
@@ -52,10 +52,13 @@ class CommandSync(BrokerCommand):
             os.environ.get("PATH", ""))}
         try:
             compileLock()
-            run_command(["git", "checkout", "master"], path=domaindir, env=git_env)
-            run_command(["git", "pull"], path=domaindir, env=git_env)
+            run_command(["git", "checkout", "master"],
+                        path=domaindir, env=git_env, logger=logger)
+            run_command(["git", "pull"],
+                        path=domaindir, env=git_env, logger=logger)
         except ProcessException, e:
-            run_command(["git", "reset", "--hard", "origin/master"], path=domaindir, env=git_env)
+            run_command(["git", "reset", "--hard", "origin/master"],
+                        path=domaindir, env=git_env, logger=logger)
             raise ArgumentError('''
                 %s%s
 
@@ -67,7 +70,7 @@ class CommandSync(BrokerCommand):
             ''' %(e.out,e.err))
         finally:
             run_command(["git-update-server-info"],
-                        path=domaindir, env=git_env)
+                        path=domaindir, env=git_env, logger=logger)
             compileRelease()
         remote_command = """env PATH="%s:$PATH" NO_PROXY=* git pull""" % (
                 self.config.get("broker", "git_path"))

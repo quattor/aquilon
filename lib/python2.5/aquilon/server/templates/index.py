@@ -121,7 +121,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
                 % (mtime, obj))
     content.append("</profiles>")
 
-    write_file(index_path, "\n".join(content))
+    write_file(index_path, "\n".join(content), logger=logger)
 
     if config.has_option("broker", "server_notifications"):
         service_modules = {}

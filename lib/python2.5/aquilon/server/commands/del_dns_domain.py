@@ -40,7 +40,7 @@ class CommandDelDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, dns_domain, **arguments):
+    def render(self, session, logger, dns_domain, **arguments):
         dbdns_domain = get_dns_domain(session, dns_domain)
 
         dbsystem = session.query(System).filter_by(
@@ -51,7 +51,7 @@ class CommandDelDnsDomain(BrokerCommand):
         session.delete(dbdns_domain)
         session.flush()
 
-        dsdb_runner = DSDBRunner()
+        dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.delete_dns_domain(dns_domain)
 
         return

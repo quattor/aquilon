@@ -32,7 +32,6 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.processes import read_file
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 

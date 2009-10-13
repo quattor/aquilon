@@ -94,7 +94,7 @@ class CommandDelHost(BrokerCommand):
 
             if archetype != 'aurora' and ip is not None:
                 try:
-                    dsdb_runner = DSDBRunner()
+                    dsdb_runner = DSDBRunner(logger=logger)
                     dsdb_runner.delete_host_details(ip)
                 except ProcessException, e:
                     raise ArgumentError("Could not remove host %s from dsdb: %s" %
@@ -115,7 +115,7 @@ class CommandDelHost(BrokerCommand):
                 ph.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
-                remove_file(os.path.join(profiles, fqdn+".xml"))
+                remove_file(os.path.join(profiles, fqdn+".xml"), logger=logger)
 
                 # Update any plenary client mappings
                 for si in bindings:

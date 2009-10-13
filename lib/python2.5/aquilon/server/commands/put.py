@@ -44,14 +44,14 @@ class CommandPut(BrokerCommand):
 
     required_parameters = ["domain", "bundle"]
 
-    def render(self, session, domain, bundle, **arguments):
+    def render(self, session, logger, domain, bundle, **arguments):
         # Verify that it exists before writing to the filesystem.
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
 
         (handle, filename) = mkstemp()
         contents = b64decode(bundle)
-        write_file(filename, contents)
+        write_file(filename, contents, logger=logger)
 
         domaindir = os.path.join(self.config.get("broker", "templatesdir"),
                 dbdomain.name)
@@ -59,19 +59,20 @@ class CommandPut(BrokerCommand):
             os.environ.get("PATH", ""))}
         try:
             compileLock()
-            run_command(["git", "bundle", "verify", filename], path=domaindir,
-                env=git_env)
-            run_command(["git", "pull", filename, "HEAD"], path=domaindir,
-                env=git_env)
+            run_command(["git", "bundle", "verify", filename],
+                        path=domaindir, env=git_env, logger=logger)
+            run_command(["git", "pull", filename, "HEAD"],
+                        path=domaindir, env=git_env, logger=logger)
         except ProcessException, e:
-            run_command(["git", "reset", "--hard"], env=git_env, path=domaindir)
+            run_command(["git", "reset", "--hard"],
+                        path=domaindir, env=git_env, logger=logger)
             raise ArgumentError("\n%s%s" %(e.out,e.err))
         finally:
             compileRelease()
-            remove_file(filename)
+            remove_file(filename, logger=logger)
             try:
-                run_command(["git-update-server-info"], path=domaindir,
-                            env=git_env)
+                run_command(["git-update-server-info"],
+                            path=domaindir, env=git_env, logger=logger)
             except ProcessException, e2:
                 pass
         return

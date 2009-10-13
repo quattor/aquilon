@@ -39,16 +39,18 @@ from __future__ import with_statement
 import os
 import re
 import errno
+import logging
 
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
-from twisted.python import log
 
 from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
 from aquilon.config import Config
 
 
-def run_command(args, env=None, path="."):
+LOGGER = logging.getLogger('aquilon.server.processes')
+
+def run_command(args, env=None, path=".", logger=LOGGER):
     '''
     run the specified command (args should be a list corresponding to ARGV
     returns any output (stdout only). If the command fails, then ProcessException
@@ -70,27 +72,27 @@ def run_command(args, env=None, path="."):
     command_args = [str(arg) for arg in args]
 
     simple_command = " ".join(command_args)
-    log.msg("run_command: %s"%simple_command)
+    logger.info("run_command: %s" % simple_command)
     p = Popen(args=command_args, stdout=PIPE, stderr=PIPE, cwd=path,
             env=shell_env)
     (out, err) = p.communicate()
 
     if p.returncode >= 0:
-        log.msg("command `%s` exited with return code %d" %
-                (simple_command, p.returncode))
+        logger.info("command `%s` exited with return code %d" %
+                    (simple_command, p.returncode))
     else:
-        log.msg("command `%s` exited with signal %d" %
-                (simple_command, -p.returncode))
+        logger.info("command `%s` exited with signal %d" %
+                    (simple_command, -p.returncode))
     if out:
-        log.msg("command `%s` stdout: %s" % (simple_command, out))
+        logger.info("command `%s` stdout: %s" % (simple_command, out))
     if err:
-        log.msg("command `%s` stderr: %s" % (simple_command, err))
+        logger.info("command `%s` stderr: %s" % (simple_command, err))
     if p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
                 code=p.returncode)
     return out
 
-def run_git_command(config, args, env=None, path="."):
+def run_git_command(config, args, env=None, path=".", logger=LOGGER):
     if env:
         git_env = env.copy()
     else:
@@ -104,9 +106,9 @@ def run_git_command(config, args, env=None, path="."):
     else:
         git_args = ["git", args]
 
-    return run_command(git_args, env=git_env, path=path)
+    return run_command(git_args, env=git_env, path=path, logger=logger)
 
-def remove_dir(dir):
+def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in files:
@@ -114,7 +116,7 @@ def remove_dir(dir):
                 thisfile = os.path.join(root, name)
                 os.remove(thisfile)
             except OSError, e:
-                log.msg("Failed to remove '%s': %s" % (thisfile, e))
+                logger.info("Failed to remove '%s': %s" % (thisfile, e))
         for name in dirs:
             try:
                 thisdir = os.path.join(root, name)
@@ -126,14 +128,14 @@ def remove_dir(dir):
                 try:
                     os.remove(thisdir)
                 except OSError, e1:
-                    log.msg("Failed to remove '%s': %s" % (thisdir, e))
+                    logger.info("Failed to remove '%s': %s" % (thisdir, e))
     try:
         os.rmdir(dir)
     except OSError, e:
-        log.msg("Failed to remove '%s': %s" % (dir, e))
+        logger.info("Failed to remove '%s': %s" % (dir, e))
     return
 
-def write_file(filename, content, mode=None):
+def write_file(filename, content, mode=None, logger=LOGGER):
     """Atomically write content into the specified filename.
 
     The content is written into a temp file in the same directory as
@@ -173,7 +175,7 @@ def write_file(filename, content, mode=None):
         if os.path.exists(fpath):
             os.remove(fpath)
 
-def read_file(path, filename):
+def read_file(path, filename, logger=LOGGER):
     fullfile = os.path.join(path, filename)
     try:
         return open(fullfile).read()
@@ -181,14 +183,14 @@ def read_file(path, filename):
         raise AquilonError("Could not read contents of %s: %s"
                 % (fullfile, e))
 
-def remove_file(filename):
+def remove_file(filename, logger=LOGGER):
     try:
         os.remove(filename)
     except OSError, e:
         if e.errno != errno.ENOENT:
-            log.msg("Could not remove file '%s': %s" % (filename, e))
+            logger.info("Could not remove file '%s': %s" % (filename, e))
 
-def cache_version(config):
+def cache_version(config, logger=LOGGER):
     """Try to determine the broker version by examining the path
     to this source file.  If this file path matches
     /aquilon/PROJ/aqd/<version>/ (likely /ms/dist) or
@@ -208,25 +210,23 @@ def cache_version(config):
         return
 
     try:
-        out = run_git_command(config, "describe",
+        out = run_git_command(config, "describe", logger=logger,
                               path=config.get("broker", "srcdir"))
         config.set("broker", "version", out.strip())
     except ProcessException, e:
-        log.msg("Could not run git describe to get version: %s" % e)
+        logger.info("Could not run git describe to get version: %s" % e)
         config.set("broker", "version", "Unknown")
 
 
+IP_NOT_DEFINED_RE = re.compile("Host with IP address "
+                               "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
+                               " is not defined")
+
 class DSDBRunner(object):
-    # Any "new" object will have all the same info as any other.
-    __shared_state = {}
 
-    ip_not_defined_re = re.compile("Host with IP address [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} is not defined")
-
-    def __init__(self):
-        self.__dict__ = self.__shared_state
-        if hasattr(self, "config"):
-            return
+    def __init__(self, logger=LOGGER):
         self.config = Config()
+        self.logger = logger
 
     def getenv(self):
         if self.config.getboolean("broker", "dsdb_use_testdb"):
@@ -255,8 +255,9 @@ class DSDBRunner(object):
                     "delete", "host", "-ip_address", ip],
                     env=self.getenv())
         except ProcessException, e:
-            if e.out and self.ip_not_defined_re.search(e.out):
-                log.msg("DSDB did not have a host with this IP address, proceeding with aqdb command.")
+            if e.out and IP_NOT_DEFINED_RE.search(e.out):
+                self.logger.info("DSDB did not have a host with this IP "
+                                 "address, proceeding with aqdb command.")
                 return
             raise
         return
@@ -290,14 +291,16 @@ class DSDBRunner(object):
         try:
             self.add_host(dbinterface)
         except ProcessException, pe1:
-            log.msg("Failed adding new information to dsdb, attempting to restore old info.")
+            self.logger.info("Failed adding new information to dsdb, "
+                             "attempting to restore old info.")
             try:
                 self.add_host_details(dbinterface.system.fqdn, oldinfo["ip"],
                         oldinfo["name"], oldinfo["mac"])
             except ProcessException, pe2:
                 # FIXME: Add details.
                 raise AquilonError("DSDB is now in an inconsistent state.  Removing old information succeeded, but cannot add new information.")
-            log.msg("Restored old info, re-raising the problem with the add.")
+            self.logger.info("Restored old info, re-raising the problem "
+                             "with the add.")
             raise pe1
         return
 
@@ -307,11 +310,11 @@ class DSDBRunner(object):
                     "show", "dns_domains", "-domain_name", dns_domain],
                     env=self.getenv())
         except ProcessException, e:
-            log.msg("The DNS domain %s does not exist in DSDB, adding it." %
-                    dns_domain)
+            self.logger.info("The DNS domain %s does not exist in DSDB, "
+                             "adding it." % dns_domain)
         else:
-            log.msg("The DNS domain %s already exists in DSDB, continuing." %
-                    dns_domain)
+            self.logger.info("The DNS domain %s already exists in DSDB, "
+                             "continuing." % dns_domain)
             return
 
         if not comments:
@@ -327,10 +330,10 @@ class DSDBRunner(object):
                     "delete", "dns_domain", "-domain_name", dns_domain],
                     env=self.getenv())
         except ProcessException, e:
-            log.msg("Encountered a problem removing the DNS domain %s from DSDB, continuing: %s" %
-                    (dns_domain, e))
+            self.logger.info("Encountered a problem removing the DNS domain "
+                             "%s from DSDB, continuing: %s" % (dns_domain, e))
         else:
-            log.msg("Removed DNS domain %s from DSDB." % dns_domain)
+            self.logger.info("Removed DNS domain %s from DSDB." % dns_domain)
         return
 
     primary_re = re.compile(r'^Primary Name:\s*\b([-\w]+)\b$', re.M)

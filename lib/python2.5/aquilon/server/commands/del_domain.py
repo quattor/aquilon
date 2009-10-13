@@ -59,7 +59,7 @@ class CommandDelDomain(BrokerCommand):
         try:
             compileLock(logger=logger)
             for dir in domain.directories():
-                remove_dir(dir)
+                remove_dir(dir, logger=logger)
         finally:
             compileRelease(logger=logger)
 

@@ -127,7 +127,7 @@ class CommandAddHost(BrokerCommand):
             # XXX: This (and some of the code above) is horrible.  There
             # should be a generic/configurable hook here that could kick
             # in based on archetype and/or domain.
-            dsdb_runner = DSDBRunner()
+            dsdb_runner = DSDBRunner(logger=logger)
             if dbhost.archetype.name == 'aurora':
                 # For aurora, check that DSDB has a record of the host.
                 if not skip_dsdb_check:

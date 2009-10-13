@@ -66,7 +66,7 @@ class CommandDelManager(BrokerCommand):
             session.flush()
     
             try:
-                dsdb_runner = DSDBRunner()
+                dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
                 raise ArgumentError("Could not remove host %s from dsdb: %s" %

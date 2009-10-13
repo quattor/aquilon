@@ -118,7 +118,7 @@ class CommandAddManager(BrokerCommand):
             compileLock(logger=logger)
             plenary_info.write(locked=True)
 
-            dsdb_runner = DSDBRunner()
+            dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:

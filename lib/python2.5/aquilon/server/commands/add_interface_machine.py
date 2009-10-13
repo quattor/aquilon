@@ -97,7 +97,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 old_network = prev.system.network
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
-                self.remove_dsdb(dummy_ip)
+                self.remove_dsdb(logger, dummy_ip)
                 self.consolidate_names(session, logger, dbmachine,
                                        dummy_machine.name, pending_removals)
                 # It seems like a shame to throw away the IP address that
@@ -127,7 +127,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         session.refresh(dbmachine)
 
         if dbmanager:
-            dsdb_runner = DSDBRunner()
+            dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
@@ -185,11 +185,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
         session.delete(dbmachine)
         session.flush()
 
-    def remove_dsdb(self, old_ip):
+    def remove_dsdb(self, logger, old_ip):
         # If this is a host trying to update itself, this would be annoying.
         # Hopefully whatever the problem is here, it's transient.
         try:
-            dsdb_runner = DSDBRunner()
+            dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.delete_host_details(old_ip)
         except ProcessException, e:
             raise ArgumentError("Could not remove host entry with ip %s from dsdb: %s" %
