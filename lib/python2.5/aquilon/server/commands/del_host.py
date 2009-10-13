@@ -92,7 +92,7 @@ class CommandDelHost(BrokerCommand):
             session.flush()
             delplenary = True
 
-            if archetype != 'aurora':
+            if archetype != 'aurora' and ip is not None:
                 try:
                     dsdb_runner = DSDBRunner()
                     dsdb_runner.delete_host_details(ip)
