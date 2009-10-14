@@ -164,7 +164,9 @@ class Chooser(object):
         self.check_errors()
         for dbservice in self.required_services:
             self.choose_cluster_aligned(dbservice)
+            self.choose_available_capacity(dbservice)
             self.choose_past_use(dbservice)
+        self.check_errors()
         # If this code needs to be made more efficient, this could
         # be refactored.  We don't always need count_servers()...
         # In theory don't always need the loop above, either.
@@ -197,6 +199,8 @@ class Chooser(object):
             self.find_service_instances(service)
         self.check_errors()
         self.choose_cluster_aligned(service)
+        self.choose_available_capacity(service)
+        self.check_errors()
         self.choose_past_use(service)
         # If this code needs to be made more efficient, this could
         # be refactored.  We don't always need count_servers()...
@@ -261,6 +265,39 @@ class Chooser(object):
     def choose_cluster_aligned(self, dbservice):
         # Only implemented for hosts.
         pass
+
+    def choose_available_capacity(self, dbservice):
+        """Verify that the available instances have spare capacity.
+
+        Error out if none should be used.
+
+        """
+        maxed_out_instances = set()
+        for instance in self.staging_services[dbservice][:]:
+            max_clients = instance.max_clients
+            if max_clients is None:
+                max_clients = instance.service.max_clients
+            current_clients = instance.client_count
+            if max_clients is not None and current_clients >= max_clients:
+                # We shouldn't use this instance, unless...
+                if current_clients == max_clients and \
+                   self.original_service_instances.get(dbservice) == instance:
+                    # It's OK to choose an instance right at the limit if
+                    # this host is already bound to that instance.
+                    continue
+                # Not the edge case, toss it.
+                self.staging_services[dbservice].remove(instance)
+                maxed_out_instances.add(instance)
+                self.debug("Rejected service %s instance %s with "
+                           "max_client value of %s since client_count is %s.",
+                           instance.service.name, instance.name,
+                           max_clients, current_clients)
+        if len(self.staging_services[dbservice]) < 1:
+            self.error("The available instances %s for service %s are "
+                       "at full capacity.",
+                       [instance.name for instance in maxed_out_instances],
+                       dbservice.name)
+        return
 
     def choose_past_use(self, dbservice):
         """If more than one service instance was found in the maps,
