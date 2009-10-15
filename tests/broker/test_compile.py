@@ -80,7 +80,7 @@ class TestCompile(TestBrokerCommand):
         # the number we're looking for based on everything. It might
         # be better to look for the objects being processed and checking
         # that the numbers a/b are different.
-        self.matchoutput(out, "5/5 compiled", command)
+        self.matchoutput(err, "5/5 compiled", command)
 
 
 if __name__=='__main__':

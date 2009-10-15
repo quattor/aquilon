@@ -85,6 +85,6 @@ class CommandMakeCluster(BrokerCommand):
         finally:
             compileRelease(logger=logger)
 
-        return str(out)
+        return
 
 

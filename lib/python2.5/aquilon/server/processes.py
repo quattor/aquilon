@@ -43,18 +43,45 @@ import logging
 
 from subprocess import Popen, PIPE
 from tempfile import mkstemp
+from threading import Thread
 
 from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
 from aquilon.config import Config
 
-
 LOGGER = logging.getLogger('aquilon.server.processes')
 
-def run_command(args, env=None, path=".", logger=LOGGER):
-    '''
-    run the specified command (args should be a list corresponding to ARGV
-    returns any output (stdout only). If the command fails, then ProcessException
-    will be raised
+
+class StreamLoggerThread(Thread):
+    """Helper class for streaming output as it becomes available."""
+    def __init__(self, logger, loglevel, process, stream):
+        self.logger = logger
+        self.loglevel = loglevel
+        self.process = process
+        self.stream = stream
+        self.buffer = []
+        Thread.__init__(self)
+
+    def run(self):
+        while True:
+            data = self.stream.readline()
+            if data == '' and (self.stream.closed or
+                               self.process.poll() != None):
+                break
+            if data != '':
+                self.buffer.append(data)
+                # This log output will appear in the server logs without
+                # correct channel information.  We will re-log it separately
+                # and with the correct info.
+                self.logger.log(self.loglevel, data.rstrip())
+
+
+def run_command(args, env=None, path=".",
+                logger=LOGGER, loglevel=logging.INFO):
+    '''Run the specified command (args should be a list corresponding to ARGV).
+
+    Returns any output (stdout only).  If the command fails, then
+    ProcessException will be raised.  To pass the output back to the client
+    pass in a logger and specify loglevel as CLIENT_INFO.
     '''
     if env:
         shell_env = env.copy()
@@ -73,26 +100,36 @@ def run_command(args, env=None, path=".", logger=LOGGER):
 
     simple_command = " ".join(command_args)
     logger.info("run_command: %s" % simple_command)
-    p = Popen(args=command_args, stdout=PIPE, stderr=PIPE, cwd=path,
-            env=shell_env)
-    (out, err) = p.communicate()
 
+    p = Popen(args=command_args, stdin=None, stdout=PIPE, stderr=PIPE,
+              cwd=path, env=shell_env)
+    out_thread = StreamLoggerThread(logger, loglevel, p, p.stdout)
+    err_thread = StreamLoggerThread(logger, loglevel, p, p.stderr)
+    out_thread.start()
+    err_thread.start()
+    out_thread.join()
+    err_thread.join()
+    p.wait()
     if p.returncode >= 0:
         logger.info("command `%s` exited with return code %d" %
                     (simple_command, p.returncode))
     else:
         logger.info("command `%s` exited with signal %d" %
                     (simple_command, -p.returncode))
+    out = "".join(out_thread.buffer)
     if out:
         logger.info("command `%s` stdout: %s" % (simple_command, out))
+    err = "".join(err_thread.buffer)
     if err:
         logger.info("command `%s` stderr: %s" % (simple_command, err))
+
     if p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
-                code=p.returncode)
+                               code=p.returncode)
     return out
 
-def run_git_command(config, args, env=None, path=".", logger=LOGGER):
+def run_git_command(config, args, env=None, path=".",
+                    logger=LOGGER, loglevel=logging.INFO):
     if env:
         git_env = env.copy()
     else:
@@ -106,7 +143,8 @@ def run_git_command(config, args, env=None, path=".", logger=LOGGER):
     else:
         git_args = ["git", args]
 
-    return run_command(git_args, env=git_env, path=path, logger=logger)
+    return run_command(git_args, env=git_env, path=path,
+                       logger=logger, loglevel=loglevel)
 
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""

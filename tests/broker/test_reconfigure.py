@@ -113,7 +113,7 @@ class TestReconfigure(TestBrokerCommand):
     def testreconfigureunittest00(self):
         command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(out, "0/1 object template", command)
+        self.matchoutput(err, "0/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
@@ -203,7 +203,7 @@ class TestReconfigure(TestBrokerCommand):
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--os", "linux/5.0-x86_64"]
         (out, err) = self.successtest(command)
-        self.matchoutput(out, "1/1 object template", command)
+        self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
@@ -235,7 +235,7 @@ class TestReconfigure(TestBrokerCommand):
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchoutput(out, "1/1 object template", command)
+        self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
@@ -343,7 +343,7 @@ class TestReconfigure(TestBrokerCommand):
             command = ["reconfigure",
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
             (out, err) = self.successtest(command)
-            self.matchoutput(out, "0/1 object template", command)
+            self.matchoutput(err, "0/1 object template", command)
             self.matchclean(err, "removing binding", command)
             self.matchclean(err, "adding binding", command)
 

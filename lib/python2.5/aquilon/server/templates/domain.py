@@ -39,6 +39,7 @@ from aquilon.server.processes import run_command
 from aquilon.server.templates.index import build_index
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.aqdb.model import Host, Cluster
+from aquilon.server.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger('aquilon.server.templates.domain')
 
@@ -145,7 +146,8 @@ class TemplateDomain(object):
             self.logger.info("starting compile")
             try:
                 out = run_command(args, env=panc_env, logger=self.logger,
-                                  path=config.get("broker", "quattordir"))
+                                  path=config.get("broker", "quattordir"),
+                                  loglevel=CLIENT_INFO)
             except ProcessException, e:
                 raise ArgumentError("\n%s%s" % (e.out, e.err))
 

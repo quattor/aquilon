@@ -44,4 +44,5 @@ class CommandCompile(BrokerCommand):
         if (len(d) != 1):
             raise NotFoundException("Domain '%s' not found"%domain)
         dom = TemplateDomain(d[0], logger=logger)
-        return dom.compile(session)
+        dom.compile(session)
+        return
