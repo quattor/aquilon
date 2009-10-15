@@ -31,7 +31,6 @@
 
 import os
 
-from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
@@ -44,11 +43,12 @@ class CommandDelAuxiliary(BrokerCommand):
 
     required_parameters = ["auxiliary"]
 
-    def render(self, session, auxiliary, user, **arguments):
-        log.msg("Aquiring lock to attempt to delete %s" % auxiliary)
+    def render(self, session, logger, auxiliary, user, **arguments):
+        logger.client_info("Acquiring lock to attempt to delete %s" % auxiliary)
         delhost_lock.acquire()
         try:
-            log.msg("Aquired lock, attempting to delete %s" % auxiliary)
+            logger.client_info("Acquired lock, attempting to delete %s" %
+                               auxiliary)
             # Check dependencies, translate into user-friendly message
             dbauxiliary = get_system(session, auxiliary)
             if not isinstance(dbauxiliary, Auxiliary):
@@ -75,7 +75,8 @@ class CommandDelAuxiliary(BrokerCommand):
                 raise ArgumentError("Could not remove host %s from dsdb: %s" %
                             (auxiliary, e))
         finally:
-            log.msg("Released lock from attempt to delete %s" % auxiliary)
+            logger.client_info("Released lock from attempt to delete %s" %
+                               auxiliary)
             delhost_lock.release()
 
         if dbmachine.host:

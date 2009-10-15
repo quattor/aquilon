@@ -45,7 +45,8 @@ class TestDelManager(TestBrokerCommand):
 
     def testdelunittest00r(self):
         command = "del manager --manager unittest00r.one-nyp.ms.com"
-        self.noouttest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
 
     def testverifydelunittest00r(self):
         command = "show manager --manager unittest00r.one-nyp.ms.com"
@@ -53,7 +54,8 @@ class TestDelManager(TestBrokerCommand):
 
     def testdelunittest02rsa(self):
         command = "del manager --manager unittest02rsa.one-nyp.ms.com"
-        self.noouttest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
 
     def testverifydelunittest02rsa(self):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
@@ -61,7 +63,8 @@ class TestDelManager(TestBrokerCommand):
 
     def testdelunittest12r(self):
         command = "del manager --manager unittest12r.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
 
     def testverifydelunittest12r(self):
         command = "show manager --manager unittest12r.aqd-unittest.ms.com"

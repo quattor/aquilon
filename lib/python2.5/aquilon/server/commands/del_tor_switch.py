@@ -29,8 +29,6 @@
 """Contains the logic for `aq del tor_switch`."""
 
 
-from twisted.python import log
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
@@ -40,17 +38,21 @@ class CommandDelTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch"]
 
-    def render(self, session, tor_switch, **arguments):
+    def render(self, session, logger, tor_switch, **arguments):
         dbtor_switch = get_tor_switch(session, tor_switch)
 
         for iface in dbtor_switch.interfaces:
-            log.msg("Before deleting tor_switch '%s', removing interface '%s' [%s] boot=%s)" %
-                    (dbtor_switch.fqdn, iface.name, iface.mac, iface.bootable))
+            logger.info("Before deleting tor_switch '%s', "
+                        "removing interface '%s' [%s] boot=%s)" %
+                        (dbtor_switch.fqdn,
+                         iface.name, iface.mac, iface.bootable))
             session.delete(iface)
 
         for iface in dbtor_switch.tor_switch_hw.interfaces:
-            log.msg("Before deleting tor_switch '%s', removing hardware interface '%s' [%s] boot=%s)" %
-                    (dbtor_switch.fqdn, iface.name, iface.mac, iface.bootable))
+            logger.info("Before deleting tor_switch '%s', "
+                        "removing hardware interface '%s' [%s] boot=%s)" %
+                        (dbtor_switch.fqdn,
+                         iface.name, iface.mac, iface.bootable))
             session.delete(iface)
 
         session.delete(dbtor_switch.tor_switch_hw)

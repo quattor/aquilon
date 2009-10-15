@@ -30,8 +30,8 @@
 
 
 import re
+import logging
 
-from twisted.python import log
 from sqlalchemy.orm import eagerload
 
 from aquilon.exceptions_ import ArgumentError
@@ -39,6 +39,7 @@ from aquilon.aqdb.model import Role, Realm, UserPrincipal
 from aquilon.server.dbwrappers.host import hostname_to_host
 
 
+LOGGER = logging.getLogger('aquilon.server.dbwrappers.user_principal')
 principal_re = re.compile(r'^(.*)@([^@]+)$')
 host_re = re.compile(r'^host/(.*)@([^@]+)$')
 
@@ -74,10 +75,10 @@ def get_or_create_user_principal(session, user,
         if not createrealm:
             raise ArgumentError("Could not find realm '%s' to create principal '%s', use --createrealm to create a new record for the realm."
                     % (realm, principal))
-        log.msg("Realm %s did not exist, creating..." % realm)
+        LOGGER.info("Realm %s did not exist, creating..." % realm)
         dbrealm = Realm(name=realm)
         session.add(dbrealm)
-        log.msg("Creating user %s@%s..." % (user, realm))
+        LOGGER.info("Creating user %s@%s..." % (user, realm))
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
         session.add(dbuser)
         if commitoncreate:
@@ -89,7 +90,8 @@ def get_or_create_user_principal(session, user,
         if not createuser:
             raise ArgumentError("Could not find principal '%s' to permission, use --createuser to create a new record for the principal."
                     % principal)
-        log.msg("User %s did not exist in realm %s, creating..." % (user, realm))
+        LOGGER.info("User %s did not exist in realm %s, creating..." %
+                    (user, realm))
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
         session.add(dbuser)
         if commitoncreate:

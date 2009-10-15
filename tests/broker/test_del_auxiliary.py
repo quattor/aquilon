@@ -45,7 +45,8 @@ class TestDelAuxiliary(TestBrokerCommand):
 
     def testdelunittest00e1(self):
         command = "del auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
-        self.noouttest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
 
     def testverifydelunittest00e1(self):
         command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"

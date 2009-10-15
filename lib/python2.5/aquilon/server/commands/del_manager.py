@@ -31,7 +31,6 @@
 
 import os
 
-from twisted.python import log
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
@@ -44,11 +43,12 @@ class CommandDelManager(BrokerCommand):
 
     required_parameters = ["manager"]
 
-    def render(self, session, manager, user, **arguments):
-        log.msg("Aquiring lock to attempt to delete %s" % manager)
+    def render(self, session, logger, manager, user, **arguments):
+        logger.client_info("Acquiring lock to attempt to delete %s" % manager)
         delhost_lock.acquire()
         try:
-            log.msg("Aquired lock, attempting to delete %s" % manager)
+            logger.client_info("Acquired lock, attempting to delete %s" %
+                               manager)
             # Check dependencies, translate into user-friendly message
             dbmanager = get_system(session, manager, Manager, 'Manager')
 
@@ -72,7 +72,8 @@ class CommandDelManager(BrokerCommand):
                 raise ArgumentError("Could not remove host %s from dsdb: %s" %
                             (manager, e))
         finally:
-            log.msg("Released lock from attempt to delete %s" % manager)
+            logger.client_info("Released lock from attempt to delete %s" %
+                               manager)
             delhost_lock.release()
 
         if dbmachine.host:
