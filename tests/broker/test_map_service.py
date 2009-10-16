@@ -162,29 +162,29 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--company", "ms",
                         "--service", "utsvc", "--instance", "utsi2",
                         "--archetype", "aquilon",
-                        "--personality", "lemon-oracle"])
+                        "--personality", "lemon-collector-oracle"])
 
     def testverifymappersona(self):
         command = ["show_map", "--archetype=aquilon",
-                   "--personality=lemon-oracle", "--service=utsvc"]
+                   "--personality=lemon-collector-oracle", "--service=utsvc"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-oracle "
+                         "Archetype: aquilon Personality: lemon-collector-oracle "
                          "Service: utsvc Instance: utsi2 Map: Company ms",
                          command)
 
     def testverifymapwihtoutarchetype(self):
         command = ["show_map",
-                   "--personality=lemon-oracle", "--service=utsvc"]
+                   "--personality=lemon-collector-oracle", "--service=utsvc"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-oracle "
+                         "Archetype: aquilon Personality: lemon-collector-oracle "
                          "Service: utsvc Instance: utsi2 Map: Company ms",
                          command)
 
     def testverifypersonalitymapproto(self):
         command = ["show_map", "--format=proto", "--archetype=aquilon",
-                   "--personality=lemon-oracle", "--service=utsvc"]
+                   "--personality=lemon-collector-oracle", "--service=utsvc"]
         out = self.commandtest(command)
         servicemaplist = self.parse_servicemap_msg(out, expect=1)
         map = servicemaplist.servicemaps[0]
@@ -192,7 +192,7 @@ class TestMapService(TestBrokerCommand):
         self.failUnlessEqual(map.location.location_type, 'company')
         self.failUnlessEqual(map.service.name, 'utsvc')
         self.failUnlessEqual(map.service.serviceinstances[0].name, 'utsi2')
-        self.failUnlessEqual(map.personality.name, 'lemon-oracle')
+        self.failUnlessEqual(map.personality.name, 'lemon-collector-oracle')
         self.failUnlessEqual(map.personality.archetype.name, 'aquilon')
 
     def testmapwindowsfail(self):
