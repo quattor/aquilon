@@ -142,10 +142,10 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapwithpersona(self):
         self.noouttest(["unmap", "service", "--company", "ms", "--service", "utsvc",
                         "--instance", "utsi2", "--archetype", "aquilon",
-                        "--personality", "lemon-oracle"])
+                        "--personality", "lemon-collector-oracle"])
 
     def testverifyunmapwithpersona(self):
-        command = "show map --archetype aquilon --personality lemon-oracle --service utsvc"
+        command = "show map --archetype aquilon --personality lemon-collector-oracle --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "", command)
 
