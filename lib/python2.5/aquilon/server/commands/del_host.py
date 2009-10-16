@@ -115,6 +115,10 @@ class CommandDelHost(BrokerCommand):
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
                 remove_file(os.path.join(profiles, fqdn+".xml"))
+                # And the cached template created by ant
+                remove_file(os.path.join(self.config.get("broker",
+                                                         "quattordir"),
+                                         "objects", fqdn + ".tpl"))
 
                 # Update any plenary client mappings
                 for si in bindings:
