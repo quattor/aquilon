@@ -282,6 +282,22 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Model model-does-not-exist not found",
                          command)
 
+    def testmodelvendorconflict(self):
+        command = "search host --model vb1205xm --vendor dell"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "vendor dell conflicts with model vb1205xm "
+                         "where vendor is verari",
+                         command)
+
+    def testmodelmachinetypeconflict(self):
+        command = "search host --model vb1205xm --machine_type virtual_machine"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "machine_type virtual_machine conflicts with "
+                         "model vb1205xm where machine_type is blade",
+                         command)
+
     def testvendoravailable(self):
         command = "search host --vendor dell"
         out = self.commandtest(command.split(" "))
@@ -292,6 +308,15 @@ class TestSearchHost(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Vendor vendor-does-not-exist not found",
                          command)
+
+    def testmachinetypeavailable(self):
+        command = "search host --machine_type rackmount"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
+
+    def testmachinetypeunavailable(self):
+        command = "search host --machine_type machine_type-does-not-exist"
+        self.noouttest(command.split(" "))
 
     def testserialavailable(self):
         command = "search host --serial 99C5553"

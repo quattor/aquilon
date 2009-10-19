@@ -50,10 +50,25 @@ def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
     if kwargs.get('model', None):
         dbmodel = get_model(session, kwargs['model'])
         q = q.filter_by(model=dbmodel)
-    if kwargs.get('vendor', None):
-        dbvendor = get_vendor(session, kwargs['vendor'])
+        if kwargs.get('machine_type') and \
+           dbmodel.machine_type != kwargs['machine_type']:
+            raise ArgumentError("machine_type %s conflicts with model %s "
+                                "where machine_type is %s" %
+                                (kwargs['machine_type'], dbmodel.name,
+                                 dbmodel.machine_type))
+        if kwargs.get('vendor') and \
+           dbmodel.vendor.name != kwargs['vendor']:
+            raise ArgumentError("vendor %s conflicts with model %s "
+                                "where vendor is %s" %
+                                (kwargs['vendor'], dbmodel.name,
+                                 dbmodel.vendor.name))
+    if kwargs.get('vendor') or kwargs.get('machine_type'):
         q = q.join(['model'])
-        q = q.filter_by(vendor=dbvendor)
+        if kwargs.get('vendor'):
+            dbvendor = get_vendor(session, kwargs['vendor'])
+            q = q.filter_by(vendor=dbvendor)
+        if kwargs.get('machine_type'):
+            q = q.filter_by(machine_type=kwargs['machine_type'])
         q = q.reset_joinpoint()
     if kwargs.get('mac', None):
         q = q.join('interfaces')
