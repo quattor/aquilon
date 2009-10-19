@@ -65,6 +65,15 @@ def _describe_uniqueness_request(cls, *args, **kwargs):
 
 
 class Base(object):
+    def __init__(self, **kw):
+        for k in kw:
+            if not hasattr(type(self), k):
+                msg = "%r is an invalid argument for %s" %(k, type(self).__name__)
+                raise TypeError(msg)
+            setattr(self, k, kw[k])
+        if getattr(self,'__table__'):
+            self.__table__.schema = 'AQUILON'
+
     def __repr__(self):
         # This functions much more like a __str__ than a __repr__...
         return "%s %s" % (self.__class__._get_class_label(),
@@ -230,13 +239,6 @@ class Base(object):
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)
 Base = declarative_base(cls=Base)
 
-@monkeypatch(Base)
-def __init__(self, **kw):
-    for k in kw:
-        if not hasattr(type(self), k):
-            msg = "%r is an invalid argument for %s" %(k, type(self).__name__)
-            raise TypeError(msg)
-        setattr(self, k, kw[k])
 
 # WAY too much magic in AssociationProxy.  This bug and proposed patch is
 # listed in the second half of this message:
@@ -276,4 +278,3 @@ def __get__(self, obj, class_):
         proxy = self._new(self._lazy_collection(weakref.ref(obj)))
         setattr(obj, self.key, (id(obj), proxy))
         return proxy
-

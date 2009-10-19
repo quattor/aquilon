@@ -41,7 +41,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.server.authorization import AuthorizationBroker
 from aquilon.server.messages import StatusCatalog
 from aquilon.server.logger import RequestLogger
-from aquilon.aqdb.db_factory import db_factory
+from aquilon.aqdb.db_factory import DbFactory
 from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
@@ -116,7 +116,7 @@ class BrokerCommand(object):
         All of the command objects are singletons (or Borg).
 
         """
-        self.dbf = db_factory()
+        self.dbf = DbFactory()
         self.config = Config()
         self.az = AuthorizationBroker()
         self.formatter = ResponseFormatter()
@@ -183,7 +183,7 @@ class BrokerCommand(object):
                 finally:
                     self._remove_status(kwargs)
             if not "session" in kwargs:
-                kwargs["session"] = self.dbf.session()
+                kwargs["session"] = self.dbf.Session()
             session = kwargs["session"]
             try:
                 dbuser = get_or_create_user_principal(session, principal,
@@ -319,5 +319,3 @@ def validate_basic(label, value):
     if not basic_validation_re.match(value):
         raise ArgumentError("'%s' is not a valid value for %s" %
                             (value, label))
-
-

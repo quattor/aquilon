@@ -38,15 +38,15 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
 import aquilon.aqdb.depends
 
-from sqlalchemy.exceptions      import DatabaseError, IntegrityError
+from sqlalchemy.exceptions import DatabaseError, IntegrityError
 
 from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
-                                 City, Building, System, TorSwitch, Network)
-from aquilon.aqdb.model.network import  _mask_to_cidr, get_bcast
+                                City, Building, System, TorSwitch, Network)
+from aquilon.aqdb.model.network import _mask_to_cidr, get_bcast
 
-from aquilon.aqdb.db_factory import db_factory
-from aquilon.aqdb.dsdb       import DsdbConnection
-from aquilon.aqdb.data_sync  import NetRecord, RefreshReport
+from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.dsdb import DsdbConnection
+from aquilon.aqdb.data_sync import NetRecord, RefreshReport
 
 LOGGER = logging.getLogger('aquilon.aqdb.data_sync.net_refresh')
 
@@ -235,24 +235,24 @@ def main(*args, **kw):
 
     p.add_option('-v',
                  action = 'count',
-                 dest   = 'verbose',
+                 dest = 'verbose',
                  default = 0,
-                 help   = 'increase verbosity by adding more (vv), etc.')
+                 help = 'increase verbosity by adding more (vv), etc.')
 
     p.add_option('-b', '--building',
                  action = 'store',
-                 dest   = 'building',
+                 dest = 'building',
                  default = 'dd' )
 
     p.add_option('-n', '--dry-run',
-                      action  = 'store_true',
-                      dest    = 'dry_run',
+                      action = 'store_true',
+                      dest = 'dry_run',
                       default = False,
-                      help    = "no commit (for testing, default=False)")
+                      help = "no commit (for testing, default=False)")
     opts, args = p.parse_args()
 
     dsdb = DsdbConnection()
-    aqdb = db_factory()
+    aqdb = DbFactory()
 
     if opts.verbose > 1:
         log_level = logging.DEBUG
@@ -265,7 +265,7 @@ def main(*args, **kw):
                     format='%(asctime)s %(levelname)-6s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
 
-    nr = NetRefresher(dsdb, aqdb.session(),
+    nr = NetRefresher(dsdb, aqdb.Session(),
                       bldg=opts.building,
                       #keep logic stated in postive language (readability)
                       commit = not(opts.dry_run))
@@ -278,5 +278,3 @@ def main(*args, **kw):
 
 if __name__ == '__main__':
     main(sys.argv)
-
-

@@ -30,9 +30,6 @@
 import os
 import sys
 import optparse
-import tempfile
-
-import subprocess as sp
 
 _DIR    = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, '..','..')
@@ -46,24 +43,35 @@ if _TESTDIR not in sys.path:
 
 import aquilon.aqdb.depends
 
-#FOR ALL YOU HATERS: this IS for interactive work. Step off the import * ;)
-from aquilon.aqdb.model      import *
-from aquilon.aqdb.dsdb       import *
-from aquilon.aqdb.db_factory import db_factory
-from aquilon.aqdb.utils      import schema2dot
+from aquilon.config import Config
+from ms.modulecmd import Modulecmd
 
+config = Config()
+m = Modulecmd()
+if config.has_option("database", "module"):
+    m.load(config.get("database", "module"))
+
+from aquilon.aqdb.model import *
+from aquilon.aqdb.dsdb import *
+from aquilon.aqdb.db_factory import DbFactory
+
+db = DbFactory()
+Base.metadata.bind = db.engine
+
+prompt = '%s@%s'% (db.engine.url.username, db.engine.url.host)
+if db.engine.url.database:
+    prompt +='/%s'
+prompt += '>'
 
 from IPython.Shell import IPShellEmbed
-_banner  = '***Embedded IPython, Ctrl-D to quit.'
-_args    = []
+_banner = '***Welcome to the Aquilon shell derived from IPython. Ctrl-D to quit'
+_args = ['-pi1', prompt, '-nosep']
 ipshell = IPShellEmbed(_args, banner=_banner)
 
 def configure(*args, **kw):
     usage = """ usage: %prog [options] """
-
     desc = 'An ipython shell, useful for testing and exploring'
-
-    p = optparse.OptionParser(usage=usage, prog=sys.argv[0], version='0.1',
+    p = optparse.OptionParser(usage=usage, prog=sys.argv[0], version='0.2',
                               description=desc)
 
     p.add_option('-v',
@@ -77,19 +85,17 @@ def configure(*args, **kw):
 def main(*args, **kw):
     opts = configure(*args, **kw)
 
-    db = db_factory()
-    Base.metadata.bind = db.engine
-    s = db.Session()
-
-    #left a hole in between for verbose=1. not sure we'll ever use it
-    if opts.verbose > 1:
+    if opts.verbose >= 1:
         db.engine.echo = True
 
+    s = db.Session()
     ipshell()
 
 #TODO: schema/uml as an argument (DRY)
 def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
-    schema2dot.write_schema_graph(db,file_name)
+    import aquilon.aqdb.utils.schema2dot
+    aquilon.aqdb.utils.schema2dot.show_schema_graph(db, '/tmp/test.png')
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -82,17 +82,18 @@ class DbFactory(object):
             self.login(passwds)
 
         #DB2
-        elif self.dsn.startswith('ibm_db_sa'):
-            import ibm_db_sa
-            import ibm_db_dbi
+        #FIXME: DB2 support in an upcoming branch
+        #elif self.dsn.startswith('ibm_db_sa'):
+            #import ibm_db_sa
+            #import ibm_db_dbi
 
-            self.vendor = 'db2'
-
-            user = ''
-            self.engine = create_engine(
-                'ibm_db_sa:///NYTD_AQUILON?UID=%s'% (user))
-            self.connection = self.engine.connect()
-            self.engine.execute('set current schema AQUILON')
+            #self.vendor = 'db2'
+            #
+            #user = ''
+            #self.engine = create_engine(
+            #    'ibm_db_sa:///NYTD_AQUILON?UID=%s'% (user))
+            #self.connection = self.engine.connect()
+            #self.engine.execute('set current schema AQUILON')
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
@@ -114,9 +115,6 @@ class DbFactory(object):
 
         self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert self.Session
-
-    def session(self):
-        return self.Session()
 
     def login(self, passwds):
         errs = []
@@ -240,10 +238,6 @@ class DbFactory(object):
                 self.safe_execute('DROP SEQUENCE %s'%(seq))
 
             self.safe_execute('PURGE RECYCLEBIN')
-
-#ensure forward compatibility for proper class naming convention
-#TODO: s/db_factory/DbFactory/g
-db_factory = DbFactory
 
 def is_prod_ora_instance(dsn):
     prod_re = re.compile('@NYPO_AQUILON', re.IGNORECASE)
