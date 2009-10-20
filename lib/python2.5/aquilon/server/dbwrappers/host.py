@@ -33,7 +33,8 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Host, DnsDomain
-from aquilon.server.dbwrappers.system import get_system
+from aquilon.server.dbwrappers.system import (get_system,
+                                              get_system_dependencies)
 
 
 def hostname_to_host(session, hostname):
@@ -51,7 +52,7 @@ def get_host_dependencies(session, dbhost):
     If the host has no dependencies, then an empty list is returned
     """
     ret = []
-    # XXX: Show any service instance which has dbhost as an element in host_list.hosts
+    ret.extend(get_system_dependencies(session, dbhost))
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
        dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
        dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):

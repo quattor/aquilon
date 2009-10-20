@@ -323,6 +323,21 @@
       <transport method="post" path="command/net_refresh" />
    </command>
 
+   <command name="refresh_windows_hosts">
+      Refresh Windows host entries based on information in the data warehouse.
+
+      The data warehouse contains a merge of host/machine/interface data
+      from both aqdb and Windows hosts using those interfaces.  This syncs
+      up any non-conflicting data.
+
+      The add_windows_host and del_windows_host commands can be used to
+      create entries manually.
+      <optgroup name="refresh_windows_hosts_optional" mandatory="False">
+         <option name="dryrun" type="boolean" conflicts="">Report what will change</option>
+      </optgroup>
+      <transport method="post" path="command/refresh_windows_hosts" />
+   </command>
+
    <command name="show_hostiplist">
       Shows a list of all hosts.  Can be narrowed by archetype.
       <optgroup name="show_hostiplist_options">
