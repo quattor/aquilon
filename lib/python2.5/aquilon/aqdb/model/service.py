@@ -43,7 +43,7 @@
 from datetime import datetime
 import re
 
-from sqlalchemy import (Column,Integer, Sequence, String, DateTime, ForeignKey,
+from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref
 
@@ -58,16 +58,8 @@ class Service(Base):
     __tablename__  = 'service'
 
     id = Column(Integer, Sequence('service_id_seq'), primary_key=True)
-
     name = Column(AqStr(64), nullable=False)
-
     max_clients = Column(Integer, nullable=True) #null means 'no limit'
-
-    cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
-                                             name='svc_cfg_pth_fk',
-                                             ondelete='CASCADE'),
-                         nullable=False)
-
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
@@ -78,5 +70,5 @@ class Service(Base):
 service = Service.__table__
 table   = Service.__table__
 
-service.primary_key.name='service_pk'
+service.primary_key.name = 'service_pk'
 service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))

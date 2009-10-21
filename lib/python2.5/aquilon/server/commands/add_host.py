@@ -52,8 +52,8 @@ class CommandAddHost(BrokerCommand):
                            "osname", "osversion"]
 
     def render(self, session, hostname, machine, archetype, personality,
-               domain, buildstatus, osname, osversion, skip_dsdb_check=False,
-               **arguments):
+               domain, buildstatus, comments, osname, osversion,
+               skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:
@@ -113,14 +113,9 @@ class CommandAddHost(BrokerCommand):
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
-<<<<<<< HEAD
-                      mac=mac, ip=ip, network=dbnetwork, comments=comments,
+                      mac=mac, ip=ip, network=dbnetwork, operating_system=dbos,
                       name=short, dns_domain=dbdns_domain,
-                      personality=dbpersonality)
-=======
-                mac=mac, ip=ip, network=dbnetwork, operating_system=dbos,
-                name=short, dns_domain=dbdns_domain, personality=dbpersonality)
->>>>>>> a877403... port commands add_*host. osname and version required for all
+                      personality=dbpersonality, comments=comments)
         session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost

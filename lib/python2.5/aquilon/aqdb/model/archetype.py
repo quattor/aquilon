@@ -37,6 +37,9 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'archetype'
 
+_archetypes = ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost', 'pserver']
+_compileable = ['aquilon', 'vmhost', 'pserver']
+
 
 class Archetype(Base):
     """ Archetype names """
@@ -59,11 +62,12 @@ def populate(sess, *args, **kw):
     if len(sess.query(Archetype).all()) > 0:
         return
 
-    for a_name in ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost']:
+    for a_name in _archetypes:
         a = Archetype(name=a_name)
-        sess.add(a)
-        if a_name in ['aquilon', 'vmhost']:
+        if a_name in _compileable:
             a.is_compileable = True
+
+        sess.add(a)
 
     try:
         sess.commit()
@@ -73,5 +77,3 @@ def populate(sess, *args, **kw):
 
     a = sess.query(Archetype).first()
     assert(a)
-
-

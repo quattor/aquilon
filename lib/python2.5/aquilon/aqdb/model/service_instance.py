@@ -30,9 +30,9 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, Index)
-from sqlalchemy.orm import relation, backref, deferred, object_session
+from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
+                        ForeignKey, UniqueConstraint)
+from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base, Service, Host
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -49,20 +49,12 @@ class ServiceInstance(Base):
     __tablename__  = _TN
 
     id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
-
     service_id = Column(Integer, ForeignKey('service.id',
                                             name='%s_svc_fk'%(_ABV)),
                         nullable=False)
 
     name = Column(AqStr(64), nullable=False)
-
     max_clients = Column(Integer, nullable=True) #null means 'no limit'
-
-    cfg_path_id = Column(Integer, ForeignKey('cfg_path.id',
-                                             name='%s_cfg_pth_fk'%_ABV,
-                                             ondelete='CASCADE'),
-                         nullable=False)
-
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
@@ -81,17 +73,17 @@ class ServiceInstance(Base):
         return [item.host.fqdn for item in self.build_items]
 
     def __repr__(self):
-        return '(%s) %s %s'%(self.__class__.__name__ ,
-                           self.service.name, self.name)
+        return '(%s) %s %s'% (self.__class__.__name__,
+                              self.service.name, self.name)
 
 service_instance = ServiceInstance.__table__
-table            = ServiceInstance.__table__
+table = ServiceInstance.__table__
 
 table.info['abrev'] = _ABV
 
-service_instance.primary_key.name='svc_inst_pk'
-service_instance.append_constraint(UniqueConstraint('service_id', 'name',
-                                                    name='svc_inst_uk'))
+service_instance.primary_key.name = 'svc_inst_pk'
+service_instance.append_constraint(
+    UniqueConstraint('service_id', 'name', name='svc_inst_uk'))
 
 #TODO: auto-updated "last_used" column?
 class BuildItem(Base):
@@ -123,11 +115,11 @@ class BuildItem(Base):
         return self.service_instance.cfg_path
 
     def __repr__(self):
-        return '%s: %s'%(self.host.name,self.service_instance.cfg_path)
+        return '%s: %s'% (self.host.name,self.service_instance.cfg_path)
 
 build_item = BuildItem.__table__
 
-build_item.primary_key.name='build_item_pk'
+build_item.primary_key.name = 'build_item_pk'
 
 build_item.append_constraint(
     UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
