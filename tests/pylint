@@ -7,6 +7,10 @@ src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..',
                                     'lib', 'python2.5'))
 sys.path.append(src)
 
+# Need this for aquilon.server.depends to work.  An alternate solution
+# would be to flip the order and call it before aquilon.aqdb.depends.
+sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
+
 import aquilon.aqdb.depends
 import aquilon.server.depends
 import aquilon.client.depends
