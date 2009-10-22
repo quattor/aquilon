@@ -335,7 +335,6 @@
       </optgroup>
       <optgroup name="refresh_network_mandatory" mandatory="False">
          <option name="dryrun" type="boolean" conflicts="">Report what will change</option>
-         <option name="loglevel" type="string" conflicts="">Increase the logging level in the server logs</option>
       </optgroup>
       <transport method="post" path="command/net_refresh" />
    </command>
