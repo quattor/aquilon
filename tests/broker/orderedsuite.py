@@ -103,6 +103,7 @@ from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
 from test_refresh_windows_hosts import TestRefreshWindowsHosts
+from test_constraints_chooser import TestChooserConstraints
 from test_flush import TestFlush
 from test_compile import TestCompile
 from test_bind_server import TestBindServer
@@ -214,6 +215,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddVirtualHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
                 TestRefreshWindowsHosts,
+                TestChooserConstraints,
                 TestFlush, TestCompile,
                 TestBindServer,
                 TestBindClientConstraints, TestBindServerConstraints,
