@@ -43,6 +43,22 @@ from brokertest import TestBrokerCommand
 
 class TestBindServerConstraints(TestBrokerCommand):
 
+    def testrejectdelunittest02(self):
+        command = "del host --hostname unittest00.one-nyp.ms.com"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "cannot delete host 'unittest00.one-nyp.ms.com' due "
+                         "to the following dependencies:",
+                         command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com is bound as a server for "
+                         "service utsvc instance utsi1",
+                         command)
+        self.matchoutput(out,
+                         "unittest00.one-nyp.ms.com is bound as a server for "
+                         "service utsvc instance utsi2",
+                         command)
+
     # Test that unittest00 comes out of utsi1 but stays in utsi2
     def testunbindutsi1unittest00(self):
         self.noouttest(["unbind", "server",
