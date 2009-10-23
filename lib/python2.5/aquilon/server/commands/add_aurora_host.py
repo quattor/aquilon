@@ -51,7 +51,7 @@ class CommandAddAuroraHost(CommandAddHost):
     sys_loc_re = re.compile(
             r'^[-\.\w]+\s*(?:[-\.\w]*\.)?(\w+)\.(\w+)\.(\w+)\b$', re.M)
 
-    def render(self, session, logger, hostname, *args, **kwargs):
+    def render(self, session, logger, hostname, osname, osversion, **kwargs):
         # Pull relevant info out of dsdb...
         dsdb_runner = DSDBRunner(logger=logger)
         try:
@@ -140,15 +140,22 @@ class CommandAddAuroraHost(CommandAddHost):
         # FIXME: Pull this from somewhere.
         buildstatus = 'ready'
 
+        if osname is None:
+            osname = 'linux'
+        if osversion is None:
+            osversion = 'generic'
+
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session
         kwargs['logger'] = logger
         kwargs['hostname'] = fqdn
         kwargs['archetype'] = 'aurora'
+        kwargs['osname'] = osname
+        kwargs['osversion'] = osversion
         kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
         kwargs['machine'] = dbmachine.name
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
         # The superclass already contains the rest of the logic to handle this.
-        return CommandAddHost.render(self, *args, **kwargs)
+        return CommandAddHost.render(self, **kwargs)

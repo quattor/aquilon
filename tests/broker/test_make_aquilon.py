@@ -307,12 +307,22 @@ class TestMakeAquilon(TestBrokerCommand):
         self.failIf(results, "Found service plenary data that includes "
                              "aquilon93.aqd-unittest.ms.com")
 
-    def testfailwindows(self):
+    def testmakewithos(self):
         command = ["make", "aquilon",
-                   "--hostname", "unittest01.one-nyp.ms.com",
+                   "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--os", "linux/4.0.1-x86_64"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "is not a compilable archetype", command)
+        (out, err) = self.successtest(command)
+
+    def testverifyunittest17(self):
+        command = "show host --hostname unittest17.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3].ip,
+                         command)
+        self.matchoutput(out,
+                         "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
+                         command)
 
     # Turns out this test is completely bogus.  There is a sequence of
     # binding that would allow a client to bind to ut.a on chooser1

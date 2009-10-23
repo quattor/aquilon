@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance, CfgPath, Tld
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
@@ -45,15 +45,7 @@ class CommandAddService(BrokerCommand):
                **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
         if not dbservice:
-            # FIXME: Could have better error handling
-            dbtld = session.query(Tld).filter_by(type="service").first()
-            # Need to get or create cfgpath.
-            q = session.query(CfgPath)
-            dbcfg_path = q.filter_by(tld=dbtld, relative_path=service).first()
-            if not dbcfg_path:
-                dbcfg_path = CfgPath(tld=dbtld, relative_path=service)
-                session.add(dbcfg_path)
-            dbservice = Service(name=service, cfg_path=dbcfg_path)
+            dbservice = Service(name=service)
             session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)
@@ -69,15 +61,7 @@ class CommandAddService(BrokerCommand):
             raise ArgumentError("Service %s instance %s already exists." %
                                 (dbservice.name, instance))
 
-        relative_path = "%s/%s" % (service, instance)
-        dbcfg_path = session.query(CfgPath).filter_by(
-            tld=dbservice.cfg_path.tld, relative_path=relative_path).first()
-        if not dbcfg_path:
-            dbcfg_path = CfgPath(tld=dbservice.cfg_path.tld,
-                                 relative_path=relative_path)
-            session.add(dbcfg_path)
-        dbsi = ServiceInstance(service=dbservice, name=instance,
-                               cfg_path=dbcfg_path)
+        dbsi = ServiceInstance(service=dbservice, name=instance)
         session.add(dbsi)
         session.flush()
 

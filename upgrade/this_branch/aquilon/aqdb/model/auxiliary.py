@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,17 +26,32 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""CfgPath formatter."""
+""" Represent secondary interfaces """
 
+from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy.orm import relation
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import CfgPath
+from aquilon.aqdb.model import System, Machine
 
+class Auxiliary(System):
+    __tablename__ = 'auxiliary'
 
-class CfgPathFormatter(ObjectFormatter):
-    def format_raw(self, cfg_path, indent=""):
-        return indent + "Template: %s" % cfg_path
+    id = Column(Integer, ForeignKey('system.id',
+                                    name='aux_system_fk',
+                                    ondelete='CASCADE'),
+                primary_key=True)
 
-ObjectFormatter.handlers[CfgPath] = CfgPathFormatter()
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                             name='aux_machine_fk'),
+                         nullable=False)
+
+    machine = relation(Machine, backref='auxiliaries')
+
+    __mapper_args__ = {'polymorphic_identity':'auxiliary'}
+
+auxiliary = Auxiliary.__table__
+auxiliary.primary_key.name='aux_pk'
+
+table = auxiliary
 
 

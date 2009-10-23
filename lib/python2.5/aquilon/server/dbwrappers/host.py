@@ -42,7 +42,7 @@ def hostname_to_host(session, hostname):
 
 def get_host_build_item(self, dbhost, dbservice):
     for template in dbhost.templates:
-        si = template.cfg_path.svc_inst
+        si = template.service_instance
         if si and si.service == dbservice:
             return template
     return None

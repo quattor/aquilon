@@ -53,10 +53,9 @@ from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.dns_domain import DnsDomain
 
 #CONFIG
-from aquilon.aqdb.model.tld import Tld
-from aquilon.aqdb.model.cfg_path import CfgPath
 from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.personality import Personality
+from aquilon.aqdb.model.operating_system import OperatingSystem
 
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor
@@ -76,7 +75,6 @@ from aquilon.aqdb.model.console_server import ConsoleServer
 from aquilon.aqdb.model.manager import Manager
 from aquilon.aqdb.model.domain import Domain
 from aquilon.aqdb.model.host import Host
-from aquilon.aqdb.model.build_item import BuildItem
 from aquilon.aqdb.model.tor_switch import TorSwitch
 
 #HARDWARE/SYSTEM LINKAGES
@@ -88,7 +86,7 @@ from aquilon.aqdb.model.auxiliary import Auxiliary
 
 #SERVICE
 from aquilon.aqdb.model.service import Service
-from aquilon.aqdb.model.service_instance import ServiceInstance
+from aquilon.aqdb.model.service_instance import ServiceInstance, BuildItem
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.service_list_item import ServiceListItem

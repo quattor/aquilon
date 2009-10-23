@@ -32,11 +32,12 @@
 from threading import Lock
 import sqlite3
 
-from aquilon.exceptions_ import PartialError
+from aquilon.exceptions_ import PartialError, InternalError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import get_host_dependencies
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, Status, DnsDomain, System)
+                                Personality, Status, DnsDomain, System,
+                                OperatingSystem)
 
 
 REFRESH_WINDOWS_HOSTS_LOCK = Lock()
@@ -119,11 +120,18 @@ class CommandRefreshNetwork(BrokerCommand):
 
         dbdomain = Domain.get_unique(session,
                                      self.config.get("broker",
-                                                     "windows_host_domain"))
-        dbarchetype = Archetype.get_unique(session, "windows")
+                                                     "windows_host_domain"),
+                                     compel=InternalError)
+        dbarchetype = Archetype.get_unique(session, "windows",
+                                           compel=InternalError)
         dbpersonality = Personality.get_unique(session, archetype=dbarchetype,
-                                               name="generic")
-        dbstatus = Status.get_unique(session, "ready")
+                                               name="generic",
+                                               compel=InternalError)
+        dbstatus = Status.get_unique(session, "ready", compel=InternalError)
+        dbos = OperatingSystem.get_unique(session, name="windows",
+                                          version="generic",
+                                          archetype=dbarchetype,
+                                          compel=InternalError)
         for (host, mac) in windows_hosts.items():
             if host.find('.') < 0:
                 msg = "Skipping host %s: Missing DNS domain in name." % \
@@ -183,7 +191,7 @@ class CommandRefreshNetwork(BrokerCommand):
             dbhost = Host(machine=dbmachine, domain=dbdomain,
                           status=dbstatus, mac=mac, ip=None, network=None,
                           name=short, dns_domain=dbdns_domain,
-                          personality=dbpersonality,
+                          personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
             dbinterface.system = dbhost

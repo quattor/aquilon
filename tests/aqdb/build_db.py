@@ -29,13 +29,14 @@
 # TERMS THAT MAY APPLY.
 """ The way to populate an aqdb instance """
 
-import os
-import re
+#import os
+#import re
 import sys
+#TODO: fix the use of __init__ here
 import __init__
 import logging
 import optparse
-from   traceback import print_exc
+from traceback import print_exc
 
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -53,37 +54,37 @@ m = Modulecmd()
 if config.has_option("database", "module"):
     m.load(config.get("database", "module"))
 
-from aquilon.aqdb.model      import Base
-from aquilon.aqdb.db_factory import db_factory
-from aquilon.aqdb.utils      import constraints as cnst
+from aquilon.aqdb.model import Base
+from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.utils import constraints as cnst
 import test_campus_populate as tcp
 
-pkgs         = {}
+pkgs = {}
 
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
-pkgs['loc']  = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-                'city', 'building', 'room', 'rack', 'desk',
-                'location_search_list', 'search_list_item']
+pkgs['loc'] = ['location', 'company', 'hub', 'continent', 'campus', 'country',
+               'city', 'building', 'room', 'rack', 'desk',
+               'location_search_list', 'search_list_item']
 
-pkgs['net']  = ['dns_domain', 'network']
+pkgs['net'] = ['dns_domain', 'network']
 
-pkgs['cfg']  = ['archetype', 'personality','tld', 'cfg_path']
+pkgs['cfg'] = ['archetype', 'personality', 'operating_system']
 
-pkgs['hw']   = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
+pkgs['hw'] = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
                 'interface', 'observed_mac', 'machine_specs', 'chassis_slot',
                 'console_server_hw', 'serial_cnxn']
 
-pkgs['sy']   = ['system', 'domain', 'host', 'build_item',
+pkgs['sy'] = ['system', 'domain', 'host',
                 'chassis', 'tor_switch', 'auxiliary', 'manager',
                 'console_server']
 
-pkgs['svc']  = ['service', 'service_instance', 'service_instance_server',
+pkgs['svc'] = ['service', 'service_instance', 'service_instance_server',
                 'service_map', 'service_list_item', 'cluster', 'metacluster',
                 'personality_service_list_item']
 
-order        = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
+order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 
 def importName(modulename, name):
     """ Import a named object from a module in the context of this function.
@@ -92,7 +93,10 @@ def importName(modulename, name):
         module = __import__(modulename, globals(), locals(), [name])
     except ImportError:
         return None
-    return getattr(module, name)
+    try:
+        return getattr(module, name)
+    except AttributeError:
+        print 'getattr(%s, %s) failed (modulename = %s)'% (module, name, modulename)
 
 def parse_cli(*args, **kw):
     usage = """ usage: %prog [options]
@@ -135,8 +139,8 @@ def main(*args, **kw):
     if opts.debug:
         log.setLevel(logging.DEBUG)
 
-    db = db_factory(verbose=opts.verbose)
-    assert(db, "No db_factory in build_db")
+    db = DbFactory(verbose=opts.verbose)
+    assert db, "No db_factory in build_db"
     Base.metadata.bind = db.engine
 
     if opts.verbose:
@@ -163,7 +167,7 @@ def main(*args, **kw):
             pkg_name = 'aquilon.aqdb.model'
 
             try:
-                mod = importName(pkg_name,module_name)
+                mod = importName(pkg_name, module_name)
             except ImportError, e:
                 log.error('Failed to import %s\n' % (module_name, str(e)))
                 sys.exit(9)
@@ -181,7 +185,7 @@ def main(*args, **kw):
 
     if opts.populate:
         s = db.Session()
-        assert(s, "No Session in build_db.py populate")
+        assert s, "No Session in build_db.py populate"
 
         import aquilon.aqdb.dsdb as dsdb_
         kwargs['dsdb'] = dsdb_.DsdbConnection()
@@ -198,7 +202,7 @@ def main(*args, **kw):
 
     if opts.populate:
         try:
-            import test_campus_populate as tcp
+            #import test_campus_populate as tcp
             cps = tcp.TestCampusPopulate(s, **kwargs)
             cps.setUp()
             cps.testPopulate()

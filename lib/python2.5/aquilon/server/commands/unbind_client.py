@@ -54,7 +54,7 @@ class CommandUnbindClient(BrokerCommand):
         dbtemplate = get_host_build_item(session, dbhost, dbservice)
         if dbtemplate:
             logger.info("Removing client binding")
-            si = dbtemplate.cfg_path.svc_inst
+            si = dbtemplate.service_instance
             session.delete(dbtemplate)
             session.flush()
 

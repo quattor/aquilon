@@ -70,6 +70,10 @@ _long_nms['MACHINE_CLUSTER_MEMBER'] = 'MCHN_CLSTR_MMBR'
 _long_nms['HOST_CLUSTER_MEMBER'] = 'HOST_CLSTR_MMBR'
 _long_nms['MACHINE_SPECS'] = 'MCHN_SPECS'
 _long_nms['CONTROLLER_TYPE'] = 'CNTRLR_TYPE'
+_long_nms['CREATION_DATE']           = 'CR_DATE'
+_long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
+_long_nms['OPERATING_SYSTEM'] = 'OS'
+
 
 def rename_sys_pks(db, *args, **kw):
     stmt = """

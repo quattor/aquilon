@@ -35,7 +35,7 @@ from random import choice
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError, IncompleteError
-from aquilon.aqdb.model import (Host, Cluster, Tld, BuildItem, ServiceMap,
+from aquilon.aqdb.model import (Host, Cluster, BuildItem, ServiceMap,
                                 PersonalityServiceMap, ClusterServiceBinding,
                                 ClusterAlignedService)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
@@ -187,7 +187,7 @@ class Chooser(object):
             cfg_path = list(self.instances_unbound)[0].cfg_path
             self.error("%s is already bound to %s, use unbind "
                        "to clear first or rebind to force." %
-                       (self.description, cfg_path.relative_path))
+                       (self.description, cfg_path))
             self.check_errors()
         self.stash_services()
         self.apply_changes()
@@ -464,11 +464,7 @@ class HostChooser(Chooser):
             self.required_services.add(item.service)
         for item in self.personality.service_list:
             self.required_services.add(item.service)
-        self.dbservice_tld = Tld.get_unique(self.session, 'service')
-        if not self.dbservice_tld:
-            raise InternalError("No config path TLDs named 'service'.")
         q = self.session.query(BuildItem).filter_by(host=self.dbhost)
-        q = q.join('cfg_path').filter_by(tld=self.dbservice_tld)
         self.original_service_build_items = q.all()
         """Cache of the build_items related to services."""
         self.original_service_instances = {}
@@ -476,13 +472,8 @@ class HostChooser(Chooser):
         that was bound (values).
         """
         for dbbi in self.original_service_build_items:
-            if not dbbi.cfg_path.svc_inst:
-                self.error("Internal Error: %s bound to template %s "
-                           "which is missing a service instance aqdb entry." %
-                           (self.description, dbbi.cfg_path))
-                continue
-            self.original_service_instances[dbbi.cfg_path.svc_inst.service] = \
-                    dbbi.cfg_path.svc_inst
+            self.original_service_instances[dbbi.service_instance.service] = \
+                    dbbi.service_instance
             self.logger.debug("%s original binding: %s",
                               self.description, dbbi.cfg_path)
         self.cluster_aligned_services = {}
@@ -541,11 +532,6 @@ class HostChooser(Chooser):
 
     def apply_changes(self):
         """Update the host object with pending changes."""
-        # Reserve 0 for os
-        max_position = 0
-        for bi in self.dbhost.templates:
-            if bi.position > max_position:
-                max_position = bi.position
         for instance in self.instances_bound:
             self.logger.client_info("%s adding binding for service %s "
                                     "instance %s",
@@ -554,20 +540,18 @@ class HostChooser(Chooser):
             if self.original_service_instances.get(instance.service, None):
                 previous = None
                 for bi in self.original_service_build_items:
-                    if bi.cfg_path.svc_inst and \
-                       bi.cfg_path.svc_inst.service == instance.service:
+                    if bi.service_instance and \
+                       bi.service_instance.service == instance.service:
                         previous = bi
                         break
                 if previous:
-                    previous.cfg_path = instance.cfg_path
+                    previous.service_instance = instance
                 else:
                     self.error("Internal Error: Error in alogorithm to find "
                                "previous binding for %s %s" %
                                (instance.service.name, instance.name))
                 continue
-            max_position += 1
-            bi = BuildItem(host=self.dbhost, cfg_path=instance.cfg_path,
-                           position=max_position)
+            bi = BuildItem(host=self.dbhost, service_instance=instance)
             self.dbhost.templates.append(bi)
         for instance in self.instances_unbound:
             self.logger.client_info("%s removing binding for "
@@ -579,7 +563,7 @@ class HostChooser(Chooser):
                 continue
             found_instance = False
             for bi in self.original_service_build_items:
-                if bi.cfg_path.svc_inst == instance:
+                if bi.service_instance == instance:
                     self.session.delete(bi)
                     found_instance = True
                     break
@@ -675,5 +659,3 @@ class ClusterChooser(Chooser):
         plenary_cluster = PlenaryCluster(self.dbcluster, logger=self.logger)
         plenary_cluster.stash()
         self.plenaries.append(plenary_cluster)
-
-

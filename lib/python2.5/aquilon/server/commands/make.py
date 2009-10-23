@@ -31,11 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.aqdb.model import BuildItem
+from aquilon.aqdb.model import BuildItem, OperatingSystem
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.host import PlenaryHost
@@ -43,10 +42,10 @@ from aquilon.server.services import Chooser
 
 class CommandMake(BrokerCommand):
 
-    required_parameters = ["hostname", "os"]
+    required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, os, archetype, personality,
-               buildstatus, **arguments):
+    def render(self, session, logger, hostname, archetype, personality,
+               buildstatus, osname, osversion, os, debug, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # We grab a template compile lock over this whole operation,
@@ -61,23 +60,7 @@ class CommandMake(BrokerCommand):
             # a Machine already.  If that ever changes, need to check here and
             # bail if dbhost.machine does not exist.
 
-            # Need to get all the BuildItem objects for this host.
-            # They should include:
-            # - exactly one OS
-            # And may include:
-            # - many services
-
-            if os:
-                dbos = get_cfg_path(session, "os", os)
-                dbos_bi = session.query(BuildItem).filter_by(host=dbhost).join(
-                    'cfg_path').filter_by(tld=dbos.tld).first()
-                if dbos_bi:
-                    dbos_bi.cfg_path = dbos
-                else:
-                    # FIXME: This could fail if there is already an item at 0
-                    dbos_bi = BuildItem(host=dbhost, cfg_path=dbos, position=0)
-                session.add(dbos_bi)
-
+            # Need to get all the BuildItem/Service instance objects
             if personality:
                 arch = archetype
                 if not arch:
@@ -93,6 +76,13 @@ class CommandMake(BrokerCommand):
                                          dbhost.cluster.cluster_type,
                                          dbhost.cluster.name))
                 dbhost.personality = dbpersonality
+                session.add(dbhost)
+
+            dbos = self.get_os(session, dbhost, osname, osversion, os)
+            if dbos:
+                # Hmm... no cluster constraint here...
+                dbhost.operating_system = dbos
+                session.add(dbhost)
 
             if not dbhost.archetype.is_compileable:
                 raise ArgumentError("Host %s is not a compilable archetype (%s)" %
@@ -130,4 +120,22 @@ class CommandMake(BrokerCommand):
 
         return
 
-
+    def get_os(self, session, dbhost, osname, osversion, os):
+        """Wrapper for handling deprecated os argument."""
+        if os:
+            (splitname, splitversion) = os.split('/')
+            if not osname:
+                osname = splitname
+            if not osversion:
+                osversion = splitversion
+        if not osname:
+            osname = dbhost.operating_system.name
+        if osname and osversion:
+            return OperatingSystem.get_unique(session, name=osname,
+                                              version=osversion,
+                                              archetype=dbhost.archetype,
+                                              compel=True)
+        elif osname != dbhost.operating_system.name:
+            raise ArgumentError("Must specify version to use for os '%s'" %
+                                osname)
+        return None

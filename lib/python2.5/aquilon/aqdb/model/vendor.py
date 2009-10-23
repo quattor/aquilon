@@ -35,7 +35,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
 
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.model import Base, Tld
+from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'vendor'
@@ -61,7 +61,6 @@ vendor.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
 def populate(sess, **kw):
 
     if len(sess.query(Vendor).all()) < 1:
-        import cfg_path as cfg
         created = []
 
         cfg_base = kw['cfg_base']

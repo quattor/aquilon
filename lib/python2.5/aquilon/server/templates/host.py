@@ -109,16 +109,24 @@ class PlenaryToplevelHost(Plenary):
                     "bootproto":bootproto,
                     "name":dbinterface.name})
 
-        os_template = None
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
+        os_template = self.dbhost.operating_system.cfg_path + '/config'
 
         services = []
+        required_services = set()
+        for item in self.dbhost.archetype.service_list:
+            required_services.add(item.service)
+        for item in self.dbhost.personality.service_list:
+            required_services.add(item.service)
+
         for t in self.dbhost.templates:
-            if t.cfg_path.tld.type == 'os':
-                os_template = repr(t.cfg_path) + '/config'
-            elif t.cfg_path.tld.type == 'service':
-                services.append(repr(t.cfg_path) + '/client/config')
+            if t.service_instance.service in required_services:
+                required_services.remove(t.service_instance.service)
+            services.append(t.cfg_path + '/client/config')
+        if required_services:
+            raise IncompleteError("Host %s is missing required services %s." %
+                                  (self.name, required_services))
 
         provides = []
         for sis in self.dbhost.sislist:
@@ -126,9 +134,8 @@ class PlenaryToplevelHost(Plenary):
 
         templates = []
         templates.append("archetype/base")
-        if not os_template:
-            raise IncompleteError("Host %s is missing OS." % self.name)
         templates.append(os_template)
+
         for service in services:
             templates.append(service)
         for provide in provides:
@@ -163,6 +170,7 @@ class PlenaryToplevelHost(Plenary):
             lines.append("'/system/cluster/name' = '%s';" % self.dbhost.cluster.name)
         lines.append("")
         for template in templates:
+
             lines.append("include { '%s' };" % template)
         lines.append("")
 
@@ -177,5 +185,3 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
         self.name = dbhost.fqdn
         self.plenary_core = dbhost.dns_domain.name
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
-
-

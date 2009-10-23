@@ -220,7 +220,8 @@
          <option name="networkip" type="string">Network IP address</option>
          <option name="mac" type="string">primary mac address</option>
          <option name="personality" type="string">personality</option>
-         <option name="os" type="string">os</option>
+         <option name="osname" type="string">osname</option>
+         <option name="osversion" type="string">osversion</option>
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="model" type="string">machine model name</option>
@@ -482,6 +483,8 @@
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="osname" type="string">Operating system (e.g. linux)</option>
+         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
@@ -515,6 +518,8 @@
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="osname" type="string">Operating system (e.g. linux)</option>
+         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
          <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
@@ -536,6 +541,9 @@
       lowest:         Use lowest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
+
+      Currently operating system name/version is windows/generic for all windows
+      machines since they are the only versions in the database.
       <optgroup name="add_windows_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
@@ -561,6 +569,8 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="osname" type="string">Operating system: defaults to linux, no solaris (yet)</option>
+         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64. Defaults to 'generic')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="aurora_host/%(hostname)s" />
@@ -1185,7 +1195,7 @@
       host's bootserver.
       After a successful installation, the host will automatically pxeswitch
       itself back to local disk booting.
-      The --configure option forces a reset of the configuration files for this host on 
+      The --configure option forces a reset of the configuration files for this host on
       the bootserver.
       <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
@@ -1217,11 +1227,13 @@
          <option name="hostname" type="string">Host name</option>
       </optgroup>
       <optgroup name="reconfigure_optional" mandatory="False">
-         <option name="os" type="string">OS to assign to host</option>
+         <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+         <option name="osversion" type="string">version of the OS</option>
          <option name="archetype" type="string">Archetype of the personality</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
    </command>
@@ -1725,28 +1737,31 @@
   <command name="add_os">
       Create an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="os" type="string">The name of the operating system</option>
-         <option name="vers" type="string">The version of the operating system</option>
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being added to</option>
       </optgroup>
-      <transport method="put" path="os/%(os)s/%(vers)s/%(archetype)s" />
+      <optgroup name="add_os_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
   </command>
 
   <command name="del_os">
       Delete an operating system definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
-         <option name="os" type="string">The name of the operating system</option>
-         <option name="vers" type="string">The version of the operating system</option>
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">Which archetype the OS is being deleted from</option>
       </optgroup>
-      <transport method="delete" path="os/%(os)s/%(vers)s/%(archetype)s" />
+      <transport method="delete" path="os/%(osname)s/%(osversion)s/%(archetype)s" />
   </command>
 
   <command name="show_os">
       Show an operating system definition.
       <optgroup name="show_os_opts" mandatory="True" fields="any">
-         <option name="os" type="string">The name of the operating system</option>
-         <option name="vers" type="string">The version of the operating system</option>
+         <option name="osname" type="string">The name of the operating system</option>
+         <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">The archetype to search within</option>
          <option name="all" type="boolean">Show all operating systems</option>
       </optgroup>
@@ -1795,13 +1810,15 @@
       put the host into "install" mode of pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
-         <option name="os" type="string">OS to assign to host</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+         <option name="osversion" type="string">version of the OS</option>
          <option name="archetype" type="string">Archetype of the host (defaults to aquilon)</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make" />
    </command>
@@ -1820,12 +1837,14 @@
       put the host into "install" mode of pxeswitch.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name to make</option>
-         <option name="os" type="string">OS to assign to host</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+         <option name="osversion" type="string">version of the OS</option>
          <option name="personality" type="string">Personality of the host</option>
          <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
+         <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/make_aquilon" />
    </command>

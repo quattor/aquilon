@@ -40,7 +40,7 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Host
+from aquilon.aqdb.model import Host, OperatingSystem
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.processes import DSDBRunner
@@ -51,7 +51,7 @@ class CommandAddHost(BrokerCommand):
     required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     def render(self, session, logger, hostname, machine, archetype,
-               personality, domain, buildstatus, comments,
+               personality, domain, buildstatus, comments, osname, osversion,
                skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
@@ -61,13 +61,40 @@ class CommandAddHost(BrokerCommand):
             dbstatus = get_status(session, "build")
         dbmachine = get_machine(session, machine)
 
+        dbarchetype = get_archetype(session, archetype)
         if not personality:
-            dbarchetype = get_archetype(session, archetype)
             if dbarchetype.name == 'aquilon':
                 personality = 'inventory'
             else:
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
+
+        if dbarchetype.name == 'aquilon':
+            # default to os linux/4.0.1-x86_64 for aquilon
+            # this is a statistically valid assumption given the population
+            # of aquilon machines as of Oct. 2009
+            if not osname:
+                osname = 'linux'
+            if not osversion:
+                osversion = '4.0.1-x86_64'
+        elif dbarchetype.name =='aurora':
+            if not osname:
+                #no solaris yet
+                osname = 'linux'
+            if not osversion:
+                osversion = 'generic'
+        elif dbarchetype.name == 'windows':
+            if not osname:
+                osname = 'windows'
+            if not osversion:
+                osversion = 'generic'
+        else:
+            if not osname or not osversion:
+                raise ArgumentError("Can not determine a sensible default OS for archetype %s. Please use osname and osversion parameters" % (dbarchetype.name))
+
+        dbos = OperatingSystem.get_unique(session, name=osname,
+                                          version=osversion,
+                                          archetype=dbarchetype, compel=True)
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):
@@ -108,9 +135,9 @@ class CommandAddHost(BrokerCommand):
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
-                      mac=mac, ip=ip, network=dbnetwork, comments=comments,
+                      mac=mac, ip=ip, network=dbnetwork, operating_system=dbos,
                       name=short, dns_domain=dbdns_domain,
-                      personality=dbpersonality)
+                      personality=dbpersonality, comments=comments)
         session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost

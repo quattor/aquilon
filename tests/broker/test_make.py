@@ -72,6 +72,11 @@ class TestMake(TestBrokerCommand):
             self.failUnless(results, "No service plenary data that includes"
                                      "evh%s.aqd-unittest.ms.com" % i)
 
+    def testfailwindows(self):
+        command = ["make", "--hostname", "unittest01.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "is not a compilable archetype", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)

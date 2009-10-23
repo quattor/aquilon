@@ -26,21 +26,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a cfg_path simpler."""
+""" Enum column type for network table """
+from exceptions import TypeError
+
+import sqlalchemy
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+_NETWORK_TYPES = ['transit', 'vip', 'management', 'unknown', 'grid_domain',
+                  'legacy', 'stretch']
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import CfgPath
+class NetworkTypeError(TypeError):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return "Illegal NetworkType '%s'" % self.value
+
+class NetworkType(sqlalchemy.types.TypeDecorator):
+    """a type that decorates String, and serves as an enum-like value check
+       for the network table"""
+
+    impl = sqlalchemy.types.String
+
+    def process_bind_param(self, value, engine):
+        value = value.strip().lower()
+        if value in _NETWORK_TYPES:
+            return value
+        else:
+            raise NetworkTypeError(value)
+
+    def process_result_value(self, value, engine):
+        return value
+
+    def copy(self):
+        return NetworkType(self.impl.length)
 
 
-def get_cfg_path(session, cfg_tld, cfg_path):
-    try:
-        dbcfg_path = session.query(CfgPath).filter_by(
-                relative_path=cfg_path).join('tld').filter_by(
-                        type=cfg_tld).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("%s template %s not found: %s" %
-                (cfg_tld, cfg_path, e))
-    return dbcfg_path

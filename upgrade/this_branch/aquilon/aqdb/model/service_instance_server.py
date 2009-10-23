@@ -26,63 +26,58 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" For Systems and related objects """
+""" Store the list of servers that backs a service instance."""
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint)
+from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
+                        ForeignKey, UniqueConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from aquilon.aqdb.model import Base, Host, CfgPath
+from aquilon.aqdb.model import Base, System, ServiceInstance
 
 
-class BuildItem(Base):
-    """ Identifies the build process of a given Host.
-        Parent of 'build_element' """
-    __tablename__ = 'build_item'
+class ServiceInstanceServer(Base):
+    """ Store the list of servers that backs a service instance."""
 
-    id = Column(Integer, Sequence('build_item_id_seq'), primary_key=True)
+    __tablename__ = 'service_instance_server'
 
-    host_id = Column('host_id', Integer, ForeignKey('host.id',
-                                                     ondelete='CASCADE',
-                                                     name='build_item_host_fk'),
-                      nullable=False)
+    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
+                                                     name='sis_si_fk',
+                                                     ondelete='CASCADE'),
+                                 primary_key=True)
 
-    cfg_path_id = Column(Integer, ForeignKey(
-        'cfg_path.id', name='build_item_cfg_path_fk'), nullable=False)
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='sis_system_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
 
     position = Column(Integer, nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    # Having lazy=False here is essential.  This outer join saves
-    # thousands of queries whenever finding clients of a service
-    # instance.
-    host = relation(Host, backref='build_items', lazy=False)
-    #TODO: auto-updated "last_used" column?
-    cfg_path = relation(CfgPath, uselist=False, backref='build_items')
+    service_instance = relation(ServiceInstance)
+    system = relation(System, uselist=False, backref='sislist')
 
+    def __str__(self):
+        return str(self.system.fqdn)
 
     def __repr__(self):
-        return '%s: %s'%(self.host.name,self.cfg_path)
+        return self.__class__.__name__ + " " + str(self.system.fqdn)
 
-build_item = BuildItem.__table__
 
-build_item.primary_key.name='build_item_pk'
+service_instance_server = ServiceInstanceServer.__table__
+service_instance_server.primary_key.name='service_instance_server_pk'
 
-build_item.append_constraint(
-    UniqueConstraint('host_id', 'cfg_path_id', name='host_tmplt_uk'))
+table = service_instance_server
 
-build_item.append_constraint(
-    UniqueConstraint('host_id', 'position', name='host_position_uk'))
+#TODO: would we like this mapped in service_instance.py instead?
+ServiceInstance.servers = relation(ServiceInstanceServer,
+                          collection_class=ordering_list('position'),
+                          order_by=[ServiceInstanceServer.__table__.c.position])
 
-Host.templates = relation(BuildItem,
-                         collection_class=ordering_list('position'),
-                         order_by=['build_item.position'])
-
-table = build_item
 
 

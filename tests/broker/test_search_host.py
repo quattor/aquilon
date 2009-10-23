@@ -116,7 +116,7 @@ class TestSearchHost(TestBrokerCommand):
     def testarchetypeunavailable(self):
         command = "search host --archetype archetype-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype archetype-does-not-exist not found",
+        self.matchoutput(out, "Archetype 'archetype-does-not-exist' not found",
                          command)
 
     def testbuildstatusavailable(self):
@@ -212,9 +212,9 @@ class TestSearchHost(TestBrokerCommand):
         # Will only get this error if archetype is specified
         command = "search host --archetype aquilon --personality personality-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Personality "
-                              "personality-does-not-exist in Archetype aquilon not found",
-                         command)
+        self.matchoutput(out, "Personality with ", command)
+        self.matchoutput(out, "Archetype aquilon", command)
+        self.matchoutput(out, "name of 'personality-does-not-exist'", command)
 
     def testpersonalityunavailable2(self):
         # Will only get an error if archetype is specified
@@ -222,16 +222,28 @@ class TestSearchHost(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testosavailable(self):
-        command = "search host --os linux/4.0.1-x86_64"
+        command = "search host --osname linux --osversion 4.0.1-x86_64 --archetype aquilon"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testosunavailable(self):
-        command = "search host --os os-does-not-exist"
+        command = "search host --osname os-does-not-exist --osversion foo --archetype aquilon"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "os template os-does-not-exist not found",
-                         command)
+        self.matchoutput(out, "Operating System with ", command)
+        self.matchoutput(out, "version of 'foo'", command)
+        self.matchoutput(out, "Archetype aquilon", command)
+        self.matchoutput(out, "name of 'os-does-not-exist'", command)
+
+    def testosnameonly(self):
+        command = "search host --osname linux"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+
+    def testosversiononly(self):
+        command = "search host --osversion 4.0.1-x86_64"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testserviceavailable(self):
         command = "search host --service utsvc"

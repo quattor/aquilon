@@ -27,31 +27,33 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+
+from aquilon.aqdb.model import OperatingSystem, Archetype
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, Tld, CfgPath
 from aquilon.exceptions_ import ArgumentError
 import re
 
+
 class CommandAddOS(BrokerCommand):
 
-    required_parameters = [ "os", "vers", "archetype" ]
+    required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, os, vers, archetype, **arguments):
+    def render(self, session, osname, osversion, archetype, comments,
+               **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(os)):
-            raise ArgumentError("OS name '%s' is not valid" % os)
-        if not valid.match(vers):
-            raise ArgumentError("OS version '%s' is not valid" % vers)
+        if (not valid.match(osname)):
+            raise ArgumentError("OS name '%s' is not valid" % osname)
+        if not valid.match(osversion):
+            raise ArgumentError("OS version '%s' is not valid" % osversion)
 
-        path = os + "/" + vers
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        OperatingSystem.get_unique(session, name=osname, version=osversion,
+                                   archetype=dbarchetype, preclude=True)
 
-        dbtld = session.query(Tld).filter_by(type='os').first()
-        existing = session.query(CfgPath).filter_by(relative_path=path, tld=dbtld).first()
+        dbos = OperatingSystem(name=osname, version=osversion,
+                               archetype=dbarchetype, comments=comments)
+        session.add(dbos)
 
-        if existing:
-            raise ArgumentError("OS version '%s' already exists" % path)
-
-        dbos = CfgPath(tld=dbtld, relative_path=path)
-
-        session.save(dbos)
         return
+
+

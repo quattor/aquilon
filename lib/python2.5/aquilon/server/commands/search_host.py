@@ -32,14 +32,12 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import Host, CfgPath, Cluster
+from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
+                                OperatingSystem)
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.domain import get_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.server.dbwrappers.cfg_path import get_cfg_path
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.location import get_location
@@ -52,7 +50,7 @@ class CommandSearchHost(BrokerCommand):
     required_parameters = []
 
     def render(self, session, hostname, machine, domain, archetype,
-               buildstatus, personality, os, service, instance,
+               buildstatus, personality, osname, osversion, service, instance,
                model, machine_type, vendor, serial, cluster,
                fullinfo, **arguments):
         if hostname:
@@ -65,47 +63,57 @@ class CommandSearchHost(BrokerCommand):
             dbdomain = get_domain(session, domain)
             q = q.filter_by(domain=dbdomain)
 
+        if archetype:
+            # Added to the searches as appropriate below.
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if personality and archetype:
-            dbpersonality = get_personality(session, archetype, personality)
+            dbpersonality = Personality.get_unique(session,
+                                                   archetype=dbarchetype,
+                                                   name=personality,
+                                                   compel=True)
             q = q.filter_by(personality=dbpersonality)
         elif personality:
             q = q.join('personality').filter_by(name=personality)
             q = q.reset_joinpoint()
         elif archetype:
-            dbarchetype = get_archetype(session, archetype)
             q = q.join('personality').filter_by(archetype=dbarchetype)
             q = q.reset_joinpoint()
 
         if buildstatus:
             dbbuildstatus = get_status(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
-        if os:
-            dbos = get_cfg_path(session, "os", os)
-            q = q.join('build_items').filter_by(cfg_path=dbos)
+
+        if osname and osversion and archetype:
+            # archetype was already resolved above
+            dbos = OperatingSystem.get_unique(session, name=osname,
+                                              version=osversion,
+                                              archetype=dbarchetype,
+                                              compel=True)
+            q = q.filter_by(operating_system=dbos)
+        elif osname or osversion:
+            q = q.join('operating_system')
+            if osname:
+                q = q.filter_by(name=osname)
+            if osversion:
+                q = q.filter_by(version=osversion)
             q = q.reset_joinpoint()
+
         if service:
             dbservice = get_service(session, service)
             if instance:
                 dbsi = get_service_instance(session, dbservice, instance)
                 q = q.join('build_items')
-                q = q.filter_by(cfg_path=dbsi.cfg_path)
+                q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
             else:
-                q = q.join('build_items')
-                path_query = dbservice.cfg_path.relative_path + '/%'
-                q = q.filter(CfgPath.relative_path.like(path_query))
-                q = q.reset_joinpoint()
-                q = q.join(['build_items', 'cfg_path'])
-                q = q.filter_by(tld=dbservice.cfg_path.tld)
+                q = q.join('build_items', 'service_instance')
+                q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join('build_items')
-            path_query = '%/' + instance.lower().strip()
-            q = q.filter(CfgPath.relative_path.like(path_query))
+            q = q.join(['build_items', 'service_instance'])
+            q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
-            q = q.join(['build_items', 'cfg_path', 'tld'])
-            q = q.filter_by(type='service')
-            q = q.reset_joinpoint()
+
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.join(['machine'])

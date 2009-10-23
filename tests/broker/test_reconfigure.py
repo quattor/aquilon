@@ -183,12 +183,14 @@ class TestReconfigure(TestBrokerCommand):
                    "--personality", "desktop"]
         self.noouttest(command)
 
-    def testreconfigurewindowsos(self):
-        command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-                   "--os", "linux/4.0.1-x86_64"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Can only set os for compileable archetypes",
-                         command)
+# This test needs to adapt to become a test that changes the OS on a
+# non-compilable archetype.
+#   def testreconfigurewindowsos(self):
+#       command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+#                  "--os", "linux/4.0.1-x86_64"]
+#       err = self.badrequesttest(command)
+#       self.matchoutput(err, "Can only set os for compileable archetypes",
+#                        command)
 
     def testverifyreconfigurewindows(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
@@ -202,6 +204,15 @@ class TestReconfigure(TestBrokerCommand):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--os", "linux/5.0-x86_64"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 object template", command)
+        self.matchclean(err, "removing binding", command)
+        self.matchclean(err, "adding binding", command)
+
+    def testreconfigureossplitargs(self):
+        command = ["reconfigure",
+                   "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--osname", "linux", "--osversion", "5.0-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
@@ -361,4 +372,3 @@ class TestReconfigure(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
