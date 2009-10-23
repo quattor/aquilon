@@ -101,6 +101,7 @@
       the search will not return the machine.
       <optgroup name="search_hardware_opts" mandatory="True" fields="any">
          <option name="model" type="string">model name</option>
+         <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="string">mac address of an attached interface</option>
          <option name="serial" type="string">serial number</option>
@@ -140,6 +141,7 @@
          <option name="memory" type="string">memory in MB</option>
          <option name="cluster" type="string">cluster name</option>
          <option name="model" type="string">model name</option>
+         <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="string">mac address of an attached interface</option>
          <option name="serial" type="string">serial number</option>
@@ -200,6 +202,7 @@
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="model" type="string">machine model name</option>
+         <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster name</option>

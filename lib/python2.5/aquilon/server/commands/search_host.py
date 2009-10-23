@@ -53,7 +53,7 @@ class CommandSearchHost(BrokerCommand):
 
     def render(self, session, hostname, machine, domain, archetype,
                buildstatus, personality, os, service, instance,
-               model, vendor, serial, cluster,
+               model, machine_type, vendor, serial, cluster,
                fullinfo, **arguments):
         if hostname:
             arguments['fqdn'] = hostname
@@ -116,10 +116,23 @@ class CommandSearchHost(BrokerCommand):
             q = q.join(['machine'])
             q = q.filter_by(model=dbmodel)
             q = q.reset_joinpoint()
-        if vendor:
-            dbvendor = get_vendor(session, vendor)
+            if machine_type and machine_type != dbmodel.machine_type:
+                raise ArgumentError("machine_type %s conflicts with model %s "
+                                    "where machine_type is %s" %
+                                    (machine_type, dbmodel.name,
+                                     dbmodel.machine_type))
+            if vendor and vendor != dbmodel.vendor.name:
+                raise ArgumentError("vendor %s conflicts with model %s "
+                                    "where vendor is %s" %
+                                    (vendor, dbmodel.name,
+                                     dbmodel.vendor.name))
+        elif vendor or machine_type:
             q = q.join(['machine', 'model'])
-            q = q.filter_by(vendor=dbvendor)
+            if vendor:
+                dbvendor = get_vendor(session, vendor)
+                q = q.filter_by(vendor=dbvendor)
+            if machine_type:
+                q = q.filter_by(machine_type=machine_type)
             q = q.reset_joinpoint()
         if serial:
             q = q.join(['machine'])

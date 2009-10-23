@@ -60,6 +60,23 @@ class TestSearchHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rackmount: ut3s01p1", command)
 
+    def testmodelvendorconflict(self):
+        command = "search hardware --model vb1205xm --vendor dell"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "vendor dell conflicts with model vb1205xm "
+                         "where vendor is verari",
+                         command)
+
+    def testmodelmachinetypeconflict(self):
+        command = ["search_hardware", "--model=vb1205xm",
+                   "--machine_type=virtual_machine"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "machine_type virtual_machine conflicts with "
+                         "model vb1205xm where machine_type is blade",
+                         command)
+
     def testvendoravailable(self):
         command = "search hardware --vendor verari"
         out = self.commandtest(command.split(" "))
@@ -72,6 +89,15 @@ class TestSearchHardware(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Vendor vendor-does-not-exist not found",
                          command)
+
+    def testmachinetypeavailable(self):
+        command = "search hardware --machine_type blade"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut8s02p1", command)
+
+    def testmachinetypeunavailable(self):
+        command = "search hardware --machine_type machine_type-does-not-exist"
+        self.noouttest(command.split(" "))
 
     def testserialavailable(self):
         command = "search hardware --serial 99C5553"
