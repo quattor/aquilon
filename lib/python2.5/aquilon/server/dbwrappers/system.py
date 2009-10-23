@@ -111,3 +111,18 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('type', None):
         q = q.filter_by(system_type=kwargs['type'])
     return q
+
+def get_system_dependencies(session, dbsystem):
+    """Return a list of strings describing how a system is being used.
+
+    An empty list will be returned if there are no dependencies.
+
+    """
+    ret = []
+    for sis in dbsystem.sislist:
+        ret.append("%s is bound as a server for service %s instance %s" %
+                   (sis.system.fqdn, sis.service_instance.service.name,
+                    sis.service_instance.name))
+    return ret
+
+
