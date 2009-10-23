@@ -28,10 +28,13 @@
 # TERMS THAT MAY APPLY.
 
 
+import os
+
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import EsxCluster
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.processes import remove_file
 
 
 class CommandDelESXCluster(BrokerCommand):
@@ -42,6 +45,7 @@ class CommandDelESXCluster(BrokerCommand):
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
         if not dbcluster:
             raise NotFoundException("No cluster with name '%s'" % cluster)
+        cluster = str(dbcluster.name)
         if dbcluster.machines:
             raise ArgumentError("Cluster still in use by virtual machines: %s"
                                 % ", ".join([m.name
@@ -57,7 +61,16 @@ class CommandDelESXCluster(BrokerCommand):
 
         session.flush()
 
+        # Cleanup the domain-specific files.
         plenary.cleanup(domain)
+
+        # Remove the compiled profile.
+        remove_file(os.path.join(self.config.get("broker", "profilesdir"),
+                                 "clusters", cluster + ".xml"))
+        # Remove the cache in the global profiles directory created by
+        # the ant task.
+        remove_file(os.path.join(self.config.get("broker", "quattordir"),
+                                 "objects", "clusters", cluster + ".tpl"))
 
         return
 

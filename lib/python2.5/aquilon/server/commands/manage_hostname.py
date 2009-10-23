@@ -28,8 +28,6 @@
 # TERMS THAT MAY APPLY.
 
 
-from twisted.python import log
-
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -52,16 +50,15 @@ class CommandManageHostname(BrokerCommand):
                                 "cluster level; this host is a member of the "
                                 "cluster " + dbhost.cluster.name)
 
-        plenary_host = PlenaryHost(dbhost)
         old_domain = dbhost.domain.name
 
         dbhost.domain = dbdomain
         session.add(dbhost)
         session.flush()
+        plenary_host = PlenaryHost(dbhost)
 
         try:
             compileLock()
-            plenary_host.cleanup(old_domain, locked=True)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
@@ -73,6 +70,8 @@ class CommandManageHostname(BrokerCommand):
                 # This template cannot be written, we leave it alone
                 # It would be nice to flag the state in the the host?
                 pass
+
+            plenary_host.cleanup(old_domain, locked=True)
         except:
             # This will not restore the cleaned up files.  That's OK.
             # They will be recreated as needed.

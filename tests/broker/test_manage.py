@@ -53,6 +53,14 @@ class TestManage(TestBrokerCommand):
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Domain: changetest1", command)
 
+    def testverifycleanup(self):
+        command = [self.config.get("broker", "basedir"),
+                   "-name", "unittest02.one-nyp.ms.com*",
+                   "-path", "*/unittest/*"]
+        out = self.findcommand(command)
+        self.matchclean("".join(out), "unittest",
+                        "find %s" % " ".join(command))
+
     def testmanageunittest00(self):
         self.noouttest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
             "--domain", "changetest2"])

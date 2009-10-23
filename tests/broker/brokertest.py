@@ -455,6 +455,26 @@ class TestBrokerCommand(unittest.TestCase):
                   "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                   % (command, out, err))
 
+    def findcommand(self, command, **kwargs):
+        if self.config.has_option("unittest", "find"):
+            find = self.config.get("unittest", "find")
+        else:
+            find = "/usr/bin/find"
+        if isinstance(command, list):
+            args = command[:]
+        else:
+            args = [command]
+        args.insert(0, find)
+        env = {}
+        p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
+        (out, err) = p.communicate()
+        # Ignore out/err unless we get a non-zero return code, then log it.
+        if p.returncode == 0:
+            return out.splitlines()
+        self.fail("Error return code for %s, "
+                  "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                  % (command, out, err))
+
 
 class DummyIP(object):
     def __init__(self, parts):

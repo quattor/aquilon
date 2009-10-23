@@ -187,7 +187,7 @@ class Plenary(object):
         try:
             if not locked:
                 compileLock()
-            self.remove(locked=True)
+            # Can't call remove() here because it relies on the new domain.
             if self.template_type == "object" and hasattr(self, 'name'):
                 qdir = self.config.get("broker", "quattordir")
                 xmlfile = os.path.join(qdir, "build", "xml", domain,
@@ -196,6 +196,10 @@ class Plenary(object):
                 depfile = os.path.join(qdir, "build", "xml", domain,
                                        self.name + ".xml.dep")
                 remove_file(depfile)
+                builddir = self.config.get("broker", "builddir")
+                mainfile = os.path.join(builddir, "domains", domain,
+                                        "profiles", self.name + ".tpl")
+                remove_file(mainfile)
         except:
             if not locked:
                 self.restore_stash()
