@@ -2,7 +2,7 @@
 import os
 import sys
 import time
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, cpu_count
 from multiprocessing.managers import SyncManager
 
 _HOME = os.path.expanduser('~daqscott')
@@ -18,7 +18,7 @@ from sqlalchemy.orm import create_session
 
 #we import these relative to the local path since we need a weird set of
 #dependencies: we need build_item to have the transient column of cfg_path_id, etc.
-from aquilon.aqdb.model import Host, ServiceInstance, BuildItem, OperatingSystem
+from aquilon.aqdb.model import Archetype, Host, ServiceInstance, BuildItem, OperatingSystem
 
 from pprint import pprint
 
@@ -74,6 +74,16 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
     sess = get_session(cstr)
     processed = 0
 
+    generic_windows_os = sess.query(OperatingSystem).filter_by(
+        name='windows').filter_by(version='generic').one()
+
+    generic_aurora_os = sess.query(OperatingSystem).filter_by(
+        version='generic').filter_by(name='linux').filter(
+        Archetype.name == 'aurora').one()
+
+    esx_os = sess.query(OperatingSystem).filter_by(name='esxi').one()
+    pserver_os =sess.query(OperatingSystem).filter_by(name='ontap').one()
+
     while True:
         host_id = host_q.get()
         host = sess.query(Host).get(host_id)
@@ -81,7 +91,7 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
         processed += 1
         #fix this for aurora + windows
         if host.build_items and (host.archetype.name == 'aquilon' or
-                                 host.archetype.name =='vmhost') :
+                                 host.archetype.name =='vmhost'):
             for item in host.build_items:
                 if item.cfg_path.tld.type == 'os':
                     host.operating_system_id = os_cache[item.cfg_path.relative_path]
@@ -93,14 +103,29 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
                         print 'No service instance for %s'% (item.cfg_path)
                 else:
                     print 'build item %s has no useable cfg_path'% (item.id)
-        #TODO: else: do something for windows/aurora hosts
+        elif host.archetype.name == 'aurora':
+            host.operating_system = generic_aurora_os
+        elif host.archetype.name == 'windows':
+            host.operating_system = generic_windows_os
+        elif host.archetype.name == 'pserver':
+            host.operating_system = pserver_os
+        elif host.archetype.name == 'aquilon':
+            if host.operating_system_id == None:
+                host.operating_system_id = os_cache['linux/4.0.1-x86_64']
+        else:
+            print 'No useable os for host %s archetype %s' % (host.fqdn,
+                                                              host.archetype.name)
 
-                if processed % commit_count == 0:
-                    try:
-                        sess.commit()
-                    except Exception, e:
-                        print e
-                        sess.rollback()
+        if host.archetype.name == 'vmhost':
+            #just in case, the cache up above is linux only
+            host.operating_system = esx_os
+
+        if processed % commit_count == 0:
+            try:
+                sess.commit()
+            except Exception, e:
+                print e
+                sess.rollback()
 
         if host_q.qsize() == 0:
             print 'committing at end'
@@ -114,13 +139,14 @@ def work(cstr, host_q, os_cache, si_cache, commit_count=25):
 
 class AqdbManager(SyncManager):
     def __init__(self, timeout=120):
-        #FIXME: replace with production instance
-        # have it error out with a helpful message
-        self._cstr = 'oracle://daqscott:vau849tt@LNTO_AQUILON_NY'
+        #FIXME: fill in your connect string here
+        #self._cstr = 'oracle://USER:PASSWORD@LNTO_AQUILON_NY'
+        self._cstr = ''
+        assert self._cstr, 'Add a database connection string in line 144'
+
         self.timeout = timeout
-        self.NUMBER_OF_PROCESSES = 4
+        self.NUMBER_OF_PROCESSES = cpu_count()
         self.host_q = Queue()
-        self.is_incomplete = True #flag for loop
 
         self.si_cache = get_si_cache(self._cstr)
         self.os_cache = get_one_os_cache(self._cstr)
@@ -154,26 +180,51 @@ class AqdbManager(SyncManager):
         #the cfg_path_id column.
         count = sess.query(BuildItem).filter(
             BuildItem.service_instance_id == None).count()
-        if count == 0:
+        count2 = sess.query(Host).filter(
+            Host.operating_system_id == None).count()
+
+        #fix any stragglers/one-offs
+        if count2 > 0:
+            for host in sess.query(Host).filter(
+            Host.operating_system_id == None).all():
+                if host.archetype.name == 'aquilon':
+                    host.operating_system_id = self.os_cache['linux/4.0.1-x86_64']
+                    sess.add(host)
+            try:
+                sess.commit()
+            except Exception, e:
+                print e
+                sess.rollback()
+        count2 = sess.query(Host).filter(
+            Host.operating_system_id == None).count()
+
+        if count == 0 and count2 == 0:
             print 'completing schema migration'
 
-            stmnts = ['ALTER TABLE "BUILD_ITEM" DROP COLUMN "CFG_PATH_ID"',
-                      'ALTER TABLE "BUILD_ITEM" ADD CONSTRAINT "BUILD_ITEM_UK" UNIQUE ("HOST_ID", "SERVICE_INSTANCE_ID")',
-                      'ALTER TABLE "BUILD_ITEM" DROP CONSTRAINT "HOST_POSITION_UK"',
-                      'ALTER TABLE "BUILD_ITEM" DROP COLUMN "POSITION"',
-                      'ALTER TABLE "SERVICE" DROP COLUMN "CFG_PATH_ID"',
-                      'ALTER TABLE "SERVICE_INSTANCE" DROP COLUMN "CFG_PATH_ID"']
+            stmnts = ['ALTER TABLE BUILD_ITEM DROP COLUMN CFG_PATH_ID',
+                      'ALTER TABLE BUILD_ITEM ADD CONSTRAINT "BUILD_ITEM_UK" UNIQUE ("HOST_ID", "SERVICE_INSTANCE_ID")',
+                      'ALTER TABLE BUILD_ITEM DROP CONSTRAINT HOST_POSITION_UK',
+                      'ALTER TABLE BUILD_ITEM DROP COLUMN "POSITION"',
+                      'ALTER TABLE SERVICE DROP COLUMN "CFG_PATH_ID"',
+                      'ALTER TABLE SERVICE_INSTANCE DROP COLUMN "CFG_PATH_ID"',
+                      'ALTER TABLE HOST ADD CONSTRAINT HOST_OS_ID_NN CHECK ("OPERATING_SYSTEM_ID" IS NOT NULL) ENABLE']
 
             for s in stmnts:
                 sess.execute(s)
-            self.is_incomplete = True
+            sess.commit()
             print 'Complete!'
         else:
-            print 'there are %s rows with no service instance ids'% (count)
-            for item in sess.query(BuildItem).filter(
-                BuildItem.service_instance_id == None).all():
-                print '%s %s'% (item.host.name, item.cfg_path)
-            print 'I should be trying again now...'
+            print 'some build items were not processed'
+            if count > 0:
+                print 'there are %s rows with no service instance ids'% (count)
+                for item in sess.query(BuildItem).filter(
+                    BuildItem.service_instance_id == None).all():
+                    print '%s %s'% (item.host.name, item.cfg_path)
+        if count2 > 0:
+            print 'there are %s hosts with no OS' %(count2)
+            for host in sess.query(Host).filter(
+                Host.operating_system_id == None).all():
+                print '%s' % (host.fqdn)
 
 
     def stop(self):
@@ -187,14 +238,10 @@ class AqdbManager(SyncManager):
 
 if __name__ == '__main__':
     start = time.time()
-
     m = AqdbManager()
-
-    #while m.is_incomplete:
     m.start()
-
     end = time.time()
-    #m.stop()
+
     print 'execution time: %s seconds'% (int(end-start))
 
     sys.exit(0)
