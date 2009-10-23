@@ -252,6 +252,10 @@ if __name__ == "__main__":
             default_aqport
     aquser = globalOptions.get('aquser') or os.environ.get('AQUSER', None) or \
             default_aquser
+    if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
+        serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
+        false_values = ['false', 'f', 'no', 'n', '0', '']
+        globalOptions['slowstatus'] = not serial in false_values
 
     # Save these in case there are errors...
     globalOptions["aqhost"] = host
@@ -320,16 +324,22 @@ if __name__ == "__main__":
     # Kick off a thread to (potentially) get status...
     if command == "show_request" or not globalOptions.get("quiet"):
         status_thread = StatusThread(host, port, authuser, **commandOptions)
-        status_thread.start()
 
     if command == "show_request":
         status_thread.outstream = sys.stdout
+        status_thread.start()
         status_thread.join()
         if not status_thread.response_status or \
            status_thread.response_status == httplib.OK:
             sys.exit(0)
         else:
             sys.exit(status_thread.response_status / 100)
+
+    # Normally the status thread will start right away.  We should delay
+    # starting it on request - generally because the broker is running
+    # with sqlite and can't reliably handle connections in parallel.
+    if status_thread and not globalOptions.get("slowstatus"):
+        status_thread.start()
 
     try:
         if transport.method == 'get' or transport.method == 'delete':
@@ -385,6 +395,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if status_thread:
+        if globalOptions.get("slowstatus"):
+            status_thread.start()
         # Re-join the thread here before printing data.
         # Hard-coded timeout of 10 seconds to wait for info, otherwise it
         # is silently dropped.

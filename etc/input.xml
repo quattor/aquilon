@@ -32,6 +32,11 @@
          <option name="usesock" type="string" conflicts="noauth">
             Connect directly (noauth) to the given unix socket.
          </option>
+         <option name="slowstatus" type="boolean" conflicts="quiet">
+            Request status messages from the server only after the
+            original request completes.  This is only meant to be used
+            for aqd development with a broker running with a sqlite database.
+         </option>
          <option name="aqport" type="string" conflicts="">
             Server port to connect to
          </option>

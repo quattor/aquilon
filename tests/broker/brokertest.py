@@ -100,6 +100,8 @@ class TestBrokerCommand(unittest.TestCase):
         args.append(kncport)
         args.append("--aquser")
         args.append(self.config.get("broker", "user"))
+        if self.config.get("database", "dsn").startswith("sqlite"):
+            args.append("--slowstatus")
         if kwargs.has_key("env"):
             # Make sure that kerberos tickets are still present if the
             # environment is being overridden...
@@ -216,6 +218,8 @@ class TestBrokerCommand(unittest.TestCase):
         args.append("--aqport")
         args.append(openport)
         args.append("--noauth")
+        if self.config.get("database", "dsn").startswith("sqlite"):
+            args.append("--slowstatus")
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
         # Strip any msversion dev warnings out of STDERR
