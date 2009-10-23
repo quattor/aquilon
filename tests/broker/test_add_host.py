@@ -137,20 +137,25 @@ class TestAddHost(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Personality: compileserver", command)
 
+    #will use this one off host for make test the default to linux/4.0.1-x86_64
     def testaddunittest17(self):
         self.noouttest(["add", "host",
             "--hostname", "unittest17.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--machine", "ut8s02p3", "--domain", "unittest",
-            "--osname", "linux", "--osversion", "4.0.1-x86_64",
+            #"--osname", "linux", "--osversion", "4.0.1-x86_64",
             "--buildstatus", "build", "--archetype", "aquilon"])
 
     def testverifyunittest17(self):
+        #verifies default os and personality for aquilon
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3].ip,
+                         command)
+        self.matchoutput(out,
+                         "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
@@ -175,6 +180,7 @@ class TestAddHost(TestBrokerCommand):
                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)
+
 
     def testpopulateverarirackhosts(self):
         # This gives us evh1.aqd-unittest.ms.com through evh10

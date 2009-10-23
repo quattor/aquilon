@@ -48,8 +48,7 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddHost(BrokerCommand):
 
-    required_parameters = ["hostname", "machine", "archetype", "domain",
-                           "osname", "osversion"]
+    required_parameters = ["hostname", "machine", "archetype", "domain"]
 
     def render(self, session, hostname, machine, archetype, personality,
                domain, buildstatus, comments, osname, osversion,
@@ -69,6 +68,29 @@ class CommandAddHost(BrokerCommand):
             else:
                 personality = 'generic'
         dbpersonality = get_personality(session, archetype, personality)
+
+        if dbarchetype.name == 'aquilon':
+            # default to os linux/4.0.1-x86_64 for aquilon
+            # this is a statistically valid assumption given the population
+            # of aquilon machines as of Oct. 2009
+            if not osname:
+                osname = 'linux'
+            if not osversion:
+                osversion = '4.0.1-x86_64'
+        elif dbarchetype.name =='aurora':
+            if not osname:
+                #no solaris yet
+                osname = 'linux'
+            if not osversion:
+                osversion = 'generic'
+        elif dbarchetype.name == 'windows':
+            if not osname:
+                osname = 'windows'
+            if not osversion:
+                osversion = 'generic'
+        else:
+            if not osname or not osversion:
+                raise ArgumentError("Can not determine a sensible default OS for archetype %s. Please use osname and osversion parameters" % (dbarchetype.name))
 
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,
