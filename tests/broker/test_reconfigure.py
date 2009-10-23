@@ -209,6 +209,15 @@ class TestReconfigure(TestBrokerCommand):
         self.matchclean(out, "removing binding", command)
         self.matchclean(out, "adding binding", command)
 
+    def reconfigureossplitargs(self):
+        command = ["reconfigure",
+                   "--hostname", "unittest17-aqd-unittest.ms.com",
+                   "--osname", "linux", "--osversion", "4.0.1-x86_64"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "1/1 object template", command)
+        self.matchclean(out, "removing binding", command)
+        self.matchclean(out, "adding binding", command)
+
     def testmissingpersonalitytemplate(self):
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
@@ -363,4 +372,3 @@ class TestReconfigure(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
