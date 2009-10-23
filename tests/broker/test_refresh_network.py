@@ -50,19 +50,19 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     def testrefreshnetworkdryrun(self):
         command = "refresh network --building np --dryrun"
-        out = self.commandtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
 
-    def testrefreshnetworkloglevel(self):
-        command = "refresh network --building np --loglevel 1"
-        out = self.commandtest(command.split(" "))
+    def testrefreshnetworkdebug(self):
+        command = "refresh network --building np --debug"
+        (out, err) = self.successtest(command.split(" "))
 
-    def testrefreshnetworkdryrunloglevel(self):
-        command = "refresh network --building np --dryrun --loglevel 2"
-        out = self.commandtest(command.split(" "))
+    def testrefreshnetworkdryrundebug(self):
+        command = "refresh network --building np --dryrun --debug"
+        (out, err) = self.successtest(command.split(" "))
 
     def testrefreshnetworkstandard(self):
         command = "refresh network --building np"
-        out = self.commandtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
 
 
 if __name__=='__main__':

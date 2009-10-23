@@ -27,14 +27,19 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+
 import os
 import time
 import socket
-import xml.etree.ElementTree as ET
-from aquilon.server.dbwrappers.service import get_service
-from twisted.python import log
-from aquilon.server.processes import write_file
+import logging
 
+import xml.etree.ElementTree as ET
+
+from aquilon.server.dbwrappers.service import get_service
+from aquilon.server.processes import write_file
+from aquilon.server.logger import CLIENT_INFO
+
+LOGGER = logging.getLogger('aquilon.server.templates.index')
 
 CCM_NOTIF = 1
 CDB_NOTIF = 2
@@ -49,7 +54,8 @@ try:
 except:
     CDPPORT = 7777
 
-def build_index(config, session, profilesdir, clientNotify=True):
+def build_index(config, session, profilesdir, clientNotify=True,
+                logger=LOGGER):
     '''
     Create an index of what profiles are available
 
@@ -81,7 +87,8 @@ def build_index(config, session, profilesdir, clientNotify=True):
                             obj = obj[:-4]
                         old_object_index[obj] = int(profile.attrib["mtime"])
         except Exception, e:
-            log.msg("Error processing %s, continuing: %s" % (index_path, e))
+            logger.info("Error processing %s, continuing: %s" %
+                        (index_path, e))
 
     # object_index ties namespaced files to mtime
     object_index = {}
@@ -114,7 +121,7 @@ def build_index(config, session, profilesdir, clientNotify=True):
                 % (mtime, obj))
     content.append("</profiles>")
 
-    write_file(index_path, "\n".join(content))
+    write_file(index_path, "\n".join(content), logger=logger)
 
     if config.has_option("broker", "server_notifications"):
         service_modules = {}
@@ -127,17 +134,20 @@ def build_index(config, session, profilesdir, clientNotify=True):
                         for sis in instance.servers:
                             service_modules[sis.system.fqdn] = 1
                 except Exception, e:
-                    log.msg("failed to lookup up server module %s: %s" % (service, e))
-        count = send_notification(CDB_NOTIF, service_modules.keys())
-        log.msg("sent %d server notifications" % count)
+                    logger.info("failed to lookup up server module %s: %s" %
+                                (service, e))
+        count = send_notification(CDB_NOTIF, service_modules.keys(),
+                                  logger=logger)
+        logger.log(CLIENT_INFO, "sent %d server notifications" % count)
 
     if (config.has_option("broker", "client_notifications")
         and config.getboolean("broker", "client_notifications")
         and clientNotify):
-        count = send_notification(CCM_NOTIF, modified_index.keys())
-        log.msg("sent %d client notifications" % count)
+        count = send_notification(CCM_NOTIF, modified_index.keys(),
+                                  logger=logger)
+        logger.log(CLIENT_INFO, "sent %d client notifications" % count)
 
-def send_notification(ntype, modified):
+def send_notification(ntype, modified, logger=LOGGER):
     '''send CDP notification messages to a list of hosts.
 
     This are sent synchronously, but we don't wait (or care) for any
@@ -168,6 +178,6 @@ def send_notification(ntype, modified):
             pass
 
         except Exception, e:
-            log.msg("Error notifying %s: %s" % (host, e))
+            logger.info("Error notifying %s: %s" % (host, e))
 
     return success

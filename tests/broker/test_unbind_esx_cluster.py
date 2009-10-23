@@ -128,7 +128,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
         # cluster (or a cluster with hosts) while bound to such a service...
         command = ["bind_esx_cluster", "--cluster=utecl4",
                    "--service=utsvc", "--instance=utsi1"]
-        out = self.commandtest(command)
+        (out, err) = self.successtest(command)
 
         command = ["unbind_esx_cluster", "--cluster=utecl4",
                    "--service=utsvc", "--instance=utsi1"]

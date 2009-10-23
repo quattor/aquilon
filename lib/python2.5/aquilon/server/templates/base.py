@@ -31,13 +31,14 @@
 
 import os
 from threading import Lock
+import logging
 
-from twisted.python import log
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
 from aquilon.server.processes import write_file, read_file, remove_file
+from aquilon.server.logger import CLIENT_INFO
 
 
 # We have a global compile lock.
@@ -49,21 +50,23 @@ from aquilon.server.processes import write_file, read_file, remove_file
 #    in progress
 
 compile_lock = Lock()
+LOGGER = logging.getLogger('aquilon.server.templates.base')
 
-def compileLock():
-    log.msg("requesting compile lock")
+def compileLock(logger=LOGGER):
+    logger.log(CLIENT_INFO, "requesting compile lock")
     compile_lock.acquire()
-    log.msg("aquired compile lock")
+    logger.log(CLIENT_INFO, "acquired compile lock")
 
-def compileRelease():
-    log.msg("releasing compile lock")
+def compileRelease(logger=LOGGER):
+    logger.log(CLIENT_INFO, "releasing compile lock")
     compile_lock.release()
 
 
 class Plenary(object):
-    def __init__(self, dbobj=None):
+    def __init__(self, dbobj=None, logger=LOGGER):
         self.config = Config()
         self.dbobj = dbobj
+        self.logger = logger
         self.template_type = 'structure'
         self.plenary_template = None
         self.plenary_core = None
@@ -138,7 +141,7 @@ class Plenary(object):
                 return 0
             if not os.path.exists(plenary_path):
                 os.makedirs(plenary_path)
-            write_file(plenary_file, content)
+            write_file(plenary_file, content, logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -156,7 +159,8 @@ class Plenary(object):
         if dir is not None:
             self.dir = dir
         # FIXME: Dupes some logic from pathname()
-        return read_file(self.dir, self.plenary_template + ".tpl")
+        return read_file(self.dir, self.plenary_template + ".tpl",
+                         logger=self.logger)
 
     def remove(self, dir=None, locked=False):
         """
@@ -170,7 +174,7 @@ class Plenary(object):
             if (not locked):
                 compileLock()
             self.stash()
-            remove_file(self.pathname())
+            remove_file(self.pathname(), logger=self.logger)
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
@@ -192,14 +196,14 @@ class Plenary(object):
                 qdir = self.config.get("broker", "quattordir")
                 xmlfile = os.path.join(qdir, "build", "xml", domain,
                                        self.name + ".xml")
-                remove_file(xmlfile)
+                remove_file(xmlfile, logger=self.logger)
                 depfile = os.path.join(qdir, "build", "xml", domain,
                                        self.name + ".xml.dep")
-                remove_file(depfile)
+                remove_file(depfile, logger=self.logger)
                 builddir = self.config.get("broker", "builddir")
                 mainfile = os.path.join(builddir, "domains", domain,
                                         "profiles", self.name + ".tpl")
-                remove_file(mainfile)
+                remove_file(mainfile, logger=self.logger)
         except:
             if not locked:
                 self.restore_stash()
@@ -242,8 +246,8 @@ class Plenary(object):
 
         """
         if not self.stashed:
-            log.msg("Attempt to restore plenary '%s' "
-                    "without having saved state." % self.pathname())
+            self.logger.info("Attempt to restore plenary '%s' "
+                             "without having saved state." % self.pathname())
             return
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
@@ -275,8 +279,9 @@ class PlenaryCollection(object):
     group that needs to be written.
 
     """
-    def __init__(self):
+    def __init__(self, logger=LOGGER):
         self.plenaries = []
+        self.logger = logger
 
     def stash(self):
         for plen in self.plenaries:
@@ -350,6 +355,7 @@ class PlenaryCollection(object):
         raise InternalError
 
     def append(self, plenary):
+        plenary.logger = self.logger
         self.plenaries.append(plenary)
 
     def refresh(self):

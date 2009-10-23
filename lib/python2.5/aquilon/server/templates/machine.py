@@ -29,12 +29,15 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 
+import logging
+
 from aquilon.server.templates.base import Plenary
 
+LOGGER = logging.getLogger('aquilon.server.templates.machine')
 
 class PlenaryMachineInfo(Plenary):
-    def __init__(self, dbmachine):
-        Plenary.__init__(self, dbmachine)
+    def __init__(self, dbmachine, logger=LOGGER):
+        Plenary.__init__(self, dbmachine, logger=logger)
         self.dbmachine = dbmachine
         self.machine = dbmachine.name
 

@@ -38,10 +38,10 @@ class CommandCatHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, **kwargs):
+    def render(self, session, logger, hostname, **kwargs):
         dbhost = hostname_to_host(session, hostname)
 
         dpath = "%s/domains/%s/profiles"%(self.config.get("broker", "builddir"), dbhost.domain.name)
-        return read_file(dpath, hostname + '.tpl')
+        return read_file(dpath, hostname + '.tpl', logger=logger)
 
 

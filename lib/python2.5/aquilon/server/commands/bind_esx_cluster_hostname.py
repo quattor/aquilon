@@ -40,7 +40,8 @@ class CommandBindESXClusterHostname(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, hostname, cluster, force=False, **arguments):
+    def render(self, session, logger, hostname, cluster, force=False,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = EsxCluster.get_unique(session, cluster)
         if not dbcluster:
@@ -104,7 +105,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
             session.refresh(dbhost)
             # Enforce that service instances are set correctly for the
             # new cluster association.
-            chooser = Chooser(dbhost)
+            chooser = Chooser(dbhost, logger=logger)
             chooser.set_required()
             chooser.flush_changes()
         # If this host is already bound to the cluster,
@@ -118,7 +119,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
         if chooser:
             chooser.write_plenary_templates()
         else:
-            plenary = PlenaryCluster(dbcluster)
+            plenary = PlenaryCluster(dbcluster, logger=logger)
             plenary.write()
 
         return

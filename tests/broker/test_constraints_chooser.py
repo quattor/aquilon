@@ -59,8 +59,9 @@ class TestChooserConstraints(TestBrokerCommand):
         # Bind a host to that instance
         command = ["bind_client", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--service=chooser_test", "--instance=max_clients"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com adding binding for "
                          "service chooser_test instance max_clients",
                          command)
@@ -80,9 +81,10 @@ class TestChooserConstraints(TestBrokerCommand):
         # This is for coverage to check the edge condition.
         command = ["rebind_client", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--service=chooser_test"]
-        out = self.commandtest(command)
-        self.matchclean(out, "removing binding", command)
-        self.matchclean(out, "adding binding", command)
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchclean(err, "removing binding", command)
+        self.matchclean(err, "adding binding", command)
 
     def test_120_verifyrebind(self):
         command = ["show_host", "--hostname=aquilon61.aqd-unittest.ms.com"]
@@ -92,8 +94,9 @@ class TestChooserConstraints(TestBrokerCommand):
 
     def test_200_cleanuphost(self):
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com removing binding for "
                          "service chooser_test instance max_clients",
                          command)

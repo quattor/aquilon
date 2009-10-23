@@ -30,7 +30,6 @@
 
 
 from sqlalchemy.exceptions import InvalidRequestError
-from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  UnimplementedError, IncompleteError)
@@ -53,12 +52,12 @@ class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, machine, model, serial, chassis, slot,
+    def render(self, session, logger, machine, model, serial, chassis, slot,
                clearchassis, multislot, cluster,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                user, **arguments):
         dbmachine = get_machine(session, machine)
-        plenaries = PlenaryCollection()
+        plenaries = PlenaryCollection(logger=logger)
 
         if clearchassis:
             for dbslot in dbmachine.chassis_slot:
@@ -67,17 +66,19 @@ class CommandUpdateMachine(BrokerCommand):
             session.flush()
             session.refresh(dbmachine)
 
-        remove_plenaries = PlenaryCollection()
+        remove_plenaries = PlenaryCollection(logger=logger)
         if chassis:
             dbchassis = get_system(session, chassis, Chassis, 'Chassis')
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dbchassis.chassis_hw.location):
-                remove_plenaries.append(PlenaryMachineInfo(dbmachine))
+                remove_plenaries.append(PlenaryMachineInfo(dbmachine,
+                                                           logger=logger))
             dbmachine.location = dbchassis.chassis_hw.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot information")
             slot = force_int("slot", slot)
-            self.adjust_slot(session, dbmachine, dbchassis, slot, multislot)
+            self.adjust_slot(session, logger,
+                             dbmachine, dbchassis, slot, multislot)
         elif slot:
             dbchassis = None
             for dbslot in dbmachine.chassis_slot:
@@ -89,7 +90,8 @@ class CommandUpdateMachine(BrokerCommand):
                 raise ArgumentError("Option --slot requires --chassis "
                                     "information")
             slot = force_int("slot", slot)
-            self.adjust_slot(session, dbmachine, dbchassis, slot, multislot)
+            self.adjust_slot(session, logger,
+                             dbmachine, dbchassis, slot, multislot)
 
         dblocation = get_location(session, **arguments)
         if dblocation:
@@ -106,7 +108,8 @@ class CommandUpdateMachine(BrokerCommand):
                         session.delete(dbslot)
             if machine_plenary_will_move(old=dbmachine.location,
                                          new=dblocation):
-                remove_plenaries.append(PlenaryMachineInfo(dbmachine))
+                remove_plenaries.append(PlenaryMachineInfo(dbmachine,
+                                                           logger=logger))
             dbmachine.location = dblocation
 
         if model:
@@ -180,8 +183,8 @@ class CommandUpdateMachine(BrokerCommand):
                                      len(dbcluster.machines),
                                      len(dbcluster.hosts)))
             dbmachine.location = dbcluster.location_constraint
-            plenaries.append(PlenaryCluster(old_cluster))
-            plenaries.append(PlenaryCluster(dbcluster))
+            plenaries.append(PlenaryCluster(old_cluster, logger=logger))
+            plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 
         session.add(dbmachine)
         session.flush()
@@ -190,11 +193,11 @@ class CommandUpdateMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
-        plenaries.append(PlenaryMachineInfo(dbmachine))
+        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
         if remove_plenaries.plenaries and dbmachine.host:
-            plenaries.append(PlenaryHost(dbmachine.host))
+            plenaries.append(PlenaryHost(dbmachine.host, logger=logger))
         try:
-            compileLock()
+            compileLock(logger=logger)
             remove_plenaries.stash()
             plenaries.write(locked=True)
             remove_plenaries.remove(locked=True)
@@ -207,11 +210,12 @@ class CommandUpdateMachine(BrokerCommand):
             remove_plenaries.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 
-    def adjust_slot(self, session, dbmachine, dbchassis, slot, multislot):
+    def adjust_slot(self, session, logger,
+                    dbmachine, dbchassis, slot, multislot):
         for dbslot in dbmachine.chassis_slot:
             # This update is a noop, ignore.
             # Technically, this could be a request to trim the list down
@@ -225,9 +229,9 @@ class CommandUpdateMachine(BrokerCommand):
                                 "current chassis slot information.")
         if not multislot:
             for dbslot in dbmachine.chassis_slot:
-                log.msg("Clearing machine %s out of chassis %s slot %d" %
-                        (dbmachine.name, dbslot.chassis.fqdn,
-                         dbslot.slot_number))
+                logger.info("Clearing machine %s out of chassis %s slot %d" %
+                            (dbmachine.name, dbslot.chassis.fqdn,
+                             dbslot.slot_number))
                 dbslot.machine = None
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis, slot_number=slot)

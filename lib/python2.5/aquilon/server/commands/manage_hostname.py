@@ -40,7 +40,7 @@ class CommandManageHostname(BrokerCommand):
 
     required_parameters = ["domain", "hostname"]
 
-    def render(self, session, domain, hostname, **arguments):
+    def render(self, session, logger, domain, hostname, **arguments):
         # FIXME: Need to verify that this server handles this domain?
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
@@ -55,10 +55,10 @@ class CommandManageHostname(BrokerCommand):
         dbhost.domain = dbdomain
         session.add(dbhost)
         session.flush()
-        plenary_host = PlenaryHost(dbhost)
+        plenary_host = PlenaryHost(dbhost, logger=logger)
 
         try:
-            compileLock()
+            compileLock(logger=logger)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
@@ -78,7 +78,7 @@ class CommandManageHostname(BrokerCommand):
             plenary_host.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 

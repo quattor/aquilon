@@ -27,12 +27,17 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+
 import os
+import logging
+
 from aquilon.server.templates.base import Plenary
 
+LOGGER = logging.getLogger('aquilon.server.templates.personality')
+
 class PlenaryPersonality(Plenary):
-    def __init__(self, dbpersonality):
-        Plenary.__init__(self, dbpersonality)
+    def __init__(self, dbpersonality, logger=LOGGER):
+        Plenary.__init__(self, dbpersonality, logger=logger)
         self.name = dbpersonality.name
         self.plenary_core = "personality/%(name)s" % self.__dict__
         self.plenary_template = self.plenary_core + "/config"

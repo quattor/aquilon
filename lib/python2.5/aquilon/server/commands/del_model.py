@@ -30,7 +30,6 @@
 
 
 from sqlalchemy.exceptions import InvalidRequestError
-from twisted.python import log
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
@@ -42,7 +41,7 @@ class CommandDelModel(BrokerCommand):
 
     required_parameters = ["name", "vendor", "type"]
 
-    def render(self, session, name, vendor, type, **arguments):
+    def render(self, session, logger, name, vendor, type, **arguments):
         dbvendor = get_vendor(session, vendor)
         try:
             dbmodel = session.query(Model).filter_by(name=name,
@@ -52,7 +51,9 @@ class CommandDelModel(BrokerCommand):
                     % (name, vendor, type, e))
         if dbmodel.machine_specs:
             # FIXME: Log some details...
-            log.msg("Before deleting model %s %s '%s', removing machine specifications." % (type, vendor, name))
+            logger.info("Before deleting model %s %s '%s', "
+                        "removing machine specifications." %
+                        (type, vendor, name))
             session.delete(dbmodel.machine_specs)
         session.delete(dbmodel)
         return

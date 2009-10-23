@@ -40,7 +40,7 @@ class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, personality, archetype, **arguments):
+    def render(self, session, logger, personality, archetype, **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(personality)):
             raise ArgumentError("name '%s' is not valid"% personality)
@@ -58,6 +58,6 @@ class CommandAddPersonality(BrokerCommand):
         session.add(dbpersona)
         session.flush()
 
-        plenary = PlenaryPersonality(dbpersona)
+        plenary = PlenaryPersonality(dbpersona, logger=logger)
         plenary.write()
         return

@@ -43,7 +43,7 @@ class CommandAddDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, domain, user, **arguments):
+    def render(self, session, logger, domain, user, **arguments):
         dbuser = get_or_create_user_principal(session, user)
         if not dbuser:
             raise AuthorizationException("Cannot create a domain without"
@@ -68,8 +68,9 @@ class CommandAddDomain(BrokerCommand):
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
             os.environ.get("PATH", ""))}
         run_command(["git", "clone", self.config.get("broker", "kingdir"),
-            domaindir], env=git_env)
+                     domaindir], env=git_env, logger=logger)
         # The 1.0 code notes that this should probably be done as a
         # hook in git... just need to make sure it runs.
-        run_command(["git-update-server-info"], env=git_env, path=domaindir)
+        run_command(["git-update-server-info"], env=git_env, path=domaindir,
+                    logger=logger)
         return

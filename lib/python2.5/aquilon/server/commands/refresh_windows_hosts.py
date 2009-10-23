@@ -32,8 +32,6 @@
 from threading import Lock
 import sqlite3
 
-from twisted.python import log
-
 from aquilon.exceptions_ import PartialError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import get_host_dependencies
@@ -48,11 +46,12 @@ class CommandRefreshNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, dryrun, **arguments):
-        log.msg("Aquiring lock to refresh windows hosts")
+    def render(self, session, logger, dryrun, **arguments):
+        logger.client_info("Acquiring lock to refresh windows hosts")
         REFRESH_WINDOWS_HOSTS_LOCK.acquire()
+        logger.client_info("Acquired lock to refresh windows hosts")
         try:
-            self.refresh_windows_hosts(session)
+            self.refresh_windows_hosts(session, logger)
             if dryrun:
                 session.rollback()
         except PartialError, e:
@@ -62,11 +61,11 @@ class CommandRefreshNetwork(BrokerCommand):
                 session.commit()
             raise e
         finally:
-            log.msg("Released lock from refresh windows hosts.")
+            logger.client_info("Released lock from refresh windows hosts.")
             REFRESH_WINDOWS_HOSTS_LOCK.release()
         return
 
-    def refresh_windows_hosts(self, session):
+    def refresh_windows_hosts(self, session, logger):
         conn = sqlite3.connect(self.config.get("broker", "windows_host_info"))
         # Enable dictionary-style access to the rows.
         conn.row_factory = sqlite3.Row
@@ -105,7 +104,7 @@ class CommandRefreshNetwork(BrokerCommand):
                 msg = "Skipping removal of host %s with dependencies: %s" % \
                         (dbhost.fqdn, ", ".join(deps))
                 failed.append(msg)
-                log.msg(msg)
+                logger.info(msg)
                 continue
             for dbinterface in dbhost.interfaces:
                 # Verify that there's only one?
@@ -130,7 +129,7 @@ class CommandRefreshNetwork(BrokerCommand):
                 msg = "Skipping host %s: Missing DNS domain in name." % \
                         host
                 failed.append(msg)
-                log.msg(msg)
+                logger.info(msg)
                 continue
             (short, dns_domain) = host.split('.', 1)
             dbdns_domain = DnsDomain.get_unique(session, dns_domain)
@@ -138,7 +137,7 @@ class CommandRefreshNetwork(BrokerCommand):
                 msg = "Skipping host %s: No AQDB entry for DNS domain '%s'" % \
                         (host, dns_domain)
                 failed.append(msg)
-                log.msg(msg)
+                logger.info(msg)
                 continue
             existing = System.get_unique(session, name=short,
                                          dns_domain=dbdns_domain)
@@ -149,20 +148,20 @@ class CommandRefreshNetwork(BrokerCommand):
                     msg = "Skipping host %s: Host already exists but has " % \
                             "no interface attached." % host
                     failed.append(msg)
-                    log.msg(msg)
+                    logger.info(msg)
                 elif existing.interfaces[0].mac != mac:
                     msg = "Skipping host %s: Host already exists but with " \
                             "MAC %s and not MAC %s" % \
                             (host, existing.interfaces[0].mac, mac)
                     failed.append(msg)
-                    log.msg(msg)
+                    logger.info(msg)
                 continue
             dbinterface = session.query(Interface).filter_by(mac=mac).first()
             if not dbinterface:
                 msg = "Skipping host %s: MAC %s is not present in AQDB" % \
                         (host, mac)
                 failed.append(msg)
-                log.msg(msg)
+                logger.info(msg)
                 continue
             q = session.query(Machine)
             q = q.filter_by(id=dbinterface.hardware_entity.id)
@@ -172,14 +171,14 @@ class CommandRefreshNetwork(BrokerCommand):
                         "tied to hardware %s instead of a virtual machine" % \
                         (host, mac, dbinterface.hardware_entity.hardware_name)
                 failed.append(msg)
-                log.msg(msg)
+                logger.info(msg)
                 continue
             if dbinterface.system:
                 msg = "Skipping host %s: the AQDB interface with mac %s is " \
                         "already tied to %s" % \
                         (host, mac, dbinterface.system.fqdn)
                 failed.append(msg)
-                log.msg(msg)
+                logger.info(msg)
                 continue
             dbhost = Host(machine=dbmachine, domain=dbdomain,
                           status=dbstatus, mac=mac, ip=None, network=None,

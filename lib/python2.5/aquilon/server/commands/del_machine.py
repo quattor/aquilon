@@ -29,8 +29,6 @@
 """Contains the logic for `aq del machine`."""
 
 
-from twisted.python import log
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
@@ -43,10 +41,10 @@ class CommandDelMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, machine, **arguments):
+    def render(self, session, logger, machine, **arguments):
         dbmachine = get_machine(session, machine)
 
-        plenary_machine = PlenaryMachineInfo(dbmachine)
+        plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
         dbcluster = dbmachine.cluster
 
         if dbmachine.host:
@@ -57,23 +55,25 @@ class CommandDelMachine(BrokerCommand):
                                 % (dbmachine, ",".join(
                                     [a.fqdn for a in dbmachine.auxiliaries])))
         for iface in dbmachine.interfaces:
-            log.msg("Before deleting machine '%s', removing interface '%s' [%s] boot=%s)" %
-                    (dbmachine.name, iface.name, iface.mac, iface.bootable))
+            logger.info("Before deleting machine '%s', "
+                        "removing interface '%s' [%s] boot=%s)" %
+                        (dbmachine.name, iface.name, iface.mac,
+                         iface.bootable))
             session.delete(iface)
         for disk in dbmachine.disks:
             # Rely on cascade delete to remove the disks.  The Oracle driver
             # can handle the additional/explicit delete request but the
             # sqlite driver can't.
-            log.msg("While deleting machine '%s' will remove disk '%s'" %
-                    (dbmachine.name, disk.device_name))
+            logger.info("While deleting machine '%s' will remove disk '%s'" %
+                        (dbmachine.name, disk.device_name))
             #session.delete(disk)
         session.delete(dbmachine)
         session.flush()
 
         if dbcluster:
-            plenary_cluster = PlenaryCluster(dbcluster)
+            plenary_cluster = PlenaryCluster(dbcluster, logger=logger)
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenary_machine.stash()
             if dbcluster:
                 plenary_cluster.write(locked=True)
@@ -84,7 +84,7 @@ class CommandDelMachine(BrokerCommand):
                 plenary_cluster.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return
 

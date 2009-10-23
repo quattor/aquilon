@@ -51,9 +51,9 @@ class CommandAddAuroraHost(CommandAddHost):
     sys_loc_re = re.compile(
             r'^[-\.\w]+\s*(?:[-\.\w]*\.)?(\w+)\.(\w+)\.(\w+)\b$', re.M)
 
-    def render(self, session, hostname, *args, **kwargs):
+    def render(self, session, logger, hostname, *args, **kwargs):
         # Pull relevant info out of dsdb...
-        dsdb_runner = DSDBRunner()
+        dsdb_runner = DSDBRunner(logger=logger)
         try:
             fields = dsdb_runner.show_host(hostname)
         except ProcessException, e:
@@ -112,7 +112,8 @@ class CommandAddAuroraHost(CommandAddHost):
             else:
                 try:
                     out = run_command([self.config.get("broker", "sys_loc"),
-                        dsdb_lookup])
+                                       dsdb_lookup],
+                                      logger=logger)
                 except ProcessException, e:
                     # Shouldn't happen, sys_loc returns 0 even for failures
                     raise ArgumentError("Using sys_loc to find a building for node %s failed, please add an Aurora machine manually and follow with add_host: %s" %
@@ -141,6 +142,7 @@ class CommandAddAuroraHost(CommandAddHost):
 
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session
+        kwargs['logger'] = logger
         kwargs['hostname'] = fqdn
         kwargs['archetype'] = 'aurora'
         kwargs['personality'] = 'generic'

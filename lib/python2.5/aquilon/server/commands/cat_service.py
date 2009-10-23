@@ -39,12 +39,13 @@ class CommandCatService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, service, default, **kwargs):
+    def render(self, session, logger, service, default, **kwargs):
         dbservice = get_service(session, service)
         if default:
-            plenary_info = PlenaryServiceClientDefault(dbservice)
+            plenary_info = PlenaryServiceClientDefault(dbservice,
+                                                       logger=logger)
         else:
-            plenary_info = PlenaryServiceToplevel(dbservice)
+            plenary_info = PlenaryServiceToplevel(dbservice, logger=logger)
         return plenary_info.read()
 
 

@@ -100,6 +100,8 @@ class TestBrokerCommand(unittest.TestCase):
         args.append(kncport)
         args.append("--aquser")
         args.append(self.config.get("broker", "user"))
+        if self.config.get("database", "dsn").startswith("sqlite"):
+            args.append("--slowstatus")
         if kwargs.has_key("env"):
             # Make sure that kerberos tickets are still present if the
             # environment is being overridden...
@@ -114,6 +116,10 @@ class TestBrokerCommand(unittest.TestCase):
         (out, err) = p.communicate()
         # Strip any msversion dev warnings out of STDERR
         err = self.msversion_dev_re.sub('', err)
+        # Lock messages are pretty common...
+        err = err.replace('requesting compile lock\n', '')
+        err = err.replace('acquired compile lock\n', '')
+        err = err.replace('releasing compile lock\n', '')
         return (p, out, err)
 
     def successtest(self, command, **kwargs):
@@ -125,11 +131,20 @@ class TestBrokerCommand(unittest.TestCase):
                          % (command, out, err))
         return (out, err)
 
+    def assertEmptyStream(self, name, contents, command):
+        self.assertEqual(contents, "",
+                         "%s for %s was not empty:\n@@@\n'%s'\n@@@\n"
+                         % (name, command, contents))
+
+    def assertEmptyErr(self, contents, command):
+        self.assertEmptyStream("STDERR", contents, command)
+
+    def assertEmptyOut(self, contents, command):
+        self.assertEmptyStream("STDOUT", contents, command)
+
     def commandtest(self, command, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
-        self.assertEqual(err, "",
-                "STDERR for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                % (command, err))
+        self.assertEmptyErr(err, command)
         self.assertEqual(p.returncode, 0,
                 "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\n"
                 % (command, out))
@@ -181,20 +196,14 @@ class TestBrokerCommand(unittest.TestCase):
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
                          "\nSTDERR:\n@@@\n'%s'\n@@@" %
                          (command, p.returncode, 4, out, err))
-        if "--debug" in command:
-            # Looser requirement when there's debug output involved...
-            self.failUnless(err.find("Bad Request") >= 0,
-                            "STDERR for %s did not include Bad Request:"
-                            "\n@@@\n'%s'\n@@@\n" %
-                            (command, err))
-        else:
+        self.failUnless(err.find("Bad Request") >= 0,
+                        "STDERR for %s did not include Bad Request:"
+                        "\n@@@\n'%s'\n@@@\n" %
+                        (command, err))
+        if "--debug" not in command:
             self.assertEqual(out, "",
                              "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                              (command, out))
-            self.assertEqual(err.find("Bad Request"), 0,
-                             "STDERR for %s did not start with Bad Request:"
-                             "\n@@@\n'%s'\n@@@\n" %
-                             (command, err))
         return err
 
     def unauthorizedtest(self, command, **kwargs):
@@ -209,6 +218,8 @@ class TestBrokerCommand(unittest.TestCase):
         args.append("--aqport")
         args.append(openport)
         args.append("--noauth")
+        if self.config.get("database", "dsn").startswith("sqlite"):
+            args.append("--slowstatus")
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
         # Strip any msversion dev warnings out of STDERR
@@ -221,17 +232,10 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(out, "",
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))
-        if "--debug" in command:
-            # Looser requirement when there's debug output involved...
-            self.failUnless(err.find("Unauthorized") >= 0,
-                            "STDERR for %s did not include Unauthorized:"
-                            "\n@@@\n'%s'\n@@@\n" %
-                            (command, err))
-        else:
-            self.assertEqual(err.find("Unauthorized"), 0,
-                             "STDERR for %s did not start with Unauthorized:"
-                             "\n@@@\n'%s'\n@@@\n" %
-                             (command, err))
+        self.failUnless(err.find("Unauthorized:") >= 0,
+                        "STDERR for %s did not include Unauthorized:"
+                        "\n@@@\n'%s'\n@@@\n" %
+                        (command, err))
         self.matchoutput(err, "Unauthorized anonymous access attempt", command)
         return err
 

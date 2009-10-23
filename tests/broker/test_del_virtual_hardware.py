@@ -45,7 +45,8 @@ class TestDelVirtualHardware(TestBrokerCommand):
 
     def test_200_del_windows_hosts(self):
         command = "del_host --hostname aqddesk1.msad.ms.com"
-        self.noouttest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
 
     def test_300_readd_windows_host(self):
         command = ["add_windows_host", "--hostname=aqdtop1.msad.ms.com",
@@ -61,7 +62,8 @@ class TestDelVirtualHardware(TestBrokerCommand):
 
     def test_500_redel_windows_hosts(self):
         command = "del_host --hostname aqdtop1.msad.ms.com"
-        self.noouttest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
 
     def test_700_delmachines(self):
         for i in range(1, 10):

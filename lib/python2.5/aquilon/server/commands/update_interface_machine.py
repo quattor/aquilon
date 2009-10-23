@@ -44,8 +44,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, interface, machine, mac, ip, boot, comments,
-            user, **arguments):
+    def render(self, session, logger, interface, machine, mac, ip, boot,
+               comments, user, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -101,9 +101,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             session.refresh(dbinterface.system)
         newinfo = self.snapshot(dbinterface)
 
-        plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity)
+        plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity,
+                                          logger=logger)
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenary_info.write(locked=True)
 
             if (dbinterface.system and \
@@ -111,13 +112,13 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                      dbinterface.system.archetype.name == 'aurora')):
                 # This relies on *not* being able to set the boot flag
                 # (directly) to false.
-                dsdb_runner = DSDBRunner()
+                dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbinterface, oldinfo)
         except:
             plenary_info.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
         return
 
     def snapshot(self, dbinterface):

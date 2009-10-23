@@ -26,10 +26,14 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+
+
 import httplib
 import subprocess
 import os
-import sys
+
+from aquilon.client.chunked import ChunkedHTTPConnection
+
 
 class ProcessWrapper(object):
 
@@ -68,7 +72,8 @@ class ProcessWrapper(object):
     def __getattr__(self, attr):
         return getattr(self._stdout, attr)
 
-class WrappedHTTPConnection(httplib.HTTPConnection):
+
+class WrappedHTTPConnection(ChunkedHTTPConnection):
 
     def __init__(self, executable, host, port, service = None, strict = None):
         httplib.HTTPConnection.__init__(self, host, port, strict)
@@ -89,6 +94,7 @@ class WrappedHTTPConnection(httplib.HTTPConnection):
 
     def getError(self):
         return self._process.stderr.read()
+
 
 class KNCHTTPConnection(WrappedHTTPConnection):
 

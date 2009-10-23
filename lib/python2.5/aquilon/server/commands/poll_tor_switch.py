@@ -32,8 +32,6 @@
 from csv import DictReader, Error as CSVError
 from StringIO import StringIO
 
-from twisted.python import log
-
 from aquilon.exceptions_ import AquilonError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
@@ -62,7 +60,7 @@ class CommandPollTorSwitch(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, rack, **arguments):
+    def render(self, session, logger, rack, **arguments):
         dblocation = get_location(session, rack=rack)
         q = session.query(TorSwitch)
         #q = q.join('tor_switch_hw')
@@ -72,26 +70,27 @@ class CommandPollTorSwitch(BrokerCommand):
         switches = q.all()
         if not switches:
             raise NotFoundException("No switch found.")
-        return self.poll(session, switches)
+        return self.poll(session, logger, switches)
 
-    def poll(self, session, switches):
+    def poll(self, session, logger, switches):
         for switch in switches:
-            out = self.run_checknet(switch)
-            macports = self.parse_ports(out)
+            out = self.run_checknet(logger, switch)
+            macports = self.parse_ports(logger, out)
             for (mac, port) in macports:
                 get_or_create_observed_mac(session, switch, port, mac)
         return
 
-    def run_checknet(self, switch):
+    def run_checknet(self, logger, switch):
         if switch.dns_domain.name == 'ms.com':
             hostname = switch.name
         else:
             hostname = switch.fqdn
         return run_command([self.config.get("broker", "CheckNet"),
-                     "-ho", hostname, "camtable", "-nobanner",
-                     "-table", "1", "-noprompt"])
+                            "-ho", hostname, "camtable", "-nobanner",
+                            "-table", "1", "-noprompt"],
+                           logger=logger)
 
-    def parse_ports(self, results):
+    def parse_ports(self, logger, results):
         """ This method could require switch and have hard-coded field
             names based on the switch model, but for now just loosely
             searches for any known fields."""
@@ -123,15 +122,15 @@ class CommandPollTorSwitch(BrokerCommand):
                 port = row.get(port_label, None)
                 if mac is None or port is None or \
                    len(mac) == 0 or len(port) == 0:
-                    log.msg("Missing value for mac or port in CheckNet "
-                            "output line #%d: %s" % (reader.line_num, row))
+                    logger.info("Missing value for mac or port in CheckNet "
+                                "output line #%d: %s" % (reader.line_num, row))
                     continue
                 try:
                     port_int = int(port)
                 except ValueError, e:
-                    log.msg("Error parsing port number in CheckNet output "
-                            "line #%d: %s error: %s" %
-                            (reader.line_num, row, e))
+                    logger.info("Error parsing port number in CheckNet output "
+                                "line #%d: %s error: %s" %
+                                (reader.line_num, row, e))
                     continue
                 macports.append([mac, port_int])
 

@@ -41,8 +41,8 @@ class CommandDelDisk(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, machine, disk, type, capacity, all, user,
-            **arguments):
+    def render(self, session, logger, machine, disk, type, capacity, all, user,
+               **arguments):
         dbmachine = get_machine(session, machine)
         q = session.query(Disk).filter_by(machine=dbmachine)
         if disk:
@@ -68,6 +68,6 @@ class CommandDelDisk(BrokerCommand):
         session.flush()
         session.refresh(dbmachine)
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
         return

@@ -192,7 +192,8 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
     def test_310_cleandryrun(self):
         command = ["refresh_windows_hosts", "--dryrun"]
-        self.noouttest(command)
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
 
     def test_350_verify(self):
         for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",
@@ -250,7 +251,8 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
     def test_410_cleanrun(self):
         command = ["refresh_windows_hosts"]
-        self.noouttest(command)
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
 
     def test_450_verify(self):
         for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",
@@ -268,7 +270,8 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 
     def test_510_cleanrun(self):
         command = ["refresh_windows_hosts"]
-        self.noouttest(command)
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
 
     def test_550_verify(self):
         for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",

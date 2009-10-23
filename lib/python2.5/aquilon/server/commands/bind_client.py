@@ -37,17 +37,16 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.services import Chooser
-from aquilon.server.templates.host import PlenaryHost
 
 class CommandBindClient(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, hostname, service, instance, debug, force=False,
+    def render(self, session, logger, hostname, service, instance, force=False,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = get_service(session, service)
-        chooser = Chooser(dbhost, required_only=False, debug=debug)
+        chooser = Chooser(dbhost, logger=logger, required_only=False)
         if instance:
             dbinstance = get_service_instance(session, dbservice, instance)
             chooser.set_single(dbservice, dbinstance, force=force)
@@ -57,10 +56,6 @@ class CommandBindClient(BrokerCommand):
         chooser.flush_changes()
         chooser.write_plenary_templates()
 
-        if chooser.debug_info:
-            # The output of bind client does not run through a formatter.
-            # Maybe it should.
-            return str("\n".join(chooser.debug_info))
-        return str("\n".join(chooser.messages))
+        return
 
 

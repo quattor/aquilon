@@ -41,11 +41,8 @@ from aquilon.aqdb.model import (Host, Cluster, Tld, BuildItem, ServiceMap,
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import (compileLock, compileRelease,
-                                           PlenaryCollection)
+from aquilon.server.templates.base import PlenaryCollection
 
-
-log = logging.getLogger('aquilon.server.services')
 
 class Chooser(object):
     """Helper for choosing services for an object."""
@@ -65,14 +62,11 @@ class Chooser(object):
                        "required_services", "original_service_instances",
                        "apply_changes"]
 
-    def __init__(self, dbobj, required_only=False, debug=False):
+    def __init__(self, dbobj, logger, required_only=False):
         """Initialize the chooser.
 
         To clear out bindings that are not required, pass in
         required_only=True.
-
-        If the debug flag is set to True, debug output will be
-        gathered in an array for later use by the calling code.
 
         Several staging areas and caches are set up within this object.
         The general flow is that potential service instance choices
@@ -90,22 +84,17 @@ class Chooser(object):
         and original_service_instances.
 
         Subclasses should call this before starting their own
-        initialization.  At the very least, this must be called to use some
-        common methods, like debug() and error().
+        initialization.
 
         """
         self.dbobj = dbobj
         self.session = object_session(dbobj)
-        self.is_debug_enabled = debug
         self.required_only = required_only
-        self.debug_info = []
-        """Store debug information."""
+        self.logger = logger
         self.description = self.generate_description()
-        self.debug("Creating service Chooser for %s", self.description)
+        self.logger.debug("Creating service Chooser for %s", self.description)
         self.staging_services = {}
         """Stores interim service instance lists."""
-        self.messages = []
-        """Report info-level log messages."""
         self.errors = []
         """Report as many errors as possible in one shot."""
         self.servers = {}
@@ -116,7 +105,7 @@ class Chooser(object):
         """Set of service instances losing a client."""
         self.chosen_services = {}
         """Track the chosen services."""
-        self.plenaries = PlenaryCollection()
+        self.plenaries = PlenaryCollection(logger=self.logger)
         """Keep stashed plenaries for rollback purposes."""
 
     def generate_description(self):
@@ -133,32 +122,17 @@ class Chooser(object):
             for (service, instance) in self.original_service_instances.items():
                 self.staging_services[service] = [instance]
 
-    def debug(self, msg, *args, **kwargs):
-        if self.is_debug_enabled:
-            self.debug_info.append(msg % args)
-        log.debug(msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        """Store status messages of interest to users."""
-        formatted = msg % args
-        if self.is_debug_enabled:
-            self.debug_info.append(formatted)
-        self.messages.append(formatted)
-        log.info(msg, *args, **kwargs)
-
     def error(self, msg, *args, **kwargs):
         """Errors are consolidated so that many can be reported at once."""
         formatted = msg % args
-        if self.is_debug_enabled:
-            self.debug_info.append(formatted)
         self.errors.append(formatted)
-        log.error(msg, *args, **kwargs)
+        self.logger.info(msg, *args, **kwargs)
 
     def set_required(self):
         """Main entry point when setting the required services for a host."""
         self.verify_init()
         self.prestash_primary()
-        self.debug("Setting required services")
+        self.logger.debug("Setting required services")
         for dbservice in self.required_services:
             self.find_service_instances(dbservice)
         self.check_errors()
@@ -190,11 +164,12 @@ class Chooser(object):
         self.verify_init()
         self.prestash_primary()
         if instance:
-            self.debug("Setting service %s instance %s",
-                       service.name, instance.name)
+            self.logger.debug("Setting service %s instance %s",
+                              service.name, instance.name)
             self.staging_services[service] = [instance]
         else:
-            self.debug("Setting service %s with auto-bind", service.name)
+            self.logger.debug("Setting service %s with auto-bind",
+                              service.name)
             self.staging_services[service] = None
             self.find_service_instances(service)
         self.check_errors()
@@ -228,20 +203,20 @@ class Chooser(object):
         for service_map in [PersonalityServiceMap, ServiceMap]:
             for location in locations:
                 if service_map == PersonalityServiceMap:
-                    self.debug("Checking personality %s %s service %s maps "
-                               "for %s %s",
-                               self.archetype.name,
-                               self.personality.name,
-                               dbservice.name,
-                               location.location_type.capitalize(),
-                               location.name)
+                    self.logger.debug("Checking personality %s %s service %s "
+                                      "maps for %s %s",
+                                      self.archetype.name,
+                                      self.personality.name,
+                                      dbservice.name,
+                                      location.location_type.capitalize(),
+                                      location.name)
                     q = self.session.query(service_map)
                     q = q.filter_by(personality=self.personality)
                 else:
-                    self.debug("Checking service %s maps for %s %s",
-                               dbservice.name,
-                               location.location_type.capitalize(),
-                               location.name)
+                    self.logger.debug("Checking service %s maps for %s %s",
+                                      dbservice.name,
+                                      location.location_type.capitalize(),
+                                      location.name)
                     q = self.session.query(service_map)
                 q = q.filter_by(location=location)
                 q = q.join('service_instance').filter_by(service=dbservice)
@@ -249,8 +224,9 @@ class Chooser(object):
                 instances = [map.service_instance for map in maps]
                 if len(instances) >= 1:
                     for instance in instances:
-                        self.debug("Found service %s instance %s in the maps.",
-                                   instance.service.name, instance.name)
+                        self.logger.debug("Found service %s instance %s "
+                                          "in the maps.",
+                                          instance.service.name, instance.name)
                     self.staging_services[dbservice] = instances
                     return
         self.error("Could not find a relevant service map for service %s "
@@ -258,9 +234,7 @@ class Chooser(object):
 
     def check_errors(self):
         if self.errors:
-            if self.is_debug_enabled:
-                raise ArgumentError("\n".join(self.debug_info))
-            raise ArgumentError("\n".join(self.messages + self.errors))
+            raise ArgumentError("\n".join(self.errors))
 
     def choose_cluster_aligned(self, dbservice):
         # Only implemented for hosts.
@@ -288,10 +262,11 @@ class Chooser(object):
                 # Not the edge case, toss it.
                 self.staging_services[dbservice].remove(instance)
                 maxed_out_instances.add(instance)
-                self.debug("Rejected service %s instance %s with "
-                           "max_client value of %s since client_count is %s.",
-                           instance.service.name, instance.name,
-                           max_clients, current_clients)
+                self.logger.debug("Rejected service %s instance %s with "
+                                  "max_client value of %s since client_count "
+                                  "is %s.",
+                                  instance.service.name, instance.name,
+                                  max_clients, current_clients)
         if len(self.staging_services[dbservice]) < 1:
             self.error("The available instances %s for service %s are "
                        "at full capacity.",
@@ -310,9 +285,10 @@ class Chooser(object):
            self.original_service_instances.get(dbservice, None) and \
            self.original_service_instances[dbservice] in \
            self.staging_services[dbservice]:
-            self.debug("Chose service %s instance %s because of past use.",
-                       dbservice.name,
-                       self.original_service_instances[dbservice])
+            self.logger.debug("Chose service %s instance %s because "
+                              "of past use.",
+                              dbservice.name,
+                              self.original_service_instances[dbservice])
             self.staging_services[dbservice] = [
                 self.original_service_instances[dbservice]]
         return
@@ -371,9 +347,9 @@ class Chooser(object):
         max_instances = None
         for instance in self.staging_services[dbservice]:
             common_servers = []
-            self.debug("Checking service %s instance %s servers %s" %
-                       (instance.service.name, instance.name,
-                        [sis.system.fqdn for sis in instance.servers]))
+            self.logger.debug("Checking service %s instance %s servers %s",
+                              instance.service.name, instance.name,
+                              [sis.system.fqdn for sis in instance.servers])
             for sis in instance.servers:
                 if self.servers.get(sis.system, None):
                     common_servers.append(sis.system)
@@ -388,9 +364,9 @@ class Chooser(object):
            len(max_instances) < len(self.staging_services[dbservice]):
             for instance in self.staging_services[dbservice]:
                 if instance not in max_instances:
-                    self.debug("Discounted service %s instance %s due to "
-                               "server affinity (stickiness).",
-                               instance.service.name, instance.name)
+                    self.logger.debug("Discounted service %s instance %s "
+                                      "due to server affinity (stickiness).",
+                                      instance.service.name, instance.name)
             self.staging_services[dbservice] = max_instances
 
     def choose_least_loaded(self, dbservice):
@@ -407,17 +383,19 @@ class Chooser(object):
         if len(least_loaded) < len(self.staging_services[dbservice]):
             for instance in self.staging_services[dbservice]:
                 if instance not in least_loaded:
-                    self.debug("Discounted service %s instance %s due to "
-                               "load.", instance.service.name, instance.name)
+                    self.logger.debug("Discounted service %s instance %s "
+                                      "due to load.",
+                                      instance.service.name, instance.name)
             self.staging_services[dbservice] = least_loaded
 
     def choose_random(self, dbservice):
         """Pick a service instance randomly."""
         self.staging_services[dbservice] = [
             choice(self.staging_services[dbservice])]
-        self.debug("Randomly chose service %s instance %s "
-                   "from remaining choices.",
-                   dbservice.name, self.staging_services[dbservice][0].name)
+        self.logger.debug("Randomly chose service %s instance %s "
+                          "from remaining choices.",
+                          dbservice.name,
+                          self.staging_services[dbservice][0].name)
 
     def finalize_service_instances(self):
         """Fill out the list of chosen services."""
@@ -449,7 +427,8 @@ class Chooser(object):
 
     def stash_services(self):
         for instance in self.instances_bound.union(self.instances_unbound):
-            plenary = PlenaryServiceInstanceServer(instance.service, instance)
+            plenary = PlenaryServiceInstanceServer(instance.service, instance,
+                                                   logger=self.logger)
             plenary.stash()
             self.plenaries.append(plenary)
 
@@ -504,8 +483,8 @@ class HostChooser(Chooser):
                 continue
             self.original_service_instances[dbbi.cfg_path.svc_inst.service] = \
                     dbbi.cfg_path.svc_inst
-            self.debug("%s original binding: %s",
-                       self.description, dbbi.cfg_path)
+            self.logger.debug("%s original binding: %s",
+                              self.description, dbbi.cfg_path)
         self.cluster_aligned_services = {}
         if self.dbhost.cluster:
             # Note that cluster services are currently ignored unless
@@ -552,9 +531,10 @@ class HostChooser(Chooser):
                        self.cluster_aligned_services[dbservice].name,
                        self.dbhost.fqdn)
             return
-        self.debug("Chose service %s instance %s because it is cluster "
-                   "aligned.", dbservice.name,
-                   self.cluster_aligned_services[dbservice].name)
+        self.logger.debug("Chose service %s instance %s because it is cluster "
+                          "aligned.",
+                          dbservice.name,
+                          self.cluster_aligned_services[dbservice].name)
         self.staging_services[dbservice] = [
             self.cluster_aligned_services[dbservice]]
         return
@@ -567,9 +547,10 @@ class HostChooser(Chooser):
             if bi.position > max_position:
                 max_position = bi.position
         for instance in self.instances_bound:
-            self.info("%s adding binding for service %s instance %s",
-                       self.description,
-                       instance.service.name, instance.name)
+            self.logger.client_info("%s adding binding for service %s "
+                                    "instance %s",
+                                    self.description,
+                                    instance.service.name, instance.name)
             if self.original_service_instances.get(instance.service, None):
                 previous = None
                 for bi in self.original_service_build_items:
@@ -589,9 +570,10 @@ class HostChooser(Chooser):
                            position=max_position)
             self.dbhost.templates.append(bi)
         for instance in self.instances_unbound:
-            self.info("%s removing binding for service %s instance %s",
-                       self.description,
-                       instance.service.name, instance.name)
+            self.logger.client_info("%s removing binding for "
+                                    "service %s instance %s",
+                                    self.description,
+                                    instance.service.name, instance.name)
             if self.chosen_services.get(instance.service, None):
                 # We have a replacement, no need to remove BuildItem
                 continue
@@ -615,7 +597,7 @@ class HostChooser(Chooser):
             self.session.add(self.dbhost)
 
     def prestash_primary(self):
-        plenary_host = PlenaryHost(self.dbhost)
+        plenary_host = PlenaryHost(self.dbhost, logger=self.logger)
         plenary_host.stash()
         self.plenaries.append(plenary_host)
 
@@ -645,8 +627,8 @@ class ClusterChooser(Chooser):
         """
         for si in self.dbcluster.service_bindings:
             self.original_service_instances[si.service] = si
-            self.debug("%s original binding: %s",
-                       self.description, si.cfg_path)
+            self.logger.debug("%s original binding: %s",
+                              self.description, si.cfg_path)
 
     def generate_description(self):
         return "%s cluster %s" % (self.dbcluster.cluster_type,
@@ -655,9 +637,10 @@ class ClusterChooser(Chooser):
     def apply_changes(self):
         """Update the cluster object with pending changes."""
         for instance in self.instances_unbound:
-            self.info("%s removing binding for service %s instance %s",
-                       self.description,
-                       instance.service.name, instance.name)
+            self.logger.client_info("%s removing binding for "
+                                    "service %s instance %s",
+                                    self.description,
+                                    instance.service.name, instance.name)
             dbcs = ClusterServiceBinding.get_unique(self.session,
                 cluster_id=self.dbcluster.id,
                 service_instance_id=instance.id)
@@ -668,28 +651,28 @@ class ClusterChooser(Chooser):
                            "service %s instance %s" %
                            (instance.service.name, instance.name))
         for instance in self.instances_bound:
-            self.info("%s adding binding for service %s instance %s",
-                       self.description,
-                       instance.service.name, instance.name)
+            self.logger.client_info("%s adding binding for "
+                                    "service %s instance %s",
+                                    self.description,
+                                    instance.service.name, instance.name)
             dbcs = ClusterServiceBinding(cluster=self.dbcluster,
                                          service_instance=instance)
             self.session.add(dbcs)
             self.flush_changes()
             for h in self.dbcluster.hosts:
-                host_plenary = PlenaryHost(h)
+                host_plenary = PlenaryHost(h, logger=self.logger)
                 host_plenary.stash()
                 self.plenaries.append(host_plenary)
-                host_chooser = Chooser(h, required_only=False,
-                                       debug=self.is_debug_enabled)
+                host_chooser = Chooser(h, logger=self.logger,
+                                       required_only=False)
                 host_chooser.set_single(instance.service, instance, force=True)
                 host_chooser.flush_changes()
-                # FIXME: Merge host_chooser debug_info with self.debug_info?
                 # Note, host plenary will be written later.
         if self.instances_bound or self.instances_unbound:
             self.session.add(self.dbcluster)
 
     def prestash_primary(self):
-        plenary_cluster = PlenaryCluster(self.dbcluster)
+        plenary_cluster = PlenaryCluster(self.dbcluster, logger=self.logger)
         plenary_cluster.stash()
         self.plenaries.append(plenary_cluster)
 

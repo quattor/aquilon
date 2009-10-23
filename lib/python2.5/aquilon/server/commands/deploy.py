@@ -41,7 +41,7 @@ class CommandDeploy(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, domain, to, **arguments):
+    def render(self, session, logger, domain, to, **arguments):
         """ This currently ignores the 'to' parameter."""
 
         # Verify that it exists before trying to deploy it.
@@ -52,11 +52,11 @@ class CommandDeploy(BrokerCommand):
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
                 os.environ.get("PATH", ""))}
         try:
-            run_command(["git", "pull", domaindir], env=git_env,
-                    path=self.config.get("broker", "kingdir"))
+            run_command(["git", "pull", domaindir], env=git_env, logger=logger,
+                        path=self.config.get("broker", "kingdir"))
         except ProcessException, e:
-            run_command(["git", "reset", "--hard"], env=git_env,
-                    path=self.config.get("broker", "kingdir"))
+            run_command(["git", "reset", "--hard"], env=git_env, logger=logger,
+                        path=self.config.get("broker", "kingdir"))
             raise ArgumentError("\n%s%s" %(e.out,e.err))
         return
 

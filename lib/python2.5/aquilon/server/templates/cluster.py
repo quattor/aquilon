@@ -28,19 +28,22 @@
 # TERMS THAT MAY APPLY.
 
 
+import logging
+
 from aquilon.server.templates.base import (Plenary, PlenaryCollection,
                                             compileLock, compileRelease)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
+LOGGER = logging.getLogger('aquilon.server.templates.cluster')
 
 class PlenaryCluster(PlenaryCollection):
     """
     A facade for the variety of PlenaryCluster subsidiary files
     """
-    def __init__(self, dbcluster):
-        PlenaryCollection.__init__(self)
-        self.plenaries.append(PlenaryClusterObject(dbcluster))
-        self.plenaries.append(PlenaryClusterClient(dbcluster))
+    def __init__(self, dbcluster, logger=LOGGER):
+        PlenaryCollection.__init__(self, logger=LOGGER)
+        self.plenaries.append(PlenaryClusterObject(dbcluster, logger=logger))
+        self.plenaries.append(PlenaryClusterClient(dbcluster, logger=logger))
 
 
 class PlenaryClusterObject(Plenary):
@@ -50,8 +53,8 @@ class PlenaryClusterObject(Plenary):
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
-    def __init__(self, dbcluster):
-        Plenary.__init__(self, dbcluster)
+    def __init__(self, dbcluster, logger=LOGGER):
+        Plenary.__init__(self, dbcluster, logger=logger)
         self.template_type = 'object'
         self.dbcluster = dbcluster
         self.name = dbcluster.name
@@ -107,8 +110,8 @@ class PlenaryClusterClient(Plenary):
     A host that is a member of a cluster will include the cluster client
     plenary template. This just names the cluster and nothing more.
     """
-    def __init__(self, dbcluster):
-        Plenary.__init__(self, dbcluster)
+    def __init__(self, dbcluster, logger=LOGGER):
+        Plenary.__init__(self, dbcluster, logger=logger)
         self.name = dbcluster.name
         self.plenary_core = "cluster/%(name)s" % self.__dict__
         self.plenary_template = "%(plenary_core)s/client" % self.__dict__

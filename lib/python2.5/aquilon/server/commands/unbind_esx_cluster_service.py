@@ -40,7 +40,7 @@ class CommandUnbindESXClusterService(BrokerCommand):
 
     required_parameters = ["cluster", "service", "instance"]
 
-    def render(self, session, cluster, service, instance, **arguments):
+    def render(self, session, logger, cluster, service, instance, **arguments):
         cluster_type = 'esx'
         dbservice = get_service(session, service)
         dbinstance = get_service_instance(session, dbservice, instance)
@@ -63,7 +63,7 @@ class CommandUnbindESXClusterService(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenaryCluster(dbcluster)
+        plenary = PlenaryCluster(dbcluster, logger=logger)
         plenary.write()
         return
 

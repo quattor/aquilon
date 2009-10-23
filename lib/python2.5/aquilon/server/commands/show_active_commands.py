@@ -31,9 +31,10 @@
 
 import os
 import re
+from logging import DEBUG, INFO
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.processes import read_file
+from aquilon.server.messages import StatusCatalog
 
 
 class CommandShowActive(BrokerCommand):
@@ -41,70 +42,35 @@ class CommandShowActive(BrokerCommand):
     requires_transaction = False
     requires_azcheck = False
 
-    def render(self, **arguments):
-        logdir = self.config.get("broker", "logdir")
-        commands = {}
-        logs = {}
-        for f in ["aqd.log.1", "aqd.log"]:
-            logfile = os.path.join(logdir, f)
-            if os.path.exists(logfile):
-                self.read_logfile(logfile, commands, logs)
+    def render(self, debug, **arguments):
+        catalog = StatusCatalog()
         retval = []
-        for id in [str(i) for i in sorted([int(s) for s in commands.keys()])]:
-            command = commands[id]
-            retval.append("[%(id)s] %(user)s: aq %(command)s%(args)s" %
-                          command)
-            if logs.get(command['channel'], None):
-                for line in logs[command['channel']]:
-                    retval.append("(%s) %s" % (id, line))
+        if debug:
+            loglevel = DEBUG
+        else:
+            # Note this is server level info!  That's more than the client
+            # normally gets...
+            loglevel = INFO
+        # These could be streamed like show_request...
+        for auditid in sorted(catalog.status_by_auditid.keys(), key=int):
+            status = catalog.get_request_status(auditid=auditid)
+            for record in status.records:
+                if record.levelno >= loglevel:
+                    retval.append(self.massage_record(auditid,
+                                                      record.getMessage()))
         return "\n".join(retval)
 
-    starting_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[-\] Starting aqd')
-    incoming_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[(?P<channel>.*?)\]'
-                             r' Incoming command #(?P<id>\d+)'
+    incoming_re = re.compile(r'Incoming command #(?P<id>\d+)'
                              r' from user=(?P<user>\S+)'
                              r' aq (?P<command>\S+)'
                              r' with arguments {(?P<bareargs>.*)}')
-    finished_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[-\]'
-                             r' Command #(?P<id>\d+) finished.')
-    log_re = re.compile(r'^(?P<timestamp>[\s\d:+-]+) \[(?P<channel>.*?)\]'
-                        r' (?P<log>.*)$')
     args_re = re.compile(r'\'(?P<option>\w+)\': (?P<parameter>\'.*?\')')
 
-    def read_logfile(self, logfile, commands, logs):
-        f = open(logfile)
-        try:
-            for line in f:
-                line = line.rstrip()
-                m = self.starting_re.match(line)
-                if m:
-                    self.clear_all(commands, logs)
-                    continue
-                m = self.incoming_re.match(line)
-                if m:
-                    command = self.massage_matched_command(m.groupdict())
-                    commands[command['id']] = command
-                    continue
-                m = self.finished_re.match(line)
-                if m:
-                    self.clear_command(commands, logs, m.groupdict()['id'])
-                    continue
-                m = self.log_re.match(line)
-                if m:
-                    loginfo = m.groupdict()
-                    if loginfo['channel'] == '-':
-                        continue
-                    self.save_log(commands, logs, loginfo)
-                    continue
-        finally:
-            f.close()
-
-    def clear_all(self, commands, logs):
-        commands.clear()
-        logs.clear()
-
-    def massage_matched_command(self, command):
-        command = command.copy()
+    def massage_record(self, auditid, message):
+        m = self.incoming_re.match(message)
+        if not m:
+            return "(%s) %s" % (auditid, message)
+        command = m.groupdict()
         args = []
         for a in self.args_re.finditer(command['bareargs']):
             if a.groupdict()['option'] == 'format' and \
@@ -115,17 +81,6 @@ class CommandShowActive(BrokerCommand):
             else:
                 args.append(" --%(option)s=%(parameter)s" % a.groupdict())
         command['args'] = "".join(args)
-        return command
-
-    def clear_command(self, commands, logs, id):
-        command = commands.pop(id, None)
-        if command:
-            logs.pop(command['channel'], None)
-
-    def save_log(self, commands, logs, loginfo):
-        if logs.get(loginfo['channel'], None):
-            logs[loginfo['channel']].append(loginfo['log'])
-        else:
-            logs[loginfo['channel']] = [loginfo['log']]
+        return "[%(id)s] %(user)s: aq %(command)s%(args)s" % command
 
 

@@ -45,7 +45,8 @@ class CommandUnbindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, hostname, service, instance, user, **arguments):
+    def render(self, session, logger, hostname, service, instance, user,
+               **arguments):
         dbsystem = get_system(session, hostname)
         dbservice = get_service(session, service)
         if instance:
@@ -62,9 +63,10 @@ class CommandUnbindServer(BrokerCommand):
                     session.delete(item)
         session.flush()
 
-        plenaries = PlenaryCollection()
+        plenaries = PlenaryCollection(logger=logger)
         for dbinstance in dbinstances:
-            plenaries.append(PlenaryServiceInstance(dbservice, dbinstance))
+            plenaries.append(PlenaryServiceInstance(dbservice, dbinstance,
+                                                    logger=logger))
         plenaries.write()
 
         # XXX: Need to recompile...

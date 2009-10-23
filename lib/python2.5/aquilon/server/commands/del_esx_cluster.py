@@ -41,7 +41,7 @@ class CommandDelESXCluster(BrokerCommand):
 
     required_parameters = [ "cluster" ]
 
-    def render(self, session, cluster, **arguments):
+    def render(self, session, logger, cluster, **arguments):
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
         if not dbcluster:
             raise NotFoundException("No cluster with name '%s'" % cluster)
@@ -55,7 +55,7 @@ class CommandDelESXCluster(BrokerCommand):
                                 ", ".join([h.fqdn
                                            for h in dbcluster.hosts]))
         dbmetacluster = dbcluster.metacluster
-        plenary = PlenaryCluster(dbcluster)
+        plenary = PlenaryCluster(dbcluster, logger=logger)
         domain = dbcluster.domain.name
         session.delete(dbcluster)
 
@@ -66,11 +66,13 @@ class CommandDelESXCluster(BrokerCommand):
 
         # Remove the compiled profile.
         remove_file(os.path.join(self.config.get("broker", "profilesdir"),
-                                 "clusters", cluster + ".xml"))
+                                 "clusters", cluster + ".xml"),
+                    logger=logger)
         # Remove the cache in the global profiles directory created by
         # the ant task.
         remove_file(os.path.join(self.config.get("broker", "quattordir"),
-                                 "objects", "clusters", cluster + ".tpl"))
+                                 "objects", "clusters", cluster + ".tpl"),
+                    logger=logger)
 
         return
 

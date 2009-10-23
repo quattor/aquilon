@@ -30,7 +30,6 @@
 
 
 from sqlalchemy.exceptions import InvalidRequestError
-from twisted.python import log
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException)
 from aquilon.server.broker import BrokerCommand, force_int

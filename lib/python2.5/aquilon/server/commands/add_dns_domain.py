@@ -39,7 +39,7 @@ class CommandAddDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, dns_domain, comments, **arguments):
+    def render(self, session, logger, dns_domain, comments, **arguments):
         if session.query(DnsDomain).filter_by(name=dns_domain).first():
             raise ArgumentError("DNS domain %s already exists." % dns_domain)
 
@@ -55,7 +55,7 @@ class CommandAddDnsDomain(BrokerCommand):
         session.flush()
         session.refresh(dbdns_domain)
 
-        dsdb_runner = DSDBRunner()
+        dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
 
         return

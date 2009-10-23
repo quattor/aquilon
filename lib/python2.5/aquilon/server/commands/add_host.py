@@ -50,9 +50,9 @@ class CommandAddHost(BrokerCommand):
 
     required_parameters = ["hostname", "machine", "archetype", "domain"]
 
-    def render(self, session, hostname, machine, archetype, personality,
-               domain, buildstatus, comments, skip_dsdb_check=False,
-               **arguments):
+    def render(self, session, logger, hostname, machine, archetype,
+               personality, domain, buildstatus, comments,
+               skip_dsdb_check=False, **arguments):
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
         if buildstatus:
@@ -118,16 +118,16 @@ class CommandAddHost(BrokerCommand):
         session.flush()
         session.refresh(dbhost)
 
-        plenary_info = PlenaryMachineInfo(dbmachine)
+        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
 
         try:
-            compileLock()
+            compileLock(logger=logger)
             plenary_info.write(locked=True)
 
             # XXX: This (and some of the code above) is horrible.  There
             # should be a generic/configurable hook here that could kick
             # in based on archetype and/or domain.
-            dsdb_runner = DSDBRunner()
+            dsdb_runner = DSDBRunner(logger=logger)
             if dbhost.archetype.name == 'aurora':
                 # For aurora, check that DSDB has a record of the host.
                 if not skip_dsdb_check:
@@ -149,6 +149,6 @@ class CommandAddHost(BrokerCommand):
             plenary_info.restore_stash()
             raise
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
         return

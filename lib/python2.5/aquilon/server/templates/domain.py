@@ -31,8 +31,7 @@
 
 import os
 from os import environ as os_environ
-
-from twisted.python import log
+import logging
 
 from aquilon.config import Config
 from aquilon.exceptions_ import (ArgumentError, ProcessException)
@@ -40,12 +39,15 @@ from aquilon.server.processes import run_command
 from aquilon.server.templates.index import build_index
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.aqdb.model import Host, Cluster
+from aquilon.server.logger import CLIENT_INFO
 
+LOGGER = logging.getLogger('aquilon.server.templates.domain')
 
 class TemplateDomain(object):
 
-    def __init__(self, dom):
+    def __init__(self, dom, logger=LOGGER):
         self.domain = dom
+        self.logger = logger
 
     def directories(self):
         """Return a list of directories required for compiling this domain"""
@@ -87,7 +89,7 @@ class TemplateDomain(object):
         output (as a string) of the compile
         """
 
-        log.msg("preparing domain %s for compile"%self.domain.name)
+        self.logger.info("preparing domain %s for compile" % self.domain.name)
 
         # Ensure that the compile directory is in a good state.
         config = Config()
@@ -96,7 +98,7 @@ class TemplateDomain(object):
         for d in self.directories() + self.outputdirs():
             if not os.path.exists(d):
                 try:
-                    log.msg("creating %s"%d)
+                    self.logger.info("creating %s" % d)
                     os.makedirs(d, mode=0770)
                 except OSError, e:
                     raise ArgumentError("failed to mkdir %s: %s" % (d, e))
@@ -105,7 +107,7 @@ class TemplateDomain(object):
         # nice to be able to give progress messages to the user
         try:
             if (not locked):
-                compileLock()
+                compileLock(logger=self.logger)
 
             if (only):
                 objectlist = [ only ]
@@ -141,18 +143,20 @@ class TemplateDomain(object):
                 args.append("compile.domain.profiles")
 
             out = ''
-            log.msg("starting compile")
+            self.logger.info("starting compile")
             try:
-                out = run_command(args, env=panc_env,
-                                  path=config.get("broker", "quattordir"))
+                out = run_command(args, env=panc_env, logger=self.logger,
+                                  path=config.get("broker", "quattordir"),
+                                  loglevel=CLIENT_INFO)
             except ProcessException, e:
                 raise ArgumentError("\n%s%s" % (e.out, e.err))
 
         finally:
             if (not locked):
-                compileRelease()
+                compileRelease(logger=self.logger)
 
-        build_index(config, session, config.get("broker", "profilesdir"))
+        build_index(config, session, config.get("broker", "profilesdir"),
+                    logger=self.logger)
         return out
 
 

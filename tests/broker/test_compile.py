@@ -46,7 +46,7 @@ class TestCompile(TestBrokerCommand):
     def test_000_precompile(self):
         # Before the tests below, make sure everything is up to date.
         command = "compile --domain unittest"
-        out = self.commandtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
 
     def test_100_addchange(self):
         # Change the template used by utsi1 clients to trigger a recompile.
@@ -72,7 +72,7 @@ class TestCompile(TestBrokerCommand):
 
     def test_200_compileunittest(self):
         command = "compile --domain unittest"
-        out = self.commandtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
         # Currently assumes that there is only one client of utsi1.
         # The idea is to check that only that hosts that needed to
         # be compiled actually were. Note that clusters and other
@@ -80,7 +80,7 @@ class TestCompile(TestBrokerCommand):
         # the number we're looking for based on everything. It might
         # be better to look for the objects being processed and checking
         # that the numbers a/b are different.
-        self.matchoutput(out, "5/5 compiled", command)
+        self.matchoutput(err, "5/5 compiled", command)
 
 
 if __name__=='__main__':

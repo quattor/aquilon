@@ -29,8 +29,6 @@
 """Contains the logic for `aq bind server`."""
 
 
-from twisted.python import log
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceInstanceServer
 from aquilon.server.broker import BrokerCommand
@@ -44,8 +42,8 @@ class CommandBindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service", "instance"]
 
-    def render(self, session, hostname, service, instance, user, force=False, 
-            **arguments):
+    def render(self, session, logger, hostname, service, instance, user,
+               force=False, **arguments):
         dbsystem = get_system(session, hostname)
         dbservice = get_service(session, service)
         dbinstance = get_service_instance(session, dbservice, instance)
@@ -71,7 +69,8 @@ class CommandBindServer(BrokerCommand):
         session.flush()
         session.refresh(dbinstance)
 
-        plenary_info = PlenaryServiceInstance(dbservice, dbinstance)
+        plenary_info = PlenaryServiceInstance(dbservice, dbinstance,
+                                              logger=logger)
         plenary_info.write()
 
         # XXX: Need to recompile...

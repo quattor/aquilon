@@ -43,7 +43,7 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, hostname, cluster, **arguments):
+    def render(self, session, logger, hostname, cluster, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = EsxCluster.get_unique(session, cluster)
         if not dbcluster:
@@ -74,9 +74,9 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
                                  len(dbcluster.machines),
                                  len(dbcluster.hosts)))
 
-        plenaries = PlenaryCollection()
-        plenaries.append(PlenaryHost(dbhost))
-        plenaries.append(PlenaryCluster(dbcluster))
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryHost(dbhost, logger=logger))
+        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
         plenaries.write()
 
 

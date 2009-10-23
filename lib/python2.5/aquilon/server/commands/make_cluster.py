@@ -41,14 +41,14 @@ class CommandMakeCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, cluster, keepbindings, debug, **arguments):
+    def render(self, session, logger, cluster, keepbindings, **arguments):
         dbcluster = Cluster.get_unique(session, cluster)
         if not dbcluster:
             raise NotFoundException("Cluster '%s' not found." % cluster)
 
         chooser = None
         try:
-            compileLock()
+            compileLock(logger=logger)
 
             if not dbcluster.personality.archetype.is_compileable:
                 raise ArgumentError("Cluster %s is not a compilable archetype "
@@ -60,8 +60,8 @@ class CommandMakeCluster(BrokerCommand):
                 required_only = False
             else:
                 required_only = True
-            chooser = Chooser(dbcluster, required_only=required_only,
-                              debug=debug)
+            chooser = Chooser(dbcluster, logger=logger,
+                              required_only=required_only)
             chooser.set_required()
             chooser.flush_changes()
             chooser.write_plenary_templates(locked=True)
@@ -70,7 +70,7 @@ class CommandMakeCluster(BrokerCommand):
             for h in dbcluster.hosts:
                 profile_list.append(h.fqdn)
 
-            td = TemplateDomain(dbcluster.domain)
+            td = TemplateDomain(dbcluster.domain, logger=logger)
             out = td.compile(session, only=" ".join(profile_list), locked=True)
 
         except:
@@ -80,18 +80,11 @@ class CommandMakeCluster(BrokerCommand):
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
 
-            # Error will not include any debug output...
             raise
 
         finally:
-            compileRelease()
+            compileRelease(logger=logger)
 
-        # If out is empty, make sure we use an empty list to prevent
-        # an extra newline below.
-        out_array = out and [out] or []
-        # This command does not use a formatter.  Maybe it should.
-        if chooser and chooser.debug_info:
-            return str("\n".join(chooser.debug_info + out_array))
-        return str("\n".join(chooser.messages + out_array))
+        return
 
 

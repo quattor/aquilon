@@ -47,12 +47,12 @@ class TestMakeCluster(TestBrokerCommand):
 
     def testmakeutecl1(self):
         command = ["make_cluster", "--cluster", "utecl1"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "esx cluster utecl1 adding binding for "
                          "service esx_management",
                          command)
-        self.matchclean(out, "removing binding", command)
+        self.matchclean(err, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
@@ -78,12 +78,12 @@ class TestMakeCluster(TestBrokerCommand):
 
     def testmakeutecl2(self):
         command = ["make_cluster", "--cluster", "utecl2"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
                          "esx cluster utecl2 adding binding for "
                          "service esx_management",
                          command)
-        self.matchclean(out, "removing binding", command)
+        self.matchclean(err, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",

@@ -47,7 +47,7 @@ class CommandAddMachine(BrokerCommand):
     required_parameters = ["machine", "model"]
 
     # arguments will contain one of --chassis --rack or --desk
-    def render(self, session, machine, model, serial, chassis, slot,
+    def render(self, session, logger, machine, model, serial, chassis, slot,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                cluster, user, **arguments):
         dblocation = get_location(session, **arguments)
@@ -131,10 +131,10 @@ class CommandAddMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection()
-        plenaries.append(PlenaryMachineInfo(dbmachine))
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
         if cluster:
-            plenaries.append(PlenaryCluster(dbcluster))
+            plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

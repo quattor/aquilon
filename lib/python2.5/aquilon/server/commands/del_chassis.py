@@ -29,18 +29,17 @@
 """Contains the logic for `aq del chassis`."""
 
 
-from twisted.python import log
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Chassis, ChassisSlot
 
+
 class CommandDelChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
-    def render(self, session, chassis, **arguments):
+    def render(self, session, logger, chassis, **arguments):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')
         q = session.query(ChassisSlot).filter_by(
             chassis=dbchassis).filter(
@@ -52,13 +51,17 @@ class CommandDelChassis(BrokerCommand):
                                 (dbchassis.fqdn, machine_count))
 
         for iface in dbchassis.interfaces:
-            log.msg("Before deleting chassis '%s', removing interface '%s' [%s] boot=%s)" %
-                    (dbchassis.fqdn, iface.name, iface.mac, iface.bootable))
+            logger.info("Before deleting chassis '%s', "
+                        "removing interface '%s' [%s] boot=%s)" %
+                        (dbchassis.fqdn,
+                         iface.name, iface.mac, iface.bootable))
             session.delete(iface)
 
         for iface in dbchassis.chassis_hw.interfaces:
-            log.msg("Before deleting chassis '%s', removing hardware interface '%s' [%s] boot=%s)" %
-                    (dbchassis.fqdn, iface.name, iface.mac, iface.bootable))
+            logger.info("Before deleting chassis '%s', "
+                        "removing hardware interface '%s' [%s] boot=%s)" %
+                        (dbchassis.fqdn,
+                         iface.name, iface.mac, iface.bootable))
             session.delete(iface)
 
         session.delete(dbchassis.chassis_hw)

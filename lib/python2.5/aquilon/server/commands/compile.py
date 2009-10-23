@@ -31,7 +31,6 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Machine, Domain, Service
-from twisted.python import log
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.exceptions_ import NotFoundException
 
@@ -40,9 +39,10 @@ class CommandCompile(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, domain, user, **arguments):
+    def render(self, session, logger, domain, user, **arguments):
         d = session.query(Domain).filter_by(name=domain).all()
         if (len(d) != 1):
             raise NotFoundException("Domain '%s' not found"%domain)
-        dom = TemplateDomain(d[0])
-        return dom.compile(session)
+        dom = TemplateDomain(d[0], logger=logger)
+        dom.compile(session)
+        return

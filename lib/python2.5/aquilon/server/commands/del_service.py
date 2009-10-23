@@ -44,7 +44,7 @@ class CommandDelService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, service, instance, **arguments):
+    def render(self, session, logger, service, instance, **arguments):
         # This should fail nicely if the service is required for an archetype.
         dbservice = get_service(session, service)
         if not instance:
@@ -54,7 +54,7 @@ class CommandDelService(BrokerCommand):
             session.delete(dbservice)
             session.flush()
 
-            plenary_info = PlenaryService(dbservice)
+            plenary_info = PlenaryService(dbservice, logger=logger)
             plenary_info.remove()
 
             return
@@ -79,7 +79,8 @@ class CommandDelService(BrokerCommand):
             session.delete(dbsi)
             session.flush()
 
-            plenary_info = PlenaryServiceInstance(dbservice, dbsi)
+            plenary_info = PlenaryServiceInstance(dbservice, dbsi,
+                                                  logger=logger)
             plenary_info.remove()
 
         # FIXME: Cascade to relevant objects...

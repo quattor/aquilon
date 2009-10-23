@@ -41,7 +41,7 @@ class CommandUpdateRack(BrokerCommand):
 
     required_parameters = ["name"]
 
-    def render(self, session, name, row, column, fullname, comments,
+    def render(self, session, logger, name, row, column, fullname, comments,
                **arguments):
         dbrack = get_location(session, rack=name)
         if row is not None:
@@ -65,10 +65,10 @@ class CommandUpdateRack(BrokerCommand):
         # The first one should remain valid for awhile.  The second
         # should be fixed once we can easily do searches for any
         # location attribute (as opposed to just the direct link).
-        plenaries = PlenaryCollection()
+        plenaries = PlenaryCollection(logger=logger)
         machines = session.query(Machine).filter_by(location=dbrack).all()
         for dbmachine in machines:
-            plenaries.append(PlenaryMachineInfo(dbmachine))
+            plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
         plenaries.write()
 
         # XXX: Reconfigure/compile here?

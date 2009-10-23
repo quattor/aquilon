@@ -42,8 +42,8 @@ class CommandPxeswitch(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, install, localboot, status, firmware,
-               configure, **arguments):
+    def render(self, session, logger, hostname,
+               install, localboot, status, firmware, configure, **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = get_service(session, "bootserver")
@@ -80,6 +80,6 @@ class CommandPxeswitch(BrokerCommand):
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log"%logdir)
-        return run_command(args)
+        return run_command(args, logger=logger)
 
 

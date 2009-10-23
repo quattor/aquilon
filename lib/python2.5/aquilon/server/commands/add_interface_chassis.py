@@ -47,7 +47,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
     required_parameters = ["interface", "chassis", "mac"]
 
-    def render(self, session, interface, chassis, mac, comments, user,
+    def render(self, session, logger, interface, chassis, mac, comments, user,
                **arguments):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')
 
@@ -94,7 +94,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         session.refresh(dbinterface)
         session.refresh(dbchassis)
 
-        dsdb_runner = DSDBRunner()
+        dsdb_runner = DSDBRunner(logger=logger)
         try:
             dsdb_runner.add_host(dbinterface)
         except ProcessException, e:

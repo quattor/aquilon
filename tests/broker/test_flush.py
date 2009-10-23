@@ -44,7 +44,7 @@ from brokertest import TestBrokerCommand
 class TestFlush(TestBrokerCommand):
 
     def testflushunittest(self):
-        self.noouttest(["flush"])
+        (out, err) = self.successtest(["flush"])
 
 
 if __name__=='__main__':
