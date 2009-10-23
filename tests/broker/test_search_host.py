@@ -222,7 +222,6 @@ class TestSearchHost(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testosavailable(self):
-        #TODO: archetype agnostic search
         command = "search host --osname linux --osversion 4.0.1-x86_64 --archetype aquilon"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
@@ -235,6 +234,16 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "version of 'foo'", command)
         self.matchoutput(out, "Archetype aquilon", command)
         self.matchoutput(out, "name of 'os-does-not-exist'", command)
+
+    def testosnameonly(self):
+        command = "search host --osname linux"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+
+    def testosversiononly(self):
+        command = "search host --osversion 4.0.1-x86_64"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testserviceavailable(self):
         command = "search host --service utsvc"
