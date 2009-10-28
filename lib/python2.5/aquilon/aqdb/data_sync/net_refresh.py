@@ -48,13 +48,15 @@ from aquilon.aqdb.db_factory import db_factory
 from aquilon.aqdb.dsdb       import DsdbConnection
 from aquilon.aqdb.data_sync  import NetRecord, RefreshReport
 
+LOGGER = logging.getLogger('aquilon.aqdb.data_sync.net_refresh')
+
 class NetRefresher(object):
     """ Class to encapsulate what's needed to replicate networks from AQDB
         to AQDB"""
     __shared_state = {}
 
     #Dependency injection: allows us to supply our own *fake* dsdb connection
-    def __init__(self, dsdb_cnxn, session, *args, **kw):
+    def __init__(self, dsdb_cnxn, session, logger=LOGGER, *args, **kw):
 
         self.dsdb = dsdb_cnxn
         assert self.dsdb
@@ -69,7 +71,7 @@ class NetRefresher(object):
         self.report = RefreshReport()
         assert self.report
 
-        self.log = logging.getLogger('net_refresh')
+        self.log = logger
         assert self.log
 
         self.commit    = kw['commit']

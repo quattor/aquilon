@@ -33,6 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref
+from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -61,7 +62,12 @@ class Disk(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    machine = relation(Machine, backref=backref('disks', cascade='all'))
+    # The order_by here ensures that machine templates always list the
+    # disks in the same order.  Technically order is irrelevant in the
+    # template since the disks are stored in a hash but this helps with
+    # the tests and with preventing spurious re-writes.
+    machine = relation(Machine, backref=backref('disks', cascade='all',
+                                                order_by=asc('device_name')))
 
     __mapper_args__ = {'polymorphic_on': disk_type}
 
