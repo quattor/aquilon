@@ -271,6 +271,27 @@ class TestAddMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut8s02p3", command)
 
+    # one-offs for testing odd add host parameter combinations for
+    # archetypes aurora and windows for increased code coverage
+    def testaddut8s02p4(self):
+        self.noouttest(["add", "machine", "--machine", "ut8s02p4",
+            "--rack", "ut8", "--model", "vb1205xm"])
+
+    def testverifyaddut8s02p4(self):
+        command = "show machine --machine ut8s02p4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut8s02p4", command)
+
+    def testaddut8s02p5(self):
+        self.noouttest(["add", "machine", "--machine", "ut8s02p5",
+            "--rack", "ut8", "--model", "vb1205xm"])
+
+    def testverifyaddut8s02p5(self):
+        command = "show machine --machine ut8s02p5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut8s02p5", command)
+
+
     # This test should look very different, but these were needed for
     # testing chassis updates...
     def testaddhprack(self):
@@ -309,4 +330,3 @@ class TestAddMachine(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMachine)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

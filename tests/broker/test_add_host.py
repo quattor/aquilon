@@ -137,13 +137,12 @@ class TestAddHost(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Personality: compileserver", command)
 
-    #will use this one off host for make test the default to linux/4.0.1-x86_64
+    #test aquilons default linux/4.0.1-x86_64
     def testaddunittest17(self):
         self.noouttest(["add", "host",
             "--hostname", "unittest17.aqd-unittest.ms.com",
             "--ipfromsystem", "ut01ga1s02.aqd-unittest.ms.com",
             "--machine", "ut8s02p3", "--domain", "unittest",
-            #"--osname", "linux", "--osversion", "4.0.1-x86_64",
             "--buildstatus", "build", "--archetype", "aquilon"])
 
     def testverifyunittest17(self):
@@ -165,6 +164,7 @@ class TestAddHost(TestBrokerCommand):
         # It also needs to run *after* the testadd* methods above
         # as some of them rely on a clean IP space for testing the
         # auto-allocation algorithms.
+        # I stole the last 2 hp rack hosts for default host
         servers = 0
         for i in range(51, 100):
             if servers < 10:
@@ -181,7 +181,6 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)
 
-
     def testpopulateverarirackhosts(self):
         # This gives us evh1.aqd-unittest.ms.com through evh10
         # and leaves the other 40 machines for future use.
@@ -196,6 +195,46 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "vmhost", "--personality", "esx_server"]
             self.noouttest(command)
 
+    def testaddhostnousefularchetype(self):
+        command = ["add", "host", "--archetype", "pserver",
+                   "--hostname", "unittest01.one-nyp.ms.com",
+                   "--ip", self.net.unknown[0].usable[10].ip,
+                   "--domain", "unittest", "--machine", "ut3c1n4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Can not determine a sensible default OS", command)
+
+    #test aurora and windows defaults now
+    def testaddauroradefaultos(self):
+        self.noouttest(["add", "host", "--archetype", "aurora",
+                        "--hostname", "test_aurora_default_os.ms.com",
+                        "--ip", "4.2.3.126", "--domain", "ny-prod", "--machine",
+                        "ut8s02p4"])
+
+    def testverifyaddauroradefaultos(self):
+        command = "show host --hostname test_aurora_default_os.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: test_aurora_default_os.ms.com", command)
+        self.matchoutput(out, "Archetype: aurora", command)
+        self.matchoutput(out, "Personality: generic", command)
+        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Template: aurora/os/linux/generic/config.tpl",
+                         command)
+
+    def testaddwindowsefaultos(self):
+        self.noouttest(["add", "host", "--archetype", "windows",
+                        "--hostname", "test_windows_default_os.msad.ms.com",
+                        "--ip", "4.2.3.127", "--domain", "ny-prod",
+                        "--machine", "ut8s02p5"])
+
+    def testverifyaddwindowsdefaultos(self):
+        command = "show host --hostname test_windows_default_os.msad.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: test_windows_default_os.msad.ms.com", command)
+        self.matchoutput(out, "Archetype: windows", command)
+        self.matchoutput(out, "Personality: generic", command)
+        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Template: windows/os/windows/generic/config.tpl",
+                         command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

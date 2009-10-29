@@ -99,6 +99,22 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine ut8s02p3"
         self.notfoundtest(command.split(" "))
 
+    def testdelut8s02p4(self):
+        command = "del machine --machine ut8s02p4"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut8s02p4(self):
+        command = "show machine --machine ut8s02p4"
+        self.notfoundtest(command.split(" "))
+
+    def testdelut8s02p5(self):
+        command = "del machine --machine ut8s02p5"
+        self.noouttest(command.split(" "))
+
+    def testverifydelut8s02p5(self):
+        command = "show machine --machine ut8s02p5"
+        self.notfoundtest(command.split(" "))
+
     def testdelhprack(self):
         for i in range(51, 100):
             port = i - 50
