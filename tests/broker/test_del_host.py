@@ -133,6 +133,22 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdeltest_aurora_default_os(self):
+        command = "del host --hostname test_aurora_default_os.ms.com --quiet"
+        self.noouttest(command.split(" "))
+
+    def testverifydeltest_aurora_default_os(self):
+        command = "show host --hostname test_aurora_default_os.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testdeltest_windows_default_os(self):
+        command = "del host --hostname test_windows_default_os.msad.ms.com --quiet"
+        self.noouttest(command.split(" "))
+
+    def testverifydeltest_windows_default_os(self):
+        command = "show host --hostname test_windows_default_os.msad.ms.com"
+        self.notfoundtest(command.split(" "))
+
     def testdelhprackhosts(self):
         servers = 0
         for i in range(51, 100):
@@ -157,4 +173,3 @@ class TestDelHost(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

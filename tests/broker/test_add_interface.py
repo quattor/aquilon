@@ -323,6 +323,32 @@ class TestAddInterface(TestBrokerCommand):
                          self.net.tor_net[0].usable[3].mac.lower(),
                          command)
 
+    def testaddut8s02p4eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut8s02p4",
+                        "--mac", self.net.tor_net[0].usable[4].mac])
+
+    def testverifyaddut8s04p3eth0(self):
+        command = "show machine --machine ut8s02p4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Interface: eth0 %s boot=True" %
+                         self.net.tor_net[0].usable[4].mac.lower(),
+                         command)
+
+    def testaddut8s02p5eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut8s02p5",
+                        "--mac", self.net.tor_net[0].usable[5].mac])
+
+    def testverifyaddut8s05p3eth0(self):
+        command = "show machine --machine ut8s02p5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Interface: eth0 %s boot=True" %
+                         self.net.tor_net[0].usable[5].mac.lower(),
+                         command)
+
     def testaddhprackinterfaces(self):
         for i in range(51, 100):
             port = i - 50
@@ -353,4 +379,3 @@ class TestAddInterface(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

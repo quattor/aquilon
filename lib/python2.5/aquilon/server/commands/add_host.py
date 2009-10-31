@@ -105,6 +105,8 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("Machine '%s' is already allocated to host '%s'." %
                     (dbmachine.name, dbmachine.host.fqdn))
 
+        (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
+
         dbinterface = None
         mac = None
         if dbpersonality.archetype.name != 'aurora':
@@ -133,7 +135,6 @@ class CommandAddHost(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
 
-        (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
         dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
                       mac=mac, ip=ip, network=dbnetwork, operating_system=dbos,
                       name=short, dns_domain=dbdns_domain,

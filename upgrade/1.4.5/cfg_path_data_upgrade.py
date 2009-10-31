@@ -46,12 +46,12 @@ from sqlalchemy.orm import create_session
 
 #we import these relative to the local path since we need a weird set of
 #dependencies: we need build_item to have the transient column of cfg_path_id, etc.
-from aquilon.aqdb.model import Archetype, Host, ServiceInstance, BuildItem, OperatingSystem
+from aquilon.aqdb.model import (Archetype, Host, ServiceInstance, BuildItem,
+                                OperatingSystem)
 
 from pprint import pprint
 
 #TODO: make this run the sql script, and have another at finish?
-#TODO: confirm the database your updating?
 
 def get_session(cstr):
     engine = create_engine(cstr)
@@ -177,6 +177,8 @@ class AqdbManager(SyncManager):
 
         self.timeout = timeout
         self.NUMBER_OF_PROCESSES = cpu_count()
+        if self.NUMBER_OF_PROCESSES < 4:
+            self.NUMBER_OF_PROCESSES = 4
         self.host_q = Queue()
 
         self.si_cache = get_si_cache(self._cstr)
@@ -199,79 +201,12 @@ class AqdbManager(SyncManager):
         for w in self.workers:
             w.terminate()
 
-        sess = get_session(self._cstr)
-
-        # drop all os rows from build_items
-        stmt = '''delete from build_item where cfg_path_id in
-                  (select id from cfg_path where tld_id =
-                  (select id from tld where type='os'))'''
-        sess.execute(text(stmt))
-        sess.commit()
-
-        #now that they're gone make sure there are no rows that have null
-        #service_instance_id otherwise we can't continue...
-
-        non_processed_build_items = sess.query(BuildItem).filter(
-            BuildItem.service_instance_id == None).all()
-
-        if len(non_processed_build_items) > 0:
-            print 'there are %s rows with no service instance ids'% (
-                len(non_processed_build_items))
-            for item in non_processed_build_items:
-                    print '%s %s'% (item.host.fqdn, item.cfg_path)
-
-        no_os_hosts = sess.query(Host).filter(
-            Host.operating_system_id == None).all()
-
-        #fix any stragglers/one-offs
-        if len(no_os_hosts) > 0:
-            for host in no_os_hosts:
-                if host.archetype.name == 'aquilon':
-                    host.operating_system_id = self.os_cache['linux/4.0.1-x86_64']
-                    sess.add(host)
-            try:
-                sess.commit()
-            except Exception, e:
-                print e
-                sess.rollback()
-        no_os_hosts = sess.query(Host).filter(
-            Host.operating_system_id == None).all()
-
-        if len(no_os_hosts) > 0:
-            print 'there are %s hosts with no OS' %(non_processed_host_os_count)
-            for host in sess.query(Host).filter(
-                Host.operating_system_id == None).all():
-                print '%s' % (host.fqdn)
-            sys.exit(-1)
-
-
-        if len(non_processed_build_items) == 0 and len(no_os_hosts) == 0:
+        #run post processing
+        if post_processing(self._cstr, self.os_cache):
             print """
 All hosts have an operating system, and all build items processed successfully.
-Complete the schema migration by executing the post_os_upgrade.sql script. """
-
-            #stmnts = ['ALTER TABLE BUILD_ITEM DROP COLUMN CFG_PATH_ID',
-            #          'ALTER TABLE BUILD_ITEM ADD CONSTRAINT "BUILD_ITEM_UK" UNIQUE ("HOST_ID", "SERVICE_INSTANCE_ID")',
-            #          'ALTER TABLE BUILD_ITEM DROP CONSTRAINT HOST_POSITION_UK',
-            #          'ALTER TABLE BUILD_ITEM DROP COLUMN "POSITION"',
-            #          'ALTER TABLE SERVICE DROP COLUMN "CFG_PATH_ID"',
-            #          'ALTER TABLE SERVICE_INSTANCE DROP COLUMN "CFG_PATH_ID"',
-            #          'ALTER TABLE HOST ADD CONSTRAINT HOST_OS_ID_NN CHECK ("OPERATING_SYSTEM_ID" IS NOT NULL) ENABLE']
-        #
-        #    for s in stmnts:
-        #        sess.execute(s)
-        #    sess.commit()
-        #    print 'Complete!'
-        #else:
-        #    print 'some build items were not processed'
-        #    if non_processed_build_items > 0:
-        #        print 'there are %s rows with no service instance ids'% (non_processed_build_items)
-        #        for item in sess.query(BuildItem).filter(
-        #            BuildItem.service_instance_id == None).all():
-        #            print '%s %s'% (item.host.name, item.cfg_path)
-        else:
-            print "shouldn't get here"
-
+Complete the schema migration by executing the post_os_upgrade.sql script.
+"""
 
     def stop(self):
         self.host_q.put(None)
@@ -280,6 +215,73 @@ Complete the schema migration by executing the post_os_upgrade.sql script. """
             #w.terminate()
 
         self.host_q.close()
+
+
+def post_processing(cstr, os_cache):
+    """ Perform tasks to verify data manipulation has been sucessful
+
+        Run a one-off to repair any aquilon nodes that were missed: hosts that
+        exist but have never been built lack an OS. Then check all hosts have
+        an OS. If not, fail.
+
+        If all have OS, remove all OS build_item related rows. Check the
+        remaining rows to see that they all have a valid service_instance_id. If
+        so, migration was sucessful.
+    """
+    sess = get_session(cstr)
+
+    no_host_query = sess.query(Host).filter(Host.operating_system_id == None)
+
+    bad_build_items_query = sess.query(BuildItem).filter(
+        BuildItem.service_instance_id == None)
+
+    no_os_hosts = no_host_query.all()
+
+    if len(no_os_hosts) > 0:
+        for host in no_os_hosts:
+            if host.archetype.name == 'aquilon':
+                host.operating_system_id = os_cache['linux/4.0.1-x86_64']
+                sess.add(host)
+        try:
+            sess.commit()
+        except Exception, e:
+            sess.rollback()
+            raise e
+
+        no_os_hosts = no_host_query.all()
+
+        if len(no_os_hosts) > 0:
+            # Failure
+            print 'The following hosts have no OS:'
+            for host in no_os_hosts:
+                print '%s: archetype %s personality %s' % (host.fqdn,
+                                                           host.archetype.name,
+                                                           host.personality.name)
+
+            raise ValueError('Can not proceed while hosts with no OS exist')
+
+    stmt = """ delete from build_item where cfg_path_id in
+                  (select id from cfg_path where tld_id =
+                  (select id from tld where type='os')) """
+    sess.execute(text(stmt))
+    sess.commit()
+    sess.expunge_all()
+
+    non_processed_build_items = bad_build_items_query.all()
+
+    if len(non_processed_build_items) > 0:
+        # Failure
+        print 'The following build items are unprocessed:'
+
+        if len(non_processed_build_items) < 200:
+            #every host in the DB is too much for a usable scroll back buffer
+            for item in non_processed_build_items:
+                print '%s %s'% (item.host.fqdn, item.cfg_path)
+        print '%s bad build items left' %(len(non_processed_build_items))
+
+        raise ValueError('Can not proceed with unprocessed build_items')
+    else:
+        return True
 
 
 if __name__ == '__main__':
@@ -291,7 +293,3 @@ if __name__ == '__main__':
     print 'execution time: %s seconds'% (int(end-start))
 
     sys.exit(0)
-
-#delete from build_item where cfg_path_id in
-#  (select id from cfg_path where tld_id = (select id from tld where type='os'));
-#commit;
