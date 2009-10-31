@@ -29,35 +29,50 @@
 """Contains the logic for `aq show request`."""
 
 
-from time import sleep
 from logging import DEBUG
+
+from twisted.internet.defer import Deferred
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.logger import CLIENT_INFO
+from aquilon.server.messages import StatusSubscriber
+
+
+class StatusWriter(StatusSubscriber):
+    def __init__(self, deferred, request, loglevel):
+        StatusSubscriber.__init__(self)
+        self.deferred = deferred
+        self.request = request
+        self.loglevel = loglevel
+
+    def process(self, record):
+        if record.levelno >= self.loglevel and \
+           self.request.channel.transport.connected:
+            self.request.write(str(record.getMessage()))
+
+    def finish(self):
+        if not self.deferred.called:
+            self.deferred.callback('')
 
 
 class CommandShowRequest(BrokerCommand):
+
+    requires_azcheck = False
+    requires_transaction = False
+    requires_format = False
+    defer_to_thread = False
 
     def render(self, requestid, request, logger, debug, **arguments):
         status = logger.get_status()
         if not status:
             raise NotFoundException("requestid %s not found" % requestid)
-        reported = 0
         if debug:
             loglevel = DEBUG
         else:
             loglevel = CLIENT_INFO
-        while request.channel.transport.connected:
-            current = status.get_new(reported)
-            if current != reported:
-                messages = [record.getMessage() for record
-                            in status.records[reported:current]
-                            if record.levelno >= loglevel]
-                request.write(str("\n".join(messages)))
-                reported = current
-            if status.is_finished and reported == len(status.records):
-                break
-        return ''
+        deferred = Deferred()
+        status.add_subscriber(StatusWriter(deferred, request, loglevel))
+        return deferred
 
 
