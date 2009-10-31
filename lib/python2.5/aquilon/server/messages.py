@@ -33,6 +33,8 @@ from __future__ import with_statement
 
 from threading import Lock
 
+from twisted.internet import reactor
+
 
 class RequestStatus(object):
     """Store status information for each incoming request.
@@ -152,8 +154,8 @@ class StatusCatalog(object):
         """Mark the RequestStatus as finished and remove references to it."""
         status.finish()
         self.status_by_auditid.pop(status.auditid, None)
-        # FIXME: Should set an action using the reactor to gracefully remove
-        # the requestid key after 5 minutes or so.
+        # Clean up any unused requestid entries after one minute.
+        reactor.callLater(60, self.remove_by_requestid, status)
 
     def remove_by_requestid(self, status):
         """Mark the RequestStatus as no longer needed by the client."""
