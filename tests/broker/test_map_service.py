@@ -256,7 +256,7 @@ class TestMapService(TestBrokerCommand):
     def testverifyshowservicemappersonality(self):
         command = ["show_service", "--service=esx_license", "--instance=ut.a"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Service: esx_license Instance: ut.a ", command)
+        self.matchoutput(out, "Service: esx_license Instance: ut.a", command)
         self.matchoutput(out,
                          "Personality Service Map: Building ut "
                          "(Archetype vmhost Personality esx_server)",
