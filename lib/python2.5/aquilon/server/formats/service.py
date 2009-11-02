@@ -37,7 +37,7 @@ from aquilon.aqdb.model import Service
 class ServiceFormatter(ObjectFormatter):
     def format_raw(self, service, indent=""):
         details = [indent + "Service: %s" % service.name]
-        details.append(self.redirect_raw(service.cfg_path, indent+"  "))
+        details.append(indent + "  Template: %s" % service.cfg_path)
         max_clients = service.max_clients
         if max_clients is None:
             max_clients = "Unlimited"
