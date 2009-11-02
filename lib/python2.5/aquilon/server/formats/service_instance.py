@@ -46,6 +46,14 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Service Map: %s %s" %
                     (map.location.location_type.capitalize(),
                     map.location.name))
+        for pmap in si.personality_service_map:
+            details.append(indent +
+                           "  Personality Service Map: %s %s "
+                           "(Archetype %s Personality %s)" %
+                           (pmap.location.location_type.capitalize(),
+                            pmap.location.name,
+                            pmap.personality.archetype.name,
+                            pmap.personality.name))
         max_clients = si.max_clients
         if max_clients is None:
             if si.service.max_clients is None:
