@@ -36,9 +36,9 @@ from utils import load_classpath, commit, add
 load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import (Service, ServiceInstance, Tld, CfgPath, Cluster,
-                                ClusterAlignedService, Building, Personality,
-                                Archetype, EsxCluster, ClusterServiceBinding)
+from aquilon.aqdb.model import (Archetype, Building, Cluster, Personality,
+                                Service, ServiceInstance, EsxCluster, Domain,
+                                ClusterAlignedService, ClusterServiceBinding)
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
@@ -52,6 +52,7 @@ sess = db.Session()
 CLUSTER_NAME = 'test_esx_cluster'
 SVC_NAME = 'test_esx_management'
 INST_NAME = 'test_esx_manager'
+DOMAIN = 'ny-prod'
 
 #for testing cascaded deletion
 SVC_2 = 'test_svc_delete_me'
@@ -75,24 +76,7 @@ def clean_up():
     del_service_instance(sess, INST_NAME)
     del_service(sess, SVC_NAME)
     del_clusters()
-    del_pths()
 
-
-def del_pth(sess, tld_name, pth):
-    cfg_path = sess.query(CfgPath).filter(and_(
-        Tld.type==tld_name, CfgPath.relative_path==pth)).first()
-    if cfg_path:
-        sess.delete(cfg_path)
-        print 'sess.delete(%s/%s)'% (tld_name, pth)
-
-def del_pths():
-    for i in [SVC_NAME, '%s/%s'%(SVC_NAME, INST_NAME)]:
-        a = sess.query(CfgPath).filter(and_(
-            Tld.type=='service', CfgPath.relative_path==i)).first()
-        if a:
-            print 'need to delete cfgpath %s'% (i)
-            sess.delete(a)
-            commit(sess)
 
 def del_clusters():
     clist = sess.query(Cluster).all()
@@ -112,8 +96,6 @@ def del_cluster_member():
 def del_service_instance(sess, name):
     si = sess.query(ServiceInstance).filter_by(name=name).first()
     if si:
-        pth_name = si.service.name + '/' + name
-        del_pth(sess, 'service', pth_name)
         count = sess.query(ServiceInstance).filter_by(name=name).delete()
         commit(sess)
         print 'called del_service_instance(%s), deleted %s rows'% (name, count)
@@ -122,7 +104,6 @@ def del_service(sess, name):
     ''' reusable service delete for other tests '''
     svc = sess.query(Service).filter_by(name=name).first()
     if svc:
-        del_pth(sess, 'service', name)
         count = sess.query(Service).filter_by(name=name).delete()
         commit(sess)
         print 'session.delete(%s) deleted %s rows'% (name, count)
@@ -139,21 +120,12 @@ def del_cluster_aligned_svc():
     print 'deleted cluster aligned service'
 
 
-
 def add_service(sess, name):
     ''' reusable add service code for other tests '''
     svc = sess.query(Service).filter_by(name=name).first()
     if not svc:
-        svc_tld = sess.query(Tld).filter_by(type='service').one()
-        cfg_pth = sess.query(CfgPath).filter(
-            and_(Tld.type=='service', CfgPath.relative_path==name)).first()
-
-        if not cfg_pth:
-            cfg_pth = CfgPath(tld=svc_tld,
-                              relative_path='%s'%(name))
-
-        svc=Service(name=name, cfg_path=cfg_pth)
-        sess.add_all([cfg_pth, svc])
+        svc=Service(name=name)
+        add(sess,svc)
         commit(sess)
     return svc
 
@@ -167,16 +139,19 @@ def test_add_service():
 def test_create_cluster():
     #TODO: make this a reusable function in test_cluster and import
     np = sess.query(Building).filter_by(name='np').one()
+    dmn = sess.query(Domain).first()
+    assert dmn, 'No domain found in %s' % (inspect.stack()[1][3])
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
 
-    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per)
+    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per,
+            domain=dmn)
 
-    sess.add(ec)
+    add(sess,ec)
     commit(sess)
 
-    assert ec
+    assert ec, "No EsxCluster created by %s" % (inspect.stack()[1][3])
     print ec
 
 def test_add_aligned_service():
@@ -199,17 +174,14 @@ def add_service_instance(sess, service_name, name):
     si = sess.query(ServiceInstance).filter_by(name=name).first()
     if not si:
         print 'Creating %s instance %s '% (service_name, name)
-        svc_tld = sess.query(Tld).filter_by(type='service').one()
-        cp = CfgPath(tld=svc_tld,
-                     relative_path='%s/%s'%(service_name, name))
 
         svc = sess.query(Service).filter_by(name=service_name).one()
         assert svc, 'No %s service in %s'% (service_name, inspect.stack()[1][3])
 
-        si = ServiceInstance(name=name, service=svc, cfg_path=cp)
-        sess.add_all([cp, si])
+        si = ServiceInstance(name=name, service=svc)
+        add(sess, si)
         commit(sess)
-        assert si, 'no service instance created by %s'% (inspect.stack()[1][3])
+        assert si, 'no service instance created by %s' % (inspect.stack()[1][3])
     return si
 
 def test_cluster_bound_svc():
@@ -219,10 +191,10 @@ def test_cluster_bound_svc():
 
     ec = Cluster.get_by('name', CLUSTER_NAME, sess)[0]
     cs = ClusterServiceBinding(cluster=ec, service_instance=si)
-    sess.add(cs)
+    add(sess, cs)
     commit(sess)
 
-    assert cs, 'no cluster bound service created by'% (inspect.stack()[1][3])
+    assert cs, 'no cluster bound service created by' % (inspect.stack()[1][3])
     print cs
 
 def test_cluster_service_binding_assoc_proxy():
@@ -239,7 +211,7 @@ def test_cascaded_delete_1():
     print 'Creating throwawy service'
     svc = add_service(sess, SVC_2)
 
-    assert svc, 'service not created by %s'% (inspect.stack()[1][3])
+    assert svc, 'service not created by %s' % (inspect.stack()[1][3])
     print 'added throw away service %s'% (svc)
 
     #make it a cluster aligned svc
