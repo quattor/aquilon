@@ -130,7 +130,7 @@ class PlenaryToplevelHost(Plenary):
 
         provides = []
         for sis in self.dbhost.sislist:
-            provides.append(repr(sis.service_instance.cfg_path) + '/server/config')
+            provides.append('%s/server/config' % sis.service_instance.cfg_path)
 
         templates = []
         templates.append("archetype/base")
