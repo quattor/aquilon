@@ -30,7 +30,9 @@
 """Option parsing for the aq client."""
 
 
-from optparse import OptionParser
+from __future__ import with_statement
+
+from optparse import OptionParser, OptionValueError
 from xml.parsers import expat
 import os
 import re
@@ -41,6 +43,15 @@ import sys
 
 def cmdName():
     return os.path.basename(sys.argv[0])
+
+def read_file(option, opt, value, parser):
+    try:
+        with open(value) as f:
+            setattr(parser.values, option.dest, f.read())
+    except Exception, e:
+        raise OptionValueError("Error opening '%s' for %s: %s" %
+                               (value, opt, e))
+
 
 # =========================================================================== #
 
@@ -453,6 +464,9 @@ class option(Element):
             str = str+', action="store_true"'
         elif (self.type == 'string'):
             str = str+', action="store"'
+        elif (self.type=='file'):
+            # Need type?
+            str = str+', action="callback", callback=read_file, type="string"'
         elif (self.type == 'multiple'):
             str = str +', action="append"'
         else:
@@ -473,7 +487,8 @@ class option(Element):
 # --------------------------------------------------------------------------- #
 
     def shortHelp(self):
-        return "--" + self.name + ("" if self.type != "string" else " " + self.name.upper())
+        return "--" + self.name + ("" if self.type not in ["string", "file"]
+                                   else " " + self.name.upper())
 
 # --------------------------------------------------------------------------- #
 
