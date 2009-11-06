@@ -116,7 +116,7 @@ def test_create_nas_disk():
     print machine
 
     disk = NasDisk(machine=machine, capacity=40, controller_type='sata',
-                   device_name='c_drive', service_instance=si)
+            device_name='c_drive', address='0:1:0', service_instance=si)
     add(sess, disk)
     commit(sess)
 
