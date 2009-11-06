@@ -43,3 +43,5 @@ ms.version.addpkg('ibm_db','0.6.0-9.5.2')
 ms.version.addpkg('ipython','0.9.1')
 
 ms.version.addpkg('nose','0.11.0')
+
+ms.version.addpkg('coverage', '3.1')
