@@ -1223,8 +1223,9 @@
       original arguments.  Any services that are not listed as required
       for the personality or the archetype are dropped unless the
       --keepbindings flag is specified.
-      <optgroup name="reconfigure_options" mandatory="True" fields="all">
-         <option name="hostname" type="string">Host name</option>
+      <optgroup name="reconfigure_options" mandatory="True" fields="any">
+         <option name="hostname" type="string" conflicts="hostlist">Host name</option>
+         <option name="hostlist" type="file" conflicts="hostname">File with one host per line</option>
       </optgroup>
       <optgroup name="reconfigure_optional" mandatory="False">
          <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
@@ -1236,6 +1237,7 @@
          <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
+      <transport trigger="hostlist" method="post" path="command/reconfigure/hostlist" />
    </command>
 
    <command name="add_domain">
