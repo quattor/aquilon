@@ -45,8 +45,6 @@ from aquilon.aqdb.model.room import Room
 from aquilon.aqdb.model.campus import Campus
 from aquilon.aqdb.model.rack import Rack
 from aquilon.aqdb.model.desk import Desk
-from aquilon.aqdb.model.location_search_list import LocationSearchList
-from aquilon.aqdb.model.search_list_item import SearchListItem
 
 #NETWORK
 from aquilon.aqdb.model.network import Network
@@ -66,12 +64,10 @@ from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.status import Status
 from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw
-from aquilon.aqdb.model.console_server_hw import ConsoleServerHw
 
 #SYSTEM
 from aquilon.aqdb.model.system import System, DynamicStub
 from aquilon.aqdb.model.chassis import Chassis
-from aquilon.aqdb.model.console_server import ConsoleServer
 from aquilon.aqdb.model.manager import Manager
 from aquilon.aqdb.model.domain import Domain
 from aquilon.aqdb.model.host import Host
@@ -79,7 +75,6 @@ from aquilon.aqdb.model.tor_switch import TorSwitch
 
 #HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
-from aquilon.aqdb.model.serial_cnxn  import SerialCnxn
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
 from aquilon.aqdb.model.interface import Interface
 from aquilon.aqdb.model.auxiliary import Auxiliary

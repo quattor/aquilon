@@ -60,8 +60,7 @@ pkgs = {}
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
 pkgs['loc'] = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-               'city', 'building', 'room', 'rack', 'desk',
-               'location_search_list', 'search_list_item']
+               'city', 'building', 'room', 'rack', 'desk']
 
 pkgs['net'] = ['dns_domain', 'network']
 
@@ -69,11 +68,10 @@ pkgs['cfg'] = ['archetype', 'personality', 'operating_system']
 
 pkgs['hw'] = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
-                'interface', 'observed_mac', 'machine_specs', 'chassis_slot',
-                'console_server_hw', 'serial_cnxn']
+                'interface', 'observed_mac', 'machine_specs', 'chassis_slot']
 
 pkgs['sy'] = ['system', 'domain', 'host', 'chassis', 'tor_switch',
-              'auxiliary', 'manager', 'console_server']
+              'auxiliary', 'manager']
 
 pkgs['svc'] = ['service', 'service_instance', 'service_instance_server',
                 'service_map', 'service_list_item', 'cluster', 'metacluster',
