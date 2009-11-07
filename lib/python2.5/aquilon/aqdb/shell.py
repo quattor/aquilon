@@ -64,7 +64,7 @@ if db.engine.url.database:
 prompt += '>'
 
 from IPython.Shell import IPShellEmbed
-_banner = '***Welcome to the Aquilon shell derived from IPython. Ctrl-D to quit'
+_banner = '<<<Welcome to the Aquilon shell (courtesy of IPython). Ctrl-D to quit>>>\n'
 _args = ['-pi1', prompt, '-nosep']
 ipshell = IPShellEmbed(_args, banner=_banner)
 
