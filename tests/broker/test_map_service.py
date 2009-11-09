@@ -55,14 +55,18 @@ class TestMapService(TestBrokerCommand):
                          "Instance: q.ny.ms.com Map: Building ut",
                          command)
 
+    def testverifynomatch(self):
+        command = "show map --service afs --instance q.ny.ms.com --company ms"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "No matching map found.", command)
+
     def testmapdns(self):
         self.noouttest(["map", "service", "--hub", "ny",
                         "--service", "dns", "--instance", "nyinfratest"])
 
     def testverifymapdns(self):
-        command = ["show", "map", "--archetype", "aquilon",
-                   "--service", "dns", "--instance", "nyinfratest",
-                   "--hub", "ny"]
+        command = ["show", "map", "--hub", "ny",
+                   "--service", "dns", "--instance", "nyinfratest"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: dns "
@@ -74,7 +78,7 @@ class TestMapService(TestBrokerCommand):
                         "--service", "aqd", "--instance", "ny-prod"])
 
     def testverifymapaqd(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=aqd", "--instance=ny-prod", "--campus=ny"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -87,7 +91,7 @@ class TestMapService(TestBrokerCommand):
                         "--service", "lemon", "--instance", "ny-prod"])
 
     def testverifymaplemon(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=lemon", "--instance=ny-prod", "--campus=ny"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -101,8 +105,7 @@ class TestMapService(TestBrokerCommand):
 
     def testverifymapbootserver(self):
         command = ["show_map", "--service", "bootserver",
-                   "--instance", "np.test", "--building", "ut",
-                   "--archetype", "aquilon"]
+                   "--instance", "np.test", "--building", "ut"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: bootserver "
@@ -114,7 +117,7 @@ class TestMapService(TestBrokerCommand):
                         "--service", "ntp", "--instance", "pa.ny.na"])
 
     def testverifymapntp(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=ntp", "--instance=pa.ny.na", "--city=ny"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -143,7 +146,7 @@ class TestMapService(TestBrokerCommand):
                          command)
 
     def testverifyutmapproto(self):
-        command = "show map --archetype aquilon --building ut --format proto"
+        command = "show map --building ut --format proto"
         out = self.commandtest(command.split(" "))
         self.parse_servicemap_msg(out)
 
@@ -182,6 +185,14 @@ class TestMapService(TestBrokerCommand):
                          "Service: utsvc Instance: utsi2 Map: Company ms",
                          command)
 
+    def testverifymapwihtoutpersonality(self):
+        command = ["show_map", "--archetype=aquilon", "--service=utsvc"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         command)
+
     def testverifypersonalitymapproto(self):
         command = ["show_map", "--format=proto", "--archetype=aquilon",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
@@ -202,13 +213,12 @@ class TestMapService(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
-    def testverifyshowmapunimplemented(self):
-        command = "show map --archetype windows"
-        out = self.unimplementederrortest(command.split(" "))
-        self.matchoutput(out,
-                         "Archetype level ServiceMaps other than "
-                         "aquilon are not yet available",
-                         command)
+    def testmapgenericfail(self):
+        command = ["map", "service", "--company", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--personality", "generic"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out, "Not all mandatory options specified!", command)
 
     def testmapesx(self):
         self.noouttest(["map", "service", "--building", "ut",
