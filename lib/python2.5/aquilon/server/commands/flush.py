@@ -96,6 +96,8 @@ class CommandFlush(BrokerCommand):
             logger.client_info("flushing hosts")
             for d in session.query(Domain).all():
                 for h in d.hosts:
+                    if not h.archetype.is_compileable:
+                        continue
                     try:
                         plenary_host = PlenaryHost(h)
                         written += plenary_host.write(locked=True)
