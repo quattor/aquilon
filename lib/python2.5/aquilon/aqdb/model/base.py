@@ -65,14 +65,15 @@ def _describe_uniqueness_request(cls, *args, **kwargs):
 
 
 class Base(object):
+    """ The abstract base class for all aqdb objects """
+
     def __init__(self, **kw):
         for k in kw:
             if not hasattr(type(self), k):
-                msg = "%r is an invalid argument for %s" %(k, type(self).__name__)
+                msg = "%r is an invalid argument for %s" % (
+                    k, type(self).__name__)
                 raise TypeError(msg)
             setattr(self, k, kw[k])
-        if getattr(self,'__table__'):
-            self.__table__.schema = 'AQUILON'
 
     def __repr__(self):
         # This functions much more like a __str__ than a __repr__...
@@ -80,12 +81,13 @@ class Base(object):
                           self._get_instance_label())
 
     @classmethod
-    def get_by(cls,k, v, session):
+    def get_by(cls, k, v, session):
         return session.query(cls).filter(cls.__dict__[k] == v).all()
 
     @classmethod
     def _get_class_label(cls):
         return getattr(cls, "_class_label", cls.__name__)
+
 
     def _get_instance_label(self):
         """Subclasses can override this method or just set a property to check.
@@ -110,6 +112,7 @@ class Base(object):
             if hasattr(self, attr):
                 return getattr(self, attr).name
         return 'instance'
+
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
