@@ -161,19 +161,30 @@ class CommandReconfigureHostlist(BrokerCommand):
         if not choosers:
             return
 
+        # Optimize so that duplicate service plenaries are not re-written
+        templates = set()
+        for chooser in choosers:
+            # chooser.plenaries is a PlenaryCollection - this flattens
+            # that top level.
+            templates.update(chooser.plenaries.plenaries)
+
         # Don't bother locking until every possible check before the
         # actual writing and compile is done.  This will allow for fast
         # turnaround on errors (no need to wait for a lock if there's
         # a missing service map entry or something).
         try:
             compileLock(logger=logger)
-            for chooser in choosers:
-                chooser.write_plenary_templates(locked=True)
+            logger.client_info("writing %s plenary templates", len(templates))
+            for template in templates:
+                logger.debug("Writing %s", template)
+                template.write(locked=True)
             td = TemplateDomain(dbdomain, logger=logger)
             out = td.compile(session, locked=True)
         except:
-            for chooser in choosers:
-                chooser.restore_stash()
+            logger.client_info("restoring plenary templates")
+            for template in templates:
+                logger.debug("Restoring %s", template)
+                template.restore_stash()
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
             raise
