@@ -32,9 +32,10 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation, deferred, contains_eager
+from sqlalchemy.orm.session import object_session
 
-from aquilon.aqdb.model import Base, Service, Host
+from aquilon.aqdb.model import Base, Service, Host, System, DnsDomain
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN  = 'service_instance'
@@ -70,7 +71,27 @@ class ServiceInstance(Base):
 
     @property
     def clients(self):
-        return [item.host.fqdn for item in self.build_items]
+        session = object_session(self)
+        q = session.query(Host)
+        q = q.join(['build_items'])
+        q = q.filter_by(service_instance=self)
+        q = q.reset_joinpoint()
+        q = q.outerjoin(System.dns_domain)
+        q = q.options(contains_eager(System.dns_domain))
+        q = q.order_by(DnsDomain.name, System.name)
+        return [sys.fqdn for sys in q.all()]
+
+    @property
+    def server_fqdns(self):
+        session = object_session(self)
+        q = session.query(System)
+        q = q.join(['sislist'])
+        q = q.filter_by(service_instance=self)
+        q = q.reset_joinpoint()
+        q = q.outerjoin(System.dns_domain)
+        q = q.options(contains_eager(System.dns_domain))
+        q = q.order_by(DnsDomain.name, System.name)
+        return [sys.fqdn for sys in q.all()]
 
     def __repr__(self):
         return '(%s) %s %s'% (self.__class__.__name__,

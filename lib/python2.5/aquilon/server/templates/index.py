@@ -131,8 +131,8 @@ def build_index(config, session, profilesdir, clientNotify=True,
                     # service may be unknown
                     srvinfo = get_service(session, service)
                     for instance in srvinfo.instances:
-                        for sis in instance.servers:
-                            service_modules[sis.system.fqdn] = 1
+                        for fqdn in instance.server_fqdns:
+                            service_modules[fqdn] = 1
                 except Exception, e:
                     logger.info("failed to lookup up server module %s: %s" %
                                 (service, e))
