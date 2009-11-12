@@ -54,7 +54,10 @@ class TestRebuild(unittest.TestCase):
         p = Popen(cmd, stdout=1, stderr=2, env=env, cwd=_DIR)
         (out, err) = p.communicate()
 
-        self.assertEqual(p.returncode, 0, "Database rebuild failed:\n%s" % err)
+        self.assertEqual(p.returncode, 0,
+                         "Database rebuild failed with returncode %s:\n"
+                         "STDOUT:\n%s\nSTDERR:\n%s\n" %
+                         (p.returncode, out, err))
 
 
 if __name__=='__main__':
