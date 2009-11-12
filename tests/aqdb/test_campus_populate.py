@@ -120,8 +120,8 @@ class TestCampusPopulate(object):
     def testPopulate(self):
         for c in self.campuses:
             #hack for an empty campus
-            if c.name == 'at':
-                continue
+            #if c.name == 'at':
+            #    continue
 
             cs = CampusDiffStruct(self.dsdb,
                                   self.sess,
