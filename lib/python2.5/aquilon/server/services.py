@@ -37,7 +37,7 @@ from sqlalchemy.orm.session import object_session
 from aquilon.exceptions_ import ArgumentError, InternalError, IncompleteError
 from aquilon.aqdb.model import (Host, Cluster, BuildItem, ServiceMap,
                                 PersonalityServiceMap, ClusterServiceBinding,
-                                ClusterAlignedService)
+                                ClusterAlignedService, ServiceInstance)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
@@ -93,6 +93,8 @@ class Chooser(object):
         self.logger = logger
         self.description = self.generate_description()
         self.logger.debug("Creating service Chooser for %s", self.description)
+        # Cache of the service maps
+        self.mapped_services = {}
         self.staging_services = {}
         """Stores interim service instance lists."""
         self.errors = []
@@ -133,6 +135,7 @@ class Chooser(object):
         self.verify_init()
         self.prestash_primary()
         self.logger.debug("Setting required services")
+        self.cache_service_maps(self.required_services)
         for dbservice in self.required_services:
             self.find_service_instances(dbservice)
         self.check_errors()
@@ -171,6 +174,7 @@ class Chooser(object):
             self.logger.debug("Setting service %s with auto-bind",
                               service.name)
             self.staging_services[service] = None
+            self.cache_service_maps([service])
             self.find_service_instances(service)
         self.check_errors()
         self.choose_cluster_aligned(service)
@@ -193,42 +197,24 @@ class Chooser(object):
         self.apply_changes()
         self.check_errors()
 
+    def cache_service_maps(self, dbservices):
+        self.service_maps = ServiceInstance.get_mapped_instance_cache(
+            self.personality, self.location, dbservices)
+
     def find_service_instances(self, dbservice):
-        """This finds the "closest" service instances, based on the
-        known maps."""
-        locations = [self.location]
-        while (locations[-1].parent is not None and
-               locations[-1].parent != locations[-1]):
-            locations.append(locations[-1].parent)
-        for service_map in [PersonalityServiceMap, ServiceMap]:
-            for location in locations:
-                if service_map == PersonalityServiceMap:
-                    self.logger.debug("Checking personality %s %s service %s "
-                                      "maps for %s %s",
-                                      self.archetype.name,
-                                      self.personality.name,
-                                      dbservice.name,
-                                      location.location_type.capitalize(),
-                                      location.name)
-                    q = self.session.query(service_map)
-                    q = q.filter_by(personality=self.personality)
-                else:
-                    self.logger.debug("Checking service %s maps for %s %s",
-                                      dbservice.name,
-                                      location.location_type.capitalize(),
-                                      location.name)
-                    q = self.session.query(service_map)
-                q = q.filter_by(location=location)
-                q = q.join('service_instance').filter_by(service=dbservice)
-                maps = q.all()
-                instances = [map.service_instance for map in maps]
-                if len(instances) >= 1:
-                    for instance in instances:
-                        self.logger.debug("Found service %s instance %s "
-                                          "in the maps.",
-                                          instance.service.name, instance.name)
-                    self.staging_services[dbservice] = instances
-                    return
+        """This finds the "closest" service instances, based on the known maps.
+
+        It expects that cache_service_maps has been run.
+
+        """
+        instances = self.service_maps.get(dbservice, [])
+        if len(instances) >= 1:
+            for instance in instances:
+                self.logger.debug("Found service %s instance %s "
+                                  "in the maps.",
+                                  instance.service.name, instance.name)
+            self.staging_services[dbservice] = instances
+            return
         self.error("Could not find a relevant service map for service %s "
                    "on %s", dbservice.name, self.description)
 
