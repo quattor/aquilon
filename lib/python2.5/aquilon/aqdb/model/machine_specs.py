@@ -88,13 +88,16 @@ def populate(sess, *args, **kw):
     if len(sess.query(MachineSpecs).all()) < 1:
         from sqlalchemy import insert
 
-        specs = [["hs20-884345u", "xeon_2660", 2, 8192, 'scsi', 36, 2],
-             ["hs21-8853l5u", "xeon_2660", 2, 8192, 'scsi', 68, 2],
-             ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
-             ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
-             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
-             ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
-             ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0]]
+        specs = [
+            ["hs20-884345u", "xeon_2660", 2, 8192, 'scsi', 36, 2],
+            ["hs21-8853l5u", "xeon_2660", 2, 8192, 'scsi', 68, 2],
+            ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
+            ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
+            ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+            ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+            ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0],
+            ["v3160", "amd", "opteron_2600", 2, 16384, 'fibrechannel', 0 , 8],
+            ["v3170", "amd", "opteron_2600", 2, 16384, 'fibrechannel', 0 , 8]]
 
 
         for ms in specs:
