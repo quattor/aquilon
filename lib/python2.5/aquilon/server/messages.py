@@ -32,8 +32,19 @@
 from __future__ import with_statement
 
 from threading import Lock
+from collections import deque
+from logging import DEBUG
 
 from twisted.internet import reactor
+
+
+# Some requests can generate many debug messages.  After this limit is
+# passed older records will be replaced with None.
+# This is somewhat arbitrary as a number.  If each log message was a
+# string of 100 bytes then 10000 would be about 1 MB.  However the log
+# record object has quite a few more fields (source file, line, function
+# name, and potentially exception info) which can bloat this quite a bit.
+MAX_DEBUG_MESSAGES_PER_REQUEST = 10000
 
 
 class RequestStatus(object):
@@ -67,6 +78,7 @@ class RequestStatus(object):
         self.auditid = (auditid is not None) and str(auditid) or None
         self.requestid = requestid
         self.records = []
+        self.debug_fifo = deque()
         self.is_finished = False
         # Dict of subscribers to the length of the records list the last
         # time it was processed by the subscriber.
@@ -80,6 +92,13 @@ class RequestStatus(object):
         """Add a new message into the status log and notify watchers."""
         with self.lock:
             self.records.append(record)
+            # Constrain the number of debug messages kept to keep memory
+            # usage in check.
+            if record.levelno <= DEBUG:
+                self.debug_fifo.append(len(self.records)-1)
+                if len(self.debug_fifo) > MAX_DEBUG_MESSAGES_PER_REQUEST:
+                    remove_index = self.debug_fifo.popleft()
+                    self.records[remove_index] = None
             for (subscriber, processed) in self.subscribers.items():
                 self._notify_subscriber(subscriber, processed)
 
@@ -100,7 +119,11 @@ class RequestStatus(object):
         # messages are finished.  Lock is taken at a higher level when needed.
         known = len(self.records)
         for record_index in range(processed, known):
-            subscriber.process(self.records[record_index])
+            record = self.records[record_index]
+            # The record may have been replaced by None if too many
+            # debug messages were seen.
+            if record is not None:
+                subscriber.process(record)
         if subscriber in self.subscribers:
             self.subscribers[subscriber] = known
 
