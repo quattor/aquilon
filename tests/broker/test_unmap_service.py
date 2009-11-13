@@ -45,52 +45,46 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapafs(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "afs", "--instance", "q.ny.ms.com",
-                        "--archetype", "aquilon"])
+                        "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifyunmapafs(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=afs", "--instance=q.ny.ms.com", "--building=ut"]
         self.notfoundtest(command)
 
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
-                        "--service", "dns", "--instance", "nyinfratest",
-                        "--archetype", "aquilon"])
+                        "--service", "dns", "--instance", "nyinfratest"])
 
     def testverifyunmapdns(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=dns", "--instance=nyinfratest", "--hub=ny"]
         self.notfoundtest(command)
 
     def testunmapaqd(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
-                        "--service", "aqd", "--instance", "ny-prod",
-                        "--archetype", "aquilon"])
+                        "--service", "aqd", "--instance", "ny-prod"])
 
     def testverifyunmapaqd(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=aqd", "--instance=ny-prod", "--campus=ny"]
         self.notfoundtest(command)
 
     def testunmaplemon(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
-                        "--service", "lemon", "--instance", "ny-prod",
-                        "--archetype", "aquilon"])
+                        "--service", "lemon", "--instance", "ny-prod"])
 
     def testverifyunmaplemon(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=lemon", "--instance=ny-prod", "--campus=ny"]
         self.notfoundtest(command)
 
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "bootserver", "--instance", "np.test",
-                        "--archetype", "aquilon"])
+                        "--service", "bootserver", "--instance", "np.test"])
 
     def testverifyunmapbootserver(self):
-        command = ["show_map", "--archetype=aquilon",
-                   "--service=bootserver", "--instance=np.test",
+        command = ["show_map", "--service=bootserver", "--instance=np.test",
                    "--building=ut"]
         self.notfoundtest(command)
 
@@ -109,21 +103,19 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "utsvc", "--instance", "utsi1",
-                        "--archetype", "aquilon"])
+                        "--service", "utsvc", "--instance", "utsi1"])
 
     def testverifyunmaputsi1(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=utsvc", "--instance=utsi1", "--building=ut"]
         self.notfoundtest(command)
 
     def testunmaputsi2(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "utsvc", "--instance", "utsi2",
-                        "--archetype", "aquilon"])
+                        "--service", "utsvc", "--instance", "utsi2"])
 
     def testverifyunmaputsi2(self):
-        command = ["show_map", "--archetype=aquilon",
+        command = ["show_map",
                    "--service=utsvc", "--instance=utsi2", "--building=ut"]
         self.notfoundtest(command)
 
@@ -136,7 +128,6 @@ class TestUnmapService(TestBrokerCommand):
                     continue
                 instance = "ut.%s" % n
                 self.noouttest(["unmap", "service", "--building", "ut",
-                                "--archetype", "aquilon",
                                 "--service", service, "--instance", instance])
 
     def testunmapwithpersona(self):
@@ -152,16 +143,6 @@ class TestUnmapService(TestBrokerCommand):
     # TODO: If/when there is another mapped personality, explicitly skip
     # the unmap operation to test that del_service automatically removes
     # the mapping.
-
-    def testunmapwindowsfail(self):
-        command = ["unmap", "service", "--company", "ms",
-                   "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "windows"]
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out,
-                         "Archetype level ServiceMaps other than "
-                         "aquilon are not yet available",
-                         command)
 
     def testunmapesx(self):
         self.noouttest(["unmap", "service", "--building", "ut",
@@ -191,6 +172,20 @@ class TestUnmapService(TestBrokerCommand):
                         command)
         self.matchclean(out, "Service: esx_management Instance: ut.b ",
                         command)
+
+    def testunmapwindowsfail(self):
+        command = ["unmap", "service", "--company", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--archetype", "windows"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out, "Not all mandatory options specified!", command)
+
+    def testunmapgenericfail(self):
+        command = ["unmap", "service", "--company", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--personality", "generic"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out, "Not all mandatory options specified!", command)
 
 
 if __name__=='__main__':

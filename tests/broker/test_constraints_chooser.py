@@ -102,7 +102,7 @@ class TestChooserConstraints(TestBrokerCommand):
                          command)
 
     def test_210_cleanupservice(self):
-        command = ["unmap_service", "--archetype=aquilon", "--building=ut",
+        command = ["unmap_service", "--building=ut",
                    "--service=chooser_test", "--instance=max_clients"]
         self.noouttest(command)
 

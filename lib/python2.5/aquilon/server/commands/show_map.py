@@ -62,11 +62,11 @@ class CommandShowMap(BrokerCommand):
             q = q.reset_joinpoint()
             queries.append(q)
         elif archetype:
-            if archetype == 'aquilon':
-                queries.append(session.query(ServiceMap))
-            else:
-                raise UnimplementedError("Archetype level ServiceMaps other "
-                                         "than aquilon are not yet available")
+            # Alternately, this could throw an error and ask for personality.
+            q = session.query(PersonalityServiceMap)
+            q = q.join(['personality', 'archetype']).filter_by(name=archetype)
+            q = q.reset_joinpoint()
+            queries.append(q)
         else:
             queries.append(session.query(ServiceMap))
             queries.append(session.query(PersonalityServiceMap))
@@ -87,7 +87,7 @@ class CommandShowMap(BrokerCommand):
         results = ServiceMapList()
         for q in queries:
             results.extend(q.all())
-        if archetype and service and instance and dblocation:
+        if service and instance and dblocation:
             # This should be an exact match.  (Personality doesn't
             # matter... either it was given and it should be an
             # exact match for PersonalityServiceMap or it wasn't

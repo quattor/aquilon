@@ -1158,9 +1158,9 @@
       <optgroup name="unmap_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <option name="instance" type="string" mandatory="True">instance name</option>
-         <option name="archetype" type="string">archetype name</option>
       </optgroup>
-      <optgroup name="unmap_service_personality_opts" fields="any">
+      <optgroup name="unmap_service_personality_opts" mandatory="False" fields="all">
+         <option name="archetype" type="string">archetype name</option>
          <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="unmap_service_location_opts" mandatory="True" fields="any">

@@ -28,38 +28,43 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq unmap service`."""
 
-from aquilon.exceptions_ import UnimplementedError
+
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
-from aquilon.server.dbwrappers.service import get_service
+from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap, Service,
+                                ServiceInstance, Archetype, Personality)
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.server.dbwrappers.service_instance import get_service_instance
 
 
 class CommandUnmapService(BrokerCommand):
 
-    required_parameters = ["service", "instance", "archetype"]
+    required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality,
                **arguments):
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, name=service, compel=True)
+        dbinstance = ServiceInstance.get_unique(session, service=dbservice,
+                                                name=instance, compel=True)
         dblocation = get_location(session, **arguments)
-        dbinstance = get_service_instance(session, dbservice, instance)
 
-        # The archetype is required, so will always be set.
         if personality:
-            dbpersona = get_personality(session, archetype, personality)
-            dbmap = session.query(PersonalityServiceMap).filter_by(
-                personality=dbpersona)
-        elif archetype != 'aquilon':
-            raise UnimplementedError("Archetype level ServiceMaps other "
-                                     "than aquilon are not yet available")
+            if not archetype:
+                # Can't get here with the standard aq client.
+                raise ArgumentError("specifying personality requires you to "
+                                    "also specify archetype")
+            dbarchetype = Archetype.get_unique(session, archetype,
+                                               compel=True)
+            dbpersonality = Personality.get_unique(session,
+                                                   archetype=dbarchetype,
+                                                   name=personality,
+                                                   compel=True)
+            q = session.query(PersonalityServiceMap)
+            q = q.filter_by(personality=dbpersonality)
         else:
-            dbmap = session.query(ServiceMap)
+            q = session.query(ServiceMap)
 
-        dbmap = dbmap.filter_by(location=dblocation,
-                service_instance=dbinstance).first()
+        q = q.filter_by(location=dblocation, service_instance=dbinstance)
+        dbmap = q.first()
 
         if dbmap:
             session.delete(dbmap)
