@@ -94,6 +94,11 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, "'instance' = 'utsi2';", command)
         self.matchoutput(out, "'servers' = list('unittest00.one-nyp.ms.com');", command)
 
+    def testreconfigureunittest00(self):
+        command = "reconfigure --hostname unittest00.one-nyp.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+
     def testverifybindutsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
@@ -111,6 +116,18 @@ class TestBindServer(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
+
+    def testverifycatunittest00(self):
+        command = "cat --hostname unittest00.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "object template unittest00.one-nyp.ms.com",
+                         command)
+        self.matchoutput(out,
+                         "include { 'service/utsvc/utsi1/server/config' };",
+                         command)
+        self.matchoutput(out,
+                         "include { 'service/utsvc/utsi2/server/config' };",
+                         command)
 
 
 if __name__=='__main__':
