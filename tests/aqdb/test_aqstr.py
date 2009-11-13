@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,37 +27,30 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" tests the AqStr column_type """
-import sys
-import os
 
-import unittest
+""" DESCRIBE ME """
+from utils import load_classpath, add, commit
 
-if __name__ == "__main__":
-    #import testing_depends
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..", "lib", "python2.5")
-    sys.path.insert(0, SRCDIR)
-#import nose
+load_classpath()
 
+from nose.tools import raises
 import aquilon.aqdb.depends
-
-import aquilon.aqdb.db_factory         as aqdbf
-import aquilon.aqdb.utils.shell        as shell
-
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 from sqlalchemy import MetaData, Table, Column, Integer, insert, create_engine
-from sqlalchemy.orm import create_session
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from exceptions import TypeError
 
 dsn  = 'sqlite:///:memory:'
 eng  = create_engine(dsn)  #, echo = True)
-Base = declarative_base(engine = eng)
+Base = declarative_base(engine=eng)
 
-s    = create_session(bind = eng, transactional = True)
+Session = scoped_session(sessionmaker(bind=eng))
+assert Session
+
+s = Session()
 
 class StringTbl(Base):
     __tablename__ = 'aqstr_test'
@@ -67,53 +60,46 @@ class StringTbl(Base):
     def __repr__(self):
             return self.__class__.__name__ + ' ' + str(self.name)
 
-class testAqStr(unittest.TestCase):
+def clean_up():
+    pass
 
-    def setUp(self, *args, **kw):
-        StringTbl.__table__.create()
-        self.t = StringTbl.__table__
+def setup():
+    print 'set up'
+    StringTbl.__table__.create()
+    #t = StringTbl.__table__
 
-    def tearDown(self, *args, **kw):
-        #in memory DB, doesn't need any tear down
-        pass
+t = StringTbl.__table__
 
-    def testInsert(self):
-        self.t.insert().execute(name = 'Hi there')
-        o = self.t.select().execute().fetchone()
-        assert o['name'].startswith('h'), 'lower case failure'
+def teardown():
+    print 'tear down'
 
-        self.t.insert().execute(name = '  some eXTRa space     ')
-        p = self.t.select().execute().fetchall()[1]
-        assert p['name'].startswith('s')
 
-        print list(self.t.select().execute())
+def testInsert():
+    t.insert().execute(name = 'Hi there')
+    o = t.select().execute().fetchone()
+    assert o['name'].startswith('h'), 'lower case failure'
 
-    def testObjCreate(self):
-        f = StringTbl(name='  ThisISALONGTEST  ')
-        print "before commit: '%s'"%(f)
+    t.insert().execute(name = '  some eXTRa space     ')
+    p = t.select().execute().fetchall()[1]
+    assert p['name'].startswith('s')
 
-        s.save(f)
-        print 'setting autoexpire = True'
-        s.autoexpire = True
-        s.commit()
-        s.autoexpire = False
+    print list(t.select().execute())
 
-        print "after commit '%s'"%(f)
+def testObjCreate():
+    f = StringTbl(name='  ThisISALONGTEST  ')
+    print "before commit: '%s'"%(f)
 
-        #print "table query: %s"%(s.query(StringTbl).all())
-        print list(self.t.select().execute())
-        s.refresh(f)
-        print "After refresh, f = '%s'"%(f)
+    s.add(f)
+    s.commit()
 
-    def runTest(self):
-        self.setUp()
-        #self.testInsert()
-        self.testObjCreate()
-        #testDelAqStr()
-        self.tearDown()
+    print "after commit '%s'"%(f)
+
+    print "table query: %s"%(s.query(StringTbl).all())
+    print list(t.select().execute())
+    s.refresh(f)
+    print "After refresh, f = '%s'"%(f)
+
 
 if __name__ == "__main__":
-    ta = testAqStr()
-    ta.runTest()
-
-
+    import nose
+    nose.runmodule()

@@ -29,11 +29,9 @@
 # TERMS THAT MAY APPLY.
 """ The way to populate an aqdb instance """
 
-#import os
-#import re
+import os
+import re
 import sys
-#TODO: fix the use of __init__ here
-import __init__
 import logging
 import optparse
 from traceback import print_exc
@@ -41,12 +39,10 @@ from traceback import print_exc
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
 
-# Do any necessary module loads...
-import __init__
+import utils
+utils.load_classpath()
 
 from aquilon.config import Config
-import ms.version
-ms.version.addpkg('ms.modulecmd', '1.0.1', 'dist')
 from ms.modulecmd import Modulecmd
 
 config = Config()
@@ -64,8 +60,7 @@ pkgs = {}
 pkgs['auth'] = ['role', 'realm', 'user_principal']
 
 pkgs['loc'] = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-               'city', 'building', 'room', 'rack', 'desk',
-               'location_search_list', 'search_list_item']
+               'city', 'building', 'room', 'rack', 'desk']
 
 pkgs['net'] = ['dns_domain', 'network']
 
@@ -73,12 +68,10 @@ pkgs['cfg'] = ['archetype', 'personality', 'operating_system']
 
 pkgs['hw'] = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
                 'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
-                'interface', 'observed_mac', 'machine_specs', 'chassis_slot',
-                'console_server_hw', 'serial_cnxn']
+                'interface', 'observed_mac', 'machine_specs', 'chassis_slot']
 
-pkgs['sy'] = ['system', 'domain', 'host',
-                'chassis', 'tor_switch', 'auxiliary', 'manager',
-                'console_server']
+pkgs['sy'] = ['system', 'domain', 'host', 'chassis', 'tor_switch',
+              'auxiliary', 'manager']
 
 pkgs['svc'] = ['service', 'service_instance', 'service_instance_server',
                 'service_map', 'service_list_item', 'cluster', 'metacluster',
@@ -154,12 +147,9 @@ def main(*args, **kw):
     #fill this with module objects if we're populating
     mods_to_populate = []
 
-    s = db.Session()
     cfg_base = db.config.get("broker", "kingdir")
 
-    kwargs = {'log'     : log,
-              'full'    : opts.full,
-              'debug'   : opts.debug,
+    kwargs = {'log' : log, 'full' : opts.full, 'debug' : opts.debug,
               'cfg_base': cfg_base}
 
     for p in order:
@@ -172,7 +162,7 @@ def main(*args, **kw):
                 log.error('Failed to import %s\n' % (module_name, str(e)))
                 sys.exit(9)
 
-            if hasattr(mod,'populate'):
+            if hasattr(mod, 'populate'):
                 mods_to_populate.append(mod)
 
     Base.metadata.create_all(checkfirst=True)

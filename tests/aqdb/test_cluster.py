@@ -37,19 +37,20 @@ from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import (Vendor, Model, Machine, Cpu, Building, Domain,
                                 DnsDomain, Status, Personality, Archetype, Host,
                                 Cluster, EsxCluster, HostClusterMember, Service,
-                                ServiceInstance, Tld, CfgPath,
-                                MachineClusterMember)
+                                ServiceInstance, MachineClusterMember, 
+                                OperatingSystem)
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
 from sqlalchemy.exc import IntegrityError
 
-#from nose.plugins.attrib import attr
 from nose.tools import raises
+import inspect
 
 db = DbFactory()
 sess = db.Session()
 
+ARCHETYPE_NAME = 'vmhost'
 VM_NAME = 'test_vm'
 MACHINE_NAME = 'test_esx_machine'
 HOST_NAME = 'test_esx_host'
@@ -87,14 +88,14 @@ def del_machines():
         for machine in machines:
             sess.delete(machine)
         commit(sess)
-        print 'deleted %s esx machines'%(len(machines))
+        print 'deleted %s esx machines' % (len(machines))
 
     machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
     if machines:
         for vm in machines:
             sess.delete(vm)
         commit(sess)
-        print 'deleted %s virtual machines'%(len(machines))
+        print 'deleted %s virtual machines' % (len(machines))
 
 def del_hosts():
     hosts = sess.query(Host).filter(Host.name.like(HOST_NAME+'%')).all()
@@ -102,7 +103,7 @@ def del_hosts():
         for host in hosts:
             sess.delete(host)
         commit(sess)
-        print 'deleted %s hosts'% (len(hosts))
+        print 'deleted %s hosts' % (len(hosts))
 
 def del_clusters():
     clist = sess.query(Cluster).all()
@@ -110,7 +111,7 @@ def del_clusters():
         for c in clist:
             sess.delete(c)
         commit(sess)
-        print 'deleted %s cluster(s)'%(len(clist))
+        print 'deleted %s cluster(s)' % (len(clist))
 
 def del_cluster_member():
     ech = sess.query(HostClusterMember).filter(Host.name==HOST_NAME).first()
@@ -126,7 +127,7 @@ def test_create_vm():
     np = Building.get_by('name', 'np', sess)[0]
 
     for i in xrange(NUM_MACHINES):
-        vm = Machine(name='%s%s'%(VM_NAME, i), location=np, model = mod,
+        vm = Machine(name='%s%s'%(VM_NAME, i), location=np, model=mod,
                      cpu=proc, cpu_quantity=1, memory=4196)
         add(sess, vm)
     commit(sess)
@@ -134,7 +135,7 @@ def test_create_vm():
     machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
 
     assert len(machines) is NUM_MACHINES
-    print 'created %s machines'%(len(machines))
+    print 'created %s machines' % (len(machines))
 
 def test_create_machines_for_hosts():
     np = Building.get_by('name', 'np', sess)[0]
@@ -151,7 +152,7 @@ def test_create_machines_for_hosts():
         Machine.name.like(MACHINE_NAME+'%')).all()
 
     assert len(machines) is NUM_MACHINES
-    print 'created %s esx machines'%(len(machines))
+    print 'created %s esx machines' % (len(machines))
 
 def esx_machine_factory():
     machines = sess.query(Machine).filter(
@@ -163,10 +164,12 @@ def esx_machine_factory():
 m_factory = esx_machine_factory()
 
 def test_create_hosts():
-    dmn = Domain.get_by('name', 'daqscott', sess)[0]
+    dmn = Domain.get_unique(sess, 'ny-prod')
     dns_dmn = DnsDomain.get_by('name', 'one-nyp.ms.com', sess)[0]
     stat = Status.get_by('name', 'build', sess)[0]
-
+    os = sess.query(OperatingSystem).filter(Archetype.name == 'vmhost').first()
+    assert os, 'No OS in %s' % (inspect.stack()[1][3])
+    
     pers = sess.query(Personality).select_from(
         join(Personality, Archetype)).filter(
         and_(Archetype.name=='vmhost', Personality.name=='generic')).one()
@@ -175,8 +178,8 @@ def test_create_hosts():
 
     for i in xrange(NUM_HOSTS):
         machine = m_factory.next()
-        vm_host = Host(machine=machine, name='%s%s'% (HOST_NAME, i), dns_domain=dns_dmn,
-               domain=dmn, personality=pers, status=stat)
+        vm_host = Host(machine=machine, name='%s%s' % (HOST_NAME, i), dns_domain=dns_dmn,
+               domain=dmn, personality=pers, status=stat, operating_system=os)
         add(sess, vm_host)
 
     sess.autoflush=True

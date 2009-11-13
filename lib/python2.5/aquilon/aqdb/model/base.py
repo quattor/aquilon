@@ -65,18 +65,29 @@ def _describe_uniqueness_request(cls, *args, **kwargs):
 
 
 class Base(object):
+    """ The abstract base class for all aqdb objects """
+
+    def __init__(self, **kw):
+        for k in kw:
+            if not hasattr(type(self), k):
+                msg = "%r is an invalid argument for %s" % (
+                    k, type(self).__name__)
+                raise TypeError(msg)
+            setattr(self, k, kw[k])
+
     def __repr__(self):
         # This functions much more like a __str__ than a __repr__...
         return "%s %s" % (self.__class__._get_class_label(),
                           self._get_instance_label())
 
     @classmethod
-    def get_by(cls,k, v, session):
+    def get_by(cls, k, v, session):
         return session.query(cls).filter(cls.__dict__[k] == v).all()
 
     @classmethod
     def _get_class_label(cls):
         return getattr(cls, "_class_label", cls.__name__)
+
 
     def _get_instance_label(self):
         """Subclasses can override this method or just set a property to check.
@@ -101,6 +112,7 @@ class Base(object):
             if hasattr(self, attr):
                 return getattr(self, attr).name
         return 'instance'
+
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
@@ -230,13 +242,6 @@ class Base(object):
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)
 Base = declarative_base(cls=Base)
 
-@monkeypatch(Base)
-def __init__(self, **kw):
-    for k in kw:
-        if not hasattr(type(self), k):
-            msg = "%r is an invalid argument for %s" %(k, type(self).__name__)
-            raise TypeError(msg)
-        setattr(self, k, kw[k])
 
 # WAY too much magic in AssociationProxy.  This bug and proposed patch is
 # listed in the second half of this message:
@@ -276,4 +281,3 @@ def __get__(self, obj, class_):
         proxy = self._new(self._lazy_collection(weakref.ref(obj)))
         setattr(obj, self.key, (id(obj), proxy))
         return proxy
-

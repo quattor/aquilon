@@ -31,9 +31,6 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import System
-# Pull this in, at least temporarily, because *nothing* else references it
-from aquilon.aqdb.model import ConsoleServer
-
 
 # Should never get invoked...
 class SystemFormatter(ObjectFormatter):

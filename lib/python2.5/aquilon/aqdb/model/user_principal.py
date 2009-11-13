@@ -84,7 +84,7 @@ def populate(sess, *args, **kw):
                    'benjones']
 
         unixeng = ['cesarg', 'jasona', 'dankb', 'goliaa', 'samsh', 'hagberg',
-                   'hookn', 'jelinker', 'kovacsk', 'lookerm', 'walkert', 'af',
+                   'hookn', 'jelinker', 'lookerm', 'walkert', 'af',
                    'lillied']
 
         operations = ['premdasr', 'bestc', 'chawlav', 'wbarnes', 'gleasob',
