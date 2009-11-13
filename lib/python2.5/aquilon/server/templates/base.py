@@ -78,6 +78,26 @@ class Plenary(object):
         self.removed = False
         self.changed = False
 
+    def __hash__(self):
+        """Since equality is based on dbobj, just hash on it."""
+        return hash(self.dbobj)
+
+    def __eq__(self, other):
+        """Plenary objects are equal if they describe the same object.
+
+        Technically this should probably also check that the class
+        matches.  There are some odd cases when the plenary stores
+        extra information, currently ignored.
+
+        """
+        if self.dbobj is None or other.dbobj is None:
+            return False
+        return self.dbobj == other.dbobj
+
+    def __str__(self):
+        """For debug output."""
+        return "Plenary(%s)" % self.dbobj
+
     def pathname(self):
         return os.path.join(self.dir, self.plenary_template + ".tpl")
 
@@ -282,6 +302,33 @@ class PlenaryCollection(object):
     def __init__(self, logger=LOGGER):
         self.plenaries = []
         self.logger = logger
+
+    def __hash__(self):
+        """The hash just needs to be ballpark (and not clash with __eq__)."""
+        if self.plenaries:
+            return hash(self.plenaries[0])
+        return hash(None)
+
+    def __eq__(self, other):
+        """Two collections are equal if they have all the same members.
+
+        This currently requires that the order by the same.  It's good
+        enough for now - really we just want (for example) the
+        ServiceInstance plenary collection to evaluate as equal, and
+        those members will always be defined in the same order.
+
+        """
+        if len(self.plenaries) != len(other.plenaries):
+            return False
+        for (i, j) in zip(self.plenaries, other.plenaries):
+            if i != j:
+                return False
+        return True
+
+    def __str__(self):
+        """For debug output."""
+        return "PlenaryCollection(%s)" % ", ".join([str(plenary) for plenary
+                                                    in self.plenaries])
 
     def stash(self):
         for plen in self.plenaries:

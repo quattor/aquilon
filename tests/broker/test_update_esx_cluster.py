@@ -58,7 +58,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         default_max = self.config.get("broker",
                                       "esx_cluster_max_members_default")
         self.matchoutput(out, "esx cluster: utecl4", command)
-        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
@@ -76,7 +76,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = "show esx_cluster --cluster utecl2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl2", command)
-        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 5:2", command)
@@ -97,7 +97,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = "show esx_cluster --cluster utecl3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl3", command)
-        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
@@ -165,7 +165,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl1", command)
-        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Rack: ut10", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)

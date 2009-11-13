@@ -28,6 +28,9 @@
 # TERMS THAT MAY APPLY.
 """Basic module for running tests on broker commands."""
 
+
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
@@ -474,6 +477,12 @@ class TestBrokerCommand(unittest.TestCase):
         self.fail("Error return code for %s, "
                   "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                   % (command, out, err))
+
+    def writescratch(self, filename, contents):
+        scratchfile = os.path.join(self.scratchdir, filename)
+        with open(scratchfile, 'w') as f:
+            f.write(contents)
+        return scratchfile
 
 
 class DummyIP(object):

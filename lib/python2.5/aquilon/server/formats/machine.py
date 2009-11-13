@@ -74,7 +74,7 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in machine.disks:
             extra = d.disk_type
-            if d.disk_type == "nas":
+            if d.disk_type == "nas" and d.service_instance:
                 extra = extra + " from " + d.service_instance.name
             details.append(indent + "  Disk: %s %d GB %s (%s)"
                     % (d.device_name, d.capacity, d.controller_type,

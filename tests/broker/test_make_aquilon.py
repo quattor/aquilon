@@ -242,35 +242,44 @@ class TestMakeAquilon(TestBrokerCommand):
         # 71 - 80 UNUSED
         # 81 - 90 are unixeng-test below
         # 91 - 99 are reserved for testing failure conditions
-        for i in range(61, 66):
-            hostname = "aquilon%d.aqd-unittest.ms.com" % i
-            command = ["make", "aquilon", "--hostname", hostname,
-                       "--os", "linux/4.0.1-x86_64"]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "%s adding binding" % hostname, command)
-            self.matchclean(err, "removing binding", command)
+        # Note that make and reconfigure are basically the same thing for
+        # a compileable archetype, so testing reconfigure --hostlist here.
+        # (This used to be a loop for make.)
+        hosts = ["aquilon%d.aqd-unittest.ms.com\n" % i for i in range(61, 66)]
+        scratchfile = self.writescratch("hpinventory", "".join(hosts))
+        command = ["reconfigure", "--hostlist", scratchfile]
+        (out, err) = self.successtest(command)
+        for hostname in hosts:
+            h = hostname.strip()
+            self.matchoutput(err, "%s adding binding" % h, command)
+        self.matchclean(err, "removing binding", command)
 
     def testmakerhel5(self):
-        for i in range(66, 71):
-            hostname = "aquilon%d.aqd-unittest.ms.com" % i
-            command = ["make", "aquilon", "--hostname", hostname,
-                       "--os", "linux/5.0-x86_64"]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "%s adding binding" % hostname, command)
-            self.matchclean(err, "removing binding", command)
+        hosts = ["aquilon%d.aqd-unittest.ms.com\n" % i for i in range(66, 71)]
+        scratchfile = self.writescratch("rhel5hosts", "".join(hosts))
+        command = ["reconfigure", "--hostlist", scratchfile,
+                   "--buildstatus=build", "--archetype=aquilon",
+                   "--osname=linux", "--osversion=5.0-x86_64"]
+        (out, err) = self.successtest(command)
+        for hostname in hosts:
+            h = hostname.strip()
+            self.matchoutput(err, "%s adding binding" % h, command)
+        self.matchclean(err, "removing binding", command)
 
     def testmakehpunixeng(self):
-        for i in range(81, 91):
-            hostname = "aquilon%d.aqd-unittest.ms.com" % i
-            command = ["make", "aquilon", "--hostname", hostname,
-                       "--personality", "unixeng-test",
-                       "--os", "linux/4.0.1-x86_64"]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "%s adding binding" % hostname, command)
-            self.matchoutput(err, "service chooser1", command)
-            self.matchoutput(err, "service chooser2", command)
-            self.matchoutput(err, "service chooser3", command)
-            self.matchclean(err, "removing binding", command)
+        hosts = ["aquilon%d.aqd-unittest.ms.com\n" % i for i in range(81, 90)]
+        scratchfile = self.writescratch("hpunixeng", "".join(hosts))
+        command = ["reconfigure", "--hostlist", scratchfile,
+                   "--archetype=aquilon", "--personality=unixeng-test"]
+        (out, err) = self.successtest(command)
+        for hostname in hosts:
+            h = hostname.strip()
+            self.matchoutput(err, "%s adding binding" % h, command)
+        self.matchclean(err, "removing binding", command)
+        self.matchoutput(err, "service chooser1", command)
+        self.matchoutput(err, "service chooser2", command)
+        self.matchoutput(err, "service chooser3", command)
+        self.matchclean(err, "removing binding", command)
 
     def testmissingrequiredservice(self):
         command = ["make", "aquilon",

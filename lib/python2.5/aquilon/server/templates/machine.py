@@ -112,7 +112,7 @@ class PlenaryMachineInfo(Plenary):
                 disk_dev_info = "create('%s', \n" \
                     "                   'capacity', %d*GB)" % \
                     (relpath, disk.capacity)
-            elif disk.disk_type == 'nas':
+            elif disk.disk_type == 'nas' and disk.service_instance:
                 relpath = "service/nas_disk_share/%s/client/nasinfo" % \
                     disk.service_instance.name
                 diskpath = "%s/%s.vmdk" % (self.machine, disk.device_name)

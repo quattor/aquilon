@@ -152,7 +152,9 @@ class PlenaryServiceInstanceToplevel(Plenary):
         lines.append("include { 'servicedata/%(service)s/config' };" % self.__dict__)
         lines.append("")
         lines.append("'instance' = '%(name)s';" % self.__dict__)
-        lines.append("'servers' = list(" + ", ".join([("'" + sis.system.fqdn + "'") for sis in self.dbinstance.servers]) + ");")
+        lines.append("'servers' = list(%s);" %
+                     ", ".join(["'%s'" % fqdn for fqdn
+                                in self.dbinstance.server_fqdns]))
 
 
 class PlenaryServiceInstanceServer(Plenary):

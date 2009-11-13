@@ -44,13 +44,13 @@ from brokertest import TestBrokerCommand
 class TestMetaClusterConstraints(TestBrokerCommand):
 
     def testdelmetaclusterwithclusters(self):
-        command = "del metacluster --metacluster namc1"
+        command = "del metacluster --metacluster utmc1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Metacluster still in use by clusters", command)
 
     def testfailrebindmetacluster(self):
         command = ["rebind_metacluster", "--cluster=utecl1",
-                   "--metacluster=namc2"]
+                   "--metacluster=utmc2"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot move cluster to a new metacluster "

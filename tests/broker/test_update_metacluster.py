@@ -47,28 +47,28 @@ class TestUpdateMetaCluster(TestBrokerCommand):
     def testupdatenoop(self):
         default_max = self.config.get("broker",
                                       "metacluster_max_members_default")
-        self.noouttest(["update_metacluster", "--metacluster=namc1",
+        self.noouttest(["update_metacluster", "--metacluster=utmc1",
                         "--max_members=%s" % default_max])
 
     def testverifynoop(self):
-        command = "show metacluster --metacluster namc1"
+        command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
         default_max = self.config.get("broker",
                                       "metacluster_max_members_default")
-        self.matchoutput(out, "MetaCluster: namc1", command)
+        self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchclean(out, "Comments", command)
 
-    def testupdatenamc2(self):
-        command = ["update_metacluster", "--metacluster=namc2",
+    def testupdateutmc2(self):
+        command = ["update_metacluster", "--metacluster=utmc2",
                    "--max_members=98", "--max_shares=88",
                    "--comments", "MetaCluster with a new comment"]
         self.noouttest(command)
 
-    def testverifynamc2(self):
-        command = "show metacluster --metacluster namc2"
+    def testverifyutmc2(self):
+        command = "show metacluster --metacluster utmc2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: namc2", command)
+        self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 98", command)
         self.matchoutput(out, "Max shares: 88", command)
         self.matchoutput(out, "Comments: MetaCluster with a new comment",
@@ -82,21 +82,21 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          command)
 
     def testfailreducemaxmembers(self):
-        command = ["update_metacluster", "--metacluster=namc3",
+        command = ["update_metacluster", "--metacluster=utmc3",
                    "--max_members=-1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "metacluster namc3 already exceeds -1 "
+                         "metacluster utmc3 already exceeds -1 "
                          "max_members with 0 clusters currently bound",
                          command)
 
     def testfailreducemaxshares(self):
-        command = ["update_metacluster", "--metacluster=namc1",
+        command = ["update_metacluster", "--metacluster=utmc1",
                    "--max_shares=6"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot set max_shares to 6: Metacluster "
-                         "namc1 has 8 shares already attached.",
+                         "utmc1 has 8 shares already attached.",
                          command)
 
     # FIXME: Need tests for plenary templates

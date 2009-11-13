@@ -45,7 +45,7 @@ class TestRebindMetaCluster(TestBrokerCommand):
 
     def testfailinvalidcluster(self):
         command = ["rebind_metacluster", "--cluster=cluster-does-not-exist",
-                   "--metacluster=namc1"]
+                   "--metacluster=utmc1"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Cluster 'cluster-does-not-exist' not found.",
@@ -61,13 +61,13 @@ class TestRebindMetaCluster(TestBrokerCommand):
 
     def testfailfullmetacluster(self):
         command = ["rebind_metacluster", "--cluster=utecl4",
-                   "--metacluster=namc3"]
+                   "--metacluster=utmc3"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "namc3 already at maximum capacity (0)", command)
+        self.matchoutput(out, "utmc3 already at maximum capacity (0)", command)
 
     def testrebindutecl3(self):
         command = ["rebind_metacluster", "--cluster=utecl3",
-                   "--metacluster=namc1"]
+                   "--metacluster=utmc1"]
         self.noouttest(command)
 
     def testverifyrebindutecl3(self):
@@ -75,7 +75,7 @@ class TestRebindMetaCluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl3;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl3';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
 

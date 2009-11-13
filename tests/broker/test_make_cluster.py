@@ -68,7 +68,7 @@ class TestMakeCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.searchoutput(out,
@@ -99,7 +99,7 @@ class TestMakeCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl2;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl2';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.searchoutput(out,
