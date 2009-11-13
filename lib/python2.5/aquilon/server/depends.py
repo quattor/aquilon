@@ -26,8 +26,12 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries, and the defaults for the 
-    binaries shipped.
+""" Suggested versions of external libraries.
+
+These versions are the defaults for the binaries shipped.
+
+Anything referencing aquilon.server.depends should also set up the
+dependencies listed in aquilon.aqdb.depends.
     
 """
 
@@ -45,6 +49,6 @@ ms.version.addpkg('protoc', 'prod', meta='aquilon')
 ms.version.addpkg('zope.interface', '3.5.2', 'dist')
 ms.version.addpkg('twisted', '8.2.0-ms1', 'dist')
 ms.version.addpkg('ms.modulecmd', '1.0.1', 'dist')
-ms.version.addpkg('coverage', '2.80', 'dist')
+# The coverage module is made available by aqdb.depends.
 
 

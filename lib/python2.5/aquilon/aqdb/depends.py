@@ -43,3 +43,5 @@ ms.version.addpkg('ipython', '0.9.1')
 ms.version.addpkg('nose', '0.11.0')
 
 ms.version.addpkg('ms.modulecmd', '1.0.2')
+
+ms.version.addpkg('coverage', '3.1')
