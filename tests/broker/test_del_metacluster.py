@@ -44,34 +44,34 @@ from brokertest import TestBrokerCommand
 
 class TestDelMetaCluster(TestBrokerCommand):
 
-    def testdelnamc1(self):
-        command = ["del_metacluster", "--metacluster=namc1"]
+    def testdelutmc1(self):
+        command = ["del_metacluster", "--metacluster=utmc1"]
         self.noouttest(command)
 
-    def testverifydelnamc1(self):
-        command = ["show_metacluster", "--metacluster=namc1"]
+    def testverifydelutmc1(self):
+        command = ["show_metacluster", "--metacluster=utmc1"]
         self.notfoundtest(command)
 
-    def testdelnamc2(self):
-        command = ["del_metacluster", "--metacluster=namc2"]
+    def testdelutmc2(self):
+        command = ["del_metacluster", "--metacluster=utmc2"]
         self.noouttest(command)
 
-    def testverifydelnamc2(self):
-        command = ["show_metacluster", "--metacluster=namc2"]
+    def testverifydelutmc2(self):
+        command = ["show_metacluster", "--metacluster=utmc2"]
         self.notfoundtest(command)
 
-    def testdelnamc3(self):
-        command = ["del_metacluster", "--metacluster=namc3"]
+    def testdelutmc3(self):
+        command = ["del_metacluster", "--metacluster=utmc3"]
         self.noouttest(command)
 
-    def testverifydelnamc3(self):
-        command = ["show_metacluster", "--metacluster=namc3"]
+    def testverifydelutmc3(self):
+        command = ["show_metacluster", "--metacluster=utmc3"]
         self.notfoundtest(command)
 
     def testverifyall(self):
         command = ["show_metacluster", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "Metacluster: namc", command)
+        self.matchclean(out, "Metacluster: utmc", command)
 
     def testdelnotfound(self):
         command = ["del_metacluster",

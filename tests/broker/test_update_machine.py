@@ -420,8 +420,8 @@ class TestUpdateMachine(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot move machine to a new "
-                         "metacluster: Current metacluster namc1 "
-                         "does not match new metacluster namc2",
+                         "metacluster: Current metacluster utmc1 "
+                         "does not match new metacluster utmc2",
                          command)
 
     def testfailfullcluster(self):

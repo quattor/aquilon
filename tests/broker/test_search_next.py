@@ -152,20 +152,20 @@ class TestSearchNext(TestBrokerCommand):
         self.matchclean(out, "newseries", command)
 
     def testmetaclusterdefault(self):
-        command = ["search_next", "--metacluster=namc"]
+        command = ["search_next", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "namc4", command)
+        self.matchoutput(out, "utmc4", command)
 
     def testmetaclusterfullname(self):
-        command = ["search_next", "--fullname", "--metacluster=namc"]
+        command = ["search_next", "--fullname", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "namc4", command)
+        self.matchoutput(out, "utmc4", command)
 
     def testmetaclusternumber(self):
-        command = ["search_next", "--number", "--metacluster=namc"]
+        command = ["search_next", "--number", "--metacluster=utmc"]
         out = self.commandtest(command)
         self.matchoutput(out, "4", command)
-        self.matchclean(out, "namc", command)
+        self.matchclean(out, "utmc", command)
 
     def testmetaclusterdefaultmissing(self):
         command = ["search_next", "--metacluster=newseries"]

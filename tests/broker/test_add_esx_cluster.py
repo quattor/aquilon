@@ -49,7 +49,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testaddutecl1(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
-                   "--metacluster=namc1", "--building=ut",
+                   "--metacluster=utmc1", "--building=ut",
                    "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
@@ -62,7 +62,7 @@ class TestAddESXCluster(TestBrokerCommand):
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
         self.matchoutput(out, "esx cluster: utecl1", command)
-        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
@@ -77,14 +77,14 @@ class TestAddESXCluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.matchclean(out, "include { 'service", command)
 
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
-                   "--metacluster=namc1", "--building=ut",
+                   "--metacluster=utmc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server",
                    "--domain=unittest",
                    "--max_members=101", "--vm_to_host_ratio=1:2",
@@ -95,7 +95,7 @@ class TestAddESXCluster(TestBrokerCommand):
         command = "show esx_cluster --cluster utecl2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "esx cluster: utecl2", command)
-        self.matchoutput(out, "Metacluster: namc1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
         self.matchoutput(out, "vm_to_host_ratio: 1:2", command)
@@ -110,14 +110,14 @@ class TestAddESXCluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl2;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl2';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.matchclean(out, "include { 'service", command)
 
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
-                   "--metacluster=namc1", "--building=ut",
+                   "--metacluster=utmc1", "--building=ut",
                    "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -125,7 +125,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testfailaddnoncampus(self):
         command = ["add_esx_cluster", "--cluster=uteclfail",
-                   "--metacluster=namc1", "--country=us",
+                   "--metacluster=utmc1", "--country=us",
                    "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -144,7 +144,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailinvalidname(self):
         command = ["add_esx_cluster", "--cluster=invalid?!?",
                    "--domain=unittest",
-                   "--metacluster=namc1", "--building=ut",
+                   "--metacluster=utmc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'invalid?!?' is not a valid value for cluster",
@@ -153,10 +153,10 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailnoroom(self):
         command = ["add_esx_cluster", "--cluster=newcluster",
                    "--domain=unittest",
-                   "--metacluster=namc3", "--building=ut",
+                   "--metacluster=utmc3", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "namc3 already at maximum capacity (0)", command)
+        self.matchoutput(out, "utmc3 already at maximum capacity (0)", command)
 
     def testverifyshowall(self):
         command = "show esx_cluster --all"
@@ -165,9 +165,9 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "esx cluster: utecl2", command)
 
     def testverifyshowmetacluster(self):
-        command = "show metacluster --metacluster namc1"
+        command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: namc1", command)
+        self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Member: esx cluster utecl1", command)
         self.matchoutput(out, "Member: esx cluster utecl2", command)
         self.matchclean(out, "Member: esx cluster utecl3", command)
@@ -179,7 +179,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testaddutecl3(self):
         command = ["add_esx_cluster", "--cluster=utecl3",
                    "--max_members=0",
-                   "--metacluster=namc2", "--building=ut",
+                   "--metacluster=utmc2", "--building=ut",
                    "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
@@ -190,7 +190,7 @@ class TestAddESXCluster(TestBrokerCommand):
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
         self.matchoutput(out, "esx cluster: utecl3", command)
-        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 0", command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
@@ -205,7 +205,7 @@ class TestAddESXCluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl3;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl3';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc2';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc2';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.matchclean(out, "include { 'service", command)
@@ -213,7 +213,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testaddutecl4(self):
         # Bog standard - used for some noop tests
         command = ["add_esx_cluster", "--cluster=utecl4",
-                   "--metacluster=namc2", "--building=ut",
+                   "--metacluster=utmc2", "--building=ut",
                    "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
@@ -226,7 +226,7 @@ class TestAddESXCluster(TestBrokerCommand):
         default_max = self.config.get("broker",
                                       "esx_cluster_max_members_default")
         self.matchoutput(out, "esx cluster: utecl4", command)
-        self.matchoutput(out, "Metacluster: namc2", command)
+        self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
@@ -241,7 +241,7 @@ class TestAddESXCluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "object template clusters/utecl4;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl4';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc2';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc2';", command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.matchclean(out, "include { 'service", command)

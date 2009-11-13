@@ -43,16 +43,16 @@ from brokertest import TestBrokerCommand
 
 class TestAddMetaCluster(TestBrokerCommand):
 
-    def testaddnamc1(self):
-        command = "add metacluster --metacluster namc1 --max_shares 8"
+    def testaddutmc1(self):
+        command = "add metacluster --metacluster utmc1 --max_shares 8"
         self.noouttest(command.split(" "))
 
-    def testverifynamc1(self):
-        command = "show metacluster --metacluster namc1"
+    def testverifyutmc1(self):
+        command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
         default_members = self.config.get("broker",
                                           "metacluster_max_members_default")
-        self.matchoutput(out, "MetaCluster: namc1", command)
+        self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_members, command)
         self.matchoutput(out, "Max shares: 8", command)
         self.matchclean(out, "Comments", command)
@@ -60,36 +60,36 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchclean(out, "Share:", command)
 
     def testfailaddexisting(self):
-        command = "add metacluster --metacluster namc1"
+        command = "add metacluster --metacluster utmc1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Metacluster 'namc1' already exists", command)
+        self.matchoutput(out, "Metacluster 'utmc1' already exists", command)
 
-    def testaddnamc2(self):
-        command = ["add_metacluster", "--metacluster=namc2",
+    def testaddutmc2(self):
+        command = ["add_metacluster", "--metacluster=utmc2",
                    "--max_members=99", "--max_shares=89",
                    "--comments", "MetaCluster with a comment"]
         self.noouttest(command)
 
-    def testverifynamc2(self):
-        command = "show metacluster --metacluster namc2"
+    def testverifyutmc2(self):
+        command = "show metacluster --metacluster utmc2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: namc2", command)
+        self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 99", command)
         self.matchoutput(out, "Max shares: 89", command)
         self.matchoutput(out, "Comments: MetaCluster with a comment", command)
 
-    def testaddnamc3(self):
-        command = ["add_metacluster", "--metacluster=namc3",
+    def testaddutmc3(self):
+        command = ["add_metacluster", "--metacluster=utmc3",
                    "--max_members=0",
                    "--comments", "MetaCluster with no members allowed"]
         self.noouttest(command)
 
-    def testverifynamc3(self):
+    def testverifyutmc3(self):
         default_shares = self.config.get("broker",
                                          "metacluster_max_shares_default")
-        command = "show metacluster --metacluster namc3"
+        command = "show metacluster --metacluster utmc3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: namc3", command)
+        self.matchoutput(out, "MetaCluster: utmc3", command)
         self.matchoutput(out, "Max members: 0", command)
         self.matchoutput(out, "Max shares: %s" % default_shares, command)
         self.matchoutput(out, "Comments: MetaCluster with no members allowed",
@@ -98,9 +98,9 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: namc1", command)
-        self.matchoutput(out, "MetaCluster: namc2", command)
-        self.matchoutput(out, "MetaCluster: namc3", command)
+        self.matchoutput(out, "MetaCluster: utmc1", command)
+        self.matchoutput(out, "MetaCluster: utmc2", command)
+        self.matchoutput(out, "MetaCluster: utmc3", command)
 
     def testnotfoundmetacluster(self):
         command = "show metacluster --metacluster metacluster-does-not-exist"

@@ -118,9 +118,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          command)
 
     def test_190_verifyadddisk(self):
-        command = ["show_metacluster", "--metacluster=namc1"]
+        command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "MetaCluster: namc1", command)
+        self.matchoutput(out, "MetaCluster: utmc1", command)
         for i in range(1, 9):
             self.matchoutput(out, "Share: test_share_%s" % i, command)
         self.matchclean(out, "Share: test_share_9", command)
@@ -197,7 +197,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
-        self.matchoutput(out, "'/system/metacluster/name' = 'namc1';", command)
+        self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.matchoutput(out, "'/system/cluster/machines' = nlist(", command)
         for i in range(1, 9):
             machine = "evm%s" % i
