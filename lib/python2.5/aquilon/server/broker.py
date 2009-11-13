@@ -109,6 +109,10 @@ class BrokerCommand(object):
 
     """
 
+    # Run the render method on a separate thread.  This will be forced
+    # to True if requires_azcheck or requires_transaction.
+    defer_to_thread = True
+
     def __init__(self):
         """ Provides some convenient variables for commands.
 
@@ -144,6 +148,14 @@ class BrokerCommand(object):
         if self.action.startswith("cat"):
             self.requires_format = True
         self._update_render(self.render)
+        if not self.defer_to_thread:
+            if self.requires_azcheck or self.requires_transaction:
+                self.defer_to_thread = True
+                log.msg("Forcing defer_to_thread to True because of "
+                        "required authorization or transaction for %s" %
+                        self.command)
+            # Not sure how to handle formatting with deferred...
+            self.requires_format = False
 
     def render(self, **arguments):
         """ Implement this method to create a functional broker command.

@@ -160,6 +160,7 @@ class StatusThread(Thread):
         self.response_status = None
         self.retry = 5
         self.outstream = outstream
+        self.waiting_for_request = True
         Thread.__init__(self)
 
     def run(self):
@@ -170,10 +171,11 @@ class StatusThread(Thread):
             pass
 
     def show_request(self):
-        # Delay before attempting to retrive status messages.
+        # Delay before attempting to retrieve status messages.
         # We want to give the main thread a chance to compose and send the
         # original request before we send the status request.
-        sleep(.1)
+        while self.waiting_for_request:
+            sleep(.1)
         #print >>sys.stderr, "Attempting status connection..."
         if self.authuser:
             sconn = KNCHTTPConnection(self.host, self.port, self.authuser)
@@ -194,6 +196,7 @@ class StatusThread(Thread):
            self.retry > 0:
             self.retry -= 1
             # Maybe the command has not gotten to the server yet... retry.
+            sleep(.1)
             return self.show_request()
 
         if res.status != httplib.OK:
@@ -327,6 +330,7 @@ if __name__ == "__main__":
 
     if command == "show_request":
         status_thread.outstream = sys.stdout
+        status_thread.waiting_for_request = False
         status_thread.start()
         status_thread.join()
         if not status_thread.response_status or \
@@ -382,6 +386,8 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # handle failed requests
+        if status_thread:
+            status_thread.waiting_for_request = False
         res = conn.getresponse()
 
     except (httplib.HTTPException, socket.error), e:

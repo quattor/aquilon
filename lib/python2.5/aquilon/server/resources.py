@@ -162,8 +162,13 @@ class ResponsePage(resource.Resource):
             style = getattr(request, "output_format", None)
         if style is None:
             style = getattr(handler, "default_style", "raw")
-        d = d.addCallback(lambda arguments: threads.deferToThread(
+        if handler.defer_to_thread:
+            d = d.addCallback(lambda arguments: threads.deferToThread(
                 handler.render, style=style, request=request, **arguments))
+        else:
+            d = d.addCallback(lambda arguments: handler.render(style=style,
+                                                               request=request,
+                                                               **arguments))
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
