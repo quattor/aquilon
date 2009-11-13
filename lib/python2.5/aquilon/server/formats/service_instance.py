@@ -39,13 +39,21 @@ class ServiceInstanceFormatter(ObjectFormatter):
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.name)]
-        details.append(self.redirect_raw(si.cfg_path, indent + "  "))
+        details.append(indent + "  Template: %s" % si.cfg_path)
         for sis in si.servers:
             details.append(indent + "  Server: %s" % sis.system.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: %s %s" %
                     (map.location.location_type.capitalize(),
                     map.location.name))
+        for pmap in si.personality_service_map:
+            details.append(indent +
+                           "  Personality Service Map: %s %s "
+                           "(Archetype %s Personality %s)" %
+                           (pmap.location.location_type.capitalize(),
+                            pmap.location.name,
+                            pmap.personality.archetype.name,
+                            pmap.personality.name))
         max_clients = si.max_clients
         if max_clients is None:
             if si.service.max_clients is None:
