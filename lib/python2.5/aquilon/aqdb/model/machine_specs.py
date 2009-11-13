@@ -86,36 +86,50 @@ table = machine_specs
 
 def populate(sess, *args, **kw):
     if len(sess.query(MachineSpecs).all()) < 1:
-        from sqlalchemy import insert
+        import inspect
 
-        specs = [["hs20-884345u", "xeon_2660", 2, 8192, 'scsi', 36, 2],
-             ["hs21-8853l5u", "xeon_2660", 2, 8192, 'scsi', 68, 2],
-             ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
-             ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
-             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
-             ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
-             ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0]]
+        specs = [
+            ["hs20-884345u", "xeon_2660", 2, 8192, 'scsi', 36, 2],
+            ["hs21-8853l5u", "xeon_2660", 2, 8192, 'scsi', 68, 2],
+            ["poweredge_6650", "xeon_3000", 4, 16384, 'scsi', 36, 2],
+            ["bl45p", "opteron_2600", 2, 32768, 'scsi', 36, 2],
+            ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+            ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
+            ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0],
+            ["v3160", "opteron_2600", 2, 16384, 'fibrechannel', 0 , 8],
+            ["v3170", "opteron_2600", 2, 16384, 'fibrechannel', 0 , 8]]
 
 
         for ms in specs:
             try:
                 dbmodel = sess.query(Model).filter_by(name=ms[0]).one()
+                if not dbmodel:
+                    print 'no model found for %s in %s' % (
+                        ms[0], inspect.stack()[1][3])
+
                 dbcpu = sess.query(Cpu).filter_by(name=ms[1]).one()
+                if not dbcpu:
+                    print 'no cpu found for %s in %s' % (
+                        ms[1], inspect.stack()[1][3])
+
                 cpu_quantity = ms[2]
                 memory = ms[3]
                 disk_type = 'local'
                 controller_type = ms[4]
                 disk_capacity = ms[5]
                 nic_count = ms[6]
+
                 dbms = MachineSpecs(model=dbmodel, cpu=dbcpu,
                         cpu_quantity=cpu_quantity, memory=memory,
                         disk_type=disk_type, controller_type=controller_type,
                         disk_capacity=disk_capacity, nic_count=nic_count)
                 sess.add(dbms)
+
             except Exception,e:
                 sess.rollback()
-                print 'Creating machine specs: %s' % e
+                print 'Creating machine specs for %s %s' % (ms[0], e)
                 continue
+
             try:
                 sess.commit()
             except Exception,e:

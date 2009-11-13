@@ -39,7 +39,8 @@ from aquilon.aqdb.model import Base, Machine, ServiceInstance
 from aquilon.aqdb.column_types import AqStr, Enum
 
 disk_types = ['local', 'nas', 'san']
-controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash']
+controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
+                    'fibrechannel']
 
 _TN = 'disk'
 class Disk(Base):

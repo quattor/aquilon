@@ -39,6 +39,8 @@ from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'vendor'
+_VENDORS = ['bnt', 'cisco', 'virtual', 'aurora_vendor', 'netapp']
+
 
 class Vendor(Base):
     """ Vendor names """
@@ -87,7 +89,7 @@ def populate(sess, **kw):
                         continue
                     created.append(j)
 
-        for v in ['bnt', 'cisco', 'virtual', 'aurora_vendor']:
+        for v in _VENDORS:
             if not v in created:
                 dbv = Vendor(name=v)
                 try:
