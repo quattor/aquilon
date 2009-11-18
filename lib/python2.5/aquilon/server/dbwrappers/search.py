@@ -31,20 +31,33 @@
 
 import re
 
+from aquilon.server.broker import force_int
 
 int_re = re.compile(r'(\d+)')
 
-def search_next(session, cls, attr, value, **filters):
+def search_next(session, cls, attr, value, start, pack, **filters):
     q = session.query(cls).filter(attr.startswith(value))
     if filters:
         q = q.filter_by(**filters)
-    found = 0
+    if start:
+        start = force_int("start", start)
+    else:
+        start = 1
+    entries = []
     for item in q.all():
         m = int_re.match(item.name[len(value):])
         if m:
             n = int(m.group(1))
-            if n > found:
-                found = n
-    return found + 1
-
-
+            # Only remember entries that we care about...
+            if n >= start:
+                entries.append(n)
+    if not entries:
+        return start
+    entries.sort()
+    if pack:
+        expecting = start
+        for current in entries:
+            if current > expecting:
+                return expecting
+            expecting += 1
+    return entries[-1] + 1

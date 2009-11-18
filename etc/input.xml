@@ -252,10 +252,14 @@
       Search for the next available number in a series.  If entries are
       found in the database of the prefix followed by a number, the
       numbers are sorted and the highest number plus one is returned.
-      If no entries are found, the command returns 1.
+      If no entries are found, the command returns 1.  If the --pack
+      option is given the first free value is returned instead of choosing
+      one past the highest.  This will fill in any "holes" in the sequence.
 
       Use the --number flag to return just that number, otherwise
       return the full name.
+
+      Use the --start option to count from a number other than 1.
 
       Examples:
 
@@ -278,6 +282,8 @@
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="number" type="boolean">show only the next number</option>
          <option name="fullname" type="boolean">show the next available full name (default)</option>
+         <option name="pack" type="boolean">Return first free value</option>
+         <option name="start" type="string">Start counting at a different number than one</option>
       </optgroup>
       <transport method="get" trigger="short" path="find/next/system" />
       <transport method="get" trigger="machine" path="find/next/machine" />

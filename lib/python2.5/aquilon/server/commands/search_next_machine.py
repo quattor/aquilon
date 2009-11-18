@@ -38,9 +38,10 @@ class CommandSearchNextMachine(BrokerCommand):
 
     required_parameters = ['machine']
 
-    def render(self, session, machine, number, fullname, **arguments):
+    def render(self, session, machine, start, number, fullname, pack,
+               **arguments):
         result = search_next(session=session, cls=Machine, attr=Machine.name,
-                             value=machine)
+                             value=machine, start=start, pack=pack)
         if number:
             return str(result)
         return "%s%d" % (machine, result)

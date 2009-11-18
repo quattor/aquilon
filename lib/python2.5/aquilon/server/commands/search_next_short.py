@@ -39,11 +39,12 @@ class CommandSearchNextShort(BrokerCommand):
 
     required_parameters = ['short', 'dns_domain']
 
-    def render(self, session, short, dns_domain, number, fullname,
+    def render(self, session, short, dns_domain, start, number, fullname, pack,
                **arguments):
         dbdns_domain = get_dns_domain(session, dns_domain)
         result = search_next(session=session, cls=System, attr=System.name,
-                             value=short, dns_domain=dbdns_domain)
+                             value=short, dns_domain=dbdns_domain,
+                             start=start, pack=pack)
         if number:
             return str(result)
         return "%s%d.%s" % (short, result, dbdns_domain.name)

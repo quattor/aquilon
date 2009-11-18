@@ -183,6 +183,31 @@ class TestSearchNext(TestBrokerCommand):
         self.matchoutput(out, "1", command)
         self.matchclean(out, "newseries", command)
 
+    def testnewstart(self):
+        command = ["search_next", "--start=9", "--metacluster=newseries"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "newseries9", command)
+
+    def testpackfull(self):
+        command = ["search_next", "--pack", "--metacluster=utmc"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc4", command)
+
+    def testpacksparse(self):
+        command = ["search_next", "--pack", "--start=0", "--metacluster=utmc"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc0", command)
+
+    def testpackfullstart(self):
+        command = ["search_next", "--pack", "--start=2", "--metacluster=utmc"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc4", command)
+
+    def testpackskiptostart(self):
+        command = ["search_next", "--pack", "--start=9", "--metacluster=utmc"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc9", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNext)
