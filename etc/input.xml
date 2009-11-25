@@ -2146,7 +2146,8 @@
          <option name="all" type="boolean" conflicts="personality archetype">all</option>
       </optgroup>
       <optgroup name="show_personality_optional" mandatory="False">
-         <option name="domain" type="string">Domain to check for threshold information</option>
+         <option name="domain" type="string" conflicts="sandbox">Domain to check for threshold information</option>
+         <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
       </optgroup>
       <transport method="get" path="personality" />
   </command>
