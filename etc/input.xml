@@ -416,6 +416,20 @@
       <transport trigger="domain" method="get" path="domain/%(domain)s" />
    </command>
 
+   <command name="show_sandbox">
+      Shows the configuration for a given sandbox.  With the '--all' option,
+      every sandbox will be listed with its configuration.
+      <optgroup name="show_sandbox_Input" mandatory="True" fields="any">
+         <option name="sandbox" type="string" conflicts="all">Sandbox name</option>
+         <option name="all" type="boolean" conflicts="hostname">Select all sandboxes</option>
+      </optgroup>
+      <optgroup name="show_sandbox_options" mandatory="False">
+         <option name="pathonly" type="boolean" conflicts="all">Show only the sandbox path</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="sandbox/command/show_all" />
+      <transport trigger="sandbox" method="get" path="sandbox/command/show" />
+   </command>
+
    <command name="show_network">
       Shows the configuration for a network, or for networks selected by location.
 

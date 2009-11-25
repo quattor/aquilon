@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,20 +26,29 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Domain formatter."""
+"""Contains the logic for `aq show sandbox --sandbox`."""
 
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import Domain
+import os
+
+from aquilon.server.broker import BrokerCommand
+from aquilon.aqdb.model import Sandbox
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.dbwrappers.sandbox import get_sandbox
 
 
-class DomainFormatter(ObjectFormatter):
-    def format_raw(self, domain, indent=""):
-        details = [indent + "Domain: %s" % domain.name]
-        details.append(indent + "  Owner: %s" % domain.owner.name)
-        details.append(indent + "  Compiler: %s" % domain.compiler)
-        if domain.comments:
-            details.append(indent + "  Comments: %s" % domain.comments)
-        return "\n".join(details)
+class CommandShowSandboxSandbox(BrokerCommand):
 
-ObjectFormatter.handlers[Domain] = DomainFormatter()
+    required_parameters = ["sandbox"]
+
+    def render(self, session, logger, sandbox, pathonly, **arguments):
+        (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox)
+        if not pathonly:
+            return dbsandbox
+        if not dbauthor:
+            raise ArgumentError("Must specify sandbox as author/branch "
+                                "when using --pathonly")
+        templatesdir = self.config.get("broker", "templatesdir")
+        sandboxdir = os.path.join(templatesdir, dbauthor.name,
+                                  dbsandbox.name)
+        return sandboxdir
