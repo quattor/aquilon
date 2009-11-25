@@ -42,6 +42,7 @@ class CommandStatus(BrokerCommand):
         stat.append("Aquilon Broker %s" % self.config.get("broker", "version"))
         stat.append("Server: %s" % self.config.get("broker", "servername"))
         stat.append("Database: %s" % self.config.get("database", "dsn"))
+        stat.append("Sandboxes: %s" % self.config.get("broker", "templatesdir"))
         if dbuser:
             stat.append("Connected as: %s [%s]" % (dbuser, dbuser.role.name))
         return stat
