@@ -215,15 +215,33 @@ class AQDMaker(object):
         # This flag controls whether or not this process will start up
         # and monitor knc.  Except for noauth mode knc has to be running,
         # but this process doesn't have to be the thing that starts it up.
-        if config.getboolean("broker", "run_knc"):
+        if config.getboolean("broker", "run_knc") or \
+           config.getboolean("broker", "run_git_daemon"):
             mon = ProcessMonitor()
             # FIXME: Should probably run krb5_keytab here as well.
             # and/or verify that the keytab file exists.
-            mon.addProcess("knc", ["/usr/bin/env",
-                "KRB5_KTNAME=FILE:/var/spool/keytabs/%s"
-                % config.get("broker", "user"),
-                config.get("broker", "knc"), "-lS", sockname,
-                config.get("broker", "kncport")])
+            if config.getboolean("broker", "run_knc"):
+                mon.addProcess("knc",
+                               ["/usr/bin/env",
+                                "KRB5_KTNAME=FILE:/var/spool/keytabs/%s"
+                                % config.get("broker", "user"),
+                                config.get("broker", "knc"), "-lS", sockname,
+                                config.get("broker", "kncport")])
+            if config.getboolean("broker", "run_git_daemon"):
+                # The git daemon *must* be invoked using the form 'git-daemon'
+                # instead of invoking git with a 'daemon' argument.  The latter
+                # will fork and exec git-daemon, resulting in a new pid that
+                # the process monitor won't know about!
+                gitpath = config.get("broker", "git_path")
+                ospath = os.environ.get("PATH", "")
+                args = ["/usr/bin/env", "PATH=%s:%s" % (gitpath, ospath),
+                        os.path.join(gitpath, "git-daemon"), "--export-all",
+                        "--base-path=%s" %
+                        config.get("broker", "git_daemon_basedir")]
+                if config.has_option("broker", "git_port"):
+                    args.append("--port=%s" % config.get("broker", "git_port"))
+                args.append(config.get("broker", "kingdir"))
+                mon.addProcess("git-daemon", args)
             mon.startService()
             reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
 
@@ -235,8 +253,7 @@ class AQDMaker(object):
                 os.remove(sockname)
                 log.msg("Succeeded removing old socket.")
             except OSError, e:
-                log.msg("Could not remove old socket '%s': %s" %
-                        (sockname, e))
+                log.msg("Could not remove old socket '%s': %s" % (sockname, e))
 
         unixsocket = "unix:%s" % sockname
         kncSite = KNCSite( restServer )
