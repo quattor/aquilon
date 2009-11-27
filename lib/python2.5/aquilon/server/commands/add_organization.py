@@ -30,32 +30,23 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.commands.add_location import CommandAddLocation
 from aquilon.server.commands import BrokerCommand
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, Company
 
 
-class CommandAddHub(CommandAddLocation):
+class CommandAddOrganization(BrokerCommand):
 
-    required_parameters = ["name"]
+    required_parameters = ["organization"]
 
-    def render(self, session, organization, name, fullname, comments, **arguments):
+    def render(self, session, organization, fullname, comments, **arguments):
         if organization:
             org = session.query(Location).filter_by(location_type='company',
                                                     name=organization).first()
-            if not org:
-                raise ArgumentError("Organization '%s' is unknown" % organization)
+            if org:
+                raise ArgumentError("Organization '%s' already exists" % organization)
 
-            org = organization
-        else:
-            org = self.config.get("broker", "default_organization")
-
-        if not org:
-            raise ArgumentError("Must specify organization, since no default is available")
-
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='hub', fullname=fullname,
-                parentname=org, parenttype='company',
-                comments=comments, **arguments)
+        dborg = Company(name=organization, fullname=fullname, comments=comments)
+        session.add(dborg)
+        session.flush()
 
 

@@ -1652,13 +1652,26 @@
       <transport method="delete" path="location/continent/%(name)s" />
    </command>
 
+   <command name="add_organization">
+      Add a new organization.
+      <optgroup name="add_org_options" mandatory="True" fields="all">
+         <option name="organization" type="string">Name of the new organization</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_organization/%(organization)s" />
+   </command>
+
    <command name="add_hub">
-      Add a new hub for MS to the database. See also add_location.
+      Add a new hub to the database. See also add_location.
       <optgroup name="add_hub_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new hub</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive (region) name</option>
+         <option name="organization" type="string">The owning organization of the hub</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="location/add_hub/%(name)s" />
