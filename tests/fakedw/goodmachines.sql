@@ -15,8 +15,8 @@ INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sys
 -- Valid entries.  The first are the same as in badmachines.  The next one
 -- repurposes one of the virtual machines from badmachines with a new name.
 -- The last is brand new.
-INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:00:02", "evm3", "desktop1.msad.ms.com", NULL, "desktop1.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
-INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:00:03", "evm4", "desktop2.msad.ms.com", NULL, "desktop2.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
-INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:00:05", "evm6", "desktop5.msad.ms.com", NULL, "desktop5.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
-INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:00:06", "evm7", "desktop6.msad.ms.com", NULL, "desktop6.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
+INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:20:02", "evm3", "desktop1.msad.ms.com", NULL, "desktop1.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
+INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:20:03", "evm4", "desktop2.msad.ms.com", NULL, "desktop2.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
+INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:20:05", "evm6", "desktop5.msad.ms.com", NULL, "desktop5.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
+INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:20:06", "evm7", "desktop6.msad.ms.com", NULL, "desktop6.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
 
