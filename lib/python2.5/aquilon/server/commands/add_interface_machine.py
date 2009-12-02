@@ -268,7 +268,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                      "enabled for ESX clusters.")
         # FIXME: These values should probably be configurable.
         mac_prefix_esx = "00:50:56"
-        mac_start_esx = "01:00:00"
+        mac_start_esx = "01:20:00"
         mac_end_esx = "3f:ff:ff"
         mac_prefix = mac_prefix_esx
         mac_start = MACAddress(mac_prefix + ":" + mac_start_esx)

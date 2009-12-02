@@ -161,7 +161,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
             self.matchoutput(out,
-                             "Interface: eth0 00:50:56:01:00:%02x boot=True" %
+                             "Interface: eth0 00:50:56:01:20:%02x boot=True" %
                              (i - 1),
                              command)
 
@@ -185,7 +185,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              command)
             self.matchoutput(out,
                              """"cards/nic/eth0/hwaddr" """
-                             """= "00:50:56:01:00:%02x";""" % (i - 1),
+                             """= "00:50:56:01:20:%02x";""" % (i - 1),
                              command)
             self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
 
