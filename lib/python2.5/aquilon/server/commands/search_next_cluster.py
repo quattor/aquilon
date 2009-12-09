@@ -40,9 +40,10 @@ class CommandSearchNextCluster(BrokerCommand):
 
     required_parameters = ['cluster']
 
-    def render(self, session, cluster, number, fullname, **arguments):
+    def render(self, session, cluster, start, number, fullname, pack,
+               **arguments):
         result = search_next(session=session, cls=Cluster, attr=Cluster.name,
-                             value=cluster)
+                             value=cluster, start=start, pack=pack)
         if number:
             return str(result)
         return "%s%d" % (cluster, result)
