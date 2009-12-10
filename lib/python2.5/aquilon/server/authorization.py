@@ -68,7 +68,8 @@ class AuthorizationBroker(object):
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
-                      'add_os', 'del_os']:
+                      'add_os', 'del_os',
+                      'add_organization', 'del_organization']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(
                     "Must have the engineering or aqd_admin role to %s." %

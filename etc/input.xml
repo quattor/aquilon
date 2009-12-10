@@ -1664,6 +1664,24 @@
       <transport method="put" path="location/add_organization/%(organization)s" />
    </command>
 
+   <command name="del_organization">
+      Delete an organization. This will fail if the organization contains
+      any hubs.
+      <optgroup name="del_org_options" mandatory="True" fields="all">
+         <option name="organization" type="string">Name of the organization</option>
+      </optgroup>
+      <transport method="delete" path="location/organization/%(organization)s" />
+   </command>
+
+   <command name="show_organization">
+      Show an organization.
+      <optgroup name="show_org_options" mandatory="False" fields="all">
+         <option name="organization" type="string">Name of the organization</option>
+      </optgroup>
+      <transport method="get" path="location/organization" />
+      <transport trigger="organization" method="get" path="location/organization/%(organization)s" />
+   </command>
+
    <command name="add_hub">
       Add a new hub to the database. See also add_location.
       <optgroup name="add_hub_options" mandatory="True" fields="all">
