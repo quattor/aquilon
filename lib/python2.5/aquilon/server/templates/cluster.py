@@ -96,8 +96,28 @@ class PlenaryClusterObject(Plenary):
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
-            lines.append("    '%s', create('%s')," % (machine.name,
-                                                      pmac.plenary_template))
+            lines.append("    '%s', nlist(" % machine.name)
+            lines.append("            'hardware', create('%s')," % 
+                                                    pmac.plenary_template)
+            if (machine.host):
+                # we fill this in manually instead of just assigning 
+                # 'system' = value("//hostname/system")
+                # because the target host might not actually have a profile.
+                lines.append("            'system', nlist(")
+                lines.append("                'archetype', nlist(")
+                lines.append("                    'name', '%s'," % 
+                                                    machine.host.archetype.name)
+                lines.append("                    'os', '%s'," % 
+                                                    machine.host.operating_system.name)
+                lines.append("                 ),")
+                lines.append("                'network', nlist(")
+                lines.append("                    'hostname', '%s'," % 
+                                                    machine.host.name)
+                lines.append("                    'domainname', '%s'," % 
+                                                    machine.host.dns_domain)
+                lines.append("                 ),")
+                lines.append("             ),")
+            lines.append("         ),")
         lines.append(");")
 
         for servinst in self.dbcluster.service_bindings:

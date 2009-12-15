@@ -108,7 +108,8 @@ class CommandMake(BrokerCommand):
 
         except:
             if chooser:
-                chooser.restore_stash()
+                pass
+                #chooser.restore_stash()
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
