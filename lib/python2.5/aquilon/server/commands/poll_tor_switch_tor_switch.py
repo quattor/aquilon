@@ -39,8 +39,8 @@ class CommandPollTorSwitchTorSwitch(CommandPollTorSwitch):
 
     required_parameters = ["tor_switch"]
 
-    def render(self, session, logger, tor_switch, **arguments):
+    def render(self, session, logger, tor_switch, clear, **arguments):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
-        return self.poll(session, logger, [dbtor_switch])
+        return self.poll(session, logger, [dbtor_switch], clear)
 
 

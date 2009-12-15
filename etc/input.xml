@@ -2042,6 +2042,9 @@
          <option name="tor_switch" type="string" conflicts="rack">tor_switch name</option>
          <option name="rack" type="string" conflicts="tor_switch">Rack name</option>
       </optgroup>
+      <optgroup name="poll_tor_switch optional" mandatory="False" fields="any">
+         <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
+      </optgroup>
       <transport trigger="tor_switch" method="post" path="tor_switch/%(tor_switch)s/command/poll" />
       <transport method="post" path="poll/rack/%(rack)s" />
    </command>
