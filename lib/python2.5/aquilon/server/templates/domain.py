@@ -73,6 +73,12 @@ class TemplateDomain(object):
         config = Config()
         dirs = []
         dirs.append(config.get("broker", "profilesdir"))
+        # The regression tests occasionally have issues with panc
+        # auto-creating this directory - not sure why.
+        if self.domain.clusters:
+            dirs.append(os.path.join(config.get("broker", "quattordir"),
+                                     "build", "xml", self.domain.name,
+                                     "clusters"))
         return dirs
 
     def compile(self, session, only=None, locked=False):
