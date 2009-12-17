@@ -31,24 +31,24 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
-from sqlalchemy.sql import select
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy.orm import relation
 from sqlalchemy.orm.session import object_session
 
 from aquilon.aqdb.model import Base, Archetype
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'prsnlty'
-_TN  = 'personality'
+_TN = 'personality'
+
 
 class Personality(Base):
     """ Personality names """
-    __tablename__  = _TN
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % (_ABV)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     archetype_id = Column(Integer, ForeignKey(
-        'archetype.id', name='%s_arch_fk'%(_ABV)), nullable=False)
+        'archetype.id', name='%s_arch_fk' % (_ABV)), nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
@@ -56,8 +56,8 @@ class Personality(Base):
     archetype = relation(Archetype, backref='personality', uselist=False)
 
     def __repr__(self):
-        s = ("<"+self.__class__.__name__ + " name ='"+ self.name +
-             "', " + str(self.archetype) +'>')
+        s = ("<" + self.__class__.__name__ + " name ='" + self.name +
+             "', " + str(self.archetype) + '>')
         return s
 
     @classmethod
@@ -68,36 +68,41 @@ class Personality(Base):
 
 
 personality = Personality.__table__
-table       = Personality.__table__
+table = Personality.__table__
 
-
-personality.primary_key.name='%s_pk'%(_ABV)
+personality.primary_key.name = '%s_pk' % (_ABV)
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
-                                               name='%s_uk'%(_TN)))
+                                               name='%s_uk' % (_TN)))
 
-def populate(sess, *args, **kw):
+generics = ['windows', 'aurora', 'aegis', 'vmhost', 'pserver']
+
+aquilon_personalities = ['c1_regbas_qa', 'c1_rs_grid', 'compileserver',
+                         'cva-ice20-qa', 'cva-ice20', 'desktopserver',
+                         'fxoption-nyriskprod-qa', 'fxoption-nyriskprod',
+                         'ied-rvtesting', 'ied-scenprod', 'ied-testgrid',
+                         'infra', 'inventory', 'lemon-collector-oracle',
+                         'db2-test', 'ied-prodgrid', 'spg-shared-qa',
+                         'spg-shared-va', 'unixeng-test', 'zcs', 'ifmx-test',
+                         'aqd-testing', 'spg-rmi', 'sybase-test', 'train-prod',
+                         'train-tu']
+
+
+def populate(sess, **kw):
     if len(sess.query(Personality).all()) > 0:
         return
 
-    import os
+    for arch in generics:
+        archetype = sess.query(Archetype).filter_by(name=arch).first()
+        assert archetype, "No archetype found for '%s' in populate" % arch
+        pers = Personality(name='generic', archetype=archetype)
+        sess.add(pers)
 
-    cfg_base = kw['cfg_base']
-    assert os.path.isdir(cfg_base), "No such directory '%s'"%(cfg_base)
+    aquln = sess.query(Archetype).filter_by(name='aquilon').first()
+    assert aquln, "No aquilon archetype found in personality populate"
 
-    for arch in sess.query(Archetype).all():
-        #find aquilon archetype and all directories under it
-        #change if we grow past having multiple archtypes w/ personalities
-        if arch.name == 'aquilon':
-            p = os.path.join(cfg_base, arch.name, 'personality')
-            assert os.path.isdir(p), \
-                    "Can't find personality directory '%s' in populate" % p
-            for i in os.listdir(p):
-                if os.path.isdir(os.path.abspath(os.path.join(p, i))):
-                    pers = Personality(name=i, archetype=arch)
-                    sess.add(pers)
-        else:
-            pers = Personality(name='generic', archetype=arch)
-            sess.add(pers)
+    for nm in aquilon_personalities:
+        pers = Personality(archetype=aquln, name=nm)
+        sess.add(pers)
 
     try:
         sess.commit()
@@ -107,5 +112,3 @@ def populate(sess, *args, **kw):
 
     a = sess.query(Personality).first()
     assert(a)
-
-

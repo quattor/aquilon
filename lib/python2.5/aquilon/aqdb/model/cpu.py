@@ -27,119 +27,88 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ If you can read this you should be documenting """
-from __future__ import with_statement
-from datetime   import datetime
-import os
+from datetime import datetime
 
-from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
-                        select, ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import mapper, relation, deferred
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint)
+from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base, Vendor
 from aquilon.aqdb.column_types.aqstr import AqStr
 
+_TN = 'cpu'
+
+cpus = [['amd', 'opteron_2212', '2000'],
+        ['amd', 'opteron_2216', '2400'],
+        ['amd', 'opteron_2218', '2600'],
+        ['amd', 'opteron_248', '2200'],
+        ['amd', 'opteron_250', '2400'],
+        ['amd', 'opteron_2600', '2600'],
+        ['amd', 'opteron_275', '2200'],
+        ['amd', 'opteron_280', '2400'],
+        ['intel', 'pentium_2660', '2600'],
+        ['intel', 'core_duo', '2000'],
+        ['intel', 'l5420', 2500],
+        ['intel', 'woodcrest_2300', 2300],
+        ['intel', 'woodcrest_2660', 2660],
+        ['intel', 'xeon_2500', 2500],
+        ['intel', 'xeon_2660', 2660],
+        ['intel', 'xeon_3000', 3000],
+        ['intel', 'xeon_3100', 3100],
+        ['intel', 'xeon_3400', 3400],
+        ['intel', 'xeon_3600', 3600],
+        ['sun', 'ultrasparc_iii_i_1300', 1300],
+        ['sun', 'ultrasparc_iii_i_1600', 1600],
+        ['aurora_vendor', 'aurora_cpu', 0],
+        ['virtual', 'virtual_cpu', 0]]
+
 
 class Cpu(Base):
-    __tablename__ = 'cpu'
-    id = Column(Integer, Sequence('cpu_id_seq'), primary_key=True)
+    """ Cpus with vendor, model name and speed (in MHz) """
+    __tablename__ = _TN
+
+    id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
     name = Column(AqStr(64), nullable=False)
     vendor_id = Column(Integer, ForeignKey('vendor.id',
                                            name='cpu_vendor_fk'),
                        nullable=False)
 
     speed = Column(Integer, nullable=False)
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False ))
-    comments = deferred(Column(String(255), nullable=True))
+
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
+
     vendor = relation(Vendor)
 
 cpu = Cpu.__table__
-cpu.primary_key.name='cpu_pk'
+cpu.primary_key.name = '%s_pk' % _TN
 
 cpu.append_constraint(
-    UniqueConstraint('vendor_id','name','speed', name='cpu_nm_speed_uk'))
+    UniqueConstraint('vendor_id', 'name', 'speed', name='%s_nm_speed_uk' % _TN))
 
 table = cpu
 
+
 def populate(sess, *args, **kw):
+    """ Populate some well known cpus for testing """
 
     if len(sess.query(Cpu).all()) < 1:
-        import re
-        m=re.compile('speed')
-
-        cfg_base = kw['cfg_base']
-        assert os.path.isdir(cfg_base), "no cfg path supplied"
 
         log = kw['log']
 
-        #get all dir names immediately under template-king/hardware/cpu/
-        base=os.path.join(str(cfg_base),'hardware/cpu')
-        cpus=[]
+        for vendor, name, speed in cpus:
 
-        for i in os.listdir(base):
-            for j in os.listdir(os.path.join(base,i)):
-                name = j.rstrip('.tpl').strip()
-                with open(os.path.join(base,i,j),'r') as f:
-                    assert(m)
-                    for line in f.readlines():
-                        a_match=m.search(line)
-                        if a_match:
-                            l,e,freq=line.partition('=')
-                            assert(isinstance(freq,str))
-                            speed=re.sub('\*MHz','',freq.strip().rstrip(';'))
-                            #TODO: better checking if freq is ok here
-                            if speed.isdigit():
-                                cpus.append([i,name,speed])
-                                break
-                            else:
-                                Assert(False)
-                    f.close()
+            vendor = sess.query(Vendor).filter_by(name=vendor).first()
+            assert vendor, "No vendor found for '%s'" % vendor
 
-        for vendor,name,speed in cpus:
-            kw={}
-            vendor=sess.query(Vendor).filter_by(name=vendor).first()
-
-            assert(vendor)
-            assert(name)
-            assert(speed)
-
-            if vendor:
-                kw['vendor'] = vendor
-                kw['name']   = name
-                kw['speed']  = int(speed)
-
-                a=Cpu(**kw)
-
-                assert(isinstance(a,Cpu))
-
-                try:
-                    sess.add(a)
-                except Exception,e:
-                    sess.rollback()
-                    log.error(str(e))
-                    continue
-            else:
-                log.error("CREATE CPU: cant find vendor '%s'"%(vendor))
+            a = Cpu(vendor=vendor, name=name, speed=speed)
+            sess.add(a)
 
         try:
-            av = sess.query(Vendor).filter_by(name='aurora_vendor').one()
-            a = Cpu(vendor=av, name='aurora_cpu', speed=0,
-                    comments='Placeholder Aurora CPU type.')
-            vv = Vendor.get_unique(sess, 'virtual')
-            vc = Cpu(vendor=vv, name='virtual_cpu', speed=0)
-            sess.add_all([a, vc])
+            sess.commit()
         except Exception, e:
             sess.rollback()
             log.error(str(e))
 
-        try:
-            sess.commit()
-        except Exception,e:
-            sess.rollback()
-            log.error(str(e))
-
-
-
-
         cnt = len(sess.query(Cpu).all())
-        log.debug('created %s cpus'%(cnt))
+        log.debug('created %s cpus' % cnt)

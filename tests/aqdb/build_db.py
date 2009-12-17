@@ -147,10 +147,7 @@ def main(*args, **kw):
     #fill this with module objects if we're populating
     mods_to_populate = []
 
-    cfg_base = db.config.get("broker", "kingdir")
-
-    kwargs = {'log' : log, 'full' : opts.full, 'debug' : opts.debug,
-              'cfg_base': cfg_base}
+    kwargs = {'log' : log, 'full' : opts.full, 'debug' : opts.debug}
 
     for p in order:
         for module_name in pkgs[p]:
@@ -192,7 +189,6 @@ def main(*args, **kw):
 
     if opts.populate:
         try:
-            #import test_campus_populate as tcp
             cps = tcp.TestCampusPopulate(s, **kwargs)
             cps.setUp()
             cps.testPopulate()
