@@ -66,9 +66,9 @@ pkgs['net'] = ['dns_domain', 'network']
 
 pkgs['cfg'] = ['archetype', 'personality', 'operating_system']
 
-pkgs['hw'] = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
-                'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
-                'interface', 'observed_mac', 'machine_specs', 'chassis_slot']
+pkgs['hw'] = ['status', 'vendor', 'model', 'hardware_entity', 'cpu', 'machine',
+              'disk', 'tor_switch_hw', 'chassis_hw', 'interface',
+              'observed_mac', 'machine_specs', 'chassis_slot']
 
 pkgs['sy'] = ['system', 'domain', 'host', 'chassis', 'tor_switch',
               'auxiliary', 'manager']
