@@ -29,10 +29,8 @@
 """ Enumerates kerberos realms """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
+from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         UniqueConstraint)
-
-from sqlalchemy.orm                  import relation, deferred
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -41,31 +39,34 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 #  -Needs it's own creation_date + comments columns. Audit log depends on
 #   this table for it's info, and would have a circular dependency
 
+
 class Realm(Base):
+    """ Represent Kerberos Realms (simple names) """
     __tablename__ = 'realm'
 
     id = Column(Integer, Sequence('realm_id_seq'), primary_key=True)
-
     name = Column(AqStr(32), nullable=False)
-
-    creation_date = deferred(Column(DateTime,
-                                    nullable=False, default=datetime.now))
-
-    comments = deferred(Column('comments', String(255), nullable=True))
+    creation_date = Column(DateTime, nullable=False, default=datetime.now)
+    comments = Column('comments', String(255), nullable=True)
 
 realm = Realm.__table__
 table = Realm.__table__
 
+realm.primary_key.name = 'realm_pk'
+realm.append_constraint(UniqueConstraint('name', name='realm_uk'))
 
-realm.primary_key.name='realm_pk'
-realm.append_constraint(UniqueConstraint('name',name='realm_uk'))
 
-def populate(sess, *args, **kw):
+def populate(sess, **kw):
+    """ populate our only kerberos realm (is1.morgan) """
     if sess.query(Realm).count() == 0:
-        r = Realm(name='is1.morgan')
-        sess.add(r)
-        sess.commit()
-        r = sess.query(Realm).first()
-        assert(r)
-    else:
-        return True
+        rlm = Realm(name='is1.morgan')
+        sess.add(rlm)
+
+        try:
+            sess.commit()
+        except Exception, e:
+            sess.rollback()
+            raise e
+
+        rlm = sess.query(Realm).first()
+        assert(rlm)

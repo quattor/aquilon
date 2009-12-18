@@ -30,9 +30,9 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
-                        select, ForeignKey, PassiveDefault, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint)
+from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base, Role, Realm
 
@@ -48,39 +48,38 @@ class UserPrincipal(Base):
     realm_id = Column(Integer, ForeignKey(
         'realm.id', name='usr_princ_rlm_fk'), nullable=False)
 
-    role_id = Column(Integer, ForeignKey(
-        'role.id', name='usr_princ_role_fk', ondelete='CASCADE'),
-                     nullable=False)
+    role_id = Column(Integer, ForeignKey('role.id',
+                                         name='usr_princ_role_fk',
+                                         ondelete='CASCADE'), nullable=False)
 
-    creation_date = deferred(Column(DateTime,
-                                    nullable=False, default=datetime.now))
+    creation_date = Column(DateTime, nullable=False, default=datetime.now)
 
-    comments = deferred(Column('comments', String(255), nullable=True))
+    comments = Column('comments', String(255), nullable=True)
 
+    role = relation(Role, uselist=False)
     realm = relation(Realm, uselist=False)
-    role  = relation(Role, uselist=False)
 
     def __str__(self):
-        return '@'.join([self.name,self.realm.name])
+        return '@'.join([self.name, self.realm.name])
 
 user_principal = UserPrincipal.__table__
-user_principal.primary_key.name='user_principal_pk'
+user_principal.primary_key.name = 'user_principal_pk'
 user_principal.append_constraint(
-    UniqueConstraint('name','realm_id',name='user_principal_realm_uk'))
+    UniqueConstraint('name', 'realm_id', name='user_principal_realm_uk'))
 
 table = user_principal
 
-def populate(sess, *args, **kw):
+
+def populate(sess, **kw):
     if len(sess.query(UserPrincipal).all()) < 1:
         log = kw['log']
-        from sqlalchemy import insert
 
-        admin = sess.query(Role).filter_by(name='aqd_admin').one()
-        eng   = sess.query(Role).filter_by(name='engineering').one()
-        ops   = sess.query(Role).filter_by(name='operations').one()
+        eng = sess.query(Role).filter_by(name='engineering').one()
+        ops = sess.query(Role).filter_by(name='operations').one()
         telco = sess.query(Role).filter_by(name='telco_eng').one()
+        admin = sess.query(Role).filter_by(name='aqd_admin').one()
 
-        admins  = ['cdb', 'aqdqa', 'njw', 'wesleyhe', 'daqscott', 'kgreen',
+        admins = ['cdb', 'aqdqa', 'njw', 'wesleyhe', 'daqscott', 'kgreen',
                    'benjones']
 
         unixeng = ['cesarg', 'jasona', 'dankb', 'goliaa', 'samsh', 'hagberg',
@@ -90,39 +89,33 @@ def populate(sess, *args, **kw):
         operations = ['premdasr', 'bestc', 'chawlav', 'wbarnes', 'gleasob',
                       'lchun', 'peteryip', 'richmoj', 'hardyb', 'martinva']
 
-        telco_eng = ['dalys', 'medinad', 'peikonb', 'kulawiak']
+        telco_eng = ['dalys', 'peikonb', 'kulawiak']
 
-        r = sess.query(Realm).first()
-        assert(r.name == 'is1.morgan')
+        rlm = sess.query(Realm).first()
+        assert rlm.name == 'is1.morgan'
 
         for nm in admins:
-            up=UserPrincipal(name = nm, realm = r,role = admin,
-                             comments = 'AutoPopulated')
+            up = UserPrincipal(name=nm, realm=rlm, role=admin)
             sess.add(up)
-            sess.commit()
-            assert(up)
 
         for nm in unixeng:
-            up=UserPrincipal(name = nm, realm = r,role = eng,
-                             comments = 'AutoPopulated')
+            up = UserPrincipal(name=nm, realm=rlm, role=eng)
             sess.add(up)
-            sess.commit()
-            assert(up)
 
         for nm in operations:
-            up=UserPrincipal(name = nm, realm = r, role = ops,
-                             comments = 'AutoPopulated')
+            up = UserPrincipal(name=nm, realm=rlm, role=ops)
             sess.add(up)
-            sess.commit()
-            assert(up)
 
         for nm in telco_eng:
-            up = UserPrincipal(name = nm, realm = r, role = telco,
-                               comments = 'AutoPopulated')
+            up = UserPrincipal(name=nm, realm=rlm, role=telco)
             sess.add(up)
-            sess.commit()
-            assert(up)
 
-        cnt = len(sess.query(UserPrincipal).all())
-        assert(cnt > 0)
-        log.debug('created %s users'%(cnt))
+        try:
+            sess.commit()
+        except Exception, e:
+            sess.rollback()
+            raise e
+
+        cnt = sess.query(UserPrincipal).count()
+        assert cnt > 0
+        log.debug('created %s users' % cnt)
