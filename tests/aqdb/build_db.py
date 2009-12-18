@@ -120,11 +120,15 @@ def main(*args, **kw):
         db.meta.bind.echo = True
 
     if opts.delete_db == True:
-        if db.vendor is 'oracle':
-            log.debug('dropping oracle database')
-            db.drop_all_tables_and_sequences(no_confirm = opts.delete_db)
+        #if db.vendor is 'oracle':
+        #    log.debug('dropping oracle database')
+        #    db.drop_all_tables_and_sequences(no_confirm = opts.delete_db)
+        #else:
+        Base.metadata.reflect()
+        for table in reversed(Base.metadata.sorted_tables):
+            table.drop(checkfirst=True)
 
-    #TODO: pass opts arg around? stop passing dsdb around?
+    #TODO: pass opts arg around? stop passing dsdb around/make ?
     kwargs = {'full': opts.full}
 
     if opts.populate:
