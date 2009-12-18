@@ -27,10 +27,10 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Country is a subclass of Location """
-
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.utils import monkeypatch
+from aquilon.aqdb.model import Location, Continent
 
 class Country(Location):
     """ Country is a subtype of location """
@@ -46,12 +46,17 @@ country.primary_key.name='country_pk'
 
 table = country
 
-def populate(sess, *args, **kw):
-    if len(sess.query(Country).all()) < 1:
-        from aquilon.aqdb.model import Continent, Hub
 
-        log = kw['log']
-        assert log, "no log in kwargs for Country.populate()"
+@monkeypatch(country)
+def populate(sess, *args, **kw):
+    if sess.query(Country).count() < 1:
+
+        if sess.query(Continent).count() < 1:
+            Continent.populate(sess, **kw)
+
+        import logging
+        log = logging.getLogger('aqdb.populate')
+
         dsdb = kw['dsdb']
         assert dsdb, "No dsdb in kwargs for Country.populate()"
 
@@ -75,5 +80,3 @@ def populate(sess, *args, **kw):
             log.error(str(e))
 
         log.debug('created %s countries'%(len(sess.query(Country).all())))
-
-

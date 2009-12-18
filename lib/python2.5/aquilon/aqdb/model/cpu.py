@@ -33,6 +33,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Vendor
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -89,12 +90,12 @@ cpu.append_constraint(
 table = cpu
 
 
+@monkeypatch(cpu)
 def populate(sess, *args, **kw):
     """ Populate some well known cpus for testing """
-
     if len(sess.query(Cpu).all()) < 1:
-
-        log = kw['log']
+        import logging
+        log = logging.getLogger('aqdb.populate')
 
         for vendor, name, speed in cpus:
 

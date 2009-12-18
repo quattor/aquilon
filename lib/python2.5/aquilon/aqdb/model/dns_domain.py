@@ -34,6 +34,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint)
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _domains = ['ms.com', 'one-nyp.ms.com', 'devin1.ms.com', 'the-ha.ms.com',
@@ -63,7 +64,7 @@ table = DnsDomain.__table__
 table.primary_key.name = '%s_pk' % (_TN)
 table.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))
 
-
+@monkeypatch(table)
 def populate(sess, **kw):
     """ populate some well known domains """
 

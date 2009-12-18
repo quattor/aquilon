@@ -33,6 +33,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         UniqueConstraint)
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 #Upfront Design Decisions:
@@ -56,6 +57,7 @@ realm.primary_key.name = 'realm_pk'
 realm.append_constraint(UniqueConstraint('name', name='realm_uk'))
 
 
+@monkeypatch(realm)
 def populate(sess, **kw):
     """ populate our only kerberos realm (is1.morgan) """
     if sess.query(Realm).count() == 0:

@@ -30,7 +30,8 @@
 
 from sqlalchemy import Column, Integer, Numeric, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.utils import monkeypatch
+from aquilon.aqdb.model import Location, Building
 from aquilon.aqdb.column_types import AqStr
 
 class Rack(Location):
@@ -50,10 +51,14 @@ rack = Rack.__table__
 rack.primary_key.name = 'rack_pk'
 table = rack
 
-def populate(sess, *args, **kw):
+
+@monkeypatch(rack)
+def populate(sess, **kw):
 
     if len(sess.query(Rack).all()) < 1:
-        from building import Building
+
+        if sess.query(Building).count() > 0:
+            Building.__table__.populate(sess, **kw)
 
         bldg = {}
 
@@ -61,16 +66,12 @@ def populate(sess, *args, **kw):
             np = sess.query(Building).filter_by(name='np').one()
         except Exception, e:
             print e
-            sys.exit(9)
 
         rack_name='np3'
-        a = Rack(name = rack_name, fullname='Rack %s'%(rack_name),
-                     parent = np, comments = 'AutoPopulated')
+        a = Rack(name=rack_name, fullname='Rack %s'%(rack_name), parent=np)
         sess.add(a)
+
         try:
             sess.commit()
         except Exception, e:
             print e
-
-
-

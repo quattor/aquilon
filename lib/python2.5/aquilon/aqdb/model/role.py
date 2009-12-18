@@ -33,7 +33,10 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         UniqueConstraint)
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
+
+roles = ['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
 
 #Upfront Design Decisions:
 #  -Needs it's own creation_date + comments columns. Audit log depends on
@@ -58,9 +61,9 @@ role.primary_key.name = 'role_pk'
 role.append_constraint(UniqueConstraint('name', name='role_uk'))
 
 
+@monkeypatch(role)
 def populate(sess, **kw):
-    roles = ['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng']
-
+    """ populate our roles """
     if sess.query(Role).count() >= len(roles):
         return
 

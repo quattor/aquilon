@@ -34,6 +34,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Role, Realm
 
 
@@ -70,9 +71,11 @@ user_principal.append_constraint(
 table = user_principal
 
 
+@monkeypatch(user_principal)
 def populate(sess, **kw):
     if len(sess.query(UserPrincipal).all()) < 1:
-        log = kw['log']
+        import logging
+        log = logging.getLogger('aqdb.populate')
 
         eng = sess.query(Role).filter_by(name='engineering').one()
         ops = sess.query(Role).filter_by(name='operations').one()
@@ -89,7 +92,7 @@ def populate(sess, **kw):
         operations = ['premdasr', 'bestc', 'chawlav', 'wbarnes', 'gleasob',
                       'lchun', 'peteryip', 'richmoj', 'hardyb', 'martinva']
 
-        telco_eng = ['dalys', 'peikonb', 'kulawiak']
+        telco_eng = ['dalys', 'kulawiak']
 
         rlm = sess.query(Realm).first()
         assert rlm.name == 'is1.morgan'

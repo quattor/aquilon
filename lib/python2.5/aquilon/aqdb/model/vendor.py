@@ -33,6 +33,7 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         UniqueConstraint)
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'vendor'
@@ -59,6 +60,7 @@ vendor.append_constraint(
     UniqueConstraint('name', name='%s_uk' % _TN))
 
 
+@monkeypatch(vendor)
 def populate(sess, **kw):
     """ populate some vendors we use for testing"""
     if len(sess.query(Vendor).all()) < 1:

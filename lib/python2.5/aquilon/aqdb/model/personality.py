@@ -34,6 +34,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
 from sqlalchemy.orm import relation
 from sqlalchemy.orm.session import object_session
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Archetype
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -74,7 +75,7 @@ personality.primary_key.name = '%s_pk' % (_ABV)
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
                                                name='%s_uk' % (_TN)))
 
-generics = ['windows', 'aurora', 'aegis', 'vmhost', 'pserver']
+generics = ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost', 'pserver']
 
 aquilon_personalities = ['c1_regbas_qa', 'c1_rs_grid', 'compileserver',
                          'cva-ice20-qa', 'cva-ice20', 'desktopserver',
@@ -87,6 +88,7 @@ aquilon_personalities = ['c1_regbas_qa', 'c1_rs_grid', 'compileserver',
                          'train-tu']
 
 
+@monkeypatch(personality)
 def populate(sess, **kw):
     if len(sess.query(Personality).all()) > 0:
         return

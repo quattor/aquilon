@@ -29,7 +29,8 @@
 """ Room is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.utils import monkeypatch
+from aquilon.aqdb.model import Location, Building
 
 
 class Room(Location):
@@ -47,22 +48,19 @@ room.primary_key.name = 'room_pk'
 
 table = room
 
-def populate(sess, *args, **kwargs):
+
+@monkeypatch(room)
+def populate(sess, **kwargs):
     """Populate skeleton database with some room information."""
 
     if len(sess.query(Room).all()) > 0:
         return
 
-    from aquilon.aqdb.model import Building
-
-    log = kwargs['log']
-    assert log, "no log in kwargs for Room.populate()"
+    if sess.query(Building).count() < 1:
+        Building.populate(sess, **kw)
 
     devin1 = Building.get_unique(sess, 'dd')
     if devin1:
         pod3 = Room(name='ddroom3', fullname='Devin Pod 3', parent=devin1)
         sess.add(pod3)
     sess.commit()
-    log.debug('created %s room(s)' % (len(sess.query(Room).all())))
-
-

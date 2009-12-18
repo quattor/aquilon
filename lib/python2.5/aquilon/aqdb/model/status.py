@@ -35,6 +35,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _statuses = ['blind', 'build', 'ready']
@@ -64,7 +65,7 @@ table  = Status.__table__
 status.primary_key.name='%s_pk'%(_TN)
 status.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
 
-
+@monkeypatch(status)
 def populate(sess, *args, **kw):
     from sqlalchemy import insert
     from sqlalchemy.exceptions import IntegrityError
@@ -78,5 +79,3 @@ def populate(sess, *args, **kw):
                 pass
 
     assert len(sess.query(Status).all()) == len(_statuses)
-
-

@@ -28,7 +28,6 @@
 # TERMS THAT MAY APPLY.
 """ The module governing tables and objects that represent IP networks in
     Aquilon. """
-
 from datetime import datetime
 from struct import pack
 from socket import inet_ntoa
@@ -39,11 +38,13 @@ from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
 from sqlalchemy.sql import and_
 from sqlalchemy.orm import relation
 
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Base, Location
+from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.column_types.IPV4 import (IPV4, dq_to_int, get_bcast,
                                             int_to_dq)
-from aquilon.aqdb.model import Base, Location
+
 
 #used in locations, and lambda isn't as readable
 def _get_location(x):
@@ -152,26 +153,20 @@ def get_net_id_from_ip(s, ip):
 
     return s.query(Network).get(row[0])
 
-#def get_type_cache(dsdb):
-#    """ Takes a dsdb object (dependency injection)
-#        returns a dict of network type by keyed on id """
-#    #TODO: reflect the network type table from dsdb, then FK to it with an ENUM
-#    d = {}
-#    d[0] = 'unknown'
-#    for row in dsdb.dump('net_type'):
-#        d[row[0]] = row[1]
-#    return d
-
+@monkeypatch(network)
 def populate(sess, **kw):
     """ populates networks from dsdb """
+
     #TODO populate comments, have a full populate do the other
     #    networks in an asynchronous manner while others run
 
     if len(sess.query(Network).limit(30).all()) < 1:
         from aquilon.aqdb.model import Building
         import time
+        import logging
 
-        log = kw['log']
+        log = logging.getLogger('aqdb.populate')
+
         dsdb = kw['dsdb']
         b_cache = {}
         count = 0
@@ -217,9 +212,19 @@ def populate(sess, **kw):
             sess.add(net)
             count += 1
             if count % 3000 == 0:
-                sess.commit()
+                try:
+                    sess.commit()
+                except Exception, e:
+                    sess.rollback()
+                    print e
 
-        sess.commit()
+
+        try:
+            sess.commit()
+        except Exception, e:
+            print e
+            sess.rollback()
+
         stend = time.clock()
         thetime = stend - start
         log.info('created %s networks in %2f'%(count, thetime))
@@ -297,3 +302,13 @@ _cidr_to_mask = {
     1  : ['128.0.0.0', 2147483648],
     0  : ['0.0.0.0',   4294967296]
 }
+
+#def get_type_cache(dsdb):
+#    """ Takes a dsdb object (dependency injection)
+#        returns a dict of network type by keyed on id """
+#    #TODO: reflect the network type table from dsdb, then FK to it with an ENUM
+#    d = {}
+#    d[0] = 'unknown'
+#    for row in dsdb.dump('net_type'):
+#        d[row[0]] = row[1]
+#    return d
