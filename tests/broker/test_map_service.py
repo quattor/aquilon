@@ -56,7 +56,7 @@ class TestMapService(TestBrokerCommand):
                          command)
 
     def testverifynomatch(self):
-        command = "show map --service afs --instance q.ny.ms.com --company ms"
+        command = "show map --service afs --instance q.ny.ms.com --organization ms"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "No matching map found.", command)
 
@@ -162,7 +162,7 @@ class TestMapService(TestBrokerCommand):
                                 "--service", service, "--instance", instance])
 
     def testmaputsilpersona(self):
-        self.noouttest(["map", "service", "--company", "ms",
+        self.noouttest(["map", "service", "--organization", "ms",
                         "--service", "utsvc", "--instance", "utsi2",
                         "--archetype", "aquilon",
                         "--personality", "lemon-collector-oracle"])
@@ -207,14 +207,14 @@ class TestMapService(TestBrokerCommand):
         self.failUnlessEqual(map.personality.archetype.name, 'aquilon')
 
     def testmapwindowsfail(self):
-        command = ["map", "service", "--company", "ms",
+        command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "windows"]
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
     def testmapgenericfail(self):
-        command = ["map", "service", "--company", "ms",
+        command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--personality", "generic"]
         out = self.badoptiontest(command)
