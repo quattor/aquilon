@@ -89,6 +89,8 @@ class TestBrokerCommand(unittest.TestCase):
         pass
 
     msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
+    lock_request_re = re.compile('requesting compile lock with \d+ others '
+                                 'waiting\n')
 
     def runcommand(self, command, **kwargs):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
@@ -118,7 +120,7 @@ class TestBrokerCommand(unittest.TestCase):
         # Strip any msversion dev warnings out of STDERR
         err = self.msversion_dev_re.sub('', err)
         # Lock messages are pretty common...
-        err = err.replace('requesting compile lock\n', '')
+        err = self.lock_request_re.sub('', err)
         err = err.replace('acquired compile lock\n', '')
         err = err.replace('releasing compile lock\n', '')
         return (p, out, err)
