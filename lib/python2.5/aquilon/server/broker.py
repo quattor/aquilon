@@ -181,36 +181,33 @@ class BrokerCommand(object):
             request = kwargs["request"]
             principal = request.channel.getPrincipal()
             kwargs["user"] = principal
-            if not self.requires_transaction and not self.requires_azcheck:
-                self._add_logger(args, kwargs)
-                try:
-                    # These five lines are duped below... seemed like the
-                    # simplest way to code this method.
-                    retval = command(*args, **kwargs)
-                    if self.requires_format:
-                        style = kwargs.get("style", None)
-                        return self.formatter.format(style, retval, request)
-                    return retval
-                finally:
-                    self._remove_status(kwargs)
-            if not "session" in kwargs:
-                kwargs["session"] = self.dbf.Session()
-            session = kwargs["session"]
+            # The logger used to be set up after the session.  However,
+            # this keeps a record of the request from forming immediately
+            # if all the sqlalchmey session threads are in use.
+            # This will be a problem if/when we want an auditid to come
+            # from the database, but we can revisit at that point.
+            self._add_logger(args, kwargs)
             try:
-                dbuser = get_or_create_user_principal(session, principal,
-                                                      commitoncreate=True)
-                kwargs["dbuser"] = dbuser
-                self._add_logger(args, kwargs)
-                if self.requires_azcheck:
-                    self.az.check(principal=principal, dbuser=dbuser,
-                                  action=self.action, resource=request.path)
-                if self.requires_readonly:
-                    self._set_readonly(session)
-                # begin() is only required if session has transactional=False
-                #session.begin()
-                # Command is an instance method, and will already have self...
+                if self.requires_transaction or self.requires_azcheck:
+                    # Set up a session...
+                    if not "session" in kwargs:
+                        kwargs["session"] = self.dbf.Session()
+                    session = kwargs["session"]
+                    dbuser = get_or_create_user_principal(session, principal,
+                                                          commitoncreate=True)
+                    kwargs["dbuser"] = dbuser
+                    if self.requires_azcheck:
+                        self.az.check(principal=principal, dbuser=dbuser,
+                                      action=self.action,
+                                      resource=request.path)
+                    if self.requires_readonly:
+                        self._set_readonly(session)
+                    # begin() is only required if session transactional=False
+                    #session.begin()
+                # Command is an instance method already having self...
                 retval = command(*args, **kwargs)
-                session.commit()
+                if "session" in kwargs:
+                    session.commit()
                 if self.requires_format:
                     style = kwargs.get("style", None)
                     return self.formatter.format(style, retval, request)
@@ -218,13 +215,15 @@ class BrokerCommand(object):
             except:
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)
-                session.rollback()
-                session.close()
+                if "session" in kwargs:
+                    session.rollback()
+                    session.close()
                 raise
             finally:
                 # Obliterating the scoped_session - next call to session()
                 # will create a new one.
-                self.dbf.Session.remove()
+                if "session" in kwargs:
+                    self.dbf.Session.remove()
                 self._remove_status(kwargs)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__
