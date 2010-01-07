@@ -98,7 +98,8 @@ class DbFactory(object):
         #SQLITE
         elif self.dsn.startswith('sqlite'):
             self.engine = create_engine(self.dsn)
-            self.connection = self.engine.connect()
+            connection = self.engine.connect()
+            connection.close()
             self.vendor = 'sqlite'
         else:
             msg = "supported database datasources are db2, sqlite and oracle.\n"
@@ -116,6 +117,15 @@ class DbFactory(object):
         self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert self.Session
 
+        # For database types that support concurrent connections, we
+        # create a separate thread pool for connections that promise
+        # not to wait on locks.
+        if hasattr(self, "no_lock_engine"):
+            self.NLSession = scoped_session(sessionmaker(
+                bind=self.no_lock_engine))
+        else:
+            self.NLSession = self.Session
+
     def login(self, passwds):
         errs = []
         pswd_re = re.compile('PASSWORD')
@@ -127,7 +137,9 @@ class DbFactory(object):
             self.engine = create_engine(self.dsn)
 
             try:
-                self.connection = self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
+                self.no_lock_engine = create_engine(self.dsn)
                 return
             except SaDBError, e:
                 errs.append(e)

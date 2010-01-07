@@ -108,6 +108,17 @@ class BrokerCommand(object):
 
     """
 
+    # Promise that the command does not take a lock when it executes.
+    #
+    # Any command with this flag set to True will use the separate
+    # NLSession thread pool and should not have to wait on commands
+    # that are potentially all blocking on the same lock.
+    #
+    # It is automatically set to True for all search and show commands,
+    # but could be reversed back to False by overriding __init__ for the
+    # command.
+    is_lock_free = False
+
     # Run the render method on a separate thread.  This will be forced
     # to True if requires_azcheck or requires_transaction.
     defer_to_thread = True
@@ -143,9 +154,12 @@ class BrokerCommand(object):
         # just set the variables themselves.
         if self.action.startswith("show") or self.action.startswith("search"):
             self.requires_readonly = True
+            self.is_lock_free = True
             self.requires_format = True
         if self.action.startswith("cat"):
             self.requires_format = True
+            self.requires_readonly = True
+            self.is_lock_free = True
         self._update_render(self.render)
         if not self.defer_to_thread:
             if self.requires_azcheck or self.requires_transaction:
@@ -191,7 +205,10 @@ class BrokerCommand(object):
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
                     if not "session" in kwargs:
-                        kwargs["session"] = self.dbf.Session()
+                        if self.is_lock_free:
+                            kwargs["session"] = self.dbf.NLSession()
+                        else:
+                            kwargs["session"] = self.dbf.Session()
                     session = kwargs["session"]
                     dbuser = get_or_create_user_principal(session, principal,
                                                           commitoncreate=True)
