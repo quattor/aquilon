@@ -33,7 +33,6 @@ import re
 
 from sqlalchemy.sql import text
 from twisted.internet import defer
-from twisted.internet import reactor
 from twisted.python import log
 
 from aquilon.config import Config
