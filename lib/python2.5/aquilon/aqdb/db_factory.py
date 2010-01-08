@@ -134,12 +134,14 @@ class DbFactory(object):
         for p in passwds:
             self.dsn = re.sub(pswd_re, p, dsn_copy)
 
-            self.engine = create_engine(self.dsn)
+            pool_options = {"pool_size":10, "max_overflow":0,
+                            "pool_timeout":None}
+            self.engine = create_engine(self.dsn, **pool_options)
 
             try:
                 connection = self.engine.connect()
                 connection.close()
-                self.no_lock_engine = create_engine(self.dsn)
+                self.no_lock_engine = create_engine(self.dsn, **pool_options)
                 return
             except SaDBError, e:
                 errs.append(e)
