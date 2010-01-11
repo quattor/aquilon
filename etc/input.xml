@@ -59,6 +59,14 @@
       Force the server to write out all templates that it creates
       automatically, based on the current information in AQDB.
       Requires aqd_admin entitlement.
+      <optgroup name="sections" fields="any">
+         <option name="hosts" type="boolean">flush the host templates</option>
+         <option name="machines" type="boolean">flush the machine templates</option>
+         <option name="personalities" type="boolean">flush the personality templates</option>
+         <option name="clusters" type="boolean">flush the cluster templates</option>
+         <option name="services" type="boolean">flush the service templates</option>
+         <option name="all" type="boolean">flush all templates</option>
+      </optgroup>
       <transport method="post" path="flush" />
    </command>
 
