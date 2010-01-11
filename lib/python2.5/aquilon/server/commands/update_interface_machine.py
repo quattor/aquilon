@@ -69,10 +69,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if dbhost.archetype.name == 'aurora' and not dbhost.interfaces:
                 dbinterface.system = dbhost
                 dbhost.mac = dbinterface.mac
-        if mac:
-            dbinterface.mac = mac
-            if dbinterface.system:
-                dbinterface.system.mac = mac
+
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
             restrict_tor_offsets(dbnetwork, ip)
@@ -93,6 +90,16 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     session.add(i)
         if dbinterface.system:
             session.add(dbinterface.system)
+
+        #Set this mac address last so that you can update to a bootable
+        #interface *before* adding a mac address. This is so the validation
+        #that takes place in the interface class doesn't have to be worried
+        #about the order of update to bootable=True and mac address
+        if mac:
+            dbinterface.mac = mac
+            if dbinterface.system:
+                dbinterface.system.mac = mac
+
         session.add(dbinterface)
         session.flush()
         session.refresh(dbinterface)
