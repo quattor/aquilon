@@ -64,3 +64,13 @@ ObjectFormatter.handlers[Cluster] = ClusterFormatter()
 ObjectFormatter.handlers[EsxCluster] = ClusterFormatter()
 
 
+class SimpleClusterList(list):
+    """By convention, holds a list of clusters to be formatted in a simple
+       (name-only) manner."""
+    pass
+
+class SimpleClusterListFormatter(ObjectFormatter):
+    def format_raw(self, sclist, indent=""):
+        return str("\n".join([indent + cluster.name for cluster in sclist]))
+
+ObjectFormatter.handlers[SimpleClusterList] = SimpleClusterListFormatter()
