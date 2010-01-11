@@ -43,7 +43,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddInterface(TestBrokerCommand):
 
-    def testaddut3c5n10eth0(self):
+    def testaddut3c5n10eth0_good_mac(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10",
                         "--mac", self.net.unknown[0].usable[0].mac.upper()])
@@ -347,6 +347,15 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out,
                          "Interface: eth0 %s boot=True" %
                          self.net.tor_net[0].usable[5].mac.lower(),
+                         command)
+
+    def testadd_bootable_no_mac(self):
+        """ if name == 'eth0' its bootable. without a mac should fail. """
+        command = ["add", "interface", "--interface", "eth0", "--machine",
+                   "ut9s03p1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         'Bootable interfaces require a MAC address',
                          command)
 
     def testaddhprackinterfaces(self):

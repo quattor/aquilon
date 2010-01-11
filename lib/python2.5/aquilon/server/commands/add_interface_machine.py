@@ -111,7 +111,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         elif automac:
             mac = self.generate_mac(session, dbmachine)
         else:
-            raise ArgumentError("Interface requires a MAC address.")
+            #Ignore now that Mac Address can be null
+            pass
 
         dbinterface = Interface(name=interface, hardware_entity=dbmachine,
                                 mac=mac, interface_type=itype, **extra)
@@ -333,5 +334,3 @@ class MACAddress(object):
         # in between every two characters of the address.
         return ":".join(["".join(t) for t in
                          zip(a[0:len(a):2], a[1:len(a):2])])
-
-
