@@ -43,6 +43,7 @@ from aquilon.server.processes import write_file, remove_file, run_command
 class CommandPut(BrokerCommand):
 
     required_parameters = ["domain", "bundle"]
+    requires_readonly = True
 
     def render(self, session, logger, domain, bundle, **arguments):
         # Verify that it exists before writing to the filesystem.
