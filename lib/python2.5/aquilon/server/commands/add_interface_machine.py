@@ -114,14 +114,19 @@ class CommandAddInterfaceMachine(BrokerCommand):
             #Ignore now that Mac Address can be null
             pass
 
-        dbinterface = Interface(name=interface, hardware_entity=dbmachine,
-                                mac=mac, interface_type=itype, **extra)
+        try:
+            dbinterface = Interface(name=interface, hardware_entity=dbmachine,
+                                    mac=mac, interface_type=itype, **extra)
+        except ValueError, e:
+            raise ArgumentError(e.message)
+
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
             dbinterface.system = dbmanager
             dbmanager.mac = dbinterface.mac
             session.add(dbmanager)
+
         session.add(dbinterface)
         session.flush()
         session.refresh(dbinterface)

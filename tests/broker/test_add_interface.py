@@ -391,10 +391,10 @@ class TestAddInterface(TestBrokerCommand):
                             "--machine", machine,
                             "--mac", self.net.tor_net[2].usable[port].mac])
 
+    # FIXME: Missing a test for no mac or automac specified. (Might not
+    # be possible to test the broker side and changes to the aqmac column type)
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.
-    # FIXME: Missing a test for no mac or automac specified. (Might not
-    # be possible to test the broker side.)
     # FIXME: Missing a test for a failed DSDB add_host.
     # FIXME: Missing tests around Dell rename hack.
 
