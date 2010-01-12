@@ -41,6 +41,7 @@ from aquilon.server.processes import run_command
 class CommandSync(BrokerCommand):
 
     required_parameters = ["domain"]
+    requires_readonly = True
 
     def render(self, session, logger, domain, **arguments):
         # Verify that it exists before attempting the sync.
