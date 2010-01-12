@@ -38,6 +38,7 @@ from aquilon.exceptions_ import NotFoundException
 class CommandCompile(BrokerCommand):
 
     required_parameters = ["domain"]
+    requires_readonly = True
 
     def render(self, session, logger, domain, user, **arguments):
         d = session.query(Domain).filter_by(name=domain).all()
