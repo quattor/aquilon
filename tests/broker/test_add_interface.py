@@ -358,6 +358,23 @@ class TestAddInterface(TestBrokerCommand):
                          'Bootable interfaces require a MAC address',
                          command)
 
+    def testadd_no_mac(self):
+        """ if it's named eth1 it should work with no mac address """
+        self.noouttest(["add", "interface",
+                        "--interface", "eth1", "--machine", "ut8s02p3"])
+
+    def testverify_no_mac(self):
+        command = "show_machine --machine ut8s02p3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Interface: eth1 boot=False (no mac addr)",
+                         command)
+
+    def testverify_no_mac_proto(self):
+        command = ["show_machine", "--machine", "ut8s02p3", "--format=proto"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyErr(err, command)
+
     def testaddhprackinterfaces(self):
         for i in range(51, 100):
             port = i - 50
