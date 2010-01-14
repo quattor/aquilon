@@ -184,10 +184,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              """"hardware/cpu/intel/xeon_2500"));""",
                              command)
             self.matchoutput(out,
-                             """"cards/nic/eth0/hwaddr" """
-                             """= "00:50:56:01:20:%02x";""" % (i - 1),
+                             """"hwaddr", "00:50:56:01:20:%02x",""" % (i - 1),
                              command)
-            self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
+            self.matchoutput(out, """"boot", true,""", command)
 
     # FIXME: Add a test for creating an aquilon host out of a virtual
     # machine.
@@ -273,4 +272,3 @@ class TestAddVirtualHardware(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVirtualHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -333,6 +333,30 @@ class TestMakeAquilon(TestBrokerCommand):
                          "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
                          command)
 
+    def testverifyunittest17proto(self):
+        command = ["show_host", "--format=proto",
+                   "--hostname=unittest17.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyErr(err, command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.assertEqual(host.fqdn, "unittest17.aqd-unittest.ms.com")
+        #still fails, but it's checked below in the for loop
+        self.assertEqual(host.ip, self.net.tor_net[0].usable[3].ip)
+        self.assertEqual(host.mac.upper(),
+                         self.net.tor_net[0].usable[3].mac.upper())
+        self.assertEqual(host.machine.name, "ut8s02p3")
+        self.assertEqual(len(host.machine.interfaces), 2)
+        for i in host.machine.interfaces:
+            if i.device == 'eth0':
+                self.assertEqual(i.ip, self.net.tor_net[0].usable[3].ip)
+                self.assertEqual(i.mac, self.net.tor_net[0].usable[3].mac)
+            elif i.device == 'eth1':
+                # Skipping IP test to avoid merge conflict
+                self.assertEqual(i.mac, "None")
+            else:
+                self.fail("Unrecognized interface '%s'" % i.device)
+
     # Turns out this test is completely bogus.  There is a sequence of
     # binding that would allow a client to bind to ut.a on chooser1
     # without needing to be bound to ut.a on chooser2 or chooser3.  The

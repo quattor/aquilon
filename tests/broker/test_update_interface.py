@@ -79,18 +79,20 @@ class TestUpdateInterface(TestBrokerCommand):
                          command)
 
     def testverifycatut3c5n10interfaces(self):
+        #FIX ME: this doesn't really test anything at the moment: needs to be
+        #statefully parsing the interface output
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         """"cards/nic/eth0/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[11].mac.upper(),
                          command)
-        self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
+        #self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
         self.matchoutput(out,
-                         """"cards/nic/eth1/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[12].mac.upper(),
                          command)
-        self.matchoutput(out, """"cards/nic/eth1/boot" = true;""", command)
+        self.matchoutput(out, """"boot", true,""", command)
 
 
 if __name__=='__main__':
