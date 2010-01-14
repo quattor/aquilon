@@ -183,9 +183,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              """"cpu" = list(create("""
                              """"hardware/cpu/intel/xeon_2500"));""",
                              command)
-            self.matchoutput(out,
-                             """"hwaddr", "00:50:56:01:20:%02x",""" % (i - 1),
-                             command)
+            self.searchoutput(out,
+                              r'"cards/nic/eth0" = nlist\(\s*'
+                              r'"hwaddr", "00:50:56:01:20:%02x",\s*'
+                              r'"boot", true,\s*\);'
+                              % (i - 1),
+                              command)
             self.matchoutput(out, """"boot", true,""", command)
 
     # FIXME: Add a test for creating an aquilon host out of a virtual

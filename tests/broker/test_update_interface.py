@@ -83,16 +83,17 @@ class TestUpdateInterface(TestBrokerCommand):
         #statefully parsing the interface output
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         """"hwaddr", "%s",""" %
-                         self.net.unknown[0].usable[11].mac.upper(),
-                         command)
-        #self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
-        self.matchoutput(out,
-                         """"hwaddr", "%s",""" %
-                         self.net.unknown[0].usable[12].mac.upper(),
-                         command)
-        self.matchoutput(out, """"boot", true,""", command)
+        self.searchoutput(out,
+                          r'"cards/nic/eth0" = nlist\(\s*'
+                          r'"hwaddr", "%s",\s*\);'
+                          % (self.net.unknown[0].usable[11].mac.upper()),
+                          command)
+        self.searchoutput(out,
+                          r'"cards/nic/eth1" = nlist\(\s*'
+                          r'"hwaddr", "%s",\s*'
+                          r'"boot", true,\s*\);'
+                          % (self.net.unknown[0].usable[12].mac.upper()),
+                          command)
 
 
 if __name__=='__main__':
