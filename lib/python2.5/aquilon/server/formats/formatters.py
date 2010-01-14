@@ -196,7 +196,7 @@ class ObjectFormatter(object):
             host_msg.sysloc = str(host.sysloc)
         if hasattr(host, "ip"):
             host_msg.ip = str(host.ip)
-        if hasattr(host, "mac"):
+        if getattr(host, "mac", None):
             host_msg.mac = str(host.mac)
         if hasattr(host, "system_type"):
             host_msg.type = str(host.system_type)
@@ -224,7 +224,7 @@ class ObjectFormatter(object):
                 for i in host.machine.interfaces:
                     int_msg = host_msg.machine.interfaces.add()
                     int_msg.device = str(i.name)
-                    if hasattr(i, "mac"):
+                    if getattr(i, "mac", None):
                         int_msg.mac = str(i.mac)
                     if hasattr(i.system, "ip"):
                         int_msg.ip = str(i.system.ip)
