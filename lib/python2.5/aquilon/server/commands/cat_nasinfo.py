@@ -38,13 +38,18 @@ class CommandCatNasinfo(BrokerCommand):
 
     required_parameters = ["nasinfo"]
 
-    def render(self, session, logger, nasinfo, **kwargs):
+    def render(self, session, logger, nasinfo, generate, **kwargs):
         dbservice = Service.get_unique(session, name='nas_disk_share',
                                        compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=nasinfo, compel=True)
         plenary_info = PlenaryInstanceNasDiskShare(dbservice, dbsi,
                                                    logger=logger)
-        return plenary_info.read()
+        if generate:
+            lines = []
+            plenary_info.body(lines)
+            return "\n".join(lines)
+        else:
+            return plenary_info.read()
 
 

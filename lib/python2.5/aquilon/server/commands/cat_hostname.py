@@ -32,16 +32,23 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.processes import read_file
+from aquilon.server.templates.host import PlenaryToplevelHost
 
 
 class CommandCatHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, **kwargs):
+    def render(self, generate, session, logger, hostname, **kwargs):
         dbhost = hostname_to_host(session, hostname)
 
         dpath = "%s/domains/%s/profiles"%(self.config.get("broker", "builddir"), dbhost.domain.name)
-        return read_file(dpath, hostname + '.tpl', logger=logger)
+        if generate:
+            plenary = PlenaryToplevelHost(dbhost)
+            lines = []
+            plenary.body(lines)
+            return "\n".join(lines)
+        else:
+            return read_file(dpath, hostname + '.tpl', logger=logger)
 
 
