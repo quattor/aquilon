@@ -88,8 +88,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     oldinfo = self.snapshot(i)
                     i.bootable = False
                     session.add(i)
-        if dbinterface.system:
-            session.add(dbinterface.system)
 
         #Set this mac address last so that you can update to a bootable
         #interface *before* adding a mac address. This is so the validation
@@ -100,6 +98,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if dbinterface.system:
                 dbinterface.system.mac = mac
 
+        if dbinterface.system:
+            session.add(dbinterface.system)
         session.add(dbinterface)
         session.flush()
         session.refresh(dbinterface)
