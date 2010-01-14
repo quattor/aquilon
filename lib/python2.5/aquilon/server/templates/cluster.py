@@ -93,7 +93,7 @@ class PlenaryClusterObject(Plenary):
         campus = self.dbcluster.location_constraint.campus
         if campus:
             lines.append("'/system/cluster/campus' = '%s';" % campus.name)
-        lines.append("'/system/cluster/ratio' = list(%d, %d)\n" % (
+        lines.append("'/system/cluster/ratio' = list(%d, %d);\n" % (
                             self.dbcluster.vm_count,
                             self.dbcluster.host_count))
         lines.append("'/system/cluster/machines' = nlist(")
