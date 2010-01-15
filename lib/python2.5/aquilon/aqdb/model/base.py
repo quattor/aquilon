@@ -140,6 +140,8 @@ class Base(object):
         # into args, these can't be in the method definition.  (If
         # they were, any positional args would be slurped into whichever
         # of these happened to have been defined first!)
+        # Before calling this command recursively these need to be
+        # re-added to kwargs.
         compel = kwargs.pop('compel', False)
         preclude = kwargs.pop('preclude', False)
 
@@ -234,6 +236,8 @@ class Base(object):
                'polymorphic_identity' in cls.__mapper_args__:
                 kwargs[cls.__base__.__mapper_args__['polymorphic_on'].name] = \
                         cls.__mapper_args__['polymorphic_identity']
+            kwargs['compel'] = compel
+            kwargs['preclude'] = preclude
             return cls.__base__.get_unique(session, *args, **kwargs)
         raise InternalError("No uniqueness constraint found for %s " %
                             _describe_uniqueness_request(cls, *args, **kwargs))

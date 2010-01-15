@@ -272,6 +272,57 @@
       <transport method="get" path="find/host" />
    </command>
 
+   <command name="search_esx_cluster">
+      Shows any information available for the matching ESX clusters.
+
+      There are three sets of parameters: 1 - those that match directly
+      against the cluster (name, domain, cluster_building, etc.).  2 -
+      those that match against the ESX vmhosts that make up the cluster
+      (esx_hostname, vmhost_rack, etc.).  3 - those that match against
+      the virtual machines running on the cluster (virtual_machine,
+      guest).
+      <optgroup name="search_cluster_opts" mandatory="True" fields="any">
+         <option name="cluster" type="string">cluster name</option>
+         <option name="metacluster" type="string">metacluster name</option>
+         <option name="esx_hostname" type="string">fully qualified domain name of a vmhost</option>
+         <option name="virtual_machine" type="string">virtual machine label (evm1)</option>
+         <option name="guest" type="string">fully qualified host name of a virtual machine</option>
+         <option name="domain" type="string">template domain</option>
+         <option name="archetype" type="string">archetype (vmhost)</option>
+         <option name="personality" type="string">personality</option>
+         <option name="service" type="string">client of service (single service only)</option>
+         <option name="instance" type="string">client of service instance (single instance only)</option>
+         <option name="share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+         <optgroup name="search_cluster_location_opts" fields="any">
+	    <option name="cluster_organization" type="string">Cluster Organization</option>
+	    <option name="cluster_hub" type="string">Cluster Hub</option>
+	    <option name="cluster_continent" type="string">Cluster Continent</option>
+	    <option name="cluster_country" type="string">Cluster Country</option>
+	    <option name="cluster_city" type="string">Cluster City</option>
+	    <option name="cluster_building" type="string">Cluster Building</option>
+	    <option name="cluster_room" type="string">Cluster Room</option>
+	    <option name="cluster_rack" type="string">Cluster Rack</option>
+	    <option name="cluster_desk" type="string">Cluster Desk</option>
+         </optgroup>
+         <optgroup name="search_vmhost_location_opts" fields="any">
+	    <option name="vmhost_organization" type="string">vmhost Organization</option>
+	    <option name="vmhost_hub" type="string">vmhost Hub</option>
+	    <option name="vmhost_continent" type="string">vmhost Continent</option>
+	    <option name="vmhost_country" type="string">vmhost Country</option>
+	    <option name="vmhost_city" type="string">vmhost City</option>
+	    <option name="vmhost_building" type="string">vmhost Building</option>
+	    <option name="vmhost_room" type="string">vmhost Room</option>
+	    <option name="vmhost_rack" type="string">vmhost Rack</option>
+	    <option name="vmhost_desk" type="string">vmhost Desk</option>
+         </optgroup>
+         <option name="all" type="boolean">list all ESX clusters</option>
+      </optgroup>
+      <optgroup name="search_cluster_prefs" mandatory="False">
+         <option name="fullinfo" type="boolean">show full information for the matching clusters</option>
+      </optgroup>
+      <transport method="get" path="find/cluster/esx" />
+   </command>
+
    <command name="search_next">
       Search for the next available number in a series.  If entries are
       found in the database of the prefix followed by a number, the
