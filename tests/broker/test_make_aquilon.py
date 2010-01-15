@@ -353,7 +353,7 @@ class TestMakeAquilon(TestBrokerCommand):
                 self.assertEqual(i.mac, self.net.tor_net[0].usable[3].mac)
             elif i.device == 'eth1':
                 # Skipping IP test to avoid merge conflict
-                self.assertEqual(i.mac, "None")
+                self.assertEqual(i.mac, "")
             else:
                 self.fail("Unrecognized interface '%s'" % i.device)
 
