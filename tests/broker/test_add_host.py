@@ -195,6 +195,30 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "vmhost", "--personality", "esx_server"]
             self.noouttest(command)
 
+    def testverifyshowhostproto(self):
+        # We had a bug where a dangling interface with no IP address
+        # assigned would cause show host --format=proto to fail...
+        command = ["show_host", "--format=proto",
+                   "--hostname=evh1.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyErr(err, command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.assertEqual(host.fqdn, "evh1.aqd-unittest.ms.com")
+        self.assertEqual(host.ip, self.net.tor_net[2].usable[1].ip)
+        self.assertEqual(host.machine.name, "ut10s04p1")
+        self.assertEqual(len(host.machine.interfaces), 2)
+        for i in host.machine.interfaces:
+            if i.device == 'eth0':
+                self.assertEqual(i.ip, self.net.tor_net[2].usable[1].ip)
+                # We're not using this field anymore...
+                self.assertEqual(i.network_id, 0)
+            elif i.device == 'eth1':
+                self.assertEqual(i.ip, "")
+                self.assertEqual(i.network_id, 0)
+            else:
+                self.fail("Unrecognized interface '%s'" % i.device)
+
     def testaddhostnousefularchetype(self):
         command = ["add", "host", "--archetype", "pserver",
                    "--hostname", "unittest01.one-nyp.ms.com",

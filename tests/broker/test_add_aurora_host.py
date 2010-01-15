@@ -93,6 +93,18 @@ class TestAddAuroraHost(TestBrokerCommand):
                          "aurora_node machines.",
                          command)
 
+    def testshowhostproto(self):
+        fqdn = self.aurora_with_node
+        if not fqdn.endswith(".ms.com"):
+            fqdn = "%s.ms.com" % fqdn
+        command = ["show_host", "--hostname", fqdn, "--format=proto"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyErr(err, command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.assertEqual(host.fqdn, fqdn)
+        self.assertEqual(host.ip, "")
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAuroraHost)

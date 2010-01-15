@@ -364,6 +364,13 @@ class TestAddInterface(TestBrokerCommand):
             self.noouttest(["add", "interface", "--interface", "eth0",
                             "--machine", machine,
                             "--mac", self.net.tor_net[2].usable[port].mac])
+            # Didn't bother putting a tor_switch on this network, although
+            # it wouldn't hurt.  At least the first ten (ESX servers) are
+            # meant to be left dangling with no IP assigned to test some
+            # edge cases.
+            self.noouttest(["add", "interface", "--interface", "eth1",
+                            "--machine", machine,
+                            "--mac", self.net.tor_net[6].usable[port].mac])
 
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.
