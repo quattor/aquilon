@@ -43,7 +43,9 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 
 class CommandFlush(BrokerCommand):
 
-    def render(self, session, logger, user, **arguments):
+    def render(self, session, logger, user, 
+               services, personalities, machines, clusters, hosts, all,
+               **arguments):
         success = []
         failed = []
         written = 0
@@ -51,70 +53,73 @@ class CommandFlush(BrokerCommand):
         try:
             compileLock(logger=logger)
 
-            logger.client_info("flushing services")
-            for dbservice in session.query(Service).all():
-                try:
-                    plenary_info = PlenaryService(dbservice)
-                    written += plenary_info.write(locked=True)
-                except Exception, e:
-                    failed.append("service %s failed: %s" % (dbservice.name, e))
-                    continue
-
-                for dbinst in dbservice.instances:
+            if services or all:
+                logger.client_info("flushing services")
+                for dbservice in session.query(Service).all():
                     try:
-                        plenary_info = PlenaryServiceInstance(dbservice, dbinst)
+                        plenary_info = PlenaryService(dbservice)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
+                        failed.append("service %s failed: %s" % (dbservice.name, e))
                         continue
 
-            logger.client_info("flushing personalities")
-            for persona in session.query(Personality).all():
-                try:
-                    plenary_info = PlenaryPersonality(persona)
-                    written += plenary_info.write(locked=True)
-                except Exception, e:
-                    failed.append("personality %s failed: %s" %
-                                  (persona.name, e))
-                    continue
+                    for dbinst in dbservice.instances:
+                        try:
+                            plenary_info = PlenaryServiceInstance(dbservice, dbinst)
+                            written += plenary_info.write(locked=True)
+                        except Exception, e:
+                            failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
+                            continue
 
-            logger.client_info("flushing machines")
-            for machine in session.query(Machine).all():
-                try:
-                    plenary_info = PlenaryMachineInfo(machine)
-                    written += plenary_info.write(locked=True)
-                except Exception, e:
-                    label = machine.name
-                    if machine.host:
-                        label = "%s (host: %s)" % (machine.name,
-                                                   machine.host.fqdn)
-                    failed.append("machine %s failed: %s" % (label, e))
-                    continue
-
-            # what about the plenary hosts within domains... do we want those too?
-            # let's say yes for now...
-            logger.client_info("flushing hosts")
-            for d in session.query(Domain).all():
-                for h in d.hosts:
-                    if not h.archetype.is_compileable:
-                        continue
+            if personalities or all:
+                logger.client_info("flushing personalities")
+                for persona in session.query(Personality).all():
                     try:
-                        plenary_host = PlenaryHost(h)
-                        written += plenary_host.write(locked=True)
-                    except IncompleteError, e:
-                        pass
-                        #logger.client_info("Not flushing host: %s" % e)
+                        plenary_info = PlenaryPersonality(persona)
+                        written += plenary_info.write(locked=True)
                     except Exception, e:
-                        failed.append("host %s in domain %s failed: %s" %(h.fqdn,d.name,e))
+                        failed.append("personality %s failed: %s" %
+                                      (persona.name, e))
+                        continue
 
-            logger.client_info("flushing clusters")
-            for clus in session.query(Cluster).all():
-                try:
-                    plenary = PlenaryCluster(clus)
-                    written += plenary.write(locked=True)
-                except Exception, e:
-                    failed.append("%s cluster %s failed: %s" %
-                                  (clus.cluster_type, clus.name, e))
+            if machines or all:
+                logger.client_info("flushing machines")
+                for machine in session.query(Machine).all():
+                    try:
+                        plenary_info = PlenaryMachineInfo(machine)
+                        written += plenary_info.write(locked=True)
+                    except Exception, e:
+                        label = machine.name
+                        if machine.host:
+                            label = "%s (host: %s)" % (machine.name,
+                                                       machine.host.fqdn)
+                        failed.append("machine %s failed: %s" % (label, e))
+                        continue
+
+            if hosts or all:
+                logger.client_info("flushing hosts")
+                for d in session.query(Domain).all():
+                    for h in d.hosts:
+                        if not h.archetype.is_compileable:
+                            continue
+                        try:
+                            plenary_host = PlenaryHost(h)
+                            written += plenary_host.write(locked=True)
+                        except IncompleteError, e:
+                            pass
+                            #logger.client_info("Not flushing host: %s" % e)
+                        except Exception, e:
+                            failed.append("host %s in domain %s failed: %s" %(h.fqdn,d.name,e))
+
+            if clusters or all:
+                logger.client_info("flushing clusters")
+                for clus in session.query(Cluster).all():
+                    try:
+                        plenary = PlenaryCluster(clus)
+                        written += plenary.write(locked=True)
+                    except Exception, e:
+                        failed.append("%s cluster %s failed: %s" %
+                                      (clus.cluster_type, clus.name, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this

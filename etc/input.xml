@@ -56,9 +56,33 @@
    </command>
 
    <command name="flush">
-      Force the server to write out all templates that it creates
-      automatically, based on the current information in AQDB.
+      Force the server to (re)write the plenary templates
+      based on the current information in AQDB. This is intended to
+      be used when re-creating the server state after a rebuild, or
+      when upgrading the broker.
+
       Requires aqd_admin entitlement.
+
+      Without arguments, no templates are selected for flushing. Use
+      either --all to select all templates, or specify which groups
+      of templates to flush by combining arguments. For example, "flush
+      --hosts --machines" would flush all the host and machine templates
+      but would leave all other plenary templates alone.
+
+      The command will return success if all templates selected were
+      written without error. The command will return partial success if
+      any templates could not be written. The output of the command indicates
+      how many templates were successfully written and how many templates
+      were selected. For example "flushed 10/10 templates" would indicate
+      that 10 templates matched and they were all written out successfully.
+      <optgroup name="sections" fields="any">
+         <option name="hosts" type="boolean">flush the host templates</option>
+         <option name="machines" type="boolean">flush the machine templates</option>
+         <option name="personalities" type="boolean">flush the personality templates</option>
+         <option name="clusters" type="boolean">flush the cluster templates</option>
+         <option name="services" type="boolean">flush the service templates</option>
+         <option name="all" type="boolean">flush all templates</option>
+      </optgroup>
       <transport method="post" path="flush" />
    </command>
 
