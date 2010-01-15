@@ -201,12 +201,15 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "'/system/cluster/machines' = nlist(", command)
         for i in range(1, 9):
             machine = "evm%s" % i
-            self.matchoutput(out,
-                             "'%s', create('machine/americas/ut/None/%s')," %
-                             (machine, machine),
-                             command)
-        self.matchclean(out, "'evm9', create('machine/americas/ut/None/evm9'),",
-                        command)
+            self.searchoutput(out,
+                              r"'%s', nlist\(\s*'hardware', create\("
+                              r"'machine/americas/ut/None/%s'\),\s*\),"
+                              % (machine, machine),
+                              command)
+        self.searchclean(out,
+                         r"'evm9', nlist\(\s*'hardware', create\("
+                         r"'machine/americas/ut/None/evm9'\),\s*\),",
+                         command)
         self.searchoutput(out,
                           r"include { 'service/esx_management/ut.[ab]/"
                           r"client/config' };",
