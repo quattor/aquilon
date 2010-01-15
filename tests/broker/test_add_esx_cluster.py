@@ -35,6 +35,7 @@ from __future__ import with_statement
 import os
 import sys
 import unittest
+import re
 
 
 if __name__ == "__main__":
@@ -78,6 +79,11 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
         self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
+        default_ratio = self.config.get("broker",
+                                        "esx_cluster_vm_to_host_ratio")
+        default_ratio = re.sub(r"(\d+):(\d+)", r"\1, \2", default_ratio)
+
+        self.matchoutput(out, "'/system/cluster/ratio' = list(%s);" % default_ratio, command)
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.matchclean(out, "include { 'service", command)
