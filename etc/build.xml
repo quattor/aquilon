@@ -136,10 +136,30 @@
 		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
 			<fileset refid="source.fileset" />
 		</copy>
-		<!-- Copy any compiled profiles into the web directory.  -->
+		<!--
+		Copy only relevant compiled profiles into the web directory.
+		-->
 		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}">
-			<fileset dir="${compiled.profiles}" includes="**/*.xml" />
+			<!--
+			The relevant ant scripting sections in the manual:
+			CoreTypes/selectors.html#scriptselector
+			OptionalTasks/script.html
+			-->
+			<fileset dir="${compiled.profiles}" includes="**/*.xml">
+				<scriptselector language="javascript"> <![CDATA[
+					importClass(java.io.File);
+					// importClass(java.lang.System);
+
+					var thisfile = self.getFile().getPath();
+					var prefix = self.getProject().getProperty("compiled.profiles").toString();
+					// This could be more rigorous...
+					var base = thisfile.substring(prefix.length());
+					var source = self.getProject().getProperty("source.profiles");
+					var counterpart = new File(source, base.replaceAll(".xml$", ".tpl"));
+					// System.out.println("Comparing '" + thisfile + "' with source '" + counterpart + "' and exists=" + counterpart.exists());
+					self.setSelected(counterpart.exists());
+				]]></scriptselector>
+			</fileset>
 		</copy>
 	</target>
-
 </project>
