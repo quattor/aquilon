@@ -295,6 +295,17 @@ class TestAddService(TestBrokerCommand):
             self.noouttest(["add_service", "--service=nas_disk_share",
                             "--instance=test_share_%s" % i])
 
+    def testcatnasinfo(self):
+        command = ["cat", "--nasinfo=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "structure template service/nas_disk_share/"
+                         "test_share_1/client/nasinfo",
+                         command)
+        self.matchoutput(out, "'server' = 'lnn30f1';", command)
+        self.matchoutput(out, "'mountpoint' = '/vol/lnn30f1v1/test_share_1';",
+                         command)
+
     def testfailaddnasshare(self):
         command = ["add_service", "--service=nas_disk_share",
                    "--instance=share-does-not-exist"]

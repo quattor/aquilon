@@ -1373,18 +1373,20 @@
       given options.  All are exclusive, except --instance and/or --default
       also require --service.
       <optgroup name="cat options" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="machine cluster service instance default">Name of the host</option>
-         <option name="machine" type="string" conflicts="hostname cluster service instance default">Name of the machine</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default">Name of the machine</option>
-         <option name="service" type="string" conflicts="hostname machine cluster">Name of the service</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster">Name of the service instance</option>
-	 <option name="default" type="boolean" conflicts="hostname machine cluster">Get the default client config for the service/instance</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo">Name of the host</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo">Name of the machine</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo">Name of the machine</option>
+         <option name="service" type="string" conflicts="hostname machine cluster nasinfo">Name of the service</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster nasinfo">Name of the service instance</option>
+	 <option name="default" type="boolean" conflicts="hostname machine cluster nasinfo">Get the default client config for the service/instance</option>
+	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default">Get the default client config for the service/instance</option>
       </optgroup>
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
       <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
+      <transport trigger="nasinfo" method="get" path="nasinfo/%(nasinfo)s/plenary" />
    </command>
 
    <command name="sync">
