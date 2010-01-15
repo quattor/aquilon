@@ -40,10 +40,13 @@ ms.version.addpkg('cx_Oracle', '5.0.1-11.1.0.6')
 
 ms.version.addpkg('ipython', '0.9.1')
 
-ms.version.addpkg('nose', '0.11.0')
+#needed to eliminate import noise created by nose and protoc in brokertest
+ms.version.addpkg('setuptools', '0.6c9')
+
+ms.version.addpkg('nose', '0.11.1')
 
 ms.version.addpkg('ms.modulecmd', '1.0.2')
 
 ms.version.addpkg('coverage', '3.1')
 
-ms.version.addpkg('argparse', '0.9.1')
+ms.version.addpkg('argparse', '1.0.1')
