@@ -31,13 +31,15 @@
 
 from csv import DictReader, Error as CSVError
 from StringIO import StringIO
+from datetime import datetime
 
 from aquilon.exceptions_ import AquilonError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.observed_mac import get_or_create_observed_mac
+from aquilon.server.dbwrappers.observed_mac import (
+    update_or_create_observed_mac)
 from aquilon.server.processes import run_command
-from aquilon.aqdb.model import TorSwitch, HardwareEntity
+from aquilon.aqdb.model import TorSwitch, HardwareEntity, ObservedMac
 
 
 # This runs...
@@ -60,7 +62,7 @@ class CommandPollTorSwitch(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, rack, **arguments):
+    def render(self, session, logger, rack, clear, **arguments):
         dblocation = get_location(session, rack=rack)
         q = session.query(TorSwitch)
         #q = q.join('tor_switch_hw')
@@ -70,15 +72,24 @@ class CommandPollTorSwitch(BrokerCommand):
         switches = q.all()
         if not switches:
             raise NotFoundException("No switch found.")
-        return self.poll(session, logger, switches)
+        return self.poll(session, logger, switches, clear)
 
-    def poll(self, session, logger, switches):
+    def poll(self, session, logger, switches, clear):
+        now = datetime.now()
         for switch in switches:
+            if clear and clear != str(False):
+                self.clear(session, logger, switch)
             out = self.run_checknet(logger, switch)
             macports = self.parse_ports(logger, out)
             for (mac, port) in macports:
-                get_or_create_observed_mac(session, switch, port, mac)
+                update_or_create_observed_mac(session, switch, port, mac, now)
         return
+
+    def clear(self, session, logger, switch):
+        macs = session.query(ObservedMac).filter_by(switch=switch).all()
+        for om in macs:
+            session.delete(om)
+        session.flush()
 
     def run_checknet(self, logger, switch):
         if switch.dns_domain.name == 'ms.com':

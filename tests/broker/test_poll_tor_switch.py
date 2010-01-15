@@ -32,6 +32,8 @@
 import os
 import sys
 import unittest
+import re
+from time import sleep
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -49,11 +51,28 @@ class TestPollTorSwitch(TestBrokerCommand):
 
     # Tests re-polling np06bals03 and polls np06fals01
     def testpollnp7(self):
+        # Need to make sure that last_seen != creation_date for np06bals03
+        # so sleep for 2 seconds here...
+        sleep(2)
         self.noouttest(["poll", "tor_switch", "--rack", "np7"])
 
+    def testrepollwithclear(self):
+        # Forcing there to "normally" be a difference in last_seen and
+        # creation_date to test that clear is working...
+        sleep(2)
+        self.noouttest(["poll", "tor_switch", "--tor_switch=np06fals01.ms.com",
+                        "--clear"])
+
+    # FIXME: Verify the poll and that last_seen != creation_date
     def testverifypollnp06bals03(self):
         command = "show tor_switch --tor_switch np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
+        r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
+        m = self.searchoutput(out, r, command)
+        self.failIf(m.group(1) == m.group(2),
+                    "Expected creation date '%s' to be different from "
+                    "last seen '%s' in output:\n%s" %
+                    (m.group(1), m.group(2), out))
         self.matchoutput(out, "Port 17: 00:30:48:66:3a:62", command)
         self.matchoutput(out, "Port 2: 00:1f:29:c4:39:ba", command)
         self.matchoutput(out, "Port 22: 00:30:48:66:38:e6", command)
@@ -101,6 +120,12 @@ class TestPollTorSwitch(TestBrokerCommand):
         command = "show tor_switch --tor_switch np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
+        r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
+        m = self.searchoutput(out, r, command)
+        self.failIf(m.group(1) != m.group(2),
+                    "Expected creation date '%s' to be the same as "
+                    "last seen '%s' in output:\n%s" %
+                    (m.group(1), m.group(2), out))
 
 
 if __name__=='__main__':
