@@ -73,7 +73,7 @@ def create_machine(session, machine, dblocation, dbmodel,
         elif dbmodel.machine_specs:
             # Not exact, but see if the specs match the default.
             dbcpu = dbmodel.machine_specs.cpu
-            if ((cpuname and not dbcpu.name.startswith(cpuname.lower))
+            if ((cpuname and not dbcpu.name.startswith(cpuname.lower()))
                     or (cpuspeed and dbcpu.speed != cpuspeed)
                     or (cpuvendor and
                         dbcpu.vendor.name != cpuvendor.lower())):
