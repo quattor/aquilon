@@ -131,7 +131,7 @@ class TestUnmapService(TestBrokerCommand):
                                 "--service", service, "--instance", instance])
 
     def testunmapwithpersona(self):
-        self.noouttest(["unmap", "service", "--company", "ms", "--service", "utsvc",
+        self.noouttest(["unmap", "service", "--organization", "ms", "--service", "utsvc",
                         "--instance", "utsi2", "--archetype", "aquilon",
                         "--personality", "lemon-collector-oracle"])
 
@@ -174,14 +174,14 @@ class TestUnmapService(TestBrokerCommand):
                         command)
 
     def testunmapwindowsfail(self):
-        command = ["unmap", "service", "--company", "ms",
+        command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "windows"]
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
     def testunmapgenericfail(self):
-        command = ["unmap", "service", "--company", "ms",
+        command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--personality", "generic"]
         out = self.badoptiontest(command)

@@ -38,19 +38,24 @@ from aquilon.aqdb.model import Location
 
 def get_location(session, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
-    location_type = None
+    location_type = None # The type in the DB
+    argname = None # The name of the key in the args
     #TODO: remove dependency on const and pull types from an ordered query
     for lt in const.location_types:
-        if kwargs.get(lt):
+        lookup = lt
+        if lt == "company":
+            lookup = "organization" # temporary until locations in DB restructured
+        if kwargs.get(lookup):
             if location_type:
                 raise ArgumentError("Single location can not be both %s and %s"
-                        % (lt, location_type))
+                        % (lookup, location_type))
             location_type = lt
+            argname = lookup
     if not location_type:
         return None
     try:
         dblocation = session.query(Location).filter_by(
-                name=kwargs[location_type], location_type=location_type).one()
+                name=kwargs[argname], location_type=location_type).one()
     except InvalidRequestError, e:
         raise NotFoundException("%s '%s' not found: %s"
                 % (location_type.capitalize(), kwargs[location_type], e))

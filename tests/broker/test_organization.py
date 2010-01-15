@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,36 +27,44 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq add hub`."""
+"""Module for testing the add organization command."""
+
+import os
+import sys
+import unittest
+
+if __name__ == "__main__":
+    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    SRCDIR = os.path.join(BINDIR, "..", "..")
+    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+
+from brokertest import TestBrokerCommand
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.server.commands.add_location import CommandAddLocation
-from aquilon.server.commands import BrokerCommand
-from aquilon.aqdb.model import Location
+class TestOrganization(TestBrokerCommand):
+
+    def testaddexorg(self):
+        command = "add organization --name example --fullname 'Example, Inc'"
+        self.noouttest(command.split(" "))
+
+    def testverifyaddexorg(self):
+        command = "show organization --organization example"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Company: example", command)
+
+    def testdelexorg(self):
+        command = "del organization --organization example"
+        self.noouttest(command.split(" "))
+
+    def testverifydelexorg(self):
+        command = "show organization --organization example"
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Not Found: Location type='company' name='example' not found: No row was found for one()",
+                         command)
 
 
-class CommandAddHub(CommandAddLocation):
-
-    required_parameters = ["name"]
-
-    def render(self, session, organization, name, fullname, comments, **arguments):
-        if organization:
-            org = session.query(Location).filter_by(location_type='company',
-                                                    name=organization).first()
-            if not org:
-                raise ArgumentError("Organization '%s' is unknown" % organization)
-
-            org = organization
-        else:
-            org = self.config.get("broker", "default_organization")
-
-        if not org:
-            raise ArgumentError("Must specify organization, since no default is available")
-
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='hub', fullname=fullname,
-                parentname=org, parenttype='company',
-                comments=comments, **arguments)
-
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRoom)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 

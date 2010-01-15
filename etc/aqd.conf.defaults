@@ -79,6 +79,7 @@ vendor = sqlite
 database_section = database_sqlite
 
 [broker]
+default_organization = ms
 servername = %(hostname)s
 umask = 0022
 kncport = 6900

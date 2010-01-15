@@ -64,6 +64,7 @@ from test_add_personality import TestAddPersonality
 from test_add_service import TestAddService
 from test_update_service import TestUpdateService
 from test_add_required_service import TestAddRequiredService
+from test_organization import TestOrganization
 from test_add_building import TestAddBuilding
 from test_add_room import TestAddRoom
 from test_add_rack import TestAddRack

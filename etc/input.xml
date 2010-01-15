@@ -128,7 +128,7 @@
          <option name="mac" type="string">mac address of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
+	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
@@ -168,7 +168,7 @@
          <option name="mac" type="string">mac address of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_machine_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
+	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
@@ -230,7 +230,7 @@
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster name</option>
          <optgroup name="search_hardware_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
+	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
@@ -324,7 +324,7 @@
             <option name="discovered" type="boolean">Discovered</option>
          </optgroup>
          <optgroup name="show_network_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
+	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
@@ -831,7 +831,7 @@
          <option name="ip" type="string">Network IP address</option>
          <option name="mask" type="string">Network IP mask</option>
          <optgroup name="update_network_location_opts" mandatory="True" fields="any">
-            <option name="company" type="string">Company</option>
+            <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>
             <option name="country" type="string">Country</option>
@@ -873,7 +873,7 @@
 	<option name="ip" type="string" conflicts="network update_network_location_opts">Network name</option>
 	<option name="type" type="string" conflicts="ip network">Network type</option>
 	<optgroup name="update_network_location_opts" fields="any">
-            <option name="company" type="string">Company</option>
+            <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
@@ -1120,7 +1120,7 @@
          <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="map_service_location_opts" mandatory="True" fields="any">
-        <option name="company" type="string">Company</option>
+        <option name="organization" type="string">Organization</option>
         <option name="hub" type="string">Hub</option>
         <option name="continent" type="string">Continent</option>
         <option name="country" type="string">Country</option>
@@ -1142,7 +1142,7 @@
          <option name="archetype" type="string">archetype name</option>
          <option name="personality" type="string">personality name</option>
          <optgroup name="show_map_location_opts" fields="any">
-            <option name="company" type="string">Company</option>
+            <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>
             <option name="country" type="string">Country</option>
@@ -1170,7 +1170,7 @@
          <option name="personality" type="string">personality name</option>
       </optgroup>
       <optgroup name="unmap_service_location_opts" mandatory="True" fields="any">
-         <option name="company" type="string">Company</option>
+         <option name="organization" type="string">Organization</option>
          <option name="hub" type="string">Hub</option>
          <option name="continent" type="string">Continent</option>
          <option name="country" type="string">Country</option>
@@ -1658,13 +1658,44 @@
       <transport method="delete" path="location/continent/%(name)s" />
    </command>
 
+   <command name="add_organization">
+      Add a new organization.
+      <optgroup name="add_org_options" mandatory="True" fields="all">
+         <option name="organization" type="string">Name of the new organization</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="fullname" type="string">Full, descriptive name</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="location/add_organization/%(organization)s" />
+   </command>
+
+   <command name="del_organization">
+      Delete an organization. This will fail if the organization contains
+      any hubs.
+      <optgroup name="del_org_options" mandatory="True" fields="all">
+         <option name="organization" type="string">Name of the organization</option>
+      </optgroup>
+      <transport method="delete" path="location/organization/%(organization)s" />
+   </command>
+
+   <command name="show_organization">
+      Show an organization.
+      <optgroup name="show_org_options" mandatory="False" fields="all">
+         <option name="organization" type="string">Name of the organization</option>
+      </optgroup>
+      <transport method="get" path="location/organization" />
+      <transport trigger="organization" method="get" path="location/organization/%(organization)s" />
+   </command>
+
    <command name="add_hub">
-      Add a new hub for MS to the database. See also add_location.
+      Add a new hub to the database. See also add_location.
       <optgroup name="add_hub_options" mandatory="True" fields="all">
          <option name="name" type="string">Name of the new hub</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive (region) name</option>
+         <option name="organization" type="string">The owning organization of the hub</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="location/add_hub/%(name)s" />
@@ -2160,7 +2191,7 @@
          <option name="cluster" type="string">Name of the new esx_cluster</option>
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
          <optgroup name="add_cluster_location_opts" fields="any">
-            <option name="company" type="string">Company</option>
+            <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>
             <option name="country" type="string">Country</option>
@@ -2208,7 +2239,7 @@
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="comments" type="string">Comments</option>
          <optgroup name="update_cluster_location_opts" fields="any">
-	    <option name="company" type="string">Company</option>
+	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
