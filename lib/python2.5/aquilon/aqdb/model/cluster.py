@@ -82,7 +82,7 @@ class Cluster(Base):
                                    lazy=False)
 
     personality = relation(Personality, uselist=False, lazy=False)
-    domain = relation(Domain, uselist=False, lazy=False)
+    domain = relation(Domain, uselist=False, lazy=False, backref='clusters')
 
     #FIXME: Is it possible to have an append that checks the max_members?
     hosts = association_proxy('_hosts', 'host', creator=_cluster_host_append)
