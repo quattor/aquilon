@@ -40,6 +40,7 @@ from aquilon.server.processes import run_command
 class CommandDeploy(BrokerCommand):
 
     required_parameters = ["domain"]
+    requires_readonly = True
 
     def render(self, session, logger, domain, to, **arguments):
         """ This currently ignores the 'to' parameter."""

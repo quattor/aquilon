@@ -65,7 +65,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from twisted.web import server, resource, http, static
-from twisted.internet import defer, threads
+from twisted.internet import defer, threads, reactor
 from twisted.python import log
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException, \
@@ -390,6 +390,19 @@ class RestServer(ResponsePage):
 
     def set_umask(self):
         os.umask(int(self.config.get("broker", "umask"), 8))
+
+    def set_thread_pool_size(self):
+        # This is a somewhat made up number.  The default is ten.
+        # We are resource-limited in 32-bit, can't just make this
+        # a huge number.
+        # We need at least 10 threads for the normal sqlalchemy
+        # thread pool and 10 for the special "no locks allowed"
+        # pool.  Anything beyond that are just being allowed to
+        # queue and get themselves a logger.
+        # We are also constrained by the number of knc sockets
+        # that can be open at once (max file descriptors).
+        pool_size = self.config.get("broker", "twisted_thread_pool_size")
+        reactor.suggestThreadPoolSize(int(pool_size))
 
     def make_required_dirs(self):
         for d in ["basedir", "profilesdir", "depsdir", "hostsdir",

@@ -36,6 +36,8 @@ from aquilon.server.dbwrappers.domain import verify_domain
 class CommandGet(BrokerCommand):
 
     required_parameters = ["domain"]
+    requires_readonly = True
+    is_lock_free = True
 
     def render(self, session, domain, **arguments):
         # Verify that it exists before returning the command to pull.
@@ -46,5 +48,3 @@ class CommandGet(BrokerCommand):
                 "url":self.config.get("broker", "git_templates_url"),
                 "domain":dbdomain.name}
         return str(remote_command)
-
-

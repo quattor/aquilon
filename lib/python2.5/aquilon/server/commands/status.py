@@ -30,22 +30,19 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.user_principal import (
-        get_or_create_user_principal)
 
 
 class CommandStatus(BrokerCommand):
 
     requires_format = True
+    is_lock_free = True
+    requires_readonly = True
 
-    def render(self, session, user, **arguments):
+    def render(self, session, dbuser, **arguments):
         stat = []
         stat.append("Aquilon Broker %s" % self.config.get("broker", "version"))
         stat.append("Server: %s" % self.config.get("broker", "servername"))
         stat.append("Database: %s" % self.config.get("database", "dsn"))
-        dbuser = get_or_create_user_principal(session, user)
         if dbuser:
             stat.append("Connected as: %s [%s]" % (dbuser, dbuser.role.name))
         return stat
-
-

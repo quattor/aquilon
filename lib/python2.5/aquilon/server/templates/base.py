@@ -48,13 +48,25 @@ from aquilon.server.logger import CLIENT_INFO
 #    if we end up with multiple of these running.
 # 2) to prevent changing plenary templates while a compile is
 #    in progress
+#
+# The wait_count variable helps track how many requests there are
+# for the lock to let clients know how much contention there is.
 
 compile_lock = Lock()
 LOGGER = logging.getLogger('aquilon.server.templates.base')
+wait_count = 0
 
 def compileLock(logger=LOGGER):
-    logger.log(CLIENT_INFO, "requesting compile lock")
+    # Try a non-blocking acquire first.
+    if compile_lock.acquire(False):
+        logger.log(CLIENT_INFO, "acquired compile lock")
+        return
+    global wait_count
+    logger.log(CLIENT_INFO, "requesting compile lock with %s others waiting",
+               wait_count)
+    wait_count += 1
     compile_lock.acquire()
+    wait_count -= 1
     logger.log(CLIENT_INFO, "acquired compile lock")
 
 def compileRelease(logger=LOGGER):

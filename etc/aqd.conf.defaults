@@ -129,6 +129,8 @@ ant = /ms/dist/ossjava/PROJ/ant/1.7.1/bin/ant
 namespaced_host_profiles = False
 flat_host_profiles = True
 windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
+# See comments in aquilon.server.resources.set_thread_pool_size
+twisted_thread_pool_size = 250
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

@@ -137,6 +137,8 @@ class AQDMaker(object):
         # set to daemonize.  This sets it back.
         restServer.set_umask()
         reactor.addSystemEventTrigger('after', 'startup', restServer.set_umask)
+        reactor.addSystemEventTrigger('after', 'startup',
+                                      restServer.set_thread_pool_size)
 
         sockdir = config.get("broker", "sockdir")
         if not os.path.exists(sockdir):
