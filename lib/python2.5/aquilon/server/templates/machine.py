@@ -130,9 +130,8 @@ class PlenaryMachineInfo(Plenary):
         interfaces = []
         for interface in self.dbmachine.interfaces:
             if interface.interface_type == 'public':
-                interfaces.append({"name":interface.name,
-                                        "mac":interface.mac,
-                                        "boot":interface.bootable})
+                interfaces.append({"name":interface.name, "mac":interface.mac,
+                                   "boot":interface.bootable})
                 continue
             if interface.interface_type == 'management':
                 manager = {"type":interface.name, "mac":interface.mac,
@@ -144,11 +143,14 @@ class PlenaryMachineInfo(Plenary):
                 continue
 
         for interface in interfaces:
-            lines.append('"cards/nic/%s/hwaddr" = "%s";'
-                    % (interface['name'], interface['mac'].upper()))
-            if interface['boot']:
-                lines.append('"cards/nic/%s/boot" = %s;'
-                        % (interface['name'], str(interface['boot']).lower()))
+            lines.append('"cards/nic/%s" = nlist(' % interface['name'])
+            if interface['mac']:
+                lines.append('                           "hwaddr", "%s",' %
+                             interface['mac'].upper())
+                if interface['boot']:
+                    lines.append('                           "boot", %s,' %
+                                 str(interface['boot']).lower())
+            lines.append(");")
 
         for manager in managers:
             lines.append('"console/%(type)s" = nlist(' % manager)
@@ -172,5 +174,3 @@ def machine_plenary_will_move(old, new):
        old.rack != new.rack:
         return True
     return False
-
-

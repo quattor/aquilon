@@ -224,7 +224,8 @@ class ObjectFormatter(object):
                 for i in host.machine.interfaces:
                     int_msg = host_msg.machine.interfaces.add()
                     int_msg.device = str(i.name)
-                    int_msg.mac = str(i.mac)
+                    if hasattr(i, "mac"):
+                        int_msg.mac = str(i.mac)
                     if getattr(i.system, "ip", None):
                         int_msg.ip = str(i.system.ip)
                     if hasattr(i, "bootable"):

@@ -48,15 +48,19 @@ class CommandShowMachineMacList(BrokerCommand):
         q = q.options(eagerload('interfaces'))
         q = q.options(eagerload('interfaces.system'))
         q = q.options(eagerload('interfaces.system.dns_domain'))
-        
+
         maclist = MachineMacList()
         for hwentity in q.all():
             for intf in hwentity.interfaces:
+                #skip nulls. this is less than efficient, then again this
+                #command would be more efficient in hand written sql
+                if intf.mac is None:
+                    continue
                 entry = [ intf.mac, intf.hardware_entity.hardware_name ]
                 if intf.system:
                     entry.append(intf.system.fqdn)
                 else:
                     entry.append("")
                 maclist.append(entry)
-            
+
         return maclist

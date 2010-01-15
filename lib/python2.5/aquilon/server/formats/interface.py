@@ -35,10 +35,16 @@ from aquilon.aqdb.model import Interface
 
 class InterfaceFormatter(ObjectFormatter):
     def format_raw(self, interface, indent=""):
-        details = [indent + "Interface: %s %s boot=%s" % (interface.name,
-                                                          interface.mac,
-                                                          interface.bootable),
-                   indent + "  Type: %s" % interface.interface_type]
+        details = ''
+        if interface.mac:
+            details = [indent + "Interface: %s %s boot=%s" % (
+                interface.name, interface.mac, interface.bootable)]
+        else:
+            details = [indent + "Interface: %s boot=%s (no mac addr)" % (
+                interface.name, interface.bootable)]
+
+        details.append(indent + "  Type: %s" % interface.interface_type)
+
         hw = interface.hardware_entity
         hw_type = hw.hardware_entity_type
         if hw_type == 'machine':
@@ -92,5 +98,3 @@ class MissingManagersFormatter(ObjectFormatter):
         return "\n".join(hosts)
 
 ObjectFormatter.handlers[MissingManagersList] = MissingManagersFormatter()
-
-

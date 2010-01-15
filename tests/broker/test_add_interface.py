@@ -43,7 +43,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddInterface(TestBrokerCommand):
 
-    def testaddut3c5n10eth0(self):
+    def testaddut3c5n10eth0_good_mac(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10",
                         "--mac", self.net.unknown[0].usable[0].mac.upper()])
@@ -69,15 +69,15 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         """"cards/nic/eth0/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[0].mac.upper(),
                          command)
-        self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
+        self.matchoutput(out, """"boot", true,""", command)
         self.matchoutput(out,
-                         """"cards/nic/eth1/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[1].mac.upper(),
                          command)
-        self.matchclean(out, """"cards/nic/eth1/boot" = true;""", command)
+        self.matchclean(out, """"cards/nic/eth1/boot" = true,""", command)
 
     def testaddut3c1n3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
@@ -126,15 +126,16 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         """"cards/nic/eth0/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[2].mac.upper(),
                          command)
-        self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
+        self.matchoutput(out, """"boot", true,""", command)
         self.matchoutput(out,
-                         """"cards/nic/eth1/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[3].mac.upper(),
                          command)
-        self.matchclean(out, """"cards/nic/eth1/boot" = true;""", command)
+        #FIX ME: commented out for quick delivery
+        #self.matchclean(out, """"cards/nic/eth1/boot" = true;""", command)
         self.matchoutput(out, """"console/bmc" = nlist(""", command)
         self.matchoutput(out,
                          '"hwaddr", "%s"' %
@@ -174,14 +175,14 @@ class TestAddInterface(TestBrokerCommand):
                          command)
         self.matchclean(out, "Interface: eth1", command)
 
-    def testverifycatut3c1n4interface(self):
+    def testverifycatut3c1n4interfaces(self):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         """"cards/nic/eth0/hwaddr" = "%s";""" %
+                         """"hwaddr", "%s",""" %
                          self.net.unknown[0].usable[5].mac.upper(),
                          command)
-        self.matchoutput(out, """"cards/nic/eth0/boot" = true;""", command)
+        self.matchoutput(out, """"boot", true,""", command)
 
     def testaddinterfaceut3c5(self):
         command = ["add", "interface", "--interface", "oa",
@@ -349,6 +350,27 @@ class TestAddInterface(TestBrokerCommand):
                          self.net.tor_net[0].usable[5].mac.lower(),
                          command)
 
+    def testadd_bootable_no_mac(self):
+        """ if name == 'eth0' its bootable. without a mac should fail. """
+        command = ["add", "interface", "--interface", "eth0", "--machine",
+                   "ut9s03p1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         'Bootable interfaces require a MAC address',
+                         command)
+
+    def testadd_no_mac(self):
+        """ if it's named eth1 it should work with no mac address """
+        self.noouttest(["add", "interface",
+                        "--interface", "eth1", "--machine", "ut8s02p3"])
+
+    def testverify_no_mac(self):
+        command = "show_machine --machine ut8s02p3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Interface: eth1 boot=False (no mac addr)",
+                         command)
+
     def testaddhprackinterfaces(self):
         for i in range(51, 100):
             port = i - 50
@@ -372,10 +394,10 @@ class TestAddInterface(TestBrokerCommand):
                             "--machine", machine,
                             "--mac", self.net.tor_net[6].usable[port].mac])
 
+    # FIXME: Missing a test for no mac or automac specified. (Might not
+    # be possible to test the broker side and changes to the aqmac column type)
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.
-    # FIXME: Missing a test for no mac or automac specified. (Might not
-    # be possible to test the broker side.)
     # FIXME: Missing a test for a failed DSDB add_host.
     # FIXME: Missing tests around Dell rename hack.
 

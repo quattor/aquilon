@@ -30,14 +30,13 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, Index,
-                        Boolean, CheckConstraint, UniqueConstraint, DateTime,
-                        ForeignKey, PrimaryKeyConstraint, insert, select)
-from sqlalchemy.orm import mapper, relation, deferred
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint, Boolean)
+from sqlalchemy.orm import relation #, synonym
 
+from aquilon.aqdb.column_types import AqMac, AqStr
 from aquilon.aqdb.model import Base, System, HardwareEntity
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types.aqstr import AqStr
+
 
 class Interface(Base):
     """ In this design, interface is really just a name/type pair, AND the
@@ -51,11 +50,11 @@ class Interface(Base):
 
     name = Column(AqStr(32), nullable=False) #like e0, hme1, etc.
 
-    mac = Column(AqMac(17), nullable=False)
+    mac = Column(AqMac(17), nullable=True)
 
     bootable = Column(Boolean, nullable=False, default=False)
 
-    interface_type = Column(AqStr(32), nullable=False) #TODO: index
+    interface_type = Column(AqStr(32), nullable=False) #TODO: index or delete
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                                     name='IFACE_HW_ENT_FK',
@@ -67,30 +66,51 @@ class Interface(Base):
                                            ondelete='CASCADE'),
                        nullable=True)
 
-    creation_date = deferred(Column('creation_date', DateTime,
-                                    default=datetime.now,
-                                    nullable=False))
+    creation_date = Column('creation_date', DateTime, default=datetime.now,
+                           nullable=False)
 
-    comments = deferred(Column('comments',String(255)))
+    comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, backref='interfaces',
                                passive_deletes=True)
 
     system = relation(System, backref='interfaces', passive_deletes=True)
 
+    # This is experimental code which will code in use later on
+    # remember to change the column name to mymac above, also in unique index
+    # below the class definition
+    #def _get_mac(self):
+    #    return self.mymac
+    #
+    #def _set_mac(self, mac=None):
+    #    if self.bootable == True and mac is None:
+    #        msg = 'Bootable interfaces require a MAC address'
+    #        raise ArgumentError(msg)
+    #    self.mymac=mac
+    #
+    #mac = synonym('mymac', descriptor=property(_get_mac, _set_mac))
+
+    def __init__(self, **kw): # pylint: disable-msg=E1002
+        """ Overload the Base initializer to prevent null MAC addresses
+            where the interface is bootable
+        """
+
+        if 'bootable' in kw and kw['bootable'] == True:
+            if not kw['mac']:
+                msg = 'Bootable interfaces require a MAC address'
+                raise ValueError(msg)
+        super(Interface, self).__init__(**kw)
+
     # We'll need seperate python classes for each subtype if we want to
     # use single table inheritance like this.
     #__mapper_args__ = {'polymorphic_on' : interface_type}
 
-interface = Interface.__table__
-interface.primary_key.name='interface_pk'
+interface = Interface.__table__ # pylint: disable-msg=C0103, E1101
+interface.primary_key.name = 'interface_pk'
 
 interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
 
-interface.append_constraint(UniqueConstraint('hardware_entity_id', 'name',
-                                             name='iface_hw_name_uk'))
+interface.append_constraint(
+    UniqueConstraint('hardware_entity_id', 'name', name='iface_hw_name_uk'))
 
-table = interface
-
-
-
+table = interface # pylint: disable-msg=C0103
