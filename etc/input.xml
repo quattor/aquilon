@@ -1372,14 +1372,22 @@
       Prints the content of the plenary template in use for any one of the
       given options.  All are exclusive, except --instance and/or --default
       also require --service.
-      <optgroup name="cat options" mandatory="True" fields="any">
+      The --generate option allows you to see what the body of a plenary template
+      might look like if it were to be generated right now. This is useful if the
+      plenary template does not exist yet because it cannot be compiled. Note
+      that template generated on-demand in this way will be incomplete
+      (especially if it cannot be compiled) and is purely provided for debugging.
+      <optgroup name="cat selector" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="machine cluster service instance default nasinfo">Name of the host</option>
          <option name="machine" type="string" conflicts="hostname cluster service instance default nasinfo">Name of the machine</option>
          <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo">Name of the machine</option>
          <option name="service" type="string" conflicts="hostname machine cluster nasinfo">Name of the service</option>
          <option name="instance" type="string" conflicts="hostname machine cluster nasinfo">Name of the service instance</option>
-	 <option name="default" type="boolean" conflicts="hostname machine cluster nasinfo">Get the default client config for the service/instance</option>
-	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default">Get the default client config for the service/instance</option>
+	 <option name="default" type="boolean" conflicts="hostname machine cluster nasinfo">Show the default client config for the service/instance</option>
+	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default">Show the default client config for the service/instance</option>
+      </optgroup>
+      <optgroup name="cat options" fields="any">
+          <option name="generate" type="boolean">Show the plenary template as it would be generated</option>
       </optgroup>
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />

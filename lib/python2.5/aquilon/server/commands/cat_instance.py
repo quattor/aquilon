@@ -40,7 +40,7 @@ class CommandCatService(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, default, **kwargs):
+    def render(self, session, logger, service, instance, default, generate, **kwargs):
         dbservice = get_service(session, service)
         dbsi = get_service_instance(session, dbservice, instance)
         if default:
@@ -49,6 +49,11 @@ class CommandCatService(BrokerCommand):
         else:
             plenary_info = PlenaryServiceInstanceToplevel(dbservice, dbsi,
                                                           logger=logger)
-        return plenary_info.read()
+        if generate:
+            lines = []
+            plenary_info.body(lines)
+            return "\n".join(lines)
+        else:
+            return plenary_info.read()
 
 
