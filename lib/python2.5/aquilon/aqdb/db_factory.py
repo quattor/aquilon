@@ -134,8 +134,8 @@ class DbFactory(object):
         for p in passwds:
             self.dsn = re.sub(pswd_re, p, dsn_copy)
 
-            pool_options = {"pool_size":10, "max_overflow":0,
-                            "pool_timeout":None}
+            pool_options = {"pool_size":30, "max_overflow":10,
+                            "pool_timeout":60}
             self.engine = create_engine(self.dsn, **pool_options)
 
             try:
