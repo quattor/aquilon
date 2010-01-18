@@ -1,4 +1,4 @@
-#!/ms/dist/python/PROJ/core/2.6.1/bin/python
+#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2009  Contributor
