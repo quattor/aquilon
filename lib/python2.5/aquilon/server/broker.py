@@ -223,11 +223,11 @@ class BrokerCommand(object):
                     #session.begin()
                 # Command is an instance method already having self...
                 retval = command(*args, **kwargs)
-                if "session" in kwargs:
-                    session.commit()
                 if self.requires_format:
                     style = kwargs.get("style", None)
-                    return self.formatter.format(style, retval, request)
+                    retval = self.formatter.format(style, retval, request)
+                if "session" in kwargs:
+                    session.commit()
                 return retval
             except:
                 # Need to close after the rollback, or the next time session
