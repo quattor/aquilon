@@ -45,6 +45,7 @@ sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
 from aquilon.config import Config
 from aquilon.utils  import kill_from_pid_file
+from verbose_text_test import VerboseTextTestRunner
 
 from broker.orderedsuite import BrokerTestSuite
 from aqdb.orderedsuite import DatabaseTestSuite
@@ -216,47 +217,6 @@ p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
     stdout=1, stderr=2)
 rc = p.wait()
 # FIXME: check rc
-
-
-class VerboseTextTestResult(unittest._TextTestResult):
-    lastmodule = ""
-
-    def printModule(self, test):
-        if self.dots:
-            if test.__class__.__module__ != self.lastmodule:
-                self.lastmodule = test.__class__.__module__
-                self.stream.writeln("")
-                self.stream.write("%s" % self.lastmodule)
-
-    def addSuccess(self, test):
-        self.printModule(test)
-        unittest._TextTestResult.addSuccess(self, test)
-
-    def printResult(self, flavour, result):
-        (test, err) = result
-        self.stream.writeln()
-        self.stream.writeln(self.separator1)
-        self.stream.writeln("%s: %s" % (flavour, self.getDescription(test)))
-        self.stream.writeln(self.separator2)
-        self.stream.writeln("%s" % err)
-
-    def addError(self, test, err):
-        self.printModule(test)
-        # Specifically skip over base class's implementation.
-        unittest.TestResult.addError(self, test, err)
-        self.printResult("ERROR", self.errors[-1])
-
-    def addFailure(self, test, err):
-        self.printModule(test)
-        # Specifically skip over base class's implementation.
-        unittest.TestResult.addFailure(self, test, err)
-        self.printResult("FAIL", self.failures[-1])
-
-
-class VerboseTextTestRunner(unittest.TextTestRunner):
-    def _makeResult(self):
-        return VerboseTextTestResult(self.stream, self.descriptions,
-                                     self.verbosity)
 
 
 suite = unittest.TestSuite()
