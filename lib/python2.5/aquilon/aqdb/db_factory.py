@@ -32,6 +32,7 @@ from __future__ import with_statement
 import re
 import os
 import sys
+import logging
 
 from getpass import getpass
 from StringIO import StringIO
@@ -131,11 +132,21 @@ class DbFactory(object):
         pswd_re = re.compile('PASSWORD')
         dsn_copy = self.dsn
 
+        log = logging.getLogger('aqdb.db_factory')
+        pool_options = {}
+        pool_options["pool_size"] = self.config.getint("database", "pool_size")
+        pool_options["max_overflow"] = self.config.getint("database",
+                                                          "pool_max_overflow")
+        if len(self.config.get("database", "pool_timeout").strip()) > 0:
+            pool_options["pool_timeout"] = self.config.getint("database",
+                                                              "pool_timeout")
+        else:
+            pool_options["pool_timeout"] = None
+        log.info("Database engine using pool options %s" % pool_options)
+
         for p in passwds:
             self.dsn = re.sub(pswd_re, p, dsn_copy)
 
-            pool_options = {"pool_size":15, "max_overflow":0,
-                            "pool_timeout":None}
             self.engine = create_engine(self.dsn, **pool_options)
 
             try:
