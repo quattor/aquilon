@@ -32,9 +32,12 @@
 This may have issues being tested somewhere that the command actually works...
 """
 
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
+from mktemp import NamedTemporaryFile
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -88,6 +91,16 @@ class TestPxeswitch(TestBrokerCommand):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --configure"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "--configure", command)
+
+    def testconfigurelist(self):
+        with NamedTemporaryFile() as file:
+            file.writelines("unittest02.one-nyp.ms.com\n", "unittest01.one-nyp.ms.com\n")
+            file.flush()
+            command = "pxeswitch --list %s --configure" % file.name
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "--configure", command)
+            # We would like to test more of the output... we need something
+            # special for aii-shellfe however...
 
 
 if __name__=='__main__':

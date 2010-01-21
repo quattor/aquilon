@@ -1278,8 +1278,12 @@
       itself back to local disk booting.
       The --configure option forces a reset of the configuration files for this host on
       the bootserver.
-      <optgroup name="pxeswitch_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Host name</option>
+      The --list option can be used to change multiple hosts at the same time. The
+      argument to --list is a filename containing a list of hostnames, one per line.
+      All hosts will be set to the same status.
+      <optgroup name="pxeswitch_opts" mandatory="True" fields="any">
+         <option name="hostname" type="string" conflicts="list">Host name</option>
+         <option name="list" type="file" conflicts="hostname">file containing hostnames</option>
       </optgroup>
       <optgroup name="pxeswitch_action" mandatory="True" fields="any">
          <option name="install" type="boolean" conflicts="localboot status firmware configure">set the host to install from the network at next reboot</option>
@@ -1289,6 +1293,7 @@
          <option name="firmware" type="boolean" conflicts="install localboot status configure">set the host to boot its firmware image</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
+      <transport trigger="list" method="post" path="command/pxeswitch/list" />
    </command>
 
    <command name="reconfigure">
