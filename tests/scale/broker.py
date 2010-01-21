@@ -47,7 +47,7 @@ class AQBroker(object):
     default_dir = os.path.dirname(__file__)
     default_twistd = os.path.realpath(os.path.join(default_dir,
                                                    '..', '..',
-                                                   'bin', 'twistd'))
+                                                   'bin', 'twistd.py'))
     default_configfile = os.path.realpath(os.path.join(default_dir,
                                                        'aqd.conf.scale'))
 
@@ -139,9 +139,9 @@ class AQBroker(object):
         for (key, value) in os.environ.items():
             env[key] = value
         env["AQDCONF"] = self.configfile
-        aqdbdir = os.path.join(self.config.get("broker", "srcdir"), "lib",
-                               "python2.5", "aquilon", "aqdb")
-        cmdlst = ['./utils/build_db.py', '--populate'] 
+        aqdbdir = os.path.join(self.config.get("broker", "srcdir"),
+                               "tests", "aqdb")
+        cmdlst = ['./build_db.py', '--delete', '--populate']
         p = Popen(cmdlst, stdout=1, stderr=2, env=env, cwd=aqdbdir)
         rc = p.wait()
 
