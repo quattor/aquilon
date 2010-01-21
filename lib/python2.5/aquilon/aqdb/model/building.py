@@ -27,9 +27,11 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Building is a subclass of Location """
+import logging
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.utils import monkeypatch
+from aquilon.aqdb.model import Location, City
 
 
 class Building(Location):
@@ -47,15 +49,18 @@ building.primary_key.name='building_pk'
 
 table = building
 
-def populate(sess, *args, **kw):
 
-    if len(sess.query(Building).all()) > 0:
+@monkeypatch(building)
+def populate(sess, **kw):
+    if sess.query(Building).count() > 0:
         return
 
-    from aquilon.aqdb.model import City
+    if sess.query(City).count() < 1:
+        City.populate(sess, **kw)
 
-    log = kw['log']
-    assert log, "no log in kwargs for Building.populate()"
+    import logging
+    log = logging.getLogger('aqdb.populate')
+
     dsdb = kw['dsdb']
     assert dsdb, "No dsdb in kwargs for Building.populate()"
 
@@ -74,8 +79,10 @@ def populate(sess, *args, **kw):
                     fullname = str(row[1]),
                     parent = city[str(row[2])])
         sess.add(a)
-    sess.commit()
+
+    try:
+        sess.commit()
+    except Exception, e:
+        print e
+
     log.debug('created %s buildings'%(len(sess.query(Building).all())))
-
-
-

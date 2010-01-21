@@ -26,29 +26,30 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" The module governing tables and objects that represent IP networks in
-    Aquilon."""
+""" DNS Domains, as simple names """
 
-#TODO: nullable location id.
-#TODO: nullable description column?
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint)
-from sqlalchemy.orm import relation
 
-from aquilon.aqdb.model import Base, Location
+from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
+_domains = ['ms.com', 'one-nyp.ms.com', 'devin1.ms.com', 'the-ha.ms.com',
+            'devin2.ms.com', 'msad.ms.com']
 
 _TN = 'dns_domain'
 
+
 class DnsDomain(Base):
-    """ For Dns Domain names """
-    __tablename__  = _TN
+    """ Dns Domain (simple names that compose bigger records) """
+
+    __tablename__ = _TN
     _class_label = 'DNS Domain'
 
-    id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
@@ -58,43 +59,23 @@ class DnsDomain(Base):
         return str(self.name)
 
 
-dns_domain = DnsDomain.__table__
 table = DnsDomain.__table__
 
+table.primary_key.name = '%s_pk' % (_TN)
+table.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))
 
-dns_domain.primary_key.name='%s_pk'%(_TN)
-dns_domain.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
-
-def populate(sess, *args, **kw):
+@monkeypatch(table)
+def populate(sess, **kw):
+    """ populate some well known domains """
 
     if len(sess.query(DnsDomain).all()) < 1:
 
-        ms   = DnsDomain(name='ms.com')#,
-                         #audit_info = kw['audit_info'])
-
-        onyp = DnsDomain(name='one-nyp.ms.com',
-                         #audit_info = kw['audit_info'])
-                         comments = '1 NYP test domain')
-
-        devin1 = DnsDomain(name='devin1.ms.com',
-                           #audit_info = kw['audit_info'])
-                           comments='43881 Devin Shafron Drive domain')
-
-        theha = DnsDomain(name='the-ha.ms.com',
-                          #audit_info = kw['audit_info'])
-                          comments='HA domain')
-
-        msad = DnsDomain(name='msad.ms.com',
-                         #audit_info = kw['audit_info'])
-                         comments='DNS Domain used by Windows hosts')
-
-        for i in (ms, onyp, devin1, theha, msad):
-            sess.add(i)
+        for domain in _domains:
+            dmn = DnsDomain(name=domain)
+            sess.add(dmn)
 
         try:
             sess.commit()
         except Exception, e:
             sess.rollback()
             raise e
-
-

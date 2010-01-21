@@ -27,84 +27,50 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Manufacturer names """
-import os
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint, Index)
-
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
+                        UniqueConstraint)
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-_ABV = 'vendor'
-_VENDORS = ['bnt', 'cisco', 'virtual', 'aurora_vendor', 'netapp']
+_TN = 'vendor'
+vendors = ['amd', 'intel', 'sun', 'generic', 'dell', 'hp', 'ibm', 'verari',
+           'virtual', 'vmware', '3com', 'broadcom', 'bnt', 'cisco', 'netapp',
+           'aurora_vendor']
 
 
 class Vendor(Base):
     """ Vendor names """
-    __tablename__  = _ABV
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_id_seq'%(_ABV)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
 vendor = Vendor.__table__
 table = Vendor.__table__
 
-table.info['abrev']      = _ABV
+vendor.primary_key.name = '%s_pk' % (_TN)
+vendor.append_constraint(
+    UniqueConstraint('name', name='%s_uk' % _TN))
 
-vendor.primary_key.name='%s_pk'%(_ABV)
-vendor.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
 
+@monkeypatch(vendor)
 def populate(sess, **kw):
-
+    """ populate some vendors we use for testing"""
     if len(sess.query(Vendor).all()) < 1:
-        created = []
 
-        cfg_base = kw['cfg_base']
-        assert os.path.isdir(cfg_base)
-
-        #in case user's config doesn't have one...
-        if not cfg_base.endswith('/'):
-            cfg_base += '/'
-        cfg_base += 'hardware'
-
-        for i in os.listdir(cfg_base):
-            if i == 'ram':
-                continue
-            for j in os.listdir(os.path.join(cfg_base,i)):
-                if j in created:
-                    continue
-                else:
-                    a=Vendor(name=j)
-                    try:
-                        sess.add(a)
-                    except Exception,e:
-                        sess.rollback()
-                        sys.stderr.write(e)
-                        continue
-                    created.append(j)
-
-        for v in _VENDORS:
-            if not v in created:
-                dbv = Vendor(name=v)
-                try:
-                    sess.add(dbv)
-                except Exception, e:
-                    sess.rollback()
-                    raise e
-                created.append(v)
+        for v in vendors:
+            dbv = Vendor(name=v)
+            sess.add(dbv)
 
         try:
             sess.commit()
-        except Exception,e:
+        except Exception, e:
+            sess.rollback()
             raise e
-        finally:
-            sess.close()
-
-        if 'log' in locals():
-            log.INFO('created %s vendors'%(len(created)))

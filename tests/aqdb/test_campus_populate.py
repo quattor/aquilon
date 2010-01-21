@@ -29,6 +29,7 @@
 """ test populating campus """
 
 import os
+import logging
 import __init__
 
 import aquilon.aqdb.depends
@@ -45,7 +46,7 @@ class TestCampusPopulate(object):
         self.dsdb = kw['dsdb']
         assert self.dsdb
 
-        self.log = kw['log']
+        self.log = logging.getLogger('aqdb.populate')
 
         self.sess     = sess
         self.campuses = []

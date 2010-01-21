@@ -29,7 +29,9 @@
 """ Company is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Location
+
 
 class Company(Location):
     """ Company is a subtype of location """
@@ -45,15 +47,18 @@ company.primary_key.name='company_pk'
 
 table = company
 
-def populate(sess, *args, **kw):
 
-    if len(sess.query(Company).all()) < 1:
-        a = Company(name='ms', fullname='root node')
+@monkeypatch(company)
+def populate(sess, *args, **kw):
+    """ create the only one """
+
+    if sess.query(Company).count() < 1:
+        a = Company(name='ms', fullname='morgan stanley')
         #NO PARENT FOR THE ROOT NODE: breaks connect_by
         #TODO: audit for null parents in location table
         #      where its not the root node
         sess.add(a)
-        sess.commit()
-
-
-
+        try:
+            sess.commit()
+        except Exception, e:
+            print e

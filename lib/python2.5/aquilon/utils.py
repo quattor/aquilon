@@ -84,10 +84,10 @@ def confirm(prompt=None, resp=False):
         ans = raw_input(prompt)
         if not ans:
             return resp
-        if ans not in ['y', 'Y', 'n', 'N']:
+        if ans not in ['y', 'Y', 'yes', 'n', 'N', 'no']:
             print 'please enter y or n.'
             continue
-        if ans == 'y' or ans == 'Y':
+        if ans == 'y' or ans == 'Y' or ans == 'yes':
             return True
-        if ans == 'n' or ans == 'N':
+        if ans == 'n' or ans == 'N' or ans == 'no':
             return False

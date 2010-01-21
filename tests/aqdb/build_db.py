@@ -28,13 +28,9 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ The way to populate an aqdb instance """
-
-import os
-import re
 import sys
 import logging
 import optparse
-from traceback import print_exc
 
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -50,34 +46,15 @@ m = Modulecmd()
 if config.has_option("database", "module"):
     m.load(config.get("database", "module"))
 
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import *
+import aquilon.aqdb.dsdb as dsdb_
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
 import test_campus_populate as tcp
 
-pkgs = {}
+ordered_locations = ['location', 'company', 'hub', 'continent', 'country',
+                     'city', 'building', 'room', 'rack', 'desk']
 
-pkgs['auth'] = ['role', 'realm', 'user_principal']
-
-pkgs['loc'] = ['location', 'company', 'hub', 'continent', 'campus', 'country',
-               'city', 'building', 'room', 'rack', 'desk']
-
-pkgs['net'] = ['dns_domain', 'network']
-
-pkgs['cfg'] = ['archetype', 'personality', 'operating_system']
-
-pkgs['hw'] = ['status', 'vendor', 'model', 'hardware_entity', 'cpu',
-                'disk_type', 'machine', 'disk', 'tor_switch_hw', 'chassis_hw',
-                'interface', 'observed_mac', 'machine_specs', 'chassis_slot']
-
-pkgs['sy'] = ['system', 'domain', 'host', 'chassis', 'tor_switch',
-              'auxiliary', 'manager']
-
-pkgs['svc'] = ['service', 'service_instance', 'service_instance_server',
-                'service_map', 'service_list_item', 'cluster', 'metacluster',
-                'personality_service_list_item']
-
-order = ['auth', 'loc', 'net', 'cfg', 'hw', 'sy', 'svc' ]
 
 def importName(modulename, name):
     """ Import a named object from a module in the context of this function.
@@ -89,7 +66,9 @@ def importName(modulename, name):
     try:
         return getattr(module, name)
     except AttributeError:
-        print 'getattr(%s, %s) failed (modulename = %s)'% (module, name, modulename)
+        print 'getattr(%s, %s) failed (modulename = %s)' % (module,
+                                                            name, modulename)
+
 
 def parse_cli(*args, **kw):
     usage = """ usage: %prog [options]
@@ -126,6 +105,7 @@ def parse_cli(*args, **kw):
 
     return parser.parse_args()
 
+
 def main(*args, **kw):
     (opts, args) = parse_cli(args, kw)
 
@@ -140,68 +120,74 @@ def main(*args, **kw):
         db.meta.bind.echo = True
 
     if opts.delete_db == True:
-        if db.vendor is 'oracle':
-            log.debug('dropping oracle database')
-            db.drop_all_tables_and_sequences(no_confirm = opts.delete_db)
+        #if db.vendor is 'oracle':
+        #    log.debug('dropping oracle database')
+        #    db.drop_all_tables_and_sequences(no_confirm = opts.delete_db)
+        #else:
+        Base.metadata.reflect()
+        for table in reversed(Base.metadata.sorted_tables):
+            table.drop(checkfirst=True)
 
-    #fill this with module objects if we're populating
-    mods_to_populate = []
-
-    cfg_base = db.config.get("broker", "kingdir")
-
-    kwargs = {'log' : log, 'full' : opts.full, 'debug' : opts.debug,
-              'cfg_base': cfg_base}
-
-    for p in order:
-        for module_name in pkgs[p]:
-            pkg_name = 'aquilon.aqdb.model'
-
-            try:
-                mod = importName(pkg_name, module_name)
-            except ImportError, e:
-                log.error('Failed to import %s\n' % (module_name, str(e)))
-                sys.exit(9)
-
-            if hasattr(mod, 'populate'):
-                mods_to_populate.append(mod)
-
-    Base.metadata.create_all(checkfirst=True)
-    log.debug('created all tables')
-
-    #TODO: rename should be able to dump DDL to file
-    if db.dsn.startswith('oracle'):
-        log.debug('renaming constraints...')
-        cnst.rename_non_null_check_constraints(db)
+    #TODO: pass opts arg around? stop passing dsdb around/make ?
+    kwargs = {'full': opts.full}
 
     if opts.populate:
         s = db.Session()
         assert s, "No Session in build_db.py populate"
 
-        import aquilon.aqdb.dsdb as dsdb_
         kwargs['dsdb'] = dsdb_.DsdbConnection()
 
-        for mod in mods_to_populate:
-            #log.debug('populating %s'%(mod.table.name))
-            try:
-                mod.populate(s, **kwargs)
-            except Exception, e:
-                log.error('Error populating %s'%(mod.table.name))
-                print_exc(file=sys.stderr)
-                #TODO: make death on first fail an option
-                sys.exit(9)
+    # Location doesn't work with sorted tables (only FK to parent, not to
+    # its dependent parent location type. Hacking it for now with a list.
+    # These don't change a lot, and we'll go to a single table inheritance
+    # perhaps sometime soon, which eliminates the extra loop
+    for module_name in ordered_locations:
+        pkg_name = 'aquilon.aqdb.model'
+        try:
+            mod = importName(pkg_name, module_name)
+        except ImportError, e:
+            log.error('Failed to import %s\n' % (module_name, str(e)))
+            sys.exit(9)
 
+        mod.table.create(checkfirst=True)
+        if hasattr(mod, 'populate') and opts.populate:
+            #log.debug('populating %s' % tbl.name)
+            mod.populate(s, **kwargs)
+
+    #New loop: over sorted tables in Base.metadata.
+    for tbl in Base.metadata.sorted_tables:
+        #this might be a place to set schema if needed (for DB2)
+        #skip locations: they're handled separately above
+        if tbl.name in ordered_locations:
+            continue
+
+        tbl.create(checkfirst=True)
+        if hasattr(tbl, 'populate') and opts.populate:
+            #log.debug('populating %s' % tbl.name)
+            tbl.populate(s, **kwargs)
+
+    #CAMPUS
     if opts.populate:
         try:
-            #import test_campus_populate as tcp
             cps = tcp.TestCampusPopulate(s, **kwargs)
             cps.setUp()
             cps.testPopulate()
         except Exception, e:
-            log.error(e)
+            log.error('problem populating campuses')
+            log.error(str(e))
             sys.exit(9)
             #TODO: death on fail an option
 
-        log.info('database built and populated')
+
+    #CONSTRAINTS
+    if db.dsn.startswith('oracle'):
+        #TODO: rename should be able to dump DDL to a file
+        log.debug('renaming constraints...')
+        cnst.rename_non_null_check_constraints(db)
+
+
+    log.info('database built and populated')
+
 
 if __name__ == '__main__':
     main(sys.argv)

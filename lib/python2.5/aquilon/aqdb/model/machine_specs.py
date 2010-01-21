@@ -33,30 +33,34 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint)
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Base, Model, Vendor, Cpu
-from aquilon.aqdb.model.disk import disk_types, controller_types
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
+from aquilon.aqdb.model import Base, Model, Cpu
+from aquilon.aqdb.model.disk import disk_types, controller_types
+
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
     #TODO: Maybe this entire table is in fact a part of the model "subtype"
 
-    _def_cpu_cnt = { 'workstation':1, 'blade': 2, 'rackmount' : 4 }
-    _def_nic_cnt = { 'workstation':1, 'blade': 2, 'rackmount' : 2 }
-    _def_memory  = { 'workstation': 2048, 'blade': 8192, 'rackmount': 16384 }
+    _def_cpu_cnt = {'workstation': 1, 'blade': 2, 'rackmount': 4}
+    _def_nic_cnt = {'workstation': 1, 'blade': 2, 'rackmount': 2}
+    _def_memory = {'workstation': 2048, 'blade': 8192, 'rackmount': 16384}
 
     __tablename__ = 'machine_specs'
-    id = Column( Integer, Sequence('mach_specs_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
 
     model_id = Column(Integer, ForeignKey('model.id',
                                           name='mach_spec_model_fk'),
                       nullable=False)
 
-    cpu_id = Column(Integer, ForeignKey('cpu.id', name='mach_spec_cpu_fk'), nullable=False)
+    cpu_id = Column(Integer, ForeignKey('cpu.id',
+                                        name='mach_spec_cpu_fk'),
+                    nullable=False)
 
     cpu_quantity = Column(Integer, nullable=False) #Constrain to below 512?
 
@@ -76,16 +80,18 @@ class MachineSpecs(Base):
 
 
 machine_specs = MachineSpecs.__table__
+machine_specs.primary_key.name = 'machine_specs_pk'
 
-machine_specs.primary_key.name='machine_specs_pk'
 #for now, need a UK on model_id. WILL be a name AND a model_id as UK.
 machine_specs.append_constraint(
     UniqueConstraint('model_id', name='machine_specs_model_uk'))
 
 table = machine_specs
 
-def populate(sess, *args, **kw):
-    if len(sess.query(MachineSpecs).all()) < 1:
+
+@monkeypatch(machine_specs)
+def populate(sess, **kw):
+    if sess.query(MachineSpecs).count() < 1:
         import inspect
 
         specs = [
@@ -96,8 +102,8 @@ def populate(sess, *args, **kw):
             ["bl260c", "xeon_2500", 2, 24576, 'scsi', 36, 2],
             ["vb1205xm", "xeon_2500", 2, 24576, 'scsi', 36, 2],
             ["aurora_model", "aurora_cpu", 0, 0, 'scsi', 0, 0],
-            ["v3160", "opteron_2600", 2, 16384, 'fibrechannel', 0 , 8],
-            ["v3170", "opteron_2600", 2, 16384, 'fibrechannel', 0 , 8]]
+            ["v3160", "opteron_2600", 2, 16384, 'fibrechannel', 0, 8],
+            ["v3170", "opteron_2600", 2, 16384, 'fibrechannel', 0, 8]]
 
 
         for ms in specs:
@@ -125,14 +131,14 @@ def populate(sess, *args, **kw):
                         disk_capacity=disk_capacity, nic_count=nic_count)
                 sess.add(dbms)
 
-            except Exception,e:
+            except Exception, e:
                 sess.rollback()
                 print 'Creating machine specs for %s %s' % (ms[0], e)
                 continue
 
             try:
                 sess.commit()
-            except Exception,e:
+            except Exception, e:
                 sess.rollback()
-                print 'Commiting ',e
+                print e
                 continue

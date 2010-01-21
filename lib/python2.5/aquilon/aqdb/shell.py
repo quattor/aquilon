@@ -29,19 +29,19 @@
 # TERMS THAT MAY APPLY.
 import os
 import sys
-import optparse
 
-_DIR    = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..','..')
-_TESTDIR=os.path.join(_DIR,'..','..','..','..','tests','aqdb')
+_DIR = os.path.dirname(os.path.realpath(__file__))
+_LIBDIR = os.path.join(_DIR, '..', '..')
+_TESTDIR = os.path.join(_DIR, '..', '..', '..', '..', 'tests', 'aqdb')
 
 if _LIBDIR not in sys.path:
-    sys.path.insert(0,_LIBDIR)
+    sys.path.insert(0, _LIBDIR)
 
 if _TESTDIR not in sys.path:
-    sys.path.insert(1,_TESTDIR)
+    sys.path.insert(1, _TESTDIR)
 
 import aquilon.aqdb.depends
+import argparse
 
 from aquilon.config import Config
 from ms.modulecmd import Modulecmd
@@ -58,9 +58,12 @@ from aquilon.aqdb.db_factory import DbFactory
 db = DbFactory()
 Base.metadata.bind = db.engine
 
-prompt = '%s@%s'% (db.engine.url.username, db.engine.url.host)
-if db.engine.url.database:
-    prompt +='/%s'
+if db.engine.url.drivername == 'sqlite':
+    prompt = str(db.engine.url).split('///')[1]
+else:
+    prompt = '%s@%s' % (db.engine.url.username, db.engine.url.host)
+    if db.engine.url.database:
+        prompt += '/%s'
 prompt += '>'
 
 from IPython.Shell import IPShellEmbed
@@ -68,22 +71,14 @@ _banner = '<<<Welcome to the Aquilon shell (courtesy of IPython). Ctrl-D to quit
 _args = ['-pi1', prompt, '-nosep']
 ipshell = IPShellEmbed(_args, banner=_banner)
 
-def configure(*args, **kw):
-    usage = """ usage: %prog [options] """
-    desc = 'An ipython shell, useful for testing and exploring'
-    p = optparse.OptionParser(usage=usage, prog=sys.argv[0], version='0.2',
-                              description=desc)
-
-    p.add_option('-v',
-                 action = 'count',
-                 dest   = 'verbose',
-                 help   = 'increase verbosity by adding more (vv), etc.')
-
-    opts, args = p.parse_args()
-    return opts
 
 def main(*args, **kw):
-    opts = configure(*args, **kw)
+    parser = argparse.ArgumentParser(
+        description='An ipython shell, useful for testing and exploring aqdb')
+
+    parser.add_argument('-v', action='count', dest='verbose',
+                        help='increase verbosity by adding more (-vv), etc.')
+    opts = parser.parse_args()
 
     if opts.verbose >= 1:
         db.engine.echo = True
@@ -91,11 +86,12 @@ def main(*args, **kw):
     s = db.Session()
     ipshell()
 
-#TODO: schema/uml as an argument (DRY)
-def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
-    import aquilon.aqdb.utils.schema2dot
-    aquilon.aqdb.utils.schema2dot.show_schema_graph(db, '/tmp/test.png')
 
+def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
+    """ Produces a png image of the schema. """
+    import aquilon.aqdb.utils.schema2dot
+    aquilon.aqdb.utils.schema2dot.show_schema_graph(db, file_name)
+    #TODO: schema/uml as an argument (DRY)
 
 if __name__ == '__main__':
     main(sys.argv)

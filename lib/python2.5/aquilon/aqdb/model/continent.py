@@ -29,6 +29,7 @@
 """ Continent is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Location
 
 
@@ -46,12 +47,17 @@ continent.primary_key.name='continent_pk'
 
 table = continent
 
-def populate(sess, *args, **kw):
+
+@monkeypatch(continent)
+def populate(sess, **kw):
 
     _continents = ('af', 'as', 'au', 'eu', 'na', 'sa')
 
     if len(sess.query(Continent).all()) < len(_continents):
         from aquilon.aqdb.model import Hub
+
+        if sess.query(Hub).count() < 3:
+            Hub.populate(sess, **kw)
 
         hubs ={}
         for hub in sess.query(Hub).all():
@@ -66,6 +72,3 @@ def populate(sess, *args, **kw):
         for i in (a,b,c,d,e,f):
             sess.add(i)
         sess.commit()
-
-
-

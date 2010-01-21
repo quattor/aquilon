@@ -44,7 +44,8 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.utils import monkeypatch
+from aquilon.aqdb.model import Location, Company
 
 class Hub(Location):
     """ Hub is a subtype of location """
@@ -60,6 +61,7 @@ hub.primary_key.name='hub_pk'
 
 table = hub
 
+@monkeypatch(hub)
 def populate(sess, *args, **kw):
 
     _hubs = {
@@ -68,12 +70,12 @@ def populate(sess, *args, **kw):
         'ny':'Americas',
     }
 
-    if len(sess.query(Hub).all()) < len(_hubs.keys()):
+    if sess.query(Hub).count() < len(_hubs.keys()):
+        if sess.query(Company).count() < 1:
+            Company.populate(sess, **kw)
+
         for h in _hubs:
             #FIX ME: don't fix it on id = 1 (breaks in certain conditions)
             a = Hub(name=h, fullname=_hubs[h], parent_id=1)
             sess.add(a)
         sess.commit()
-
-
-

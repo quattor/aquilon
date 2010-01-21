@@ -33,6 +33,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
 from sqlalchemy.orm import relation, deferred
 
 from aquilon.aqdb.model import Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'archetype'
@@ -58,6 +59,8 @@ table = Archetype.__table__
 archetype.primary_key.name='%s_pk'%(_ABV)
 archetype.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
 
+
+@monkeypatch(archetype)
 def populate(sess, *args, **kw):
     if len(sess.query(Archetype).all()) > 0:
         return

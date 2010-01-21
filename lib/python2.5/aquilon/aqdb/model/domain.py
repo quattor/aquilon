@@ -34,6 +34,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -65,10 +66,12 @@ domain.append_constraint(UniqueConstraint('name',name='domain_uk'))
 
 table = domain
 
+
+@monkeypatch(domain)
 def populate(sess, *args, **kw):
     if len(sess.query(Domain).all()) < 1:
         cdb = sess.query(UserPrincipal).filter_by(name='cdb').one()
-        assert(cdb)
+        assert cdb, 'no cdb in populate domain'
 
         r = Domain(name='ny-prod', owner=cdb,
                    comments='The NY regional production domain')

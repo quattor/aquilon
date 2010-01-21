@@ -29,7 +29,8 @@
 """ City is a subclass of Location """
 from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import Location
+from aquilon.utils import monkeypatch
+from aquilon.aqdb.model import Location, Country
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 class City(Location):
@@ -47,13 +48,14 @@ city.primary_key.name='city_pk'
 
 table = city
 
-def populate(sess, *args, **kw):
 
-    if len(sess.query(City).all()) < 1:
-        from aquilon.aqdb.model import Country
+@monkeypatch(city)
+def populate(sess, **kw):
+    """ populate our cities"""
+    if sess.query(City).count() < 1:
+        if sess.query(Country).count() < 1:
+            Country.populate(sess, **kw)
 
-        log = kw['log']
-        assert log, "no log in kwargs for City.populate()"
         dsdb = kw['dsdb']
         assert dsdb, "No dsdb in kwargs for City.populate()"
 
@@ -73,7 +75,7 @@ def populate(sess, *args, **kw):
                         parent = p)
             sess.add(a)
 
+    try:
         sess.commit()
-
-
-
+    except Exception, e:
+        print e

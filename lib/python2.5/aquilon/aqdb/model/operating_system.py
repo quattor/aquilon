@@ -34,6 +34,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
 from sqlalchemy.orm import relation
 from sqlalchemy.orm.session import object_session
 
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Archetype
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -81,6 +82,8 @@ operating_system.primary_key.name = '%s_pk'% (_ABV)
 operating_system.append_constraint(
     UniqueConstraint('name', 'version', 'archetype_id', name='%s_uk'% (_TN)))
 
+
+@monkeypatch(operating_system)
 def populate(sess, *args, **kw):
     if len(sess.query(OperatingSystem).all()) > 0:
         return
