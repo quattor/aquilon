@@ -41,16 +41,13 @@ from sqlalchemy.orm import relation
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Location
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.IPV4 import (IPV4, dq_to_int, get_bcast,
-                                            int_to_dq)
+from aquilon.aqdb.column_types import AqStr, IPV4
+from aquilon.aqdb.column_types.IPV4 import dq_to_int, get_bcast, int_to_dq
+
+#TODO: enum type for network_type, mask
+#TODO: constraint for cidr
 
 
-#used in locations, and lambda isn't as readable
-def _get_location(x):
-    return x.location
-
-#TODO: enum type for network_type, cidr
 class Network(Base):
     """ Represents subnets in aqdb.  Network Type can be one of four values
         which have been carried over as legacy from the network table in DSDB:
@@ -72,7 +69,7 @@ class Network(Base):
         *   heartbeat
         *   wan
         *   campus
-"""
+    """
 
     __tablename__ = 'network'
 
@@ -88,7 +85,7 @@ class Network(Base):
     name = Column(AqStr(255), nullable=False) #TODO: default to ip
     ip = Column(IPV4, nullable=False)
     bcast = Column(IPV4, nullable=False)
-    mask = Column(Integer, nullable=False) #TODO: ENUM!!!
+    mask = Column(Integer, nullable=False) #TODO: enum
     side = Column(AqStr(4), nullable=True, default='a')
 
     is_discoverable = Column(Boolean, nullable=False, default=False)
@@ -104,10 +101,10 @@ class Network(Base):
         return inet_ntoa(pack('>I', bits))
 
     def first_host(self):
-        return int_to_dq(dq_to_int(self.ip)+1)
+        return int_to_dq(dq_to_int(self.ip) + 1)
 
     def last_host(self):
-        return int_to_dq(dq_to_int(self.bcast)-1)
+        return int_to_dq(dq_to_int(self.bcast) - 1)
 
     def addresses(self):
         # Since range will stop one before the endpoint, passing it
@@ -115,27 +112,27 @@ class Network(Base):
         # the network start to last_host.
         return [int_to_dq(i) for i in range(dq_to_int(self.ip),
                                             dq_to_int(self.bcast))]
+
     def __repr__(self):
         msg = '<Network '
 
         if self.name != self.ip:
-            msg += '%s ip='% (self.name)
+            msg += '%s ip=' % (self.name)
 
-        msg += '%s/%s (netmask=%s), type=%s, side=%s, located in %r>'% (self.ip,
-              self.cidr, _cidr_to_mask[self.cidr][0], self.network_type,
-              self.side, self.location)
+        msg += '%s/%s (netmask=%s), type=%s, side=%s, located in %r>' % (
+            self.ip, self.cidr, _cidr_to_mask[self.cidr][0], self.network_type,
+            self.side, self.location)
         return msg
 
-    #TODO: custom str
 
 network = Network.__table__
 network.primary_key.name = 'network_pk'
 
+table = network
+
 network.append_constraint(UniqueConstraint('ip', name='net_ip_uk'))
 
 Index('net_loc_id_idx', network.c.location_id)
-
-table = network
 
 def get_net_id_from_ip(s, ip):
     """Requires a session, and will return the Network for a given ip."""
@@ -152,6 +149,7 @@ def get_net_id_from_ip(s, ip):
         raise ArgumentError("Could not determine network for ip %s" % ip)
 
     return s.query(Network).get(row[0])
+
 
 @monkeypatch(network)
 def populate(sess, **kw):
@@ -191,7 +189,7 @@ def populate(sess, **kw):
             try:
                 kwargs['location_id'] = b_cache[bldg_name]
             except KeyError:
-                log.error("Can't find building '%s'"%(bldg_name))
+                log.error("Can't find building '%s'" % bldg_name)
                 continue
 
             kwargs['name'] = name
@@ -227,7 +225,7 @@ def populate(sess, **kw):
 
         stend = time.clock()
         thetime = stend - start
-        log.info('created %s networks in %2f'%(count, thetime))
+        log.info('created %s networks in %2f' % (count, thetime))
 
 
 #for fast lookups as opposed to a computed column approach
@@ -264,51 +262,38 @@ _mask_to_cidr = {
     536870912  : 3,
     1073741824 : 2,
     2147483648 : 1,
-    4294967296 : 0
-}
+    4294967296 : 0}
 
-_cidr_to_mask = {
-    32 : ['255.255.255.255',    1],
-    31 : ['255.255.255.254',    2],
-    30 : ['255.255.255.252',    4],
-    29 : ['255.255.255.248',    8],
-    28 : ['255.255.255.240',   16],
-    27 : ['255.255.255.224',   32],
-    26 : ['255.255.255.192',   64],
-    25 : ['255.255.255.128',  128],
-    24 : ['255.255.255.0',    256],   #/24 = class C
-    23 : ['255.255.254.0',    512],
-    22 : ['255.255.252.0',   1024],
-    21 : ['255.255.248.0',   2048],
-    20 : ['255.255.240.0',   4096],
-    19 : ['255.255.224.0',   8192],
-    18 : ['255.255.192.0',  16384],
-    17 : ['255.255.128.0',  32768],
-    16 : ['255.255.0.0',    65536],     #/16 = class B
-    15 : ['255.254.0.0',   131072],
-    14 : ['255.252.0.0',   262144],
-    13 : ['255.248.0.0',   524288],
-    12 : ['255.240.0.0',  1048576],
-    11 : ['255.224.0.0',  2097152],
-    10 : ['255.192.0.0',  4194304],
-    9  : ['255.128.0.0',  8388608],
-    8  : ['255.0.0.0',   16777216],       #/8 = class A
-    7  : ['254.0.0.0',   33554432],
-    6  : ['252.0.0.0',   67108864],
-    5  : ['248.0.0.0',  134217728],
-    4  : ['240.0.0.0',  268435456],
-    3  : ['224.0.0.0',  536870912],
-    2  : ['192.0.0.0', 1073741824],
-    1  : ['128.0.0.0', 2147483648],
-    0  : ['0.0.0.0',   4294967296]
-}
-
-#def get_type_cache(dsdb):
-#    """ Takes a dsdb object (dependency injection)
-#        returns a dict of network type by keyed on id """
-#    #TODO: reflect the network type table from dsdb, then FK to it with an ENUM
-#    d = {}
-#    d[0] = 'unknown'
-#    for row in dsdb.dump('net_type'):
-#        d[row[0]] = row[1]
-#    return d
+_cidr_to_mask = { 32: ['255.255.255.255', 1],
+    31: ['255.255.255.254', 2],
+    30: ['255.255.255.252', 4],
+    29: ['255.255.255.248', 8],
+    28: ['255.255.255.240', 16],
+    27: ['255.255.255.224', 32],
+    26: ['255.255.255.192', 64],
+    25: ['255.255.255.128', 128],
+    24: ['255.255.255.0', 256],   #/24 = class C
+    23: ['255.255.254.0', 512],
+    22: ['255.255.252.0', 1024],
+    21: ['255.255.248.0', 2048],
+    20: ['255.255.240.0', 4096],
+    19: ['255.255.224.0', 8192],
+    18: ['255.255.192.0', 16384],
+    17: ['255.255.128.0', 32768],
+    16: ['255.255.0.0', 65536],     #/16 = class B
+    15: ['255.254.0.0', 131072],
+    14: ['255.252.0.0', 262144],
+    13: ['255.248.0.0', 524288],
+    12: ['255.240.0.0', 1048576],
+    11: ['255.224.0.0', 2097152],
+    10: ['255.192.0.0', 4194304],
+    9: ['255.128.0.0', 8388608],
+    8: ['255.0.0.0', 16777216],      #/8 = class A
+    7: ['254.0.0.0', 33554432],
+    6: ['252.0.0.0', 67108864],
+    5: ['248.0.0.0', 134217728],
+    4: ['240.0.0.0', 268435456],
+    3: ['224.0.0.0', 536870912],
+    2: ['192.0.0.0', 1073741824],
+    1: ['128.0.0.0', 2147483648],
+    0: ['0.0.0.0', 4294967296]}
