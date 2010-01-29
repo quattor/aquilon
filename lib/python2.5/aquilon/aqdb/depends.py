@@ -38,7 +38,7 @@ ms.version.addpkg('sqlalchemy', '0.5.5')
 
 ms.version.addpkg('cx_Oracle', '5.0.1-11.1.0.6')
 
-ms.version.addpkg('ipython', '0.9.1')
+ms.version.addpkg('ipython', '0.10')
 
 #needed to eliminate import noise created by nose and protoc in brokertest
 ms.version.addpkg('setuptools', '0.6c9')
