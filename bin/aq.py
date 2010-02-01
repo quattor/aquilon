@@ -194,6 +194,7 @@ class StatusThread(Thread):
         self.response_status = res.status
         if res.status == httplib.NOT_FOUND and not self.finished and \
            self.retry > 0:
+            sconn.close()
             self.retry -= 1
             # Maybe the command has not gotten to the server yet... retry.
             sleep(.1)
@@ -206,12 +207,14 @@ class StatusThread(Thread):
             if self.retry <= 0:
                 print >>sys.stderr, \
                         "Client status messages disabled, retries exceeded."
+            sconn.close()
             return
 
         while res.fp:
             pageData = res.read_chunk()
             if pageData:
                 print >>self.outstream, pageData
+        sconn.close()
         return
 
 
