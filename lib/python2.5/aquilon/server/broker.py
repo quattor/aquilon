@@ -192,15 +192,8 @@ class BrokerCommand(object):
 
         """
         def updated_render(self, *args, **kwargs):
+            principal = kwargs["user"]
             request = kwargs["request"]
-            principal = request.channel.getPrincipal()
-            kwargs["user"] = principal
-            # The logger used to be set up after the session.  However,
-            # this keeps a record of the request from forming immediately
-            # if all the sqlalchmey session threads are in use.
-            # This will be a problem if/when we want an auditid to come
-            # from the database, but we can revisit at that point.
-            self._add_logger(args, kwargs)
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
@@ -258,7 +251,7 @@ class BrokerCommand(object):
         audit_id += 1
         request.aq_audit_id = audit_id
 
-    def _audit(self, *args, **kwargs):
+    def _audit(self, **kwargs):
         logger = kwargs.pop('logger')
         session = kwargs.pop('session', None)
         request = kwargs.pop('request')
@@ -276,17 +269,16 @@ class BrokerCommand(object):
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
         extra = ""
-        if args:
-            extra = "and unnamed arguments %s" % args
         logger.info("Incoming command #%d from user=%s aq %s "
                     "with arguments %s%s",
                     request.aq_audit_id, user, self.command, kwargs_str, extra)
 
-    # This helper needs to modify the command_arguments dictionary
-    # in-place.  The ** operator should not be used when calling or
-    # in the definition.
-    def _add_logger(self, command_args, command_kwargs):
+    # This is meant to be called before calling render() in order to
+    # add a logger into the argument list.  It returns the arguments
+    # that will be passed into render().
+    def add_logger(self, **command_kwargs):
         request = command_kwargs.get("request")
+        command_kwargs["user"] = request.channel.getPrincipal()
         self._add_audit_id(request)
         if self.command == "show_request":
             status = self.catalog.get_request_status(
@@ -298,7 +290,8 @@ class BrokerCommand(object):
                 requestid=command_kwargs.get("requestid", None))
         logger = RequestLogger(status=status, module_logger=self.module_logger)
         command_kwargs["logger"] = logger
-        self._audit(*command_args, **command_kwargs)
+        self._audit(**command_kwargs)
+        return command_kwargs
 
     def _remove_status(self, command_kwargs):
         logger = command_kwargs.get("logger", None)
