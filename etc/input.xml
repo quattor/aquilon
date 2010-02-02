@@ -303,12 +303,16 @@
          <option name="esx_hostname" type="string">fully qualified domain name of a vmhost</option>
          <option name="virtual_machine" type="string">virtual machine label (evm1)</option>
          <option name="guest" type="string">fully qualified host name of a virtual machine</option>
-         <option name="domain" type="string">template domain</option>
          <option name="archetype" type="string">archetype (vmhost)</option>
          <option name="personality" type="string">personality</option>
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+         <optgroup name="search_cluster_branch" fields="any">
+            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+         </optgroup>
          <optgroup name="search_cluster_location_opts" fields="any">
 	    <option name="cluster_organization" type="string">Cluster Organization</option>
 	    <option name="cluster_hub" type="string">Cluster Hub</option>
