@@ -34,6 +34,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -48,12 +49,15 @@ from aquilon.server.processes import DSDBRunner
 
 class CommandAddHost(BrokerCommand):
 
-    required_parameters = ["hostname", "machine", "archetype", "domain"]
+    required_parameters = ["hostname", "machine", "archetype"]
 
-    def render(self, session, logger, hostname, machine, archetype,
-               personality, domain, buildstatus, comments, osname, osversion,
+    def render(self, session, logger, hostname, machine, archetype, domain,
+               sandbox, osname, osversion, buildstatus, personality, comments,
                skip_dsdb_check=False, **arguments):
-        dbdomain = Domain.get_unique(session, domain, compel=True)
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     compel=True)
         if buildstatus:
             dbstatus = get_status(session, buildstatus)
         else:
@@ -135,10 +139,11 @@ class CommandAddHost(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
 
-        dbhost = Host(machine=dbmachine, domain=dbdomain, status=dbstatus,
-                      mac=mac, ip=ip, network=dbnetwork, operating_system=dbos,
-                      name=short, dns_domain=dbdns_domain,
-                      personality=dbpersonality, comments=comments)
+        dbhost = Host(name=short, dns_domain=dbdns_domain,
+                      mac=mac, ip=ip, network=dbnetwork, comments=comments,
+                      machine=dbmachine, branch=dbbranch,
+                      sandbox_author=dbauthor, personality=dbpersonality,
+                      status=dbstatus, operating_system=dbos)
         session.add(dbhost)
         if dbinterface:
             dbinterface.system = dbhost
