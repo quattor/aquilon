@@ -249,7 +249,6 @@
          <option name="machine" type="string">node name</option>
          <option name="dnsdomain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
-         <option name="domain" type="string">template domain</option>
          <option name="archetype" type="string">archetype (aquilon, windows, aurora)</option>
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
          <option name="ip" type="string">IP address</option>
@@ -265,6 +264,11 @@
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster name</option>
+         <optgroup name="search_host_branch" fields="any">
+            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+         </optgroup>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>

@@ -37,6 +37,7 @@ from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
 
@@ -45,9 +46,10 @@ class CommandSearchHost(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, hostname, machine, domain, archetype,
+    def render(self, session, logger, hostname, machine, archetype,
                buildstatus, personality, osname, osversion, service, instance,
                model, machine_type, vendor, serial, cluster,
+               domain, sandbox, branch,
                fullinfo, **arguments):
         if hostname:
             arguments['fqdn'] = hostname
@@ -55,9 +57,14 @@ class CommandSearchHost(BrokerCommand):
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(machine=dbmachine)
-        if domain:
-            dbdomain = Domain.get_unique(session, domain, compel=True)
-            q = q.filter_by(domain=dbdomain)
+
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     branch=branch)
+        if dbbranch:
+            q = q.filter_by(branch=dbbranch)
+            q = q.filter_by(sandbox_author=dbauthor)
 
         if archetype:
             # Added to the searches as appropriate below.
