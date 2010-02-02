@@ -657,7 +657,10 @@
       <optgroup name="add_aquilon_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
-         <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <optgroup name="add_host_branch" mandatory="True" fields="any">
+            <option name="domain" type="string" conflicts="sandbox">Template (not DNS) domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
