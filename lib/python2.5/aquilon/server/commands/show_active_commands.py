@@ -41,6 +41,7 @@ class CommandShowActive(BrokerCommand):
 
     requires_transaction = False
     requires_azcheck = False
+    defer_to_thread = False
 
     def render(self, debug, **arguments):
         catalog = StatusCatalog()

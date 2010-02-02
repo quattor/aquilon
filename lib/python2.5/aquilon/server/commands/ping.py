@@ -37,6 +37,7 @@ class CommandPing(BrokerCommand):
     requires_transaction = False
     requires_azcheck = False
     requires_format = True
+    defer_to_thread = False
 
     def render(self, **arguments):
         return "pong"

@@ -162,13 +162,19 @@ class ResponsePage(resource.Resource):
             style = getattr(request, "output_format", None)
         if style is None:
             style = getattr(handler, "default_style", "raw")
-        if handler.defer_to_thread:
-            d = d.addCallback(lambda arguments: threads.deferToThread(
-                handler.render, style=style, request=request, **arguments))
-        else:
-            d = d.addCallback(lambda arguments: handler.render(style=style,
+        # The logger used to be set up after the session.  However,
+        # this keeps a record of the request from forming immediately
+        # if all the sqlalchmey session threads are in use.
+        # This will be a problem if/when we want an auditid to come
+        # from the database, but we can revisit at that point.
+        d = d.addCallback(lambda arguments: handler.add_logger(style=style,
                                                                request=request,
                                                                **arguments))
+        if handler.defer_to_thread:
+            d = d.addCallback(lambda arguments: threads.deferToThread(
+                handler.render, **arguments))
+        else:
+            d = d.addCallback(lambda arguments: handler.render(**arguments))
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
