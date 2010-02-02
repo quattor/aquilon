@@ -2549,7 +2549,10 @@
          </optgroup>
          <option name="archetype" type="string">Archetype name</option>
          <option name="personality" type="string">Personality name</option>
-         <option name="domain" type="string">Name of template domain/sandbox</option>
+         <optgroup name="branch_opts" fields="any">
+            <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_esx_cluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>
