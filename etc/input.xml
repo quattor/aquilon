@@ -1547,6 +1547,19 @@
       <transport method="post" path="domain/%(domain)s/command/deploy" />
    </command>
 
+   <command name="del_sandbox">
+      Removes the specified sandbox branch.  This will fail if there are
+      hosts still being managed by the sandbox: you must use the "manage"
+      command to reassign those hosts to other domains.
+
+      This will not remove user-owned working directories.  A reminder
+      will be issued to clean up any such directories.
+      <optgroup name="del_sandbox_options" mandatory="True" fields="all">
+         <option name="sandbox" type="string">Name of the sandbox to be deleted</option>
+      </optgroup>
+      <transport method="post" path="sandbox/command/delete" />
+   </command>
+
    <command name="manage">
       Take a host and make it build its configuration using the specified
       template domain. This allows you to test building hosts using alternate
