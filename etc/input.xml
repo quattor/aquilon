@@ -1480,13 +1480,34 @@
       <transport method="delete" path="domain/%(domain)s" />
    </command>
 
-   <command name="get">
-      Download a copy of the templates from the specified template domain. The
-      templates will be placed in the current directory.
-      <optgroup name="get options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the domain</option>
+   <command name="add_sandbox">
+      Add a new template sandbox.  This is for testing changes to the
+      templates.  The new sandbox will have no hosts when it is freshly
+      created and you should use the "manage" command in order to assign
+      some hosts to the sandbox in order to run complete tests.
+
+      After adding the sandbox branch on the broker the client will
+      automatically attempt to run a 'get' for the user.  This can be
+      disabled with the --noget flag.
+      <optgroup name="add sandbox mandatory" mandatory="True" fields="all">
+         <option name="sandbox" type="string">Name of the new sandbox</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/get" expect="command"/>
+      <optgroup name="add sandbox optional" mandatory="False">
+         <option name="start" type="string">Branch to use as a starting point (default: prod)</option>
+         <option name="noget" type="boolean">Do not automatically create the user-controlled sandbox, only the branch server-side.</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="sandbox/command/add" expect="command"/>
+   </command>
+
+   <command name="get">
+      Create a working copy of the templates in a sandbox.  The
+      templates will be placed in a shared location that the broker
+      will still be able to read.
+      <optgroup name="get mandatory" mandatory="True" fields="all">
+         <option name="sandbox" type="string">Name of the sandbox</option>
+      </optgroup>
+      <transport method="post" path="sandbox/command/get" expect="command"/>
    </command>
 
    <command name="put">

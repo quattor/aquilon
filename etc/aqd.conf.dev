@@ -30,6 +30,7 @@ dsdb=/bin/echo
 #server_notifications = cdb2sql bootserver
 client_notifications = no
 environment = dev
+mean = %(srcdir)s/tests/fakebin/fake_mean
 
 [unittest]
 scratchdir = %(basedir)s/scratch
