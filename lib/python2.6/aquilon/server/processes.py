@@ -127,8 +127,9 @@ def run_command(args, env=None, path=".",
                                code=p.returncode)
     return out
 
-def run_git_command(config, args, env=None, path=".",
-                    logger=LOGGER, loglevel=logging.INFO):
+def run_git(args, env=None, path=".",
+            logger=LOGGER, loglevel=logging.INFO):
+    config = Config()
     if env:
         git_env = env.copy()
     else:
@@ -247,8 +248,8 @@ def cache_version(config, logger=LOGGER):
         return
 
     try:
-        out = run_git_command(config, "describe", logger=logger,
-                              path=config.get("broker", "srcdir"))
+        out = run_git("describe", logger=logger,
+                      path=config.get("broker", "srcdir"))
         config.set("broker", "version", out.strip())
     except ProcessException, e:
         logger.info("Could not run git describe to get version: %s" % e)
