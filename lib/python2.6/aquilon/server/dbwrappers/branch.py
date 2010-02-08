@@ -39,6 +39,26 @@ from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.domain import TemplateDomain
 
 
+def get_branch_and_author(session, logger,
+                          domain=None, sandbox=None, branch=None,
+                          compel=False):
+    dbbranch = None
+    dbauthor = None
+    if domain:
+        dbbranch = Domain.get_unique(session, domain, compel=True)
+    elif branch:
+        dbbranch = Branch.get_unique(session, branch, compel=True)
+    elif sandbox:
+        (author, slash, name) = sandbox.partition('/')
+        if not slash:
+            raise ArgumentError("Expected sandbox as 'author/branch', author "
+                                "name and branch name separated by a slash.")
+        dbbranch = Sandbox.get_unique(session, name, compel=True)
+        dbauthor = get_user_principal(session, author)
+    elif compel:
+        raise ArgumentError("Please specify either sandbox or domain.")
+    return (dbbranch, dbauthor)
+
 def get_branch_dependencies(dbbranch):
     """Returns a list of strings describing how a branch is being used.
 
