@@ -407,7 +407,7 @@
 
    <command name="show_domain">
       Shows the configuration for a given domain. With the '--all' option,
-      every domain will be listed, with its configuration.
+      every domain will be listed with its configuration.
       <optgroup name="show_domain_Input" mandatory="True" fields="any">
          <option name="domain" type="string" conflicts="all">Domain name</option>
          <option name="all" type="boolean" conflicts="hostname">Select all domains</option>

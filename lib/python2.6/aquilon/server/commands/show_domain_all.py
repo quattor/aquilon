@@ -37,5 +37,3 @@ class CommandShowDomainAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return session.query(Domain).all()
-
-
