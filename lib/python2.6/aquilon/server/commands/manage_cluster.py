@@ -29,7 +29,8 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Cluster, Domain
+from aquilon.server.dbwrappers.branch import get_branch_and_author
+from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import PlenaryCollection
@@ -39,21 +40,25 @@ from aquilon.exceptions_ import IncompleteError, NotFoundException
 
 class CommandManageCluster(BrokerCommand):
 
-    required_parameters = ["domain", "cluster"]
+    required_parameters = ["cluster"]
 
-    def render(self, session, logger, domain, cluster, **arguments):
-        # FIXME: Need to verify that this server handles this domain?
-        dbdomain = Domain.get_unique(session, domain, compel=True)
+    def render(self, session, logger, domain, sandbox, cluster, **arguments):
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     compel=True)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
-        old_domain = dbcluster.domain.name
+        old_branch = dbcluster.branch.name
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryCluster(dbcluster, logger=logger))
-        dbcluster.domain = dbdomain
+        dbcluster.branch = dbbranch
+        dbcluster.sandbox_author = dbauthor
         session.add(dbcluster)
         for dbhost in dbcluster.hosts:
             plenaries.append(PlenaryHost(dbhost, logger=logger))
-            dbhost.domain = dbdomain
+            dbhost.branch = dbbranch
+            dbhost.sandbox_author = dbauthor
             session.add(dbhost)
 
         session.flush()
@@ -63,7 +68,7 @@ class CommandManageCluster(BrokerCommand):
         try:
             lock_queue.acquire(key)
             plenaries.stash()
-            plenaries.cleanup(old_domain, locked=True)
+            plenaries.cleanup(old_branch, locked=True)
             plenaries.write(locked=True)
         except:
             plenaries.restore_stash()

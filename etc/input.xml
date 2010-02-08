@@ -1619,17 +1619,21 @@
 
    <command name="manage">
       Take a host and make it build its configuration using the specified
-      template domain. This allows you to test building hosts using alternate
-      templates, or to move a host back to a default production domain once
-      testing has completed.
+      template domain or sandbox.  This allows you to test building hosts
+      using alternate templates, or to move a host back to a default
+      production domain once testing has completed.
       <optgroup name="manage options" mandatory="True" fields="all">
          <optgroup name="host_or_cluster" fields="any" mandatory="True">
             <option name="hostname" type="string">Name of the host to manage</option>
-            <option name="cluster" type="string">Name of the cluster to manage</option></optgroup>
-         <option name="domain" type="string">Name of the domain</option>
+            <option name="cluster" type="string">Name of the cluster to manage</option>
+         </optgroup>
+         <optgroup name="domain_or_sandbox" fields="any" mandatory="True">
+            <option name="domain" type="string" conflicts="sandbox">Name of the domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/manage_hostname" trigger="hostname" />
-      <transport method="post" trigger="cluster" path="domain/%(domain)s/command/manage_cluster" />
+      <transport method="post" path="command/manage_hostname" trigger="hostname" />
+      <transport method="post" trigger="cluster" path="command/manage_cluster" />
    </command>
 
    <command name="cat">
