@@ -41,27 +41,39 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestUpdateDomain(TestBrokerCommand):
+class TestUpdateBranch(TestBrokerCommand):
+    # FIXME: Add some tests around (no)autosync
+    # FIXME: Verify against sandboxes
 
     def testupdatedomain(self):
-        self.noouttest(["update", "domain", "--domain", "changetest1",
-                        "--owner", "testuseraqd_admin@is1.morgan",
+        self.noouttest(["update", "branch", "--branch", "deployable",
                         "--comments", "Updated Comments",
-                        "--compiler",
-                        "/ms/dist/elfms/PROJ/panc/8.2.7/bin/panc"])
+                        "--compiler_version=8.2.7"])
 
     def testverifyupdatedomain(self):
-        command = "show domain --domain changetest1"
+        command = "show domain --domain deployable"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: changetest1", command)
-        self.matchoutput(out, "Owner: testuseraqd_admin", command)
+        self.matchoutput(out, "Domain: deployable", command)
         self.matchoutput(out,
-                         "Compiler: /ms/dist/elfms/PROJ/panc/8.2.7/bin/panc",
+                         "Compiler: "
+                         "/ms/dist/elfms/PROJ/panc/8.2.7/lib/panc.jar",
                          command)
         self.matchoutput(out, "Comments: Updated Comments", command)
 
+    def testbadcompilerversioncharacters(self):
+        command = ["update_branch", "--branch=changetest1",
+                   "--compiler_version=version!with@bad#characters"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid characters in compiler version",
+                         command)
+
+    def testbadcompilerversion(self):
+        command = ["update_branch", "--branch=changetest1",
+                   "--compiler_version=version-does-not-exist"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Compiler not found at", command)
+
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDomain)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBranch)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

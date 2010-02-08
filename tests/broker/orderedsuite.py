@@ -51,10 +51,11 @@ from test_status import TestStatus
 from test_show_active_commands import TestShowActiveCommands
 from test_permission import TestPermission
 from test_add_dns_domain import TestAddDnsDomain
+from test_add_sandbox import TestAddSandbox
 from test_add_domain import TestAddDomain
-from test_update_domain import TestUpdateDomain
-from test_get_domain import TestGetDomain
-from test_put_domain import TestPutDomain
+from test_update_branch import TestUpdateBranch
+from test_get import TestGet
+from test_publish_sandbox import TestPublishSandbox
 from test_deploy_domain import TestDeployDomain
 from test_sync_domain import TestSyncDomain
 from test_merge_conflicts import TestMergeConflicts
@@ -178,6 +179,7 @@ from test_del_personality import TestDelPersonality
 from test_del_os import TestDelOS
 from test_del_archetype import TestDelArchetype
 from test_del_domain import TestDelDomain
+from test_del_sandbox import TestDelSandbox
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
 from test_stop import TestBrokerStop
@@ -198,8 +200,10 @@ class BrokerTestSuite(unittest.TestSuite):
         for test in [TestBrokerStart,
                 TestPing, TestStatus, TestShowActiveCommands,
                 TestPermission,
-                TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
-                TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
+                TestAddDnsDomain,
+                TestAddSandbox, TestAddDomain, TestUpdateBranch,
+                TestGet, TestPublishSandbox, TestDeployDomain,
+                TestSyncDomain,
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
@@ -258,7 +262,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
-                TestDelDomain, TestDelDnsDomain,
+                TestDelDomain, TestDelSandbox, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))

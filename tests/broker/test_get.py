@@ -42,43 +42,49 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestGetDomain(TestBrokerCommand):
+class TestGet(TestBrokerCommand):
 
     def testclearchangetest1domain(self):
         p = Popen(("/bin/rm", "-rf",
-            os.path.join(self.scratchdir, "changetest1")), stdout=1, stderr=2)
+                   os.path.join(self.sandboxdir, "changetest1")),
+                  stdout=1, stderr=2)
         rc = p.wait()
 
     def testclearchangetest2domain(self):
         p = Popen(("/bin/rm", "-rf",
-            os.path.join(self.scratchdir, "changetest2")), stdout=1, stderr=2)
-        rc = p.wait()
-
-    def testclearunittestdomain(self):
-        p = Popen(("/bin/rm", "-rf",
-            os.path.join(self.scratchdir, "unittest")), stdout=1, stderr=2)
+                   os.path.join(self.sandboxdir, "changetest2")),
+                  stdout=1, stderr=2)
         rc = p.wait()
 
     def testgetchangetest1domain(self):
-        self.ignoreoutputtest(["get", "--domain", "changetest1"],
-                cwd=self.scratchdir)
-        self.assert_(os.path.exists(os.path.join(
-            self.scratchdir, "changetest1")))
+        (out, err) = self.successtest(["get", "--sandbox", "changetest1"])
+        self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
+                                                    "changetest1")))
 
     def testgetchangetest2domain(self):
-        self.ignoreoutputtest(["get", "--domain", "changetest2"],
-                cwd=self.scratchdir)
-        self.assert_(os.path.exists(os.path.join(
-            self.scratchdir, "changetest2")))
+        user = self.config.get("unittest", "user")
+        (out, err) = self.successtest(["get",
+                                       "--sandbox=%s/changetest2" % user])
+        self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
+                                                    "changetest2")))
 
-    def testgetunittestdomain(self):
-        self.ignoreoutputtest(["get", "--domain", "unittest"],
-                cwd=self.scratchdir)
-        self.assert_(os.path.exists(os.path.join(
-            self.scratchdir, "unittest")))
+    def testgetutsandbox(self):
+        # This one was added with --noget
+        (out, err) = self.successtest(["get", "--sandbox", "utsandbox"])
+        self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
+                                                    "utsandbox")))
+
+    def testgetbaduser(self):
+        command = ["get",
+                   "--sandbox", "user-does-not-exist/badbranch"]
+        out = self.badrequesttest(command)
+        user = self.config.get("unittest", "user")
+        self.matchoutput(out,
+                         "User '%s' cannot add or get a sandbox on "
+                         "behalf of 'user-does-not-exist'." % user,
+                         command)
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestGetDomain)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestGet)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

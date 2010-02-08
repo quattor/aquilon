@@ -158,6 +158,7 @@ class TestAddHost(TestBrokerCommand):
         # auto-allocation algorithms.
         # I stole the last 2 hp rack hosts for default host
         servers = 0
+        user = self.config.get("unittest", "user")
         for i in range(51, 100):
             if servers < 10:
                 servers += 1
@@ -168,7 +169,8 @@ class TestAddHost(TestBrokerCommand):
             command = ["add", "host", "--hostname", hostname,
                        "--ip", self.net.tor_net[1].usable[port].ip,
                        "--machine", "ut9s03p%d" % port,
-                       "--domain", "unittest", "--buildstatus", "build",
+                       "--sandbox", "%s/utsandbox" % user,
+                       "--buildstatus", "build",
                        "--osname", "linux", "--osversion", "4.0.1-x86_64",
                        "--archetype", "aquilon", "--personality", "inventory"]
             self.noouttest(command)

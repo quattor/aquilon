@@ -44,12 +44,12 @@ from brokertest import TestBrokerCommand
 
 class TestUmaskConstraints(TestBrokerCommand):
 
-    # Check that all of the git commands have left the index as readable
+    # Check that all of the git commands have created files as readable
     # by all.
-    def testgitindexpermission(self):
-        self.assert_(os.stat(os.path.join(
-            self.config.get("broker", "kingdir"), ".git", "index")).st_mode
-            & stat.S_IROTH)
+    def testgitfilepermission(self):
+        self.assert_(os.stat(os.path.join(self.config.get("broker", "kingdir"),
+                                          "refs", "heads", "utsandbox")
+                            ).st_mode & stat.S_IROTH)
 
 
 if __name__=='__main__':

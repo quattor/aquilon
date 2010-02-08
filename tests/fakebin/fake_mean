@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "NOT running mean to update directory ownership information."
+echo "Please update AQDCONF and comment out [broker]/mean to use the real one."
+echo "#mean $@"
+

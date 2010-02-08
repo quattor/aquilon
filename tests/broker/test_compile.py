@@ -49,9 +49,10 @@ class TestCompile(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
 
     def test_100_addchange(self):
-        # Change the template used by utsi1 clients to trigger a recompile.
-        templatedir = os.path.join(self.scratchdir, "unittest")
-        template = os.path.join(templatedir, "service", "utsvc", "utsi1",
+        # Touch the template used by utsi1 clients to trigger a recompile.
+        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
+                                 "unittest")
+        template = os.path.join(domaindir, "service", "utsvc", "utsi1",
                                 "client", "config.tpl")
         f = open(template)
         try:
@@ -64,11 +65,6 @@ class TestCompile(TestBrokerCommand):
             f.writelines(contents)
         finally:
             f.close()
-        self.gitcommand(["commit", "-a", "-m",
-                         "modified unit test service instance 1"],
-                         cwd=templatedir)
-        self.ignoreoutputtest(["put", "--domain", "unittest"],
-                              env=self.gitenv(), cwd=templatedir)
 
     def test_200_compileunittest(self):
         command = "compile --domain unittest"

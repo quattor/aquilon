@@ -61,6 +61,10 @@ class TestBrokerCommand(unittest.TestCase):
                   'aqddnsdomains_pb2']:
             globals()[m] = __import__(m)
 
+        self.sandboxdir = os.path.join(self.config.get("broker",
+                                                       "templatesdir"),
+                                       self.config.get("broker", "user"))
+
         # This method is cumbersome.  Should probably develop something
         # like unittest.conf.defaults.
         if self.config.has_option("unittest", "scratchdir"):
@@ -423,16 +427,16 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(p.returncode, 0,
                 "Non-zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                 % (command, out, err))
-        return
+        return (out, err)
 
     def gitcommand_expectfailure(self, command, **kwargs):
         p = self.gitcommand_raw(command, **kwargs)
         # Ignore out/err unless we get a non-zero return code, then log it.
         (out, err) = p.communicate()
-        self.assertEqual(p.returncode, 1,
+        self.failIfEqual(p.returncode, 0,
                 "Zero return code for %s, STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                 % (command, out, err))
-        return err
+        return (out, err)
 
     def check_git_merge_health(self, repo):
         command = "merge HEAD"

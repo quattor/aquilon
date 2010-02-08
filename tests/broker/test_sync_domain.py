@@ -29,6 +29,9 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the sync domain command."""
 
+
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
@@ -43,24 +46,15 @@ from brokertest import TestBrokerCommand
 
 class TestSyncDomain(TestBrokerCommand):
 
-    def testprepchangetest2domain(self):
-        self.gitcommand(["checkout", "master"],
-                cwd=os.path.join(self.scratchdir, "changetest2"))
-
-    def testsyncchangetest2domain(self):
-        self.ignoreoutputtest(["sync", "--domain", "changetest2"],
-                cwd=os.path.join(self.scratchdir, "changetest2"))
-        template = os.path.join(self.scratchdir, "changetest2", "aquilon",
-                "archetype", "base.tpl")
-        f = open(template)
-        try:
+    def testsyncdomain(self):
+        self.successtest(["sync", "--domain", "ut-prod"])
+        template = os.path.join(self.config.get("broker", "domainsdir"),
+                                "ut-prod", "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
-        self.assertEqual(contents[-1], "#Added by unittest\n")
+        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSyncDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
