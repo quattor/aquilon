@@ -1572,6 +1572,20 @@
       <transport method="post" path="command/deploy" />
    </command>
 
+   <command name="validate">
+      Assert that a branch (a sandbox or a domain) can by sync'd into
+      a tracking domain.
+      Typically this is used after a rollback has been issued on a
+      tracking domain.
+      <optgroup name="validate options" mandatory="True" fields="all">
+         <option name="branch" type="string">Name of domain or sandbox</option>
+      </optgroup>
+      <optgroup name="validate optional" mandatory="False" fields="all">
+         <option name="comments" type="string">Provide a comment as to why the branch is valid</option>
+      </optgroup>
+      <transport method="post" path="branch/%(branch)s/command/validate" />
+   </command>
+
    <command name="rollback">
       Set a tracking domain back to a known good state.  Any valid
       git reference (usually the SHA1 hash commit id, can be
