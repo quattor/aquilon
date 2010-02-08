@@ -394,12 +394,13 @@
    </command>
 
    <command name="compile">
-      Compile anything that is out-of-date within a specified domain or
-      only for the specified host.  Only out of date profiles will be
-      compiled.
+      Compile anything that is out-of-date within a specified domain,
+      sandbox, or only for the specified host.  Only out of date profiles
+      will be compiled.
       <optgroup name="compile_input" mandatory="True" fields="any">
-         <option name="domain" type="string" conflicts="hostname">Domain name</option>
-      <option name="hostname" type="string" conflicts="domain">FQDN</option>
+         <option name="domain" type="string" conflicts="sandbox hostname">Domain name</option>
+         <option name="sandbox" type="string" conflicts="domain hostname">Name of the sandbox (given as 'author/branch')</option>
+         <option name="hostname" type="string" conflicts="domain sandbox">FQDN</option>
       </optgroup>
       <transport method="post" path="compile"/>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
