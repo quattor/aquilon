@@ -1630,13 +1630,14 @@
    </command>
 
    <command name="sync">
-      Flush all plenary templates within the specified domain. This is only required
-      if the broker has somehow become out-of-sync between the templates that live
-      on the local disk, and the state within the database.
-      <optgroup name="sync options" mandatory="True" fields="all">
+      Use this to bring the broker's working copy of a template branch up to
+      date with the information in template-king.
+      A sync is automatically run for any domains tracking a deploy
+      unless the nosync option was used.
+      <optgroup name="sync mandatory" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/sync" expect="command"/>
+      <transport method="post" path="domain/%(domain)s/command/sync" />
    </command>
 
    <command name="add_location">
