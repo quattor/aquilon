@@ -146,7 +146,7 @@ class PlenaryMachineInfo(Plenary):
             lines.append('"cards/nic/%s" = nlist(' % interface['name'])
             if interface['mac']:
                 lines.append('                           "hwaddr", "%s",' %
-                             interface['mac'].upper())
+                             interface['mac'])
                 if interface['boot']:
                     lines.append('                           "boot", %s,' %
                                  str(interface['boot']).lower())

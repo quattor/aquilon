@@ -343,8 +343,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.assertEqual(host.fqdn, "unittest17.aqd-unittest.ms.com")
         #still fails, but it's checked below in the for loop
         self.assertEqual(host.ip, self.net.tor_net[0].usable[3].ip)
-        self.assertEqual(host.mac.upper(),
-                         self.net.tor_net[0].usable[3].mac.upper())
+        self.assertEqual(host.mac, self.net.tor_net[0].usable[3].mac)
         self.assertEqual(host.machine.name, "ut8s02p3")
         self.assertEqual(len(host.machine.interfaces), 2)
         for i in host.machine.interfaces:
