@@ -1444,12 +1444,27 @@
    </command>
 
    <command name="add_domain">
-      Add a new template domain. This is for testing changes to the templates. The
-      new domain will have no hosts when it is freshly created and you should use
-      the "manage" command in order to assign some hosts to the domain in order to
-      run complete tests.
-      <optgroup name="add domain options" mandatory="True" fields="all">
+      Add a new server-managed template domain.  Updates to these domains
+      can only be made through the broker.  A domain can either allow new
+      content to be merged in or can track another domain.
+
+      A tracking domain is useful because it can be rolled back to a
+      previous state quickly.  Such a domain is initialized to point to
+      the same commit as the branch it is tracking.
+
+      If a domain is not directly tracking another it still needs to
+      be initialized to start somewhere.  This is specified with the
+      start option.  The default is the head of the prod domain.
+
+      Either type of domain can be used with the "manage" command in
+      order to assign some hosts to the domain and run complete tests.
+      <optgroup name="add domain mandatory" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
+      </optgroup>
+      <optgroup name="add domain optional" mandatory="False">
+         <option name="track" type="string" conflicts="start">Branch to track</option>
+         <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>

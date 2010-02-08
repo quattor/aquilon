@@ -30,47 +30,82 @@
 
 
 import os
-
-from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
-from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Domain
-from aquilon.server.dbwrappers.user_principal import (
-        get_or_create_user_principal)
-from aquilon.server.processes import run_command
 import re
+
+from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
+                                 InternalError, ProcessException)
+from aquilon.server.broker import BrokerCommand
+from aquilon.aqdb.model import Domain, Branch
+from aquilon.server.processes import run_git, remove_dir
+
 
 class CommandAddDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, logger, domain, user, **arguments):
-        dbuser = get_or_create_user_principal(session, user)
+    def render(self, session, logger, dbuser,
+               domain, track, start, comments, **arguments):
         if not dbuser:
             raise AuthorizationException("Cannot create a domain without"
                     + " an authenticated connection.")
+
+        Branch.get_unique(session, domain, preclude=True)
 
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(domain)):
             raise ArgumentError("Domain name '%s' is not valid." % domain)
 
-        # For now, succeed without error if the domain already exists.
-        dbdomain = session.query(Domain).filter_by(name=domain).first()
-        if not dbdomain:
-            compiler = self.config.get("panc", "pan_compiler")
-            dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler)
-            session.add(dbdomain)
-            session.flush()
-            session.refresh(dbdomain)
-        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
-                dbdomain.name)
-        # FIXME: If this command fails, should the domain entry be
-        # created in the database anyway?
-        git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
-            os.environ.get("PATH", ""))}
-        run_command(["git", "clone", self.config.get("broker", "kingdir"),
-                     domaindir], env=git_env, logger=logger)
-        # The 1.0 code notes that this should probably be done as a
-        # hook in git... just need to make sure it runs.
-        run_command(["git-update-server-info"], env=git_env, path=domaindir,
-                    logger=logger)
+        # FIXME: Verify that track is a valid branch name?
+        # Or just let the branch command fail?
+
+        compiler = self.config.get("panc", "pan_compiler")
+        dbtracked = None
+        if track:
+            dbtracked = Branch.get_unique(session, track, compel=True)
+            if getattr(dbtracked, "tracked_branch", None):
+                raise ArgumentError("Cannot nest tracking.  Try tracking "
+                                    "%s %s directly." %
+                                    (dbtracked.tracked_branch.branch_type,
+                                     dbtracked.tracked_branch.name))
+            start_point = dbtracked
+        else:
+            if not start:
+                start = self.config.get("broker", "default_domain_start")
+            start_point = Branch.get_unique(session, start, compel=True)
+
+        dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler,
+                          tracked_branch=dbtracked, comments=comments)
+        session.add(dbdomain)
+        session.flush()
+        session.refresh(dbdomain)
+
+        domainsdir = self.config.get("broker", "domainsdir")
+        clonedir = os.path.join(domainsdir, dbdomain.name)
+        if os.path.exists(clonedir):
+            raise InternalError("Domain directory already exists")
+
+        kingdir = self.config.get("broker", "kingdir")
+        cmd = ["branch"]
+        if track:
+            cmd.append("--track")
+        else:
+            cmd.append("--no-track")
+        cmd.append(dbdomain.name)
+        cmd.append(start_point.name)
+        run_git(cmd, path=kingdir, logger=logger)
+
+        # If the branch command above fails the DB will roll back as normal.
+        # If the command below fails we need to clean up from itself and above.
+        try:
+            run_git(["clone", "--branch", dbdomain.name,
+                     kingdir, dbdomain.name],
+                    path=domainsdir, logger=logger)
+        except ProcessException, e:
+            try:
+                remove_dir(clonedir, logger=logger)
+                run_git(["branch", "-D", dbdomain.name],
+                        path=kingdir, logger=logger)
+            except ProcessException, e2:
+                logger.info("Exception while cleaning up: %s", e2)
+            raise e
         return

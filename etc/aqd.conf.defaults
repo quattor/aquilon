@@ -107,6 +107,7 @@ builddir = %(quattordir)s/cfg
 compiletooldir = %(srcdir)s/etc
 kingdir = %(quattordir)s/template-king
 templatesdir = %(quattordir)s/templates
+domainsdir = %(quattordir)s/domains
 rundir = %(quattordir)s/run
 sockdir = %(rundir)s/sockets
 logdir = %(quattordir)s/logs
