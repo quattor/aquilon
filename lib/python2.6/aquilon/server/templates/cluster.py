@@ -65,10 +65,10 @@ class PlenaryClusterObject(Plenary):
         self.plenary_core = "clusters"
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
         self.dir = self.config.get("broker", "builddir") + \
-                    "/domains/%s/profiles" % dbcluster.domain.name
+                    "/domains/%s/profiles" % dbcluster.branch.name
 
     def get_key(self):
-        return CompileKey(domain=self.dbcluster.domain.name,
+        return CompileKey(domain=self.dbcluster.branch.name,
                           profile=self.plenary_template, logger=self.logger)
 
     def body(self, lines):
@@ -167,7 +167,7 @@ class PlenaryClusterClient(Plenary):
 
     def get_key(self):
         # This takes a domain lock because it could affect all clients...
-        return CompileKey(domain=self.dbobj.domain.name, logger=self.logger)
+        return CompileKey(domain=self.dbobj.branch.name, logger=self.logger)
 
     def body(self, lines):
         lines.append("'/system/cluster/name' = '%s';" % self.name)
