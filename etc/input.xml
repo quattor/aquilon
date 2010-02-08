@@ -1500,9 +1500,9 @@
    </command>
 
    <command name="del_domain">
-      Removes the specified template domain. This will fail if there are hosts still being
-      managed by the domain: you must use the "manage" command to reassign those
-      hosts to other domains.
+      Removes the specified template domain.  This will fail if there are
+      hosts still being managed by the domain: you must use the "manage"
+      command to reassign those hosts to other domains.
       <optgroup name="del_domain_options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain to be deleted</option>
       </optgroup>
