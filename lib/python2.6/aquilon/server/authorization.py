@@ -70,7 +70,8 @@ class AuthorizationBroker(object):
                       'add_vendor', 'del_vendor',
                       'add_os', 'del_os',
                       'add_model', 'update_model', 'del_model',
-                      'add_organization', 'del_organization']:
+                      'add_organization', 'del_organization',
+                      'rollback']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(
                     "Must have the engineering or aqd_admin role to %s." %

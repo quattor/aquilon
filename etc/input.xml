@@ -1572,6 +1572,23 @@
       <transport method="post" path="command/deploy" />
    </command>
 
+   <command name="rollback">
+      Set a tracking domain back to a known good state.  Any valid
+      git reference (usually the SHA1 hash commit id, can be
+      abbreviated) can be given.  Alternately the lastsync option will
+      roll back to the commit in use before the domain was last sync'd.
+      The tracked domain will be flagged to not allow a sync until a
+      validate has been run or fixes have been deployed.
+      <optgroup name="rollback options" mandatory="True" fields="all">
+         <option name="domain" type="string">Name of domain or sandbox</option>
+         <optgroup name="ref options" mandatory="True" fields="any">
+            <option name="ref" type="string" conflicts="lastsync">Any valid git reference to a previous commit in the branch</option>
+            <option name="lastsync" type="boolean" conflicts="ref">Use the reference stored in AQDB of the commit in use before the last sync</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="domain/%(domain)s/command/rollback" />
+   </command>
+
    <command name="del_sandbox">
       Removes the specified sandbox branch.  This will fail if there are
       hosts still being managed by the sandbox: you must use the "manage"
