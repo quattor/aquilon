@@ -1555,16 +1555,21 @@
    </command>
 
    <command name="deploy">
-      Take a template domain and deploy it to production.
+      Take a template branch as a source (the name of either a domain or
+      a sandbox) and deploy its changes to the target domain specified.
+      If the target domain had been marked as invalid for syncing because
+      of a previous rollback that flag is cleared.
+      If using the nosync option follow this with the sync command to
+      pull the changes into any production domains.
       <optgroup name="deploy options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the domain</option>
+         <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+         <option name="target" type="string">Name of the target domain</option>
       </optgroup>
-      <optgroup name="deploy to" mandatory="False" fields="all">
-         <option name="to" type="string">
-            Name of the domain to deploy to
-         </option>
+      <optgroup name="deploy optional" mandatory="False">
+         <option name="nosync" type="boolean">Do not automatically sync tracking domains</option>
+         <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/deploy" />
+      <transport method="post" path="command/deploy" />
    </command>
 
    <command name="del_sandbox">
