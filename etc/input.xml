@@ -1539,14 +1539,19 @@
       <transport method="post" path="sandbox/command/get" expect="command"/>
    </command>
 
-   <command name="put">
-      Upload the templates (and all their changes) in the current directory to the
-      specified template domain. You should run "compile" on the domain afterwards to
-      confirm any changes.
-      <optgroup name="put options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the new domain</option>
+   <command name="publish">
+      Upload the template changes in the current directory to the
+      specified template sandbox branch.  This makes the changes
+      available to others for review and for the deploy command.
+      The manage and compile commands can be used before running
+      publish to test the changes.
+      <optgroup name="publish options" mandatory="True" fields="all">
+         <option name="branch" type="string">Name of the sandbox branch to update</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/bundle" custom="create_bundle"/>
+      <optgroup name="publish optional" mandatory="False">
+         <option name="nosync" type="boolean">Do not automatically sync tracking domains</option>
+      </optgroup>
+      <transport method="post" path="branch/%(branch)s/command/publish" custom="create_bundle" expect="command"/>
    </command>
 
    <command name="deploy">

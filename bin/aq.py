@@ -109,19 +109,19 @@ class CustomAction(object):
 
         p = Popen(("git", "fetch"), stderr=2)
         p.wait()  ## wait for return, but it's okay if this fails
-        p = Popen(("git", "status"), stdout=PIPE, stderr=2)
+        p = Popen(("git", "status", "--porcelain"), stdout=PIPE, stderr=2)
         (out, err) = p.communicate()
-        # Looks like git status returns with "1" if there is nothing to commit.
-        #if p.returncode:
-        #    sys.stdout.write(out)
-        #    print >>sys.stderr, "Error running git status, returncode %d" \
-        #            % p.returncode
-        #    sys.exit(1)
-        if not search("nothing to commit", out):
-            print >>sys.stderr, "Not ready to commit: %s" % out
+        if p.returncode:
+            print >>sys.stderr, \
+                    "\nError running git status --porcelain, returncode %d" \
+                    % p.returncode
+            sys.exit(1)
+        if out:
+            print >>sys.stderr, "Not ready to publish, found:\n%s" % out
             sys.exit(1)
 
-        p = Popen(("git", "log", "origin/master..HEAD"), stdout=PIPE, stderr=2)
+        revlist = "origin/%s..HEAD" % commandOptions["branch"]
+        p = Popen(("git", "log", revlist), stdout=PIPE, stderr=2)
         (out,err) = p.communicate()
 
         if out:
@@ -135,7 +135,7 @@ class CustomAction(object):
             
         (handle, filename) = mkstemp()
         try:
-            rc = Popen(("git", "bundle", "create", filename, "origin/master..HEAD"),
+            rc = Popen(("git", "bundle", "create", filename, revlist),
                         stdout=1, stderr=2).wait()
             if rc:
                 print >>sys.stderr, \
