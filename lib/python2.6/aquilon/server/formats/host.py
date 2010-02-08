@@ -48,7 +48,11 @@ class HostFormatter(ObjectFormatter):
         details.append(self.redirect_raw(host.personality, indent + "  "))
         details.append(self.redirect_raw(host.archetype, indent + "  "))
         details.append(self.redirect_raw(host.operating_system, indent + "  "))
-        details.append(self.redirect_raw(host.domain, indent + "  "))
+        if host.branch.branch_type == 'domain':
+            details.append(indent + "  Domain: %s" % host.branch.name)
+        else:
+            details.append(indent + "  Sandbox: %s/%s" %
+                           (host.sandbox_author.name, host.branch.name))
         details.append(self.redirect_raw(host.status, indent + "  "))
         for build_item in host.templates:
             details.append(indent + "  Template: %s" % build_item.cfg_path)
