@@ -196,7 +196,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            dbhost = Host(machine=dbmachine, domain=dbdomain,
+            dbhost = Host(machine=dbmachine, branch=dbdomain,
                           status=dbstatus, mac=mac, ip=None, network=None,
                           name=short, dns_domain=dbdns_domain,
                           personality=dbpersonality, operating_system=dbos,
