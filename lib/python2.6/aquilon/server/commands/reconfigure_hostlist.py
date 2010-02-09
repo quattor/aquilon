@@ -95,14 +95,19 @@ class CommandReconfigureHostlist(BrokerCommand):
         if buildstatus:
             dbstatus = Status.get_unique(session, buildstatus, compel=True)
 
-        domains = {}
+        branches = {}
+        authors = {}
         # Do any final cross-list or dependency checks before entering
         # the Chooser loop.
         for dbhost in dbhosts:
-            if dbhost.domain in domains:
-                domains[dbhost.domain].append(dbhost)
+            if dbhost.branch in branches:
+                branches[dbhost.branch].append(dbhost)
             else:
-                domains[dbhost.domain] = [dbhost]
+                branches[dbhost.branch] = [dbhost]
+            if dbhost.sandbox_author in authors:
+                authors[dbhost.sandbox_author].append(dbhost)
+            else:
+                authors[dbhost.sandbox_author] = [dbhost]
             if personality and dbhost.cluster and \
                dbhost.cluster.personality != dbpersonality:
                 failed.append("%s: Cannot change personality of host "
@@ -112,15 +117,25 @@ class CommandReconfigureHostlist(BrokerCommand):
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
-        if len(domains) > 1:
-            keys = domains.keys()
-            domain_sort = lambda x,y: cmp(len(domains[x]), len(domains[y]))
-            keys.sort(cmp=domain_sort)
-            stats = ["%s hosts in domain %s" %
-                     (len(domains[domain]), domain.name) for domain in keys]
-            raise ArgumentError("All hosts must be in the same domain:\n%s" %
-                                "\n".join(stats))
-        dbdomain = domains.keys()[0]
+        if len(branches) > 1:
+            keys = branches.keys()
+            branch_sort = lambda x,y: cmp(len(branches[x]), len(branches[y]))
+            keys.sort(cmp=branch_sort)
+            stats = ["%s hosts in %s %s" %
+                     (len(branches[branch]), branch.branch_type, branch.name)
+                     for branch in keys]
+            raise ArgumentError("All hosts must be in the same domain or "
+                                "sandbox:\n%s" % "\n".join(stats))
+        dbbranch = branches.keys()[0]
+        if len(authors) > 1:
+            keys = authors.keys()
+            author_sort = lambda x,y: cmp(len(authors[x]), len(authors[y]))
+            keys.sort(cmp=author_sort)
+            stats = ["%s hosts with sandbox author %s" %
+                     (len(authors[author]), author.name) for author in keys]
+            raise ArgumentError("All hosts must be managed by the same "
+                                "sandbox author:\n%s" % "\n".join(stats))
+        dbauthor = authors.keys()[0]
 
         failed = []
         choosers = []
@@ -175,7 +190,7 @@ class CommandReconfigureHostlist(BrokerCommand):
         # The lock must be over at least the domain, but could be over
         # all if (for example) service plenaries need to change.
         key = CompileKey.merge([p.get_write_key() for p in templates] +
-                               [CompileKey(domain=dbdomain.name,
+                               [CompileKey(domain=dbbranch.name,
                                            logger=logger)])
         try:
             lock_queue.acquire(key)
@@ -183,7 +198,7 @@ class CommandReconfigureHostlist(BrokerCommand):
             for template in templates:
                 logger.debug("Writing %s", template)
                 template.write(locked=True)
-            td = TemplateDomain(dbdomain, logger=logger)
+            td = TemplateDomain(dbbranch, dbauthor, logger=logger)
             out = td.compile(session, locked=True)
         except:
             logger.client_info("Restoring plenary templates.")

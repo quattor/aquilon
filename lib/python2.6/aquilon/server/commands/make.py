@@ -95,14 +95,15 @@ class CommandMake(BrokerCommand):
 
         # Force a host lock as pan might overwrite the profile...
         key = CompileKey.merge([chooser.get_write_key(),
-                                CompileKey(domain=dbhost.domain.name,
+                                CompileKey(domain=dbhost.branch.name,
                                            profile=dbhost.fqdn,
                                            logger=logger)])
         try:
             lock_queue.acquire(key)
             chooser.write_plenary_templates(locked=True)
 
-            td = TemplateDomain(dbhost.domain, logger=logger)
+            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+                                logger=logger)
             out = td.compile(session, only=dbhost.fqdn, locked=True)
 
         except:
