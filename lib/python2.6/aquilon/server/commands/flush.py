@@ -30,7 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, Machine, Domain, Personality, Cluster
+from aquilon.aqdb.model import Service, Machine, Branch, Personality, Cluster
 from aquilon.server.templates.personality import PlenaryPersonality
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.service import (PlenaryService,
@@ -101,8 +101,8 @@ class CommandFlush(BrokerCommand):
 
             if hosts or all:
                 logger.client_info("Flushing hosts.")
-                for d in session.query(Domain).all():
-                    for h in d.hosts:
+                for b in session.query(Branch).all():
+                    for h in b.hosts:
                         if not h.archetype.is_compileable:
                             continue
                         try:
@@ -112,8 +112,8 @@ class CommandFlush(BrokerCommand):
                             pass
                             #logger.client_info("Not flushing host: %s" % e)
                         except Exception, e:
-                            failed.append("Host %s in domain %s failed: %s" %
-                                          (h.fqdn,d.name,e))
+                            failed.append("Host %s in %s %s failed: %s" %
+                                          (h.fqdn, d.branch_type, b.name, e))
 
             if clusters or all:
                 logger.client_info("Flushing clusters.")
