@@ -56,7 +56,7 @@ class CommandDelESXCluster(BrokerCommand):
                                                      dbcluster.hosts])))
         dbmetacluster = dbcluster.metacluster
         plenary = PlenaryCluster(dbcluster, logger=logger)
-        domain = dbcluster.domain.name
+        domain = dbcluster.branch.name
         session.delete(dbcluster)
 
         session.flush()
