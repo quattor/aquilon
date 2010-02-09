@@ -1497,21 +1497,21 @@
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
 
-   <command name="update_domain">
-      Update the meta-information for a template domain.  This includes
-      domain owner, comments about the domain, and the location of the
-      pan compiler to use.
-
-      Currently restricted to aqd-admin only.
-      <optgroup name="update_domain_mandatory" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the template domain</option>
+   <command name="update_branch">
+      Update the meta-information for a template branch.  This includes
+      comments about the domain, the version of the pan compiler to use,
+      and whether to automatically sync deployed or published changes
+      to tracking domains.
+      <optgroup name="update_branch_mandatory" mandatory="True" fields="all">
+         <option name="branch" type="string">Name of the template branch (domain or sandbox)</option>
       </optgroup>
-      <optgroup name="update_domain_options" mandatory="True" fields="any">
-         <option name="comments" type="string">Comments on the domain</option>
-         <option name="owner" type="string">Principal listed as domain owner</option>
-         <option name="compiler" type="string">Full path to the panc binary</option>
+      <optgroup name="update_branch_options" mandatory="True" fields="any">
+         <option name="comments" type="string">Comments on the branch</option>
+         <option name="compiler_version" type="string">Version of panc to use</option>
+         <option name="autosync" type="boolean" conflicts="noautosync">Set the autosync flag</option>
+         <option name="noautosync" type="boolean" conflicts="autosync">Unset the autosync flag</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s" />
+      <transport method="post" path="branch/%(branch)s" />
    </command>
 
    <command name="del_domain">
