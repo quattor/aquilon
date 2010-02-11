@@ -99,17 +99,13 @@ class DsdbConnection(object):
         except Exception,e:
             print e
 
-    def get_network_by_sysloc(self,loc):
+    def get_network_by_sysloc(self, loc):
         """ append a sysloc to the base query, get networks"""
-        #TODO: make it general case somehow
-        s = "    AND location = '%s' \n    ORDER BY A.net_ip_addr"%(loc)
+        s = "    AND location = '%s' \n    ORDER BY A.net_ip_addr" % (loc)
         sql = '\n'.join([dt['net_base'], s])
 
         data = self.run_query(sql)
-        if data is not None:
-            return data.fetchall()
-        else:
-            return None
+        return data.fetchall() if data else None
 
     def get_host_pod(self,host):
         sql    = """

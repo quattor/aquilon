@@ -415,16 +415,22 @@
    </command>
 
    <command name="refresh_network">
-      Refresh aqdb network information from dsdb for a given building.
+      Refresh aqdb network information from dsdb.
 
-      The loglevel option can be used to increase logging on the server
-      for debugging.  The default is warnings only (0), and can be
-      increased to more info (1) and debug level (2).
-      <optgroup name="refresh_network_mandatory" mandatory="True" fields="all">
-         <option name="building" type="string" conflicts="">Building name</option>
+      Generally this command is called with the --all option but can be
+      restricted to a single building for speed.  A dryrun option is
+      provided to see what would change.
+
+      Using the incremental option will cause every change to be committed
+      to the database individually.  This is recommended for automated
+      usage but is off by default for interactive use as it is slower.
+      <optgroup name="refresh_network_mandatory" mandatory="True" fields="any">
+         <option name="building" type="string" conflicts="all">Building name</option>
+         <option name="all" type="boolean" conflicts="building">All locations</option>
       </optgroup>
       <optgroup name="refresh_network_mandatory" mandatory="False">
-         <option name="dryrun" type="boolean" conflicts="">Report what will change</option>
+         <option name="dryrun" type="boolean" conflicts="incremental">Report what will change</option>
+         <option name="incremental" type="boolean" conflicts="dryrun">Commit every change as it is decided</option>
       </optgroup>
       <transport method="post" path="command/net_refresh" />
    </command>

@@ -48,24 +48,146 @@ from brokertest import TestBrokerCommand
 
 class TestRefreshNetwork(TestBrokerCommand):
 
-    def testrefreshnetworkdryrun(self):
-        command = "refresh network --building np --dryrun"
-        (out, err) = self.successtest(command.split(" "))
+    # NOTE: The --all switch is not tested here because it would
+    # delay a standard run by minutes.  Please test manually.
 
-    def testrefreshnetworkdebug(self):
-        command = "refresh network --building np --debug"
-        (out, err) = self.successtest(command.split(" "))
+    # NOTE: There's currently no way to test updates.  Please test
+    # any changes manually.
 
-    def testrefreshnetworkdryrundebug(self):
-        command = "refresh network --building np --dryrun --debug"
-        (out, err) = self.successtest(command.split(" "))
+    def striplock(self, err):
+        filtered = []
+        for line in err.splitlines():
+            if line.find("Acquiring lock") == 0:
+                continue
+            if line.find("Lock acquired.") == 0:
+                continue
+            if line.find("Released lock") == 0:
+                continue
+            filtered.append(line)
+        return "".join("%s\n" % line for line in filtered)
 
-    def testrefreshnetworkstandard(self):
+    # 100 sync up building np
+    def test_100_syncfirst(self):
         command = "refresh network --building np"
         (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        # There may be output here if the networks have changed between
+        # populating the database and now.
+
+    # 110 sync up building np expecting no output
+    def test_110_syncclean(self):
+        command = "refresh network --building np"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        # Technically this could have changed in the last few seconds,
+        # but the test seems worth the risk. :)
+        err = self.striplock(err)
+        self.assertEmptyErr(err, command)
+
+    # 120 sync up building np dryrun expecting no output
+    def test_120_dryrun(self):
+        command = "refresh network --building np --dryrun"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        # Technically this also could have changed in the last few seconds,
+        # but the test again seems worth the risk. :)
+        err = self.striplock(err)
+        self.assertEmptyErr(err, command)
+
+    # 150 test adds with the sync of another building
+    def test_150_addhq(self):
+        command = "refresh network --building hq"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        err = self.striplock(err)
+        self.matchoutput(err, "adding", command)
+        self.matchclean(err, "updating", command)
+        self.matchclean(err, "deleting", command)
+
+    # 200 add a dummy 0.1.1.0/26 network to np
+    def test_200_adddummynetwork(self):
+        command = ["add_network", "--network=0.1.1.0", "--ip=0.1.1.0",
+                   "--mask=256", "--building=np"]
+        self.noouttest(command)
+
+    # 300 add a small dynamic range to 0.1.1.0
+    def test_300_adddynamicrange(self):
+        command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
+                   "--dns_domain=aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def failsync(self, command):
+        """Common code for the two tests below."""
+        err = self.partialerrortest(command.split(" "))
+        err = self.striplock(err)
+        self.matchoutput(err,
+                         "deleting <Network 0.1.1.0/24 "
+                         "(netmask=255.255.255.0), type=unknown, "
+                         "side=a, located in Building np>",
+                         command)
+        for i in range(4, 9):
+            self.matchoutput(err,
+                             "No network found for IP address 0.1.1.%d "
+                             "[dynamic-0-1-1-%d.aqd-unittest.ms.com]." %
+                             (i, i),
+                             command)
+        return err
+
+    # 400 normal should fail
+    def test_400_syncclean(self):
+        command = "refresh network --building np"
+        err = self.failsync(command)
+        self.matchoutput(err, "No changes applied because of errors.", command)
+
+    # 410 dryrun should fail, no real difference in this case...
+    def test_410_refreshnetworkdryrun(self):
+        command = "refresh network --building np --dryrun"
+        err = self.failsync(command)
+        self.matchoutput(err, "No changes applied because of errors.", command)
+
+    # 450 verify network still exists
+    def test_450_verifynetwork(self):
+        command = "show network --ip 0.1.1.0"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "IP: 0.1.1.0", command)
+
+    # 500 incrental should be a partial fail
+    def test_500_incremental_fail(self):
+        command = "refresh network --building np --incremental"
+        err = self.failsync(command)
+        self.matchclean(err, "No changes applied because of errors.", command)
+
+    # 550 verify network is gone
+    def test_550_verifynetwork(self):
+        command = "show network --ip 0.1.1.0"
+        out = self.notfoundtest(command.split(" "))
+
+    # 600 re-add the dummy 0.1.1.0/26 network to np
+    # Needed for the del dynamic range command to succeed.
+    def test_600_adddummynetwork(self):
+        command = ["add_network", "--network=0.1.1.0", "--ip=0.1.1.0",
+                   "--mask=256", "--building=np"]
+        self.noouttest(command)
+
+    # 650 delete the dynamic range
+    def test_650_deldynamicrange(self):
+        command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
+        self.noouttest(command)
+
+    # 700 sync up building np
+    # One last time to clean up the dummy network
+    def test_700_syncclean(self):
+        command = "refresh network --building np"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+        err = self.striplock(err)
+        self.matchoutput(err,
+                         "deleting <Network 0.1.1.0/24 "
+                         "(netmask=255.255.255.0), type=unknown, "
+                         "side=a, located in Building np>",
+                         command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

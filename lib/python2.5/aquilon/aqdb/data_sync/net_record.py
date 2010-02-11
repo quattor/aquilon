@@ -27,10 +27,7 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ handy for comparing networks """
-import os
-import sys
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+
 
 #TODO: rename _mask_to_cidr, it's not really hidden
 from aquilon.aqdb.model import Network
@@ -42,9 +39,12 @@ class NetRecord(object):
 
     def __init__(self, *args, **kw):
         #TODO: update comments later, it's too much noise for now
-        _required = ['name', 'ip', 'mask', 'bldg', 'side', 'net_type']
-        for k,v in kw.iteritems():
-            setattr(self,k, v)
+        # Only need/want dsdb bldg in case location is unmatched.
+        # Even there bldg is occasionally null, so mark it optional.
+        _required = ['name', 'ip', 'mask', 'side', 'net_type']
+        _optional = ['bldg', 'location']
+        for (k, v) in kw.iteritems():
+            setattr(self, k, v)
 
         #default to side 'a'
         if not getattr(self, 'side', None):
@@ -54,8 +54,12 @@ class NetRecord(object):
             if not getattr(self, r, None):
                 msg="no required '%s' attr."%(r)
                 raise ValueError(msg)
+        for o in _optional:
+            setattr(self, o, getattr(self, o, None))
 
     def __eq__(self, other):
+        # This is a really ugly override of __eq__.  Maybe something like
+        # matches() would have been a more appropriate name.
         if self.ip != other.ip:
             msg = 'subnet IP mismatch (dsdb)%s != %s(aqdb)'%(self.ip, other.ip)
             raise ValueError(msg)
@@ -64,11 +68,11 @@ class NetRecord(object):
             msg = 'type of %s is %s, should be Network'%(other,type(other))
             raise TypeError(msg)
 
-        if (self.name.lower() == other.name and
-            self.net_type     == other.network_type and
-            self.mask         == other.mask and
-            self.bldg         == other.location.name and
-            self.side         == other.side): #and
+        if (self.name.strip().lower() == other.name and
+            self.net_type == other.network_type and
+            self.mask == other.mask and
+            self.location == other.location and
+            self.side == other.side): #and
             #self.comments == other.comments):
             return True
         else:
@@ -77,61 +81,44 @@ class NetRecord(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def update_aq_net(self, aq, log, report):
-        if type(aq) != Network:
-            #TODO: make sure you're caught
-            raise TypeError(
-                         'diff_aq_net%s is %s, should be Network'%(aq,type(aq)))
-        if self.ip != aq.ip:
-            m = 'update_aq_net: network ip mismatch (dsdb)%s != %s(aqdb)'%(
-                                                                self.ip, aq.ip)
+    def update_aq_net(self, dbnetwork, nr):
+        if type(dbnetwork) != Network:
+            # The uncaught TypeError would translate up as an InternalError,
+            # which seems like the right behavior.
+            raise TypeError('update_aq_net %s is %s, should be Network' %
+                            (dbnetwork, type(dbnetwork)))
+        if self.ip != dbnetwork.ip:
+            m = 'update_aq_net: network ip mismatch (dsdb)%s != %s(aqdb)' % (
+                self.ip, dbnetwork.ip)
             raise ValueError(m)
 
-        if self.bldg != aq.location.name:
-            m = 'update_aq_net: location name mismatch (dsdb)%s != %s(aqdb)'%s(
-                                                    self.bldg, aq.location.name)
-            raise ValueError(m)
-        msg = ''
-        if self.bldg != aq.location.name:
-            msg += 'updating network %s to name %s\n'%(aq, self.name)
-            report.upds.append(msg)
-            log.debug(msg)
+        if self.location != dbnetwork.location:
+            nr.info('updating network %s to %s %s',
+                    dbnetwork, self.location.location_type, self.location.name)
+            dbnetwork.location = self.location
 
-        if self.name.lower() != aq.name:
-            msg += 'updating network %s to name %s'%(aq, self.name)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.name = self.name
+        if self.name.strip().lower() != dbnetwork.name:
+            nr.info('updating network %s to name %s', dbnetwork, self.name)
+            dbnetwork.name = self.name
 
-        if self.net_type != aq.network_type:
-            msg = 'updating network %s to type %s'%(aq, self.net_type)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.network_type = self.net_type
+        if self.net_type != dbnetwork.network_type:
+            nr.info('updating network %s to type %s', dbnetwork, self.net_type)
+            dbnetwork.network_type = self.net_type
 
-        if self.mask != aq.mask:
+        if self.mask != dbnetwork.mask:
             #calculate new cidr and new bcast
-            aq.mask = self.mask
-            aq.cidr = _mask_to_cidr[aq.mask]
-            aq.bcast = get_bcast(aq.ip, aq.cidr)
+            dbnetwork.mask = self.mask
+            dbnetwork.cidr = _mask_to_cidr[dbnetwork.mask]
+            dbnetwork.bcast = get_bcast(dbnetwork.ip, dbnetwork.cidr)
+            nr.info('updating network %s with mask %s, cidr %s, bcast %s',
+                    dbnetwork, self.mask, dbnetwork.cidr, dbnetwork.bcast)
 
-            msg = 'updating network %s with mask %s, cidr %s, bcast %s'%(
-                aq, self.mask, aq.cidr, aq.bcast)
+        if self.side != dbnetwork.side:
+            nr.info('updating network %s to side %s', dbnetwork, self.side)
+            dbnetwork.side = self.side
 
-            log.debug(msg)
-            report.upds.append(msg)
-
-        if self.side != aq.side:
-            msg = 'updating network %s to name %s'%(aq, self.name)
-            log.debug(msg)
-            report.upds.append(msg)
-            aq.side = self.side
-
-        return aq
+        return dbnetwork
 
     def __repr__(self):
-        return '<Network %s ip=%s, type=%s, mask=%s, bldg=%s, side=%s>'%(
-                self.name, self.ip, self.net_type, self.mask,
-                self.bldg, self.side)
-
-
+        return '<Network %s ip=%s, type=%s, mask=%s, bldg=%s, side=%s>' % (
+            self.name, self.ip, self.net_type, self.mask, self.bldg, self.side)

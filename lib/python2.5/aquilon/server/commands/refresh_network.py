@@ -31,7 +31,9 @@
 
 from threading import Lock
 
+from aquilon.exceptions_ import PartialError
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.logger import CLIENT_INFO
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.aqdb.dsdb import DsdbConnection
 from aquilon.aqdb.data_sync.net_refresh import NetRefresher
@@ -42,32 +44,42 @@ refresh_network_lock = Lock()
 
 class CommandRefreshNetwork(BrokerCommand):
 
-    required_parameters = ["building"]
-    requires_format = True
+    required_parameters = []
 
-    def render(self, session, logger, building, dryrun, **arguments):
-        logger.client_info("Acquiring lock to refresh network for building %s"
-                           % building)
+    def render(self, session, logger, building, dryrun, incremental,
+               **arguments):
+        if building:
+            action = "refresh network for building %s" % building
+        else:
+            action = "refresh all networks"
+        logger.client_info("Acquiring lock to %s", action)
         refresh_network_lock.acquire()
         logger.client_info("Lock acquired.")
         try:
-            dbbuilding = get_location(session, building=building)
+            if building:
+                dbbuilding = get_location(session, building=building)
+                building = dbbuilding.name
 
             dsdb = DsdbConnection()
             try:
-                nr = NetRefresher(dsdb, session, logger=logger,
-                                  bldg=dbbuilding.name, commit=not(dryrun))
+                nr = NetRefresher(dsdb, session, bldg=building,
+                                  logger=logger, loglevel=CLIENT_INFO,
+                                  incremental=incremental, dryrun=dryrun)
                 nr.refresh()
             finally:
                 dsdb.close()
 
+            if nr.errors:
+                if incremental:
+                    msg = ''
+                else:
+                    msg = 'No changes applied because of errors.'
+                raise PartialError(success=[], failed=nr.errors,
+                                   success_msg=msg)
             if dryrun:
                 session.rollback()
         finally:
-            logger.client_info("Released lock from refresh network for "
-                               "building %s" % building)
+            logger.client_info("Released lock from %s", action)
             refresh_network_lock.release()
 
-        return nr.report
-
-
+        return
