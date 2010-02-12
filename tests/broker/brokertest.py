@@ -285,6 +285,11 @@ class TestBrokerCommand(unittest.TestCase):
                          (command, out))
         return err
 
+    def partialerrortest(self, command, **kwargs):
+        # Currently these two cases behave the same way - same exit code
+        # and behavior.
+        return self.badoptiontest(command, **kwargs)
+
     def matchoutput(self, out, s, command):
         self.assert_(out.find(s) >= 0,
                      "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %

@@ -34,29 +34,42 @@ import sys
 import logging
 import optparse
 
-DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
-import aquilon.aqdb.depends
+if __name__ == "__main__":
+    DIR = os.path.dirname(os.path.realpath(__file__))
+    sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..', '..')))
+    import aquilon.aqdb.depends
 
 from sqlalchemy.exceptions import DatabaseError, IntegrityError
+from sqlalchemy.sql.expression import asc
 
-from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
-                                City, Building, System, TorSwitch, Network)
+from aquilon.aqdb.model import Building, System, Network
 from aquilon.aqdb.model.network import _mask_to_cidr, get_bcast
-
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.dsdb import DsdbConnection
-from aquilon.aqdb.data_sync import NetRecord, RefreshReport
+from aquilon.aqdb.data_sync.net_record import NetRecord
+from aquilon.aqdb.column_types.IPV4 import dq_to_int
 
 LOGGER = logging.getLogger('aquilon.aqdb.data_sync.net_refresh')
 
+
 class NetRefresher(object):
-    """ Class to encapsulate what's needed to replicate networks from AQDB
-        to AQDB"""
+    """Encapsulate what's needed to replicate networks from DSDB to AQDB"""
     __shared_state = {}
 
     #Dependency injection: allows us to supply our own *fake* dsdb connection
-    def __init__(self, dsdb_cnxn, session, logger=LOGGER, *args, **kw):
+    def __init__(self, dsdb_cnxn, session,
+                 logger=LOGGER, loglevel=logging.INFO,
+                 bldg=None, incremental=False, dryrun=False):
+        """If no building is set all locations will be synchronized.
+
+        Set incremental to True to commit every change individually.  This
+        will ensure that any errors do not roll back the entire process.
+
+        Set dryrun to True to flush every change.  No change will
+        actually be committed.  This can help to pinpoint groups of
+        errors instead of failing on the first.
+
+        """
 
         self.dsdb = dsdb_cnxn
         assert self.dsdb
@@ -64,165 +77,235 @@ class NetRefresher(object):
         self.session = session
         assert self.session
 
-        q = self.session.query(Building)
-        self.location = q.filter_by(name=kw['bldg']).one()
-        assert type(self.location) is Building
+        if bldg:
+            self.location = Building.get_unique(session, bldg,
+                                                compel=ValueError)
+            assert type(self.location) is Building
+        else:
+            self.location = None
 
-        self.report = RefreshReport()
-        assert self.report
+        self.errors = []
 
         self.log = logger
         assert self.log
+        # Let the caller choose the default log level and wrap for convenience.
+        self.loglevel = loglevel
+        self.info = lambda *args, **kwargs: self.log.log(self.loglevel,
+                                                         *args, **kwargs)
 
-        self.commit    = kw['commit']
+        self.incremental = incremental
+        self.dryrun = dryrun
 
-    def _pull_dsdb_data(self, *args, **kw):
-        """ loc argument is a sysloc string (DSDB stores this instead) """
+    def _pull_dsdb_data(self):
         d = {}
-        #query returns in order name, ip, mask, type_id, bldg, side
-        for (name, ip, mask, type, bldg,
-             side) in self.dsdb.get_network_by_sysloc(
-                                                    self.location.sysloc()):
+        if self.location:
+            data = self.dsdb.get_network_by_sysloc(self.location.sysloc())
+        else:
+            data = self.dsdb.dump('net_base')
+        buildings = {}
+        for building in self.session.query(Building).all():
+            buildings[building.name] = building
+        for (name, ip, mask, type, bldg, side) in data:
             d[ip] = NetRecord(ip=ip, name=name, net_type=type,
-                              mask=mask, bldg=bldg, side=side)
+                              mask=mask, side=side, bldg=bldg,
+                              location=buildings.get(bldg, None))
         return d
 
-    def _pull_aqdb_data(self, *args, **kw):
-        """ loc argument is a BUILDING CODE, different from dsdb """
+    def _pull_aqdb_data(self):
+        # Note that a query will auto-flush first...
         d = {}
-
         q = self.session.query(Network)
-        for n in q.filter_by(location=self.location).all():
+        if self.location:
+            q = q.filter_by(location=self.location)
+        for n in q.all():
             d[n.ip] = n
         return d
 
-    def _rollback(self, msg):
-        """ a DRY method for error handling """
-        self.log.error(msg)
-        self.report.errs.append(msg)
-        self.session.rollback()
-
-    def refresh(self, *args, **kw):
-        """ compares and refreshes the network table from dsdb to aqdb using
-            sets makes computing union and delta of keys simple and succinct """
-
+    def refresh(self):
         self.log.debug('Starting network refresh')
+        self.session.autoflush = False
+        self._refresh_networks()
+        # This will be a no-op if self.incremental or self.dryrun is True
+        self.session.flush()
+        self._refresh_system_networks()
+        self.log.debug('Finished network refresh')
 
-        ds = self._pull_dsdb_data(*args, **kw)
+    def _refresh_networks(self):
+        """Compares and refreshes the network table from dsdb to aqdb.
+
+        Using sets makes computing union and delta of keys simple and succinct.
+
+        """
+        ds = self._pull_dsdb_data()
         dset = set(ds.keys())
 
-        aq = self._pull_aqdb_data(*args, **kw)
+        aq = self._pull_aqdb_data()
         aset = set(aq.keys())
 
-        deletes  = aset - dset
+        deletes = aset - dset
         if deletes:
-            self._do_deletes(deletes, aq, *args, **kw)
-            aq = self._pull_aqdb_data(*args, **kw)
+            self._do_deletes(deletes, aq)
+            aq = self._pull_aqdb_data()
             aset = set(aq.keys())
 
         adds = dset - aset
         if adds:
-            self._do_adds(adds, ds, *args, **kw)
-            aq = self._pull_aqdb_data(*args, **kw)
+            self._do_adds(adds, ds)
+            aq = self._pull_aqdb_data()
             aset = set(aq.keys())
 
         compares = aset & dset
         if compares:
-            self._do_updates(aset & dset , aq, ds, *args, **kw)
+            self._do_updates(aset & dset, aq, ds)
 
-        self.log.debug('Finished network refresh logic')
+    def _error(self, msg):
+        self.log.error(msg)
+        self.errors.append(msg)
 
-    def _do_deletes(self, k, aq, *args, **kw):
-        """ Deletes networks in aqdb and not in dsdb. It logs and handles
-            associated reporting messages.
+    def _commit(self, msg):
+        self.info(msg)
+        try:
+            if self.dryrun:
+                self.session.flush()
+            if self.incremental:
+                self.session.commit()
+        except Exception, e:
+            self._error("Error %s: %s" % (msg, e))
+            # This doesn't do the right thing on a dryrun (goes back to
+            # a clean slate instead of the last success), but hopefully
+            # close enough.
+            self.session.rollback()
+            return False
+        return True
 
-            arguments: list of keys and dict of aqdb networks to delete
-            returns:   True/False on total success/a single failure """
-            #TODO: revisit this ^^^
+    def _do_deletes(self, k, aq):
+        """Deletes networks in aqdb and not in dsdb.
+
+        arguments: list of keys and dict of aqdb networks to delete
+
+        """
         for i in k:
-            self.log.debug('deleting %s'%(aq[i]))
-            self.report.dels.append(aq[i])
+            self.session.delete(aq[i])
+            self._commit('deleting %s' % aq[i])
 
-            if self.commit:
-                try:
-                    self.session.delete(aq[i])
-                    self.session.commit()
-                except IntegrityError,e:
-#                    """ TODO: get records that connects back to the network and
-#                            do something about it: delete it, or send message.
-#                            enhancement: start marking objects for deletion and
-#                            delete them after a week or two of no activity """
-                    self._rollback(e)
-                except Exception, e:
-                    self._rollback(e)
-                    continue
+    def _do_adds(self, k, ds):
+        """Adds networks in dsdb and not in aqdb.
 
-    def _do_adds(self, k, ds, *args, **kw):
-        """ Adds networks in dsdb and not in aqdb. Handles the logging and
-            job reporting along the way.
+        arguments: list of keys (ip addresses) and dsdb NetRecords
 
-            arguments: list of keys (ip addresses) and dsdb NetRecords
-
-            returns:   # of networks added or False based on total success or
-                       a single failure """ #TODO: revisit this
+        """
         for i in k:
-            try:
-                c = _mask_to_cidr[ds[i].mask]
-                net = Network(name         = ds[i].name,
-                              ip           = ds[i].ip,
-                              mask         = ds[i].mask,
-                              cidr         = c,
-                              bcast        = get_bcast(ds[i].ip, c),
-                              network_type = ds[i].net_type,
-                              side         = ds[i].side,
-                              location     = self.location)
-
-                net.comments = getattr(ds[i], 'comments', None)
-    #TODO: use a memoized query:
-    #self.session.query(Building).filter_by(name=ds[i].bldg).one()
-            except Exception, e:
-                self.report.errs.append(e)
-                self.log.error(e)
+            if not ds[i].location:
+                msg = "Not adding network %s: " % ds[i].ip
+                if not ds[i].bldg:
+                    self.log.warn(msg + "missing building information in dsdb")
+                else:
+                    self._error(msg + "building %s missing in aqdb" %
+                                ds[i].bldg)
                 continue
+            c = _mask_to_cidr[ds[i].mask]
+            net = Network(name=ds[i].name,
+                          ip=ds[i].ip,
+                          mask=ds[i].mask,
+                          cidr=c,
+                          bcast=get_bcast(ds[i].ip, c),
+                          network_type=ds[i].net_type,
+                          side=ds[i].side,
+                          location=ds[i].location)
 
-            #log here to get more detailed/uniform output
-            self.log.debug('adding %s'%(net))
-            self.report.adds.append(net)
+            net.comments = getattr(ds[i], 'comments', None)
 
-            if self.commit:
-                self.report.adds.append(net)
-                try:
-                    self.session.add(net)
-                    self.session.commit()
-                except Exception, e:
-                    self._rollback(e)
+            self.session.add(net)
+            self._commit('adding %s' % net)
 
-    def _do_updates(self, k, aq, ds, *args, **kw):
-        """ Makes changes to networks which have differences, logs/reports. We
-            do this *VERY* cautiously with seperate try/except for everything
+    def _do_updates(self, k, aq, ds):
+        """Makes changes to networks which have differences.
 
-            arguments: list of keys (ip addresses) for networks present in both
-                       data sources, plus a hash of the relevent data to compare
+        arguments: list of keys (ip addresses) for networks present in both
+                   data sources, plus a hash of the relevent data to compare
 
-            returns:   # of networks successfully updated or False if there's a
-                       single failure  """
+        """
         for i in k:
+            if not ds[i].location:
+                msg = "Not updating network %s: " % ds[i].ip
+                if not ds[i].bldg:
+                    self.log.warn(msg + "missing building information in dsdb")
+                else:
+                    self._error(msg + "building %s missing in aqdb" %
+                                ds[i].bldg)
+                continue
             if ds[i] != aq[i]:
                 #get an updated version of the aqdb network
-                try:
-                    aq[i] = ds[i].update_aq_net(aq[i], self.log, self.report)
-                except ValueError, e:
-                    self.report.errs.append(e)
-                    self.log.error(e)
+                aq[i] = ds[i].update_aq_net(aq[i], self)
+                self.session.add(aq[i])
+                self._commit('saving %s' % aq[i])
+                # Each update has already been added to the report.
 
-                if self.commit:
-                    try:
-                        self.log.debug('trying to commit the update\n')
-                        self.session.update(aq[i])
-                        self.session.commit()
-                        self.report.upds.append(ds[i].name)
-                    except Exception, e:
-                        self._rollback(e)
+    def _refresh_system_networks(self):
+        """Validate network entries for stored IPs."""
+        # Note... I couldn't think of a good way to "restrict" this algorithm
+        # to a single building efficiently and correctly.
+
+        # When we switch to the new DNS schema it should be sufficient
+        # to swap this to ARecord and call it a day.  (Unless IP/network
+        # combos are also stashed away somewhere else.)
+        q = self.session.query(System)
+        q = q.filter(System.ip != None)
+        q = q.order_by(asc(System.ip))
+        systems = q.all()
+
+        q = self.session.query(Network)
+        q = q.order_by(asc(Network.ip))
+        networks = q.all()
+
+        # Caches of the int representations of the IP addresses
+        system_ips = [dq_to_int(s.ip) for s in systems]
+        network_ips = [dq_to_int(n.ip) for n in networks]
+        bcast_ips = [dq_to_int(n.bcast) for n in networks]
+
+        def set_network(s, n):
+            if s.network != n:
+                s.network = n
+                session.add(s)
+                self._commit('updating %s [%s] with network %s' %
+                             (s.fqdn, s.ip, n.ip))
+
+        s_index = 0
+        n_index = 0
+        # Iterate through the ordered lists matching systems to their networks.
+        # Not worried about the edge cases of no networks or no systems.  If
+        # there are no systems there is nothing to fix.  If there are no
+        # networks then all the systems are pointing at null anyway.
+        while(s_index < len(systems) and n_index < len(networks)):
+            # database objects
+            sys = systems[s_index]
+            net = networks[n_index]
+            # int representations of the IP addresses contained in the objects.
+            s_ip = system_ips[s_index]
+            n_ip = network_ips[n_index]
+            b_ip = bcast_ips[n_index]
+            # Hopefully the common case... our system IP is in the range
+            # of the current network.  Make sure the network is set
+            # appropriately and move on to the next system.
+            if n_ip <= s_ip <= b_ip:
+                set_network(sys, net)
+                s_index += 1
+                continue
+            # Our system is beyond the range of the current network, so
+            # proceed to checking against the next network.
+            if s_ip > b_ip:
+                n_index += 1
+                continue
+            # At this point we know our system is not in the range of
+            # any networks.  We started at the "lowest" network and
+            # have been working up.  Since the system IP is less than
+            # the network IP we can't expect incrementing to the next
+            # network to help us find one. :)
+            self._error('No network found for IP address %s [%s].' %
+                        (sys.ip, sys.fqdn))
+            set_network(sys, None)
+            s_index += 1
+            continue
 
 def main(*args, **kw):
     usage = """ usage: %prog [options]
@@ -234,21 +317,27 @@ def main(*args, **kw):
                               description=desc)
 
     p.add_option('-v',
-                 action = 'count',
-                 dest = 'verbose',
-                 default = 0,
-                 help = 'increase verbosity by adding more (vv), etc.')
+                 action='count',
+                 dest='verbose',
+                 default=0,
+                 help='increase verbosity by adding more (vv), etc.')
 
     p.add_option('-b', '--building',
-                 action = 'store',
-                 dest = 'building',
-                 default = 'dd' )
+                 action='store',
+                 dest='building',
+                 default=None)
+
+    p.add_option('-i', '--incremental',
+                 action='store_true',
+                 dest='incremental',
+                 default=False,
+                 help="commit every change immediately instead of batching")
 
     p.add_option('-n', '--dry-run',
-                      action = 'store_true',
-                      dest = 'dry_run',
-                      default = False,
-                      help = "no commit (for testing, default=False)")
+                 action='store_true',
+                 dest='dry_run',
+                 default=False,
+                 help="no commit (for testing, default=False)")
     opts, args = p.parse_args()
 
     dsdb = DsdbConnection()
@@ -265,16 +354,19 @@ def main(*args, **kw):
                     format='%(asctime)s %(levelname)-6s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
 
-    nr = NetRefresher(dsdb, aqdb.Session(),
+    session = aqdb.Session()
+    nr = NetRefresher(dsdb, session,
                       bldg=opts.building,
-                      #keep logic stated in postive language (readability)
-                      commit = not(opts.dry_run))
+                      incremental=opts.incremental,
+                      dryrun=opts.dry_run)
     nr.refresh()
 
-    if opts.verbose < 2:
-        #really verbose runs don't need reporting
-        nr.report.display()
+    if opts.dry_run:
+        session.rollback()
+    else:
+        session.commit()
 
+    # Raise on nr.errors?
 
 if __name__ == '__main__':
     main(sys.argv)
