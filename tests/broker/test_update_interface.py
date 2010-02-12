@@ -86,13 +86,13 @@ class TestUpdateInterface(TestBrokerCommand):
         self.searchoutput(out,
                           r'"cards/nic/eth0" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*\);'
-                          % (self.net.unknown[0].usable[11].mac.upper()),
+                          % self.net.unknown[0].usable[11].mac,
                           command)
         self.searchoutput(out,
                           r'"cards/nic/eth1" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*'
                           r'"boot", true,\s*\);'
-                          % (self.net.unknown[0].usable[12].mac.upper()),
+                          % self.net.unknown[0].usable[12].mac,
                           command)
 
 

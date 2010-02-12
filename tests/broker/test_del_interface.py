@@ -65,12 +65,12 @@ class TestDelInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out,
                         """"cards/nic/eth0/hwdelr" = "%s";""" %
-                        self.net.unknown[0].usable[2].mac.upper(),
+                        self.net.unknown[0].usable[2].mac,
                         command)
         self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
         self.matchclean(out,
                         """"cards/nic/eth1/hwdelr" = "%s";""" %
-                        self.net.unknown[0].usable[3].mac.upper(),
+                        self.net.unknown[0].usable[3].mac,
                         command)
         self.matchclean(out, """"cards/nic/eth1/boot" = true;""", command)
 

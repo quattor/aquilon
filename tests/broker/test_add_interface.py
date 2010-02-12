@@ -72,12 +72,12 @@ class TestAddInterface(TestBrokerCommand):
                           r'"cards/nic/eth0" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*'
                           r'"boot", true,\s*\);'
-                          % (self.net.unknown[0].usable[0].mac.upper()),
+                          % self.net.unknown[0].usable[0].mac,
                           command)
         self.searchoutput(out,
                           r'"cards/nic/eth1" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*\);'
-                          % (self.net.unknown[0].usable[1].mac.upper()),
+                          % self.net.unknown[0].usable[1].mac,
                           command)
 
     def testaddut3c1n3eth0(self):
@@ -130,12 +130,12 @@ class TestAddInterface(TestBrokerCommand):
                           r'"cards/nic/eth0" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*'
                           r'"boot", true,\s*\);'
-                          % (self.net.unknown[0].usable[2].mac.upper()),
+                          % self.net.unknown[0].usable[2].mac,
                           command)
         self.searchoutput(out,
                           r'"cards/nic/eth1" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*\);'
-                          % (self.net.unknown[0].usable[3].mac.upper()),
+                          % self.net.unknown[0].usable[3].mac,
                           command)
         self.searchoutput(out,
                           r'"console/bmc" = nlist\(\s*'
@@ -183,7 +183,7 @@ class TestAddInterface(TestBrokerCommand):
                           r'"cards/nic/eth0" = nlist\(\s*'
                           r'"hwaddr", "%s",\s*'
                           r'"boot", true,\s*\);'
-                          % (self.net.unknown[0].usable[5].mac.upper()),
+                          % self.net.unknown[0].usable[5].mac,
                           command)
 
     def testaddinterfaceut3c5(self):
