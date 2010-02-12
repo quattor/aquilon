@@ -56,7 +56,7 @@ class CommandAddDomain(BrokerCommand):
         # For now, succeed without error if the domain already exists.
         dbdomain = session.query(Domain).filter_by(name=domain).first()
         if not dbdomain:
-            compiler = self.config.get("broker", "domain_default_panc")
+            compiler = self.config.get("panc", "pan_compiler")
             dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler)
             session.add(dbdomain)
             session.flush()

@@ -109,6 +109,7 @@ class TemplateDomain(object):
                 except OSError, e:
                     raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
 
+        # FIXME: Take into account clusters...
         if (only):
             objectlist = [ only ]
         else:
@@ -127,12 +128,12 @@ class TemplateDomain(object):
         args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
         args.append("-Dpanc.jar=%s" % self.domain.compiler)
         args.append("-Dpanc.formatter=%s" %
-                    config.get("broker", "panc_formatter"))
+                    config.get("panc", "formatter"))
         args.append("-Ddomain=%s" % self.domain.name)
         args.append("-Ddistributed.profiles=%s" %
                     config.get("broker", "profilesdir"))
         args.append("-Dpanc.batch.size=%s" %
-                    config.get("broker", "panc_batch_size"))
+                    config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
                     config.get("broker", "ant_contrib_jar"))
         if (only):
@@ -147,8 +148,7 @@ class TemplateDomain(object):
         out = ''
         try:
             if not locked:
-                # FIXME: The git workflow branch has a more sophisticated
-                # notion of objectlist... revisit this in that branch.
+                # FIXME: Create a key based on the objectlist.
                 key = CompileKey(domain=self.domain.name, logger=self.logger)
                 lock_queue.acquire(key)
             self.logger.info("starting compile")

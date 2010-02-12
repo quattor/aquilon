@@ -120,7 +120,6 @@ swrepdir = %(quattordir)s/swrep
 git_path = /ms/dist/fsf/PROJ/git/1.5.4.2/bin
 git = %(git_path)s/git
 dsdb = /ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb
-domain_default_panc = /ms/dist/elfms/PROJ/panc/prod/lib/panc.jar
 ant_contrib_jar = /ms/dist/msjava/PROJ/ant-contrib/1.0b2/common/lib/ant-contrib.jar
 javadir = /ms/dist/msjava/PROJ/sunjdk/1.6.0_14/bin
 knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
@@ -136,8 +135,6 @@ CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
 aurora_host_domain = ny-prod
 windows_host_domain = ny-prod
-panc_batch_size = 1000
-panc_formatter = pan
 authorization_mailgroup = aqd-eng@morganstanley.com
 esx_cluster_max_members_default = 8
 esx_cluster_vm_to_host_ratio = 16:1
@@ -153,6 +150,17 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 # The knc daemon can be run by the broker for development purposes.
 # Will default to True until we migrate to a new configuration in prod.
 run_knc = True
+
+[panc]
+default_version = prod
+version = %(default_version)s
+# The update_domain command expects to be able to read this value
+# in raw mode and set the version variable itself.
+pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
+# Number of templates to cache in memory during compiles
+batch_size = 1000
+# Option passed to panc the output format that it uses
+formatter = pan
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
