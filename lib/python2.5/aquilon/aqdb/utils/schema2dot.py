@@ -52,12 +52,12 @@ if not sys.modules.has_key('pil'):
     ms.version.addpkg('pil','1.1.6')
 from PIL import Image
 
-if not sys.modules.has_key('ms.modulecmd'):
-    ms.version.addpkg("ms.modulecmd", "1.0.0")
-from ms.modulecmd import Modulecmd
+#if not sys.modules.has_key('ms.modulecmd'):
+#    ms.version.addpkg("ms.modulecmd", "1.0.0")
+import ms.modulecmd
 
-m = Modulecmd()
-m.load('fsf/graphviz/2.6')
+#m = Modulecmd()
+ms.modulecmd.load('fsf/graphviz/2.6')
 
 #TODO:put this in the module itself, not here
 _LIBTOOL_PATH = '/ms/dist/fsf/PROJ/libtool/1.5.18/lib'

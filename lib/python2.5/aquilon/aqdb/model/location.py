@@ -26,19 +26,21 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" The Location structures represent  """
+""" How we represent location data in Aquilon """
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
+from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint, text)
 
-from sqlalchemy.orm import deferred, relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session
 
 from aquilon.aqdb.model import Base
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr
+
 
 class Location(Base):
+    """ How we represent location data in Aquilon """
     __tablename__ = 'location'
 
     id = Column(Integer, Sequence('location_id_seq'), primary_key=True)
@@ -52,86 +54,92 @@ class Location(Base):
 
     location_type = Column(AqStr(32), nullable=False)
 
-    #location_type_id = Column(Integer, ForeignKey(
-    #    'location_type.id', ondelete='CASCADE',
-    #    name='sli_loc_typ__fk'), nullable=False)
-
     fullname = Column(String(255), nullable=False)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
 
-    __mapper_args__ = {'polymorphic_on' : location_type}
+    comments = Column(String(255), nullable=True)
 
-    def get_parents(loc):
-        pl=[]
-        p_node=loc.parent
+    __mapper_args__ = {'polymorphic_on': location_type}
+
+    def get_parents(self):
+        pl = []
+        p_node = self.parent
         if not p_node:
             return pl
         while p_node.parent is not None and p_node.parent != p_node:
             pl.append(p_node)
-            p_node=p_node.parent
+            p_node = p_node.parent
         pl.append(p_node)
         pl.reverse()
         return pl
 
-    def get_p_dict(loc):
-        d={}
-        p_node=loc
+    def get_p_dict(self):
+        d = {}
+        p_node = self
         while p_node.parent is not None and p_node.parent != p_node:
-            d[str(p_node.location_type)]=p_node
-            p_node=p_node.parent
+            d[str(p_node.location_type)] = p_node
+            p_node = p_node.parent
         return d
 
-    def _parents(self):
+    @property
+    def parents(self):
         return self.get_parents()
-    parents = property(_parents)
 
-    def _p_dict(self):
+    @property
+    def p_dict(self):
         return self.get_p_dict()
-    p_dict = property(_p_dict)
 
-    def _hub(self):
+    @property
+    def hub(self):
         return self.p_dict.get('hub', None)
-    hub = property(_hub)
 
-    def _continent(self):
+    @property
+    def continent(self):
         return self.p_dict.get('continent', None)
-    continent=property(_continent)
 
-    def _country(self):
+    @property
+    def country(self):
         return self.p_dict.get('country', None)
-    country = property(_country)
 
-    def _campus(self):
+    @property
+    def campus(self):
         return self.p_dict.get('campus', None)
-    campus = property(_campus)
 
-    def _city(self):
+    @property
+    def city(self):
         return self.p_dict.get('city', None)
-    city = property(_city)
 
-    def _building(self):
+    @property
+    def building(self):
         return self.p_dict.get('building', None)
-    building = property(_building)
 
-    def _room(self):
+    @property
+    def room(self):
         return self.p_dict.get('room', None)
-    room = property(_room)
 
-    def _rack(self):
+    @property
+    def rack(self):
         return self.p_dict.get('rack', None)
-    rack = property(_rack)
 
-    def _chassis(self):
+    @property
+    def chassis(self):
         return self.p_dict.get('chassis', None)
-    chassis = property(_chassis)
 
-    def append(self,node):
+    @property
+    def append(self, node):
         if isinstance(node, Location):
             node.parent = self
             self.sublocations[node] = node
+
+    @property
+    def children(self):
+        s = text("""select * from location
+                    where id != %d
+                    connect by parent_id = prior id
+                    start with id = %d""" % (self.id, self.id))
+
+        return object_session(self).query(Location).from_statement(s).all()
 
     def sysloc(self):
         components = ['building', 'city', 'continent']
@@ -140,21 +148,11 @@ class Location(Base):
                 return None
         return str('.'.join([str(self.p_dict[item]) for item in components]))
 
-    def _children(self):
-        s = text("""select * from location
-                    where id != %d
-                    connect by parent_id = prior id
-                    start with id = %d"""%(self.id,self.id))
-
-        return object_session(self).query(Location).from_statement(s).all()
-
-    children = property(_children)
-
-    def typed_children(self,typ):
+    def typed_children(self, typ):
         s = text("""select * from location
                     where location_type = '%s'
                     connect by parent_id = prior id
-                    start with id = %d"""%(typ, self.id))
+                    start with id = %d""" % (typ, self.id))
 
         return object_session(self).query(Location).from_statement(s).all()
 
@@ -171,10 +169,5 @@ location.primary_key.name = 'location_pk'
 location.append_constraint(
     UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
-Location.sublocations = relation('Location',
-                                 backref=backref('parent',
-                                                 remote_side=[location.c.id],))
-
-table = location
-
-
+Location.sublocations = relation('Location', backref=backref(
+                                    'parent', remote_side=[location.c.id]))

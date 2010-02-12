@@ -39,12 +39,12 @@ import utils
 utils.load_classpath()
 
 from aquilon.config import Config
-from ms.modulecmd import Modulecmd
+import ms.modulecmd
 
 config = Config()
-m = Modulecmd()
+
 if config.has_option("database", "module"):
-    m.load(config.get("database", "module"))
+    ms.modulecmd.load(config.get("database", "module"))
 
 from aquilon.aqdb.model import *
 import aquilon.aqdb.dsdb as dsdb_
@@ -137,6 +137,9 @@ def main(*args, **kw):
 
         kwargs['dsdb'] = dsdb_.DsdbConnection()
 
+    #Create all tables upfront
+    Base.metadata.create_all(checkfirst=True)
+
     # Location doesn't work with sorted tables (only FK to parent, not to
     # its dependent parent location type. Hacking it for now with a list.
     # These don't change a lot, and we'll go to a single table inheritance
@@ -149,7 +152,6 @@ def main(*args, **kw):
             log.error('Failed to import %s\n' % (module_name, str(e)))
             sys.exit(9)
 
-        mod.table.create(checkfirst=True)
         if hasattr(mod, 'populate') and opts.populate:
             #log.debug('populating %s' % tbl.name)
             mod.populate(s, **kwargs)
@@ -161,7 +163,6 @@ def main(*args, **kw):
         if tbl.name in ordered_locations:
             continue
 
-        tbl.create(checkfirst=True)
         if hasattr(tbl, 'populate') and opts.populate:
             #log.debug('populating %s' % tbl.name)
             tbl.populate(s, **kwargs)

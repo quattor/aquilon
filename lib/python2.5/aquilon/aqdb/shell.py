@@ -44,12 +44,12 @@ import aquilon.aqdb.depends
 import argparse
 
 from aquilon.config import Config
-from ms.modulecmd import Modulecmd
+import ms.modulecmd
 
 config = Config()
-m = Modulecmd()
+#m = Modulecmd()
 if config.has_option("database", "module"):
-    m.load(config.get("database", "module"))
+    ms.modulecmd.load(config.get("database", "module"))
 
 from aquilon.aqdb.model import *
 from aquilon.aqdb.dsdb import *
