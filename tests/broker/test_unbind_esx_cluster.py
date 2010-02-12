@@ -90,7 +90,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
 
     def testfailservicemissingcluster(self):
         command = ["unbind_esx_cluster", "--cluster", "cluster-does-not-exist",
-                   "--service=esx_management", "--instance=ut.a"]
+                   "--service=esx_management_server", "--instance=ut.a"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "esx cluster 'cluster-does-not-exist' not found.",
@@ -109,17 +109,18 @@ class TestUnbindESXCluster(TestBrokerCommand):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         m = self.searchoutput(out,
-                              r'Member Alignment: Service esx_management '
-                              r'Instance (\S+)',
+                              r'Member Alignment: Service '
+                              r'esx_management_server Instance (\S+)',
                               command)
         instance = m.group(1)
 
         command = ["unbind_esx_cluster", "--cluster=utecl1",
-                   "--service=esx_management", "--instance=%s" % instance]
+                   "--service=esx_management_server",
+                   "--instance=%s" % instance]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot remove cluster service instance binding for "
-                         "esx cluster aligned service esx_management.",
+                         "esx cluster aligned service esx_management_server.",
                          command)
 
     def testunbindservice(self):

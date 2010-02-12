@@ -117,7 +117,7 @@ class TestBindESXCluster(TestBrokerCommand):
 
     def testfailbindservicemissingcluster(self):
         command = ["bind_esx_cluster", "--cluster=cluster-does-not-exist",
-                   "--service=esx_management", "--instance=ut.a"]
+                   "--service=esx_management_server", "--instance=ut.a"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "esx cluster 'cluster-does-not-exist' not found.",
@@ -128,12 +128,12 @@ class TestBindESXCluster(TestBrokerCommand):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         m = self.searchoutput(out,
-                              r'Member Alignment: Service esx_management '
-                              r'Instance (\S+)',
+                              r'Member Alignment: Service '
+                              r'esx_management_server Instance (\S+)',
                               command)
         next = m.group(1) == 'ut.a' and 'ut.b' or 'ut.a'
         command = ["bind_esx_cluster", "--cluster=utecl1",
-                   "--service=esx_management", "--instance=%s" % next]
+                   "--service=esx_management_server", "--instance=%s" % next]
         out = self.badrequesttest(command)
         self.matchoutput(out, "use unbind to clear first or rebind to force",
                          command)
@@ -151,20 +151,20 @@ class TestBindESXCluster(TestBrokerCommand):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         m = self.searchoutput(out,
-                              r'Member Alignment: Service esx_management '
-                              r'Instance (\S+)',
+                              r'Member Alignment: Service '
+                              r'esx_management_server Instance (\S+)',
                               command)
         next = m.group(1) == 'ut.a' and 'ut.b' or 'ut.a'
 
         command = ["rebind_esx_cluster", "--cluster=utecl1",
-                   "--service=esx_management", "--instance=%s" % next]
+                   "--service=esx_management_server", "--instance=%s" % next]
         # Do we need any checks on this output?
         (out, err) = self.successtest(command)
 
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Member Alignment: Service esx_management "
+                         "Member Alignment: Service esx_management_server "
                          "Instance %s" % next,
                          command)
 
@@ -175,7 +175,7 @@ class TestBindESXCluster(TestBrokerCommand):
         self.failUnless(members, "No hosts in output of %s." % command)
 
         command = ["search_host", "--cluster=utecl1",
-                   "--service=esx_management", "--instance=%s" % next]
+                   "--service=esx_management_server", "--instance=%s" % next]
         out = self.commandtest(command)
         aligned = out.splitlines()
         aligned.sort()

@@ -44,8 +44,9 @@ from brokertest import TestBrokerCommand
 class TestAddESXClusterAlignedService(TestBrokerCommand):
 
     def testaddesxmanagement(self):
-        command = "add esx cluster aligned service --service esx_management"
-        self.noouttest(command.split(" "))
+        command = ["add_esx_cluster_aligned_service",
+                   "--service=esx_management_server"]
+        self.noouttest(command)
 
     def testfailmissingservice(self):
         command = ["add_esx_cluster_aligned_service",
@@ -60,13 +61,15 @@ class TestAddESXClusterAlignedService(TestBrokerCommand):
         command = "show cluster_type --cluster_type esx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Type: esx", command)
-        self.matchoutput(out, "Aligned Service: esx_management", command)
+        self.matchoutput(out, "Aligned Service: esx_management_server",
+                         command)
 
     def testverifyshowclustertypeall(self):
         command = "show cluster_type --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Type: esx", command)
-        self.matchoutput(out, "Aligned Service: esx_management", command)
+        self.matchoutput(out, "Aligned Service: esx_management_server",
+                         command)
 
     def testfailunknownclustertype(self):
         command = ["show_cluster_type",

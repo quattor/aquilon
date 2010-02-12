@@ -365,30 +365,19 @@ class TestReconfigure(TestBrokerCommand):
         # evh[234] should be bound to utecl1
         command = "show esx cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        m = re.search(r'Member Alignment: Service esx_management '
+        m = re.search(r'Member Alignment: Service esx_management_server '
                        'Instance (\S+)', out)
         self.failUnless(m, "Aligned instance not found in output:\n%s" % out)
         instance = m.group(1)
         # A better test might be to search for all hosts in the cluster
         # and make sure they're all in this list.  That search command
         # does not exist yet, though.
-        command = ["search_host", "--service=esx_management",
+        command = ["search_host", "--service=esx_management_server",
                    "--instance=%s" % instance]
         out = self.commandtest(command)
         self.matchoutput(out, "evh2.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh3.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh4.aqd-unittest.ms.com", command)
-
-    def testreconfigureunboundvmhosts(self):
-        # None of these should change since they have not been bound.
-        # This test isn't really necessary...
-        for i in range(6, 10):
-            command = ["reconfigure",
-                       "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "0/1 object template", command)
-            self.matchclean(err, "removing binding", command)
-            self.matchclean(err, "adding binding", command)
 
     def testfailchangeclustermemberpersonality(self):
         command = ["reconfigure", "--hostname", "evh1.aqd-unittest.ms.com",

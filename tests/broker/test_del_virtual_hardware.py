@@ -89,7 +89,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.searchoutput(out,
-                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
                           command)
 

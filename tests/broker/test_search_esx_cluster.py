@@ -201,7 +201,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
 
     def testserviceavailable(self):
-        command = "search esx cluster --service esx_management"
+        command = "search esx cluster --service esx_management_server"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -217,20 +217,21 @@ class TestSearchESXCluster(TestBrokerCommand):
                          command)
 
     def testserviceinstanceavailable(self):
-        command = "search esx cluster --service esx_management --instance ut.a"
-        out = self.commandtest(command.split(" "))
+        command = ["search_esx_cluster", "--service=esx_management_server",
+                   "--instance=ut.a"]
+        out = self.commandtest(command)
         # Which clusters are bound to this particular instance is
         # non-deterministic, but one of them should be.
         self.matchoutput(out, "utecl", command)
 
     def testserviceinstanceunavailable(self):
-        command = "search esx cluster --service esx_management " \
+        command = "search esx cluster --service esx_management_server " \
                   "--instance service-instance-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
                          "ServiceInstance with name of "
                          "'service-instance-does-not-exist' and "
-                         "Service esx_management not found.",
+                         "Service esx_management_server not found.",
                          command)
 
     def testinstanceavailable(self):

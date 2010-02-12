@@ -44,20 +44,21 @@ from brokertest import TestBrokerCommand
 class TestDelESXClusterAlignedService(TestBrokerCommand):
 
     def testdelesxmanagement(self):
-        command = "del esx cluster aligned service --service esx_management"
-        self.noouttest(command.split(" "))
+        command = ["del_esx_cluster_aligned_service",
+                   "--service=esx_management_server"]
+        self.noouttest(command)
 
     def testverifydelesxmanagement(self):
         command = "show cluster_type --cluster_type esx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Type: esx", command)
-        self.matchclean(out, "esx_management", command)
+        self.matchclean(out, "esx_management_server", command)
 
     def testverifyshowclustertypeall(self):
         command = "show cluster_type --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Type: esx", command)
-        self.matchclean(out, "esx_management", command)
+        self.matchclean(out, "esx_management_server", command)
 
     def testfailmissingservice(self):
         command = ["del_esx_cluster_aligned_service",

@@ -55,8 +55,8 @@ class TestBindClientConstraints(TestBrokerCommand):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         m = self.searchoutput(out,
-                              r'Member Alignment: Service esx_management '
-                              r'Instance (\S+)',
+                              r'Member Alignment: Service '
+                              r'esx_management_server Instance (\S+)',
                               command)
         instance = m.group(1)
         # Grab a host from the cluster
@@ -66,17 +66,18 @@ class TestBindClientConstraints(TestBrokerCommand):
         host = m.group(1)
         # Sanity check that the host is currently aligned.
         command = ["search_host", "--host=%s" % host,
-                   "--service=esx_management", "--instance=%s" % instance]
+                   "--service=esx_management_server",
+                   "--instance=%s" % instance]
         out = self.commandtest(command)
         self.matchoutput(out, host, command)
         # Now try to swap.
         next = instance == 'ut.a' and 'ut.b' or 'ut.a'
         command = ["bind_client", "--hostname=%s" % host,
-                   "--service=esx_management", "--instance=%s" % next]
+                   "--service=esx_management_server", "--instance=%s" % next]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "The esx cluster utecl1 is set to use "
-                         "service esx_management instance %s" % instance,
+                         "The esx cluster utecl1 is set to use service "
+                         "esx_management_server instance %s" % instance,
                          command)
 
 

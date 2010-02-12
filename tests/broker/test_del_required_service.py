@@ -119,10 +119,10 @@ class TestDelRequiredService(TestBrokerCommand):
         self.matchclean(out, "Service: ntp", command)
 
     def testdelrequiredesx(self):
-        command = ["del_required_service", "--service=esx_license",
+        command = ["del_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
-        command = ["del_required_service", "--service=esx_management",
+        command = ["del_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 
@@ -130,8 +130,8 @@ class TestDelRequiredService(TestBrokerCommand):
         command = ["show_personality",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.commandtest(command)
-        self.matchclean(out, "Service: esx_license", command)
-        self.matchclean(out, "Service: esx_management", command)
+        self.matchclean(out, "Service: esx_management_server", command)
+        self.matchclean(out, "Service: vmseasoning", command)
 
 
 if __name__=='__main__':

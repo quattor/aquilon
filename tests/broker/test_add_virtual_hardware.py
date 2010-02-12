@@ -213,7 +213,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          r"'machine/americas/ut/None/evm9'\),\s*\),",
                          command)
         self.searchoutput(out,
-                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
                           command)
 

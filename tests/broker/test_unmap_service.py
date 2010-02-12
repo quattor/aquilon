@@ -146,19 +146,19 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapesx(self):
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "esx_license", "--instance", "ut.a",
+                        "--service", "esx_management_server",
+                        "--instance", "ut.a", "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "esx_management_server",
+                        "--instance", "ut.b", "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
                         "--personality", "esx_server"])
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "esx_license", "--instance", "ut.b",
-                        "--archetype", "vmhost",
-                        "--personality", "esx_server"])
-        self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "esx_management", "--instance", "ut.a",
-                        "--archetype", "vmhost",
-                        "--personality", "esx_server"])
-        self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "esx_management", "--instance", "ut.b",
+                        "--service", "vmseasoning", "--instance", "pepper",
                         "--archetype", "vmhost",
                         "--personality", "esx_server"])
 
@@ -166,12 +166,12 @@ class TestUnmapService(TestBrokerCommand):
         command = ["show_map", "--archetype=vmhost",
                    "--personality=esx_server", "--building=ut"]
         out = self.commandtest(command)
-        self.matchclean(out, "Service: esx_license Instance: ut.a ", command)
-        self.matchclean(out, "Service: esx_license Instance: ut.b ", command)
-        self.matchclean(out, "Service: esx_management Instance: ut.a ",
+        self.matchclean(out, "Service: esx_management_server Instance: ut.a ",
                         command)
-        self.matchclean(out, "Service: esx_management Instance: ut.b ",
+        self.matchclean(out, "Service: esx_management_server Instance: ut.b ",
                         command)
+        self.matchclean(out, "Service: vmseasoning Instance: salt", command)
+        self.matchclean(out, "Service: vmseasoning Instance: pepper", command)
 
     def testunmapwindowsfail(self):
         command = ["unmap", "service", "--organization", "ms",

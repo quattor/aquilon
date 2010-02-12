@@ -167,6 +167,38 @@ class TestPutDomain(TestBrokerCommand):
                          "added personality utpersonality"],
                          cwd=os.path.join(self.scratchdir, "unittest"))
 
+    def testaddesxserverpersonality(self):
+        personalitydir = os.path.join(self.scratchdir, "unittest", "vmhost",
+                                      "personality", "esx_server")
+        if not os.path.exists(personalitydir):
+            os.makedirs(personalitydir)
+        template = os.path.join(personalitydir, "espinfo.tpl")
+        with open(template, 'w') as f:
+            f.writelines(
+                """structure template personality/esx_server/espinfo;
+
+"description" = "Virtualisation Host running Server VMs";
+"class" = "INFRASTRUCTURE";
+"infrafunction" = "EUC-VMWARE";
+"systemgrn" = list("grn:/ms/ei/windows/VMWare/ESX");
+"function" = "production";
+"users" = list("IT / TECHNOLOGY");
+                """)
+        self.gitcommand(["add", "espinfo.tpl"], cwd=personalitydir)
+        template = os.path.join(personalitydir, "windows.tpl")
+        with open(template, 'w') as f:
+            f.writelines(
+                """structure template personality/esx_server/windows;
+
+"windows" = list(
+                nlist("day", "Fri", "start", "23:00", "duration", 48),
+);
+                """)
+        self.gitcommand(["add", "windows.tpl"], cwd=personalitydir)
+        self.gitcommand(["commit", "-a", "-m",
+                         "added personality esx_server"],
+                         cwd=os.path.join(self.scratchdir, "unittest"))
+
     def testaddutmedium(self):
         modeldir = os.path.join(self.scratchdir, "unittest", "hardware",
                                 "machine", "utvendor")

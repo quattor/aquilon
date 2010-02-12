@@ -222,19 +222,19 @@ class TestMapService(TestBrokerCommand):
 
     def testmapesx(self):
         self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "esx_license", "--instance", "ut.a",
+                        "--service", "esx_management_server",
+                        "--instance", "ut.a", "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "esx_management_server",
+                        "--instance", "ut.b", "--archetype", "vmhost",
+                        "--personality", "esx_server"])
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
                         "--personality", "esx_server"])
         self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "esx_license", "--instance", "ut.b",
-                        "--archetype", "vmhost",
-                        "--personality", "esx_server"])
-        self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "esx_management", "--instance", "ut.a",
-                        "--archetype", "vmhost",
-                        "--personality", "esx_server"])
-        self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "esx_management", "--instance", "ut.b",
+                        "--service", "vmseasoning", "--instance", "pepper",
                         "--archetype", "vmhost",
                         "--personality", "esx_server"])
 
@@ -244,32 +244,23 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: vmhost Personality: esx_server "
-                         "Service: esx_license Instance: ut.a "
+                         "Service: esx_management_server Instance: ut.a "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: vmhost Personality: esx_server "
-                         "Service: esx_license Instance: ut.b "
+                         "Service: esx_management_server Instance: ut.b "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: vmhost Personality: esx_server "
-                         "Service: esx_management Instance: ut.a "
+                         "Service: vmseasoning Instance: salt "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: vmhost Personality: esx_server "
-                         "Service: esx_management Instance: ut.b "
+                         "Service: vmseasoning Instance: pepper "
                          "Map: Building ut",
-                         command)
-
-    def testverifyshowservicemappersonality(self):
-        command = ["show_service", "--service=esx_license", "--instance=ut.a"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Service: esx_license Instance: ut.a", command)
-        self.matchoutput(out,
-                         "Personality Service Map: Building ut "
-                         "(Archetype vmhost Personality esx_server)",
                          command)
 
 

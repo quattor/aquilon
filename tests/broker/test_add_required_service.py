@@ -128,10 +128,10 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchclean(out, "Service: afs", command)
 
     def testaddrequiredesx(self):
-        command = ["add_required_service", "--service=esx_license",
+        command = ["add_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
-        command = ["add_required_service", "--service=esx_management",
+        command = ["add_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 
@@ -139,8 +139,8 @@ class TestAddRequiredService(TestBrokerCommand):
         command = ["show_personality",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Service: esx_license", command)
-        self.matchoutput(out, "Service: esx_management", command)
+        self.matchoutput(out, "Service: esx_management_server", command)
+        self.matchoutput(out, "Service: vmseasoning", command)
 
 
 if __name__=='__main__':

@@ -261,33 +261,33 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: unmapped", command)
 
-    def testaddesxlicense(self):
-        command = "add service --service esx_license --instance ut.a"
-        self.noouttest(command.split(" "))
-        command = "add service --service esx_license --instance ut.b"
-        self.noouttest(command.split(" "))
-
-    def testverifyesxlicense(self):
-        command = "show service --service esx_license"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: esx_license", command)
-        self.matchoutput(out, "Service: esx_license Instance: ut.a", command)
-        self.matchoutput(out, "Service: esx_license Instance: ut.b", command)
-
     def testaddesxmanagement(self):
-        command = "add service --service esx_management --instance ut.a"
+        command = "add service --service esx_management_server --instance ut.a"
         self.noouttest(command.split(" "))
-        command = "add service --service esx_management --instance ut.b"
+        command = "add service --service esx_management_server --instance ut.b"
         self.noouttest(command.split(" "))
 
     def testverifyesxmanagement(self):
-        command = "show service --service esx_management"
+        command = "show service --service esx_management_server"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: esx_management", command)
-        self.matchoutput(out, "Service: esx_management Instance: ut.a",
+        self.matchoutput(out, "Service: esx_management_server", command)
+        self.matchoutput(out, "Service: esx_management_server Instance: ut.a",
                          command)
-        self.matchoutput(out, "Service: esx_management Instance: ut.b",
+        self.matchoutput(out, "Service: esx_management_server Instance: ut.b",
                          command)
+
+    def testaddvmseasoning(self):
+        command = "add service --service vmseasoning --instance salt"
+        self.noouttest(command.split(" "))
+        command = "add service --service vmseasoning --instance pepper"
+        self.noouttest(command.split(" "))
+
+    def testverifyvmseasoning(self):
+        command = "show service --service vmseasoning"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: vmseasoning", command)
+        self.matchoutput(out, "Service: vmseasoning Instance: salt", command)
+        self.matchoutput(out, "Service: vmseasoning Instance: pepper", command)
 
     def testaddnasshares(self):
         # Creates shares test_share_1 through test_share_9

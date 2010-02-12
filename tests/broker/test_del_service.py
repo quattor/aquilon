@@ -130,28 +130,28 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: unmapped Instance: instance1", command)
 
-    def testdelesxlicense(self):
-        command = "del service --service esx_license --instance ut.a"
-        self.noouttest(command.split(" "))
-        command = "del service --service esx_license --instance ut.b"
-        self.noouttest(command.split(" "))
-        command = "del service --service esx_license"
-        self.noouttest(command.split(" "))
-
-    def testverifydelesxlicense(self):
-        command = "show service --service esx_license"
-        self.notfoundtest(command.split(" "))
-
     def testdelesxmanagement(self):
-        command = "del service --service esx_management --instance ut.a"
+        command = "del service --service esx_management_server --instance ut.a"
         self.noouttest(command.split(" "))
-        command = "del service --service esx_management --instance ut.b"
+        command = "del service --service esx_management_server --instance ut.b"
         self.noouttest(command.split(" "))
-        command = "del service --service esx_management"
+        command = "del service --service esx_management_server"
         self.noouttest(command.split(" "))
 
     def testverifydelesxmanagement(self):
-        command = "show service --service esx_management"
+        command = "show service --service esx_management_server"
+        self.notfoundtest(command.split(" "))
+
+    def testdelvmseasoning(self):
+        command = "del service --service vmseasoning --instance salt"
+        self.noouttest(command.split(" "))
+        command = "del service --service vmseasoning --instance pepper"
+        self.noouttest(command.split(" "))
+        command = "del service --service vmseasoning"
+        self.noouttest(command.split(" "))
+
+    def testverifydelvmseasoning(self):
+        command = "show service --service vmseasoning"
         self.notfoundtest(command.split(" "))
 
     def testdelnasshares(self):

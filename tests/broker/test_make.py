@@ -46,14 +46,10 @@ from brokertest import TestBrokerCommand
 class TestMake(TestBrokerCommand):
 
     def testmakevmhosts(self):
-        for i in range(1, 10):
+        for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                        "--os", "esxi/4.0.0", "--buildstatus", "build"]
             (out, err) = self.successtest(command)
-            self.matchoutput(err,
-                             "evh%s.aqd-unittest.ms.com adding binding for "
-                             "service dns instance nyinfratest" % i,
-                             command)
             self.matchclean(err, "removing binding", command)
 
             self.assert_(os.path.exists(os.path.join(

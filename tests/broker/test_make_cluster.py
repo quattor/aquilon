@@ -50,7 +50,7 @@ class TestMakeCluster(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "esx cluster utecl1 adding binding for "
-                         "service esx_management",
+                         "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
 
@@ -72,7 +72,7 @@ class TestMakeCluster(TestBrokerCommand):
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.searchoutput(out,
-                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
                           command)
 
@@ -81,7 +81,7 @@ class TestMakeCluster(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "esx cluster utecl2 adding binding for "
-                         "service esx_management",
+                         "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
 
@@ -103,7 +103,7 @@ class TestMakeCluster(TestBrokerCommand):
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.searchoutput(out,
-                          r"include { 'service/esx_management/ut.[ab]/"
+                          r"include { 'service/esx_management_server/ut.[ab]/"
                           r"client/config' };",
                           command)
 
