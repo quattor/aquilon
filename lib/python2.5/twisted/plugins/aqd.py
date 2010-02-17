@@ -32,6 +32,7 @@ import os
 import sys
 import logging
 from logging import Handler
+from signal import SIGTERM, SIGKILL
 
 # This is done by the wrapper script.
 #import aquilon.server.depends
@@ -43,7 +44,7 @@ from twisted.plugin import IPlugin
 from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
 from twisted.runner.procmon import ProcessMonitor
-from twisted.internet import reactor
+from twisted.internet import reactor, process
 from ms.modulecmd import Modulecmd, ModulecmdExecError
 
 from aquilon.config import Config
@@ -83,6 +84,39 @@ def _parseUNIX(factory, address, mode='666', backlog=50, lockfile=True):
     return ((address, factory), {'backlog': int(backlog),
                                  'wantPID': bool(int(lockfile))})
 strports._funcs["unix"] = _parseUNIX
+
+# Replacement for ProcessMonitor.stopProcess and a helper.  The
+# original does not take into account that (at least in twisted 8.2.0)
+# the callLater method to send SIGKILL
+# will never be called since stopProcess is invoked as a shutdown hook.
+# Taking the opportunity to add some logging.
+def killProcess(name, proc):
+    if not proc.pid:
+        return
+    try:
+        log.msg("Sending SIGKILL to %s [%s]" % (name, proc.pid))
+        proc.signalProcess(SIGKILL)
+    except process.ProcessExitedAlready:
+        pass
+
+def stopProcess(self, name):
+    if not self.protocols.has_key(name):
+        log.msg("No record of %s to stop, ignoring." % name)
+        return
+    proc = self.protocols[name].transport
+    del self.protocols[name]
+    try:
+        log.msg("Sending SIGTERM to %s [%s]" % (name, proc.pid))
+        proc.signalProcess(SIGTERM)
+    except process.ProcessExitedAlready:
+        log.msg("Process %s [%s] marked as exited already" % (name, proc.pid))
+    else:
+        # Hard-wire some actions for the final phase of shutdown,
+        # assuming this method is scheduled to run 'before' 'shutdown'.
+        reactor.addSystemEventTrigger('after', 'shutdown', killProcess,
+                                      name, proc)
+
+ProcessMonitor.stopProcess = stopProcess
 
 
 class AQDMaker(object):
