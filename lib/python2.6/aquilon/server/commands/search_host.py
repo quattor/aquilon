@@ -146,8 +146,6 @@ class CommandSearchHost(BrokerCommand):
             q = q.join(['machine'])
             q = q.filter_by(serial_no=serial)
             q = q.reset_joinpoint()
-        if fullinfo:
-            return q.all()
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster)
             if not dbcluster:
@@ -155,4 +153,6 @@ class CommandSearchHost(BrokerCommand):
             q = q.join('_cluster')
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
+        if fullinfo:
+            return q.all()
         return SimpleSystemList(q.all())

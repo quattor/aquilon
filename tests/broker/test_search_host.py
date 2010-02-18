@@ -367,6 +367,12 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
                          command)
 
+    def testclusterunavailablefull(self):
+        command = "search host --fullinfo --cluster cluster-does-not-exist"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
