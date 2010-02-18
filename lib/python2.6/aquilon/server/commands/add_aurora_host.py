@@ -158,6 +158,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['osversion'] = osversion
         kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
+        kwargs['sandbox'] = None
         kwargs['machine'] = dbmachine.name
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
