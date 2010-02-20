@@ -191,6 +191,7 @@
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="string">mac address of an attached interface</option>
          <option name="serial" type="string">serial number</option>
+         <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
          <optgroup name="search_machine_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>

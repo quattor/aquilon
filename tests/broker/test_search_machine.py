@@ -139,6 +139,13 @@ class TestSearchMachine(TestBrokerCommand):
         # Has a different cpu...
         self.matchclean(out, "ut3c5n10", command)
 
+    def testshare(self):
+        command = ["search_machine", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm1", command)
+        self.matchclean(out, "evm2", command)
+        self.matchclean(out, "evm10", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)

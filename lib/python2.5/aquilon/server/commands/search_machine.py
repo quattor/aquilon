@@ -29,10 +29,13 @@
 """Contains the logic for `aq search machine`."""
 
 
+from sqlalchemy.orm import aliased
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
-from aquilon.aqdb.model import Machine, Vendor, Cpu, Cluster
+from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster,
+                                Service, ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
@@ -42,7 +45,7 @@ class CommandSearchMachine(BrokerCommand):
     required_parameters = []
 
     def render(self, session, name, cpuname, cpuvendor, cpuspeed, cpucount,
-               memory, cluster, fullinfo, **arguments):
+               memory, cluster, share, fullinfo, **arguments):
         q = search_hardware_entity_query(session, Machine, **arguments)
         if name:
             q = q.filter_by(name=name)
@@ -84,8 +87,16 @@ class CommandSearchMachine(BrokerCommand):
             q = q.join('_cluster')
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
+        if share:
+            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
+                                                compel=True)
+            dbshare = ServiceInstance.get_unique(session, name=share,
+                                                 service=nas_disk_share,
+                                                 compel=True)
+            NasAlias = aliased(NasDisk)
+            q = q.join(['disks', (NasAlias, NasAlias.id==Disk.id)])
+            q = q.filter_by(service_instance=dbshare)
+            q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
         return SimpleHardwareEntityList(q.all())
-
-
