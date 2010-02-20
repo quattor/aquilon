@@ -63,6 +63,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
         details.append(indent + "  Maximum Client Count: %s" %
                        max_clients)
         details.append(indent + "  Client Count: %d" % si.client_count)
+        if si.service.name == 'nas_disk_share':
+            details.append(indent + "  Disk Count: %d" % len(si.nas_disks))
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
