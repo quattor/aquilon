@@ -98,5 +98,5 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         try:
             dsdb_runner.add_host(dbinterface)
         except ProcessException, e:
-            raise ArgumentError("Could not add hostname to dsdb: %s" % e)
+            raise ArgumentError("Could not add tor_switch to dsdb: %s" % e)
         return

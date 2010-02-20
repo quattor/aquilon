@@ -29,7 +29,7 @@
 """Contains the logic for `aq add tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
@@ -38,6 +38,7 @@ from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
                                                  describe_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
@@ -46,7 +47,7 @@ class CommandAddTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch", "model"]
 
-    def render(self, session, tor_switch, model,
+    def render(self, session, logger, tor_switch, model,
                rack, building, room, rackid, rackrow, rackcolumn,
                interface, mac, ip,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
@@ -105,5 +106,9 @@ class CommandAddTorSwitch(BrokerCommand):
             session.add(dbinterface)
             session.flush()
 
-            # FIXME: This information will need to go to dsdb.
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_host(dbinterface)
+            except ProcessException, e:
+                raise ArgumentError("Could not add tor_switch to dsdb: %s" % e)
         return
