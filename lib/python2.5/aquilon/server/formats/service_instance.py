@@ -32,6 +32,7 @@
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import ServiceInstance
+from aquilon.server.templates.service import PlenaryInstanceNasDiskShare
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
@@ -87,3 +88,25 @@ class ServiceInstanceListFormatter(ListFormatter):
         return servicelist_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
+
+class Share(object):
+    def __init__(self, dbshare):
+        self.dbshare = dbshare
+
+class ShareFormatter(ObjectFormatter):
+    def format_raw(self, share, indent=""):
+        dbshare = share.dbshare
+        details = [indent + "NAS Disk Share: %s" % dbshare.name]
+        plenary = PlenaryInstanceNasDiskShare(dbshare.service, dbshare)
+        plenary.lookup()
+        details.append(indent + "  Server: %s" % plenary.server)
+        details.append(indent + "  Mountpoint: %s" % plenary.mount)
+        disks = dbshare.nas_disks
+        details.append(indent + "  Disk Count: %d" % len(disks))
+        machines = set([disk.machine for disk in disks])
+        details.append(indent + "  Machine Count: %d" % len(machines))
+        if dbshare.comments:
+            details.append(indent + "  Comments: %s" % dbshare.comments)
+        return "\n".join(details)
+
+ObjectFormatter.handlers[Share] = ShareFormatter()

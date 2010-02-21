@@ -1044,6 +1044,16 @@
       <transport method="get" path="service" />
    </command>
 
+   <command name="show_nas_disk_share">
+      Show information for instances of the nas_disk_share service.
+      <optgroup name="show_share_opts" mandatory="True" fields="any">
+         <option name="share" type="string" conflicts="all">Share name</option>
+         <option name="all" type="boolean" conflicts="share">Select all shares</option>
+      </optgroup>
+      <transport trigger="share" method="get" path="nas_disk_share/%(share)s"/>
+      <transport method="get" path="nas_disk_share" />
+   </command>
+
    <command name="update_service">
       Update the maximum client count for a service or service instance.
 

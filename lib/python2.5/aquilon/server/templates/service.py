@@ -254,8 +254,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
         If the external lookup fails, this can raise a NotFoundException,
         a ProcessException or an IOError
         """
-        with open(self.config.get("broker", "sharedata")) as sharedata:
-            find_storage_data(sharedata, lambda inf: self.check_nas_line(inf))
+        self.lookup()
         if self.server == "":
             # TODO: We should really invoke a realtime-check by running
             # the command defined in the broker config. The output
@@ -266,6 +265,10 @@ class PlenaryInstanceNasDiskShare(Plenary):
                                     self.name)
         lines.append("'server' = '%(server)s';" % self.__dict__)
         lines.append("'mountpoint' = '%(mount)s';" % self.__dict__)
+
+    def lookup(self):
+        with open(self.config.get("broker", "sharedata")) as sharedata:
+            find_storage_data(sharedata, lambda inf: self.check_nas_line(inf))
 
     def check_nas_line(self, inf):
         """

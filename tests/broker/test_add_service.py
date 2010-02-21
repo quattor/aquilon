@@ -302,6 +302,29 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Disk Count: 0", command)
 
+    def testverifyshowshare(self):
+        command = ["show_nas_disk_share", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "Server: lnn30f1", command)
+        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
+                         command)
+        self.matchoutput(out, "Disk Count: 0", command)
+        self.matchoutput(out, "Machine Count: 0", command)
+        self.matchclean(out, "Comments", command)
+        self.matchclean(out, "NAS Disk Share: test_share_2", command)
+
+    def testverifyshowshareall(self):
+        command = ["show_nas_disk_share", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "NAS Disk Share: test_share_2", command)
+        self.matchoutput(out, "Server: lnn30f1", command)
+        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
+                         command)
+        self.matchoutput(out, "Disk Count: 0", command)
+        self.matchoutput(out, "Machine Count: 0", command)
+
     def testcatnasinfo(self):
         command = ["cat", "--nasinfo=test_share_1"]
         out = self.commandtest(command)
