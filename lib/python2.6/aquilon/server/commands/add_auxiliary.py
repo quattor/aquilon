@@ -40,7 +40,7 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Host, Interface, Auxiliary
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
 
 
@@ -117,8 +117,9 @@ class CommandAddAuxiliary(BrokerCommand):
         session.refresh(dbauxiliary)
 
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+        key = plenary_info.get_write_key()
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             plenary_info.write(locked=True)
 
             dsdb_runner = DSDBRunner(logger=logger)
@@ -130,7 +131,7 @@ class CommandAddAuxiliary(BrokerCommand):
             plenary_info.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

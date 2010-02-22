@@ -35,7 +35,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import remove_dir
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.domain import TemplateDomain
 
 
@@ -55,14 +55,15 @@ class CommandDelDomain(BrokerCommand):
                     % dbdomain.name)
         session.delete(dbdomain)
 
+        # Technically we shouldn't need a lock here at all, since
+        # nothing else should be using this domain.
         domain = TemplateDomain(dbdomain, logger=logger)
+        key = CompileKey(domain=dbdomain.name, logger=logger)
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             for dir in domain.directories():
                 remove_dir(dir, logger=logger)
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
-
-

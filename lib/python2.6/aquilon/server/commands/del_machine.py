@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
 
@@ -70,10 +70,12 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
         session.flush()
 
+        key = plenary_machine.get_remove_key()
         if dbcluster:
             plenary_cluster = PlenaryCluster(dbcluster, logger=logger)
+            key = CompileKey.merge([key, plenary_cluster.get_write_key()])
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             plenary_machine.stash()
             if dbcluster:
                 plenary_cluster.write(locked=True)
@@ -84,8 +86,6 @@ class CommandDelMachine(BrokerCommand):
                 plenary_cluster.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
-
-

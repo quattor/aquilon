@@ -29,17 +29,13 @@
 """Contains the logic for `aq refresh network`."""
 
 
-from threading import Lock
-
 from aquilon.exceptions_ import PartialError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.logger import CLIENT_INFO
 from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.dsdb import DsdbConnection
 from aquilon.aqdb.data_sync.net_refresh import NetRefresher
-
-
-refresh_network_lock = Lock()
 
 
 class CommandRefreshNetwork(BrokerCommand):
@@ -48,13 +44,8 @@ class CommandRefreshNetwork(BrokerCommand):
 
     def render(self, session, logger, building, dryrun, incremental,
                **arguments):
-        if building:
-            action = "refresh network for building %s" % building
-        else:
-            action = "refresh all networks"
-        logger.client_info("Acquiring lock to %s", action)
-        refresh_network_lock.acquire()
-        logger.client_info("Lock acquired.")
+        key = SyncKey(data="network", logger=logger)
+        lock_queue.acquire(key)
         try:
             if building:
                 dbbuilding = get_location(session, building=building)
@@ -79,7 +70,6 @@ class CommandRefreshNetwork(BrokerCommand):
             if dryrun:
                 session.rollback()
         finally:
-            logger.client_info("Released lock from %s", action)
-            refresh_network_lock.release()
+            lock_queue.release(key)
 
         return

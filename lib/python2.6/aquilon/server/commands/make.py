@@ -36,71 +36,70 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.aqdb.model import BuildItem, OperatingSystem
 from aquilon.server.templates.domain import TemplateDomain
-from aquilon.server.templates.base import compileLock, compileRelease
-from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
+
 
 class CommandMake(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, archetype, personality,
-               buildstatus, osname, osversion, os, debug, **arguments):
+    def render(self, session, logger, hostname, osname, osversion,
+               archetype, personality, buildstatus, keepbindings, os,
+               debug, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
-        # We grab a template compile lock over this whole operation,
-        # which means that we will wait until any outstanding compiles
-        # have completed before we start modifying files within template
-        # domains.
-        chooser = None
+        # Currently, for the Host to be created it *must* be associated with
+        # a Machine already.  If that ever changes, need to check here and
+        # bail if dbhost.machine does not exist.
+
+        # Need to get all the BuildItem/Service instance objects
+        if personality:
+            arch = archetype
+            if not arch:
+                arch = dbhost.archetype.name
+
+            dbpersonality = get_personality(session, arch, personality)
+            if dbhost.cluster and \
+               dbhost.cluster.personality != dbpersonality:
+                raise ArgumentError("Cannot change personality of host %s "
+                                    "while it is a member of "
+                                    "%s cluster %s" %
+                                    (dbhost.fqdn,
+                                     dbhost.cluster.cluster_type,
+                                     dbhost.cluster.name))
+            dbhost.personality = dbpersonality
+            session.add(dbhost)
+
+        dbos = self.get_os(session, dbhost, osname, osversion, os)
+        if dbos:
+            # Hmm... no cluster constraint here...
+            dbhost.operating_system = dbos
+            session.add(dbhost)
+
+        if not dbhost.archetype.is_compileable:
+            raise ArgumentError("Host %s is not a compilable archetype (%s)" %
+                                (hostname, dbhost.archetype.name))
+
+        if buildstatus:
+            dbstatus = get_status(session, buildstatus)
+            dbhost.status = dbstatus
+            session.add(dbhost)
+
+        session.flush()
+
+        chooser = Chooser(dbhost, logger=logger,
+                          required_only=not(keepbindings))
+        chooser.set_required()
+        chooser.flush_changes()
+
+        # Force a host lock as pan might overwrite the profile...
+        key = CompileKey.merge([chooser.get_write_key(),
+                                CompileKey(domain=dbhost.domain.name,
+                                           profile=dbhost.fqdn,
+                                           logger=logger)])
         try:
-            compileLock(logger=logger)
-
-            # Currently, for the Host to be created it *must* be associated with
-            # a Machine already.  If that ever changes, need to check here and
-            # bail if dbhost.machine does not exist.
-
-            # Need to get all the BuildItem/Service instance objects
-            if personality:
-                arch = archetype
-                if not arch:
-                    arch = dbhost.archetype.name
-
-                dbpersonality = get_personality(session, arch, personality)
-                if dbhost.cluster and \
-                   dbhost.cluster.personality != dbpersonality:
-                    raise ArgumentError("Cannot change personality of host %s "
-                                        "while it is a member of "
-                                        "%s cluster %s" %
-                                        (dbhost.fqdn,
-                                         dbhost.cluster.cluster_type,
-                                         dbhost.cluster.name))
-                dbhost.personality = dbpersonality
-                session.add(dbhost)
-
-            dbos = self.get_os(session, dbhost, osname, osversion, os)
-            if dbos:
-                # Hmm... no cluster constraint here...
-                dbhost.operating_system = dbos
-                session.add(dbhost)
-
-            if not dbhost.archetype.is_compileable:
-                raise ArgumentError("Host %s is not a compilable archetype (%s)" %
-                        (hostname, dbhost.archetype.name))
-
-            if buildstatus:
-                dbstatus = get_status(session, buildstatus)
-                dbhost.status = dbstatus
-                session.add(dbhost)
-
-            session.flush()
-
-            if arguments.get("keepbindings", None):
-                chooser = Chooser(dbhost, logger=logger, required_only=False)
-            else:
-                chooser = Chooser(dbhost, logger=logger, required_only=True)
-            chooser.set_required()
-            chooser.flush_changes()
+            lock_queue.acquire(key)
             chooser.write_plenary_templates(locked=True)
 
             td = TemplateDomain(dbhost.domain, logger=logger)
@@ -116,7 +115,7 @@ class CommandMake(BrokerCommand):
             raise
 
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
 

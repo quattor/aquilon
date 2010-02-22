@@ -37,7 +37,7 @@ from aquilon.config import Config
 from aquilon.exceptions_ import (ArgumentError, ProcessException)
 from aquilon.server.processes import run_command
 from aquilon.server.templates.index import build_index
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import Host, Cluster
 from aquilon.server.logger import CLIENT_INFO
 
@@ -109,48 +109,48 @@ class TemplateDomain(object):
                 except OSError, e:
                     raise ArgumentError("failed to mkdir %s: %s" % (d, e))
 
-        # XXX: This command could take many minutes, it'd be really
-        # nice to be able to give progress messages to the user
-        try:
-            if (not locked):
-                compileLock(logger=self.logger)
+        if (only):
+            objectlist = [ only ]
+        else:
+            objectlist = self.domain.hosts
 
-            if (only):
-                objectlist = [ only ]
-            else:
-                objectlist = self.domain.hosts
+        if (len(objectlist) == 0):
+            return 'no hosts: nothing to do'
 
-            if (len(objectlist) == 0):
-                return 'no hosts: nothing to do'
-
-            panc_env = {"PATH":"%s:%s" % (config.get("broker", "javadir"),
-                                          os_environ.get("PATH", ""))}
+        panc_env = {"PATH":"%s:%s" % (config.get("broker", "javadir"),
+                                      os_environ.get("PATH", ""))}
             
-            args = [config.get("broker", "ant")]
-            args.append("-f")
-            args.append("%s/build.xml" %
-                        config.get("broker", "compiletooldir"))
-            args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
-            args.append("-Dpanc.jar=%s" % self.domain.compiler)
-            args.append("-Dpanc.formatter=%s" %
-                        config.get("broker", "panc_formatter"))
-            args.append("-Ddomain=%s" % self.domain.name)
-            args.append("-Ddistributed.profiles=%s" %
-                        config.get("broker", "profilesdir"))
-            args.append("-Dpanc.batch.size=%s" %
-                        config.get("broker", "panc_batch_size"))
-            args.append("-Dant-contrib.jar=%s" %
-                        config.get("broker", "ant_contrib_jar"))
-            if (only):
-                # Use -Dforce.build=true?
-                args.append("-Dobject.profile=%s" % only)
-                args.append("compile.object.profile")
-            else:
-                # Technically this is the default, but being explicit
-                # doesn't hurt.
-                args.append("compile.domain.profiles")
+        args = [config.get("broker", "ant")]
+        args.append("-f")
+        args.append("%s/build.xml" %
+                    config.get("broker", "compiletooldir"))
+        args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
+        args.append("-Dpanc.jar=%s" % self.domain.compiler)
+        args.append("-Dpanc.formatter=%s" %
+                    config.get("broker", "panc_formatter"))
+        args.append("-Ddomain=%s" % self.domain.name)
+        args.append("-Ddistributed.profiles=%s" %
+                    config.get("broker", "profilesdir"))
+        args.append("-Dpanc.batch.size=%s" %
+                    config.get("broker", "panc_batch_size"))
+        args.append("-Dant-contrib.jar=%s" %
+                    config.get("broker", "ant_contrib_jar"))
+        if (only):
+            # Use -Dforce.build=true?
+            args.append("-Dobject.profile=%s" % only)
+            args.append("compile.object.profile")
+        else:
+            # Technically this is the default, but being explicit
+            # doesn't hurt.
+            args.append("compile.domain.profiles")
 
-            out = ''
+        out = ''
+        try:
+            if not locked:
+                # FIXME: The git workflow branch has a more sophisticated
+                # notion of objectlist... revisit this in that branch.
+                key = CompileKey(domain=self.domain.name, logger=self.logger)
+                lock_queue.acquire(key)
             self.logger.info("starting compile")
             try:
                 out = run_command(args, env=panc_env, logger=self.logger,
@@ -158,13 +158,12 @@ class TemplateDomain(object):
                                   loglevel=CLIENT_INFO)
             except ProcessException, e:
                 raise ArgumentError("\n%s%s" % (e.out, e.err))
-
         finally:
-            if (not locked):
-                compileRelease(logger=self.logger)
+            if not locked:
+                lock_queue.release(key)
 
+        # No need for a lock here - there is only a single file written
+        # and it is swapped into place atomically.
         build_index(config, session, config.get("broker", "profilesdir"),
                     logger=self.logger)
         return out
-
-

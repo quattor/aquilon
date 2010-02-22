@@ -32,7 +32,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import IncompleteError, ArgumentError
 
 
@@ -57,8 +57,10 @@ class CommandManageHostname(BrokerCommand):
         session.flush()
         plenary_host = PlenaryHost(dbhost, logger=logger)
 
+        # We're crossing domains, need to lock everything.
+        key = CompileKey(logger=logger)
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
 
             # Now we recreate the plenary to ensure that the domain is ready
             # to compile, however (esp. if there was no existing template), we
@@ -78,8 +80,6 @@ class CommandManageHostname(BrokerCommand):
             plenary_host.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
-
-

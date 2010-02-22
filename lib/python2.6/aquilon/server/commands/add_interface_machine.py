@@ -42,8 +42,8 @@ from aquilon.server.dbwrappers.interface import (describe_interface,
                                                  verify_port_group,
                                                  choose_port_group)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
-from aquilon.server.templates.base import (compileLock, compileRelease,
-                                           PlenaryCollection)
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.processes import DSDBRunner
@@ -160,8 +160,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # if the contents are the same so calling too often is
             # not a major expense.
             plenaries.append(PlenaryHost(dbmachine.host, logger=logger))
+        # Even though there may be removals going on the write key
+        # should be sufficient here.
+        key = plenaries.get_write_key()
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             pending_removals.stash()
             plenaries.write(locked=True)
             pending_removals.remove(locked=True)
@@ -169,7 +172,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             plenaries.restore_stash()
             pending_removals.restore_stash()
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         if dbmachine.host:
             # FIXME: reconfigure host

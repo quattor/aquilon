@@ -33,9 +33,10 @@ from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.base import (compileLock, compileRelease,
-                                           PlenaryCollection)
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import IncompleteError, NotFoundException
+
 
 class CommandManageCluster(BrokerCommand):
 
@@ -61,8 +62,10 @@ class CommandManageCluster(BrokerCommand):
 
         session.flush()
 
+        # We're crossing domains, need to lock everything.
+        key = CompileKey(logger=logger)
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             plenaries.stash()
             plenaries.cleanup(old_domain, locked=True)
             plenaries.write(locked=True)
@@ -70,8 +73,6 @@ class CommandManageCluster(BrokerCommand):
             plenaries.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
-
-

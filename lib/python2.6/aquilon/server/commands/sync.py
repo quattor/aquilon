@@ -34,7 +34,7 @@ import os
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.server.dbwrappers.domain import verify_domain
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.processes import run_command
 
 
@@ -51,8 +51,9 @@ class CommandSync(BrokerCommand):
                 dbdomain.name)
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
             os.environ.get("PATH", ""))}
+        key = CompileKey(domain=dbdomain.name, logger=logger)
         try:
-            compileLock()
+            lock_queue.acquire(key)
             run_command(["git", "checkout", "master"],
                         path=domaindir, env=git_env, logger=logger)
             run_command(["git", "pull"],
@@ -72,9 +73,7 @@ class CommandSync(BrokerCommand):
         finally:
             run_command(["git-update-server-info"],
                         path=domaindir, env=git_env, logger=logger)
-            compileRelease()
+            lock_queue.release(key)
         remote_command = """env PATH="%s:$PATH" NO_PROXY=* git pull""" % (
                 self.config.get("broker", "git_path"))
         return str(remote_command)
-
-

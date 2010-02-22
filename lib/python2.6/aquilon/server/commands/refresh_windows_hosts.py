@@ -26,10 +26,9 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq refresh network`."""
+"""Contains the logic for `aq refresh windows hosts`."""
 
 
-from threading import Lock
 import sqlite3
 
 from aquilon.exceptions_ import PartialError, InternalError
@@ -37,36 +36,32 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import get_host_dependencies
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, Status, DnsDomain, System,
                                 OperatingSystem)
 
 
-REFRESH_WINDOWS_HOSTS_LOCK = Lock()
-
-
-class CommandRefreshNetwork(BrokerCommand):
+class CommandRefreshWindowsHosts(BrokerCommand):
 
     required_parameters = []
 
     def render(self, session, logger, dryrun, **arguments):
-        logger.client_info("Acquiring lock to refresh windows hosts")
-        REFRESH_WINDOWS_HOSTS_LOCK.acquire()
-        logger.client_info("Acquired lock to refresh windows hosts")
         clusters = set()
+        key = SyncKey(data="windows", logger=logger)
+        lock_queue.acquire(key)
         try:
             self.refresh_windows_hosts(session, logger, clusters)
             if dryrun:
                 session.rollback()
-        except PartialError, e:
-            if not dryrun:
-                # Commit whatever was successful, since the session would
-                # normally be rolled back on error.
-                session.commit()
-            raise e
+                return
         finally:
-            logger.client_info("Released lock from refresh windows hosts.")
-            REFRESH_WINDOWS_HOSTS_LOCK.release()
+            if not dryrun:
+                # Commit whatever was successful regardless of overall
+                # success/failure.  Need to be able to release the sync lock
+                # before taking a compile lock.
+                session.commit()
+            lock_queue.release(key)
         if clusters:
             plenaries = PlenaryCollection(logger=logger)
             for dbcluster in clusters:

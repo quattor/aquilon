@@ -33,6 +33,7 @@ import logging
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError
+from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
@@ -81,6 +82,25 @@ class PlenaryToplevelHost(Plenary):
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
         self.dir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%dbhost.domain.name
+
+    def will_change(self):
+        # Need to override to handle IncompleteError...
+        self.stash()
+        if not self.new_content:
+            try:
+                self.new_content = self._generate_content()
+            except IncompleteError, e:
+                # Attempting to have IncompleteError thrown later by
+                # not caching the return
+                return self.old_content is None
+        return self.old_content != self.new_content
+
+    def get_key(self):
+        # Going with self.name instead of self.plenary_template seems like
+        # the right decision here - easier to predict behavior when meshing
+        # with other CompileKey generators like PlenaryMachine.
+        return CompileKey(domain=self.dbhost.domain.name, profile=self.name,
+                          logger=self.logger)
 
     def body(self, lines):
         # FIXME: Enforce that one of the interfaces is marked boot?

@@ -33,6 +33,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 from aquilon.server.processes import DSDBRunner
+from aquilon.server.locks import lock_queue, DeleteKey
 
 
 class CommandDelTorSwitch(BrokerCommand):
@@ -40,6 +41,16 @@ class CommandDelTorSwitch(BrokerCommand):
     required_parameters = ["tor_switch"]
 
     def render(self, session, logger, tor_switch, **arguments):
+        key = DeleteKey("system", logger=logger)
+        try:
+            lock_queue.acquire(key)
+            self.del_tor_switch(session, logger, tor_switch)
+            session.commit()
+        finally:
+            lock_queue.release(key)
+        return
+
+    def del_tor_switch(self, session, logger, tor_switch):
         dbtor_switch = get_tor_switch(session, tor_switch)
         ip = dbtor_switch.ip
 

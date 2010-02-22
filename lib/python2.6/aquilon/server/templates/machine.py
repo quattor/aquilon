@@ -31,9 +31,12 @@
 
 import logging
 
+from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary
+from aquilon.server import templates
 
 LOGGER = logging.getLogger('aquilon.server.templates.machine')
+
 
 class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine, logger=LOGGER):
@@ -66,6 +69,32 @@ class PlenaryMachineInfo(Plenary):
         self.plenary_template = ("%(plenary_core)s/%(machine)s" % self.__dict__)
         self.dir = self.config.get("broker", "plenarydir")
         return
+
+    def get_key(self):
+        host = self.dbmachine.host
+        cluster = self.dbmachine.cluster
+        # Need a compile key if:
+        # - There is a non-aurora host attached.
+        # - This is a virtual machine in a cluster.
+        if ((not host or self.dbmachine.model.machine_type == 'aurora_node')
+                and (not cluster)):
+            return None
+        # We have at least host or cluster, maybe both...
+        if host:
+            # PlenaryHost is actually a PlenaryCollection... can't call
+            # get_key() directly, so using get_remove_key().
+            ph = templates.host.PlenaryHost(host, self.logger)
+            host_key = ph.get_remove_key()
+        if cluster:
+            pc = templates.cluster.PlenaryClusterObject(cluster, self.logger)
+            cluster_key = pc.get_key()
+        if not cluster:
+            return host_key
+        if not host:
+            return cluster_key
+        # Just to make life fun, keep in mind that a virtual machine's guest
+        # and the cluster may be in separate domains.
+        return CompileKey.merge([host_key, cluster_key])
 
     def body(self, lines):
         # Firstly, location

@@ -41,10 +41,10 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Host, OperatingSystem
-from aquilon.server.templates.base import (compileLock, compileRelease,
-                                           PlenaryCollection)
+from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
 
 
@@ -148,8 +148,9 @@ class CommandAddHost(BrokerCommand):
         if dbmachine.cluster:
             plenaries.append(PlenaryCluster(dbmachine.cluster, logger=logger))
 
+        key = plenaries.get_write_key()
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             plenaries.write(locked=True)
 
             # XXX: This (and some of the code above) is horrible.  There
@@ -175,6 +176,6 @@ class CommandAddHost(BrokerCommand):
             plenaries.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return

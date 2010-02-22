@@ -37,7 +37,7 @@ from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.domain import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
 
 
@@ -50,8 +50,9 @@ class CommandFlush(BrokerCommand):
         failed = []
         written = 0
 
+        key = CompileKey(logger=logger)
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
 
             if services or all:
                 logger.client_info("flushing services")
@@ -130,6 +131,6 @@ class CommandFlush(BrokerCommand):
                 raise PartialError(success, failed)
 
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
