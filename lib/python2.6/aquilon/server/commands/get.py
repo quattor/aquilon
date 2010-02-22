@@ -37,7 +37,6 @@ class CommandGet(BrokerCommand):
 
     required_parameters = ["domain"]
     requires_readonly = True
-    is_lock_free = True
 
     def render(self, session, domain, **arguments):
         # Verify that it exists before returning the command to pull.

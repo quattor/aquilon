@@ -35,7 +35,6 @@ from aquilon.server.broker import BrokerCommand
 class CommandStatus(BrokerCommand):
 
     requires_format = True
-    is_lock_free = True
     requires_readonly = True
 
     def render(self, session, dbuser, **arguments):
