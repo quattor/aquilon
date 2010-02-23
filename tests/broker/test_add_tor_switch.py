@@ -203,7 +203,7 @@ class TestAddTorSwitch(TestBrokerCommand):
             "--building", "np", "--rackid", "7",
             "--rackrow", "g", "--rackcol", "1",
             "--model", "rs g8000",
-            "--interface", "xge49",
+            "--interface", "gigabitethernet0/1",
             "--mac", "0018b1898600", "--ip", "172.31.64.69"])
 
     def testverifynp06bals03(self):

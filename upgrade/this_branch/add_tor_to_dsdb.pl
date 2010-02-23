@@ -26,10 +26,8 @@ foreach my $line (@lines) {
         warn "Skipping bad IP address '$ip'";
         next;
     }
-    #if ($interface eq "gigabitethernet0/1") {
-    #    $interface = "xge49";
-    #}
-    unless ($interface =~ /^[a-zA-Z0-9]+$/) {
+    $interface =~ s|/|_|g;
+    unless ($interface =~ /^[a-zA-Z0-9_]+$/) {
         warn "Skipping bad interface name '$interface'";
         next;
     }
