@@ -64,13 +64,6 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
 
-    def testreconfigurefails(self):
-        command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err,
-                         "host unittest02.one-nyp.ms.com has not been built",
-                         command)
-
     def testverifyshowfqdnhost(self):
         command = "show fqdn --fqdn unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
