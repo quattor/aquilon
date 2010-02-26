@@ -191,6 +191,7 @@
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="string">mac address of an attached interface</option>
          <option name="serial" type="string">serial number</option>
+         <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
          <optgroup name="search_machine_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
@@ -1041,6 +1042,16 @@
       </optgroup>
       <transport trigger="service" method="get" path="service/%(service)s"/>
       <transport method="get" path="service" />
+   </command>
+
+   <command name="show_nas_disk_share">
+      Show information for instances of the nas_disk_share service.
+      <optgroup name="show_share_opts" mandatory="True" fields="any">
+         <option name="share" type="string" conflicts="all">Share name</option>
+         <option name="all" type="boolean" conflicts="share">Select all shares</option>
+      </optgroup>
+      <transport trigger="share" method="get" path="nas_disk_share/%(share)s"/>
+      <transport method="get" path="nas_disk_share" />
    </command>
 
    <command name="update_service">

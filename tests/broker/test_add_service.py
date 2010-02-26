@@ -288,12 +288,42 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: vmseasoning", command)
         self.matchoutput(out, "Service: vmseasoning Instance: salt", command)
         self.matchoutput(out, "Service: vmseasoning Instance: pepper", command)
+        self.matchclean(out, "Disk Count", command)
 
     def testaddnasshares(self):
         # Creates shares test_share_1 through test_share_9
         for i in range(1, 10):
             self.noouttest(["add_service", "--service=nas_disk_share",
                             "--instance=test_share_%s" % i])
+
+    def testverifydiskcount(self):
+        command = ["show_service", "--service=nas_disk_share",
+                   "--instance=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Disk Count: 0", command)
+
+    def testverifyshowshare(self):
+        command = ["show_nas_disk_share", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "Server: lnn30f1", command)
+        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
+                         command)
+        self.matchoutput(out, "Disk Count: 0", command)
+        self.matchoutput(out, "Machine Count: 0", command)
+        self.matchclean(out, "Comments", command)
+        self.matchclean(out, "NAS Disk Share: test_share_2", command)
+
+    def testverifyshowshareall(self):
+        command = ["show_nas_disk_share", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "NAS Disk Share: test_share_2", command)
+        self.matchoutput(out, "Server: lnn30f1", command)
+        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
+                         command)
+        self.matchoutput(out, "Disk Count: 0", command)
+        self.matchoutput(out, "Machine Count: 0", command)
 
     def testcatnasinfo(self):
         command = ["cat", "--nasinfo=test_share_1"]

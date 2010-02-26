@@ -117,6 +117,22 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "would exceed the metacluster's max_shares",
                          command)
 
+    def test_180_verifydiskcount(self):
+        command = ["show_service", "--service=nas_disk_share",
+                   "--instance=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Disk Count: 1", command)
+
+    def test_180_verifyshowshare(self):
+        command = ["show_nas_disk_share", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
+        self.matchoutput(out, "Server: lnn30f1", command)
+        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
+                         command)
+        self.matchoutput(out, "Disk Count: 1", command)
+        self.matchoutput(out, "Machine Count: 1", command)
+
     def test_190_verifyadddisk(self):
         command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
