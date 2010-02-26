@@ -56,6 +56,10 @@ class CommandShowActive(BrokerCommand):
         for auditid in sorted(catalog.status_by_auditid.keys(), key=int):
             status = catalog.get_request_status(auditid=auditid)
             for record in status.records:
+                # While reading status.records directly, need to be careful
+                # of any that have been removed.
+                if not record:
+                    continue
                 if record.levelno >= loglevel:
                     retval.append(self.massage_record(auditid,
                                                       record.getMessage()))
