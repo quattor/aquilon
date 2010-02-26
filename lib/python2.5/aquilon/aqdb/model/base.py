@@ -42,8 +42,9 @@ from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
 #from aquilon.aqdb.history.audit import audit_listener_for_class
 
 
-def _describe_uniqueness_request(cls, *args, **kwargs):
+def _describe_uniqueness_request(description_info):
     """Helper method for constructing errors in Base.get_unique()."""
+    (cls, args, kwargs) = description_info
     if kwargs:
         extras = []
         for (k, v) in kwargs.items():
@@ -144,6 +145,13 @@ class Base(object):
         # re-added to kwargs.
         compel = kwargs.pop('compel', False)
         preclude = kwargs.pop('preclude', False)
+        # Keep track of the original arguments for any errors that
+        # need to propogate up.
+        description_info = kwargs.pop('description_info', None)
+        if description_info is None:
+            orig_args = args[:]
+            orig_kwargs = kwargs.copy()
+            description_info = (cls, orig_args, orig_kwargs)
 
         if len(args) > 1:
             raise InternalError("Must use keyword arguments for get_unique "
@@ -213,7 +221,7 @@ class Base(object):
                 if not result:
                     if compel:
                         msg = "%s not found." % _describe_uniqueness_request(
-                            cls, *args, **kwargs)
+                            description_info)
                         if isclass(compel) and issubclass(compel, Exception):
                             raise compel(msg)
                         raise NotFoundException(msg)
@@ -224,7 +232,7 @@ class Base(object):
                                         (cls, query_args))
                 if preclude:
                     msg = "%s already exists." % _describe_uniqueness_request(
-                        cls, *args, **kwargs)
+                        description_info)
                     if isclass(preclude) and issubclass(preclude, Exception):
                         raise preclude(msg)
                     raise ArgumentError(msg)
@@ -238,9 +246,10 @@ class Base(object):
                         cls.__mapper_args__['polymorphic_identity']
             kwargs['compel'] = compel
             kwargs['preclude'] = preclude
+            kwargs['description_info'] = description_info
             return cls.__base__.get_unique(session, *args, **kwargs)
         raise InternalError("No uniqueness constraint found for %s " %
-                            _describe_uniqueness_request(cls, *args, **kwargs))
+                            _describe_uniqueness_request(description_info))
 
 
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)

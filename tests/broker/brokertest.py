@@ -192,7 +192,7 @@ class TestBrokerCommand(unittest.TestCase):
                              "\n@@@\n'%s'\n@@@\n" % (command, err))
         return err
 
-    def badrequesttest(self, command, **kwargs):
+    def badrequesttest(self, command, ignoreout=False, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
         self.assertEqual(p.returncode, 4,
                          "Return code for %s was %d instead of %d"
@@ -203,7 +203,7 @@ class TestBrokerCommand(unittest.TestCase):
                         "STDERR for %s did not include Bad Request:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
-        if "--debug" not in command:
+        if not ignoreout and "--debug" not in command:
             self.assertEqual(out, "",
                              "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                              (command, out))

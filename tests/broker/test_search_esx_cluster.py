@@ -54,8 +54,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --cluster cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Cluster 'cluster-does-not-exist' "
-                         "with cluster_type of 'esx' not found.",
+                         "ESX Cluster 'cluster-does-not-exist' not found.",
                          command)
 
     def testmetaclusteravailable(self):
