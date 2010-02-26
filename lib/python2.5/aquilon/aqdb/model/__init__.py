@@ -75,6 +75,7 @@ from aquilon.aqdb.model.tor_switch import TorSwitch
 
 #HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
+from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
 from aquilon.aqdb.model.interface import Interface
 from aquilon.aqdb.model.auxiliary import Auxiliary
