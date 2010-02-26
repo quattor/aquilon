@@ -32,6 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandDelTorSwitch(BrokerCommand):
@@ -40,6 +41,7 @@ class CommandDelTorSwitch(BrokerCommand):
 
     def render(self, session, logger, tor_switch, **arguments):
         dbtor_switch = get_tor_switch(session, tor_switch)
+        ip = dbtor_switch.ip
 
         for iface in dbtor_switch.interfaces:
             logger.info("Before deleting tor_switch '%s', "
@@ -61,6 +63,11 @@ class CommandDelTorSwitch(BrokerCommand):
         # Any switch ports hanging off this switch should be deleted with
         # the cascade delete of the switch.
 
+        if ip:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.delete_host_details(ip)
+            except ProcessException, e:
+                raise ArgumentError("Could not remove tor_switch from dsdb: %s"
+                                    % e)
         return
-
-
