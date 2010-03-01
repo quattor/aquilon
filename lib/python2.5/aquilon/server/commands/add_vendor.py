@@ -46,5 +46,5 @@ class CommandAddVendor(BrokerCommand):
             raise ArgumentError("vendor '%s' already exists" % vendor)
 
         dbv = Vendor(name=vendor)
-        session.save(dbv)
+        session.add(dbv)
         return
