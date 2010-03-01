@@ -55,7 +55,8 @@ free_subnets = range(8)
 building = "np"
 queue = []
 
-results = {"add":[], "update":[], "show":[], "delete":[]}
+results = {"add":[], "update":[], "compile":[], "transition_rack":[],
+           "show":[], "delete":[]}
 
 
 class WorkUnit(object):
@@ -72,6 +73,8 @@ class WorkUnit(object):
         elif self.action == "update":
             (self.rackid, self.oldsubnet) = allocated.popitem()
             self.subnet = free_subnets.pop()
+        elif self.action == "transition_rack":
+            (self.rackid, self.subnet) = allocated.popitem()
         elif self.action == "delete":
             (self.rackid, self.subnet) = allocated.popitem()
 
@@ -87,6 +90,13 @@ class WorkUnit(object):
                    "--subnet", str(self.subnet)]
         elif self.action == "show":
             cmd = [os.path.join(DIR, "show_info.py")]
+        elif self.action == "compile":
+            cmd = [os.path.join(DIR, "compile.py"), "--domain",
+                   choice(["testdom_odd", "testdom_even"])]
+        elif self.action == "transition_rack":
+            cmd = [os.path.join(DIR, "transition_rack.py"),
+                   "--building", self.building, "--rack", str(self.rackid),
+                   "--status", choice(["build", "ready"])]
         elif self.action == "delete":
             cmd = [os.path.join(DIR, "del_rack.py"),
                    "--building", self.building, "--rack", str(self.rackid)]
@@ -102,6 +112,8 @@ class WorkUnit(object):
         elif self.action == "update":
             free_subnets.append(self.oldsubnet)
             allocated[self.rackid] = self.subnet
+        elif self.action == "transition_rack":
+            allocated[self.rackid] = self.subnet
         elif self.action == "delete":
             free_racks.append(self.rackid)
             free_subnets.append(self.subnet)
@@ -116,13 +128,16 @@ class WorkUnit(object):
 
     @classmethod
     def create(cls):
-        actions = ["add", "update", "delete", "show"]
+        #actions = ["add", "update", "delete", "show"]
+        actions = ["add", "compile", "transition_rack", "delete"]
         if not free_racks or not free_subnets:
             actions.remove("add")
         if not free_subnets or not allocated:
-            actions.remove("update")
+            #actions.remove("update")
+            pass
         if not allocated:
             actions.remove("delete")
+            actions.remove("transition_rack")
         return WorkUnit(choice(actions))
 
 
@@ -130,7 +145,8 @@ while True:
     for workunit in queue:
         if workunit.poll() is not None:
             queue.remove(workunit)
-    if len(results["update"]) >= options.target:
+    #if len(results["update"]) >= options.target:
+    if len(results["transition_rack"]) >= options.target:
         break
     while len(queue) < options.queuesize:
         queue.append(WorkUnit.create())
