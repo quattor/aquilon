@@ -49,6 +49,7 @@ def add_rack(building, rackid, netid, aqservice):
             "--model", "rs g8000", "--interface", "xge49",
             "--rackrow", rack.row, "--rackcolumn", rack.column,
             "--mac", network.get_mac(0), "--ip", network.get_ip(0)])
+        domain = "testdom_odd" if rackid % 2 else "testdom_even"
         for offset in range(1, 49):
             machine = rack.get_machine(half, offset)
             print "Adding machine %s" % machine
@@ -62,7 +63,7 @@ def add_rack(building, rackid, netid, aqservice):
             print "Adding host %s with %s" % (host, network.get_ip(offset))
             rc = aq.wait(["add", "host", "--machine", machine,
                           "--hostname", host, "--archetype", "aquilon",
-                          "--domain", "testdom", "--buildstatus", "blind",
+                          "--domain", domain, "--buildstatus", "blind",
                           "--ip", network.get_ip(offset)])
             print "make aquilon for host %s" % host
             rc = aq.wait(["make", "aquilon", "--hostname", host,
