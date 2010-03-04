@@ -38,12 +38,16 @@ and 'unbind', 'map' and 'unmap', etc.
 
 import os
 import sys
-import unittest
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(__file__))
     SRCDIR = os.path.join(BINDIR, "..", "..")
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+
+import aquilon.aqdb.depends
+import setuptools
+import argparse
+import nose
 
 from test_start import TestBrokerStart
 from test_ping import TestPing
@@ -176,86 +180,67 @@ from test_client_failure import TestClientFailure
 from test_stop import TestBrokerStop
 
 
-class BrokerTestSuite(unittest.TestSuite):
-    """Set up the broker's unit tests in an order that allows full coverage.
+full = [TestBrokerStart, TestPing, TestStatus, TestShowActiveCommands,
+        TestPermission, TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
+        TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
+        TestMergeConflicts, TestAddArchetype, TestAddOS, TestAddPersonality,
+        TestAddService, TestUpdateService, TestAddRequiredService,
+        TestAddBuilding, TestAddRoom, TestAddRack, TestAddVendor, TestAddCpu,
+        TestAddModel, TestAddNetwork, TestAddMetaCluster, TestAddESXCluster,
+        TestAddESXClusterAlignedService, TestClusterEarlyConstraints,
+        TestAddTorSwitch, TestPollTorSwitch, TestAddChassis, TestAddMachine,
+        TestAddDisk, TestAddInterface, TestAddDynamicRange, TestAddHost,
+        TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
+        TestAddAuxiliary, TestAddManager, TestMapService, TestBindClient,
+        TestPrebindServer, TestServiceConstraints, TestMakeAquilon, TestMake,
+        TestMakeCluster, TestBindESXCluster, TestRebindESXCluster,
+        TestRebindMetaCluster, TestAddVirtualHardware, TestUnbindClient,
+        TestRebindClient, TestReconfigure, TestRefreshWindowsHosts,
+        TestChooserConstraints, TestFlush, TestCompile, TestBindServer,
+        TestBindClientConstraints, TestBindServerConstraints,
+        TestArchetypeConstraints, TestPersonalityConstraints,
+        TestDomainConstraints, TestVendorConstraints, TestMachineConstraints,
+        TestTorSwitchConstraints, TestMakeConstraints, TestClusterConstraints,
+        TestMetaClusterConstraints, TestShowHostIPList, TestShowHostMachineList,
+        TestShowMachineMacList, TestShowServiceAll, TestShowCampus,
+        TestShowFqdn, TestSearchHardware, TestSearchMachine, TestSearchSystem,
+        TestSearchHost, TestSearchNext, TestUpdateInterface, TestUpdateMachine,
+        TestUpdateRack, TestRefreshNetwork, TestUpdateNetwork,
+        TestUpdateArchetype, TestUpdateMetaCluster, TestUpdateESXCluster,
+        TestPxeswitch, TestManage, TestUmaskConstraints, TestUnbindServer,
+        TestUnmapService, TestDelVirtualHardware, TestUnbindESXCluster,
+        TestDelDynamicRange, TestDelManager, TestDelAuxiliary, TestDelHost,
+        TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
+        TestDelTorSwitch, TestDelESXClusterAlignedService, TestDelESXCluster,
+        TestDelMetaCluster, TestDelNetwork, TestDelModel, TestDelCpu,
+        TestDelVendor, TestDelRack, TestDelRoom, TestDelBuilding,
+        TestDelRequiredService, TestDelService, TestDelPersonality, TestDelOS,
+        TestDelArchetype, TestDelDomain, TestDelDnsDomain, TestClientFailure,
+        TestBrokerStop]
 
-    The general strategy is to start the broker, test adding things,
-    test deleting things, and then shut down the broker.  Most of the show
-    commands are tested as verification tests in add/del tests.  Those that
-    are not have explicit tests between add and delete.
+tiny = [TestBrokerStart, TestPing, TestBrokerStop]
 
-    """
+suites = {'full': full, 'tiny': tiny}
 
-    def __init__(self, *args, **kwargs):
-        unittest.TestSuite.__init__(self, *args, **kwargs)
-        for test in [TestBrokerStart,
-                TestPing, TestStatus, TestShowActiveCommands,
-                #TestPermission,
-                #TestAddDnsDomain, TestAddDomain, TestUpdateDomain,
-                #TestGetDomain, TestPutDomain, TestDeployDomain, TestSyncDomain,
-                #TestMergeConflicts,
-                #TestAddArchetype, TestAddOS, TestAddPersonality,
-                #TestAddService, TestUpdateService, TestAddRequiredService,
-                #TestAddBuilding, TestAddRoom,
-                #TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
-                #TestAddNetwork,
-                #TestAddMetaCluster, TestAddESXCluster,
-                #TestAddESXClusterAlignedService,
-                #TestClusterEarlyConstraints,
-                #TestAddTorSwitch, #TestPollTorSwitch,
-                #TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
-                #TestAddDynamicRange, TestAddHost,
-                #TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
-                #TestAddAuxiliary, TestAddManager,
-                #TestMapService, TestBindClient, TestPrebindServer,
-                #TestServiceConstraints,
-                #TestMakeAquilon, TestMake, TestMakeCluster,
-                #TestBindESXCluster, TestRebindESXCluster,
-                #TestRebindMetaCluster,
-                #TestAddVirtualHardware,
-                #TestUnbindClient, TestRebindClient, TestReconfigure,
-                #TestRefreshWindowsHosts,
-                #TestChooserConstraints,
-                #TestFlush, TestCompile,
-                #TestBindServer,
-                #TestBindClientConstraints, TestBindServerConstraints,
-                #TestArchetypeConstraints, TestPersonalityConstraints,
-                #TestDomainConstraints, TestVendorConstraints,
-                #TestMachineConstraints, TestTorSwitchConstraints,
-                #TestMakeConstraints,
-                #TestClusterConstraints, TestMetaClusterConstraints,
-                #TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
-                #TestShowServiceAll, TestShowCampus, TestShowFqdn,
-                #TestSearchHardware, TestSearchMachine,
-                #TestSearchSystem, TestSearchHost,
-                #TestSearchNext,
-                #TestUpdateInterface,
-                #TestUpdateMachine, TestUpdateRack,
-                #TestRefreshNetwork, TestUpdateNetwork,
-                #TestUpdateArchetype,
-                #TestUpdateMetaCluster, TestUpdateESXCluster,
-                #TestPxeswitch, TestManage,
-                #TestUmaskConstraints,
-                #TestUnbindServer, TestUnmapService,
-                #TestDelVirtualHardware, TestUnbindESXCluster,
-                #TestDelDynamicRange,
-                #TestDelManager, TestDelAuxiliary, TestDelHost,
-                #TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                #TestDelTorSwitch,
-                #TestDelESXClusterAlignedService,
-                #TestDelESXCluster, TestDelMetaCluster,
-                #TestDelNetwork,
-                #TestDelModel, TestDelCpu, TestDelVendor,
-                #TestDelRack, TestDelRoom,
-                #TestDelBuilding, TestDelRequiredService, TestDelService,
-                #TestDelPersonality, TestDelOS, TestDelArchetype,
-                #TestDelDomain, TestDelDnsDomain,
-                #TestClientFailure,
-                TestBrokerStop
-                ]:
-            self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
+class MySuite(nose.suite.ContextSuite):
+    def __init__(self, tests='tiny', *args, **kwargs):
+
+        nose.suite.ContextSuite.__init__(self, *args, **kwargs)
+        loader = nose.loader.TestLoader()
+        for t in suites[tests]:
+            self.addTest(loader.loadTestsFromTestCase(t))
 
 
 if __name__=='__main__':
-    suite = BrokerTestSuite()
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    #The old non-controllable way:
+    #nose.run(suite=MySuite())
+
+    suite = None
+
+    for k in suites.keys():
+        if k in sys.argv:
+           suite=MySuite(tests=k)
+    if not suite:
+        suite=Mysuite
+
+    nose.run(suite=suite)
