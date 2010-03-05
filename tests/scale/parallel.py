@@ -138,6 +138,9 @@ class WorkUnit(object):
         if not allocated:
             actions.remove("delete")
             actions.remove("transition_rack")
+            actions.remove("compile")
+        if not actions:
+            return None
         return WorkUnit(choice(actions))
 
 
@@ -149,7 +152,10 @@ while True:
     if len(results["transition_rack"]) >= options.target:
         break
     while len(queue) < options.queuesize:
-        queue.append(WorkUnit.create())
+        workunit = WorkUnit.create()
+        if not workunit:
+            break
+        queue.append(workunit)
     # log current queue?
     time.sleep(1)
 
