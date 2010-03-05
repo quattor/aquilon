@@ -37,7 +37,7 @@
 
 import sys
 # Need at least this version for zope.interface > 3.3.0 and the
-# default for python 2.5.4 is ms.version 1.5-py25.
+# default for python 2.6.4 is ms.version 1.5-py25.
 # Should be no harm for users without /ms/dist as python ignores
 # invalid path entries.
 sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')

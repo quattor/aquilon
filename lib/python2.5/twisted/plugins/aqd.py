@@ -215,7 +215,7 @@ class AQDMaker(object):
             coverage.stop()
             sourcefiles = []
             aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
-                                          "lib", "python2.5", "aquilon")
+                                          "lib", "python2.6", "aquilon")
             sourcefiles = []
             for dirpath, dirname, filenames in os.walk(aquilon_srcdir):
                 for filename in filenames:

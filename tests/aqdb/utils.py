@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2009,2010  Contributor
@@ -33,7 +33,7 @@ def load_classpath():
     import sys
 
     _DIR = os.path.dirname(os.path.realpath(__file__))
-    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
+    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
     _TESTDIR = os.path.join(_DIR, "..")
 
     if _LIBDIR not in sys.path:

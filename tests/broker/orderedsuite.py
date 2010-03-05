@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010  Contributor
@@ -43,7 +43,7 @@ import unittest
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(__file__))
     SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
 
 from test_start import TestBrokerStart
 from test_ping import TestPing

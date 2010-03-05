@@ -1,10 +1,10 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 
 import os
 import sys
 
 src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..',
-                                    'lib', 'python2.5'))
+                                    'lib', 'python2.6'))
 sys.path.append(src)
 
 # Need this for aquilon.server.depends to work.  An alternate solution

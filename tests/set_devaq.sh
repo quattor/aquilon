@@ -12,17 +12,17 @@ if [[ "$BASH_SOURCE" == "$0" ]] ; then
 	echo
 fi
 
-SRCDIR=$(python2.5 -c 'import os, sys; print os.path.realpath(os.path.join(os.path.dirname(sys.argv[1]), ".."))' "$0")
+SRCDIR=$(python2.6 -c 'import os, sys; print os.path.realpath(os.path.join(os.path.dirname(sys.argv[1]), ".."))' "$0")
 
 if [ -z "$AQDCONF" ] ; then
 	AQDCONF="$SRCDIR/etc/aqd.conf.dev"
 else
-	AQDCONF=$(python2.5 -c 'import os, sys; print os.path.realpath(sys.argv[1])' "$AQDCONF")
+	AQDCONF=$(python2.6 -c 'import os, sys; print os.path.realpath(sys.argv[1])' "$AQDCONF")
 fi
 
-AQUSER=$("$SRCDIR/lib/python2.5/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "user=" | head -1 | cut -d= -f2)
-AQHOST=$("$SRCDIR/lib/python2.5/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "hostname=" | head -1 | cut -d= -f2)
-AQPORT=$("$SRCDIR/lib/python2.5/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "kncport=" | head -1 | cut -d= -f2)
+AQUSER=$("$SRCDIR/lib/python2.6/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "user=" | head -1 | cut -d= -f2)
+AQHOST=$("$SRCDIR/lib/python2.6/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "hostname=" | head -1 | cut -d= -f2)
+AQPORT=$("$SRCDIR/lib/python2.6/aquilon/config.py" | grep -A 1000 "\[broker\]" | grep "kncport=" | head -1 | cut -d= -f2)
 
 echo
 echo "Using srcdir  = $SRCDIR"

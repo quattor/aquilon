@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2009  Contributor
@@ -39,7 +39,7 @@ from datetime import date
 # Could act like a quine and take this info from the bits above.
 # Going in the other direction and having this file update itself. :)
 
-shebang = "#!/usr/bin/env python2.5\n"
+shebang = "#!/usr/bin/env python2.6\n"
 
 ex_re = re.compile(r'^\s*#\s*ex:')
 ex_line = "# ex: set expandtab softtabstop=4 shiftwidth=4: " \
