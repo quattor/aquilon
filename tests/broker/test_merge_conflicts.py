@@ -29,7 +29,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing that we handle merge conflicts properly"""
 
-from __future__ import with_statement
 
 import os
 import sys
@@ -278,4 +277,3 @@ class TestMergeConflicts(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMergeConflicts)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

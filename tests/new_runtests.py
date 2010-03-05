@@ -29,7 +29,6 @@
 # TERMS THAT MAY APPLY.
 """This sets up and runs the broker unit tests."""
 
-from __future__ import with_statement
 
 import re
 import os

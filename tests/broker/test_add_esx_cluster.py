@@ -30,8 +30,6 @@
 """Module for testing the add esx_cluster command."""
 
 
-from __future__ import with_statement
-
 import os
 import sys
 import unittest
@@ -282,4 +280,3 @@ class TestAddESXCluster(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

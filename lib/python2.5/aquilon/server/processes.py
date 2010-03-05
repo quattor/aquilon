@@ -35,7 +35,6 @@ the chain.
 """
 
 
-from __future__ import with_statement
 import os
 import re
 import errno
@@ -412,5 +411,3 @@ class DSDBRunner(object):
         else:
             fields["state"] = None
         return fields
-
-

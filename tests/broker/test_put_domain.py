@@ -30,8 +30,6 @@
 """Module for testing the put domain command."""
 
 
-from __future__ import with_statement
-
 import os
 import sys
 import unittest
@@ -237,4 +235,3 @@ class TestPutDomain(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPutDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

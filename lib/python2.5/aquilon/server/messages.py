@@ -29,8 +29,6 @@
 """Pub/sub mechanism for status messages."""
 
 
-from __future__ import with_statement
-
 from threading import Lock
 from collections import deque
 from logging import DEBUG
@@ -199,5 +197,3 @@ class StatusSubscriber(object):
     def finish(self):
         """Called after all records have been processed."""
         pass
-
-

@@ -29,7 +29,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing refresh_windows_hosts."""
 
-from __future__ import with_statement
 
 import os
 import sys
@@ -120,10 +119,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                          command)
 
     def test_150_verify(self):
-        for host in ["badhost3.msad.ms.com", "badhost4.msad.ms.com", 
+        for host in ["badhost3.msad.ms.com", "badhost4.msad.ms.com",
                      "badhost5.msad.ms.com"]:
             self.notfoundtest(["show_host", "--hostname", host])
-        for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com", 
+        for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",
                      "desktop3.msad.ms.com", "desktop4.msad.ms.com"]:
             self.notfoundtest(["show_host", "--hostname", host])
 
@@ -176,10 +175,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                          command)
 
     def test_250_verify(self):
-        for host in ["badhost3.msad.ms.com", "badhost4.msad.ms.com", 
+        for host in ["badhost3.msad.ms.com", "badhost4.msad.ms.com",
                      "badhost5.msad.ms.com"]:
             self.notfoundtest(["show_host", "--hostname", host])
-        for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com", 
+        for host in ["desktop1.msad.ms.com", "desktop2.msad.ms.com",
                      "desktop3.msad.ms.com", "desktop4.msad.ms.com"]:
             command = ["show_host", "--hostname", host]
             out = self.commandtest(command)
@@ -283,4 +282,3 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshWindowsHosts)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

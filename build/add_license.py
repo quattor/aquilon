@@ -28,8 +28,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from __future__ import with_statement
-
 import re
 import sys
 import os
@@ -110,7 +108,7 @@ def fix_file(filepath):
         if copyright_re.search(line):
             current_copyright_line = line
             break
-    
+
     # If this is someone else's copyright, don't mess with the file
     if not contributor_copyright_re.search(current_copyright_line):
         sys.stderr.write("Skipping %s because of unrecognized copyright.\n" %
@@ -154,7 +152,7 @@ def fix_file(filepath):
             #print >>sys.stderr, "Skipping module line"
             continue
         new_contents.append(line)
-    
+
     if contents == new_contents:
         return
     else:
@@ -185,4 +183,3 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
-

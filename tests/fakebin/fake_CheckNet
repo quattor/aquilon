@@ -6,8 +6,6 @@
 """Fake the CheckNet command"""
 
 
-from __future__ import with_statement
-
 import sys
 import os
 
