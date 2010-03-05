@@ -127,7 +127,7 @@ class TestCampusPopulate(object):
             cs = CampusDiffStruct(self.dsdb,
                                   self.sess,
                                   c)
-            assert(cs.sync(), 'CAMPUS CREATION FAILED')
+            assert cs.sync(), 'CAMPUS CREATION FAILED'
 
             new_campus = self.sess.query(Campus).filter_by(name=c.name).first()
 
