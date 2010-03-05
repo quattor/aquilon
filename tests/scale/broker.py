@@ -58,12 +58,15 @@ class AQBroker(object):
         self.pidfile = os.path.join(self.config.get("broker", "rundir"),
                                     "aqd.pid")
         self.logfile = self.config.get("broker", "logfile")
+        self.coverage = os.path.join(self.config.get("broker", "logdir"),
+                                     "aqd.coverage")
 
     def start(self, **kwargs):
         """Start a broker with the given config."""
         args = [self.twistd, "--pidfile", self.pidfile,
                 "--logfile", self.logfile,
-                "aqd", "--config", self.configfile]
+                "aqd",
+                "--config", self.configfile, "--coverage", self.coverage]
         p = Popen(args, stdout=1, stderr=2)
         return p.wait()
 
