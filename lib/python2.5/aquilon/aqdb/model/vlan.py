@@ -30,7 +30,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, backref
 
 from aquilon.utils import monkeypatch
@@ -53,8 +54,8 @@ class VlanInfo(Base):
     __tablename__ = _VTN
 
     vlan_id = Column(Integer, primary_key=True)
-    port_group = Column(AqStr(32), primary_key=True)
-    vlan_type = Column(Enum(32, VLAN_TYPES), primary_key=True)
+    port_group = Column(AqStr(32))
+    vlan_type = Column(Enum(32, VLAN_TYPES))
 
     def __repr__(self):
         return '<%s vlan_id=%s port_group=%s vlan_type=%s>' % (
@@ -62,6 +63,8 @@ class VlanInfo(Base):
             self.vlan_type)
 
 VlanInfo.__table__.primary_key.name = '%s_pk' % _VTN
+VlanInfo.__table__.append_constraint(
+    UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
 
 #CheckConstraint doesn't upper case names by default
 VlanInfo.__table__.append_constraint(
