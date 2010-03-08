@@ -62,7 +62,7 @@ class CommandPollTorSwitch(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, rack, clear, **arguments):
+    def render(self, session, logger, rack, clear, vlan, **arguments):
         dblocation = get_location(session, rack=rack)
         q = session.query(TorSwitch)
         #q = q.join('tor_switch_hw')
@@ -72,18 +72,23 @@ class CommandPollTorSwitch(BrokerCommand):
         switches = q.all()
         if not switches:
             raise NotFoundException("No switch found.")
-        return self.poll(session, logger, switches, clear)
+        return self.poll(session, logger, switches, clear, vlan)
 
-    def poll(self, session, logger, switches, clear):
+    def poll(self, session, logger, switches, clear, vlan):
         now = datetime.now()
         for switch in switches:
             if clear and clear != str(False):
                 self.clear(session, logger, switch)
-            out = self.run_checknet(logger, switch)
-            macports = self.parse_ports(logger, out)
-            for (mac, port) in macports:
-                update_or_create_observed_mac(session, switch, port, mac, now)
+            self.poll_mac(session, logger, switch, now)
+            if vlan and vlan != str(False):
+                self.poll_vlan(session, logger, switch, now)
         return
+
+    def poll_mac(self, session, logger, switch, now):
+        out = self.run_checknet(logger, switch)
+        macports = self.parse_ports(logger, out)
+        for (mac, port) in macports:
+            update_or_create_observed_mac(session, switch, port, mac, now)
 
     def clear(self, session, logger, switch):
         macs = session.query(ObservedMac).filter_by(switch=switch).all()
@@ -148,3 +153,41 @@ class CommandPollTorSwitch(BrokerCommand):
         except CSVError, e:
             raise AquilonError("Error parsing CheckNet results: %s" % e)
         return macports
+
+    def poll_vlan(session, logger, switch, now):
+        if not switch.ip:
+            raise ArgumentError("Cannot poll VLAN info for a switch without "
+                                "a registered IP address [%s]" % switch.fqdn)
+        vlans = session.query(ObservedVlan).filter_by(switch=switch).all()
+        for vlan in vlans:
+            session.delete(vlan)
+        session.flush()
+        out = run_command([self.config.get("broker", "vlan2net"),
+                           "-ip", switch.ip])
+        try:
+            reader = DictReader(StringIO(out))
+            for row in reader:
+                vlan = row.get("vlan", None)
+                network = row.get("network", None)
+                if vlan is None or network is None or \
+                   len(vlan) == 0 or len(network) == 0:
+                    logger.info("Missing value for vlan or network in "
+                                "output line #%d: %s" % (reader.line_num, row))
+                    continue
+                try:
+                    vlan_int = int(port)
+                except ValueError, e:
+                    logger.info("Error parsing vlan number in output "
+                                "line #%d: %s error: %s" %
+                                (reader.line_num, row, e))
+                    continue
+                dbnetwork = Network.get_unique(session, ip=network)
+                if not dbnetwork:
+                    logger.info("Unknown network %s in output line #%d: %s" %
+                                (network, reader.line_num, row))
+                    continue
+                dbvlan = ObservedVlan(vlan_id=vlan_int, switch=switch,
+                                      network=dbnetwork, creation_date=now)
+                session.add(dbvlan)
+        except CSVError, e:
+            raise AquilonError("Error parsing vlan2net results: %s" % e)
