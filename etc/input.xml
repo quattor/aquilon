@@ -895,6 +895,8 @@
          <option name="ipfromip" type="string" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
          <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="boolean" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         <option name="pg" type="string" conflicts="autopg">portgroup</option>
+         <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -994,6 +996,9 @@
          <option name="mac" type="string">MAC address</option>
          <option name="ip" type="string">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
+         <option name="pg" type="string" conflicts="autopg clearpg">portgroup</option>
+         <option name="autopg" type="boolean" conflicts="pg clearpg">choose portgroup based on switch</option>
+         <option name="clearpg" type="boolean" conflicts="pg autopg">remove portgroup information</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />

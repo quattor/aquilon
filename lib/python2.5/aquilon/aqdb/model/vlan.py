@@ -111,6 +111,13 @@ class ObservedVlan(Base):
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete'))
 
     #TODO: vlan_info as query mapped property?
+    @property
+    def portgroup(self):
+        session = object_session(self)
+        info = session.query(VlanInfo).filter_by(vlan_id=self.vlan_id).first()
+        if info:
+            return info.port_group
+        return None
 
 ObservedVlan.__table__.primary_key.name = '%s_pk' % _TN
 

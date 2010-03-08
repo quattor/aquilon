@@ -156,6 +156,23 @@ class Location(Base):
 
         return object_session(self).query(Location).from_statement(s).all()
 
+    def get_parts(self):
+        parts = self.parents
+        parts.append(self)
+        return self
+
+    def merge(self, loc):
+        """Find the common root of two locations."""
+        # Optimization...
+        if self == loc:
+            return self
+        merged = None
+        for (self_part, loc_part) in zip(self.get_parts(), loc.get_parts()):
+            if self_part != loc_part:
+                return merged
+            merged = self_part
+        return merged
+
     def __repr__(self):
         return self.__class__.__name__ + " " + str(self.name)
 

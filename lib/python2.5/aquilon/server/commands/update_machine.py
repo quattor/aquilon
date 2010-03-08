@@ -144,6 +144,11 @@ class CommandUpdateMachine(BrokerCommand):
         if serial:
             dbmachine.serial_no=serial
 
+        # FIXME: For now, if a machine has its interface(s) in a portgroup
+        # this command will need to be followed by an update_interface to
+        # re-evaluate the portgroup for overflow.
+        # It would be better to have --pg and --autopg options to let it
+        # happen at this point.
         if cluster:
             if not dbmachine.cluster:
                 raise ArgumentError("Cannot add an existing machine to "

@@ -102,6 +102,9 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             raise ArgumentError("Cannot specify both --ip and --autoip")
         return ip
     dbsystem = None
+    # FIXME: Need to modify the autoip logic to check for a port group
+    # on the interface.  If there is one need to choose the appropriate
+    # network from the switch (not the management network).
     if autoip:
         if ipfromip:
             raise ArgumentError("Cannot specify both --autoip and --ipfromip")
@@ -138,6 +141,10 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         start = 8
     elif dbnetwork.network_type == 'tor_net2':
         start = 9
+    # FIXME: Verify the network type
+    elif dbnetwork.network_type == 'vm_storage_net':
+        # FIXME: Verify the start offset
+        start = 37
     else:
         start = 2
     # Not sure what to do about networks like /32 and /31...

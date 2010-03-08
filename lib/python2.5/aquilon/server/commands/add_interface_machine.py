@@ -52,7 +52,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, automac,
-               comments, **arguments):
+               pg, autopg, comments, **arguments):
         dbmachine = get_machine(session, machine)
         extra = {}
         if interface == 'eth0':
@@ -113,6 +113,25 @@ class CommandAddInterfaceMachine(BrokerCommand):
         else:
             #Ignore now that Mac Address can be null
             pass
+
+        if pg:
+            # Could check that the switch has a vlan with this port group...
+            dbpg = VlanInfo.get_unique(session, port_group=pg, compel=True)
+            extra['port_group'] = dbpg.port_group
+            # FIXME: Verify that the port group has open spots.
+        elif autopg:
+            if dbmachine.model.machine_type != "virtual_machine":
+                raise ArgumentError("Can only automatically generate "
+                                    "portgroup entry for virtual hardware.")
+            # These are actually ObservedVlan entries...
+            for vlan in dbmachine.cluster.get_vlans(vlan_type='vmnet'):
+                vlan_id = vlan.vlan_id
+                network = vlan.network
+                # FIXME: Count the number of VMs using this port group.
+                # Need to find all clusters attached to the same switch
+                # and then check how many VMs on the clusters are
+                # attached to those port groups.  Knowing that, verify
+                # against the theoretical max for the subnet.
 
         try:
             dbinterface = Interface(name=interface, hardware_entity=dbmachine,

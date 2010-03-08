@@ -35,6 +35,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
 from sqlalchemy.orm import relation, backref, object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
+from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine, Domain)
@@ -130,6 +131,56 @@ class EsxCluster(Cluster):
     @property
     def vm_to_host_ratio(self):
         return '%s:%s'% (self.vm_count, self.host_count)
+
+    @property
+    def management_network(self):
+        network = None
+        for host in self.hosts:
+            if network and host.network != network:
+                raise InternalError("Inconsistent networks on cluster %s" %
+                                    self.name)
+            network = host.network
+        return network
+
+    @property
+    def precise_location(self):
+        location = None
+        for host in self.hosts:
+            if location:
+                location = location.merge(host.location)
+            location = host.location
+        return location
+
+    @property
+    def switches(self):
+        session = object_session(self)
+        q = session.query(TorSwitch)
+        q = q.filter_by(network=self.management_network)
+        q = q.join('tor_switch_hw')
+        q = q.filter_by(location=self.precise_location)
+        return q.all()
+
+    def get_vlans(self, vlan_type=None):
+        switches = self.switches
+        if len(switches) == 0:
+            raise ArgumentError("No switches found for cluster %s" % self.name)
+        if len(switches) > 1:
+            # FIXME: No need for an error if the VLANs are the same for all...
+            raise ArgumentError("More than one switch found for cluster %s" %
+                                self.name)
+        switch = switches[0]
+        session = object_session(self)
+        q = session.query(ObservedVlan).filter_by(switch=switch)
+        if vlan_type:
+            q = q.join((VlanInfo, VlanInfo.vlan_id == ObservedVlan.vlan_id))
+            q = q.filter_by(vlan_type=vlan_type)
+            q = q.reset_joinpoint()
+        q = q.order_by('vlan_id')
+        return q.all()
+
+    @property
+    def vlans(self):
+        return self.get_vlans()
 
     def __init__(self, **kw):
         if 'max_hosts' not in kw:
