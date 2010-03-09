@@ -38,9 +38,10 @@ log = logging.getLogger('aqdb.populate')
 import utils
 utils.load_classpath()
 
-from aquilon.config import Config
+import argparse
 import ms.modulecmd
 
+from aquilon.config import Config
 config = Config()
 
 if config.has_option("database", "module"):
@@ -71,33 +72,31 @@ def importName(modulename, name):
 
 
 def parse_cli(*args, **kw):
-    usage = """ usage: %prog [options]
-    rebuilds the aquilon data store (aqdb) from scratch """
+    parser = argparse.ArgumentParser(
+        description = 'rebuilds the aquilon data store (aqdb) from scratch')
 
-    parser = optparse.OptionParser(usage=usage)
-
-    parser.add_option('-v', '--verbose',
+    parser.add_argument('-v', '--verbose',
                       action  = 'store_true',
                       dest    = 'verbose',
                       help    = 'makes metadata bind.echo = True')
 
-    parser.add_option('-D', '--delete',
+    parser.add_argument('-D', '--delete',
                       action  = 'store_true',
                       dest    = 'delete_db',
                       help    = 'delete database without confirmation')
 
-    parser.add_option('-d', '--debug',
+    parser.add_argument('-d', '--debug',
                       action  = 'store_true',
                       dest    = 'debug',
                       help    = 'write debug info on stdout')
 
-    parser.add_option('-p', '--populate',
+    parser.add_argument('-p', '--populate',
                       action  = 'store_true',
                       dest    = 'populate',
                       help    = 'run functions to prepopulate data',
                       default = False)
 
-    parser.add_option('-f', '--full',
+    parser.add_argument('-f', '--full',
                       action  = 'store_true',
                       dest    = 'full',
                       help    = 'perform full network table population',
@@ -107,7 +106,7 @@ def parse_cli(*args, **kw):
 
 
 def main(*args, **kw):
-    (opts, args) = parse_cli(args, kw)
+    opts = parse_cli(args, kw)
 
     if opts.debug:
         log.setLevel(logging.DEBUG)
