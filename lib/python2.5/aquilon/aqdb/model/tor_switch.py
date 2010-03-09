@@ -38,10 +38,10 @@ class TorSwitch(System):
 
     id = Column(Integer,
                 ForeignKey('system.id', ondelete='CASCADE',
-                           name='tor_sw_sys_fk'), primary_key=True)
+                           name='TOR_SW_SYS_FK'), primary_key=True)
 
     tor_switch_id = Column(Integer, ForeignKey('tor_switch_hw.hardware_entity_id',
-                                               name='tor_sw_sy_hw.fk',
+                                               name='TOR_SW_SY_HW_FK',
                                                ondelete='CASCADE'),
                                               nullable=False)
 
@@ -51,8 +51,6 @@ class TorSwitch(System):
     __mapper_args__ = {'polymorphic_identity' : 'tor_switch'}
 
 tor_switch = TorSwitch.__table__
-tor_switch.primary_key.name='tor_switch_pk'
+tor_switch.primary_key.name='TOR_SWITCH_PK'
 
 table = tor_switch
-
-
