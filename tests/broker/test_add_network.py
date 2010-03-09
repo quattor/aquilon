@@ -46,7 +46,7 @@ class TestAddNetwork(TestBrokerCommand):
     def testaddnetwork(self):
         for network in self.net.all:
             command = ["add_network", "--network=%s" % network.ip,
-                       "--ip=%s" % network.ip, "--mask=%s" % network.mask,
+                       "--ip=%s" % network.ip, "--mask=%s" % network.numhosts,
                        "--building=ut", "--type=%s" % network.nettype]
             self.noouttest(command)
 
@@ -69,7 +69,7 @@ class TestAddNetwork(TestBrokerCommand):
         command = "show_network --building ut"
         out = self.commandtest(command.split(" "))
         for network in self.net.all:
-            self.matchoutput(out, network.ip, command)
+            self.matchoutput(out, str(network.ip), command)
 
     def testshownetworkcsv(self):
         command = "show_network --building ut --format csv"
