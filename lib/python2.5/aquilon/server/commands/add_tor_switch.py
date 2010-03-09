@@ -105,6 +105,7 @@ class CommandAddTorSwitch(BrokerCommand):
                                     hardware_entity=dbtor_switch_hw)
             session.add(dbinterface)
             session.flush()
+            session.refresh(dbinterface)
 
             dsdb_runner = DSDBRunner(logger=logger)
             try:
