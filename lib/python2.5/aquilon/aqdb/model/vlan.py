@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, object_session
 
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -110,7 +110,6 @@ class ObservedVlan(Base):
     switch = relation(TorSwitch, backref=backref('%ss' % _TN, cascade='delete'))
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete'))
 
-    #TODO: vlan_info as query mapped property?
     @property
     def portgroup(self):
         session = object_session(self)
