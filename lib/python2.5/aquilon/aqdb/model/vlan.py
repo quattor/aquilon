@@ -40,11 +40,12 @@ from aquilon.aqdb.model import Base, Network, TorSwitch
 
 MAX_VLANS = 4096 #IEEE 802.1Q standard
 
-VLAN_TYPES = ('storage', 'vmotion', 'vmnet')
+VLAN_TYPES = ('storage', 'vmotion', 'user')
 
-VLAN_INFO = [(700, 'storage', 'storage'), (701, 'vmotion', 'vmotion'),
-    (710, 'vmnet_1', 'vmnet'), (711, 'vmnet_2', 'vmnet'),
-    (712, 'vmnet_3', 'vmnet'), (714, 'vmnet_4', 'vmnet')]
+VLAN_INFO = [(701, 'storage-v701', 'storage'),
+             (702, 'vmotion-v702', 'vmotion'),
+             (710, 'user-v710', 'user'), (711, 'user-v711', 'user'),
+             (712, 'user-v712', 'user'), (713, 'user-v713', 'user')]
 
 _VTN = 'vlan_info'
 
