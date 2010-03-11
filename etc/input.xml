@@ -2350,6 +2350,7 @@
          <option name="max_members" type="string">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="tor_switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="fix_location" type="boolean">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <optgroup name="update_cluster_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>

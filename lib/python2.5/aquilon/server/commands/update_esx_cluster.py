@@ -46,7 +46,7 @@ class CommandUpdateESXCluster(BrokerCommand):
     required_parameters = [ "cluster" ]
 
     def render(self, session, logger, cluster, archetype, personality,
-               max_members, vm_to_host_ratio, tor_switch,
+               max_members, vm_to_host_ratio, tor_switch, fix_location,
                comments, **arguments):
         cluster_type = 'esx'
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
@@ -59,6 +59,8 @@ class CommandUpdateESXCluster(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         dblocation = get_location(session, **arguments)
+        if fix_location:
+            dblocation = dbcluster.minimum_location
         if dblocation:
             errors = []
             if not dblocation.campus:

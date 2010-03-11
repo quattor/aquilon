@@ -141,7 +141,7 @@ class EsxCluster(Cluster):
         return '%s:%s'% (self.vm_count, self.host_count)
 
     @property
-    def precise_location(self):
+    def minimum_location(self):
         location = None
         for host in self.hosts:
             if location:

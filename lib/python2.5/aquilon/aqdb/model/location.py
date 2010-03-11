@@ -157,13 +157,13 @@ class Location(Base):
         return object_session(self).query(Location).from_statement(s).all()
 
     def get_parts(self):
-        parts = self.parents
+        parts = list(self.parents)
         parts.append(self)
-        return self
+        return parts
 
     def merge(self, loc):
         """Find the common root of two locations."""
-        # Optimization...
+        # Optimization since get_parts can be expensive...
         if self == loc:
             return self
         merged = None
