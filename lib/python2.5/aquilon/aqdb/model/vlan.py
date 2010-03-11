@@ -34,6 +34,7 @@ from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, object_session
 
+from aquilon.exceptions_ import InternalError
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Network, TorSwitch
@@ -57,6 +58,13 @@ class VlanInfo(Base):
     vlan_id = Column(Integer, primary_key=True)
     port_group = Column(AqStr(32))
     vlan_type = Column(Enum(32, VLAN_TYPES))
+
+    @classmethod
+    def get_port_group(cls, session, vlan_id, compel=InternalError):
+        info = session.query(cls).filter_by(vlan_id=vlan_id).first()
+        if not info and compel:
+            raise compel("No port group found for VLAN id %s" % vlan_id)
+        return info.port_group
 
     def __repr__(self):
         return '<%s vlan_id=%s port_group=%s vlan_type=%s>' % (
@@ -108,6 +116,7 @@ class ObservedVlan(Base):
     creation_date = Column('creation_date', DateTime,
                            default=datetime.now, nullable=False)
 
+    # FIXME: The backref should be ordered by vlan_id...
     switch = relation(TorSwitch, backref=backref('%ss' % _TN, cascade='delete'))
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete'))
 
@@ -118,6 +127,32 @@ class ObservedVlan(Base):
         if info:
             return info.port_group
         return None
+
+    @property
+    def vlan_type(self):
+        session = object_session(self)
+        info = session.query(VlanInfo).filter_by(vlan_id=self.vlan_id).first()
+        if info:
+            return info.vlan_type
+        return None
+
+    @property
+    def guest_count(self):
+        # Count the number of VMs in the clusters with this switch and vlan.
+        session = object_session(self)
+        port_group = VlanInfo.get_port_group(session, vlan_id=self.vlan_id)
+        q = session.query(Machine)
+        q = q.join(['cluster'])
+        q = q.filter_by(switch=self.switch)
+        q = q.reset_joinpoint()
+        q = q.join(['interface'])
+        q = q.filter_by(port_group=port_group)
+        q = q.reset_joinpoint()
+        return q.count()
+
+    @property
+    def is_at_guest_capacity(self):
+        return self.guest_count >= self.network.available_ip_count
 
 ObservedVlan.__table__.primary_key.name = '%s_pk' % _TN
 
