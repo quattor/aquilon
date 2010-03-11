@@ -996,9 +996,8 @@
          <option name="mac" type="string">MAC address</option>
          <option name="ip" type="string">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
-         <option name="pg" type="string" conflicts="autopg clearpg">portgroup</option>
-         <option name="autopg" type="boolean" conflicts="pg clearpg">choose portgroup based on switch</option>
-         <option name="clearpg" type="boolean" conflicts="pg autopg">remove portgroup information</option>
+         <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
+         <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
