@@ -2319,6 +2319,7 @@
       <optgroup name="add_esx_cluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="tor_switch" type="string">ToR switch in use by the cluster</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="cluster/esx/%(cluster)s" />
