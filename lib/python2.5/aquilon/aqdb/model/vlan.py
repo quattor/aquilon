@@ -34,7 +34,7 @@ from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, object_session
 
-from aquilon.exceptions_ import InternalError
+from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Network, TorSwitch
@@ -58,6 +58,13 @@ class VlanInfo(Base):
     vlan_id = Column(Integer, primary_key=True)
     port_group = Column(AqStr(32))
     vlan_type = Column(Enum(32, VLAN_TYPES))
+
+    @classmethod
+    def get_vlan_id(cls, session, port_group, compel=InternalError):
+        info = session.query(cls).filter_by(port_group=port_group).first()
+        if not info and compel:
+            raise compel("No VLAN found for port group %s" % port_group)
+        return info.vlan_id
 
     @classmethod
     def get_port_group(cls, session, vlan_id, compel=InternalError):
@@ -153,6 +160,18 @@ class ObservedVlan(Base):
     @property
     def is_at_guest_capacity(self):
         return self.guest_count >= self.network.available_ip_count
+
+    @classmethod
+    def get_network(cls, session, switch, vlan_id, compel=NotFoundException):
+        q = session.query(cls).filter_by(switch=switch, vlan_id=vlan_id)
+        nets = q.all()
+        if not nets:
+            raise compel("No network found for switch %s and VLAN %s" %
+                         (switch.fqdn, vlan_id))
+        if len(nets) > 1:
+            raise InternalError("More than one network found for switch %s "
+                                "and VLAN %s" % (switch.fqdn, vlan_id))
+        return nets[0]
 
 ObservedVlan.__table__.primary_key.name = '%s_pk' % _TN
 

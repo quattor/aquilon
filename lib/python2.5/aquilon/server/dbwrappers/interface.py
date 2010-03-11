@@ -102,33 +102,55 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             raise ArgumentError("Cannot specify both --ip and --autoip")
         return ip
     dbsystem = None
-    # FIXME: Need to modify the autoip logic to check for a port group
-    # on the interface.  If there is one need to choose the appropriate
-    # network from the switch (not the management network).
+    dbnetwork = None
     if autoip:
         if ipfromip:
             raise ArgumentError("Cannot specify both --autoip and --ipfromip")
         if ipfromsystem:
             raise ArgumentError("Cannot specify both --autoip and "
                                 "--ipfromsystem")
-        q = session.query(ObservedMac)
-        q = q.filter_by(mac_address=dbinterface.mac)
-        q = q.order_by(desc(ObservedMac.last_seen))
-        dbom = q.first()
-        if not dbom:
-            raise ArgumentError("No switch found in the discovery table for "
-                                "mac %s" % dbinterface.mac)
-        dbsystem = dbom.switch
+        if dbinterface.port_group:
+            # This could either be an interface from a virtual machine
+            # or an interface on an ESX vmhost.
+            dbcluster = None
+            if dbinterface.machine.cluster:
+                # VM
+                dbcluster = dbinterface.machine.cluster
+            elif dbinterface.machine.host:
+                dbcluster = dbinterface.machine.host.cluster
+            if not dbcluster:
+                raise ArgumentError("Can only automatically assign an IP to "
+                                    "an interface with a port group on "
+                                    "virtual machines or ESX hosts.")
+            if not dbcluster.switch:
+                raise ArgumentError("Cannot automatically assign an IP to "
+                                    "an interface with a port group since "
+                                    "cluster %s is not associated with a "
+                                    "switch" % dbcluster.switch)
+            vlan_id = VlanInfo.get_vlan_id(session, dbinterface.port_group)
+            dbnetwork = ObservedVlan.get_network(session, vlan_id=vlan_id,
+                                                 switch=dbcluster.switch,
+                                                 compel=ArgumentError)
+        else:
+            q = session.query(ObservedMac)
+            q = q.filter_by(mac_address=dbinterface.mac)
+            q = q.order_by(desc(ObservedMac.last_seen))
+            dbom = q.first()
+            if not dbom:
+                raise ArgumentError("No switch found in the discovery table "
+                                    "for mac %s" % dbinterface.mac)
+            dbsystem = dbom.switch
     if ipfromsystem:
         if ipfromip:
             raise ArgumentError("Cannot specify both --ipfromsystem and "
                                 "--ipfromip")
         # Assumes one system entry, not necessarily correct.
         dbsystem = get_system(session, ipfromsystem)
+
     if ipfromip:
         # determine network
         dbnetwork = get_net_id_from_ip(session, ipfromip)
-    else:
+    elif not dbnetwork:
         # Any of the other options set dbsystem...
         dbnetwork = dbsystem.network
         # Could be slightly more intelligent here, and check to see if
@@ -141,10 +163,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         start = 8
     elif dbnetwork.network_type == 'tor_net2':
         start = 9
-    # FIXME: Verify the network type
     elif dbnetwork.network_type == 'vm_storage_net':
-        # FIXME: Verify the start offset
-        start = 37
+        start = 40
     else:
         start = 2
     # Not sure what to do about networks like /32 and /31...
