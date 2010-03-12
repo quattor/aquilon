@@ -111,15 +111,18 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         if ipfromsystem:
             raise ArgumentError("Cannot specify both --autoip and "
                                 "--ipfromsystem")
+        if not dbinterface:
+            raise ArgumentError("No interface available to automatically "
+                                "generate an IP.")
         if dbinterface.port_group:
             # This could either be an interface from a virtual machine
             # or an interface on an ESX vmhost.
             dbcluster = None
-            if dbinterface.machine.cluster:
+            if getattr(dbinterface.hardware_entity, "cluster", None):
                 # VM
-                dbcluster = dbinterface.machine.cluster
-            elif dbinterface.machine.host:
-                dbcluster = dbinterface.machine.host.cluster
+                dbcluster = dbinterface.hardware_entity.cluster
+            elif getattr(dbinterface.hardware_entity, "host", None):
+                dbcluster = dbinterface.hardware_entity.host.cluster
             if not dbcluster:
                 raise ArgumentError("Can only automatically assign an IP to "
                                     "an interface with a port group on "
@@ -168,7 +171,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     elif dbnetwork.network_type == 'vm_storage_net':
         start = 40
     else:
-        start = 2
+        start = 5
     # Not sure what to do about networks like /32 and /31...
     if dbnetwork.mask < start:
         start = 0
@@ -296,7 +299,7 @@ def choose_port_group(dbmachine):
     for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
         if dbobserved_vlan.vlan_type != 'user':
             continue
-        if dbobserved_vlan.is_at_vm_capacity:
+        if dbobserved_vlan.is_at_guest_capacity:
             continue
         return dbobserved_vlan.port_group
     raise ArgumentError("No available user port groups on switch %s" %
