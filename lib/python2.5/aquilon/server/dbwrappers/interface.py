@@ -35,11 +35,13 @@ To an extent, this has become a dumping ground for any common ip methods.
 
 from sqlalchemy.exceptions import InvalidRequestError
 from sqlalchemy.sql.expression import desc
+from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types.IPV4 import dq_to_int
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Interface, Machine, ObservedMac, System
+from aquilon.aqdb.model import (Interface, Machine, ObservedMac, System,
+                                VlanInfo, ObservedVlan)
 from aquilon.server.dbwrappers.system import get_system
 
 
@@ -230,3 +232,72 @@ def describe_interface(session, interface):
         description.append("and mac is in use by '%s'" %
                            ",".join([s.fqdn for s in systems]))
     return ", ".join(description)
+
+def verify_port_group(dbmachine, port_group):
+    """Validate that the port_group can be used on an interface.
+
+    If the machine is virtual, check that the corresponding VLAN has
+    been observed on the cluster's switch.
+
+    If the machine is physical but is part of an ESX cluster, also
+    check that the VLAN has been observed.
+
+    Otherwise just accept the label.
+
+    As a convenience, return None (unset the port_group) if an empty
+    string is passed in.
+
+    """
+    if not port_group:
+        return None
+    session = object_session(dbmachine)
+    dbvi = VlanInfo.get_unique(session, port_group=port_group, compel=True)
+    if dbmachine.model.machine_type == "virtual_machine":
+        dbswitch = dbmachine.cluster.switch
+        if not dbswitch:
+            raise ArgumentError("Cannot verify port group availability: "
+                                "no tor_switch record for cluster %s" %
+                                dbmachine.cluster)
+        q = session.query(ObservedVlan)
+        q = q.filter_by(vlan_id=dbvi.vlan_id)
+        q = q.filter_by(switch=dbswitch)
+        vlans = q.all()
+        if not vlans:
+            raise ArgumentError("Cannot verify port group availability: "
+                                "no record for VLAN %s on switch %s" %
+                                (vlan_id, dbswitch.fqdn))
+        if len(vlans) > 1:
+            raise InternalError("Too many subnets found for VLAN %s "
+                                "on switch %s" %
+                                (vlan_id, dbswitch.fqdn))
+        dbobserved_vlan = vlans[0]
+        if dbobserved_vlan.is_at_guest_capacity:
+            raise ArgumentError("Port group %s is full for switch %s" %
+                                (dbvi.port_group,
+                                 dbobserved_vlan.switch.fqdn))
+    elif dbmachine.host and dbmachine.host.cluster and \
+         dbmachine.host.cluster.switch:
+        dbswitch = dbmachine.host.cluster.switch
+        q = session.query(ObservedVlan)
+        q = q.filter_by(vlan_id=dbvi.vlan_id, switch=dbswitch)
+        if not q.count():
+            raise ArgumentError("VLAN %s not found for switch %s" %
+                                (dbvi.vlan_id, dbswitch.fqdn))
+    return dbvi.port_group
+
+def choose_port_group(dbmachine):
+    if dbmachine.model.machine_type != "virtual_machine":
+        raise ArgumentError("Can only automatically generate "
+                            "portgroup entry for virtual hardware.")
+    if not dbmachine.cluster.switch:
+        raise ArgumentError("Cannot automatically allocate port group:"
+                            " no tor_switch record for cluster %s" %
+                            dbmachine.cluster)
+    for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
+        if dbobserved_vlan.vlan_type != 'user':
+            continue
+        if dbobserved_vlan.is_at_vm_capacity:
+            continue
+        return dbobserved_vlan.port_group
+    raise ArgumentError("No available user port groups on switch %s" %
+                        dbmachine.cluster.switch.fqdn)

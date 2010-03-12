@@ -38,7 +38,9 @@ from aquilon.aqdb.model import Interface, Machine, Manager
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.interface import describe_interface
+from aquilon.server.dbwrappers.interface import (describe_interface,
+                                                 verify_port_group,
+                                                 choose_port_group)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.templates.base import (compileLock, compileRelease,
                                            PlenaryCollection)
@@ -114,50 +116,10 @@ class CommandAddInterfaceMachine(BrokerCommand):
             #Ignore now that Mac Address can be null
             pass
 
-        # FIXME: Need exactly the same logic in update_interface...
-        if pg:
-            dbpg = VlanInfo.get_unique(session, port_group=pg, compel=True)
-            # FIXME: Is there a way to check non virtual machines?
-            # Maybe look at dbmachine.host.cluster.switch if ESX?
-            if dbmachine.model.machine_type == "virtual_machine":
-                dbswitch = dbmachine.cluster.switch
-                if not dbswitch:
-                    raise ArgumentError("Cannot automatically allocate port "
-                                        "group: no tor_switch record for "
-                                        "cluster %s" % dbmachine.cluster)
-                q = session.query(ObservedVlan)
-                q = q.filter_by(vlan_id=dbpg.vlan_id)
-                q = q.filter_by(switch=dbswitch)
-                vlans = q.all()
-                if not vlans:
-                    raise ArgumentError("No record for VLAN %s on switch %s" %
-                                        (vlan_id, dbswitch.fqdn))
-                if len(vlans) > 1:
-                    raise InternalError("Too many subnets found for VLAN %s "
-                                        "on switch %s" %
-                                        (vlan_id, dbswitch.fqdn))
-                dbobserved_vlan = vlans[0]
-                if dbobserved_vlan.is_at_guest_capacity:
-                    raise ArgumentError("Port group %s is full for switch %s" %
-                                        (dbpg.port_group,
-                                         dbobserved_vlan.switch.fqdn))
-            extra['port_group'] = dbpg.port_group
+        if pg is not None:
+            extra['port_group'] = verify_port_group(dbmachine, pg)
         elif autopg:
-            if dbmachine.model.machine_type != "virtual_machine":
-                raise ArgumentError("Can only automatically generate "
-                                    "portgroup entry for virtual hardware.")
-            if not dbmachine.cluster.switch:
-                raise ArgumentError("Cannot automatically allocate port group:"
-                                    " no tor_switch record for cluster %s" %
-                                    dbmachine.cluster)
-            for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
-                if dbobserved_vlan.vlan_type != 'user':
-                    continue
-                if dbobserved_vlan.is_at_vm_capacity:
-                    continue
-                extra['port_group'] = dbobserved_vlan.port_group
-            raise ArgumentError("No available user port groups on switch %s" %
-                                dbobserved_vlan.switch.fqdn)
+            extra['port_group'] = choose_port_group(dbmachine)
 
         try:
             dbinterface = Interface(name=interface, hardware_entity=dbmachine,

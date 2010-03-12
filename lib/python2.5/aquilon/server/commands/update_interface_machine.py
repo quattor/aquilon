@@ -31,7 +31,9 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
-                                                 restrict_tor_offsets)
+                                                 restrict_tor_offsets,
+                                                 verify_port_group,
+                                                 choose_port_group)
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.base import compileLock, compileRelease
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -45,7 +47,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, ip, boot,
-               comments, user, **arguments):
+               pg, autopg, comments, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -69,6 +71,14 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             if dbhost.archetype.name == 'aurora' and not dbhost.interfaces:
                 dbinterface.system = dbhost
                 dbhost.mac = dbinterface.mac
+
+        # We may need extra IP verification (or an autoip option)...
+        # This may also throw spurious errors if attempting to set the
+        # port_group to a value it already has.
+        if pg is not None:
+            dbinterface.port_group = verify_port_group(dbmachine, pg)
+        elif autopg:
+            dbinterface.port_group = choose_port_group(dbmachine)
 
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
