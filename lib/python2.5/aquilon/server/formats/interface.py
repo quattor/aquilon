@@ -44,6 +44,8 @@ class InterfaceFormatter(ObjectFormatter):
                 interface.name, interface.bootable)]
 
         details.append(indent + "  Type: %s" % interface.interface_type)
+        if interface.port_group:
+            details.append(indent + "  Port Group: %s" % interface.port_group)
 
         hw = interface.hardware_entity
         hw_type = hw.hardware_entity_type
