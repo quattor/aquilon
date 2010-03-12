@@ -44,7 +44,7 @@ sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
 
 import ms.version
 
-ms.version.addpkg('setuptools', '0.6c8-py25')
+ms.version.addpkg('setuptools', '0.6c11')
 ms.version.addpkg('protoc', 'prod', meta='aquilon')
 ms.version.addpkg('zope.interface', '3.5.2', 'dist')
 ms.version.addpkg('twisted', '8.2.0-ms1', 'dist')

@@ -31,8 +31,8 @@
 '''Script generating bash completion code from input.xml.
 '''
 
-import msversion
-msversion.addpkg('Cheetah', '2.0.1-py25', 'dist')
+import ms.version
+ms.version.addpkg('Cheetah', '2.4.1')
 
 import os
 import sys

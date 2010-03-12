@@ -35,28 +35,23 @@ import ms.version
 import subprocess as sp
 
 if not sys.modules.has_key('pyparsing'):
-    ms.version.addpkg('pyparsing', '1.5.0', 'dist')
+    ms.version.addpkg('pyparsing', '1.5.2')
     import pyparsing
 
 if not sys.modules.has_key('pydot'):
-    ms.version.addpkg('pydot', '1.0.2', 'dist')
+    ms.version.addpkg('pydot', '1.0.2')
     import pydot
 
 if not sys.modules.has_key('sqlalchemy'):
     ms.version.addpkg('sqlalchemy', '0.5.0') #TODO: REMOVE THIS STANZA!
     import sqlalchemy
-    import warnings
-    #warnings.warn('schema2dot: loading sqlalchemy on my own')
 
 if not sys.modules.has_key('pil'):
     ms.version.addpkg('pil','1.1.6')
 from PIL import Image
 
-#if not sys.modules.has_key('ms.modulecmd'):
-#    ms.version.addpkg("ms.modulecmd", "1.0.0")
 import ms.modulecmd
 
-#m = Modulecmd()
 ms.modulecmd.load('fsf/graphviz/2.6')
 
 #TODO:put this in the module itself, not here

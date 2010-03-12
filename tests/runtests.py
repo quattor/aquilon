@@ -42,6 +42,7 @@ BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
 sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
+import aquilon.aqdb.depends
 
 from aquilon.config import Config
 from aquilon.utils  import kill_from_pid_file

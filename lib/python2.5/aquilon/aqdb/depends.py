@@ -34,14 +34,13 @@ import ms.version
 # in an addpkg call!!!
 #######
 
-ms.version.addpkg('sqlalchemy', '0.5.5')
+ms.version.addpkg('sqlalchemy', '0.5.8')
 
 ms.version.addpkg('cx_Oracle', '5.0.1-11.1.0.6')
 
 ms.version.addpkg('ipython', '0.10')
 
-#needed to eliminate import noise created by nose and protoc in brokertest
-ms.version.addpkg('setuptools', '0.6c9')
+ms.version.addpkg('setuptools', '0.6c11')
 
 ms.version.addpkg('nose', '0.11.1')
 
@@ -49,4 +48,4 @@ ms.version.addpkg('ms.modulecmd', '1.0.2')
 
 ms.version.addpkg('coverage', '3.1')
 
-ms.version.addpkg('argparse', '1.0.1')
+ms.version.addpkg('argparse', '1.1')

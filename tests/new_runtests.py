@@ -44,7 +44,6 @@ SRCDIR = os.path.join(BINDIR, "..")
 sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
 
 import aquilon.aqdb.depends
-import setuptools
 import argparse
 import nose
 
@@ -231,11 +230,5 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
 if __name__ == '__main__':
     main(sys.argv)
 
-#
-# TODO: add --useenv option to take config file from $AQDCONF
-#
-#class SetConfig(argparse.Action):
-#    """ custom action to set the option from users environment """
-#    def __call__(self, parser, namespace, values, option_string=None):
-#        print '%r %r %r' % (namespace, values, option_string)
-#        setattr(namespace, self.dest, os.environ["AQDCONF"])
+    #need to completely remove the option parsing and let nose take care of it
+    #remove any options you need from sys.argv and then
