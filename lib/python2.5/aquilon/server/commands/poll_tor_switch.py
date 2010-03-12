@@ -33,13 +33,14 @@ from csv import DictReader, Error as CSVError
 from StringIO import StringIO
 from datetime import datetime
 
-from aquilon.exceptions_ import AquilonError, NotFoundException
+from aquilon.exceptions_ import AquilonError, NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.server.processes import run_command
-from aquilon.aqdb.model import TorSwitch, HardwareEntity, ObservedMac
+from aquilon.aqdb.model import (TorSwitch, HardwareEntity, ObservedMac,
+                                ObservedVlan, Network)
 
 
 # This runs...
@@ -154,7 +155,7 @@ class CommandPollTorSwitch(BrokerCommand):
             raise AquilonError("Error parsing CheckNet results: %s" % e)
         return macports
 
-    def poll_vlan(session, logger, switch, now):
+    def poll_vlan(self, session, logger, switch, now):
         if not switch.ip:
             raise ArgumentError("Cannot poll VLAN info for a switch without "
                                 "a registered IP address [%s]" % switch.fqdn)
@@ -175,7 +176,7 @@ class CommandPollTorSwitch(BrokerCommand):
                                 "output line #%d: %s" % (reader.line_num, row))
                     continue
                 try:
-                    vlan_int = int(port)
+                    vlan_int = int(vlan)
                 except ValueError, e:
                     logger.info("Error parsing vlan number in output "
                                 "line #%d: %s error: %s" %
