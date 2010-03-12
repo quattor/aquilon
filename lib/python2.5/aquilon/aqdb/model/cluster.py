@@ -146,7 +146,8 @@ class EsxCluster(Cluster):
         for host in self.hosts:
             if location:
                 location = location.merge(host.location)
-            location = host.location
+            else:
+                location = host.location
         return location
 
     def __init__(self, **kw):
