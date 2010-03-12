@@ -123,6 +123,8 @@ class TestBrokerCommand(unittest.TestCase):
         err = self.lock_request_re.sub('', err)
         err = err.replace('acquired compile lock\n', '')
         err = err.replace('releasing compile lock\n', '')
+        err = err.replace('Client status messages disabled, '
+                          'retries exceeded.\n', '')
         return (p, out, err)
 
     def successtest(self, command, **kwargs):
