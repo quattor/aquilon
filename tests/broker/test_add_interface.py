@@ -396,6 +396,22 @@ class TestAddInterface(TestBrokerCommand):
                             "--machine", machine,
                             "--mac", self.net.tor_net[6].usable[port].mac])
 
+    def testadd10gigrackinterfaces(self):
+        for port in range(1, 13):
+            for (template, offset) in [('ut11s01p%d', 0), ('ut12s02p%d', 12)]:
+                machine = template % port
+                # Both counts would start at 0 except the tor_net has two
+                # tor_switches taking IPs.
+                i = port + 1 + offset
+                j = port - 1 + offset
+                self.noouttest(["add", "interface", "--interface", "eth0",
+                                "--machine", machine,
+                                "--mac", self.net.tor_net2[2].usable[i].mac])
+                self.noouttest(["add", "interface", "--interface", "eth1",
+                                "--pg=storage-v701",
+                                "--machine", machine, "--mac",
+                                self.net.vm_storage_net[0].usable[j].mac])
+
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.
     # FIXME: Missing a test for a failed DSDB add_host.

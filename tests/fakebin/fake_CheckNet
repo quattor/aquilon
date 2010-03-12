@@ -27,18 +27,16 @@ def determine_output(args):
         sys.exit(1)
     fakedir = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                             "CheckNet.d"))
+    template = "CheckNet_-ho_%s_camtable_-nobanner_-table_1_-noprompt.out"
+    guess = os.path.join(fakedir, template % hostname)
+    if os.path.exists(guess):
+        return guess
     if hostname == 'np06bals03' or hostname == '172.31.64.69':
         return os.path.join(fakedir,
             "CheckNet_-ho_np06bals03_camtable_-nobanner_-table_1_-noprompt.out")
     if hostname == 'np06fals01' or hostname == '172.31.88.5':
         return os.path.join(fakedir,
             "CheckNet_-ho_np06fals01_camtable_-nobanner_-table_1_-noprompt.out")
-    # Somewhat fancier solution... not needed...
-    #hostname_search = "_%s_" % hostname
-    #for (dirpath, dirnames, filenames) in os.walk(fakedir):
-    #    for filename in filenames:
-    #        if filename.find(hostname_search) >= 0:
-    #            return os.path.join(dirpath, filename)
     print >>sys.stderr, "No information found for host '%s'" % hostname
     sys.exit(1)
 
@@ -50,4 +48,3 @@ def fake_checknet(args):
 
 if __name__=='__main__':
     fake_checknet(sys.argv)
-

@@ -281,9 +281,25 @@ class TestAddTorSwitch(TestBrokerCommand):
         command = "show tor_switch --tor_switch ut01ga1s99.aqd-unittest.ms.com"
         out = self.notfoundtest(command.split(" "))
 
+    def testaddut01ga2s01(self):
+        self.noouttest(["add", "tor_switch",
+                        "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com",
+                        "--building", "ut", "--rackid", "11",
+                        "--rackrow", "k", "--rackcol", "1",
+                        "--model", "rs g8000", "--interface", "xge49",
+                        "--mac", self.net.tor_net2[2].usable[0].mac,
+                        "--ip", self.net.tor_net2[2].usable[0].ip])
+
+    def testaddut01ga2s02(self):
+        self.noouttest(["add", "tor_switch",
+                        "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com",
+                        "--building", "ut", "--rackid", "12",
+                        "--rackrow", "k", "--rackcol", "2",
+                        "--model", "rs g8000", "--interface", "xge49",
+                        "--mac", self.net.tor_net2[2].usable[1].mac,
+                        "--ip", self.net.tor_net2[2].usable[1].ip])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-

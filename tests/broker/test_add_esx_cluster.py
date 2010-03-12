@@ -263,6 +263,15 @@ class TestAddESXCluster(TestBrokerCommand):
                              "'/system/cluster/name' = '%s';" % cluster,
                              "read %s" % plenary)
 
+    def testaddutmc4(self):
+        # Allocate utecl5 - utecl10 for utmc4 (port group testing)
+        for i in range(5, 11):
+            command = ["add_esx_cluster", "--cluster=utecl%d" % i,
+                       "--metacluster=utmc4", "--building=ut",
+                       "--domain=unittest",
+                       "--archetype=vmhost", "--personality=esx_server"]
+            self.noouttest(command)
+
     def testfailcatmissingcluster(self):
         command = "cat --cluster=cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))

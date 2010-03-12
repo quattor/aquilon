@@ -1,0 +1,13 @@
+Device_Name,fdbMacAddr,fdbVlan,fdbVlanId,fdbSrcPort,fdbSrcTrunk,fdbState,fdbRefSps,fdbLearnedPort,fbStatus
+ut01ga2s01.aqd-unittest.ms.com,0202040206cb,103,103,1,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206cc,103,103,2,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206cd,103,103,3,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206ce,103,103,4,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206cf,103,103,5,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d0,103,103,6,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d1,103,103,7,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d2,103,103,8,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d3,103,103,9,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d4,103,103,10,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d5,103,103,11,0,forward,,0,notpermanent
+ut01ga2s01.aqd-unittest.ms.com,0202040206d6,103,103,12,0,forward,,0,notpermanent

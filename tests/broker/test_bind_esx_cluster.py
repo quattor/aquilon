@@ -183,6 +183,13 @@ class TestBindESXCluster(TestBrokerCommand):
                              "Not all cluster members (%s) are aligned (%s)." %
                              (members, aligned))
 
+    def testbindutmc4(self):
+        for i in range(1, 25):
+            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
+            cluster = "utecl%d" % (5 + ((i - 1) / 4))
+            self.successtest(["bind_esx_cluster",
+                              "--hostname", host, "--cluster", cluster])
+
     # FIXME: Also test plenary files.
 
 
