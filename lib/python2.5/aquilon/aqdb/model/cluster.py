@@ -134,7 +134,7 @@ class EsxCluster(Cluster):
                        nullable=True)
 
     switch = relation(TorSwitch, uselist=False, lazy=False,
-                      backref=backref('esx_clusters', cascade='all'))
+                      backref=backref('esx_clusters'))
 
     @property
     def vm_to_host_ratio(self):
