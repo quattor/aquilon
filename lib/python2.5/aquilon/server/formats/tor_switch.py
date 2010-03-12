@@ -53,6 +53,10 @@ class TorSwitchFormatter(ObjectFormatter):
                            (om.port_number, om.mac_address))
             details.append(indent + "    Created: %s Last Seen: %s" %
                            (om.creation_date, om.last_seen))
+        for ov in tor_switch.observed_vlans:
+            details.append(indent + "  VLAN %d: %s" %
+                           (ov.vlan_id, ov.network.ip))
+            details.append(indent + "    Created: %s" % ov.creation_date)
         for i in tor_switch.tor_switch_hw.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if tor_switch.comments:
