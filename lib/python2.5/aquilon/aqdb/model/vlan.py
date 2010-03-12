@@ -33,6 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.utils import monkeypatch
@@ -56,8 +57,8 @@ class VlanInfo(Base):
     __tablename__ = _VTN
 
     vlan_id = Column(Integer, primary_key=True)
-    port_group = Column(AqStr(32))
-    vlan_type = Column(Enum(32, VLAN_TYPES))
+    port_group = Column(AqStr(32), nullable=False)
+    vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
 
     @classmethod
     def get_vlan_id(cls, session, port_group, compel=InternalError):
@@ -123,9 +124,10 @@ class ObservedVlan(Base):
     creation_date = Column('creation_date', DateTime,
                            default=datetime.now, nullable=False)
 
-    # FIXME: The backref should be ordered by vlan_id...
-    switch = relation(TorSwitch, backref=backref('%ss' % _TN, cascade='delete'))
-    network = relation(Network, backref=backref('%ss' % _TN, cascade='delete'))
+    switch = relation(TorSwitch, backref=backref('%ss' % _TN, cascade='delete',
+                                                 order_by=[asc('vlan_id')]))
+    network = relation(Network, backref=backref('%ss' % _TN, cascade='delete',
+                                                order_by=[asc('vlan_id')]))
 
     @property
     def portgroup(self):
