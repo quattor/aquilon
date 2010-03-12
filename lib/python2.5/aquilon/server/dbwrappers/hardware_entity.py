@@ -70,9 +70,12 @@ def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
         if kwargs.get('machine_type'):
             q = q.filter_by(machine_type=kwargs['machine_type'])
         q = q.reset_joinpoint()
-    if kwargs.get('mac', None):
+    if kwargs.get('mac') or kwargs.get('pg'):
         q = q.join('interfaces')
-        q = q.filter_by(mac=kwargs['mac'])
+        if kwargs.get('mac'):
+            q = q.filter_by(mac=kwargs['mac'])
+        if kwargs.get('pg'):
+            q = q.filter_by(port_group=kwargs['pg'])
         q = q.reset_joinpoint()
     if kwargs.get('serial', None):
         q = q.filter_by(serial_no=kwargs['serial'])
