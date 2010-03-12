@@ -32,13 +32,13 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm import relation, backref, object_session, aliased
 from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Network, TorSwitch
+from aquilon.aqdb.model import Base, Network, TorSwitch, Machine
 
 MAX_VLANS = 4096 #IEEE 802.1Q standard
 
@@ -130,7 +130,7 @@ class ObservedVlan(Base):
                                                 order_by=[asc('vlan_id')]))
 
     @property
-    def portgroup(self):
+    def port_group(self):
         session = object_session(self)
         info = session.query(VlanInfo).filter_by(vlan_id=self.vlan_id).first()
         if info:
@@ -147,14 +147,18 @@ class ObservedVlan(Base):
 
     @property
     def guest_count(self):
+        # Can't import this earlier due to circular dependencies...
+        from aquilon.aqdb.model import Cluster, EsxCluster
         # Count the number of VMs in the clusters with this switch and vlan.
         session = object_session(self)
         port_group = VlanInfo.get_port_group(session, vlan_id=self.vlan_id)
+        ESXAlias = aliased(EsxCluster)
         q = session.query(Machine)
-        q = q.join(['cluster'])
+        q = q.join(['_cluster', 'cluster',
+                    (ESXAlias, ESXAlias.esx_cluster_id == Cluster.id)])
         q = q.filter_by(switch=self.switch)
         q = q.reset_joinpoint()
-        q = q.join(['interface'])
+        q = q.join(['interfaces'])
         q = q.filter_by(port_group=port_group)
         q = q.reset_joinpoint()
         return q.count()
@@ -173,7 +177,7 @@ class ObservedVlan(Base):
         if len(nets) > 1:
             raise InternalError("More than one network found for switch %s "
                                 "and VLAN %s" % (switch.fqdn, vlan_id))
-        return nets[0]
+        return nets[0].network
 
 ObservedVlan.__table__.primary_key.name = '%s_pk' % _TN
 
