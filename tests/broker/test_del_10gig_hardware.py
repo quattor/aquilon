@@ -27,13 +27,11 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the make command."""
-
+"""Module for testing commands that remove virtual hardware."""
 
 import os
 import sys
 import unittest
-import re
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -43,42 +41,33 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestMake(TestBrokerCommand):
+class TestDel10GigHardware(TestBrokerCommand):
 
-    def testmakevmhosts(self):
-        for i in range(1, 6):
-            command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--os", "esxi/4.0.0", "--buildstatus", "build"]
+    def test_200_del_hosts(self):
+        for i in range(0, 8) + range(9, 17):
+            hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
+            command = "del_host --hostname %s" % hostname
+            (out, err) = self.successtest(command.split(" "))
+            self.assertEmptyOut(out, command)
+
+    def test_300_delaux(self):
+        for i in range(1, 25):
+            hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
+            command = ["del", "auxiliary", "--auxiliary", hostname]
             (out, err) = self.successtest(command)
-            self.matchclean(err, "removing binding", command)
+            self.assertEmptyOut(out, command)
 
-            self.assert_(os.path.exists(os.path.join(
-                self.config.get("broker", "profilesdir"),
-                "evh1.aqd-unittest.ms.com.xml")))
+    def test_700_delmachines(self):
+        for i in range(0, 18):
+            machine = "evm%d" % (10 + i)
+            self.noouttest(["del", "machine", "--machine", machine])
 
-            self.failUnless(os.path.exists(os.path.join(
-                self.config.get("broker", "builddir"),
-                "domains", "unittest", "profiles",
-                "evh1.aqd-unittest.ms.com.tpl")))
-
-            servicedir = os.path.join(self.config.get("broker", "plenarydir"),
-                                      "servicedata")
-            results = self.grepcommand(["-rl", "evh%s.aqd-unittest.ms.com" % i,
-                                        servicedir])
-            self.failUnless(results, "No service plenary data that includes"
-                                     "evh%s.aqd-unittest.ms.com" % i)
-
-    def testmake10gighosts(self):
-        for i in range(51, 75):
-            command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            (out, err) = self.successtest(command)
-
-    def testfailwindows(self):
-        command = ["make", "--hostname", "unittest01.one-nyp.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "is not a compilable archetype", command)
-
+    def test_800_verifydelmachines(self):
+        for i in range(0, 18):
+            machine = "evm%d" % (10 + i)
+            command = "show machine --machine %s" % machine
+            self.notfoundtest(command.split(" "))
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDel10GigHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)

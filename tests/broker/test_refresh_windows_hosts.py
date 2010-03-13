@@ -97,13 +97,13 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                          command)
         self.matchoutput(err,
                          "Skipping host badhost4.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:08 is tied to "
+                         "interface with mac 02:02:04:02:01:0b is tied to "
                          "hardware ut3c5.aqd-unittest.ms.com instead of a "
                          "virtual machine",
                          command)
         self.matchoutput(err,
                          "Skipping host badhost5.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:07 is already "
+                         "interface with mac 02:02:04:02:01:0a is already "
                          "tied to unittest01.one-nyp.ms.com",
                          command)
         self.matchoutput(err,
@@ -153,13 +153,13 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
                          command)
         self.matchoutput(err,
                          "Skipping host badhost4.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:08 is tied to "
+                         "interface with mac 02:02:04:02:01:0b is tied to "
                          "hardware ut3c5.aqd-unittest.ms.com instead of a "
                          "virtual machine",
                          command)
         self.matchoutput(err,
                          "Skipping host badhost5.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:07 is already "
+                         "interface with mac 02:02:04:02:01:0a is already "
                          "tied to unittest01.one-nyp.ms.com",
                          command)
         self.matchoutput(err,

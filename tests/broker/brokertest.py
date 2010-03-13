@@ -533,8 +533,7 @@ class NetworkInfo(object):
 
         self.usable = list()
         self.reserved = list()
-        # FIXME: Should be + 4 by default
-        usable_start = gateway[3] + 1
+        usable_start = gateway[3] + 4
         for offset in offsets:
             reserved = gateway[:]
             reserved[3] = gateway[3] - 1 + offset

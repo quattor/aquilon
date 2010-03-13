@@ -207,9 +207,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               command)
             self.matchoutput(out, """"boot", true,""", command)
 
-    # FIXME: Add a test for creating an aquilon host out of a virtual
-    # machine.
-
     def test_500_verifycatcluster(self):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))

@@ -73,14 +73,13 @@ class TestCompile(TestBrokerCommand):
     def test_200_compileunittest(self):
         command = "compile --domain unittest"
         (out, err) = self.successtest(command.split(" "))
-        # Currently assumes that there is only one client of utsi1.
         # The idea is to check that only that hosts that needed to
         # be compiled actually were. Note that clusters and other
         # included profiles might get recompiled, so we need to adjust
         # the number we're looking for based on everything. It might
         # be better to look for the objects being processed and checking
-        # that the numbers a/b are different.
-        self.matchoutput(err, "5/5 compiled", command)
+        # that the numbers a/b (for processing) are different.
+        self.matchoutput(err, "11/11 compiled", command)
 
 
 if __name__=='__main__':

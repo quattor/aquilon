@@ -19,9 +19,9 @@ INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sys
 -- MAC address that does not exist in AQDB
 INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("02:00:00:00:00:00", "badmachine", "badhost3.msad.ms.com", NULL, "badhost3.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
 -- Valid hostname where the mac is already taken by a chassis.
-INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("02:02:04:02:01:08", "ut3c5", "ut3c5.aqd-unittest.ms.com", "badhost4.msad.ms.com", "badhost4.msad.ms.com", "ut.ny.na", "aurora_vendor", "utchassis");
+INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("02:02:04:02:01:0b", "ut3c5", "ut3c5.aqd-unittest.ms.com", "badhost4.msad.ms.com", "badhost4.msad.ms.com", "ut.ny.na", "aurora_vendor", "utchassis");
 -- Valid Windows hostname that is not covered by refresh
-INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("02:02:04:02:01:07", "ut3c1n4", "unittest01.one-nyp.ms.com", "badhost5.msad.ms.com", "badhost5.msad.ms.com", "ut.ny.na", "ibm", "hs21-885315u");
+INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("02:02:04:02:01:0a", "ut3c1n4", "unittest01.one-nyp.ms.com", "badhost5.msad.ms.com", "badhost5.msad.ms.com", "ut.ny.na", "ibm", "hs21-885315u");
 -- Valid entries
 INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:20:02", "evm3", "desktop1.msad.ms.com", NULL, "desktop1.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
 INSERT INTO machines (ether, machine, hostname, aqhostname, windowshostname, sysloc, hwvendor, hwmodel) VALUES ("00:50:56:01:20:03", "evm4", "desktop2.msad.ms.com", NULL, "desktop2.msad.ms.com", "ut.ny.na", "utvendor", "utmedium");
