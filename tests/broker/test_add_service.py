@@ -296,6 +296,11 @@ class TestAddService(TestBrokerCommand):
             self.noouttest(["add_service", "--service=nas_disk_share",
                             "--instance=test_share_%s" % i])
 
+    def testadd10gigshares(self):
+        for i in range(5, 11):
+            self.noouttest(["add_service", "--service=nas_disk_share",
+                            "--instance=utecl%d_share" % i])
+
     def testverifydiskcount(self):
         command = ["show_service", "--service=nas_disk_share",
                    "--instance=test_share_1"]

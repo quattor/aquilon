@@ -64,6 +64,7 @@ class TestAddInterface(TestBrokerCommand):
                          "Interface: eth1 %s boot=False" %
                          self.net.unknown[0].usable[1].mac.lower(),
                          command)
+        self.matchclean(out, "Port Group", command)
 
     def testverifycatut3c5n10interfaces(self):
         command = "cat --machine ut3c5n10"
@@ -395,6 +396,43 @@ class TestAddInterface(TestBrokerCommand):
             self.noouttest(["add", "interface", "--interface", "eth1",
                             "--machine", machine,
                             "--mac", self.net.tor_net[6].usable[port].mac])
+
+    def testadd10gigrackinterfaces(self):
+        for port in range(1, 13):
+            for (template, offset) in [('ut11s01p%d', 0), ('ut12s02p%d', 12)]:
+                machine = template % port
+                # Both counts would start at 0 except the tor_net has two
+                # tor_switches taking IPs.
+                i = port + 1 + offset
+                j = port - 1 + offset
+                self.noouttest(["add", "interface", "--interface", "eth0",
+                                "--machine", machine,
+                                "--mac", self.net.tor_net2[2].usable[i].mac])
+                self.noouttest(["add", "interface", "--interface", "eth1",
+                                "--pg=storage-v701",
+                                "--machine", machine, "--mac",
+                                self.net.vm_storage_net[0].usable[j].mac])
+
+    def testverifypg(self):
+        command = "show machine --machine ut11s01p1"
+        out = self.commandtest(command.split())
+        self.matchoutput(out, "Port Group: storage-v701", command)
+
+    def testverifycatpg(self):
+        command = "cat --machine ut11s01p1"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic/eth0" = nlist\(\s*'
+                          r'"hwaddr", "%s",\s*'
+                          r'"boot", true,\s*\);'
+                          % self.net.tor_net2[2].usable[2].mac,
+                          command)
+        self.searchoutput(out,
+                          r'"cards/nic/eth1" = nlist\(\s*'
+                          r'"hwaddr", "%s",\s*'
+                          r'"port_group", "storage-v701",\s*\);'
+                          % self.net.vm_storage_net[0].usable[0].mac,
+                          command)
 
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.

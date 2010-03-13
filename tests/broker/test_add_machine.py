@@ -315,6 +315,13 @@ class TestAddMachine(TestBrokerCommand):
             self.noouttest(["add", "machine", "--machine", "ut10s04p%d" % port,
                             "--rack", "ut10", "--model", "vb1205xm"])
 
+    def testadd10gigracks(self):
+        for port in range(1, 13):
+            self.noouttest(["add", "machine", "--machine", "ut11s01p%d" % port,
+                            "--rack", "ut11", "--model", "vb1205xm"])
+            self.noouttest(["add", "machine", "--machine", "ut12s02p%d" % port,
+                            "--rack", "ut12", "--model", "vb1205xm"])
+
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.
     # FIXME: Missing a test for chassis without a slot.  (May not be possible

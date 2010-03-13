@@ -139,6 +139,13 @@ class TestDelMachine(TestBrokerCommand):
             command = "show machine --machine ut10s04p%d" % port
             self.notfoundtest(command.split(" "))
 
+    def testdel10gigracks(self):
+        for port in range(1, 13):
+            command = "del machine --machine ut11s01p%d" % port
+            self.noouttest(command.split(" "))
+            command = "del machine --machine ut12s02p%d" % port
+            self.noouttest(command.split(" "))
+
     # FIXME: Add a test for deleting a machine with only auxiliaries.
 
 

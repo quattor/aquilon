@@ -127,8 +127,53 @@ class TestPollTorSwitch(TestBrokerCommand):
                     "last seen '%s' in output:\n%s" %
                     (m.group(1), m.group(2), out))
 
+    def testpollut01ga2s01(self):
+        self.noouttest(["poll", "tor_switch", "--vlan",
+                        "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com"])
+
+    def testverifypollut01ga2s01(self):
+        command = "show tor_switch --tor_switch ut01ga2s01.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        for i in range(1, 13):
+            self.matchoutput(out,
+                             "Port %d: %s" %
+                             (i, self.net.tor_net2[2].usable[i + 1].mac),
+                         command)
+        self.matchoutput(out, "VLAN 701: %s" % self.net.vm_storage_net[0].ip,
+                         command)
+        # I was lazy... really this should be some separate non-routeable
+        # subnet and not the tor_net2...
+        self.matchoutput(out, "VLAN 702: %s" % self.net.tor_net2[2].ip,
+                         command)
+        self.matchoutput(out, "VLAN 710: %s" % self.net.unknown[2].ip, command)
+        self.matchoutput(out, "VLAN 711: %s" % self.net.unknown[3].ip, command)
+        self.matchoutput(out, "VLAN 712: %s" % self.net.unknown[4].ip, command)
+        self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[5].ip, command)
+
+    def testpollut01ga2s02(self):
+        self.noouttest(["poll", "tor_switch", "--vlan",
+                        "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com"])
+
+    def testverifypollut01ga2s02(self):
+        command = "show tor_switch --tor_switch ut01ga2s02.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        for i in range(13, 25):
+            self.matchoutput(out,
+                             "Port %d: %s" %
+                             (i - 12, self.net.tor_net2[2].usable[i + 1].mac),
+                             command)
+        self.matchoutput(out, "VLAN 701: %s" % self.net.vm_storage_net[0].ip,
+                         command)
+        # I was lazy... really this should be some separate non-routeable
+        # subnet and not the tor_net2...
+        self.matchoutput(out, "VLAN 702: %s" % self.net.tor_net2[2].ip,
+                         command)
+        self.matchoutput(out, "VLAN 710: %s" % self.net.unknown[6].ip, command)
+        self.matchoutput(out, "VLAN 711: %s" % self.net.unknown[7].ip, command)
+        self.matchoutput(out, "VLAN 712: %s" % self.net.unknown[8].ip, command)
+        self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[9].ip, command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

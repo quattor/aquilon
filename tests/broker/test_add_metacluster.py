@@ -95,6 +95,12 @@ class TestAddMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Comments: MetaCluster with no members allowed",
                          command)
 
+    def testaddutmc4(self):
+        # Sort of a mini-10 Gig design for port group testing...
+        command = ["add_metacluster", "--metacluster=utmc4",
+                   "--max_members=6", "--max_shares=6"]
+        self.noouttest(command)
+
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))

@@ -66,6 +66,8 @@ class Interface(Base):
                                            ondelete='CASCADE'),
                        nullable=True)
 
+    port_group = Column(AqStr(32), nullable=True)
+
     creation_date = Column('creation_date', DateTime, default=datetime.now,
                            nullable=False)
 

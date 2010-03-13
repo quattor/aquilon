@@ -37,6 +37,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.dbwrappers.domain import verify_domain
+from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 
 
 class CommandAddESXCluster(BrokerCommand):
@@ -44,8 +45,8 @@ class CommandAddESXCluster(BrokerCommand):
     required_parameters = ["cluster", "metacluster"]
 
     def render(self, session, logger, cluster, metacluster, archetype,
-               personality, max_members, vm_to_host_ratio, domain, comments,
-               **arguments):
+               personality, max_members, vm_to_host_ratio, domain, tor_switch,
+               comments, **arguments):
         validate_basic("cluster", cluster)
         cluster_type = 'esx'
 
@@ -81,12 +82,17 @@ class CommandAddESXCluster(BrokerCommand):
         (vm_count, host_count) = force_ratio("vm_to_host_ratio",
                                              vm_to_host_ratio)
 
+        if tor_switch:
+            dbtor_switch = get_tor_switch(session, tor_switch)
+        else:
+            dbtor_switch = None
+
         dbcluster = EsxCluster(name=cluster,
                                location_constraint=dblocation,
                                personality=dbpersonality,
                                max_hosts=max_members,
                                vm_count=vm_count, host_count=host_count,
-                               domain=dbdomain,
+                               domain=dbdomain, switch=dbtor_switch,
                                comments=comments)
         session.add(dbcluster)
 

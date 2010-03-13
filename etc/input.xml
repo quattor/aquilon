@@ -150,6 +150,7 @@
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
@@ -190,6 +191,7 @@
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
          <optgroup name="search_machine_location_opts" fields="any">
@@ -895,6 +897,8 @@
          <option name="ipfromip" type="string" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
          <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="boolean" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         <option name="pg" type="string" conflicts="autopg">portgroup</option>
+         <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -994,6 +998,8 @@
          <option name="mac" type="string">MAC address</option>
          <option name="ip" type="string">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
+         <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
+         <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
@@ -2177,6 +2183,7 @@
       </optgroup>
       <optgroup name="poll_tor_switch optional" mandatory="False" fields="any">
          <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
+         <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
       </optgroup>
       <transport trigger="tor_switch" method="post" path="tor_switch/%(tor_switch)s/command/poll" />
       <transport method="post" path="poll/rack/%(rack)s" />
@@ -2313,6 +2320,7 @@
       <optgroup name="add_esx_cluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="tor_switch" type="string">ToR switch in use by the cluster</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="cluster/esx/%(cluster)s" />
@@ -2342,6 +2350,8 @@
          <option name="personality" type="string">Personality Name</option>
          <option name="max_members" type="string">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
+         <option name="tor_switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="fix_location" type="boolean">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <optgroup name="update_cluster_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>

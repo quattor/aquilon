@@ -68,6 +68,11 @@ class TestMake(TestBrokerCommand):
             self.failUnless(results, "No service plenary data that includes"
                                      "evh%s.aqd-unittest.ms.com" % i)
 
+    def testmake10gighosts(self):
+        for i in range(51, 75):
+            command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+            (out, err) = self.successtest(command)
+
     def testfailwindows(self):
         command = ["make", "--hostname", "unittest01.one-nyp.ms.com"]
         out = self.badrequesttest(command)

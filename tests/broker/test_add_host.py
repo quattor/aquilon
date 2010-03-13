@@ -195,6 +195,23 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "vmhost", "--personality", "esx_server"]
             self.noouttest(command)
 
+    def testpopulate10gigrackhosts(self):
+        # Assuming evh11 - evh50 will eventually be claimed above.
+        for i in range(1, 25):
+            hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
+            if i < 13:
+                port = i
+                machine = "ut11s01p%d" % port
+            else:
+                port = i - 12
+                machine = "ut12s02p%d" % port
+            command = ["add", "host", "--hostname", hostname, "--autoip",
+                       "--machine", machine,
+                       "--domain", "unittest", "--buildstatus", "build",
+                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--archetype", "vmhost", "--personality", "esx_server"]
+            self.noouttest(command)
+
     def testverifyshowhostproto(self):
         # We had a bug where a dangling interface with no IP address
         # assigned would cause show host --format=proto to fail...

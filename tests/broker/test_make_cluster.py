@@ -113,6 +113,11 @@ class TestMakeCluster(TestBrokerCommand):
         self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
                          command)
 
+    def testmakeutmc4(self):
+        for i in range(5, 11):
+            command = ["make_cluster", "--cluster", "utecl%d" % i]
+            (out, err) = self.successtest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeCluster)

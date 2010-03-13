@@ -38,7 +38,9 @@ from aquilon.aqdb.model import Interface, Machine, Manager
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.interface import describe_interface
+from aquilon.server.dbwrappers.interface import (describe_interface,
+                                                 verify_port_group,
+                                                 choose_port_group)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.templates.base import (compileLock, compileRelease,
                                            PlenaryCollection)
@@ -52,7 +54,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, automac,
-               comments, **arguments):
+               pg, autopg, comments, **arguments):
         dbmachine = get_machine(session, machine)
         extra = {}
         if interface == 'eth0':
@@ -113,6 +115,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
         else:
             #Ignore now that Mac Address can be null
             pass
+
+        if pg is not None:
+            extra['port_group'] = verify_port_group(dbmachine, pg)
+        elif autopg:
+            extra['port_group'] = choose_port_group(dbmachine)
 
         try:
             dbinterface = Interface(name=interface, hardware_entity=dbmachine,

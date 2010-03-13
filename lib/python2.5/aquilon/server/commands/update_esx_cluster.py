@@ -33,6 +33,7 @@ from aquilon.aqdb.model import EsxCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
+from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -45,7 +46,8 @@ class CommandUpdateESXCluster(BrokerCommand):
     required_parameters = [ "cluster" ]
 
     def render(self, session, logger, cluster, archetype, personality,
-               max_members, vm_to_host_ratio, comments, **arguments):
+               max_members, vm_to_host_ratio, tor_switch, fix_location,
+               comments, **arguments):
         cluster_type = 'esx'
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
         if not dbcluster:
@@ -57,6 +59,8 @@ class CommandUpdateESXCluster(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         dblocation = get_location(session, **arguments)
+        if fix_location:
+            dblocation = dbcluster.minimum_location
         if dblocation:
             errors = []
             if not dblocation.campus:
@@ -136,6 +140,15 @@ class CommandUpdateESXCluster(BrokerCommand):
             dbcluster.host_count = host_count
             cluster_updated = True
 
+        if tor_switch is not None:
+            if tor_switch:
+                # FIXME: Verify that any hosts are on the same network
+                dbtor_switch = get_tor_switch(session, tor_switch)
+            else:
+                dbtor_switch = None
+            dbcluster.switch = dbtor_switch
+            cluster_updated = True
+
         if comments is not None:
             dbcluster.comments = comments
             cluster_updated = True
@@ -160,5 +173,3 @@ class CommandUpdateESXCluster(BrokerCommand):
             compileRelease(logger=logger)
 
         return
-
-

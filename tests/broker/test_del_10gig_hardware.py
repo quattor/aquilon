@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,8 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the del metacluster command."""
-
+"""Module for testing commands that remove virtual hardware."""
 
 import os
 import sys
@@ -42,48 +41,33 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelMetaCluster(TestBrokerCommand):
+class TestDel10GigHardware(TestBrokerCommand):
 
-    def testdelutmc1(self):
-        command = ["del_metacluster", "--metacluster=utmc1"]
-        self.noouttest(command)
+    def test_200_del_hosts(self):
+        for i in range(0, 8) + range(9, 17):
+            hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
+            command = "del_host --hostname %s" % hostname
+            (out, err) = self.successtest(command.split(" "))
+            self.assertEmptyOut(out, command)
 
-    def testverifydelutmc1(self):
-        command = ["show_metacluster", "--metacluster=utmc1"]
-        self.notfoundtest(command)
+    def test_300_delaux(self):
+        for i in range(1, 25):
+            hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
+            command = ["del", "auxiliary", "--auxiliary", hostname]
+            (out, err) = self.successtest(command)
+            self.assertEmptyOut(out, command)
 
-    def testdelutmc2(self):
-        command = ["del_metacluster", "--metacluster=utmc2"]
-        self.noouttest(command)
+    def test_700_delmachines(self):
+        for i in range(0, 18):
+            machine = "evm%d" % (10 + i)
+            self.noouttest(["del", "machine", "--machine", machine])
 
-    def testverifydelutmc2(self):
-        command = ["show_metacluster", "--metacluster=utmc2"]
-        self.notfoundtest(command)
-
-    def testdelutmc3(self):
-        command = ["del_metacluster", "--metacluster=utmc3"]
-        self.noouttest(command)
-
-    def testverifydelutmc3(self):
-        command = ["show_metacluster", "--metacluster=utmc3"]
-        self.notfoundtest(command)
-
-    def testdelutmc4(self):
-        command = ["del_metacluster", "--metacluster=utmc4"]
-        self.noouttest(command)
-
-    def testverifyall(self):
-        command = ["show_metacluster", "--all"]
-        out = self.commandtest(command)
-        self.matchclean(out, "Metacluster: utmc", command)
-
-    def testdelnotfound(self):
-        command = ["del_metacluster",
-                   "--metacluster=metacluster-does-not-exist"]
-        self.notfoundtest(command)
-
+    def test_800_verifydelmachines(self):
+        for i in range(0, 18):
+            machine = "evm%d" % (10 + i)
+            command = "show machine --machine %s" % machine
+            self.notfoundtest(command.split(" "))
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMetaCluster)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDel10GigHardware)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

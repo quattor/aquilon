@@ -35,9 +35,10 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
 from sqlalchemy.orm import relation, backref, object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
+from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
-                                ServiceInstance, Machine, Domain)
+                                ServiceInstance, Machine, Domain, TorSwitch)
 
 def _cluster_machine_append(machine):
     """ creator function for MachineClusterMember """
@@ -127,9 +128,27 @@ class EsxCluster(Cluster):
     vm_count = Column(Integer, default=16, nullable=True)
     host_count = Column(Integer, default=1, nullable=False)
 
+    switch_id = Column(Integer,
+                       ForeignKey('tor_switch.id',
+                                  name='esx_cluster_switch_fk'),
+                       nullable=True)
+
+    switch = relation(TorSwitch, uselist=False, lazy=False,
+                      backref=backref('esx_clusters'))
+
     @property
     def vm_to_host_ratio(self):
         return '%s:%s'% (self.vm_count, self.host_count)
+
+    @property
+    def minimum_location(self):
+        location = None
+        for host in self.hosts:
+            if location:
+                location = location.merge(host.location)
+            else:
+                location = host.location
+        return location
 
     def __init__(self, **kw):
         if 'max_hosts' not in kw:

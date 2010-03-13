@@ -14,4 +14,10 @@ pshare|lnn30f1/test_share_7|P|ln|lnn30|0|1|1228800||test_share_7||primary||lnn30
 pshare|lnn30f1/test_share_8|P|ln|lnn30|0|1|1228800||test_share_8||primary||lnn30f1v1|lnn30f1|test_share_8
 pshare|lnn30f1/test_share_9|P|ln|lnn30|0|1|1228800||test_share_9||primary||lnn30f1v1|lnn30f1|test_share_9
 pshare|lnn30f1/test_share_10|P|ln|lnn30|0|1|1228800||test_share_10||primary||lnn30f1v1|lnn30f1|test_share_10
+pshare|lnn30f1/utecl5_share|P|ln|lnn30|0|1|1228800||utecl5_share||primary||lnn30f1v1|lnn30f1|utecl5_share
+pshare|lnn30f1/utecl6_share|P|ln|lnn30|0|1|1228800||utecl6_share||primary||lnn30f1v1|lnn30f1|utecl6_share
+pshare|lnn30f1/utecl7_share|P|ln|lnn30|0|1|1228800||utecl7_share||primary||lnn30f1v1|lnn30f1|utecl7_share
+pshare|lnn30f1/utecl8_share|P|ln|lnn30|0|1|1228800||utecl8_share||primary||lnn30f1v1|lnn30f1|utecl8_share
+pshare|lnn30f1/utecl9_share|P|ln|lnn30|0|1|1228800||utecl9_share||primary||lnn30f1v1|lnn30f1|utecl9_share
+pshare|lnn30f1/utecl10_share|P|ln|lnn30|0|1|1228800||utecl10_share||primary||lnn30f1v1|lnn30f1|utecl10_share
 # End of nasobjects.map

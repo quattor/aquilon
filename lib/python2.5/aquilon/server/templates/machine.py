@@ -131,6 +131,7 @@ class PlenaryMachineInfo(Plenary):
         for interface in self.dbmachine.interfaces:
             if interface.interface_type == 'public':
                 interfaces.append({"name":interface.name, "mac":interface.mac,
+                                   "port_group":interface.port_group,
                                    "boot":interface.bootable})
                 continue
             if interface.interface_type == 'management':
@@ -145,11 +146,14 @@ class PlenaryMachineInfo(Plenary):
         for interface in interfaces:
             lines.append('"cards/nic/%s" = nlist(' % interface['name'])
             if interface['mac']:
-                lines.append('                           "hwaddr", "%s",' %
-                             interface['mac'])
+                indent = '                           '
+                lines.append('%s"hwaddr", "%s",' % (indent, interface['mac']))
                 if interface['boot']:
-                    lines.append('                           "boot", %s,' %
-                                 str(interface['boot']).lower())
+                    lines.append('%s"boot", %s,' %
+                                 (indent, str(interface['boot']).lower()))
+                if interface['port_group']:
+                    lines.append('%s"port_group", "%s",' %
+                                 (indent, str(interface['port_group'])))
             lines.append(");")
 
         for manager in managers:
