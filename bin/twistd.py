@@ -16,6 +16,12 @@ sys.path.append( os.path.join(
                     os.path.dirname( os.path.realpath(sys.argv[0]) ),
                     "..", "lib", "python2.6" ) )
 
+# avoid the warning on deprecated md5 module. will remove when
+# a later version of twisted handles this
+import warnings
+warnings.simplefilter("ignore", DeprecationWarning)
+
+
 import aquilon.server.depends
 import aquilon.aqdb.depends
 
