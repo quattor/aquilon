@@ -73,6 +73,7 @@ _long_nms['CONTROLLER_TYPE'] = 'CNTRLR_TYPE'
 _long_nms['CREATION_DATE']           = 'CR_DATE'
 _long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
 _long_nms['OPERATING_SYSTEM'] = 'OS'
+_long_nms['DOWN_HOSTS_THRESHOLD'] = 'THRSH'
 
 
 def rename_sys_pks(db, *args, **kw):

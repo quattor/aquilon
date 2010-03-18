@@ -124,9 +124,9 @@ class EsxCluster(Cluster):
                             #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
 
-    #vm_to_host_ratio = Column(Integer, default=16, nullable=True)
     vm_count = Column(Integer, default=16, nullable=True)
     host_count = Column(Integer, default=1, nullable=False)
+    down_hosts_threshold = Column(Integer, nullable=False)
 
     switch_id = Column(Integer,
                        ForeignKey('tor_switch.id',

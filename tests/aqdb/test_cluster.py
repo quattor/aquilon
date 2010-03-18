@@ -29,15 +29,16 @@
 # TERMS THAT MAY APPLY.
 
 """ tests create and delete of a machine through the session """
-from utils import load_classpath, add, commit
+import inspect
 
+from utils import load_classpath, add, commit
 load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import (Vendor, Model, Machine, Cpu, Building, Domain,
                                 DnsDomain, Status, Personality, Archetype, Host,
                                 Cluster, EsxCluster, HostClusterMember, Service,
-                                ServiceInstance, MachineClusterMember, 
+                                ServiceInstance, MachineClusterMember,
                                 OperatingSystem)
 
 from sqlalchemy import and_
@@ -45,7 +46,6 @@ from sqlalchemy.orm import join
 from sqlalchemy.exc import IntegrityError
 
 from nose.tools import raises
-import inspect
 
 db = DbFactory()
 sess = db.Session()
@@ -169,7 +169,7 @@ def test_create_hosts():
     stat = Status.get_by('name', 'build', sess)[0]
     os = sess.query(OperatingSystem).filter(Archetype.name == 'vmhost').first()
     assert os, 'No OS in %s' % (inspect.stack()[1][3])
-    
+
     pers = sess.query(Personality).select_from(
         join(Personality, Archetype)).filter(
         and_(Archetype.name=='vmhost', Personality.name=='generic')).one()
@@ -207,7 +207,8 @@ def test_create_esx_cluster():
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
 
-    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np, personality=per, domain=dmn)
+    ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np,
+                    personality=per, domain=dmn, down_hosts_threshold=2)
 
     add(sess, ec)
     commit(sess)
@@ -217,6 +218,20 @@ def test_create_esx_cluster():
 
     assert ec.max_hosts is 8
     print 'esx cluster max members = %s'%(ec.max_hosts)
+
+@raises(IntegrityError)
+def test_no_host_threshold():
+    """ ensure down_hosts_threshold must exist """
+    dmn = Domain.get_by('name', 'ny-prod', sess)[0]
+    np = sess.query(Building).filter_by(name='np').one()
+    per = sess.query(Personality).select_from(
+            join(Archetype, Personality)).filter(
+            and_(Archetype.name=='windows', Personality.name=='generic')).one()
+
+    ec = EsxCluster(name=CLUSTER_NAME,
+                    location_constraint=np, personality=per, domain=dmn)
+    add(sess, ec)
+    commit(sess)
 
 def test_add_cluster_host():
     """ test adding a host to the cluster """
