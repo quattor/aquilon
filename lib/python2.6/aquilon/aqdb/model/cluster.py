@@ -35,8 +35,8 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
 from sqlalchemy.orm import relation, backref, object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.exceptions_ import InternalError, ArgumentError
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine, Domain, TorSwitch)
 
@@ -209,7 +209,8 @@ class HostClusterMember(Base):
 
 hcm = HostClusterMember.__table__
 hcm.primary_key.name = '%s_pk'% (_HCM)
-hcm.append_constraint(UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
+hcm.append_constraint(
+    UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
@@ -288,10 +289,11 @@ class ClusterServiceBinding(Base):
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='%s_srv_inst_fk'%(_CAB)),
+    service_instance_id = Column(Integer,
+                                 ForeignKey('service_instance.id',
+                                            name='%s_srv_inst_fk'%(_CAB)),
                                  primary_key=True)
-    #TODO: Boolean is_manual for manual choice?
+
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255))
 
