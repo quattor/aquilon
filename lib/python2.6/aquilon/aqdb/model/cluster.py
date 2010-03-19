@@ -141,6 +141,15 @@ class EsxCluster(Cluster):
         return '%s:%s'% (self.vm_count, self.host_count)
 
     @property
+    def max_vm_count(self):
+        if self.host_count == 0:
+            return 0
+        effective_vmhost_count = len(self.hosts) - self.down_hosts_threshold
+        if effective_vmhost_count < 0:
+            return 0
+        return effective_vmhost_count * self.vm_count / self.host_count
+
+    @property
     def minimum_location(self):
         location = None
         for host in self.hosts:
