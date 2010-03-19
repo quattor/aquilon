@@ -172,9 +172,9 @@ class Base(object):
                 # differentiate those, though... this is the best
                 # we have so far.
                 if len(constraint.columns) == 1 and \
-                isinstance(list(constraint.columns)[0].type, Integer) and \
-                [col.name for col in constraint.columns][0] not in kwargs:
-                    continue
+                    isinstance(list(constraint.columns)[0].type, Integer) and \
+                    [col.name for col in constraint.columns][0] not in kwargs:
+                        continue
                 unique_constraints.append(constraint)
         if len(args) == 1 and len(unique_constraints) > 1:
             raise InternalError("Must use kwargs for get_unique since %s has "
