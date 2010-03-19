@@ -159,6 +159,51 @@ class EsxCluster(Cluster):
                 location = host.location
         return location
 
+    def verify_ratio(self, vm_part=None, host_part=None,
+                     current_vm_count=None, current_host_count=None,
+                     down_hosts_threshold=None, error=ArgumentError):
+        if vm_part is None:
+            vm_part = self.vm_count
+        if host_part is None:
+            host_part = self.host_count
+        if current_vm_count is None:
+            current_vm_count = len(self.machines)
+        if current_host_count is None:
+            current_host_count = len(self.hosts)
+        if down_hosts_threshold is None:
+            down_hosts_threshold = self.down_hosts_threshold
+
+        # It doesn't matter how many vmhosts we have if there are no
+        # virtual machines.
+        if current_vm_count <= 0:
+            return
+
+        if host_part == 0:
+            raise error("Invalid ratio of %s:%s for %s cluster %s" %
+                        (vm_part, host_part, self.cluster_type, self.name))
+
+        # For calculations, assume that down_hosts_threshold vmhosts
+        # are not available from the number currently configured.
+        adjusted_host_count = current_host_count - down_hosts_threshold
+
+        if adjusted_host_count <= 0:
+            raise error("%s cluster %s cannot support VMs with %s "
+                        "vmhosts and a down_host_threshold of %s" %
+                        (self.cluster_type, self.name,
+                         current_host_count, down_hosts_threshold))
+
+        # The current ratio must be less than the requirement...
+        # cur_vm / cur_host <= vm_part / host_part
+        # cur_vm * host_part <= vm_part * cur_host
+        # Apply a logical not to test for the error condition...
+        if current_vm_count * host_part > vm_part * adjusted_host_count:
+            raise error("%s VMs:%s hosts in %s cluster %s violates "
+                        "ratio %s:%s with down_hosts_threshold %s" %
+                        (current_vm_count, current_host_count,
+                         self.cluster_type, self.name, vm_part, host_part,
+                         down_hosts_threshold))
+        return
+
     def __init__(self, **kw):
         if 'max_hosts' not in kw:
             kw['max_hosts'] = 8

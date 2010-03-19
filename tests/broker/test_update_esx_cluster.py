@@ -68,8 +68,9 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
     def testupdateutecl2(self):
         command = ["update_esx_cluster", "--cluster=utecl2",
-                   "--max_members=97", "--vm_to_host_ratio=5:2",
-                   "--comments", "ESX Cluster with a new comment"]
+                   "--max_members=97", "--vm_to_host_ratio=5:1",
+                   "--comments", "ESX Cluster with a new comment",
+                   "--down_hosts_threshold=0"]
         self.noouttest(command)
 
     def testverifyutecl2(self):
@@ -79,7 +80,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
-        self.matchoutput(out, "vm_to_host_ratio: 5:2", command)
+        self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
+        self.matchoutput(out, "Down Hosts Threshold: 0",command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
@@ -149,13 +151,19 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--vm_to_host_ratio=0"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would not satisfy current ratio", command)
+        self.matchoutput(out, "violates ratio", command)
 
     def testfailupdaterealratio(self):
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--vm_to_host_ratio=2:1000"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would not satisfy current ratio", command)
+        self.matchoutput(out, "violates ratio", command)
+
+    def testfailupdatedht(self):
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--down_hosts_threshold=4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "cannot support VMs", command)
 
     def testverifyutecl1(self):
         default_max = self.config.get("broker",
@@ -186,4 +194,3 @@ class TestUpdateESXCluster(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
