@@ -65,14 +65,26 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Row: zz", command)
         self.matchoutput(out, "Column: 99", command)
 
+    def testaddnewalphanumericrack(self):
+        command = "add rack --rackid np909 --building np --row 99 --column zz"
+        self.noouttest(command.split(" "))
+
+    def testverifynp909(self):
+        command = "show rack --name np909"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rack: np909", command)
+        self.matchoutput(out, "Row: 99", command)
+        self.matchoutput(out, "Column: zz", command)
+
+
     def testverifyshowallcsv(self):
         command = "show rack --all --format=csv"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "rack,ut3,room,utroom1,a,3", command)
         self.matchoutput(out, "rack,np997,building,np,zz,99", command)
+        self.matchoutput(out, "rack,np909,building,np,99,zz", command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRack)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
