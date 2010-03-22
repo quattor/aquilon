@@ -29,9 +29,9 @@
 """Contains the logic for `aq update rack`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+#from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand #, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.base import PlenaryCollection
@@ -45,13 +45,9 @@ class CommandUpdateRack(BrokerCommand):
                **arguments):
         dbrack = get_location(session, rack=name)
         if row is not None:
-            row = row.strip().lower()
-            if not row.isalpha():
-                raise ArgumentError("The rack row contained non-alphabet "
-                                    "characters.")
             dbrack.rack_row = row
         if column is not None:
-            dbrack.rack_column = force_int("column", column)
+            dbrack.rack_column = column
         if fullname is not None:
             dbrack.fullname = fullname
         if comments is not None:
@@ -74,5 +70,3 @@ class CommandUpdateRack(BrokerCommand):
         # XXX: Reconfigure/compile here?
 
         return
-
-
