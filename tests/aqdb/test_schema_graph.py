@@ -28,15 +28,15 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ test the mock engine feature """
-
 import os
-import __init__
 
-from aquilon.aqdb.db_factory       import DbFactory
-from aquilon.aqdb.utils.schema2dot import show_schema_graph 
+from utils import load_classpath, add, commit
+load_classpath()
+
+from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.utils.schema2dot import show_schema_graph
 
 class testDbFactory(object):
-
     def setUp(self, *args, **kw):
         self.db = DbFactory()
         self.outfile='/tmp/test.png'
@@ -53,16 +53,15 @@ class testDbFactory(object):
             os.remove(self.outfile)
 
     def testSchemaGraph(self, *args, **kw):
-        assert(not (os.path.isfile(self.outfile)))
+        assert not (os.path.isfile(self.outfile))
         show_schema_graph(self.db, self.outfile)
-        assert(os.path.isfile(self.outfile))
+        assert os.path.isfile(self.outfile)
 
 def main(*args, **kw):
-    import aquilon.aqdb.depends
+    #import depends
     import nose
 
     nose.runmodule()
 
 if __name__ == "__main__":
     main()
-

@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,34 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-def load_classpath():
-    """ Sets up the class path for aquilon """
-    import os
-    import sys
+""" Load testing dependencies onto sys.path via ms.version """
+import sys
+#FIX ME: remove after python2.6.4 upgrade
+sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
+import ms.version
 
-    _DIR = os.path.dirname(os.path.realpath(__file__))
-    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
-    _TESTDIR = os.path.join(_DIR, "..")
+ms.version.addpkg('setuptools', '0.6c11')
 
-    if _LIBDIR not in sys.path:
-        sys.path.insert(0, _LIBDIR)
+ms.version.addpkg('coverage', '3.1')
 
-    if _TESTDIR not in sys.path:
-        sys.path.insert(1, _TESTDIR)
+ms.version.addpkg('argparse', '1.1')
 
-    import depends
-    import aquilon.aqdb.depends
-
-def commit(sess):
-    try:
-        sess.commit()
-    except Exception,e:
-        sess.rollback()
-        raise e
-
-def add(sess, obj):
-    try:
-        sess.add(obj)
-    except Exception, e:
-         sess.rollback()
-         raise e
+ms.version.addpkg('nose', '0.11.1')

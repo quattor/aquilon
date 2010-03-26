@@ -26,13 +26,9 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-import os
-import ms.version
+""" Pull dependencies onto sys.path via ms.version """
 
-#######
-# NEVER check in a version of this file to a for_next branch with 'dev'
-# in an addpkg call!!!
-#######
+import ms.version
 
 ms.version.addpkg('sqlalchemy', '0.5.8')
 
@@ -40,12 +36,6 @@ ms.version.addpkg('cx_Oracle', '5.0.1-11.1.0.6')
 
 ms.version.addpkg('ipython', '0.10')
 
-ms.version.addpkg('setuptools', '0.6c11')
-
-ms.version.addpkg('nose', '0.11.1')
+ms.version.addpkg('argparse', '1.1')
 
 ms.version.addpkg('ms.modulecmd', '1.0.2')
-
-ms.version.addpkg('coverage', '3.1')
-
-ms.version.addpkg('argparse', '1.1')

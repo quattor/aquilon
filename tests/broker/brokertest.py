@@ -38,11 +38,7 @@ from subprocess import Popen, PIPE
 import re
 
 from aquilon.config import Config
-
-import ms.version
-ms.version.addpkg('setuptools', '0.6c8-py25')
-ms.version.addpkg('protoc', 'prod', meta='aquilon')
-
+from aquilon.server import depends # fetch protobuf dependency
 
 class TestBrokerCommand(unittest.TestCase):
 

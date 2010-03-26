@@ -32,21 +32,20 @@ Module for testing the aqdb commands.
 """
 import os
 import sys
-import __init__
 import unittest
+
+from utils import load_classpath
+load_classpath()
 
 from test_rebuild import TestRebuild
 
 class DatabaseTestSuite(unittest.TestSuite):
-
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         self.addTest(unittest.TestLoader().loadTestsFromTestCase(TestRebuild))
-
 
 
 if __name__=='__main__':
     import nose
     nose.runmodule()
 
-#

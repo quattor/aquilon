@@ -31,7 +31,7 @@
 from utils import add, commit, load_classpath
 load_classpath()
 
-import aquilon.aqdb.depends
+#import aquilon.aqdb.depends
 
 from aquilon.aqdb.model import Network, Location, Building
 from aquilon.aqdb.db_factory import DbFactory
