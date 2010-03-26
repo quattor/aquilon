@@ -41,12 +41,7 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
     if not dblocation or not dblocation.building:
         raise ArgumentError("No parent (building or room) given for rack.")
     dbbuilding = dblocation.building
-    if rackcolumn is not None:
-        rackcolumn = force_int("rackcolumn", rackcolumn)
-    if rackrow is not None:
-        rackrow = rackrow.strip().lower()
-        if not rackrow.isalpha():
-            raise ArgumentError("The rack row contained non-alphabet characters.")
+
     # Because of http, rackid comes in as a string.  It just
     # gets treated as such here.
     # Check for redundancy...
@@ -61,7 +56,7 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
             raise ArgumentError("Found rack with name %s but the current row %s does not match given row %s." %
                     (dbrack.name, dbrack.rack_row, rackrow))
         if rackcolumn is not None and rackcolumn != dbrack.rack_column:
-            raise ArgumentError("Found rack with name %s but the current column %d does not match given column %d." %
+            raise ArgumentError("Found rack with name %s but the current column %s does not match given column %s." %
                     (dbrack.name, dbrack.rack_column, rackcolumn))
         return dbrack
 

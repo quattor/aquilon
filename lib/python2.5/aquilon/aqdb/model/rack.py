@@ -28,46 +28,54 @@
 # TERMS THAT MAY APPLY.
 """ Rack is a subclass of Location """
 
-from sqlalchemy import Column, Integer, Numeric, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import validates
 
 from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, Building
 from aquilon.aqdb.column_types import AqStr
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Location, Building
+
 
 class Rack(Location):
     """ Rack is a subtype of location """
     __tablename__ = 'rack'
-    __mapper_args__ = {'polymorphic_identity':'rack'}
+    __mapper_args__ = {'polymorphic_identity': 'rack'}
 
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='rack_loc_fk',
+    id = Column(Integer, ForeignKey('location.id', name='rack_loc_fk',
                                     ondelete='CASCADE'), primary_key=True)
 
-    #TODO: POSTHASTE: constrain to alphabetic in row, and make both non-nullable
-    rack_row    = Column(AqStr(4), nullable=True)
-    rack_column = Column(Integer, nullable=True)
+    rack_row = Column(AqStr(4), nullable=True)
+    rack_column = Column(AqStr(4), nullable=True)
 
-rack = Rack.__table__
-rack.primary_key.name = 'rack_pk'
-table = rack
+    @validates('rack_row', 'rack_column')
+    def check_rack_coordinates(self, key, value):
+        """ validates the row and column arguments """
+        value = value.strip()
+        if not str(value).isalnum():
+            msg = "the value '%s' for %s must be alphanumeric" % (
+                value, key)
+            raise ArgumentError(msg)
+        else:
+            return value
+
+Rack.__table__.primary_key.name = 'rack_pk'
 
 
-@monkeypatch(rack)
+@monkeypatch(Rack.__table__)
 def populate(sess, **kw):
 
-    if len(sess.query(Rack).all()) < 1:
+    if sess.query(Rack).count() < 1:
 
         if sess.query(Building).count() > 0:
             Building.__table__.populate(sess, **kw)
-
-        bldg = {}
 
         try:
             np = sess.query(Building).filter_by(name='np').one()
         except Exception, e:
             print e
 
-        rack_name='np3'
+        rack_name = 'np3'
         a = Rack(name=rack_name, fullname='Rack %s'%(rack_name), parent=np)
         sess.add(a)
 

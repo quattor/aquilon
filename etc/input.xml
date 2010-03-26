@@ -1558,8 +1558,8 @@
       See also add_location.
       <optgroup name="add_rack_input" mandatory="True" fields="all">
          <option name="rackid" type="string">Name of the new rack, or just the id number</option>
-         <option name="row" type="string">Row of the tile location (letters only)</option>
-         <option name="column" type="string">Column of the tile location (numbers only)</option>
+         <option name="row" type="string">Row of the tile location</option>
+         <option name="column" type="string">Column of the tile location</option>
          <optgroup name="add_rack_parent" mandatory="True" fields="any">
             <option name="building" type="string" conflicts="room">Name of the building that houses the rack</option>
             <option name="room" type="string" conflicts="building">Name of the room that houses the rack</option>
@@ -1579,8 +1579,8 @@
          <option name="name" type="string">Name of the rack</option>
       </optgroup>
       <optgroup name="optional_opts">
-         <option name="row" type="string">Row of the tile location (letters only)</option>
-         <option name="column" type="string">Column of the tile location (numbers only)</option>
+         <option name="row" type="string">Row of the tile location</option>
+         <option name="column" type="string">Column of the tile location</option>
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>

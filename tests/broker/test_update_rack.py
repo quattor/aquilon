@@ -88,12 +88,12 @@ class TestUpdateRack(TestBrokerCommand):
     def testfailrow(self):
         command = ["update", "rack", "--name", "np999", "--row", "a-b"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "contained non-alphabet characters", command)
+        self.matchoutput(err, "must be alphanumeric", command)
 
-    def testfailcolumn(self):
+    def testalphacolumn(self):
+        """ we now accept characters for rack columns   """
         command = ["update", "rack", "--name", "np999", "--column", "a"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Expected an integer for column", command)
+        err = self.noouttest(command)
 
     def testverifyshowallcsv(self):
         command = "show rack --all --format=csv"
@@ -103,7 +103,7 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, "rack,ut9,room,utroom2,h,9", command)
         self.matchoutput(out, "rack,np997,building,np,xx,77", command)
         self.matchoutput(out, "rack,np998,building,np,vv,66", command)
-        self.matchoutput(out, "rack,np999,building,np,zz,11", command)
+        self.matchoutput(out, "rack,np999,building,np,zz,a", command)
 
     def testverifyut3plenary(self):
         command = "cat --machine ut3c1n3"
@@ -130,4 +130,3 @@ class TestUpdateRack(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateRack)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
