@@ -29,13 +29,20 @@
 # TERMS THAT MAY APPLY.
 def load_classpath():
     """ Sets up the class path for aquilon """
-    import os, sys
+    import os
+    import sys
+
     _DIR = os.path.dirname(os.path.realpath(__file__))
     _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
+    _TESTDIR = os.path.join(_DIR, "..")
 
     if _LIBDIR not in sys.path:
-        sys.path.insert(0,_LIBDIR)
+        sys.path.insert(0, _LIBDIR)
 
+    if _TESTDIR not in sys.path:
+        sys.path.insert(1, _TESTDIR)
+
+    import depends
     import aquilon.aqdb.depends
 
 def commit(sess):

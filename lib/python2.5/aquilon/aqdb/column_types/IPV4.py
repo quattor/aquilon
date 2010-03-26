@@ -28,9 +28,8 @@
 # TERMS THAT MAY APPLY.
 """ Translates dotted quad strings into long integers """
 
-from struct     import pack, unpack
-from socket     import inet_aton, inet_ntoa
-from exceptions import TypeError
+from struct import pack, unpack
+from socket import inet_aton, inet_ntoa
 
 import sqlalchemy
 
@@ -50,14 +49,13 @@ def get_bcast(ip, cidr):
 class IPV4(sqlalchemy.types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
 
-    impl        = sqlalchemy.types.Integer
+    impl = sqlalchemy.types.Integer
     impl.length = 9  # hardcoding for now, TODO: figure it out and fix
 
     def process_bind_param(self, dq, engine):
         if not dq:
-            #raise TypeError('IPV4 can not be None')
-            #FIX ME: this is a quick fix to accomodate Nullable field.
             return None
+        #if column is nullable you cant raise TypeError('IPV4 cant be None')
 
         dq = str(dq)
         q = dq.split('.')
@@ -82,32 +80,4 @@ class IPV4(sqlalchemy.types.TypeDecorator):
 
     def copy(self):
         return IPV4(self.impl.length)
-
-
-def test_ipv4():
-
-    from sqlalchemy import (MetaData, Table, Column, Integer, insert)
-
-    t = Table('foo', MetaData('sqlite:///'),
-              Column('id', Integer, primary_key=True),
-              Column('e', IPV4()))
-    t.create()
-
-    t.insert().execute(e='192.168.1.1')
-    t.insert().execute(e='144.14.47.54')
-
-    print list(t.select().execute())
-
-    try:
-        t.insert().execute(e = 'lalalala')
-    except TypeError:
-        pass
-
-    try:
-        t.insert().execute(e = None)
-    except TypeError:
-        pass
-
-    print list(t.select().execute())
-
 

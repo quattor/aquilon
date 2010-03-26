@@ -28,11 +28,11 @@
 # TERMS THAT MAY APPLY.
 """ Suggested versions of external libraries.
 
-These versions are the defaults for the binaries shipped.
+    These versions are the defaults for the binaries shipped.
 
-Anything referencing aquilon.server.depends should also set up the
-dependencies listed in aquilon.aqdb.depends.
-    
+    Anything referencing aquilon.server.depends should also set up the
+    dependencies listed in aquilon.aqdb.depends.
+
 """
 
 import sys
@@ -44,11 +44,8 @@ sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
 
 import ms.version
 
-ms.version.addpkg('setuptools', '0.6c8-py25')
-ms.version.addpkg('protoc', 'prod', meta='aquilon')
-ms.version.addpkg('zope.interface', '3.5.2', 'dist')
-ms.version.addpkg('twisted', '8.2.0-ms1', 'dist')
-ms.version.addpkg('ms.modulecmd', '1.0.1', 'dist')
-# The coverage module is made available by aqdb.depends.
-
-
+ms.version.addpkg('setuptools', '0.6c11')
+ms.version.addpkg('protobuf', '2.3.0')
+ms.version.addpkg('zope.interface', '3.5.2')
+ms.version.addpkg('twisted', '8.2.0-ms1')
+ms.version.addpkg('coverage', '3.1')

@@ -52,8 +52,10 @@ class AqMac(sqlalchemy.types.TypeDecorator):
     padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
     def process_bind_param(self, value, engine):
-        if value is None:
-            return value
+        # Allow nullable Mac Addresses, consistent with behavior of IPV4
+        if not value:
+            return None
+
         # Strip, lower, and then use a regex for zero-padding if needed...
         value = self.unpadded_re.sub(r'0\1', str(value).strip().lower())
         # If we have exactly twelve hex characters, add the colons.
@@ -70,5 +72,3 @@ class AqMac(sqlalchemy.types.TypeDecorator):
 
     def copy(self):
         return AqMac(self.impl.length)
-
-

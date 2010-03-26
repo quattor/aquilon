@@ -160,10 +160,6 @@ aquilon = INFO
 [protocols]
 directory = /ms/dist/aquilon/PROJ/protocols/1.4/common/lib/python
 
-[graphviz]
-version = 2.6
-path    = /ms/dist/fsf/PROJ/graphviz/%(version)s/bin
-
 #
 # Regional Configuration
 #

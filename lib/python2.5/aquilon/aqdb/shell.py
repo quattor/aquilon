@@ -42,12 +42,11 @@ if _TESTDIR not in sys.path:
 
 import aquilon.aqdb.depends
 import argparse
-
-from aquilon.config import Config
 import ms.modulecmd
 
+from aquilon.config import Config
+
 config = Config()
-#m = Modulecmd()
 if config.has_option("database", "module"):
     ms.modulecmd.load(config.get("database", "module"))
 
@@ -91,7 +90,6 @@ def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
     """ Produces a png image of the schema. """
     import aquilon.aqdb.utils.schema2dot
     aquilon.aqdb.utils.schema2dot.show_schema_graph(db, file_name)
-    #TODO: schema/uml as an argument (DRY)
 
 if __name__ == '__main__':
     main(sys.argv)

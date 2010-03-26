@@ -28,20 +28,19 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """Test module for rebuilding the database."""
-
 import os
-import __init__
 
-import aquilon.aqdb.depends
+from utils import load_classpath
+load_classpath()
+
 import nose
 import unittest
 
-from subprocess import Popen, PIPE
-
+from subprocess import Popen
 from aquilon.config import Config
 
-class TestRebuild(unittest.TestCase):
 
+class TestRebuild(unittest.TestCase):
     def testrebuild(self):
         env = {}
         for (key, value) in os.environ.items():
@@ -60,7 +59,5 @@ class TestRebuild(unittest.TestCase):
                          (p.returncode, out, err))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     nose.runmodule()
-
-

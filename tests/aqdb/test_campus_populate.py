@@ -30,9 +30,9 @@
 
 import os
 import logging
-import __init__
 
-import aquilon.aqdb.depends
+from utils import load_classpath
+load_classpath()
 
 from aquilon.aqdb.model import Building, Campus, Continent
 from aquilon.aqdb.model.campus import CampusDiffStruct
@@ -127,7 +127,7 @@ class TestCampusPopulate(object):
             cs = CampusDiffStruct(self.dsdb,
                                   self.sess,
                                   c)
-            assert(cs.sync(), 'CAMPUS CREATION FAILED')
+            assert cs.sync(), 'CAMPUS CREATION FAILED'
 
             new_campus = self.sess.query(Campus).filter_by(name=c.name).first()
 

@@ -29,18 +29,15 @@
 import weakref
 from inspect import isclass
 
+from sqlalchemy import Integer
+from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.properties import RelationProperty
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import UniqueConstraint, PrimaryKeyConstraint
-from sqlalchemy import Integer
-from sqlalchemy.ext.associationproxy import AssociationProxy
-from sqlalchemy.orm.properties import RelationProperty
+from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
 
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
-#These extensions will be coming soon...
-#from aquilon.aqdb.history.history_meta import VersionedMeta
-#from aquilon.aqdb.history.audit import audit_listener_for_class
-
 
 def _describe_uniqueness_request(description_info):
     """Helper method for constructing errors in Base.get_unique()."""
@@ -137,6 +134,13 @@ class Base(object):
         type of exception will be raised instead.
 
         """
+
+        #Returns a far more informative error than something like
+        # "No uniqueness constraint found for <CLASS NAME>"
+        if not isinstance(session, Session):
+            msg = "get_unique's first argument must be a SQL Alchemy session"
+            raise TypeError(msg)
+
         # Since this method expects positional args to be slurped up
         # into args, these can't be in the method definition.  (If
         # they were, any positional args would be slurped into whichever
@@ -168,9 +172,9 @@ class Base(object):
                 # differentiate those, though... this is the best
                 # we have so far.
                 if len(constraint.columns) == 1 and \
-                   isinstance(list(constraint.columns)[0].type, Integer) and \
-                   list(constraint.keys())[0] not in kwargs:
-                    continue
+                    isinstance(list(constraint.columns)[0].type, Integer) and \
+                    [col.name for col in constraint.columns][0] not in kwargs:
+                        continue
                 unique_constraints.append(constraint)
         if len(args) == 1 and len(unique_constraints) > 1:
             raise InternalError("Must use kwargs for get_unique since %s has "
@@ -178,9 +182,10 @@ class Base(object):
         for constraint in unique_constraints:
             query_args = {}
             missing = 0
-            for constraint_key in constraint.keys():
-                if constraint_key in kwargs:
-                    query_args[constraint_key] = kwargs[constraint_key]
+            columns = [col.name for col in constraint.columns]
+            for column_name in columns:
+                if column_name in kwargs:
+                    query_args[column_name] = kwargs[column_name]
                     continue
                 # Allow kwargs to be sqlalchemy objects...
                 # The trick here is that we need to figure out if any of
@@ -196,7 +201,7 @@ class Base(object):
                            len(rel.local_side) == 1:
                             local_col = list(rel.local_side)[0].name
                             remote_col = list(rel.remote_side)[0].name
-                            if constraint_key == local_col:
+                            if column_name == local_col:
                                 query_args[local_col] = getattr(kwargs[kwarg],
                                                                 remote_col)
                                 found_object = True
@@ -207,7 +212,7 @@ class Base(object):
                 # try to use the positional args.
                 if args:
                     missing += 1
-                    query_args[constraint_key] = args[0]
+                    query_args[column_name] = args[0]
                     continue
                 # This constraint isn't going to work.  Next!
                 query_args = None
@@ -215,7 +220,7 @@ class Base(object):
             if missing > 1:
                 raise InternalError("Must use kwargs for get_unique since "
                                     "uniqueness constraint for %s requires "
-                                    "%s." % (cls, constraint.keys()))
+                                    "%s." % (cls, constraint.columns))
             if query_args:
                 result = session.query(cls).filter_by(**query_args).all()
                 if not result:
@@ -237,6 +242,7 @@ class Base(object):
                         raise preclude(msg)
                     raise ArgumentError(msg)
                 return result[0]
+
         if cls.__base__ != cls and hasattr(cls.__base__, '__table__'):
             # This doesn't *really* handle polymorphic inheritance,
             # but it seems to cover our use cases.
@@ -248,6 +254,7 @@ class Base(object):
             kwargs['preclude'] = preclude
             kwargs['description_info'] = description_info
             return cls.__base__.get_unique(session, *args, **kwargs)
+
         raise InternalError("No uniqueness constraint found for %s " %
                             _describe_uniqueness_request(description_info))
 
@@ -275,8 +282,11 @@ def __get__(self, obj, class_):
             self._initialize_scalar_accessors()
 
     if self.scalar:
-        # Original line from 0.5.4
-        #return self._scalar_get(getattr(obj, self.target_collection))
+        # Original line from 0.5.8
+        #proxy = self._new(self._lazy_collection(weakref.ref(obj)))
+        #setattr(obj, self.key, (id(obj), proxy))
+        #return proxy
+
         target = getattr(obj, self.target_collection)
         if target is None:
             return None
@@ -291,6 +301,6 @@ def __get__(self, obj, class_):
                 return proxy
         except AttributeError:
             pass
-        proxy = self._new(self._lazy_collection(weakref.ref(obj)))
+        proxy = self._new(_lazy_collection(obj, self.target_collection))
         setattr(obj, self.key, (id(obj), proxy))
         return proxy

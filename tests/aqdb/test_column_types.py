@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009  Contributor
+# Copyright (C) 2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,77 +27,80 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" Tests all the custom data types we create for aqd """
 
-""" DESCRIBE ME """
 from utils import load_classpath, add, commit
-
 load_classpath()
 
-from nose.tools import raises
-import aquilon.aqdb.depends
-from aquilon.aqdb.column_types.aqstr import AqStr
-
 from sqlalchemy import MetaData, Table, Column, Integer, insert, create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-from exceptions import TypeError
+from nose.tools import raises
+
+from aquilon.aqdb.column_types import IPV4, AqStr
 
 dsn  = 'sqlite:///:memory:'
-eng  = create_engine(dsn)  #, echo = True)
-Base = declarative_base(engine=eng)
+eng  = create_engine(dsn)
 
-Session = scoped_session(sessionmaker(bind=eng))
-assert Session
+IP_TABLE = Table('foo', MetaData(dsn),
+                 Column('id', Integer, primary_key=True),
+                 Column('e', IPV4()))
+
+Base = declarative_base()
+Base.metadata.bind = eng
+Session = sessionmaker()
 
 s = Session()
 
 class StringTbl(Base):
     __tablename__ = 'aqstr_test'
-    id   = Column(Integer, primary_key = True)
-    name = Column(AqStr(16), nullable = False, unique = True)
+    id = Column(Integer, primary_key=True)
+    name = Column(AqStr(16), nullable=False, unique=True)
 
     def __repr__(self):
-            return self.__class__.__name__ + ' ' + str(self.name)
-
-def clean_up():
-    pass
+        return self.__class__.__name__ + ' "' + str(self.name) + '"'
 
 def setup():
-    print 'set up'
+    #TODO: ALL the setup ??? Or do they go into a suite level setup?
+    IP_TABLE.create()
     StringTbl.__table__.create()
-    #t = StringTbl.__table__
+#No teardown for in memory tables =D
 
-t = StringTbl.__table__
+def test_valid_ipv4():
+    """ tests simple insertion of valid ip addresses """
 
-def teardown():
-    print 'tear down'
+    IP_TABLE.insert().execute(e='192.168.1.1')
+    IP_TABLE.insert().execute(e='144.14.47.54')
 
+    result = list(IP_TABLE.select().execute())
 
-def testInsert():
-    t.insert().execute(name = 'Hi there')
-    o = t.select().execute().fetchone()
-    assert o['name'].startswith('h'), 'lower case failure'
+    assert len(result) > 0, 'failed valid IPV4 insert'
 
-    t.insert().execute(name = '  some eXTRa space     ')
-    p = t.select().execute().fetchall()[1]
-    assert p['name'].startswith('s')
+@raises(TypeError)
+def test_bad_input():
+    """ test an invalid string as input """
+    IP_TABLE.insert().execute(e='lalalala')
 
-    print list(t.select().execute())
+### AqStr Tests ###
+def test_valid_aqstr():
+    a = StringTbl(name='Hi there')
+    add(s, a)
+    commit(s)
 
-def testObjCreate():
-    f = StringTbl(name='  ThisISALONGTEST  ')
-    print "before commit: '%s'"%(f)
+    s.expunge_all()
+    rec = s.query(StringTbl).first()
+    print rec.name
+    assert rec.name == 'hi there', 'String not lowercase in AqStr'
 
-    s.add(f)
-    s.commit()
+def test_whitespace_padding():
+    a=StringTbl(name='  some eXTRa space     ')
+    add(s, a)
+    commit(s)
 
-    print "after commit '%s'"%(f)
-
-    print "table query: %s"%(s.query(StringTbl).all())
-    print list(t.select().execute())
-    s.refresh(f)
-    print "After refresh, f = '%s'"%(f)
+    p = StringTbl.__table__.select().execute().fetchall()[1]
+    assert p['name'].startswith('s'), 'Whitespace not stripped in AqStr'
+    print a
 
 
 if __name__ == "__main__":

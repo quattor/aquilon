@@ -66,14 +66,10 @@ class testDbFactory(unittest.TestCase):
         self.tearDown()
 
 def main(*args, **kw):
-    import aquilon.aqdb.depends
+    import depends
     import nose
 
     nose.runmodule()
-
-    #or the non-nose way
-    #c = testDbFactory()
-    #c.runTest()
 
 if __name__ == "__main__":
     main(sys.argv)

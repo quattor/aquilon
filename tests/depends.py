@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,25 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" Load testing dependencies onto sys.path via ms.version """
+import sys
+#FIX ME: remove after python2.6.4 upgrade
+sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
+import ms.version
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Vendor
-from aquilon.exceptions_ import ArgumentError
-import re
+ms.version.addpkg('setuptools', '0.6c11')
 
-class CommandAddVendor(BrokerCommand):
+ms.version.addpkg('coverage', '3.1')
 
-    required_parameters = [ "vendor" ]
+ms.version.addpkg('argparse', '1.1')
 
-    def render(self, session, vendor, **arguments):
-        valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(vendor)):
-            raise ArgumentError("vendor name '%s' is not valid" % vendor)
-
-        existing = session.query(Vendor).filter_by(name=vendor).first()
-        if existing:
-            raise ArgumentError("vendor '%s' already exists" % vendor)
-
-        dbv = Vendor(name=vendor)
-        session.add(dbv)
-        return
+ms.version.addpkg('nose', '0.11.1')

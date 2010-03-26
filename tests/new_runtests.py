@@ -39,21 +39,21 @@ import shutil
 
 from subprocess import Popen
 
+import depends
+import nose
+import argparse
+
+
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
 sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
-
-import aquilon.aqdb.depends
-import setuptools
-import argparse
-import nose
 
 from aquilon.config import Config
 from aquilon.utils import kill_from_pid_file, confirm
 from verbose_text_test import VerboseTextTestRunner
 
-from broker.short_suite import BrokerTestSuite
-#from broker.orderedsuite import BrokerTestSuite
+from broker.short_suite import MySuite
+from broker.orderedsuite import BrokerTestSuite
 from aqdb.orderedsuite import DatabaseTestSuite
 
 
@@ -189,7 +189,7 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
     # This syncs the *contents* of the remote "template-king" by
     # appending a slash, so the remote could be any path that rsync
     # can parse that leads to a git repository.
-    p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+    p = Popen(("rsync", "-aqP", "-e", "ssh", "--delete",
                "--exclude=.git/config",
                os.path.join(config.get("unittest", "template_king_path"), ""),
                config.get("broker", "kingdir")),
@@ -197,7 +197,7 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
     rc = p.wait()
     # FIXME: check rc
     # Need the actual king's config file for merges to work.
-    p = Popen(("rsync", "-avP", "-e", "ssh",
+    p = Popen(("rsync", "-aqP", "-e", "ssh",
                config.get("unittest", "template_king_config"),
                os.path.join(config.get("broker", "kingdir"), ".git")),
               stdout=1, stderr=2)
@@ -206,7 +206,7 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
 
     swrep_repository_host = config.get("unittest", "swrep_repository_host")
     # The swrep/repository is currently *only* synced here at the top level.
-    p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+    p = Popen(("rsync", "-aqP", "-e", "ssh", "--delete",
         "%s:/var/quattor/swrep/repository" % swrep_repository_host,
         config.get("broker", "swrepdir")),
         stdout=1, stderr=2)
@@ -217,13 +217,14 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
 
     # Relies on the oracle rebuild doing a nuke first.
     suite.addTest(DatabaseTestSuite())
-    suite.addTest(BrokerTestSuite())
+    #suite.addTest(BrokerTestSuite())
+    suite.addTest(MySuite())
 
-    #it takes a bit of time to start things up. This message keeps impatient people
-    #aware of what's happening instead of thinking non essentials are wasting time
+    #it takes a bit of time to start things up. This message keeps impatient
+    #people aware of what's happening instead of assuming non essentials are
+    #wasting time
     print "starting up the test runner"
 
-    #TODO: construct an args list for nose.run to add the stop, the debug, etc.
     nose.run(suite=suite,
         testRunner=VerboseTextTestRunner(verbosity=opts.verbosity))
 
@@ -231,11 +232,4 @@ instead.""" % (os.environ["AQDCONF"], opts.configfile)
 if __name__ == '__main__':
     main(sys.argv)
 
-#
-# TODO: add --useenv option to take config file from $AQDCONF
-#
-#class SetConfig(argparse.Action):
-#    """ custom action to set the option from users environment """
-#    def __call__(self, parser, namespace, values, option_string=None):
-#        print '%r %r %r' % (namespace, values, option_string)
-#        setattr(namespace, self.dest, os.environ["AQDCONF"])
+    #need to completely remove the option parsing and let nose take care of it
