@@ -1,3 +1,5 @@
+create table rack_save as select * from rack;
+
 ALTER TABLE RACK ADD (NEW_RACK_COLUMN VARCHAR2(4));
 
 UPDATE RACK SET NEW_RACK_COLUMN=(to_char(RACK_COLUMN));
