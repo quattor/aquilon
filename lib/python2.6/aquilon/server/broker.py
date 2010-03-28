@@ -260,6 +260,7 @@ class BrokerCommand(object):
 
     def _audit(self, **kwargs):
         logger = kwargs.pop('logger')
+        status = kwargs.pop('message_status')
         session = kwargs.pop('session', None)
         request = kwargs.pop('request')
         user = kwargs.pop('user', None)
@@ -271,14 +272,16 @@ class BrokerCommand(object):
         for (key, value) in kwargs.items():
             if len(str(value)) > 100:
                 kwargs[key] = value[0:96] + '...'
-        # TODO: Something fancier...
         kwargs_str = str(kwargs)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
-        extra = ""
         logger.info("Incoming command #%d from user=%s aq %s "
-                    "with arguments %s%s",
-                    request.aq_audit_id, user, self.command, kwargs_str, extra)
+                    "with arguments %s",
+                    request.aq_audit_id, user, self.command, kwargs_str)
+        if status:
+            status.create_description(user=user, command=self.command,
+                                      id=request.aq_audit_id,
+                                      kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
     # add a logger into the argument list.  It returns the arguments
@@ -297,7 +300,7 @@ class BrokerCommand(object):
                 requestid=command_kwargs.get("requestid", None))
         logger = RequestLogger(status=status, module_logger=self.module_logger)
         command_kwargs["logger"] = logger
-        self._audit(**command_kwargs)
+        self._audit(message_status=status, **command_kwargs)
         return command_kwargs
 
     def _remove_status(self, command_kwargs):

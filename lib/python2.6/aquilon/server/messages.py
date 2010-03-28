@@ -73,8 +73,13 @@ class RequestStatus(object):
 
     def __init__(self, auditid, requestid=None):
         """Should only be created by the StatusCatalog."""
-        self.auditid = (auditid is not None) and str(auditid) or None
+        self.auditid = str(auditid) if auditid is not None else None
         self.requestid = requestid
+        self.user = ""
+        self.command = ""
+        self.args = []
+        self.description = ""
+        self.subscriber_descriptions = []
         self.records = []
         self.debug_fifo = deque()
         self.is_finished = False
@@ -85,6 +90,25 @@ class RequestStatus(object):
         # or subscribers.
         # Need to be careful to be as fine-grained as possible.
         self.lock = Lock()
+
+    def create_description(self, user, command, id, kwargs):
+        massaged = []
+        for (k, v) in kwargs.items():
+            if k == 'format' and v == 'raw':
+                continue
+            if v == 'True':
+                massaged.append(" --%s" % k)
+            else:
+                massaged.append(" --%s=%s" % (k, v))
+        description = '[%s] %s: aq %s%s' % (id, user, command,
+                                            "".join(massaged))
+        if str(id) != self.auditid:
+            self.subscriber_descriptions.append(description)
+            return
+        self.user = user
+        self.command = command
+        self.kwargs = kwargs
+        self.description = description
 
     def publish(self, record):
         """Add a new message into the status log and notify watchers."""
