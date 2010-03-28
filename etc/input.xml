@@ -100,6 +100,15 @@
       <transport method="get" path="active_commands" />
    </command>
 
+   <command name="show_active_locks">
+      Show any active locks currently held by broker commands.
+
+      In this version, the command does not make a database connection
+      and relies on in memory knowledge of acquired locks.  This
+      behavior may change in a future version.
+      <transport method="get" path="active_locks" />
+   </command>
+
    <command name="show_request">
       Show any status messages for the given request.
 
