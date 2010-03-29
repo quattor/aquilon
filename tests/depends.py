@@ -28,8 +28,6 @@
 # TERMS THAT MAY APPLY.
 """ Load testing dependencies onto sys.path via ms.version """
 import sys
-#FIX ME: remove after python2.6.4 upgrade
-sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
 import ms.version
 
 ms.version.addpkg('setuptools', '0.6c11')
