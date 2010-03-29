@@ -46,7 +46,6 @@ class TestDelInterface(TestBrokerCommand):
     # Not testing del interface for ut3c5n10... testing that those
     # interfaces are removed automatically when the machine is removed.
 
-    # FIXME: Need a test for deleting by IP.
     def testdelut3c1n3eth0(self):
         self.noouttest(["del", "interface", "--interface", "eth0",
             "--machine", "ut3c1n3"])

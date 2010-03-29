@@ -39,17 +39,18 @@ class CommandDelInterface(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, interface, machine, mac, ip, user,
+    def render(self, session, logger, interface, machine, mac, user,
                **arguments):
-        dbinterface = get_interface(session, interface, machine, mac, ip)
-        dbmachine = dbinterface.hardware_entity
-        if dbmachine.host and dbinterface.bootable:
-            raise ArgumentError("Cannot remove the bootable interface from a host.  Use `aq del host --hostname %s` first." % dbmachine.host.fqdn)
+        dbinterface = get_interface(session, interface, machine, mac)
+        if dbinterface.system:
+            msg = "Cannot remove interface, %s %s still exists. " % (
+                dbinterface.system.system_type, dbinterface.system.fqdn)
+            raise ArgumentError(msg)
+        hw_ent = dbinterface.hardware_entity
         session.delete(dbinterface)
         session.flush()
 
-        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
-        plenary_info.write()
+        if hw_ent and hw_ent.hardware_entity_type == 'machine':
+            plenary_info = PlenaryMachineInfo(hw_ent, logger=logger)
+            plenary_info.write()
         return
-
-

@@ -142,6 +142,15 @@ class TestAddManager(TestBrokerCommand):
         self.matchoutput(err, "Renaming machine 'ut3s01p1a' as 'ut3s01p1'",
                          command)
 
+    # Test that the interface cannot be removed as long as the manager exists
+    def testdelinterface(self):
+        command = ["del", "interface", "--mac",
+                   self.net.unknown[0].usable[8].mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "manager unittest12r.aqd-unittest.ms.com still exists",
+                         command)
+
     def testverifyunittest13removed(self):
         command = "show host --hostname unittest13.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
