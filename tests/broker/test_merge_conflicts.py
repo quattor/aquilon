@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2009  Contributor
@@ -29,7 +29,6 @@
 # TERMS THAT MAY APPLY.
 """Module for testing that we handle merge conflicts properly"""
 
-from __future__ import with_statement
 
 import os
 import sys
@@ -39,7 +38,7 @@ from subprocess import Popen
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
     SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
 
 from brokertest import TestBrokerCommand
 
@@ -278,4 +277,3 @@ class TestMergeConflicts(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMergeConflicts)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

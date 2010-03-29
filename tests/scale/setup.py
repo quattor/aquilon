@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009  Contributor
@@ -36,7 +36,7 @@ import sys
 if __name__=='__main__':
     DIR = os.path.dirname(os.path.realpath(__file__))
     sys.path.insert(0, os.path.realpath(os.path.join(DIR, '..', '..',
-                                                     "lib", "python2.5")))
+                                                     "lib", "python2.6")))
 
 from common import AQRunner
 from broker import AQBroker

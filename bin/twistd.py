@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 
 # Twisted, the Framework of Your Internet
 # Copyright (c) 2001-2004 Twisted Matrix Laboratories.
@@ -14,7 +14,13 @@
 import sys, os
 sys.path.append( os.path.join(
                     os.path.dirname( os.path.realpath(sys.argv[0]) ),
-                    "..", "lib", "python2.5" ) )
+                    "..", "lib", "python2.6" ) )
+
+# avoid the warning on deprecated md5 module. will remove when
+# a later version of twisted handles this
+import warnings
+warnings.simplefilter("ignore", DeprecationWarning)
+
 
 import aquilon.server.depends
 import aquilon.aqdb.depends

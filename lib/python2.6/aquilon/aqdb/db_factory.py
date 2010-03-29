@@ -27,7 +27,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """To be imported by classes and modules requiring aqdb access"""
-from __future__ import with_statement
 
 import re
 import os

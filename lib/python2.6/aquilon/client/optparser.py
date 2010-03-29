@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009  Contributor
@@ -29,8 +29,6 @@
 # TERMS THAT MAY APPLY.
 """Option parsing for the aq client."""
 
-
-from __future__ import with_statement
 
 from optparse import OptionParser, OptionValueError
 from xml.parsers import expat
@@ -130,7 +128,7 @@ class commandline(Element):
             parser.usage = self.__commandlist[command].recursiveHelp(0)
         else:
             parser.usage = self.__allcommands.recursiveHelp(0)
-        
+
 # --------------------------------------------------------------------------- #
 
     def commandList(self):
@@ -279,7 +277,7 @@ class command(Element):
             return "\n".join([lines[0]] + [ "    " + l for l in lines[1:] ])
         else:
             return ""
-        
+
 
 # --------------------------------------------------------------------------- #
 
@@ -562,7 +560,7 @@ class OptParser (object):
 
     def characterData(self, data):
         'Expat character data event handler'
-        asciidata = "" 
+        asciidata = ""
         if data.strip():
             asciidata = data.encode()
         if (len(asciidata) == 0):
@@ -634,5 +632,3 @@ if __name__ == '__main__':
         print "Command:", command
         print "Command Options:", commandOptions
         print "Global Options:", globalOptions
-
-

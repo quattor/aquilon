@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010  Contributor
@@ -34,7 +34,7 @@ import sys
 import unittest
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.5")
+_LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
 sys.path.insert(0, _LIBDIR)
 
 from aquilon.aqdb.db_factory import DbFactory

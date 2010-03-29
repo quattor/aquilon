@@ -1,12 +1,10 @@
-#!/ms/dist/python/PROJ/core/2.5.2-1/bin/python
+#!/ms/dist/python/PROJ/core/2.6.4/bin/python
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # Copyright (C) 2008 Morgan Stanley
 #
 # This module is part of Aquilon
 """Fake the vlan command"""
 
-
-from __future__ import with_statement
 
 import sys
 import os

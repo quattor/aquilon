@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2009  Contributor
@@ -28,8 +28,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from __future__ import with_statement
-
 import re
 import sys
 import os
@@ -39,7 +37,7 @@ from datetime import date
 # Could act like a quine and take this info from the bits above.
 # Going in the other direction and having this file update itself. :)
 
-shebang = "#!/usr/bin/env python2.5\n"
+shebang = "#!/usr/bin/env python2.6\n"
 
 ex_re = re.compile(r'^\s*#\s*ex:')
 ex_line = "# ex: set expandtab softtabstop=4 shiftwidth=4: " \
@@ -110,7 +108,7 @@ def fix_file(filepath):
         if copyright_re.search(line):
             current_copyright_line = line
             break
-    
+
     # If this is someone else's copyright, don't mess with the file
     if not contributor_copyright_re.search(current_copyright_line):
         sys.stderr.write("Skipping %s because of unrecognized copyright.\n" %
@@ -154,7 +152,7 @@ def fix_file(filepath):
             #print >>sys.stderr, "Skipping module line"
             continue
         new_contents.append(line)
-    
+
     if contents == new_contents:
         return
     else:
@@ -185,4 +183,3 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
-

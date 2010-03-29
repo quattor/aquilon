@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2010  Contributor
@@ -29,7 +29,6 @@
 # TERMS THAT MAY APPLY.
 """This sets up and runs the broker unit tests."""
 
-from __future__ import with_statement
 
 import re
 import os
@@ -46,7 +45,7 @@ import argparse
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SRCDIR = os.path.join(BINDIR, "..")
-sys.path.append(os.path.join(SRCDIR, "lib", "python2.5"))
+sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
 
 from aquilon.config import Config
 from aquilon.utils import kill_from_pid_file, confirm
