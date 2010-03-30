@@ -287,7 +287,7 @@ class DSDBRunner(object):
                     "-interface_name", interface]
         if mac:
             command.extend(["-ethernet_address", mac])
-        out = run_command(command)
+        out = run_command(command,env=self.getenv())
         return
 
     def delete_host_details(self, ip):
