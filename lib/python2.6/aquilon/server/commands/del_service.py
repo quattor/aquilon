@@ -31,7 +31,7 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.aqdb.model import (ServiceInstance, ServiceMap,
@@ -82,6 +82,8 @@ class CommandDelService(BrokerCommand):
             plenary_info = PlenaryServiceInstance(dbservice, dbsi,
                                                   logger=logger)
             plenary_info.remove()
+        else:
+            raise NotFoundException("No such service instance")
 
         # FIXME: Cascade to relevant objects...
         return
