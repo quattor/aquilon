@@ -83,7 +83,7 @@ def populate(sess, **kw):
         admin = sess.query(Role).filter_by(name='aqd_admin').one()
 
         admins = ['cdb', 'aqdqa', 'njw', 'wesleyhe', 'daqscott', 'kgreen',
-                   'benjones']
+                  'benjones', 'gombgabo']
 
         unixeng = ['cesarg', 'jasona', 'dankb', 'goliaa', 'samsh', 'hagberg',
                    'hookn', 'jelinker', 'lookerm', 'walkert', 'af',
