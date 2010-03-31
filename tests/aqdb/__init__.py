@@ -26,3 +26,11 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+
+import orderedsuite
+
+def setup():
+    """ rebuild the aqdb database as package level setup fixture """
+    print "runing tests.aqdb.__init__.setup(), rebuilding db..."
+    orderedsuite.TestRebuild().runTest()
+    print "db now rebuilt."
