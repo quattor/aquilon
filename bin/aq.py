@@ -438,7 +438,7 @@ if __name__ == "__main__":
 
     else:
         format = globalOptions.get("format", None)
-        if format == "proto":
+        if format == "proto" or format == "csv":
             sys.stdout.write(pageData)
         elif pageData:
             print pageData
