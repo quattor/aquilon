@@ -59,6 +59,7 @@ class TorSwitchInterfacePairFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[TorSwitchInterfacePair] = TorSwitchInterfacePairFormatter()
 
+
 class TorSwitchFormatter(ObjectFormatter):
     def format_raw(self, tor_switch, indent=""):
         details = [indent + "%s: %s" %
@@ -67,7 +68,7 @@ class TorSwitchFormatter(ObjectFormatter):
         if tor_switch.ip:
             details.append(indent + "  IP: %s" % tor_switch.ip)
         details.append(self.redirect_raw(tor_switch.tor_switch_hw.location,
-                                         indent+"  "))
+                                         indent + "  "))
         details.append(self.redirect_raw(tor_switch.tor_switch_hw.model,
                                          indent + "  "))
         if tor_switch.tor_switch_hw.serial_no:
@@ -108,5 +109,3 @@ class TorSwitchFormatter(ObjectFormatter):
             return [TorSwitchInterfacePair((tor_switch, None))]
 
 ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
-
-

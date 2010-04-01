@@ -31,6 +31,7 @@
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import MetaCluster
 
+
 class MetaClusterFormatter(ObjectFormatter):
     def format_raw(self, metacluster, indent=""):
         details = [indent + "MetaCluster: %s" % metacluster.name]
@@ -46,5 +47,3 @@ class MetaClusterFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[MetaCluster] = MetaClusterFormatter()
-
-

@@ -36,7 +36,7 @@ from aquilon.aqdb.model import DnsDomain
 
 class DnsDomainFormatter(ObjectFormatter):
     def format_raw(self, dns_domain, indent=""):
-        details = [ indent + "DNS Domain: %s" % dns_domain.name ]
+        details = [indent + "DNS Domain: %s" % dns_domain.name]
         if dns_domain.comments:
             details.append(indent + "  Comments: %s" % dns_domain.comments)
         return "\n".join(details)

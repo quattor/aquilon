@@ -42,5 +42,3 @@ class UserPrincipalFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[UserPrincipal] = UserPrincipalFormatter()
-
-

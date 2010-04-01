@@ -33,13 +33,15 @@ from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Network
 
+
 class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
+
     def format_raw(self, network, indent=""):
         netmask = network.netmask()
         sysloc = network.location.sysloc()
-        details = [ indent + "Network: %s" % network.name ]
-        details.append(indent + "IP: %s" % network.ip )
+        details = [indent + "Network: %s" % network.name]
+        details.append(indent + "IP: %s" % network.ip)
         details.append(indent + "Netmask: %s" % netmask)
         details.append(indent + "Sysloc: %s" % sysloc)
         details.append(indent + "Country: %s" % str(network.location.country.name))
@@ -57,13 +59,16 @@ class NetworkFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()
 
+
 class NetworkHostList(list):
     """Holds a list of networks for which a host list will be formatted
     """
     pass
 
+
 class NetworkHostListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
+
     def format_raw(self, netlist, indent=""):
         details = []
         for network in netlist:
@@ -79,7 +84,7 @@ class NetworkHostListFormatter(ListFormatter):
                 elif hasattr(system, "machine"):
                     device_name = int.machine.name
                 else:
-                    device_name =  system.ip
+                    device_name = system.ip
                 details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, system.mac))
         return "\n".join(details)
 
@@ -88,6 +93,7 @@ class NetworkHostListFormatter(ListFormatter):
         return(snlf.format_proto(netlist, skeleton))
 
 ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
+
 
 class SimpleNetworkList(list):
     """By convention, holds a list of networks to be formatted in a simple
@@ -98,6 +104,7 @@ class SimpleNetworkList(list):
 class SimpleNetworkListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
+
     def format_raw(self, nlist, indent=""):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:

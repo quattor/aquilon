@@ -42,5 +42,3 @@ class CpuFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Cpu] = CpuFormatter()
-
-

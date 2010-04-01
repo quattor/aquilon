@@ -46,20 +46,24 @@ class ServiceFormatter(ObjectFormatter):
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:
-            details.append(self.redirect_raw(instance, indent+"  "))
+            details.append(self.redirect_raw(instance, indent + "  "))
         return "\n".join(details)
+
     def format_proto(self, service, skeleton=None):
         slf = ServiceListFormatter()
         return slf.format_proto([service], skeleton)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()
 
+
 class ServiceList(list):
     """Class to hold a list of services to be formatted"""
     pass
 
+
 class ServiceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
+
     def format_proto(self, sl, skeleton=None):
         servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
         for service in sl:
@@ -67,5 +71,3 @@ class ServiceListFormatter(ListFormatter):
         return servicelist_msg.SerializeToString()
 
 ObjectFormatter.handlers[ServiceList] = ServiceListFormatter()
-
-

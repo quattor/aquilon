@@ -31,6 +31,7 @@
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import ClusterAlignedService
 
+
 class ClusterType(object):
     def __init__(self, cluster_type):
         self.cluster_type = cluster_type
@@ -41,6 +42,7 @@ class ClusterType(object):
         q = q.filter_by(cluster_type=self.cluster_type)
         self.services = [cas.service for cas in q.all()]
 
+
 class ClusterTypeFormatter(ObjectFormatter):
     def format_raw(self, cluster_type, indent=""):
         details = [indent + "Cluster Type: %s" % cluster_type.cluster_type]
@@ -49,5 +51,3 @@ class ClusterTypeFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[ClusterType] = ClusterTypeFormatter()
-
-

@@ -36,19 +36,20 @@ from aquilon.aqdb.model import Host
 
 class HostFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
+
     def format_raw(self, host, indent=""):
-        details = [ indent + "Hostname: %s" % host.fqdn ]
+        details = [indent + "Hostname: %s" % host.fqdn]
         if host.ip:
             details.append(indent + "  IP: %s" % host.ip)
         if host.cluster:
             details.append(indent + "  Member of %s cluster: %s"
                     % (host.cluster.cluster_type, host.cluster.name))
-        details.append(self.redirect_raw(host.machine, indent+"  "))
-        details.append(self.redirect_raw(host.personality, indent+"  "))
-        details.append(self.redirect_raw(host.archetype, indent+"  "))
-        details.append(self.redirect_raw(host.operating_system, indent+"  "))
-        details.append(self.redirect_raw(host.domain, indent+"  "))
-        details.append(self.redirect_raw(host.status, indent+"  "))
+        details.append(self.redirect_raw(host.machine, indent + "  "))
+        details.append(self.redirect_raw(host.personality, indent + "  "))
+        details.append(self.redirect_raw(host.archetype, indent + "  "))
+        details.append(self.redirect_raw(host.operating_system, indent + "  "))
+        details.append(self.redirect_raw(host.domain, indent + "  "))
+        details.append(self.redirect_raw(host.status, indent + "  "))
         for build_item in host.templates:
             details.append(indent + "  Template: %s" % build_item.cfg_path)
         if host.comments:

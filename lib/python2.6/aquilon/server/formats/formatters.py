@@ -128,18 +128,17 @@ class ObjectFormatter(object):
 
     def __init__(self):
         if hasattr(self, "protocol"):
-            if not self.loaded_protocols.has_key(self.protocol):
+            if not self.protocol in self.loaded_protocols:
                 try:
                     self.loaded_protocols[self.protocol] = __import__(self.protocol)
                 except ImportError, e:
                     self.loaded_protocols[self.protocol] = False
                     error = "path %s protocol: %s error: %s" % (self.protodir, self.protocol, e)
-                    raise ProtocolError, error
+                    raise ProtocolError(error)
             else:
                 if self.loaded_protocols[self.protocol] == False:
                     error = "path %s protocol: %s error: previous import attempt was unsuccessful" % (self.protodir, self.protocol)
-                    raise ProtocolError, error
-
+                    raise ProtocolError(error)
 
     def get_protocol(self):
         if hasattr(self, "protocol"):

@@ -41,7 +41,7 @@ class ArchetypeFormatter(ObjectFormatter):
         flagstr = ""
         if len(flags) != 0:
             flagstr = " [" + " ".join(flags) + "]"
-        details = [ indent + "Archetype: %s%s" % (archetype.name, flagstr) ]
+        details = [indent + "Archetype: %s%s" % (archetype.name, flagstr)]
         for item in archetype.service_list:
             details.append(indent + "  Required Service: %s"
                     % item.service.name)
@@ -59,5 +59,3 @@ class ArchetypeFormatter(ObjectFormatter):
         # FIXME: Implement required services
 
 ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()
-
-

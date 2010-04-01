@@ -77,6 +77,7 @@ ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 class MissingManagersList(list):
     pass
 
+
 class MissingManagersFormatter(ListFormatter):
     def format_raw(self, mmlist, indent=""):
         commands = []

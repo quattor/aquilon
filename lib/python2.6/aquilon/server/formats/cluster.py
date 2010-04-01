@@ -32,6 +32,7 @@ from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Cluster, EsxCluster
 
+
 class ClusterFormatter(ObjectFormatter):
     def format_raw(self, cluster, indent=""):
         details = [indent + "%s cluster: %s" %
@@ -69,6 +70,7 @@ class SimpleClusterList(list):
     """By convention, holds a list of clusters to be formatted in a simple
        (name-only) manner."""
     pass
+
 
 class SimpleClusterListFormatter(ListFormatter):
     def format_raw(self, sclist, indent=""):
