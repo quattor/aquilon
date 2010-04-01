@@ -31,8 +31,33 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import TorSwitch
 
+
+class TorSwitchInterfacePair(tuple):
+    """Encapsulates a (tor switch, selected interface) pair"""
+    pass
+
+
+class TorSwitchInterfacePairFormatter(ObjectFormatter):
+    def csv_fields(self, item):
+        tor_switch = item[0]
+        interface = item[1]
+
+        details = [tor_switch.fqdn,
+                   tor_switch.tor_switch_hw.location.rack,
+                   tor_switch.tor_switch_hw.location.building,
+                   tor_switch.tor_switch_hw.model.vendor.name,
+                   tor_switch.tor_switch_hw.model.name,
+                   tor_switch.tor_switch_hw.serial_no]
+        if interface:
+            details.extend([interface.name, interface.mac, interface.system.ip])
+        else:
+            details.extend([None, None, None])
+        return details
+
+ObjectFormatter.handlers[TorSwitchInterfacePair] = TorSwitchInterfacePairFormatter()
 
 class TorSwitchFormatter(ObjectFormatter):
     def format_raw(self, tor_switch, indent=""):
@@ -67,40 +92,21 @@ class TorSwitchFormatter(ObjectFormatter):
         """This is just an idea... not used anywhere (yet?)."""
         return "tor_switch,rack,building,vendor,model,serial,interface,mac,ip"
 
-    def format_csv(self, tor_switch):
+    def csv_tolist(self, tor_switch):
         """This was implemented specifically for tor_switch.  May need
         to check and do something different for other tor_switch types.
 
         """
-        results = []
-        details = [tor_switch.fqdn,
-                   tor_switch.tor_switch_hw.location.rack,
-                   tor_switch.tor_switch_hw.location.building,
-                   tor_switch.tor_switch_hw.model.vendor.name,
-                   tor_switch.tor_switch_hw.model.name,
-                   tor_switch.tor_switch_hw.serial_no]
-        if not tor_switch.tor_switch_hw.interfaces:
-            details.extend([None, None, None])
-            results.append(details)
+        interfaces = []
         for i in tor_switch.tor_switch_hw.interfaces:
             if not i.system:
                 continue
-            full = details[:]
-            full.extend([i.name, i.mac, i.system.ip])
-            results.append(full)
-        return "\n".join([",".join([str(detail or "") for detail in result])
-            for result in results])
+            interfaces.append(i)
+        if len(interfaces):
+            return [TorSwitchInterfacePair((tor_switch, i)) for i in interfaces]
+        else:
+            return [TorSwitchInterfacePair((tor_switch, None))]
 
 ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
-
-
-class SimpleTorSwitchList(list):
-    pass
-
-class SimpleTorSwitchListFormatter(ObjectFormatter):
-    def format_raw(self, smlist, indent=""):
-        return str("\n".join([indent + tor_switch.fqdn for tor_switch in smlist]))
-
-ObjectFormatter.handlers[SimpleTorSwitchList] = SimpleTorSwitchListFormatter()
 
 

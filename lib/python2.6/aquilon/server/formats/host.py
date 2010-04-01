@@ -30,6 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Host
 
 
@@ -68,15 +69,15 @@ class SimpleHostList(list):
     pass
 
 
-class SimpleHostListFormatter(ObjectFormatter):
+class SimpleHostListFormatter(ListFormatter):
     protocol = "aqdsystems_pb2"
 
     def format_raw(self, shlist, indent=""):
         return str("\n".join([indent + host.fqdn for host in shlist]))
 
-    # Should probably display some useful info...
-    def format_csv(self, shlist):
-        return str("\n".join([host.fqdn for host in shlist]))
+    # TODO: Should probably display some useful info...
+    def csv_fields(self, host):
+        return (host.fqdn,)
 
     def format_html(self, shlist):
         return "<ul>\n%s\n</ul>\n" % "\n".join([
@@ -100,9 +101,9 @@ class HostIPList(list):
     pass
 
 
-class HostIPListFormatter(ObjectFormatter):
-    def format_csv(self, hilist):
-        return str("\n".join([",".join(entry) for entry in hilist]))
+class HostIPListFormatter(ListFormatter):
+    def csv_fields(self, hostips):
+        return hostips
 
 ObjectFormatter.handlers[HostIPList] = HostIPListFormatter()
 
@@ -112,8 +113,8 @@ class HostMachineList(list):
     pass
 
 
-class HostMachineListFormatter(ObjectFormatter):
-    def format_csv(self, hlist):
-        return str("\n".join([str.join(",",(host.fqdn, host.machine.name)) for host in hlist]))
+class HostMachineListFormatter(ListFormatter):
+    def csv_fields(self, host):
+        return (host.fqdn, host.machine.name)
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()

@@ -41,8 +41,8 @@ class DnsDomainFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % dns_domain.comments)
         return "\n".join(details)
 
-    def format_csv(self, dns_domain):
-        return "%s,%s" % (dns_domain.name, dns_domain.comments or "")
+    def csv_fields(self, dns_domain):
+        return (dns_domain.name, dns_domain.comments)
 
 
 class DNSDomainList(list):
@@ -61,6 +61,9 @@ class DNSDomainListFormatter(ListFormatter):
             self.add_dns_domain_msg(dns_domain_list_msg.dns_domains.add(),
                                     dns_domain)
         return dns_domain_list_msg.SerializeToString()
+
+    def csv_fields(self, dns_domain):
+        return (dns_domain.name, dns_domain.comments)
 
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()
 ObjectFormatter.handlers[DNSDomainList] = DNSDomainListFormatter()

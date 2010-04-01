@@ -30,6 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Network
 
 class NetworkFormatter(ObjectFormatter):
@@ -61,7 +62,7 @@ class NetworkHostList(list):
     """
     pass
 
-class NetworkHostListFormatter(ObjectFormatter):
+class NetworkHostListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
     def format_raw(self, netlist, indent=""):
         details = []
@@ -94,7 +95,7 @@ class SimpleNetworkList(list):
     pass
 
 
-class SimpleNetworkListFormatter(ObjectFormatter):
+class SimpleNetworkListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
     def format_raw(self, nlist, indent=""):
@@ -126,11 +127,10 @@ class SimpleNetworkListFormatter(ObjectFormatter):
         for system in net.interfaces:
             self.add_host_msg(net_msg.hosts.add(), system)
 
-    def format_csv(self, nlist):
-        details = [",".join(self.fields)]
-        for network in nlist:
-            details.append(str(",".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.comments)])))
-        return "\n".join(details)
+    def csv_fields(self, network):
+        return (network.name, network.ip, network.netmask(),
+                network.location.sysloc(), network.location.country.name,
+                network.side, network.network_type, network.comments)
 
     def format_html(self, nlist):
         return "<ul>\n%s\n</ul>\n" % "\n".join([

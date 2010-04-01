@@ -30,6 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import System
 
 # Should never get invoked...
@@ -53,13 +54,13 @@ class SimpleSystemList(list):
     pass
 
 
-class SimpleSystemListFormatter(ObjectFormatter):
+class SimpleSystemListFormatter(ListFormatter):
     def format_raw(self, sslist, indent=""):
         return str("\n".join([indent + system.fqdn for system in sslist]))
 
-    # Should probably display some useful info...
-    def format_csv(self, sslist):
-        return str("\n".join([system.fqdn for system in sslist]))
+    # TODO: Should probably display some useful info...
+    def csv_fields(self, system):
+        return (system.fqdn,)
 
     def format_html(self, sslist):
         return "<ul>\n%s\n</ul>\n" % "\n".join([

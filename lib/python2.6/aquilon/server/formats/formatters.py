@@ -29,10 +29,16 @@
 """Base classes for formatting objects."""
 
 
-import os
+import csv
+import cStringIO
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError
+
+# Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
+# the tests.
+csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
+                     doublequote=True, lineterminator='\n')
 
 
 class ResponseFormatter(object):
@@ -55,7 +61,6 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_raw(result)
 
     def format_csv(self, result, request):
-        """For now, format_csv is implemented in the same way as format_raw."""
         return ObjectFormatter.redirect_csv(result)
 
     def format_proto(self, result, request):
@@ -147,8 +152,40 @@ class ObjectFormatter(object):
     def format_raw(self, result, indent=""):
         return indent + str(result)
 
+    def csv_fields(self, result):
+        """Return the attributes that should be printed in CSV format.
+
+        The returned value must always be a sequence, even if it contains just
+        one item."""
+        return (str(result),)
+
+    def csv_tolist(self, result):
+        """Convert a single object to a list.
+
+        Override this method if you want to print multiple lines in CSV format
+        for a single object.
+        """
+        return (result,)
+
     def format_csv(self, result):
-        return self.format_raw(result)
+        """CSV output provider.
+
+        There are two ways to customize this method. In the simple case, you
+        want exactly one line of output for every result object. In this case,
+        the descendant formatter classes should override the cvs_fields() method
+        to select the data that should be printed.
+
+        There are cases however when you want multiple lines for a single
+        object (e.g. a separate line for every interface a machine has). In this
+        case the descendant classes should override the csv_tolist() method.
+        """
+        strbuf = cStringIO.StringIO()
+        writer = csv.writer(strbuf, dialect='aquilon')
+        for item in self.csv_tolist(result):
+            fields = self.csv_fields(item)
+            if fields:
+                writer.writerow(fields)
+        return strbuf.getvalue()
 
     def format_proto(self, result, skeleton=None):
         return self.format_raw(result)

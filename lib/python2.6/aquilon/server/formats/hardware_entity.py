@@ -30,6 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import HardwareEntity
 
 
@@ -57,13 +58,13 @@ class SimpleHardwareEntityList(list):
     pass
 
 
-class SimpleHardwareEntityListFormatter(ObjectFormatter):
+class SimpleHardwareEntityListFormatter(ListFormatter):
     def format_raw(self, shelist, indent=""):
         return str("\n".join([indent + hw.hardware_name for hw in shelist]))
 
-    # Should probably display some useful info...
-    def format_csv(self, shelist):
-        return str("\n".join([hw.hardware_name for hw in shelist]))
+    # TODO: Should probably display some useful info...
+    def csv_fields(self, hw):
+        return (hw.hardware_name,)
 
     # Maybe delegate to each type...?  There is no simple/standard
     # name based hardware search.
@@ -72,5 +73,3 @@ class SimpleHardwareEntityListFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[SimpleHardwareEntityList] = \
         SimpleHardwareEntityListFormatter()
-
-
