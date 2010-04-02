@@ -110,11 +110,6 @@ class CommandAddHost(BrokerCommand):
         dbinterface = None
         mac = None
         if dbpersonality.archetype.name != 'aurora':
-            # Any host being added to DSDB will need a valid primary interface.
-            # XXX: This check for msad is horrible... look to get rid of it
-            # when system and interface tables are restructured.
-            if not dbmachine.interfaces and dbdns_domain.name != 'msad.ms.com':
-                raise ArgumentError("Machine '%s' has no interfaces." % machine)
             for interface in dbmachine.interfaces:
                 if interface.interface_type != 'public':
                     continue
@@ -125,12 +120,12 @@ class CommandAddHost(BrokerCommand):
                     dbinterface = interface
             if dbinterface:
                 mac = dbinterface.mac
-            # XXX: Another horrible check here...
-            if not dbinterface and dbdns_domain.name != 'msad.ms.com':
-                raise ArgumentError("Machine '%s' requires a bootable interface." % machine)
 
         # This method is allowed to return None, which will pass through
         # the next two.
+        # This can only happen (currently) using add_aurora_host,
+        # add_windows_host, or possibly by bypassing the aq client and
+        # posting a request directly.
         ip = generate_ip(session, dbinterface, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
@@ -163,10 +158,8 @@ class CommandAddHost(BrokerCommand):
                         fields = dsdb_runner.show_host(hostname)
                     except ProcessException, e:
                         raise ArgumentError("Could not find host in dsdb: %s" % e)
-            elif dbdns_domain.name == 'msad.ms.com':
-                # We should probably check that the host is valid in the
-                # appropriate system...
-                pass
+            elif not dbhost.ip:
+                logger.info("No IP for %s, not adding to DSDB." % dbhost.fqdn)
             else:
                 # For anything else, reserve the name and IP in DSDB.
                 try:
