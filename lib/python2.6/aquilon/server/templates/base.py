@@ -227,14 +227,15 @@ class Plenary(object):
             if self.template_type == "object" and hasattr(self, 'name'):
                 qdir = self.config.get("broker", "quattordir")
                 xmlfile = os.path.join(qdir, "build", "xml", domain,
-                                       self.name + ".xml")
+                                       self.plenary_template + ".xml")
                 remove_file(xmlfile, logger=self.logger)
                 depfile = os.path.join(qdir, "build", "xml", domain,
-                                       self.name + ".xml.dep")
+                                       self.plenary_template + ".xml.dep")
                 remove_file(depfile, logger=self.logger)
                 builddir = self.config.get("broker", "builddir")
                 mainfile = os.path.join(builddir, "domains", domain,
-                                        "profiles", self.name + ".tpl")
+                                        "profiles",
+                                        self.plenary_template + ".tpl")
                 remove_file(mainfile, logger=self.logger)
         except:
             if not locked:
