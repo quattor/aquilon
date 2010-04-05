@@ -75,10 +75,12 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the
         # port_group to a value it already has.
-        if pg is not None:
-            dbinterface.port_group = verify_port_group(dbmachine, pg)
+        if pg is not None and dbinterface.port_group != pg.lower().strip():
+            dbinterface.port_group = verify_port_group(
+                dbinterface.hardware_entity, pg)
         elif autopg:
-            dbinterface.port_group = choose_port_group(dbmachine)
+            dbinterface.port_group = choose_port_group(
+                dbinterface.hardware_entity)
 
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
