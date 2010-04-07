@@ -26,11 +26,27 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-
+import os
+import logging
 import orderedsuite
 
-def setup():
-    """ rebuild the aqdb database as package level setup fixture """
-    print "runing tests.aqdb.__init__.setup(), rebuilding db..."
+ENV_VAR = 'AQDB_NOREBUILD'
+
+#TODO: have log level inherited from nose
+logging.basicConfig(levl=logging.ERROR)
+LOG = logging.getLogger('aqdb.test')
+
+def setup(*args, **kw):
+    """ rebuild the aqdb database as package level setup fixture
+
+        if AQDB_NOREBUILD environment variable is set, no rebuild
+        will take place (for rapid testing that don't require them)
+    """
+
+    if os.environ.get(ENV_VAR, False):
+        LOG.debug('Skipping database rebuild due to $%s' % ENV_VAR)
+        return
+
+    LOG.info("runing tests.aqdb.__init__.setup(), rebuilding db...")
     orderedsuite.TestRebuild().runTest()
-    print "db now rebuilt."
+    LOG.info("db now rebuilt.")
