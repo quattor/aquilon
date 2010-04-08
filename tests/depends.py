@@ -27,13 +27,12 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Load testing dependencies onto sys.path via ms.version """
-import sys
 import ms.version
 
 ms.version.addpkg('setuptools', '0.6c11')
 
-ms.version.addpkg('coverage', '3.1')
+ms.version.addpkg('coverage', '3.3.1')
 
 ms.version.addpkg('argparse', '1.1')
 
-ms.version.addpkg('nose', '0.11.1')
+ms.version.addpkg('nose', '0.11.3')
