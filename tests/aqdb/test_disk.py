@@ -67,8 +67,8 @@ def clean_up():
                 print 'disk with id %s not deleted'% (id)
                 s.query(Disk).filter_by(id=id).delete()
             commit(sess)
-    del_service_instance(sess, SHARE_NAME)
-    del_service(sess, NAS_SVC)
+    del_service_instance(SHARE_NAME)
+    del_service(NAS_SVC)
 
 
 def setup():

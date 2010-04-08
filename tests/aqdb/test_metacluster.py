@@ -29,7 +29,7 @@
 # TERMS THAT MAY APPLY.
 
 """ tests create and delete of a machine through the session """
-from utils import load_classpath, add, commit
+from utils import load_classpath, add, commit, create
 
 load_classpath()
 
@@ -80,12 +80,10 @@ def del_metas():
 
 
 def setup():
-    print 'set up'
     clean_up()
 
 
 def teardown():
-    print 'tear down'
     clean_up()
 
 
@@ -124,8 +122,7 @@ cl_factory = cluster_factory()
 
 def test_create_metacluster():
     mc = MetaCluster(name=META_NAME, max_shares=8)
-    add(sess, mc)
-    commit(sess)
+    create(sess, mc)
 
     assert mc
     print mc
@@ -133,12 +130,11 @@ def test_create_metacluster():
 
 def test_add_meta_member():
     """ Test adding a cluster to a metacluster and cluster.metacluster """
-    mc = MetaCluster.get_by('name', META_NAME, sess)[0]
+    mc = MetaCluster.get_unique(sess, META_NAME)
     cl = cl_factory.next()
 
     mcm = MetaClusterMember(metacluster=mc, cluster=cl)
-    add(sess, mcm)
-    commit(sess)
+    create(sess, mcm)
 
     assert mcm
     assert len(mc.members) is 1
@@ -157,13 +153,11 @@ def test_add_too_many_metacluster_members():
 
     mc = MetaCluster.get_unique(sess, META_NAME)
     mcm2 = MetaClusterMember(metacluster=mc, cluster=cl2)
-    add(sess, mcm2)
-    commit(sess)
+    create(sess, mcm2)
     assert mcm2
 
     mcm3 = MetaClusterMember(metacluster=mc, cluster=cl3)
-    add(sess, mcm3)
-    commit(sess)
+    create(sess, mcm3)
     assert mcm3
 
 
@@ -181,13 +175,11 @@ def test_two_metaclusters():
     assert cl4
 
     mcm1 = MetaClusterMember(metacluster=m2, cluster=cl4)
-    add(sess, mcm1)
-    commit(sess)
+    create(sess, mcm1)
     assert mcm1
 
     mcm2 = MetaClusterMember(metacluster=m3, cluster=cl4)
-    add(sess, mcm1)
-    commit(sess)
+    create(sess, mcm1)
     assert mcm2
 
 
