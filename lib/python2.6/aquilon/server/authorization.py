@@ -70,6 +70,7 @@ class AuthorizationBroker(object):
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
                       'add_os', 'del_os',
+                      'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(
