@@ -30,11 +30,11 @@ import os
 import logging
 import orderedsuite
 
-ENV_VAR = 'AQDB_NOREBUILD'
+from aqdb_nose_plugin import ENVIRONMENT_VARNAME
 
 #TODO: have log level inherited from nose
-logging.basicConfig(levl=logging.ERROR)
-LOG = logging.getLogger('aqdb.test')
+#logging.basicConfig(levl=logging.ERROR)
+#LOG = logging.getLogger('aqdb.test')
 
 def setup(*args, **kw):
     """ rebuild the aqdb database as package level setup fixture
@@ -43,10 +43,10 @@ def setup(*args, **kw):
         will take place (for rapid testing that don't require them)
     """
 
-    if os.environ.get(ENV_VAR, False):
-        LOG.debug('Skipping database rebuild due to $%s' % ENV_VAR)
+    if ENVIRONMENT_VARNAME in os.environ.keys():
+        print 'Skipping database rebuild due to $%s' % ENVIRONMENT_VARNAME
         return
 
-    LOG.info("runing tests.aqdb.__init__.setup(), rebuilding db...")
+    print "runing tests.aqdb.__init__.setup(), rebuilding db..."
     orderedsuite.TestRebuild().runTest()
-    LOG.info("db now rebuilt.")
+    print "db now rebuilt."
