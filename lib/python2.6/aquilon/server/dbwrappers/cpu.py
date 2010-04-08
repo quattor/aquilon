@@ -31,8 +31,8 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Cpu
+from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.aqdb.model import Cpu, Vendor
 
 
 # FIXME: CPU is not specified uniquely with just name!
@@ -43,4 +43,24 @@ def get_cpu(session, cpu):
         raise NotFoundException("Cpu %s not uniquely identified: %s" % (cpu, e))
     return dbcpu
 
-
+def get_unique_cpu(session, name=None, vendor=None, speed=None):
+    """Assumes vendor is a string and speed is an int."""
+    q = session.query(Cpu)
+    error = {}
+    if name:
+        error['name'] = name
+        q = q.filter_by(name=name)
+    if speed:
+        error['speed'] = speed
+        q = q.filter_by(speed=speed)
+    if vendor:
+        dbcpuvendor = Vendor.get_unique(session, vendor, compel=True)
+        q = q.filter_by(vendor=dbcpuvendor)
+        error['vendor'] = dbcpuvendor.name
+    cpus = q.all()
+    if not cpus:
+        error_msg = " with %s" % error if error else ''
+        raise NotFoundException("No matching CPU found%s." % error_msg)
+    if len(cpus) > 1:
+        raise ArgumentError("Could not uniquely identify CPU.")
+    return cpus[0]

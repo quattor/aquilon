@@ -847,6 +847,32 @@
       <transport method="get" path="find/hardware/model" />
    </command>
 
+   <command name="update_model">
+      Update a model, optionally updating all existing hardware of that model.
+      The model must be specified by name and vendor.
+      If updating the CPU, usually cpuname will be enough to specify a CPU
+      uniquely but vendor and speed can be given as well if needed.
+      <optgroup name="update_model_specifier" mandatory="True" fields="all">
+         <option name="name" type="string">Name of the model to update</option>
+         <option name="vendor" type="string">Vendor name</option>
+      </optgroup>
+      <optgroup name="update_model_values" mandatory="False">
+         <option name="machine_type" type="string">Machine type name</option>
+         <option name="cpuname" type="string">CPU name</option>
+         <option name="cpuvendor" type="string">CPU vendor</option>
+         <option name="cpuspeed" type="string">CPU speed</option>
+         <option name="cpunum" type="string">CPU count</option>
+         <option name="mem" type="string">amount of installed memory (MB)</option>
+         <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
+         <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
+         <option name="disksize" type="string">installed disk capacity (GB)</option>
+         <option name="nics" type="string">number of NIC interfaces</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
+      </optgroup>
+      <transport method="post" path="hardware/model/%(vendor)s/%(name)s" />
+   </command>
+
    <command name="del_model">
       Decomission model
       <optgroup name="del_model_opts" mandatory="True" fields="all">

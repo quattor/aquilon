@@ -136,6 +136,7 @@ from test_search_next import TestSearchNext
 from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
+from test_update_model import TestUpdateModel
 from test_update_rack import TestUpdateRack
 from test_update_network import TestUpdateNetwork
 from test_update_archetype import TestUpdateArchetype
@@ -233,7 +234,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestSearchHardware, TestSearchMachine,
                 TestSearchSystem, TestSearchHost, TestSearchESXCluster,
                 TestSearchNext,
-                TestUpdateInterface, TestUpdateMachine, TestUpdateRack,
+                TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
+                TestUpdateRack,
                 TestRefreshNetwork, TestUpdateNetwork,
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
