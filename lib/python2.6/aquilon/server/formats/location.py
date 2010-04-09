@@ -55,26 +55,21 @@ class LocationFormatter(ObjectFormatter):
                     for p in location.parents))
         return "\n".join(details)
 
-    def format_csv(self, location):
-        # We have no policy around quoting CSV yet... leaving off fullname
+    def csv_fields(self, location):
+        # TODO: We have no policy around quoting CSV yet... leaving off fullname
         # for now.
         details = [location.location_type, location.name]
         if location.parent:
             details.append(location.parent.location_type)
             details.append(location.parent.name)
         else:
-            details.append("")
-            details.append("")
+            details.extend([None, None])
         if isinstance(location, Rack):
             details.append(location.rack_row)
             details.append(location.rack_column)
-        cleaned = []
-        for d in details:
-            if d is None:
-                cleaned.append("")
-            else:
-                cleaned.append(str(d))
-        return ",".join(cleaned)
+        else:
+            details.extend([None, None])
+        return details
 
 
 # Laziness... grab any imported Location classes and handle them above.

@@ -30,6 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Interface
 
 
@@ -76,7 +77,8 @@ ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 class MissingManagersList(list):
     pass
 
-class MissingManagersFormatter(ObjectFormatter):
+
+class MissingManagersFormatter(ListFormatter):
     def format_raw(self, mmlist, indent=""):
         commands = []
         for interface in mmlist:
@@ -90,13 +92,11 @@ class MissingManagersFormatter(ObjectFormatter):
                                 interface.hardware_entity.name)
         return "\n".join(commands)
 
-    def format_csv(self, mmlist):
-        hosts = []
-        for interface in mmlist:
-            host = interface.hardware_entity.host
-            if host:
-                # FIXME: Deal with multiple management interfaces?
-                hosts.append(host.fqdn)
-        return "\n".join(hosts)
+    def csv_fields(self, interface):
+        host = interface.hardware_entity.host
+        if host:
+            return (host.fqdn,)
+        else:
+            return None
 
 ObjectFormatter.handlers[MissingManagersList] = MissingManagersFormatter()

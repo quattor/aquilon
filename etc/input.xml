@@ -389,8 +389,12 @@
    </command>
 
    <command name="show_network">
-      %prog show network
-      Shows the configuration for a network, or for networks selected by location
+      Shows the configuration for a network, or for networks selected by location.
+
+      Supported options for --format: raw, csv, proto.
+
+      The 'csv' format contains the following fields, in this order:
+      Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
       <optgroup name="show_network_Input" mandatory="True" fields="any">
          <option name="network" type="string" conflicts="">Network name</option>
          <option name="ip" type="string" conflicts="">IP address</option>
@@ -2084,6 +2088,15 @@
 
    <command name="show_machine">
       Show the hardware configuration of the named machine.
+
+      Supported options for --format: raw, csv.
+
+      The 'csv' format contains the following fields, in this order:
+      Machine name, Rack, Building, Vendor name, Model name, Serial number,
+      Interface name, Interface MAC address, Interface IP address.
+
+      If the machine has multiple interfaces, then there will be a separate
+      line for each.
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string">machine name</option>
 	 <option name="all" type="boolean" conflicts="machine">all</option>
@@ -2158,6 +2171,15 @@
 
    <command name="show_tor_switch">
       Show the configuration information for the specified switch.
+
+      Supported options for --format: raw, csv.
+
+      The 'csv' format contains the following fields, in this order:
+      FQDN, Rack, Building, Vendor name, Model name, Serial number,
+      Interface name, Interface MAC address, Interface IP address.
+
+      If the switch has multiple interfaces assigned, then there will be a
+      separate line for each.
       <optgroup name="show_tor_switch_opts" mandatory="True" fields="any">
          <option name="tor_switch" type="string">tor_switch name</option>
          <option name="rack" type="string">Rack name</option>

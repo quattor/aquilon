@@ -48,5 +48,3 @@ for f in os.listdir(_thisdir):
         except Exception, e:
             log.msg("Error importing %s: %s" % (modulename, format_exc()))
             continue
-
-

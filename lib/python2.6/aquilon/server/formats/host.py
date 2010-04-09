@@ -30,24 +30,26 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Host
 
 
 class HostFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
+
     def format_raw(self, host, indent=""):
-        details = [ indent + "Hostname: %s" % host.fqdn ]
+        details = [indent + "Hostname: %s" % host.fqdn]
         if host.ip:
             details.append(indent + "  IP: %s" % host.ip)
         if host.cluster:
             details.append(indent + "  Member of %s cluster: %s"
                     % (host.cluster.cluster_type, host.cluster.name))
-        details.append(self.redirect_raw(host.machine, indent+"  "))
-        details.append(self.redirect_raw(host.personality, indent+"  "))
-        details.append(self.redirect_raw(host.archetype, indent+"  "))
-        details.append(self.redirect_raw(host.operating_system, indent+"  "))
-        details.append(self.redirect_raw(host.domain, indent+"  "))
-        details.append(self.redirect_raw(host.status, indent+"  "))
+        details.append(self.redirect_raw(host.machine, indent + "  "))
+        details.append(self.redirect_raw(host.personality, indent + "  "))
+        details.append(self.redirect_raw(host.archetype, indent + "  "))
+        details.append(self.redirect_raw(host.operating_system, indent + "  "))
+        details.append(self.redirect_raw(host.domain, indent + "  "))
+        details.append(self.redirect_raw(host.status, indent + "  "))
         for build_item in host.templates:
             details.append(indent + "  Template: %s" % build_item.cfg_path)
         if host.comments:
@@ -68,15 +70,15 @@ class SimpleHostList(list):
     pass
 
 
-class SimpleHostListFormatter(ObjectFormatter):
+class SimpleHostListFormatter(ListFormatter):
     protocol = "aqdsystems_pb2"
 
     def format_raw(self, shlist, indent=""):
         return str("\n".join([indent + host.fqdn for host in shlist]))
 
-    # Should probably display some useful info...
-    def format_csv(self, shlist):
-        return str("\n".join([host.fqdn for host in shlist]))
+    # TODO: Should probably display some useful info...
+    def csv_fields(self, host):
+        return (host.fqdn,)
 
     def format_html(self, shlist):
         return "<ul>\n%s\n</ul>\n" % "\n".join([
@@ -100,9 +102,9 @@ class HostIPList(list):
     pass
 
 
-class HostIPListFormatter(ObjectFormatter):
-    def format_csv(self, hilist):
-        return str("\n".join([",".join(entry) for entry in hilist]))
+class HostIPListFormatter(ListFormatter):
+    def csv_fields(self, hostips):
+        return hostips
 
 ObjectFormatter.handlers[HostIPList] = HostIPListFormatter()
 
@@ -112,8 +114,8 @@ class HostMachineList(list):
     pass
 
 
-class HostMachineListFormatter(ObjectFormatter):
-    def format_csv(self, hlist):
-        return str("\n".join([str.join(",",(host.fqdn, host.machine.name)) for host in hlist]))
+class HostMachineListFormatter(ListFormatter):
+    def csv_fields(self, host):
+        return (host.fqdn, host.machine.name)
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()

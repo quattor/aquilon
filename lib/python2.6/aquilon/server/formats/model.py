@@ -41,7 +41,7 @@ class ModelFormatter(ObjectFormatter):
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
         if model.machine_specs:
-            details.append(self.redirect_raw(model.machine_specs, indent+"  "))
+            details.append(self.redirect_raw(model.machine_specs, indent + "  "))
         return "\n".join(details)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()

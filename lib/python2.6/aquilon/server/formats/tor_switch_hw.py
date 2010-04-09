@@ -44,13 +44,4 @@ class TorSwitchHwFormatter(ObjectFormatter):
             details.append(handler.format_raw(tor_switch_hw, indent))
         return "\n".join(details)
 
-    def format_csv(self, tor_switch_hw):
-        details = []
-        for tor_switch in tor_switch_hw.tor_switch:
-            details.append(self.redirect_csv(tor_switch))
-        if not details:
-            handler = ObjectFormatter.handlers[HardwareEntity]
-            details.append(handler.format_csv(tor_switch_hw))
-        return "\n".join(details)
-
 ObjectFormatter.handlers[TorSwitchHw] = TorSwitchHwFormatter()

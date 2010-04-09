@@ -65,8 +65,8 @@ class PersonalityFormatter(ObjectFormatter):
             threshold = personality.threshold
             has_threshold = True
             personality = personality.dbpersonality
-        details = [ indent + "Personality: %s" % personality.name +
-                   " Archetype: %s" % personality.archetype.name ]
+        details = [indent + "Personality: %s" % personality.name +
+                   " Archetype: %s" % personality.archetype.name]
         details.append(indent + "  Template: %s/personality/%s/config.tpl" %
                        (personality.archetype.name, personality.name))
         if has_threshold:
@@ -101,5 +101,3 @@ class PersonalityFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
 ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
 ObjectFormatter.handlers[PersonalityList] = PersonalityListFormatter()
-
-

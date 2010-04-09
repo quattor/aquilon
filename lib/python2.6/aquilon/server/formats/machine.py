@@ -31,7 +31,34 @@
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Machine
+
+
+class MachineInterfacePair(tuple):
+    """Encapsulates a (machine, selected interface) pair"""
+    pass
+
+
+class MachineInterfacePairFormatter(ObjectFormatter):
+    def csv_fields(self, item):
+        machine = item[0]
+        interface = item[1]
+
+        details = [machine.name, machine.location.rack,
+                   machine.location.building, machine.model.vendor.name,
+                   machine.model.name, machine.serial_no]
+        if interface:
+            details.extend([interface.name, interface.mac])
+            if interface.system:
+                details.append(interface.system.ip)
+            else:
+                details.append(None)
+        else:
+            details.extend([None, None, None])
+        return details
+
+ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 
 class MachineFormatter(ObjectFormatter):
@@ -89,24 +116,12 @@ class MachineFormatter(ObjectFormatter):
         """This is just an idea... not used anywhere (yet?)."""
         return "machine,rack,building,vendor,model,serial,interface,mac,ip"
 
-    def format_csv(self, machine):
-        """This was implemented specifically for tor_switch.  May need
-        to check and do something different for other machine types.
-
-        """
-        results = []
-        details = [machine.name, machine.location.rack,
-                machine.location.building, machine.model.vendor.name,
-                machine.model.name, machine.serial_no]
-        if not machine.interfaces:
-            details.extend([None, None, None])
-            results.append(details)
-        for i in machine.interfaces:
-            full = details[:]
-            full.extend([i.name, i.mac, i.ip])
-            results.append(full)
-        return "\n".join([",".join([str(detail or "") for detail in result])
-            for result in results])
+    def csv_tolist(self, machine):
+        if machine.interfaces:
+            return [MachineInterfacePair((machine, i))
+                    for i in machine.interfaces]
+        else:
+            return [MachineInterfacePair((machine, None))]
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()
 
@@ -114,19 +129,21 @@ ObjectFormatter.handlers[Machine] = MachineFormatter()
 class SimpleMachineList(list):
     pass
 
-class SimpleMachineListFormatter(ObjectFormatter):
+
+class SimpleMachineListFormatter(ListFormatter):
     def format_raw(self, smlist, indent=""):
         return str("\n".join([indent + machine.name for machine in smlist]))
 
 ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
+
 
 class MachineMacList(list):
     """ Holds MAC, machine-name [, hostname] """
     pass
 
 
-class MachineMacListFormatter(ObjectFormatter):
-    def format_csv(self, hilist):
-        return str("\n".join([",".join(entry) for entry in hilist]))
+class MachineMacListFormatter(ListFormatter):
+    def csv_fields(self, result):
+        return result
 
 ObjectFormatter.handlers[MachineMacList] = MachineMacListFormatter()

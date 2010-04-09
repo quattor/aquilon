@@ -37,6 +37,7 @@ from aquilon.server.templates.service import PlenaryInstanceNasDiskShare
 
 class ServiceInstanceFormatter(ObjectFormatter):
     protocol = "aqdservices_pb2"
+
     def format_raw(self, si, indent=""):
         details = [indent + "Service: %s Instance: %s"
                 % (si.service.name, si.name)]
@@ -69,18 +70,22 @@ class ServiceInstanceFormatter(ObjectFormatter):
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
+
     def format_proto(self, si, skeleton=None):
         silf = ServiceInstanceListFormatter()
         return silf.format_proto([si], skeleton)
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
 
+
 class ServiceInstanceList(list):
     """holds a list of service instances to be formatted"""
     pass
 
+
 class ServiceInstanceListFormatter(ListFormatter):
     protocol = "aqdservices_pb2"
+
     def format_proto(self, sil, skeleton=None):
         servicelist_msg = self.loaded_protocols[self.protocol].ServiceList()
         for si in sil:
@@ -89,9 +94,11 @@ class ServiceInstanceListFormatter(ListFormatter):
 
 ObjectFormatter.handlers[ServiceInstanceList] = ServiceInstanceListFormatter()
 
+
 class Share(object):
     def __init__(self, dbshare):
         self.dbshare = dbshare
+
 
 class ShareFormatter(ObjectFormatter):
     def format_raw(self, share, indent=""):

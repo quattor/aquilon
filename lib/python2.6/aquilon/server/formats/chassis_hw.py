@@ -44,13 +44,4 @@ class ChassisHwFormatter(ObjectFormatter):
             details.append(handler.format_raw(chassis_hw, indent))
         return "\n".join(details)
 
-    def format_csv(self, chassis_hw):
-        details = []
-        for chassis in chassis_hw.chassis_hw:
-            details.append(self.redirect_csv(chassis))
-        if not details:
-            handler = ObjectFormatter.handlers[HardwareEntity]
-            details.append(handler.format_csv(chassis_hw))
-        return "\n".join(details)
-
 ObjectFormatter.handlers[ChassisHw] = ChassisHwFormatter()

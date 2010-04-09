@@ -35,7 +35,7 @@ from aquilon.aqdb.model import Domain
 
 class DomainFormatter(ObjectFormatter):
     def format_raw(self, domain, indent=""):
-        details = [ indent + "Domain: %s" % domain.name ]
+        details = [indent + "Domain: %s" % domain.name]
         details.append(indent + "  Owner: %s" % domain.owner.name)
         details.append(indent + "  Compiler: %s" % domain.compiler)
         if domain.comments:
@@ -43,5 +43,3 @@ class DomainFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Domain] = DomainFormatter()
-
-

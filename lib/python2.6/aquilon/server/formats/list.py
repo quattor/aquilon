@@ -29,6 +29,9 @@
 """List formatter."""
 
 
+import csv
+import cStringIO
+
 from aquilon.server.formats.formatters import ObjectFormatter
 
 
@@ -36,8 +39,35 @@ class ListFormatter(ObjectFormatter):
     def format_raw(self, result, indent=""):
         return "\n".join([self.redirect_raw(item, indent) for item in result])
 
+    def csv_fields(self, result):
+        # Delegate the field selection according to the result's class, but
+        # avoid calling ourselves recursively.
+        handler = ObjectFormatter.handlers.get(result.__class__,
+                                               ObjectFormatter.default_handler)
+        if handler.__class__ == self.__class__:
+            return super(ListFormatter, self).csv_fields(result)
+        return handler.csv_fields(result)
+
+    def csv_tolist(self, result):
+        # Delegate the conversion according to the result's class, but
+        # avoid calling ourselves recursively.
+        handler = ObjectFormatter.handlers.get(result.__class__,
+                                               ObjectFormatter.default_handler)
+        if handler.__class__ == self.__class__:
+            return super(ListFormatter, self).csv_tolist(result)
+        return handler.csv_tolist(result)
+
     def format_csv(self, result):
-        return "\n".join([self.redirect_csv(item) for item in result])
+        # This is an optimization to use a single buffer/writer for all elements
+        # of the list instead of creating one for every element
+        strbuf = cStringIO.StringIO()
+        writer = csv.writer(strbuf, dialect='aquilon')
+        for obj in result:
+            for item in self.csv_tolist(obj):
+                fields = self.csv_fields(item)
+                if fields:
+                    writer.writerow(fields)
+        return strbuf.getvalue()
 
     def format_html(self, result):
         return "<ul>\n<li>" + "<li>\n<li>".join(

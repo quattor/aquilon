@@ -31,13 +31,12 @@
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import Vendor
 
+
 class VendorFormatter(ObjectFormatter):
     def format_raw(self, vendor, indent=""):
-        details = [ indent + "Vendor: %s" % vendor.name ]
+        details = [indent + "Vendor: %s" % vendor.name]
         if vendor.comments:
             details.append(indent + "  Comments: %s" % vendor.comments)
         return "\n".join(details)
 
 ObjectFormatter.handlers[Vendor] = VendorFormatter()
-
-

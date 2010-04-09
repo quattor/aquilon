@@ -41,7 +41,7 @@ class ChassisFormatter(ObjectFormatter):
         if chassis.ip:
             details.append(indent + "  IP: %s" % chassis.ip)
         details.append(self.redirect_raw(chassis.chassis_hw.location,
-                                         indent+"  "))
+                                         indent + "  "))
         details.append(self.redirect_raw(chassis.chassis_hw.model,
                                          indent + "  "))
         if chassis.chassis_hw.serial_no:
@@ -49,11 +49,10 @@ class ChassisFormatter(ObjectFormatter):
                            chassis.chassis_hw.serial_no)
         for slot in chassis.slots:
             if slot.machine:
-                details.append(indent + "  Slot #%d: %s" %
-			       (slot.slot_number, slot.machine.name))
+                details.append(indent + "  Slot #%d: %s" % (slot.slot_number,
+                                                            slot.machine.name))
             else:
-                details.append(indent + "  Slot #%d Unknown" %
-                               slot.slot_number)
+                details.append(indent + "  Slot #%d Unknown" % slot.slot_number)
         for i in chassis.chassis_hw.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if chassis.comments:
@@ -61,5 +60,3 @@ class ChassisFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Chassis] = ChassisFormatter()
-
-

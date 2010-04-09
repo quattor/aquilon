@@ -71,6 +71,14 @@ class TestAddNetwork(TestBrokerCommand):
         for network in self.net.all:
             self.matchoutput(out, network.ip, command)
 
+    def testshownetworkcsv(self):
+        command = "show_network --building ut --format csv"
+        out = self.commandtest(command.split(" "))
+        for network in self.net.all:
+            self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
+                network.ip, network.ip, network.netmask, network.nettype),
+                command)
+
     def testshownetworkproto(self):
         command = "show network --building ut --format proto"
         out = self.commandtest(command.split(" "))
