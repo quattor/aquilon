@@ -126,6 +126,41 @@ class TestAdd10GigHardware(TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, machine, command)
 
+    # Utility method...
+    def verifypg(self):
+        command = ["search_machine", "--name=evm10", "--pg=user-v710"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm10", command)
+
+    def test_160_updatenoop(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", "user-v710"]
+        self.noouttest(command)
+        self.verifypg()
+
+    def test_165_updateclear(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", ""]
+        self.noouttest(command)
+        command = ["show_machine", "--machine=evm10"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Port Group", command)
+
+    def test_170_updatemanual(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", "user-v710"]
+        self.noouttest(command)
+        self.verifypg()
+
+    def test_175_updateauto(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", ""]
+        self.noouttest(command)
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--autopg"]
+        self.noouttest(command)
+        self.verifypg()
+
     def test_200_addaux(self):
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
