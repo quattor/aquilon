@@ -114,15 +114,17 @@ class PlenaryClusterObject(Plenary):
                 lines.append("            'system', nlist(")
                 lines.append("                'archetype', nlist(")
                 lines.append("                    'name', '%s'," %
-                                                    machine.host.archetype.name)
+                             machine.host.archetype.name)
                 lines.append("                    'os', '%s'," %
-                                                    machine.host.operating_system.name)
+                             machine.host.operating_system.name)
+                lines.append("                    'osversion', '%s'," %
+                             machine.host.operating_system.version)
                 lines.append("                 ),")
                 lines.append("                'network', nlist(")
                 lines.append("                    'hostname', '%s'," %
-                                                    machine.host.name)
+                             machine.host.name)
                 lines.append("                    'domainname', '%s'," %
-                                                    machine.host.dns_domain)
+                             machine.host.dns_domain)
                 lines.append("                 ),")
                 lines.append("             ),")
             lines.append("         ),")
