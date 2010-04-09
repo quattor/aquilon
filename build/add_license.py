@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -119,7 +119,7 @@ def fix_file(filepath):
     # We get the relevent copyright years by checking the git logs.
     # git log --format=format:"%ad" --date=short -- ./path.py | cut -d- -f1 | sort | uniq
     p1 = Popen(["git", "log", "--format=format:%ad", "--date=short",
-                "--", filepath],
+                "--follow", "--", filepath],
                stdout=PIPE, stderr=2)
     p2 = Popen(["cut", "-d-", "-f1"], stdin=p1.stdout, stdout=PIPE, stderr=2)
     p3 = Popen(["sort"], stdin=p2.stdout, stdout=PIPE, stderr=2)
