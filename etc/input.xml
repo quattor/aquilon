@@ -1011,12 +1011,19 @@
    </command>
 
    <command name="del_interface">
-      Delete a network interface from the database
+      Delete a network interface from the database.
+
+      The interface can be specified either by its MAC address or as a
+      machine/interface name pair. If a machine has just a single interface
+      then just specifying the machine name is enough.
+
+      Note that you can not select an interface by IP address since the object
+      that owns the IP address would have to be deleted before deleting the
+      interface anyway.
       <optgroup name="del_interface_opts" mandatory="True" fields="any">
          <option name="interface" type="string">Interface name</option>
          <option name="machine" type="string">Machine name</option>
          <option name="mac" type="string">MAC address</option>
-         <option name="ip" type="string">IP address</option>
       </optgroup>
       <transport method="post" path="interface/command/del" />
    </command>

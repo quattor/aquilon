@@ -61,7 +61,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         """
 
-        dbinterface = get_interface(session, interface, machine, None, None)
+        dbinterface = get_interface(session, interface, machine, None)
         # By default, oldinfo comes from the interface being updated.
         # If swapping the boot flag, oldinfo will be updated below.
         oldinfo = self.snapshot(dbinterface)
