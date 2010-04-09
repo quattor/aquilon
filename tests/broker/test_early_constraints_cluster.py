@@ -47,7 +47,7 @@ class TestClusterEarlyConstraints(TestBrokerCommand):
         command = ["add_machine", "--machine=evm1", "--model=utmedium",
                    "--cluster=utecl1"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would exceed vm_to_host_ratio", command)
+        self.matchoutput(out, "cannot support VMs", command)
 
 
 if __name__=='__main__':

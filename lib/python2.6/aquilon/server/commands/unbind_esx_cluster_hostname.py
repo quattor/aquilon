@@ -62,21 +62,10 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
         session.flush()
 
         session.refresh(dbcluster)
-        if hasattr(dbcluster, 'vm_to_host_ratio') and \
-           dbcluster.host_count * len(dbcluster.machines) > \
-           dbcluster.vm_count * len(dbcluster.hosts):
-            raise ArgumentError("Removing a vmhost from "
-                                "%s cluster %s would exceed "
-                                "vm_to_host_ratio %s (%s VMs:%s hosts)" %
-                                (dbcluster.cluster_type,
-                                 dbcluster.name,
-                                 dbcluster.vm_to_host_ratio,
-                                 len(dbcluster.machines),
-                                 len(dbcluster.hosts)))
+        if hasattr(dbcluster, 'verify_ratio'):
+            dbcluster.verify_ratio()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryHost(dbhost, logger=logger))
         plenaries.append(PlenaryCluster(dbcluster, logger=logger))
         plenaries.write()
-
-
