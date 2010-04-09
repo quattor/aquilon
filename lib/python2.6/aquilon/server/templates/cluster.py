@@ -93,9 +93,14 @@ class PlenaryClusterObject(Plenary):
         campus = self.dbcluster.location_constraint.campus
         if campus:
             lines.append("'/system/cluster/campus' = '%s';" % campus.name)
-        lines.append("'/system/cluster/ratio' = list(%d, %d);\n" % (
+        lines.append("'/system/cluster/ratio' = list(%d, %d);" % (
                             self.dbcluster.vm_count,
                             self.dbcluster.host_count))
+        lines.append("'/system/cluster/max_hosts' = %d;" %
+                     self.dbcluster.max_hosts)
+        lines.append("'/system/cluster/down_hosts_threshold' = %d;" %
+                     self.dbcluster.down_hosts_threshold)
+        lines.append('')
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
