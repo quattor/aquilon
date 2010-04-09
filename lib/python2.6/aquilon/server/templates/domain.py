@@ -139,6 +139,8 @@ class TemplateDomain(object):
                         config.get("broker", "profilesdir"))
             args.append("-Dpanc.batch.size=%s" %
                         config.get("broker", "panc_batch_size"))
+            args.append("-Dant-contrib.jar=%s" %
+                        config.get("broker", "ant_contrib_jar"))
             if (only):
                 # Use -Dforce.build=true?
                 args.append("-Dobject.profile=%s" % only)
