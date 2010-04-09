@@ -64,18 +64,11 @@ class CommandReconfigure(CommandMake):
             # to check that either OS is also being reset or that the
             # OS is valid for the new archetype.
 
-        if dbarchetype.is_compileable:
-            # Check if make_aquilon has run.  (This is a lame check -
-            # should really check for required services.)
-            # If the error is not raised, we fall through to the end
-            # of the method where MakeAquilon is called.
-            builditem = session.query(BuildItem).filter_by(host=dbhost).first()
-            if not builditem:
-                raise ArgumentError("host %s has not been built. "
-                                    "Run 'make' first." % hostname)
-        # The rest of these conditionals currently apply to all
-        # non-aquilon hosts.
-        elif buildstatus or personality or osname or osversion or os:
+        # Deal with non-compileable archetypes here, leave the rest for 'make'
+        if not dbarchetype.is_compileable:
+            if not (buildstatus or personality or osname or osversion or os):
+                raise ArgumentError("Nothing to do.")
+
             if buildstatus:
                 dbstatus = get_status(session, buildstatus)
                 dbhost.status = dbstatus
@@ -100,8 +93,6 @@ class CommandReconfigure(CommandMake):
                     dbhost.operating_system = dbos
             session.add(dbhost)
             return
-        else:
-            raise ArgumentError("Nothing to do.")
 
         return CommandMake.render(self, session=session, hostname=hostname,
                                   archetype=archetype, personality=personality,
