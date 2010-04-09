@@ -36,7 +36,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import run_command
-
+from aquilon.server.logger import CLIENT_INFO
 
 class CommandPxeswitch(BrokerCommand):
 
@@ -80,6 +80,4 @@ class CommandPxeswitch(BrokerCommand):
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log"%logdir)
-        return run_command(args, logger=logger)
-
-
+        run_command(args, logger=logger, loglevel=CLIENT_INFO)

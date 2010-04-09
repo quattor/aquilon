@@ -32,9 +32,12 @@
 This may have issues being tested somewhere that the command actually works...
 """
 
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
+from tempfile import NamedTemporaryFile
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -60,34 +63,45 @@ class TestPxeswitch(TestBrokerCommand):
         # of the actual aii-installfe.  It would be better to have a fake
         # version of aii-installfe that returned output closer to the real
         # one.
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "--install", command)
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--install", command)
         sshdir = self.config.get("broker", "installfe_sshdir")
-        self.matchoutput(out, "--sshdir %s" % sshdir, command)
+        self.matchoutput(err, "--sshdir %s" % sshdir, command)
         user = self.config.get("broker", "installfe_user")
-        self.matchoutput(out,
+        self.matchoutput(err,
                          "--servers %s@server9.aqd-unittest.ms.com" % user,
                          command)
 
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "--boot", command)
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--boot", command)
 
     def teststatusunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --status"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "--status", command)
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--status", command)
 
     def testfirmwareunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "--firmware", command)
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--firmware", command)
 
     def testconfigureunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --configure"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "--configure", command)
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configure", command)
+
+    def testconfigurelist(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --configure" % f.name
+            (out, err) = self.successtest(command.split(" "))
+            self.matchoutput(err, "--configure", command)
+            # We would like to test more of the output... we need something
+            # special for aii-shellfe however...
 
 
 if __name__=='__main__':
