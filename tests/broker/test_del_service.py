@@ -54,7 +54,7 @@ class TestDelService(TestBrokerCommand):
 
     def testdelextraafsinstance(self):
         command = "del service --service afs --instance q.ln.ms.com"
-        self.noouttest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
     def testverifydelextraafsinstance(self):
         command = "show service --service afs"
