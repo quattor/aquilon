@@ -43,9 +43,32 @@ from brokertest import TestBrokerCommand
 
 class TestManage(TestBrokerCommand):
 
+    def verify_buildfiles(self, domain, object,
+                          want_exist=True, command="manage"):
+        qdir = self.config.get("broker", "quattordir")
+        domaindir = os.path.join(qdir, "build", "xml", domain)
+        xmlfile = os.path.join(domaindir, object + ".xml")
+        depfile = os.path.join(domaindir, object + ".xml.dep")
+        builddir = self.config.get("broker", "builddir")
+        profile = os.path.join(builddir, "domains", domain, "profiles",
+                               object + ".tpl")
+        for f in [xmlfile, depfile, profile]:
+            if want_exist:
+                self.failUnless(os.path.exists(f),
+                                "Expecting %s to exist before running %s." %
+                                (f, command))
+            else:
+                self.failIf(os.path.exists(f),
+                            "Not expecting %s to exist after running %s." %
+                            (f, command))
+
     def testmanageunittest02(self):
+        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
+                               want_exist=True)
         self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-            "--domain", "changetest1"])
+                        "--domain", "changetest1"])
+        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
+                               want_exist=False)
 
     def testverifymanageunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -62,8 +85,12 @@ class TestManage(TestBrokerCommand):
                         "find %s" % " ".join(command))
 
     def testmanageunittest00(self):
+        self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
+                               want_exist=True)
         self.noouttest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
-            "--domain", "changetest2"])
+                        "--domain", "changetest2"])
+        self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
+                               want_exist=False)
 
     def testverifymanageunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -87,8 +114,10 @@ class TestManage(TestBrokerCommand):
                          command)
 
     def testmanagecluster(self):
+        self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=True)
         command = ["manage", "--cluster", "utecl1", "--domain", "changetest1"]
         self.noouttest(command)
+        self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False)
 
     def testverifymanagecluster(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
