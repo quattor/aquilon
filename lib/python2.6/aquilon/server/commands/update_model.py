@@ -39,7 +39,7 @@ from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
-class CommandAddModel(BrokerCommand):
+class CommandUpdateModel(BrokerCommand):
 
     required_parameters = ["name", "vendor"]
 
