@@ -61,9 +61,20 @@ class TestBrokerStart(unittest.TestCase):
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         logfile = config.get("broker", "logfile")
 
+        # Specify twistd and options...
         args = [sys.executable, twistd,
-                "--pidfile", pidfile, "--logfile", logfile,
-                "aqd", "--config", config.baseconfig]
+                "--pidfile", pidfile, "--logfile", logfile]
+
+        if config.has_option("unittest", "profile"):
+            if config.getboolean("unittest", "profile"):
+                args.append("--profile")
+                args.append(os.path.join(config.get("broker", "logdir"),
+                                         "aqd.profile"))
+                args.append("--profiler=cProfile")
+                args.append("--savestats")
+
+        # And then aqd and options...
+        args.extend(["aqd", "--config", config.baseconfig])
 
         if config.has_option("unittest", "coverage"):
             if config.getboolean("unittest", "coverage"):

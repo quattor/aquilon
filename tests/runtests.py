@@ -61,6 +61,7 @@ def usage():
     --config    supply an alternate config file
     --coverage  generate code coverage metrics for the broker
                 in logs/aqd.coverage.
+    --profile   generate profile information in logs/aqd.profile
 
     Note that:
     %s
@@ -81,7 +82,7 @@ def force_yes(msg):
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hdc:vq",
                                ["help", "debug", "config=", "coverage",
-                                "verbose", "quiet"])
+                                "profile", "verbose", "quiet"])
 except getopt.GetoptError, e:
     print >>sys.stderr, str(e)
     usage()
@@ -89,6 +90,7 @@ except getopt.GetoptError, e:
 
 configfile = default_configfile
 coverage = False
+profile = False
 verbosity = 1
 for o, a in opts:
     if o in ("-h", "--help"):
@@ -101,12 +103,14 @@ for o, a in opts:
         configfile = a
     elif o in ("--coverage"):
         coverage = True
+    elif o in ("--profile"):
+        profile = True
     elif o in ("-v", "--verbose"):
         verbosity += 1
     elif o in ("-q", "--quiet"):
         verbosity -= 1
     else:
-        assert False, "unhandled option"
+        assert False, "unhandled option '%s'" % o
 
 if not os.path.exists(configfile):
     print >>sys.stderr, "configfile %s does not exist" % configfile
@@ -127,6 +131,8 @@ if not config.has_option("unittest", "srcdir"):
     config.set("unittest", "srcdir", SRCDIR)
 if coverage:
     config.set("unittest", "coverage", "True")
+if profile:
+    config.set("unittest", "profile", "True")
 
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
