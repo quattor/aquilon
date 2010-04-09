@@ -157,13 +157,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["rebind_esx_cluster", "--cluster=utecl1",
                    "--host=evh1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would exceed vm_to_host_ratio", command)
+        self.matchoutput(out, "cannot support VMs", command)
 
     def test_310_failrebindmachine(self):
         command = ["update_machine", "--machine", "evm1",
                    "--cluster", "utecl2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would exceed vm_to_host_ratio", command)
+        self.matchoutput(out, "violates ratio", command)
 
     def test_500_verifyaddmachines(self):
         # Skipping evm9 since the mac is out of sequence and different cluster
@@ -214,6 +214,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "'/system/cluster/name' = 'utecl1';", command)
         self.matchoutput(out, "'/system/metacluster/name' = 'utmc1';", command)
         self.matchoutput(out, "'/system/cluster/machines' = nlist(", command)
+        self.matchoutput(out, "'/system/cluster/ratio' = list(16, 1);",
+                         command)
+        self.matchoutput(out, "'/system/cluster/max_hosts' = 8;", command)
+        self.matchoutput(out, "'/system/cluster/down_hosts_threshold' = 2;",
+                         command)
+        self.matchclean(out, "'hostname'", command)
         for i in range(1, 9):
             machine = "evm%s" % i
             self.searchoutput(out,
@@ -230,6 +236,23 @@ class TestAddVirtualHardware(TestBrokerCommand):
                           r"client/config' };",
                           command)
 
+    def test_500_verifyshow(self):
+        command = "show esx_cluster --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Max members: 8", command)
+        self.matchoutput(out, "Down Hosts Threshold: 2", command)
+        self.matchoutput(out, "Max vm_to_host_ratio: 16:1", command)
+        self.matchoutput(out, "Max virtual machine count: 16", command)
+        self.matchoutput(out, "Current vm_to_host_ratio: 8:3", command)
+        self.matchoutput(out, "Virtual Machine count: 8", command)
+        self.matchoutput(out, "ESX VMHost count: 3", command)
+        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
+        self.matchoutput(out, "Domain: unittest", command)
+
     def test_600_makecluster(self):
         command = ["make_cluster", "--cluster=utecl1"]
         (out, err) = self.successtest(command)
@@ -245,6 +268,19 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Hostname: aqddesk1.msad.ms.com", command)
         self.matchoutput(out, "Virtual_machine: evm1", command)
         self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
+
+    def test_810_verifycatcluster(self):
+        command = "cat --cluster=utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "'name', 'windows',", command)
+        self.matchoutput(out, "'os', 'windows',", command)
+        self.matchoutput(out, "'osversion', 'generic',", command)
+        self.matchoutput(out, "'hostname', 'aqddesk1',", command)
+        self.matchoutput(out, "'domainname', 'msad.ms.com',", command)
+
+    def test_820_makecluster(self):
+        command = ["make_cluster", "--cluster=utecl1"]
+        (out, err) = self.successtest(command)
 
     # FIXME: Missing a test for add_interface non-esx automac.  (Might not
     # be possible to test with the current command set.)

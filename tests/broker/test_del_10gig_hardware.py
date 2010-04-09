@@ -58,7 +58,7 @@ class TestDel10GigHardware(TestBrokerCommand):
             self.assertEmptyOut(out, command)
 
     def test_700_delmachines(self):
-        for i in range(0, 18):
+        for i in range(0, 8) + range(9, 17):
             machine = "evm%d" % (10 + i)
             self.noouttest(["del", "machine", "--machine", machine])
 

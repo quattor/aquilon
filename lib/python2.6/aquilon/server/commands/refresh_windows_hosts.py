@@ -35,6 +35,8 @@ import sqlite3
 from aquilon.exceptions_ import PartialError, InternalError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import get_host_dependencies
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, Status, DnsDomain, System,
                                 OperatingSystem)
@@ -51,8 +53,9 @@ class CommandRefreshNetwork(BrokerCommand):
         logger.client_info("Acquiring lock to refresh windows hosts")
         REFRESH_WINDOWS_HOSTS_LOCK.acquire()
         logger.client_info("Acquired lock to refresh windows hosts")
+        clusters = set()
         try:
-            self.refresh_windows_hosts(session, logger)
+            self.refresh_windows_hosts(session, logger, clusters)
             if dryrun:
                 session.rollback()
         except PartialError, e:
@@ -64,9 +67,14 @@ class CommandRefreshNetwork(BrokerCommand):
         finally:
             logger.client_info("Released lock from refresh windows hosts.")
             REFRESH_WINDOWS_HOSTS_LOCK.release()
+        if clusters:
+            plenaries = PlenaryCollection(logger=logger)
+            for dbcluster in clusters:
+                plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+            plenaries.write()
         return
 
-    def refresh_windows_hosts(self, session, logger):
+    def refresh_windows_hosts(self, session, logger, clusters):
         conn = sqlite3.connect(self.config.get("broker", "windows_host_info"))
         # Enable dictionary-style access to the rows.
         conn.row_factory = sqlite3.Row
@@ -113,6 +121,8 @@ class CommandRefreshNetwork(BrokerCommand):
                 session.add(dbinterface)
             success.append("Removed host entry for %s (%s)" %
                            (dbhost.machine.name, dbhost.fqdn))
+            if dbhost.machine.cluster:
+                clusters.add(dbhost.machine.cluster)
             session.delete(dbhost)
         session.flush()
         # The Host() creations below fail when autoflush is enabled.
@@ -198,6 +208,8 @@ class CommandRefreshNetwork(BrokerCommand):
             session.add(dbinterface)
             success.append("Added host entry for %s (%s)" %
                            (dbhost.machine.name, dbhost.fqdn))
+            if dbmachine.cluster:
+                clusters.add(dbmachine.cluster)
             session.flush()
 
         session.flush()
@@ -205,5 +217,3 @@ class CommandRefreshNetwork(BrokerCommand):
             raise PartialError(success, failed)
 
         return
-
-

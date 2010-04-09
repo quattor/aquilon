@@ -93,9 +93,14 @@ class PlenaryClusterObject(Plenary):
         campus = self.dbcluster.location_constraint.campus
         if campus:
             lines.append("'/system/cluster/campus' = '%s';" % campus.name)
-        lines.append("'/system/cluster/ratio' = list(%d, %d);\n" % (
+        lines.append("'/system/cluster/ratio' = list(%d, %d);" % (
                             self.dbcluster.vm_count,
                             self.dbcluster.host_count))
+        lines.append("'/system/cluster/max_hosts' = %d;" %
+                     self.dbcluster.max_hosts)
+        lines.append("'/system/cluster/down_hosts_threshold' = %d;" %
+                     self.dbcluster.down_hosts_threshold)
+        lines.append('')
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
@@ -109,15 +114,17 @@ class PlenaryClusterObject(Plenary):
                 lines.append("            'system', nlist(")
                 lines.append("                'archetype', nlist(")
                 lines.append("                    'name', '%s'," %
-                                                    machine.host.archetype.name)
+                             machine.host.archetype.name)
                 lines.append("                    'os', '%s'," %
-                                                    machine.host.operating_system.name)
+                             machine.host.operating_system.name)
+                lines.append("                    'osversion', '%s'," %
+                             machine.host.operating_system.version)
                 lines.append("                 ),")
                 lines.append("                'network', nlist(")
                 lines.append("                    'hostname', '%s'," %
-                                                    machine.host.name)
+                             machine.host.name)
                 lines.append("                    'domainname', '%s'," %
-                                                    machine.host.dns_domain)
+                             machine.host.dns_domain)
                 lines.append("                 ),")
                 lines.append("             ),")
             lines.append("         ),")

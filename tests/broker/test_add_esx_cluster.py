@@ -49,7 +49,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testaddutecl1(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=utmc1", "--building=ut",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 
@@ -65,6 +65,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
+        self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
@@ -90,8 +91,8 @@ class TestAddESXCluster(TestBrokerCommand):
         command = ["add_esx_cluster", "--cluster=utecl2",
                    "--metacluster=utmc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server",
-                   "--domain=unittest",
-                   "--max_members=101", "--vm_to_host_ratio=1:2",
+                   "--domain=unittest", "--down_hosts_threshold=1",
+                   "--max_members=101", "--vm_to_host_ratio=1:1",
                    "--comments=Another test ESX cluster"]
         self.noouttest(command)
 
@@ -102,8 +103,9 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
-        self.matchoutput(out, "vm_to_host_ratio: 1:2", command)
+        self.matchoutput(out, "vm_to_host_ratio: 1:1", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
+        self.matchoutput(out, "Down Hosts Threshold: 1", command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -122,7 +124,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailaddexisting(self):
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=utmc1", "--building=ut",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster 'utecl1' already exists", command)
@@ -130,14 +132,14 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailaddnoncampus(self):
         command = ["add_esx_cluster", "--cluster=uteclfail",
                    "--metacluster=utmc1", "--country=us",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "location 'us' is not within a campus", command)
 
     def testfailmetaclusternotfound(self):
         command = ["add_esx_cluster", "--cluster=utecl999",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--metacluster=metacluster-does-not-exist", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.notfoundtest(command)
@@ -147,7 +149,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testfailinvalidname(self):
         command = ["add_esx_cluster", "--cluster=invalid?!?",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--metacluster=utmc1", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -156,7 +158,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testfailnoroom(self):
         command = ["add_esx_cluster", "--cluster=newcluster",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--metacluster=utmc3", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -182,7 +184,7 @@ class TestAddESXCluster(TestBrokerCommand):
 
     def testaddutecl3(self):
         command = ["add_esx_cluster", "--cluster=utecl3",
-                   "--max_members=0",
+                   "--max_members=0", "--down_hosts_threshold=2",
                    "--metacluster=utmc2", "--building=ut",
                    "--domain=unittest",
                    "--archetype=vmhost", "--personality=esx_server"]
@@ -218,7 +220,7 @@ class TestAddESXCluster(TestBrokerCommand):
         # Bog standard - used for some noop tests
         command = ["add_esx_cluster", "--cluster=utecl4",
                    "--metacluster=utmc2", "--building=ut",
-                   "--domain=unittest",
+                   "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=vmhost", "--personality=esx_server"]
         self.noouttest(command)
 
@@ -266,7 +268,7 @@ class TestAddESXCluster(TestBrokerCommand):
         for i in range(5, 11):
             command = ["add_esx_cluster", "--cluster=utecl%d" % i,
                        "--metacluster=utmc4", "--building=ut",
-                       "--domain=unittest",
+                       "--domain=unittest", "--down_hosts_threshold=2",
                        "--archetype=vmhost", "--personality=esx_server"]
             self.noouttest(command)
 

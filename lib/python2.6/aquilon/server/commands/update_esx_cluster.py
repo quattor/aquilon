@@ -47,7 +47,7 @@ class CommandUpdateESXCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, archetype, personality,
                max_members, vm_to_host_ratio, tor_switch, fix_location,
-               comments, **arguments):
+               down_hosts_threshold, comments, **arguments):
         cluster_type = 'esx'
         dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
         if not dbcluster:
@@ -125,19 +125,20 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         (vm_count, host_count) = force_ratio("vm_to_host_ratio",
                                              vm_to_host_ratio)
-        if vm_count is not None:
-            if host_count * len(dbcluster.machines) > \
-               vm_count * len(dbcluster.hosts):
-                raise ArgumentError("Changing vm_to_host_ratio to %s "
-                                    "for %s cluster %s would not satisfy "
-                                    "current ratio of (%s VMs:%s hosts)" %
-                                    (vm_to_host_ratio,
-                                     dbcluster.cluster_type,
-                                     dbcluster.name,
-                                     len(dbcluster.machines),
-                                     len(dbcluster.hosts)))
+        if vm_count is not None or down_hosts_threshold is not None:
+            if vm_count is None:
+                vm_count = dbcluster.vm_count
+                host_count = dbcluster.host_count
+            if down_hosts_threshold is None:
+                down_hosts_threshold = dbcluster.down_hosts_threshold
+            else:
+                down_hosts_threshold = force_int("down_hosts_threshold",
+                                                 down_hosts_threshold)
+            dbcluster.verify_ratio(vm_part=vm_count, host_part=host_count,
+                                   down_hosts_threshold=down_hosts_threshold)
             dbcluster.vm_count = vm_count
             dbcluster.host_count = host_count
+            dbcluster.down_hosts_threshold = down_hosts_threshold
             cluster_updated = True
 
         if tor_switch is not None:

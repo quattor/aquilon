@@ -428,9 +428,8 @@ class TestUpdateMachine(TestBrokerCommand):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Adding a virtual machine to "
-                         "esx cluster utecl3 would exceed "
-                         "vm_to_host_ratio 16:1 (1 VMs:0 hosts)",
+                         "esx cluster utecl3 cannot support VMs with "
+                         "0 vmhosts and a down_host_threshold of 2",
                          command)
 
     def testfailaddreadmachinetocluster(self):

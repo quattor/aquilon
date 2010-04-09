@@ -76,17 +76,9 @@ class CommandBindESXClusterHostname(BrokerCommand):
             session.flush()
             session.refresh(dbhost)
             session.refresh(old_cluster)
-            if hasattr(old_cluster, 'vm_to_host_ratio') and \
-               old_cluster.host_count * len(old_cluster.machines) > \
-               old_cluster.vm_count * len(old_cluster.hosts):
-                raise ArgumentError("Removing a vmhost from "
-                                    "%s cluster %s would exceed "
-                                    "vm_to_host_ratio %s (%s VMs:%s hosts)" %
-                                    (old_cluster.cluster_type,
-                                     old_cluster.name,
-                                     old_cluster.vm_to_host_ratio,
-                                     len(old_cluster.machines),
-                                     len(old_cluster.hosts)))
+            if hasattr(old_cluster, 'verify_ratio'):
+                old_cluster.verify_ratio()
+
         chooser = None
         if not dbhost.cluster:
             if dbhost.domain != dbcluster.domain:

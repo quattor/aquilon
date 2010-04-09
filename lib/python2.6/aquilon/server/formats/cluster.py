@@ -41,13 +41,19 @@ class ClusterFormatter(ObjectFormatter):
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
-        if hasattr(cluster, "vm_to_host_ratio"):
+        if cluster.cluster_type == 'esx':
+            details.append(indent + "  Down Hosts Threshold: %s" %
+                           cluster.down_hosts_threshold)
             details.append(indent + "  Max vm_to_host_ratio: %s" %
                            cluster.vm_to_host_ratio)
+            details.append(indent + "  Max virtual machine count: %s" %
+                           cluster.max_vm_count)
             details.append(indent + "  Current vm_to_host_ratio: %s:%s" %
                            (len(cluster.machines), len(cluster.hosts)))
             details.append(indent + "  Virtual Machine count: %s" %
                            len(cluster.machines))
+            details.append(indent + "  ESX VMHost count: %s" %
+                           len(cluster.hosts))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         details.append(self.redirect_raw(cluster.domain, indent + "  "))
         for dbsi in cluster.service_bindings:

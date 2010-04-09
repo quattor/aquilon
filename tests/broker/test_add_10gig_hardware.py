@@ -148,6 +148,11 @@ class TestAdd10GigHardware(TestBrokerCommand):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
             self.matchoutput(out, hostname, command)
 
+    def test_300_delmachines(self):
+        # Need to remove machines without interfaces or the make will fail.
+        for i in [18, 27]:
+            self.noouttest(["del", "machine", "--machine", "evm%d" % i])
+
     def test_500_verifycatmachines(self):
         for i in range(0, 8):
             command = "cat --machine evm%s" % (10 + i)

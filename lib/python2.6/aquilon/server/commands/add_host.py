@@ -41,8 +41,10 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Host, OperatingSystem
+from aquilon.server.templates.base import (compileLock, compileRelease,
+                                           PlenaryCollection)
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.processes import DSDBRunner
 
 
@@ -146,11 +148,14 @@ class CommandAddHost(BrokerCommand):
         session.flush()
         session.refresh(dbhost)
 
-        plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))
+        if dbmachine.cluster:
+            plenaries.append(PlenaryCluster(dbmachine.cluster, logger=logger))
 
         try:
             compileLock(logger=logger)
-            plenary_info.write(locked=True)
+            plenaries.write(locked=True)
 
             # XXX: This (and some of the code above) is horrible.  There
             # should be a generic/configurable hook here that could kick
@@ -174,7 +179,7 @@ class CommandAddHost(BrokerCommand):
                 except ProcessException, e:
                     raise ArgumentError("Could not add host to dsdb: %s" % e)
         except:
-            plenary_info.restore_stash()
+            plenaries.restore_stash()
             raise
         finally:
             compileRelease(logger=logger)

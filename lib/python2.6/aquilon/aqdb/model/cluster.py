@@ -35,8 +35,8 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
 from sqlalchemy.orm import relation, backref, object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.exceptions_ import InternalError, ArgumentError
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine, Domain, TorSwitch)
 
@@ -124,9 +124,9 @@ class EsxCluster(Cluster):
                             #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
 
-    #vm_to_host_ratio = Column(Integer, default=16, nullable=True)
     vm_count = Column(Integer, default=16, nullable=True)
     host_count = Column(Integer, default=1, nullable=False)
+    down_hosts_threshold = Column(Integer, nullable=False)
 
     switch_id = Column(Integer,
                        ForeignKey('tor_switch.id',
@@ -141,6 +141,15 @@ class EsxCluster(Cluster):
         return '%s:%s'% (self.vm_count, self.host_count)
 
     @property
+    def max_vm_count(self):
+        if self.host_count == 0:
+            return 0
+        effective_vmhost_count = len(self.hosts) - self.down_hosts_threshold
+        if effective_vmhost_count < 0:
+            return 0
+        return effective_vmhost_count * self.vm_count / self.host_count
+
+    @property
     def minimum_location(self):
         location = None
         for host in self.hosts:
@@ -149,6 +158,51 @@ class EsxCluster(Cluster):
             else:
                 location = host.location
         return location
+
+    def verify_ratio(self, vm_part=None, host_part=None,
+                     current_vm_count=None, current_host_count=None,
+                     down_hosts_threshold=None, error=ArgumentError):
+        if vm_part is None:
+            vm_part = self.vm_count
+        if host_part is None:
+            host_part = self.host_count
+        if current_vm_count is None:
+            current_vm_count = len(self.machines)
+        if current_host_count is None:
+            current_host_count = len(self.hosts)
+        if down_hosts_threshold is None:
+            down_hosts_threshold = self.down_hosts_threshold
+
+        # It doesn't matter how many vmhosts we have if there are no
+        # virtual machines.
+        if current_vm_count <= 0:
+            return
+
+        if host_part == 0:
+            raise error("Invalid ratio of %s:%s for %s cluster %s" %
+                        (vm_part, host_part, self.cluster_type, self.name))
+
+        # For calculations, assume that down_hosts_threshold vmhosts
+        # are not available from the number currently configured.
+        adjusted_host_count = current_host_count - down_hosts_threshold
+
+        if adjusted_host_count <= 0:
+            raise error("%s cluster %s cannot support VMs with %s "
+                        "vmhosts and a down_host_threshold of %s" %
+                        (self.cluster_type, self.name,
+                         current_host_count, down_hosts_threshold))
+
+        # The current ratio must be less than the requirement...
+        # cur_vm / cur_host <= vm_part / host_part
+        # cur_vm * host_part <= vm_part * cur_host
+        # Apply a logical not to test for the error condition...
+        if current_vm_count * host_part > vm_part * adjusted_host_count:
+            raise error("%s VMs:%s hosts in %s cluster %s violates "
+                        "ratio %s:%s with down_hosts_threshold %s" %
+                        (current_vm_count, current_host_count,
+                         self.cluster_type, self.name, vm_part, host_part,
+                         down_hosts_threshold))
+        return
 
     def __init__(self, **kw):
         if 'max_hosts' not in kw:
@@ -209,7 +263,8 @@ class HostClusterMember(Base):
 
 hcm = HostClusterMember.__table__
 hcm.primary_key.name = '%s_pk'% (_HCM)
-hcm.append_constraint(UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
+hcm.append_constraint(
+    UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
@@ -288,10 +343,11 @@ class ClusterServiceBinding(Base):
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='%s_srv_inst_fk'%(_CAB)),
+    service_instance_id = Column(Integer,
+                                 ForeignKey('service_instance.id',
+                                            name='%s_srv_inst_fk'%(_CAB)),
                                  primary_key=True)
-    #TODO: Boolean is_manual for manual choice?
+
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255))
 
