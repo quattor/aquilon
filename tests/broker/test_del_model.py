@@ -44,7 +44,7 @@ from brokertest import TestBrokerCommand
 class TestDelModel(TestBrokerCommand):
 
     def testdeluttorswitch(self):
-        command = "del model --name uttorswitch --vendor hp --type tor_switch"
+        command = "del model --name uttorswitch --vendor hp"
         self.noouttest(command.split(" "))
 
     def testverifydeluttorswitch(self):
@@ -52,7 +52,7 @@ class TestDelModel(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelutblade(self):
-        command = "del model --name utblade --vendor aurora_vendor --type blade"
+        command = "del model --name utblade --vendor aurora_vendor"
         self.noouttest(command.split(" "))
 
     def testverifydelutblade(self):
@@ -60,8 +60,7 @@ class TestDelModel(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelutmedium(self):
-        command = ["del_model", "--name=utmedium", "--vendor=utvendor",
-                   "--type=virtual_machine"]
+        command = ["del_model", "--name=utmedium", "--vendor=utvendor"]
         self.noouttest(command)
 
     def testverifydelutmedium(self):

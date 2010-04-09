@@ -49,7 +49,8 @@ class AuthorizationBroker(object):
     # FIXME: Hard coded check for now.
     def check(self, principal, dbuser, action, resource):
         if action.startswith('show') or action.startswith('search') \
-           or action.startswith('get') or action == 'status':
+           or action.startswith('get') or action.startswith('cat') \
+           or action == 'status':
             return True
         if dbuser is None:
             raise AuthorizationException(
@@ -69,6 +70,7 @@ class AuthorizationBroker(object):
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
                       'add_os', 'del_os',
+                      'add_model', 'update_model', 'del_model',
                       'add_organization', 'del_organization']:
             if dbuser.role.name not in ['engineering', 'aqd_admin']:
                 raise AuthorizationException(

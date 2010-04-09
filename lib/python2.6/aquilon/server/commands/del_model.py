@@ -33,29 +33,23 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.vendor import get_vendor
-from aquilon.aqdb.model import Model
+from aquilon.aqdb.model import Vendor, Model
 
 
 class CommandDelModel(BrokerCommand):
 
-    required_parameters = ["name", "vendor", "type"]
+    required_parameters = ["name", "vendor"]
 
-    def render(self, session, logger, name, vendor, type, **arguments):
-        dbvendor = get_vendor(session, vendor)
-        try:
-            dbmodel = session.query(Model).filter_by(name=name,
-                    vendor=dbvendor, machine_type=type).one()
-        except InvalidRequestError, e:
-            raise NotFoundException("Model '%s' with vendor %s and type %s not found: %s"
-                    % (name, vendor, type, e))
+    def render(self, session, logger, name, vendor, **arguments):
+        dbvendor = Vendor.get_unique(session, vendor, compel=True)
+        dbmodel = Model.get_unique(session, name=name, vendor=dbvendor,
+                                   compel=True)
+        # FIXME: Add a nice error message if the model is in use.
         if dbmodel.machine_specs:
             # FIXME: Log some details...
             logger.info("Before deleting model %s %s '%s', "
                         "removing machine specifications." %
-                        (type, vendor, name))
+                        (dbmodel.machine_type, dbvendor.name, dbmodel.name))
             session.delete(dbmodel.machine_specs)
         session.delete(dbmodel)
         return
-
-
