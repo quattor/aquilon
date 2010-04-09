@@ -47,8 +47,17 @@ class CommandPxeswitch(BrokerCommand):
     def render(self, session, logger, list,
                install, localboot, status, firmware, configure, **arguments):
 
+        user = self.config.get("broker", "installfe_user")
         command = self.config.get("broker", "installfe")
         args = [command]
+        args.append("--cfgfile")
+        args.append("/dev/null")
+        args.append("--sshdir")
+        args.append(self.config.get("broker", "installfe_sshdir"))
+        args.append("--logfile")
+        logdir = self.config.get("broker", "logdir")
+        args.append("%s/aii-installfe.log" % logdir)
+
         if localboot:
             args.append('--bootlist')
         elif install:
@@ -94,28 +103,18 @@ class CommandPxeswitch(BrokerCommand):
             raise ArgumentError("invalid hosts in list:\n%s" % 
                                 "\n".join(failed))
 
-        for group in groups.keys():
+        for (group,hostlist) in groups.items():
             # create temporary file, point aii-installfe at that file.
+            groupargs = args
             with NamedTemporaryFile() as tmpfile:
-                tmpfile.writelines([x.fqdn + "\n" for x in groups[group]])
+                tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
                
-                args.append(tmpfile.name)
+                groupargs.append(tmpfile.name)
 
-                args.append("--cfgfile")
-                args.append("/dev/null")
+                groupargs.append("--servers")
+                groupargs.append(" ".join(["%s@%s" % (user,s) for s in servers[group]]))
 
-                args.append("--servers")
-                user = self.config.get("broker", "installfe_user")
-                args.append(" ".join(["%s@%s" % (user,s) for s in servers[group]]))
-
-                args.append("--sshdir")
-                args.append(self.config.get("broker", "installfe_sshdir"))
-
-                args.append("--logfile")
-                logdir = self.config.get("broker", "logdir")
-                args.append("%s/aii-installfe.log" % logdir)
-
-                run_command(args, logger=logger, loglevel=CLIENT_INFO)
-
+                # it would be nice to parallelize this....
+                run_command(groupargs, logger=logger, loglevel=CLIENT_INFO)
 
