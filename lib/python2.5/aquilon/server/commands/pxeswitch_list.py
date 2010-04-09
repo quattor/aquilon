@@ -105,7 +105,7 @@ class CommandPxeswitch(BrokerCommand):
 
         for (group,hostlist) in groups.items():
             # create temporary file, point aii-installfe at that file.
-            groupargs = args
+            groupargs = args[:]
             with NamedTemporaryFile() as tmpfile:
                 tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
