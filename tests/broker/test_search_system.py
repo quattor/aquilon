@@ -67,6 +67,7 @@ class TestSearchSystem(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "np998gd1r02.aqd-unittest.ms.com", command)
         self.matchoutput(out, "np999gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)

@@ -140,6 +140,14 @@ class TestAddTorSwitch(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com,np998,np,cisco,ws-c2960-48tt-l,,,", command)
 
+    # Test adding a switch but specifying the rack row in upper case
+    def testaddnp998gd1r02(self):
+        self.noouttest(["add", "tor_switch",
+            "--tor_switch", "np998gd1r02.aqd-unittest.ms.com",
+            "--building", "np", "--rackid", "998",
+            "--rackrow", "YY", "--rackcol", "88",
+            "--model", "ws-c2960-48tt-l"])
+
     # Test adding a switch, creating a new rack, and adding an IP.
     def testaddnp999gd1r01(self):
         self.noouttest(["add", "tor_switch",

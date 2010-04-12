@@ -67,6 +67,10 @@ class TestDelTorSwitch(TestBrokerCommand):
         command = "show tor_switch --tor_switch np998gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelnp998gd1r02(self):
+        command = "del tor_switch --tor_switch np998gd1r02.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+
     def testdelnp999gd1r01(self):
         command = "del tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
