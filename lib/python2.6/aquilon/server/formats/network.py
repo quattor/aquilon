@@ -145,7 +145,7 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.discoverable = net.is_discoverable
         net_msg.discovered = net.is_discovered
         for system in net.interfaces:
-            self.add_host_msg(net_msg.hosts.add(), system)
+            self.add_system_msg(net_msg.hosts.add(), system)
 
     def csv_fields(self, network):
         return (network.name, network.ip, network.netmask,

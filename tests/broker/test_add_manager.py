@@ -173,9 +173,9 @@ class TestAddManager(TestBrokerCommand):
     def testverifyunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[7],
-                         command)
-        self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
+        self.matchoutput(out,
+                         "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[7],
                          command)
         self.matchoutput(out,
                          "Manager: unittest12r.aqd-unittest.ms.com [%s]" %

@@ -33,11 +33,12 @@ import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, contains_eager
+from sqlalchemy.orm import relation, contains_eager
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 
-from aquilon.aqdb.model import Base, Service, Host, System, DnsDomain
+from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
+                                PrimaryNameAssociation)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN  = 'service_instance'
@@ -106,11 +107,11 @@ class ServiceInstance(Base):
     @property
     def clients(self):
         session = object_session(self)
-        q = session.query(Host)
-        q = q.join(['build_items'])
+        q = session.query(System)
+        q = q.join(PrimaryNameAssociation, Machine, Host, BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(System.dns_domain)
+        q = q.join(DnsDomain)
         q = q.options(contains_eager(System.dns_domain))
         q = q.order_by(DnsDomain.name, System.name)
         return [sys.fqdn for sys in q.all()]
@@ -313,27 +314,25 @@ AND l1.id in (
 )"""
 
 
-#TODO: auto-updated "last_used" column?
 class BuildItem(Base):
-    """ Identifies the build process of a given Host.
-        Parent of 'build_element' """
+    """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
+    #FIXME: remove id column. PK is machine/svc_inst
     id = Column(Integer, Sequence('build_item_id_seq'), primary_key=True)
 
-    host_id = Column('host_id', Integer, ForeignKey('host.id',
+    host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
                                                      ondelete='CASCADE',
                                                      name='build_item_host_fk'),
-                      nullable=False)
+                     nullable=False)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
-    creation_date = deferred(Column(DateTime,
-                                    default=datetime.now, nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
     host = relation(Host, backref='build_items', uselist=False)
     service_instance = relation(ServiceInstance, backref='build_items')
@@ -343,7 +342,7 @@ class BuildItem(Base):
         return self.service_instance.cfg_path
 
 
-build_item = BuildItem.__table__
+build_item = BuildItem.__table__  # pylint: disable-msg=C0103, E1101
 
 build_item.primary_key.name = 'build_item_pk'
 

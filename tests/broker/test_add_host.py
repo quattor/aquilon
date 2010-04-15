@@ -54,8 +54,9 @@ class TestAddHost(TestBrokerCommand):
     def testverifyaddunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[0],
+        self.matchoutput(out,
+                         "Primary Name: unittest02.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[0],
                          command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -63,10 +64,18 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
 
+    def testverifyunittest02machine(self):
+        command = "show machine --machine ut3c5n10"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Primary Name: unittest02.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[0],
+                         command)
+
     def testverifyshowfqdnhost(self):
         command = "show fqdn --fqdn unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
 
     def testshowhostbaddomain(self):
         command = "show host --hostname aquilon00.one-nyp"
@@ -94,9 +103,9 @@ class TestAddHost(TestBrokerCommand):
     def testverifyunittest15(self):
         command = "show host --hostname unittest15.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest15.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[1],
+        self.matchoutput(out,
+                         "Primary Name: unittest15.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[0].usable[1],
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
@@ -143,9 +152,9 @@ class TestAddHost(TestBrokerCommand):
     def testverifyunittest16(self):
         command = "show host --hostname unittest16.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest16.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[2],
+        self.matchoutput(out,
+                         "Primary Name: unittest16.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[0].usable[2],
                          command)
         self.matchoutput(out, "Personality: compileserver", command)
 
@@ -165,9 +174,9 @@ class TestAddHost(TestBrokerCommand):
         #verifies default os and personality for aquilon
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3],
+        self.matchoutput(out,
+                         "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
@@ -325,7 +334,7 @@ class TestAddHost(TestBrokerCommand):
     def testverifyaddauroradefaultos(self):
         command = "show host --hostname test_aurora_default_os.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: test_aurora_default_os.ms.com", command)
+        self.matchoutput(out, "Primary Name: test_aurora_default_os.ms.com", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
@@ -344,7 +353,7 @@ class TestAddHost(TestBrokerCommand):
     def testverifyaddwindowsdefaultos(self):
         command = "show host --hostname test_windows_default_os.msad.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: test_windows_default_os.msad.ms.com", command)
+        self.matchoutput(out, "Primary Name: test_windows_default_os.msad.ms.com", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)

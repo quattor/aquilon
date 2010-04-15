@@ -143,9 +143,9 @@ class PlenaryClusterObject(Plenary):
                 lines.append("                 ),")
                 lines.append("                'network', nlist(")
                 lines.append("                    'hostname', '%s'," %
-                             machine.host.name)
+                             machine.primary_name.name)
                 lines.append("                    'domainname', '%s'," %
-                             machine.host.dns_domain)
+                             machine.primary_name.dns_domain)
                 lines.append("                 ),")
                 lines.append("             ),")
             lines.append("         ),")

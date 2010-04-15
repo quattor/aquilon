@@ -89,8 +89,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # - that host was blindly created, and thus can be removed safely
             if prev and itype == 'management' and \
                prev.hardware_entity.hardware_type == 'machine' and \
-               prev.system and prev.system.system_type == 'host' and \
-               prev.system.status.name == 'blind':
+               prev.hardware_entity.host and \
+               prev.hardware_entity.host.status.name == 'blind':
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
@@ -190,17 +190,15 @@ class CommandAddInterfaceMachine(BrokerCommand):
         logger.info("Removing blind host '%s', machine '%s', "
                     "and interface '%s'" %
                     (prev.system.fqdn, prev.hardware_entity.label, prev.name))
-        host_plenary_info = PlenaryHost(prev.system, logger=logger)
+        host_plenary_info = PlenaryHost(prev.hardware_entity.host, logger=logger)
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
         # plenarys and dependency files.
         pending_removals.append(host_plenary_info)
-        session.delete(prev.system)
         dbmachine = prev.hardware_entity
-        machine_plenary_info = PlenaryMachineInfo(prev.hardware_entity,
-                                                  logger=logger)
+        machine_plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         pending_removals.append(machine_plenary_info)
-        session.delete(prev)
+        # This will cascade to prev & the host
         session.delete(dbmachine)
         session.flush()
 
@@ -249,8 +247,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                "auto-creating manager for %s with IP address "
                                "%s." % (dbmachine.label, old_ip))
             return
-        dbhost = dbmachine.host
-        manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
+        manager = "%sr.%s" % (dbmachine.primary_name.name,
+                              dbmachine.primary_name.dns_domain.name)
         try:
             (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                                  manager)

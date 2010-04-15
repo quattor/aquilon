@@ -196,7 +196,7 @@ class TestReconfigure(TestBrokerCommand):
     def testverifyreconfigurewindows(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest01.one-nyp.ms.com", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: desktop", command)
         self.matchoutput(out, "Build Status: ready", command)

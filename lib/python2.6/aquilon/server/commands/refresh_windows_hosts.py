@@ -39,7 +39,7 @@ from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsDomain, System,
-                                OperatingSystem)
+                                OperatingSystem, ReservedName)
 
 
 class CommandRefreshWindowsHosts(BrokerCommand):
@@ -118,15 +118,18 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            for dbinterface in dbhost.interfaces:
+            dbmachine = dbhost.machine
+            for dbinterface in dbmachine.interfaces:
                 # Verify that there's only one?
                 dbinterface.system = None
                 session.add(dbinterface)
             success.append("Removed host entry for %s (%s)" %
-                           (dbhost.machine.label, dbhost.fqdn))
-            if dbhost.machine.cluster:
-                clusters.add(dbhost.machine.cluster)
+                           (dbmachine.label, dbmachine.fqdn))
+            if dbmachine.cluster:
+                clusters.add(dbmachine.cluster)
             session.delete(dbhost)
+            session.delete(dbmachine.primary_name)
+            session.expire(dbmachine, ['_primary_name_asc'])
         session.flush()
         # The Host() creations below fail when autoflush is enabled.
         session.autoflush = False
@@ -206,20 +209,21 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             if dbmachine.host:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is already tied to %s." % \
-                        (host, mac, dbmachine.host.fqdn)
+                        (host, mac, dbmachine.fqdn)
                 failed.append(msg)
                 logger.info(msg)
                 continue
             dbhost = Host(machine=dbmachine, branch=dbdomain,
-                          status=dbstatus, ip=None, network=None,
-                          name=short, dns_domain=dbdns_domain,
+                          status=dbstatus,
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
-            dbinterface.system = dbhost
-            session.add(dbinterface)
+            dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
+            session.add(dbdns_rec)
+            dbinterface.system = dbdns_rec
+            dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %
-                           (dbhost.machine.label, dbhost.fqdn))
+                           (dbmachine.label, dbdns_rec.fqdn))
             if dbmachine.cluster:
                 clusters.add(dbmachine.cluster)
             session.flush()

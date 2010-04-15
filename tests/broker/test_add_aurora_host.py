@@ -50,7 +50,7 @@ class TestAddAuroraHost(TestBrokerCommand):
     def testverifyaddaurorawithnode(self):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
+        self.matchoutput(out, "Primary Name: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Chassis: ", command)
         self.matchoutput(out, "Slot: ", command)
@@ -69,7 +69,7 @@ class TestAddAuroraHost(TestBrokerCommand):
     def testverifyaddaurorawithoutnode(self):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
+        self.matchoutput(out, "Primary Name: %s" % self.aurora_without_node,
                 command)
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Building: ", command)
@@ -88,7 +88,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Aurora_node: ny00l4as01", command)
-        self.matchoutput(out, "Allocated to host: nyaqd1.ms.com [None]", command)
+        self.matchoutput(out, "Primary Name: nyaqd1.ms.com", command)
 
     def testshowmachine(self):
         command = "show machine --model aurora_model"

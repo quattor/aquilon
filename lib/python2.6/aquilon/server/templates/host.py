@@ -32,7 +32,8 @@
 import logging
 
 from aquilon.config import Config
-from aquilon.exceptions_ import IncompleteError
+from aquilon.exceptions_ import IncompleteError, InternalError
+from aquilon.aqdb.model import Host
 from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -52,6 +53,9 @@ class PlenaryHost(PlenaryCollection):
       if host profiles should be put into a "flat" toplevel (non-namespaced)
     """
     def __init__(self, dbhost, logger=LOGGER):
+        if not isinstance(dbhost, Host):
+            raise InternalError("PlenaryHost called with %s instead of Host" %
+                                dbhost.__class__.name)
         PlenaryCollection.__init__(self, logger=logger)
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
@@ -77,12 +81,15 @@ class PlenaryToplevelHost(Plenary):
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
         self.dbhost = dbhost
+        # Store the branch separately so get_key() works even after the dbhost
+        # object has been deleted
+        self.branch = dbhost.branch.name
         self.name = dbhost.fqdn
         self.plenary_core = ""
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
         self.dir = "%s/domains/%s/profiles" % (
-            self.config.get("broker", "builddir"), dbhost.branch.name)
+            self.config.get("broker", "builddir"), self.branch)
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -100,7 +107,7 @@ class PlenaryToplevelHost(Plenary):
         # Going with self.name instead of self.plenary_template seems like
         # the right decision here - easier to predict behavior when meshing
         # with other CompileKey generators like PlenaryMachine.
-        return CompileKey(domain=self.dbhost.branch.name, profile=self.name,
+        return CompileKey(domain=self.branch, profile=self.name,
                           logger=self.logger)
 
     def body(self, lines):
@@ -123,12 +130,12 @@ class PlenaryToplevelHost(Plenary):
             bootproto = "static"
             if dbinterface.bootable or not default_gateway:
                 default_gateway = gateway
-            interfaces.append({"ip":dbinterface.system.ip,
-                    "netmask":net.netmask,
-                    "broadcast":net.broadcast,
-                    "gateway":gateway,
-                    "bootproto":bootproto,
-                    "name":dbinterface.name})
+            interfaces.append({"ip": dbinterface.system.ip,
+                               "netmask": net.netmask,
+                               "broadcast": net.broadcast,
+                               "gateway": gateway,
+                               "bootproto": bootproto,
+                               "name": dbinterface.name})
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
@@ -200,5 +207,5 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     def __init__(self, dbhost, logger=LOGGER):
         PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
         self.name = dbhost.fqdn
-        self.plenary_core = dbhost.dns_domain.name
+        self.plenary_core = dbhost.machine.primary_name.dns_domain.name
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__

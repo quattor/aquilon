@@ -53,8 +53,9 @@ class TestAddAquilonHost(TestBrokerCommand):
     def testverifyaddunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[2],
+        self.matchoutput(out,
+                         "Primary Name: unittest00.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[2],
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -88,9 +89,9 @@ class TestAddAquilonHost(TestBrokerCommand):
     def testverifyaddunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[7],
+        self.matchoutput(out,
+                         "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[7],
                          command)
         self.matchoutput(out, "Rackmount: ut3s01p1a", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -113,9 +114,9 @@ class TestAddAquilonHost(TestBrokerCommand):
     def testverifyaddunittest13(self):
         command = "show host --hostname unittest13.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest13.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[8],
+        self.matchoutput(out,
+                         "Primary Name: unittest13.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[8],
                          command)
         self.matchoutput(out, "Rackmount: ut3s01p1b", command)
         self.matchoutput(out, "Archetype: aquilon", command)

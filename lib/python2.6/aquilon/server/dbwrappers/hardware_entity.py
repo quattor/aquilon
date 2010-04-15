@@ -39,7 +39,7 @@ from aquilon.server.dbwrappers.interface import restrict_switch_offsets
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
-                                 **kwargs):
+                                 subquery=False, **kwargs):
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
         q = q.with_polymorphic(
@@ -67,7 +67,10 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.reset_joinpoint()
     if kwargs.get('serial', None):
         q = q.filter_by(serial_no=kwargs['serial'])
-    q = q.order_by(HardwareEntity.label)
+    if not subquery:
+        # Oracle does not like "ORDER BY" in a sub-select, so we have to
+        # suppress it if we want to use this query as a subquery
+        q = q.order_by(HardwareEntity.label)
     return q
 
 def parse_primary_name(session, fqdn, ip):

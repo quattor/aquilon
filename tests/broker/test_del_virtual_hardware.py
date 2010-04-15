@@ -53,7 +53,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
     def test_400_reverify_windows_host(self):
         command = "show host --hostname aqdtop1.msad.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: aqdtop1.msad.ms.com", command)
+        self.matchoutput(out, "Primary Name: aqdtop1.msad.ms.com", command)
         self.matchoutput(out, "Virtual_machine: evm1", command)
         self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
 

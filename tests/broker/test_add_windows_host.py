@@ -52,8 +52,9 @@ class TestAddWindowsHost(TestBrokerCommand):
     def testverifyaddunittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[10],
+        self.matchoutput(out,
+                         "Primary Name: unittest01.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[10],
                          command)
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Archetype: windows", command)

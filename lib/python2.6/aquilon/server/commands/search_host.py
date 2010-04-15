@@ -34,11 +34,14 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
                                 HostLifecycle,
-                                OperatingSystem, Service, Machine, Model)
-from aquilon.server.dbwrappers.system import search_system_query
+                                OperatingSystem, Service, Machine, Model,
+                                System, DnsDomain, Interface, HardwareEntity)
+from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.server.dbwrappers.hardware_entity import search_hardware_entity_query
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.dbwrappers.network import get_network_byip
 
 
 class CommandSearchHost(BrokerCommand):
@@ -49,10 +52,70 @@ class CommandSearchHost(BrokerCommand):
                buildstatus, personality, osname, osversion, service, instance,
                model, machine_type, vendor, serial, cluster,
                domain, sandbox, branch,
-               fullinfo, **arguments):
+               dns_domain, shortname, mac, ip, networkip,
+               exact_location, fullinfo, **arguments):
+        dnsq = session.query(System.ip)
+        use_dnsq = False
         if hostname:
-            arguments['fqdn'] = hostname
-        q = search_system_query(session, Host, **arguments)
+            (short, dbdns_domain) = parse_fqdn(session, hostname)
+            dnsq = dnsq.filter_by(name=short)
+            dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
+            use_dnsq = True
+        if dns_domain:
+            dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+            dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
+            use_dnsq = True
+        if shortname:
+            dnsq = dnsq.filter_by(name=shortname)
+            use_dnsq = True
+
+        use_addrq = False
+        addrq = session.query(Interface.id)
+        if mac:
+            addrq = addrq.filter(Interface.mac == mac)
+            use_addrq = True
+        addrq = addrq.join(System)
+        if ip:
+            addrq = addrq.filter_by(ip=ip)
+            use_addrq = True
+        if networkip:
+            dbnetwork = get_network_byip(session, networkip)
+            addrq = addrq.filter(System.ip > dbnetwork.network.ip)
+            addrq = addrq.filter(System.ip < dbnetwork.network.broadcast)
+            use_addrq = True
+        if use_dnsq:
+            addrq = addrq.filter(System.ip.in_(dnsq.subquery()))
+            use_addrq = True
+
+        q = session.query(Host)
+        if use_addrq:
+            q = q.join(Machine, HardwareEntity, Interface)
+            q = q.filter(Interface.id.in_(addrq.subquery()))
+            q = q.reset_joinpoint()
+
+        dblocation = get_location(session, **arguments)
+        if dblocation:
+            q = q.join(Machine, HardwareEntity)
+            if exact_location:
+                q = q.filter_by(location=dblocation)
+            else:
+                childids = dblocation.offspring_ids()
+                q = q.filter(HardwareEntity.location_id.in_(childids))
+            q = q.reset_joinpoint()
+
+        if model or vendor or machine_type:
+            q = q.join(Machine, HardwareEntity)
+            subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                            machine_type=machine_type,
+                                            compel=True)
+            q = q.filter(HardwareEntity.model_id.in_(subq))
+            q = q.reset_joinpoint()
+
+        if serial:
+            q = q.join(Machine, HardwareEntity)
+            q = q.filter_by(serial_no=serial)
+            q = q.reset_joinpoint()
+
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(machine=dbmachine)
@@ -118,26 +181,6 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
-        dblocation = get_location(session, **arguments)
-        if dblocation:
-            q = q.join(['machine'])
-            if arguments.get('exact_location'):
-                q = q.filter_by(location=dblocation)
-            else:
-                childids = dblocation.offspring_ids()
-                q = q.filter(Machine.location_id.in_(childids))
-            q = q.reset_joinpoint()
-        if model or vendor or machine_type:
-            subq = Model.get_matching_query(session, name=model, vendor=vendor,
-                                            machine_type=machine_type,
-                                            compel=True)
-            q = q.join(['machine'])
-            q = q.filter(Machine.model_id.in_(subq))
-            q = q.reset_joinpoint()
-        if serial:
-            q = q.join(['machine'])
-            q = q.filter_by(serial_no=serial)
-            q = q.reset_joinpoint()
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             q = q.join('_cluster')

@@ -222,9 +222,9 @@ class EsxCluster(Cluster):
         location = None
         for host in self.hosts:
             if location:
-                location = location.merge(host.location)
+                location = location.merge(host.machine.location)
             else:
-                location = host.location
+                location = host.machine.location
         return location
 
     @property
@@ -411,7 +411,7 @@ class HostClusterMember(Base):
                         #if the cluster is deleted, so is membership
                         primary_key=True)
 
-    host_id = Column(Integer, ForeignKey('host.id',
+    host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
                         #if the host is deleted, so is the membership

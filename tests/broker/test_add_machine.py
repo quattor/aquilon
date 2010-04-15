@@ -55,6 +55,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
+        self.matchclean(out, "Primary Name:", command)
 
     def testverifydelmodel(self):
         # This should be in test_del_model.py but when that is run there are no

@@ -30,13 +30,16 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Host, DnsDomain
-from aquilon.server.dbwrappers.system import (get_system,
-                                              get_system_dependencies)
+from aquilon.aqdb.model import Machine
+from aquilon.server.dbwrappers.system import get_system_dependencies
 
 
 def hostname_to_host(session, hostname):
-    return get_system(session, hostname, Host, 'Host')
+    dbmachine = Machine.get_unique(session, hostname, compel=True)
+    if not dbmachine.host:
+        raise NotFoundException("{0} does not have a host "
+                                "assigned.".format(dbmachine))
+    return dbmachine.host
 
 def get_host_build_item(self, dbhost, dbservice):
     for template in dbhost.templates:
@@ -50,7 +53,7 @@ def get_host_dependencies(session, dbhost):
     If the host has no dependencies, then an empty list is returned
     """
     ret = []
-    ret.extend(get_system_dependencies(session, dbhost))
+    ret.extend(get_system_dependencies(session, dbhost.machine.primary_name))
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
        dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
        dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):

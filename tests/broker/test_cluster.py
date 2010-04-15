@@ -65,7 +65,7 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
+            self.matchoutput(out, "Primary Name: evh%s.aqd-unittest.ms.com" % i,
                              command)
             self.matchoutput(out, "Member of ESX Cluster: utecl1", command)
         command = "show esx cluster --cluster utecl1"

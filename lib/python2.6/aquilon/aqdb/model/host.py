@@ -30,33 +30,38 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
-                        Column, ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy import (Integer, DateTime, String, Column, ForeignKey,
+                        UniqueConstraint)
+from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import (Base, System, Branch, Machine, HostLifecycle,
+from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle,
                                 Personality, OperatingSystem, UserPrincipal)
-from aquilon.aqdb.column_types.aqstr import AqStr
 
 
-class Host(System):
-    """ Here's our most common kind of System, the Host. Putting a physical
-        machine into a chassis and powering it up leaves it in a state with a
-        few more attributes not filled in: what Branch configures this host?
-        If Ownership is captured, this is the place for it.
+class Host(Base):
+    """ The Host class captures the configuration profile of a machine.
+
+        Putting a physical machine into a chassis and powering it up leaves it
+        in a state with a few more attributes not filled in: what Branch
+        configures this host? If Ownership is captured, this is the place for
+        it.
+
+        Post DNS changes the class name "Host", and it's current existence may
+        not make much sense. In the interest of keeping the scope of changes
+        somewhat limited (compared to how much else is changing), the class is
+        being left in this intermediate state, for the time being. The full
+        expression of the changes would be to call the class "MachineProfile",
+        and remove any machine specific information. This would provide a more
+        normalized schema, rather than individual machines having all of the
+        rows below, which potentially would need to be nullable.
     """
 
     __tablename__ = 'host'
-    __mapper_args__ = {'polymorphic_identity':'host'}
-
-    id = Column(Integer, ForeignKey('system.id',
-                                    ondelete='CASCADE',
-                                    name='host_system_fk'),
-                primary_key=True)
+    _instance_label = 'fqdn'
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
                                             name='host_machine_fk'),
-                        nullable=False)
+                        primary_key=True)
 
     branch_id = Column(Integer, ForeignKey('branch.id',
                                            name='host_branch_fk'),
@@ -79,45 +84,49 @@ class Host(System):
                                                      name='host_os_fk'),
                                  nullable=False)
 
-    machine = relation(Machine, backref=backref('host', uselist=False))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+
+    comments = Column(String(255), nullable=True)
+
+    # Deletion of a machine deletes the host. When this is 'machine profile'
+    # this should no longer be the case as it will be many to one as opposed to
+    # one to one as it stands now. Could do innerjoin now...
+    machine = relation(Machine, lazy=False, uselist=False,
+                       backref=backref('host', uselist=False, lazy=False,
+                                       cascade='all'))
+
     branch = relation(Branch, backref='hosts')
     sandbox_author = relation(UserPrincipal, backref='sandboxed_hosts')
     personality = relation(Personality, backref='hosts')
     status = relation(HostLifecycle, backref='hosts')
     operating_system = relation(OperatingSystem, uselist=False, backref='hosts')
 
-    """ The following relation is defined in BuildItem to avoid circular
-    import dependencies. Perhaps it can be restated another way than
-    to append the property onto Host there, left for future enhancement
-
-    Host.templates = relation(BuildItem,
-                         collection_class = ordering_list('position'),
-                         order_by = [BuildItem.__table__.c.position]) """
-
-    #TODO: make thse synonyms?
-    @property
-    def location(self):
-        return self.machine.location
+    #The following relation is defined in BuildItem to avoid circular
+    #import dependencies. Perhaps it can be restated another way than
+    #to append the property onto Host there, left for future enhancement.
+    #These will be moved to a property of machine post transformation to
+    #"machine profile".
+    #
+    #Host.templates = relation(BuildItem)
 
     @property
-    def sysloc(self):
-        return self.machine.location.sysloc()
+    def fqdn(self):
+        return self.machine.fqdn
 
     @property
     def archetype(self):
+        """ proxy in our archetype attr """
         return self.personality.archetype
 
     @property
     def authored_branch(self):
+        """ return a string representation of sandbox author/branch name """
         if self.sandbox_author:
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
         return str(self.branch.name)
 
 
-#TODO: synonym for location, sysloc, fqdn (in system)
-host = Host.__table__
-host.primary_key.name='host_pk'
+host = Host.__table__  # pylint: disable-msg=C0103, E1101
+host.primary_key.name = 'host_pk'
 host.append_constraint(
     UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
-
-table = host

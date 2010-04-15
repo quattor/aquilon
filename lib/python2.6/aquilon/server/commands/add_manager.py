@@ -53,7 +53,8 @@ class CommandAddManager(BrokerCommand):
         dbmachine = dbhost.machine
 
         if not manager:
-            manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
+            manager = "%sr.%s" % (dbmachine.primary_name.name,
+                                  dbmachine.primary_name.dns_domain.name)
         (short, dbdns_domain) = parse_system_and_verify_free(session, manager)
 
         dbinterface = get_or_create_interface(session, dbmachine,

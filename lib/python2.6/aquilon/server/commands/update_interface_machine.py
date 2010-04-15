@@ -68,9 +68,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         oldinfo = self.snapshot(dbinterface)
         if arguments.get('hostname', None):
             # Hack to set an intial interface for an aurora host...
-            dbhost = hostname_to_host(session, arguments['hostname'])
-            if dbhost.archetype.name == 'aurora' and not dbhost.interfaces:
-                dbinterface.system = dbhost
+            dbhost = dbinterface.hardware_entity.host
+            if dbhost.archetype.name == 'aurora' and \
+               dbhost.machine.primary_ip and not dbinterface.system:
+                dbinterface.system = dbhost.machine.primary_name
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the

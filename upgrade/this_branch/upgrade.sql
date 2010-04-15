@@ -203,4 +203,65 @@ ALTER TABLE switch
 	MODIFY (switch_type CONSTRAINT "SWITCH_SWITCH_TYPE_NN" NOT NULL);
 ALTER INDEX "TOR_SWITCH_HW_PK" RENAME TO "SWITCH_PK";
 
+--
+-- Convert host from being based on system to hardware_entity
+--
+
+-- Convert host_cluster_member to reference host.machine_id instead of host.id
+ALTER TABLE host_cluster_member DROP CONSTRAINT "HOST_CLUSTER_MEMBER_PK";
+ALTER TABLE host_cluster_member DROP CONSTRAINT "HST_CLSTR_MMBR_HST_FK";
+ALTER TABLE host_cluster_member DROP CONSTRAINT "HOST_CLUSTER_MEMBER_HOST_UK";
+ALTER TABLE host_cluster_member DROP CONSTRAINT "HOST_CLSTR_MMBR_HOST_ID_NN";
+ALTER TABLE host_cluster_member RENAME COLUMN host_id TO host_system_id;
+ALTER TABLE host_cluster_member ADD host_id INTEGER;
+UPDATE host_cluster_member SET host_id = (SELECT machine_id FROM host WHERE host.id = host_cluster_member.host_system_id);
+-- Foreign key on host(machine_id) have to wait because that is not a primary key yet
+ALTER TABLE host_cluster_member
+	MODIFY (host_id CONSTRAINT "HOST_CLSTR_MMBR_HOST_ID_NN" NOT NULL);
+ALTER TABLE host_cluster_member DROP COLUMN host_system_id;
+ALTER TABLE host_cluster_member
+	ADD CONSTRAINT "HOST_CLUSTER_MEMBER_HOST_UK" UNIQUE (host_id);
+ALTER TABLE host_cluster_member
+	ADD CONSTRAINT "HOST_CLUSTER_MEMBER_PK" PRIMARY KEY (cluster_id, host_id);
+
+-- Convert build_item to reference host.machine_id instead of host.id
+ALTER TABLE build_item DROP CONSTRAINT "BUILD_ITEM_HOST_FK";
+ALTER TABLE build_item DROP CONSTRAINT "BUILD_ITEM_UK";
+ALTER TABLE build_item DROP CONSTRAINT "BUILD_ITEM_HOST_ID_NN";
+ALTER TABLE build_item RENAME COLUMN host_id TO host_system_id;
+ALTER TABLE build_item ADD host_id INTEGER;
+UPDATE build_item SET host_id = (SELECT machine_id FROM host WHERE host.id = build_item.host_system_id);
+ALTER TABLE build_item
+	MODIFY (host_id CONSTRAINT "BUILD_ITEM_HOST_ID_NN" NOT NULL);
+-- Foreign key on host(machine_id) have to wait because that is not a primary key yet
+ALTER TABLE build_item DROP COLUMN host_system_id;
+ALTER TABLE build_item
+	ADD CONSTRAINT "BUILD_ITEM_UK" UNIQUE (host_id, service_instance_id);
+
+-- Copy the creation date & comments from system
+ALTER TABLE host ADD creation_date DATE;
+UPDATE host SET creation_date = (SELECT creation_date FROM system WHERE system.id = host.id);
+ALTER TABLE host
+	MODIFY (creation_date CONSTRAINT "HOST_CR_DATE_NN" NOT NULL);
+ALTER TABLE host ADD comments VARCHAR(255);
+UPDATE host SET comments = (SELECT comments FROM system WHERE system.id = host.id);
+
+-- Convert the address to primary_name_association
+INSERT INTO primary_name_association (hardware_entity_id, dns_record_id, creation_date)
+	SELECT host.machine_id, host.id, system.creation_date
+		FROM host, system
+		WHERE host.id = system.id;
+
+-- Drop id, update the primary key
+ALTER TABLE host DROP CONSTRAINT "HOST_PK";
+ALTER TABLE host DROP COLUMN id;
+ALTER TABLE host
+	ADD CONSTRAINT "HOST_PK" PRIMARY KEY (machine_id);
+
+-- Now that host.machine_id is a primary key, we can enable foreign key checks
+ALTER TABLE host_cluster_member
+	ADD CONSTRAINT "HST_CLSTR_MMBR_HST_FK" FOREIGN KEY (host_id) REFERENCES host (machine_id) ON DELETE CASCADE;
+ALTER TABLE build_item
+	ADD CONSTRAINT "BUILD_ITEM_HOST_FK" FOREIGN KEY (host_id) REFERENCES host (machine_id) ON DELETE CASCADE;
+
 QUIT;

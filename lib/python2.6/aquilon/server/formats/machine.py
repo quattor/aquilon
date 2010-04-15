@@ -28,9 +28,8 @@
 # TERMS THAT MAY APPLY.
 """Machine formatter."""
 
-
 from aquilon import const
-from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.formatters import ObjectFormatter, shift
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Machine
 
@@ -65,9 +64,15 @@ class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
         details = [indent + "%s: %s" % (machine.model.machine_type.capitalize(),
                                         machine.label)]
+        if machine.primary_name:
+            details.append(indent + "  Primary Name: "
+                           "{0:a}".format(machine.primary_name))
+        # TODO: convert this formatter to mako
         if machine.host:
-            details.append(indent + "  Allocated to host: %s [%s]" %
-                           (machine.host.fqdn, machine.host.ip))
+            template = self.lookup_raw.get_template("host.mako")
+            details.append(shift(template.render(record=machine.host,
+                                                 formatter=self),
+                                 indent=indent + "  ").rstrip())
         if machine.cluster:
             details.append(indent + \
                            "  Hosted by {0:c}: {0.name}".format(machine.cluster))

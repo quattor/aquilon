@@ -325,9 +325,9 @@ class TestMakeAquilon(TestBrokerCommand):
     def testverifyunittest17(self):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3],
+        self.matchoutput(out,
+                         "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",

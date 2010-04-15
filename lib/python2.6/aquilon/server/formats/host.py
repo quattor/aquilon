@@ -34,14 +34,18 @@ from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Host
 
 
+# TODO: this formatter is kept only for the protobuf stuff, otherwise
+# MachineFormatter does everything
 class HostFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
-    template_raw = "host.mako"
 
     def format_proto(self, host, skeleton=None):
         # we actually want to return a SimpleHostList of one host...
         shlf = SimpleHostListFormatter()
         return(shlf.format_proto([host], skeleton))
+
+    def format_raw(self, host, indent=""):
+        return self.redirect_raw(host.machine, indent)
 
 ObjectFormatter.handlers[Host] = HostFormatter()
 
