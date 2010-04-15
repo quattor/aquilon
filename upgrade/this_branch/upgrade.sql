@@ -88,4 +88,19 @@ UPDATE system
 	SET system_type = 'reserved_name'
 	WHERE ip IS NULL AND system_type != 'reserved_name';
 
+--
+-- Create primary_name_association
+--
+CREATE TABLE primary_name_association (
+	hardware_entity_id INTEGER CONSTRAINT "PRI_NAME_ASC_HW_ENT_ID_NN" NOT NULL,
+	a_record_id INTEGER CONSTRAINT "PRI_NAME_ASC_A_RECORD_ID_NN" NOT NULL,
+	creation_date DATE CONSTRAINT "PRI_NAME_ASC_CR_DATE_NN" NOT NULL,
+	comments VARCHAR(255),
+	CONSTRAINT "PRIMARY_NAME_ASSOCIATION_PK" PRIMARY KEY (hardware_entity_id, a_record_id),
+	CONSTRAINT "PRIMARY_NAME_ASC_HW_ENT_UK" UNIQUE (hardware_entity_id),
+	CONSTRAINT "PRIMARY_NAME_ASC_DNS_UK" UNIQUE (a_record_id),
+	CONSTRAINT "PRIMARY_NAME_ASC_HW_FK" FOREIGN KEY (hardware_entity_id) REFERENCES hardware_entity (id),
+	CONSTRAINT "PRIMARY_NAME_ASC_A_REC_FK" FOREIGN KEY (a_record_id) REFERENCES future_a_record (system_id) ON DELETE CASCADE
+);
+
 QUIT;

@@ -36,6 +36,9 @@ from aquilon.aqdb.model import System, DynamicStub, FutureARecord, ReservedName
 
 class SystemFormatter(ObjectFormatter):
     def format_raw(self, system, indent=""):
+        if system.hardware_entity:
+            return self.redirect_raw(system.hardware_entity, indent)
+
         # This should be replaced by format()...
         details = [indent + "{0:c}: {0.fqdn}".format(system)]
         if system.ip:

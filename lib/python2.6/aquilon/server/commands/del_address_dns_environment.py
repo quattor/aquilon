@@ -54,6 +54,11 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             if ip != dbaddress.ip:
                 raise ArgumentError("IP address %s is not set for %s (%s).",
                                     (ip, dbaddress.fqdn, dbaddress.ip))
+            if dbaddress.hardware_entity:
+                raise ArgumentError("DNS record {0:a} is the primary name of "
+                                    "{1:l}, therefore it cannot be "
+                                    "deleted.".format(dbaddress,
+                                                      dbaddress.hardware_entity))
             deps = get_system_dependencies(session, dbaddress)
             if deps:
                 raise ArgumentError("Cannot remove address for %s (%s) while "

@@ -36,7 +36,7 @@ from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
 from sqlalchemy.orm import relation
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Base, Location, Model
+from aquilon.aqdb.model import Base, Location, Model, FutureARecord
 from aquilon.aqdb.column_types import AqStr, Enum
 
 HARDWARE_TYPES = ['machine', 'switch', 'chassis']  # , 'netapp_filer']
@@ -71,9 +71,30 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
+    @property
+    def fqdn(self):
+        """ Returns the FQDN, if there is a primary name """
+        if self.primary_name:
+            return self.primary_name.fqdn
+        else:
+            return None
+
+    @property
+    def primary_ip(self):
+        """ Returns the primary IP, if there is one """
+        if self.primary_name and hasattr(self.primary_name, "ip"):
+            return self.primary_name.ip
+        else:
+            return None
+
     @classmethod
     def get_unique(cls, sess, name, **kw):
         """ Returns a unique HardwareEntity given session and fqdn """
+        import aquilon.aqdb.model.primary_name_association as pna
+        # Using a series of get_unique's under the covers may be inefficient
+        # the aim is to get functional code as quick as possible for now.
+        # The import required at runtime due to circular dependency between
+        # PrimaryNameAssociation and HardwareEntity.
 
         compel = kw.pop('compel', False)
         preclude = kw.pop('preclude', False)
@@ -94,7 +115,17 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
                 hardware_type = cls.__mapper_args__['polymorphic_identity']
             clslabel = cls._get_class_label()
 
-        hwe = sess.query(cls).filter_by(label=name).first()
+        hwe = None
+
+        if "." in name:
+            dns_rec = FutureARecord.get_unique(sess, fqdn=name)
+            my_pna = pna.PrimaryNameAssociation.get_unique(sess, dns_rec)
+            if my_pna:
+                hwe = my_pna.hardware_entity
+        else:
+            # Always do the query against the base class, so we can detect
+            # hardware_type mismatches
+            hwe = sess.query(HardwareEntity).filter_by(label=name).first()
 
         if hwe:
             if hardware_type and hwe.hardware_type != hardware_type:
@@ -110,6 +141,12 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
             raise NotFoundException(msg)
         else:
             return None
+
+    #Pseudosql for a full sql query implementation for get_unique:
+    #select the hardware_entity from the primary_name_association of:
+        #select the primary_name_association with an a_record with the id of:
+            #select the dns_record with name, domain name
+                #select the dns_domain_id with the name of 'domain_name
 
 
 hardware_entity = HardwareEntity.__table__
