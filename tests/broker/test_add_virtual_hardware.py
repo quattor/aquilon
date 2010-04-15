@@ -253,6 +253,53 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Domain: unittest", command)
 
+    def test_550_updatemachine(self):
+        command = ["update_machine", "--machine=evm1", "--model=utlarge",
+                   "--cpucount=2", "--memory=12288"]
+        self.noouttest(command)
+
+    def test_551_verifycatupdate(self):
+        command = "cat --machine evm1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+        self.matchoutput(out,
+                         """include { """
+                         """'hardware/machine/utvendor/utlarge' };""",
+                         command)
+        self.matchoutput(out,
+                         """"ram" = list(create("hardware/ram/generic", """
+                         """"size", 12288*MB));""",
+                         command)
+        # Technically this isn't verifying two cpus, just more than one...
+        self.matchoutput(out,
+                         """"cpu" = list(create("""
+                         """"hardware/cpu/intel/xeon_2500"),""",
+                         command)
+        self.searchoutput(out,
+                          r'"cards/nic/eth0" = nlist\(\s*'
+                          r'"hwaddr", "00:50:56:01:20:00",\s*'
+                          r'"boot", true,\s*\);',
+                          command)
+        self.matchoutput(out, """"boot", true,""", command)
+
+    def test_552_verifyshowupdate(self):
+        command = "show machine --machine evm1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
+        self.matchoutput(out, "Cpu: Cpu xeon_2500 x 2", command)
+        self.matchoutput(out, "Memory: 12288 MB", command)
+        self.matchoutput(out,
+                         "Interface: eth0 00:50:56:01:20:00 boot=True",
+                         command)
+
+    def test_555_statusquo(self):
+        command = ["update_machine", "--machine=evm1", "--model=utmedium",
+                   "--cpucount=1", "--memory=8192"]
+        self.noouttest(command)
+
     def test_600_makecluster(self):
         command = ["make_cluster", "--cluster=utecl1"]
         (out, err) = self.successtest(command)

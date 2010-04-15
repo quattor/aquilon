@@ -67,6 +67,10 @@ class TestDelModel(TestBrokerCommand):
         command = "show model --name utmedium"
         self.notfoundtest(command.split(" "))
 
+    def testdelutlarge(self):
+        command = ["del_model", "--name=utlarge", "--vendor=utvendor"]
+        self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)

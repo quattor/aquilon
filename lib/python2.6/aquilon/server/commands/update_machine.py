@@ -116,10 +116,21 @@ class CommandUpdateMachine(BrokerCommand):
             # If overriding model, should probably overwrite default
             # machine specs as well.
             dbmodel = get_model(session, model)
-            if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
-                    'aurora_node']:
-                raise ArgumentError("The update_machine command cannot update machines of type '%(type)s'." %
-                        {"type": dbmodel.machine_type})
+            if dbmodel.machine_type not in ['blade', 'rackmount',
+                                            'workstation', 'aurora_node',
+                                            'virtual_machine']:
+                raise ArgumentError("The update_machine command cannot update "
+                                    "machines of type '%s'." %
+                                    dbmodel.machine_type)
+            # We probably could do this by forcing either cluster or
+            # location data to be available as appropriate, but really?
+            # Failing seems reasonable.
+            if dbmodel.machine_type != dbmachine.model.machine_type and \
+               'virtual_machine' in [dbmodel.machine_type,
+                                     dbmachine.model.machine_type]:
+                raise ArgumentError("Cannot change machine from %s to %s" %
+                                    (dbmachine.model.machine_type,
+                                     dbmodel.machine_type))
             dbmachine.model = dbmodel
 
         if cpuname and cpuvendor and cpuspeed:
