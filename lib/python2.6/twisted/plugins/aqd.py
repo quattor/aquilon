@@ -205,11 +205,6 @@ class AQDMaker(object):
         mon.startService()
         reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
 
-        def start_coverage():
-            log.msg("Starting coverage")
-            #coverage.erase()
-            coverage.start()
-
         def stop_coverage():
             log.msg("Finishing coverage")
             coverage.stop()
@@ -227,7 +222,6 @@ class AQDMaker(object):
             output.close()
 
         if options["coverage"]:
-            reactor.addSystemEventTrigger('after', 'startup', start_coverage)
             reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
         unixsocket = "unix:%s" % sockname
