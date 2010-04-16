@@ -861,6 +861,8 @@
          <option name="vendor" type="string">Vendor name</option>
       </optgroup>
       <optgroup name="update_model_values" mandatory="False">
+         <option name="newname" type="string">Change model name</option>
+         <option name="newvendor" type="string">Change model vendor</option>
          <option name="machine_type" type="string">Machine type name</option>
          <option name="cpuname" type="string">CPU name</option>
          <option name="cpuvendor" type="string">CPU vendor</option>

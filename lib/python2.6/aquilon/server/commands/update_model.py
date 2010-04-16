@@ -51,13 +51,14 @@ class CommandUpdateModel(BrokerCommand):
                        'diskcontroller': 'controller_type',
                        'disksize': 'disk_capacity', 'nics':'nic_count'}
 
-    def render(self, session, logger, name, vendor, comments, leave_existing,
-               **arguments):
+    def render(self, session, logger, name, vendor, newname, newvendor,
+               comments, leave_existing, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows
-            # for simple equality checks below.
-            if arg in ['machine_type', 'cpuname', 'cpuvendor', 'disktype',
-                       'diskcontroller']:
+            # for simple equality checks below and removes the need to
+            # call refresh().
+            if arg in ['newname', 'newvendor', 'machine_type',
+                       'cpuname', 'cpuvendor', 'disktype', 'diskcontroller']:
                 if value is not None:
                     arguments[arg] = value.lower().strip()
             elif arg in ['cpuspeed', 'cpunum', 'mem', 'disksize', 'nics']:
@@ -67,6 +68,34 @@ class CommandUpdateModel(BrokerCommand):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         dbmodel = Model.get_unique(session, name=name, vendor=dbvendor,
                                    compel=True)
+
+        if leave_existing and (newname or newvendor):
+            raise ArgumentError("Cannot update model name or vendor without "
+                                "updating any existing machines.")
+
+        fix_existing = not leave_existing
+        dbmachines = set()
+
+        # The sub-branching here is a little difficult to read...
+        # Basically, there are three different checks to handle
+        # setting a new vendor, a new name, or both.
+        if newvendor:
+            dbnewvendor = Vendor.get_unique(session, newvendor, compel=True)
+            if newname:
+                Model.get_unique(session, name=newname, vendor=dbnewvendor,
+                                 preclude=True)
+            else:
+                Model.get_unique(session, name=dbmodel.name,
+                                 vendor=dbnewvendor, preclude=True)
+            dbmodel.vendor = dbnewvendor
+        if newname:
+            if not newvendor:
+                Model.get_unique(session, name=newname, vendor=dbmodel.vendor,
+                                 preclude=True)
+            dbmodel.name = newname
+        if newvendor or newname:
+            q = session.query(Machine).filter_by(model=dbmodel)
+            dbmachines.update(q.all())
                 
         # For now, can't update machine_type.  There are too many spots
         # that special case things like aurora_node or virtual_machine to
@@ -101,13 +130,8 @@ class CommandUpdateModel(BrokerCommand):
                 dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
                                                **specs)
                 session.add(dbmachine_specs)
-            # Without previously existing specs, no way to know if
-            # a machine had "old" defaults.
-            return
 
-        # Must have dbmodel.machine_specs after this point.
-        dbmachines = set()
-        fix_existing = not leave_existing
+        # Anything below that updates specs should have been verified above.
 
         if cpu_values:
             dbcpu = get_unique_cpu(session, **cpu_info)
