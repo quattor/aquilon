@@ -34,13 +34,24 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import System
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError
+from aquilon.server.locks import lock_queue, DeleteKey
 
 
 class CommandAddDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, startip, endip, **arguments):
+    def render(self, session, logger, startip, endip, **arguments):
+        key = DeleteKey("system", logger=logger)
+        try:
+            lock_queue.acquire(key)
+            self.del_dynamic_range(session, logger, startip, endip)
+            session.commit()
+        finally:
+            lock_queue.release(key)
+        return
+
+    def del_dynamic_range(self, session, logger, startip, endip):
         startnet = get_net_id_from_ip(session, startip)
         endnet = get_net_id_from_ip(session, endip)
         if startnet != endnet:
@@ -69,5 +80,3 @@ class CommandAddDynamicRange(BrokerCommand):
         for stub in existing:
             session.delete(stub)
         return
-
-

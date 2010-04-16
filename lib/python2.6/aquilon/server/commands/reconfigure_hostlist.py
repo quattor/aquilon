@@ -34,7 +34,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import Archetype, Personality, OperatingSystem, Status
 from aquilon.server.templates.domain import TemplateDomain
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
 
 
@@ -172,8 +172,13 @@ class CommandReconfigureHostlist(BrokerCommand):
         # actual writing and compile is done.  This will allow for fast
         # turnaround on errors (no need to wait for a lock if there's
         # a missing service map entry or something).
+        # The lock must be over at least the domain, but could be over
+        # all if (for example) service plenaries need to change.
+        key = CompileKey.merge([p.get_write_key() for p in templates] +
+                               [CompileKey(domain=dbdomain.name,
+                                           logger=logger)])
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             logger.client_info("writing %s plenary templates", len(templates))
             for template in templates:
                 logger.debug("Writing %s", template)
@@ -189,8 +194,6 @@ class CommandReconfigureHostlist(BrokerCommand):
             # we've aborted so that DB can be appropriately rollback'd.
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
-
-

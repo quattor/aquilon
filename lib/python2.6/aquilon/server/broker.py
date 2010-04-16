@@ -29,7 +29,9 @@
 
 
 import os
+import sys
 import re
+from inspect import isclass
 
 from sqlalchemy.sql import text
 from twisted.internet import defer
@@ -44,6 +46,9 @@ from aquilon.aqdb.db_factory import DbFactory
 from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
+from aquilon.server.locks import lock_queue
+from aquilon.server.templates.base import Plenary, PlenaryCollection
+from aquilon.server.services import Chooser
 
 
 audit_id = 0
@@ -108,16 +113,17 @@ class BrokerCommand(object):
 
     """
 
-    # Promise that the command does not take a lock when it executes.
+    # Override to indicate whether the command will generally take a
+    # lock during execution.
     #
     # Any command with this flag set to True will use the separate
     # NLSession thread pool and should not have to wait on commands
     # that are potentially all blocking on the same lock.
     #
-    # It is automatically set to True for all search and show commands,
-    # but could be reversed back to False by overriding __init__ for the
-    # command.
-    is_lock_free = False
+    # If set to None (the default), the is_lock_free property will
+    # examine the command's module to try to determine if a lock
+    # may be required and then cache the value.
+    _is_lock_free = None
 
     # Run the render method on a separate thread.  This will be forced
     # to True if requires_azcheck or requires_transaction.
@@ -154,12 +160,11 @@ class BrokerCommand(object):
         # just set the variables themselves.
         if self.action.startswith("show") or self.action.startswith("search"):
             self.requires_readonly = True
-            self.is_lock_free = True
             self.requires_format = True
         if self.action.startswith("cat"):
             self.requires_format = True
             self.requires_readonly = True
-            self.is_lock_free = True
+            self._is_lock_free = True
         self._update_render(self.render)
         if not self.defer_to_thread:
             if self.requires_azcheck or self.requires_transaction:
@@ -169,6 +174,8 @@ class BrokerCommand(object):
                         self.command)
             # Not sure how to handle formatting with deferred...
             self.requires_format = False
+        #free = "True " if self.is_lock_free else "False"
+        #log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
     def render(self, **arguments):
         """ Implement this method to create a functional broker command.
@@ -253,6 +260,7 @@ class BrokerCommand(object):
 
     def _audit(self, **kwargs):
         logger = kwargs.pop('logger')
+        status = kwargs.pop('message_status')
         session = kwargs.pop('session', None)
         request = kwargs.pop('request')
         user = kwargs.pop('user', None)
@@ -264,14 +272,16 @@ class BrokerCommand(object):
         for (key, value) in kwargs.items():
             if len(str(value)) > 100:
                 kwargs[key] = value[0:96] + '...'
-        # TODO: Something fancier...
         kwargs_str = str(kwargs)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
-        extra = ""
         logger.info("Incoming command #%d from user=%s aq %s "
-                    "with arguments %s%s",
-                    request.aq_audit_id, user, self.command, kwargs_str, extra)
+                    "with arguments %s",
+                    request.aq_audit_id, user, self.command, kwargs_str)
+        if status:
+            status.create_description(user=user, command=self.command,
+                                      id=request.aq_audit_id,
+                                      kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
     # add a logger into the argument list.  It returns the arguments
@@ -290,7 +300,7 @@ class BrokerCommand(object):
                 requestid=command_kwargs.get("requestid", None))
         logger = RequestLogger(status=status, module_logger=self.module_logger)
         command_kwargs["logger"] = logger
-        self._audit(**command_kwargs)
+        self._audit(message_status=status, **command_kwargs)
         return command_kwargs
 
     def _remove_status(self, command_kwargs):
@@ -303,6 +313,54 @@ class BrokerCommand(object):
                 # Clear the auditid dictionary.
                 logger.debug("Server finishing request.")
                 logger.remove_status_by_auditid(self.catalog)
+
+    @property
+    def is_lock_free(self):
+        if self._is_lock_free is None:
+            self._is_lock_free = self.is_class_lock_free()
+        return self._is_lock_free
+
+    # A set of heuristics is provided as a default that works well
+    # enough for most commands to set the _is_lock_free flag used
+    # above.
+    #
+    # If the module has a Plenary class or the lock_queue imported it
+    # is a good indication that a lock will be taken.
+    #
+    # This can be overridden per-command if general heuristics are not
+    # enough.  This algorithm accounts for aliased (subclassed)
+    # commands like reconfigure by calling this method on the superclass.
+    # There is also an override in __init__ for the cat commands since
+    # they all use Plenary classes but do not require a lock.
+    @classmethod
+    def is_class_lock_free(cls):
+        #log.msg("Checking %s" % cls.__module__)
+        for (key, item) in sys.modules[cls.__module__].__dict__.items():
+            #log.msg("  Checking %s" % item)
+            if item == lock_queue:
+                return False
+            if not isclass(item):
+                continue
+            if issubclass(item, Plenary) or issubclass(item, Chooser) or \
+               issubclass(item, PlenaryCollection):
+                return False
+            if item != cls and item != BrokerCommand and \
+               issubclass(item, BrokerCommand):
+                if item.__module__ not in sys.modules:
+                    log.msg("Cannot evaluate %s, too early." % cls)
+                    return False
+                if item._is_lock_free is not None:
+                    super_is_free = item._is_lock_free
+                else:
+                    super_is_free = item.is_class_lock_free()
+                #log.msg("%s says %s" % (item, super_is_free))
+                # If the superclass needs a lock, we need a lock.
+                # However, if the superclass does not need a lock, keep
+                # checking in case the subclass imports something else
+                # that requires a lock.
+                if not super_is_free:
+                    return super_is_free
+        return True
 
 
 # FIXME: This utility method may be better suited elsewhere.

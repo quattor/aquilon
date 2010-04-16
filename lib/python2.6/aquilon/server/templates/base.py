@@ -30,48 +30,17 @@
 
 
 import os
-from threading import Lock
 import logging
 
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.config import Config
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.processes import write_file, read_file, remove_file
 from aquilon.server.logger import CLIENT_INFO
 
-
-# We have a global compile lock.
-# This is used in two ways:
-# 1) to serialize compiles. The panc java compiler does a pretty
-#    good job of parallelizing, so we'll just slow things down
-#    if we end up with multiple of these running.
-# 2) to prevent changing plenary templates while a compile is
-#    in progress
-#
-# The wait_count variable helps track how many requests there are
-# for the lock to let clients know how much contention there is.
-
-compile_lock = Lock()
 LOGGER = logging.getLogger('aquilon.server.templates.base')
-wait_count = 0
-
-def compileLock(logger=LOGGER):
-    # Try a non-blocking acquire first.
-    if compile_lock.acquire(False):
-        logger.log(CLIENT_INFO, "acquired compile lock")
-        return
-    global wait_count
-    logger.log(CLIENT_INFO, "requesting compile lock with %s others waiting",
-               wait_count)
-    wait_count += 1
-    compile_lock.acquire()
-    wait_count -= 1
-    logger.log(CLIENT_INFO, "acquired compile lock")
-
-def compileRelease(logger=LOGGER):
-    logger.log(CLIENT_INFO, "releasing compile lock")
-    compile_lock.release()
 
 
 class Plenary(object):
@@ -83,6 +52,7 @@ class Plenary(object):
         self.plenary_template = None
         self.plenary_core = None
         self.servername = self.config.get("broker", "servername")
+        self.new_content = None
         # The following attributes are for stash/restore_stash
         self.old_content = None
         self.old_mtime = None
@@ -124,6 +94,44 @@ class Plenary(object):
         """
         pass
 
+    def will_change(self):
+        self.stash()
+        if not self.new_content:
+            self.new_content = self._generate_content()
+        return self.old_content != self.new_content
+
+    def get_write_key(self):
+        if self.will_change():
+            return self.get_key()
+        return None
+
+    def get_remove_key(self):
+        """Return the relevant key.
+
+        In many cases it will be more efficient just to create a full
+        compile lock and bypass this method.
+
+        """
+        return self.get_key()
+
+    def get_key(self):
+        """Base implementation assumes a full compile lock."""
+        return CompileKey(logger=self.logger)
+
+    def _generate_content(self):
+        """Not meant to be overridden or called directly."""
+        # This potentially calls refresh several times for objects that
+        # have multiple plenaries, like service and cluster...
+        self.refresh()
+        lines = []
+        type = self.template_type
+        if type is not None and type is not "":
+            type = type + " "
+        lines.append("%stemplate %s;" % (type, self.plenary_template))
+        lines.append("")
+        self.body(lines)
+        return "\n".join(lines)+"\n"
+
     def write(self, dir=None, user=None, locked=False, content=None):
         """Write out the template.
 
@@ -146,31 +154,25 @@ class Plenary(object):
         # user is simply left for compatibility: it's no longer used
 
         if content is None:
-            # This potentially calls refresh several times for objects that
-            # have multiple plenaries, like service and cluster...
-            self.refresh()
-
-            lines = []
-            type = self.template_type
-            if type is not None and type is not "":
-                type = type + " "
-            lines.append("%stemplate %s;" % (type, self.plenary_template))
-            lines.append("")
-            self.body(lines)
-            content = "\n".join(lines)+"\n"
+            if not self.new_content:
+                self.new_content = self._generate_content()
+            content = self.new_content
 
         plenary_path = os.path.join(self.dir, self.plenary_core)
         plenary_file = self.pathname()
 
+        self.stash()
+        if self.old_content == content and \
+           not self.removed and not self.changed:
+            # optimise out the write (leaving the mtime good for ant)
+            # if nothing is actually changed
+            return 0
+
+        key = None
         try:
             if not locked:
-                compileLock()
-            self.stash()
-            if self.old_content == content and \
-               not self.removed and not self.changed:
-                # optimise out the write (leaving the mtime good for ant)
-                # if nothing is actually changed
-                return 0
+                key = self.get_write_key()
+                lock_queue.acquire(key)
             if not os.path.exists(plenary_path):
                 os.makedirs(plenary_path)
             write_file(plenary_file, content, logger=self.logger)
@@ -183,7 +185,7 @@ class Plenary(object):
             raise e
         finally:
             if not locked:
-                compileRelease()
+                lock_queue.release(key)
 
         return 1
 
@@ -202,17 +204,19 @@ class Plenary(object):
         if dir is not None:
             self.dir = dir
 
+        key = None
         try:
-            if (not locked):
-                compileLock()
+            if not locked:
+                key = self.get_remove_key()
+                lock_queue.acquire(key)
             self.stash()
             remove_file(self.pathname(), logger=self.logger)
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
         finally:
-            if (not locked):
-                compileRelease()
+            if not locked:
+                lock_queue.release(key)
         return
 
     def cleanup(self, domain, locked=False):
@@ -220,9 +224,11 @@ class Plenary(object):
         remove all files related to an object template including
         any intermediate build files
         """
+        key = None
         try:
             if not locked:
-                compileLock()
+                key = self.get_remove_key()
+                lock_queue.acquire(key)
             # Can't call remove() here because it relies on the new domain.
             if self.template_type == "object" and hasattr(self, 'name'):
                 qdir = self.config.get("broker", "quattordir")
@@ -243,7 +249,7 @@ class Plenary(object):
             raise
         finally:
             if not locked:
-                compileRelease()
+                lock_queue.release(key)
 
     def refresh(self):
         """Refresh any stored database objects.
@@ -260,7 +266,7 @@ class Plenary(object):
     def stash(self):
         """Record the state of the plenary to make restoration possible.
 
-        This should only be called while holding a compileLock.
+        This should only be called while holding an appropriate lock.
 
         """
         if self.stashed:
@@ -275,7 +281,7 @@ class Plenary(object):
     def restore_stash(self):
         """Restore previous state of plenary.
 
-        This should only be called while holding a compileLock.
+        This should only be called while holding an appropriate lock.
 
         """
         if not self.stashed:
@@ -343,6 +349,22 @@ class PlenaryCollection(object):
         return "PlenaryCollection(%s)" % ", ".join([str(plenary) for plenary
                                                     in self.plenaries])
 
+    def get_write_key(self):
+        keylist = []
+        for plen in self.plenaries:
+            keylist.append(plen.get_write_key())
+        return CompileKey.merge(keylist)
+
+    def get_remove_key(self):
+        keylist = []
+        for plen in self.plenaries:
+            keylist.append(plen.get_remove_key())
+        return CompileKey.merge(keylist)
+
+    def get_key(self):
+        # get_key doesn't make any sense for a plenary collection...
+        raise InternalError("get_key called on PlenaryCollection")
+
     def stash(self):
         for plen in self.plenaries:
             plen.stash()
@@ -355,13 +377,15 @@ class PlenaryCollection(object):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
+        # Pre-stash all plenaries before attempting to write any
+        # of them.  This way if an error occurs all can go through
+        # the same restore logic.
+        self.stash()
+        key = None
         try:
             if not locked:
-                compileLock()
-            # Pre-stash all plenaries before attempting to write any
-            # of them.  This way if an error occurs all can go through
-            # the same restore logic.
-            self.stash()
+                key = self.get_write_key()
+                lock_queue.acquire(key)
             for plen in self.plenaries:
                 # IncompleteError is almost pointless in this context, but
                 # it has the nice side effect of not updating the total.
@@ -376,14 +400,16 @@ class PlenaryCollection(object):
             raise
         finally:
             if not locked:
-                compileRelease()
+                lock_queue.release(key)
         return total
 
     def remove(self, dir=None, locked=False):
+        self.stash()
+        key = None
         try:
             if not locked:
-                compileLock()
-            self.stash()
+                key = self.get_remove_key()
+                lock_queue.acquire(key)
             for plen in self.plenaries:
                 plen.remove(dir, locked=True)
         except:
@@ -392,12 +418,14 @@ class PlenaryCollection(object):
             raise
         finally:
             if not locked:
-                compileRelease()
+                lock_queue.release(key)
 
     def cleanup(self, domain, locked=False):
+        key = None
         try:
             if not locked:
-                compileLock()
+                key = self.get_remove_key()
+                lock_queue.acquire(key)
             self.stash()
             for plen in self.plenaries:
                 plen.cleanup(domain, locked=True)
@@ -407,12 +435,12 @@ class PlenaryCollection(object):
             raise
         finally:
             if not locked:
-                compileRelease()
+                lock_queue.release(key)
 
     def read(self):
         # This should never be called, but we put it here
-        # just in-case, since the base-class method is inappropriate.
-        raise InternalError
+        # just in-case, since the Plenary method is inappropriate.
+        raise InternalError("read called on PlenaryCollection")
 
     def append(self, plenary):
         plenary.logger = self.logger

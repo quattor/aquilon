@@ -30,11 +30,12 @@
 
 import logging
 
-from aquilon.server.templates.base import (Plenary, PlenaryCollection,
-                                            compileLock, compileRelease)
+from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.server.locks import CompileKey
 
 LOGGER = logging.getLogger('aquilon.server.templates.cluster')
+
 
 class PlenaryCluster(PlenaryCollection):
     """
@@ -65,6 +66,10 @@ class PlenaryClusterObject(Plenary):
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
         self.dir = self.config.get("broker", "builddir") + \
                     "/domains/%s/profiles" % dbcluster.domain.name
+
+    def get_key(self):
+        return CompileKey(domain=self.dbcluster.domain.name,
+                          profile=self.plenary_template, logger=self.logger)
 
     def body(self, lines):
         arcdir = self.dbcluster.personality.archetype.name
@@ -148,7 +153,9 @@ class PlenaryClusterClient(Plenary):
         self.template_type = ''
         self.dir = self.config.get("broker", "plenarydir")
 
+    def get_key(self):
+        # This takes a domain lock because it could affect all clients...
+        return CompileKey(domain=self.dbobj.domain.name, logger=self.logger)
+
     def body(self, lines):
         lines.append("'/system/cluster/name' = '%s';" % self.name)
-
-

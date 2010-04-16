@@ -26,7 +26,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show active`."""
+"""Contains the logic for `aq show active commands`."""
 
 
 import os
@@ -37,11 +37,16 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.messages import StatusCatalog
 
 
-class CommandShowActive(BrokerCommand):
+class CommandShowActiveCommands(BrokerCommand):
 
     requires_transaction = False
     requires_azcheck = False
     defer_to_thread = False
+
+    incoming_re = re.compile(r'Incoming command #(?P<id>\d+)'
+                             r' from user=(?P<user>\S+)'
+                             r' aq (?P<command>\S+)'
+                             r' with arguments {(?P<bareargs>.*)}')
 
     def render(self, debug, **arguments):
         catalog = StatusCatalog()
@@ -55,37 +60,21 @@ class CommandShowActive(BrokerCommand):
         # These could be streamed like show_request...
         for auditid in sorted(catalog.status_by_auditid.keys(), key=int):
             status = catalog.get_request_status(auditid=auditid)
+            if not status:
+                continue
+            retval.append(status.description)
             for record in status.records:
                 # While reading status.records directly, need to be careful
                 # of any that have been removed.
                 if not record:
                     continue
                 if record.levelno >= loglevel:
-                    retval.append(self.massage_record(auditid,
-                                                      record.getMessage()))
+                    message = record.getMessage()
+                    if self.incoming_re.match(message):
+                        # The Incoming command message is highly redundant with
+                        # the status description that's already been printed.
+                        continue
+                    retval.append('(%s) %s' % (auditid, message))
+            for description in status.subscriber_descriptions:
+                retval.append(description)
         return "\n".join(retval)
-
-    incoming_re = re.compile(r'Incoming command #(?P<id>\d+)'
-                             r' from user=(?P<user>\S+)'
-                             r' aq (?P<command>\S+)'
-                             r' with arguments {(?P<bareargs>.*)}')
-    args_re = re.compile(r'\'(?P<option>\w+)\': (?P<parameter>\'.*?\')')
-
-    def massage_record(self, auditid, message):
-        m = self.incoming_re.match(message)
-        if not m:
-            return "(%s) %s" % (auditid, message)
-        command = m.groupdict()
-        args = []
-        for a in self.args_re.finditer(command['bareargs']):
-            if a.groupdict()['option'] == 'format' and \
-               a.groupdict()['parameter'] == "'raw'":
-                continue
-            if a.groupdict()['parameter'] == "'True'":
-                args.append(" --%(option)s" % a.groupdict())
-            else:
-                args.append(" --%(option)s=%(parameter)s" % a.groupdict())
-        command['args'] = "".join(args)
-        return "[%(id)s] %(user)s: aq %(command)s%(args)s" % command
-
-

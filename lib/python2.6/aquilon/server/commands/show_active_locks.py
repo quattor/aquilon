@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,24 +26,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq get`."""
+"""Contains the logic for `aq show active locks`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
+from aquilon.server.locks import lock_queue
 
 
-class CommandGet(BrokerCommand):
+class CommandShowActiveLocks(BrokerCommand):
 
-    required_parameters = ["domain"]
-    requires_readonly = True
+    requires_transaction = False
+    requires_azcheck = False
+    defer_to_thread = False
 
-    def render(self, session, domain, **arguments):
-        # Verify that it exists before returning the command to pull.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
-        remote_command = """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {
-                "path":self.config.get("broker", "git_path"),
-                "url":self.config.get("broker", "git_templates_url"),
-                "domain":dbdomain.name}
-        return str(remote_command)
+    def render(self, debug, **arguments):
+        retval = []
+        for key in lock_queue.queue[:]:
+            description = ""
+            if hasattr(key.logger, "get_status"):
+                status = key.logger.get_status()
+                if status.description:
+                    description = status.description + ' '
+            retval.append("%s%s %s" % (description, key.state, key))
+        return "\n".join(retval)

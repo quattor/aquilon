@@ -107,8 +107,14 @@ def build_index(config, session, profilesdir, clientNotify=True,
             # remaining object name is relative to that root (+1 in order
             # to remove the slash separator)
             obj = obj[len(profilesdir)+1:]
-            object_index[obj] = os.path.getmtime(
-                    os.path.join(root, profile))
+            # This operation is not done with a lock, and it's possible
+            # that the file has been removed since calling os.walk().
+            # If that's the case, no need to add it to the modified_index.
+            try:
+                object_index[obj] = os.path.getmtime(os.path.join(root,
+                                                                  profile))
+            except OSError, e:
+                continue
             if (old_object_index.has_key(obj) and
                 object_index[obj] > old_object_index[obj]):
                 modified_index[obj] = object_index[obj]

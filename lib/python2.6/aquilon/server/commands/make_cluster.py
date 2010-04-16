@@ -33,7 +33,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.domain import TemplateDomain
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
 
 
@@ -46,24 +46,23 @@ class CommandMakeCluster(BrokerCommand):
         if not dbcluster:
             raise NotFoundException("Cluster '%s' not found." % cluster)
 
-        chooser = None
+
+        if not dbcluster.personality.archetype.is_compileable:
+            raise ArgumentError("Cluster %s is not a compilable archetype "
+                                "(%s)" %
+                                (cluster,
+                                 dbcluster.personality.archetype.name))
+
+        chooser = Chooser(dbcluster, logger=logger,
+                          required_only=not(keepbindings))
+        chooser.set_required()
+        chooser.flush_changes()
+        # Force a domain lock as pan might overwrite any of the profiles...
+        key = CompileKey.merge([chooser.get_write_key(),
+                                CompileKey(domain=dbcluster.domain.name,
+                                           logger=logger)])
         try:
-            compileLock(logger=logger)
-
-            if not dbcluster.personality.archetype.is_compileable:
-                raise ArgumentError("Cluster %s is not a compilable archetype "
-                                    "(%s)" %
-                                    (cluster,
-                                     dbcluster.personality.archetype.name))
-
-            if keepbindings:
-                required_only = False
-            else:
-                required_only = True
-            chooser = Chooser(dbcluster, logger=logger,
-                              required_only=required_only)
-            chooser.set_required()
-            chooser.flush_changes()
+            lock_queue.acquire(key)
             chooser.write_plenary_templates(locked=True)
 
             profile_list = ["clusters/%s" % dbcluster.name]
@@ -74,8 +73,7 @@ class CommandMakeCluster(BrokerCommand):
             out = td.compile(session, only=" ".join(profile_list), locked=True)
 
         except:
-            if chooser:
-                chooser.restore_stash()
+            chooser.restore_stash()
 
             # Okay, cleaned up templates, make sure the caller knows
             # we've aborted so that DB can be appropriately rollback'd.
@@ -83,8 +81,6 @@ class CommandMakeCluster(BrokerCommand):
             raise
 
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return
-
-

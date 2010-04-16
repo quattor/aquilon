@@ -421,6 +421,9 @@ class Chooser(object):
     def flush_changes(self):
         self.session.flush()
 
+    def get_write_key(self):
+        return self.plenaries.get_write_key()
+
     def write_plenary_templates(self, locked=False):
         self.plenaries.write(locked=locked)
 

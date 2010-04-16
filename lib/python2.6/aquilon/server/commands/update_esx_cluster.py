@@ -37,8 +37,8 @@ from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.templates.base import (compileLock, compileRelease,
-                                           PlenaryCollection)
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.locks import lock_queue, CompileKey
 
 
 class CommandUpdateESXCluster(BrokerCommand):
@@ -161,8 +161,10 @@ class CommandUpdateESXCluster(BrokerCommand):
         session.flush()
 
         plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+        key = CompileKey.merge([plenaries.get_write_key(),
+                                remove_plenaries.get_remove_key()])
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             remove_plenaries.stash()
             plenaries.write(locked=True)
             remove_plenaries.remove(locked=True)
@@ -171,6 +173,6 @@ class CommandUpdateESXCluster(BrokerCommand):
             plenaries.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
 
         return

@@ -35,7 +35,8 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
-from aquilon.server.commands.del_host import delhost_lock
+from aquilon.server.locks import lock_queue, DeleteKey
+from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.aqdb.model import Auxiliary
 
 
@@ -44,11 +45,10 @@ class CommandDelAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, auxiliary, user, **arguments):
-        logger.client_info("Acquiring lock to attempt to delete %s" % auxiliary)
-        delhost_lock.acquire()
+        key = DeleteKey("system", logger=logger)
+        dbmachine = None
         try:
-            logger.client_info("Acquired lock, attempting to delete %s" %
-                               auxiliary)
+            lock_queue.acquire(key)
             # Check dependencies, translate into user-friendly message
             dbauxiliary = get_system(session, auxiliary)
             if not isinstance(dbauxiliary, Auxiliary):
@@ -67,22 +67,27 @@ class CommandDelAuxiliary(BrokerCommand):
 
             session.delete(dbauxiliary)
             session.flush()
-    
+
             try:
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
                 raise ArgumentError("Could not remove host %s from dsdb: %s" %
                             (auxiliary, e))
+            # Past the point of no return here (DSDB has been updated)...
+            # probably not much of an issue if writing the plenary failed.
+            # Commit the session so that we can free the delete lock.
+            session.commit()
         finally:
-            logger.client_info("Released lock from attempt to delete %s" %
-                               auxiliary)
-            delhost_lock.release()
+            lock_queue.release(key)
 
-        if dbmachine.host:
-            # FIXME: Reconfigure
-            pass
+        if dbmachine:
+            plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
+            # This may create a new lock, so we free first above.
+            plenary_info.write()
+
+            if dbmachine.host:
+                # FIXME: Reconfigure
+                pass
 
         return
-
-

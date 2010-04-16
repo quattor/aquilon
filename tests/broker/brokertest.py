@@ -38,6 +38,10 @@ import re
 from aquilon.config import Config
 from aquilon.server import depends # fetch protobuf dependency
 
+LOCK_RE = re.compile(r'^(acquired|releasing) '
+                     r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
+
+
 class TestBrokerCommand(unittest.TestCase):
 
     def setUp(self):
@@ -83,8 +87,6 @@ class TestBrokerCommand(unittest.TestCase):
         pass
 
     msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
-    lock_request_re = re.compile('requesting compile lock with \d+ others '
-                                 'waiting\n')
 
     def runcommand(self, command, **kwargs):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
@@ -114,11 +116,9 @@ class TestBrokerCommand(unittest.TestCase):
         # Strip any msversion dev warnings out of STDERR
         err = self.msversion_dev_re.sub('', err)
         # Lock messages are pretty common...
-        err = self.lock_request_re.sub('', err)
-        err = err.replace('acquired compile lock\n', '')
-        err = err.replace('releasing compile lock\n', '')
         err = err.replace('Client status messages disabled, '
                           'retries exceeded.\n', '')
+        err = LOCK_RE.sub('', err)
         return (p, out, err)
 
     def successtest(self, command, **kwargs):

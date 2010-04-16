@@ -1,6 +1,7 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,24 +27,28 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq get`."""
+"""Compile a domain."""
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
+from common import AQRunner
 
 
-class CommandGet(BrokerCommand):
+def compile(domain, aqservice):
+    aq = AQRunner(aqservice=aqservice)
+    print "Compiling domain %s" % domain
+    rc = aq.wait(["compile", "--domain=%s" % domain])
 
-    required_parameters = ["domain"]
-    requires_readonly = True
 
-    def render(self, session, domain, **arguments):
-        # Verify that it exists before returning the command to pull.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
-        remote_command = """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {
-                "path":self.config.get("broker", "git_path"),
-                "url":self.config.get("broker", "git_templates_url"),
-                "domain":dbdomain.name}
-        return str(remote_command)
+if __name__=='__main__':
+    from optparse import OptionParser
+
+    parser = OptionParser()
+    parser.add_option("-d", "--domain", dest="domain", type="string",
+                      help="The domain to compile")
+    parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
+                      help="The service name to use when connecting to aqd")
+    (options, args) = parser.parse_args()
+    if not options.domain:
+        parser.error("Missing option --domain")
+
+    compile(options.domain, options.aqservice)

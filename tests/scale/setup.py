@@ -50,7 +50,8 @@ def setup():
     if rc:
         print >>sys.stderr, "Broker start had return code %d" % rc
     aq = AQRunner(aqservice=broker.get_aqservice())
-    rc = aq.wait(["add", "domain", "--domain", "testdom"])
+    rc = aq.wait(["add", "domain", "--domain", "testdom_odd"])
+    rc = aq.wait(["add", "domain", "--domain", "testdom_even"])
     rc = aq.wait(["add", "aurora", "host", "--hostname", "nyaqd1"])
     services = [["afs", "q.ny.ms.com"],
                 ["ntp", "pa.ny.na"],

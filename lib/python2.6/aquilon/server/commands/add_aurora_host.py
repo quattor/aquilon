@@ -44,6 +44,7 @@ from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw,
 class CommandAddAuroraHost(CommandAddHost):
 
     required_parameters = ["hostname"]
+
     # Look for node name like <building><rack_id>c<chassis_id>n<node_num>
     nodename_re = re.compile(r'^\s*([a-zA-Z]+)(\d+)c(\d+)n(\d+)\s*$')
     # Look for sys_loc output like "machine <building>.<city>.<region>",

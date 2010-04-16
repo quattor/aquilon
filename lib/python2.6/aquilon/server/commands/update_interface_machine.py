@@ -35,7 +35,7 @@ from aquilon.server.dbwrappers.interface import (get_interface,
                                                  verify_port_group,
                                                  choose_port_group)
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.templates.base import compileLock, compileRelease
+from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -122,8 +122,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity,
                                           logger=logger)
+        key = plenary_info.get_write_key()
         try:
-            compileLock(logger=logger)
+            lock_queue.acquire(key)
             plenary_info.write(locked=True)
 
             if (dbinterface.system and \
@@ -137,7 +138,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             plenary_info.restore_stash()
             raise
         finally:
-            compileRelease(logger=logger)
+            lock_queue.release(key)
         return
 
     def snapshot(self, dbinterface):

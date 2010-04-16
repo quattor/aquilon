@@ -31,18 +31,16 @@
 
 import os
 
-from threading import Lock
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_dependencies)
 from aquilon.server.processes import (DSDBRunner, remove_file)
+from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.index import build_index
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
-from aquilon.server.templates.base import (compileLock, compileRelease)
-
-delhost_lock = Lock()
+from aquilon.server.locks import lock_queue, DeleteKey, CompileKey
 
 
 class CommandDelHost(BrokerCommand):
@@ -61,12 +59,11 @@ class CommandDelHost(BrokerCommand):
         # db information) after we've released the delhost lock.
         delplenary = False
 
-        logger.client_info("Acquiring lock to attempt to delete %s" % hostname)
-        delhost_lock.acquire()
-        bindings = [] # Any service bindings that we need to clean up afterwards
+        # Any service bindings that we need to clean up afterwards
+        bindings = PlenaryCollection()
+        key = DeleteKey("system", logger=logger)
         try:
-            logger.client_info("Acquired lock, attempting to delete %s" %
-                               hostname)
+            lock_queue.acquire(key)
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
             ph = PlenaryHost(dbhost, logger=logger)
@@ -83,8 +80,11 @@ class CommandDelHost(BrokerCommand):
 
             for binding in dbhost.templates:
                 ### WARNING ###
-                if (binding.service_instance):
-                    bindings.append(binding.service_instance)
+                si = binding.service_instance
+                if si:
+                    plenary = PlenaryServiceInstanceServer(si.service, si,
+                                                           logger=logger)
+                    bindings.append(plenary)
                 logger.info("Before deleting host '%s', removing binding '%s'"
                             % (fqdn, binding.cfg_path))
                 session.delete(binding)
@@ -102,17 +102,20 @@ class CommandDelHost(BrokerCommand):
                             (hostname, e))
 
             session.refresh(dbmachine)
+            # Past the point of no return... commit the transaction so
+            # that we can free the delete lock.
+            session.commit()
         finally:
-            logger.client_info("Released lock from attempt to delete %s" %
-                               hostname)
-            delhost_lock.release()
+            lock_queue.release(key)
 
         # Only if we got here with no exceptions do we clean the template
         # Trying to clean up after any errors here is really difficult
         # since the changes to dsdb have already been made.
         if (delplenary):
+            key = ph.get_remove_key()
+            key = CompileKey.merge([key, bindings.get_write_key()])
             try:
-                compileLock(logger=logger)
+                lock_queue.acquire(key)
                 ph.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
@@ -122,17 +125,9 @@ class CommandDelHost(BrokerCommand):
                                                          "quattordir"),
                                          "objects", fqdn + ".tpl"),
                             logger=logger)
-
-                # Update any plenary client mappings
-                for si in bindings:
-                    logger.info("removing plenary from binding for %s" %
-                                si.cfg_path)
-                    plenary_info = PlenaryServiceInstanceServer(si.service, si,
-                                                                logger=logger)
-                    plenary_info.write(locked=True)
-
+                bindings.write(locked=True)
             finally:
-                compileRelease(logger=logger)
+                lock_queue.release(key)
 
             build_index(self.config, session, profiles, logger=logger)
 
