@@ -2101,6 +2101,10 @@
 
    <command name="update_machine">
       Update a machine by hardware name or hostname.
+
+      Updating the model for a machine will not automatically update
+      the machine to the new model's default specifications.  To do so, give
+      the new information (cpu, count, memory) at the same time.
       <optgroup name="update_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string" conflicts="hostname">machine name</option>
          <option name="hostname" type="string" conflicts="machine">fully qualified host name</option>

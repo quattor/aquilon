@@ -113,6 +113,13 @@ class TestAddModel(TestBrokerCommand):
                    "--diskcontroller=sata", "--disksize=15", "--nics=1"]
         self.noouttest(command)
 
+    def testaddutlarge(self):
+        command = ["add_model", "--name=utlarge", "--vendor=utvendor",
+                   "--type=virtual_machine", "--cputype=xeon_2660",
+                   "--cpunum=4", "--mem=16384", "--disktype=nas",
+                   "--diskcontroller=sata", "--disksize=45", "--nics=1"]
+        self.noouttest(command)
+
     def testverifyaddutmedium(self):
         command = "show model --name utmedium"
         out = self.commandtest(command.split(" "))
