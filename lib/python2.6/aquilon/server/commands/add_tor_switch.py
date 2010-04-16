@@ -62,7 +62,7 @@ class CommandAddTorSwitch(BrokerCommand):
         if rack:
             dblocation = get_location(session, rack=rack)
         elif ((building or room) and rackid is not None and
-              rackrow and rackcolumn is not None):
+              rackrow is not None and rackcolumn is not None):
             dblocation = get_or_create_rack(session, rackid=rackid,
                                             rackrow=rackrow,
                                             rackcolumn=rackcolumn,

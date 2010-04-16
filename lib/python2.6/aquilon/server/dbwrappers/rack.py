@@ -42,6 +42,15 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
         raise ArgumentError("No parent (building or room) given for rack.")
     dbbuilding = dblocation.building
 
+    # The database contains normalized values so we have to normalize the input
+    # before doing any comparisons.
+    if rackrow is not None:
+        rackrow = str(rackrow).strip().lower()
+    if rackcolumn is not None:
+        rackcolumn = str(rackcolumn).strip().lower()
+    if rackid is not None:
+        rackid = str(rackid).strip().lower()
+
     # Because of http, rackid comes in as a string.  It just
     # gets treated as such here.
     # Check for redundancy...
@@ -51,6 +60,7 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
     else:
         rack = dbbuilding.name + rackid
     dbrack = session.query(Rack).filter_by(name=rack).first()
+
     if dbrack:
         if rackrow is not None and rackrow != dbrack.rack_row:
             raise ArgumentError("Found rack with name %s but the current row %s does not match given row %s." %
