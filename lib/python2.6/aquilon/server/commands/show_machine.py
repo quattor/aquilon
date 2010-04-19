@@ -48,7 +48,7 @@ class CommandShowMachine(BrokerCommand):
             # In the future, this should be clearly separated as 'show machine'
             # and 'search machine'.
             Machine.get_unique(session, machine, compel=True)
-            q = q.filter_by(name=machine)
+            q = q.filter_by(label=machine)
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
@@ -66,4 +66,4 @@ class CommandShowMachine(BrokerCommand):
                                             machine_type=machine_type,
                                             compel=True)
             q = q.filter(Machine.model_id.in_(subq))
-        return q.order_by(Machine.name).all()
+        return q.order_by(Machine.label).all()

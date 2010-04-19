@@ -41,7 +41,7 @@ class CommandUpdateInterfaceHostname(CommandUpdateInterfaceMachine):
 
     def render(self, session, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        arguments['machine'] = dbhost.machine.name
+        arguments['machine'] = dbhost.machine.label
         return CommandUpdateInterfaceMachine.render(self, session=session,
                                                     hostname=hostname,
                                                     **arguments)

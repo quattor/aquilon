@@ -42,7 +42,7 @@ from sqlalchemy import sql
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.column_types.aqmac import normalize_mac_address
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import (Interface, Machine, ObservedMac, System,
+from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, System,
                                 VlanInfo, ObservedVlan)
 from aquilon.server.dbwrappers.system import get_system
 
@@ -57,8 +57,9 @@ def get_interface(session, interface, machine, mac):
         q = q.filter_by(name=interface)
     if machine:
         errmsg.append("of machine " + machine)
-        q = q.filter(Interface.hardware_entity_id==Machine.machine_id)
-        q = q.filter(Machine.name==machine)
+        q = q.join(HardwareEntity)
+        q = q.filter_by(label=machine)
+        q = q.reset_joinpoint()
     if mac:
         errmsg.append("having MAC address " + mac)
         q = q.filter_by(mac=mac)
@@ -208,7 +209,7 @@ def describe_interface(session, interface):
     hw = interface.hardware_entity
     hw_type = hw.hardware_type
     if hw_type == 'machine':
-        description.append("is attached to machine %s" % hw.name)
+        description.append("is attached to machine %s" % hw.label)
     elif hw_type == 'switch':
         if hw.switch:
             description.append("is attached to switch %s" %

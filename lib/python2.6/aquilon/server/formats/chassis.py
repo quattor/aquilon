@@ -50,7 +50,7 @@ class ChassisFormatter(ObjectFormatter):
         for slot in chassis.slots:
             if slot.machine:
                 details.append(indent + "  Slot #%d: %s" % (slot.slot_number,
-                                                            slot.machine.name))
+                                                            slot.machine.label))
             else:
                 details.append(indent + "  Slot #%d Unknown" % slot.slot_number)
         for i in chassis.chassis_hw.interfaces:

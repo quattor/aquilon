@@ -45,7 +45,7 @@ class MachineInterfacePairFormatter(ObjectFormatter):
         machine = item[0]
         interface = item[1]
 
-        details = [machine.name, machine.location.rack.name,
+        details = [machine.label, machine.location.rack.name,
                    machine.location.building.name, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
         if interface:
@@ -63,11 +63,11 @@ ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
-        details = [indent + "%s: %s" %
-                (machine.model.machine_type.capitalize(), machine.name)]
+        details = [indent + "%s: %s" % (machine.model.machine_type.capitalize(),
+                                        machine.label)]
         if machine.host:
-            details.append(indent + "  Allocated to host: %s [%s]"
-                    % (machine.host.fqdn, machine.host.ip))
+            details.append(indent + "  Allocated to host: %s [%s]" %
+                           (machine.host.fqdn, machine.host.ip))
         if machine.cluster:
             details.append(indent + \
                            "  Hosted by {0:c}: {0.name}".format(machine.cluster))
@@ -132,7 +132,7 @@ class SimpleMachineList(list):
 
 class SimpleMachineListFormatter(ListFormatter):
     def format_raw(self, smlist, indent=""):
-        return str("\n".join([indent + machine.name for machine in smlist]))
+        return str("\n".join([indent + machine.label for machine in smlist]))
 
 ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
 

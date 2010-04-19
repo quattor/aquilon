@@ -123,7 +123,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 dbinterface.system = None
                 session.add(dbinterface)
             success.append("Removed host entry for %s (%s)" %
-                           (dbhost.machine.name, dbhost.fqdn))
+                           (dbhost.machine.label, dbhost.fqdn))
             if dbhost.machine.cluster:
                 clusters.add(dbhost.machine.cluster)
             session.delete(dbhost)
@@ -219,7 +219,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             dbinterface.system = dbhost
             session.add(dbinterface)
             success.append("Added host entry for %s (%s)." %
-                           (dbhost.machine.name, dbhost.fqdn))
+                           (dbhost.machine.label, dbhost.fqdn))
             if dbmachine.cluster:
                 clusters.add(dbmachine.cluster)
             session.flush()

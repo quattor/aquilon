@@ -72,7 +72,7 @@ class CommandAddAuroraHost(CommandAddHost):
         # Create a machine
         dbmodel = Model.get_unique(session, name="aurora_model",
                                    vendor="aurora_vendor", compel=True)
-        dbmachine = session.query(Machine).filter_by(name=machine).first()
+        dbmachine = Machine.get_unique(session, machine)
         dbslot = None
         if not dbmachine:
             m = self.nodename_re.search(machine)
@@ -170,7 +170,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
         kwargs['sandbox'] = None
-        kwargs['machine'] = dbmachine.name
+        kwargs['machine'] = dbmachine.label
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
         # The superclass already contains the rest of the logic to handle this.

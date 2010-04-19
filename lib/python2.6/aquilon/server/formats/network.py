@@ -82,7 +82,7 @@ class NetworkHostListFormatter(ListFormatter):
                 elif hasattr(system, "name"):
                     device_name = system.name
                 elif hasattr(system, "machine"):
-                    device_name = system.machine.name
+                    device_name = system.machine.label
                 else:
                     device_name = system.ip
                 if system.interfaces:

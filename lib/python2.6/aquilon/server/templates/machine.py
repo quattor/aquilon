@@ -42,7 +42,7 @@ class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine, logger=LOGGER):
         Plenary.__init__(self, dbmachine, logger=logger)
         self.dbmachine = dbmachine
-        self.machine = dbmachine.name
+        self.machine = dbmachine.label
 
         loc = dbmachine.location
         self.hub = loc.hub.fullname.lower()

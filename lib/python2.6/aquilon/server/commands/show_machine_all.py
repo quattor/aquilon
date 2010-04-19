@@ -37,4 +37,4 @@ from aquilon.aqdb.model import Machine
 class CommandShowMachineAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return SimpleMachineList(session.query(Machine).order_by(Machine.name).all())
+        return SimpleMachineList(session.query(Machine).order_by(Machine.label).all())

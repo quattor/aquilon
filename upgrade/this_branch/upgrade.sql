@@ -48,4 +48,7 @@ ALTER TABLE hardware_entity
 ALTER TABLE hardware_entity
 	MODIFY (hardware_type CONSTRAINT "HW_ENT_HARDWARE_TYPE_NN" NOT NULL);
 
+-- Drop machine.name
+ALTER TABLE machine DROP COLUMN name;
+
 QUIT;

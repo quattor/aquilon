@@ -62,7 +62,7 @@ def random_mac():
 
 def teardown():
     machines = sess.query(Machine).filter(
-        Machine.name.like(MACHINE_NAME_PREFIX + '%')).all()
+        Machine.label.like(MACHINE_NAME_PREFIX + '%')).all()
 
     for machine in machines:
         if machine.interfaces:
@@ -87,12 +87,12 @@ def test_create_machines_for_test_interface():
     assert isinstance(cpu, Cpu), 'no cpu in %s' % func_name()
 
     for i in xrange(NUM_MACHINES):
-        machine = Machine(name='%s%s' % (MACHINE_NAME_PREFIX, i), location=np,
+        machine = Machine(label='%s%s' % (MACHINE_NAME_PREFIX, i), location=np,
                           model=am, cpu=cpu, cpu_quantity=2, memory=32768)
         create(sess, machine)
 
     machines = sess.query(Machine).filter(
-        Machine.name.like(MACHINE_NAME_PREFIX + '%')).all()
+        Machine.label.like(MACHINE_NAME_PREFIX + '%')).all()
 
     eq_(len(machines), NUM_MACHINES)
 

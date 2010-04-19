@@ -124,7 +124,7 @@ class PlenaryClusterObject(Plenary):
                 # Do not bother creating entries for VMs that are incomplete.
                 continue
             pmac = PlenaryMachineInfo(machine)
-            lines.append("    '%s', nlist(" % machine.name)
+            lines.append("    '%s', nlist(" % machine.label)
             lines.append("            'hardware', create('%s')," %
                                                     pmac.plenary_template)
             # One day we may get to the point where this will be required.

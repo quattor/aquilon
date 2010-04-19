@@ -74,14 +74,14 @@ def teardown():
 
 def del_machines():
     machines = sess.query(Machine).filter(
-        Machine.name.like(MACHINE_NAME+'%')).all()
+        Machine.label.like(MACHINE_NAME+'%')).all()
     if machines:
         for machine in machines:
             sess.delete(machine)
         commit(sess)
         print 'deleted %s esx machines' % (len(machines))
 
-    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.label.like(VM_NAME+'%')).all()
     if machines:
         for vm in machines:
             sess.delete(vm)
@@ -118,11 +118,11 @@ def test_create_vm():
     np = Building.get_unique(sess, 'np', compel=True)
 
     for i in xrange(NUM_MACHINES):
-        vm = Machine(name='%s%s'%(VM_NAME, i), location=np, model=mod,
+        vm = Machine(label='%s%s'%(VM_NAME, i), location=np, model=mod,
                      cpu=proc, cpu_quantity=1, memory=4196)
         create(sess, vm)
 
-    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.label.like(VM_NAME+'%')).all()
 
     assert len(machines) is NUM_MACHINES
     print 'created %s machines' % (len(machines))
@@ -133,19 +133,19 @@ def test_create_machines_for_hosts():
     a_cpu = Cpu.get_unique(sess, name='aurora_cpu', compel=True)
 
     for i in xrange(NUM_HOSTS):
-        machine = Machine(name='%s%s'% (MACHINE_NAME, i), location=np, model=am,
+        machine = Machine(label='%s%s'% (MACHINE_NAME, i), location=np, model=am,
                           cpu=a_cpu, cpu_quantity=8, memory=32768)
         create(sess, machine)
 
     machines = sess.query(Machine).filter(
-        Machine.name.like(MACHINE_NAME+'%')).all()
+        Machine.label.like(MACHINE_NAME+'%')).all()
 
     assert len(machines) is NUM_MACHINES
     print 'created %s esx machines' % len(machines)
 
 def esx_machine_factory():
     machines = sess.query(Machine).filter(
-        Machine.name.like(MACHINE_NAME+'%')).all()
+        Machine.label.like(MACHINE_NAME+'%')).all()
     size = len(machines)
     for machine in machines:
         yield machine
@@ -245,7 +245,7 @@ def test_add_machines():
     if a:
         print '%s machines are already in existence'
 
-    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.label.like(VM_NAME+'%')).all()
     ec = EsxCluster.get_unique(sess, CLUSTER_NAME)
     assert ec
 
@@ -260,7 +260,7 @@ def test_add_machines():
     print 'there are %s machines in the cluster: %s'%(len(ec.machines), ec.machines)
 
 def test_vm_append():
-    machines = sess.query(Machine).filter(Machine.name.like(VM_NAME+'%')).all()
+    machines = sess.query(Machine).filter(Machine.label.like(VM_NAME+'%')).all()
     ec = EsxCluster.get_unique(sess, CLUSTER_NAME)
     assert ec
 

@@ -260,7 +260,7 @@ class ObjectFormatter(object):
             host_msg.sysloc = str(host.sysloc)
         if getattr(host, "ip", None):
             host_msg.ip = str(host.ip)
-        for iface in host.machine.hardware_entity.interfaces:
+        for iface in host.machine.interfaces:
             if iface.interface_type != 'public' or not iface.bootable:
                 continue
             host_msg.mac = str(iface.mac)
@@ -271,7 +271,7 @@ class ObjectFormatter(object):
             host_msg.personality.archetype.name = str(host.personality.archetype.name)
             host_msg.archetype.name = str(host.archetype.name)
         if hasattr(host, "machine"):
-            host_msg.machine.name = str(host.machine.name)
+            host_msg.machine.name = str(host.machine.label)
             if hasattr(host.machine, "location"):
                 host_msg.machine.location.name = str(host.machine.location.name)
                 host_msg.machine.location.location_type = str(host.machine.location.location_type)

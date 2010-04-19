@@ -1,4 +1,4 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*- # pylint: disable-msg=C0301
 #
 # Copyright (C) 2008,2009,2010  Contributor
 #
@@ -28,59 +28,43 @@
 # TERMS THAT MAY APPLY.
 """The tables/objects/mappings related to hardware in Aquilon. """
 
-from datetime import datetime
+from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint
+from sqlalchemy.orm  import relation, backref
 
-from sqlalchemy import (UniqueConstraint, Table, Column, Integer, DateTime,
-                        Sequence, String, ForeignKey, Index)
-
-from sqlalchemy.orm  import relation, deferred, backref
-
-from aquilon.aqdb.column_types.aqstr import AqStr
-
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Cpu, HardwareEntity
 
-#TODO: use selection of the machine specs to dynamically populate default
-#     values for all of the attrs where its possible
 
-class Machine(HardwareEntity):
+class Machine(HardwareEntity):  # pylint: disable-msg=W0232, R0903
+    """ Machines represents general purpose computers """
+
     __tablename__ = 'machine'
-    __mapper_args__ = {'polymorphic_identity' : 'machine'}
+    __mapper_args__ = {'polymorphic_identity': 'machine'}
 
-    #hardware_entity_
+    #TODO: should this be named hardware_entity_id?
     machine_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                           name='machine_hw_ent_fk'),
+                                           name='machine_hw_ent_fk',
+                                           ondelete='CASCADE'),
                                            primary_key=True)
-
-    name = Column('name', AqStr(64), nullable=False)
 
     cpu_id = Column(Integer, ForeignKey(
         'cpu.id', name='machine_cpu_fk'), nullable=False)
 
-    cpu_quantity = Column(Integer, nullable=False, default=2) #constrain/smallint
+    #TODO: constrain/smallint
+    cpu_quantity = Column(Integer, nullable=False, default=2)
 
     memory = Column(Integer, nullable=False, default=512)
 
-    hardware_entity = relation(HardwareEntity, uselist=False)
-
     cpu = relation(Cpu, uselist=False)
 
-    #TODO: synonym in location/model?
-    #location = relation(Location, uselist=False)
 
-    @property
-    def hardware_name(self):
-        return self.name
+machine = Machine.__table__  # pylint: disable-msg=C0103, E1101
+machine.primary_key.name = 'machine_pk'
 
-machine = Machine.__table__
 
-machine.primary_key.name='machine_pk'
-
-machine.append_constraint(
-    UniqueConstraint('name',name='machine_name_uk')
-)
-
-machine.info['unique_fields'] = ['name']
-
-#TODO:
+#TODO: an __init__ (or other method) that could use DSDB to create itself?
 #   check if it exists in dbdb minfo, and get from there if it does
-#   and/or -dsdb option, and, make machine --like [other machine] + overrides
+#    and/or -dsdb option, and, make machine --like [other machine] + overrides
+
+#TODO: an __init__ that uses the machine specs to dynamically populate default
+#      values for all of the attrs where its possible

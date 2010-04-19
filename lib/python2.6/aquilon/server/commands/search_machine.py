@@ -48,7 +48,7 @@ class CommandSearchMachine(BrokerCommand):
                memory, cluster, share, fullinfo, **arguments):
         q = search_hardware_entity_query(session, Machine, **arguments)
         if machine:
-            q = q.filter_by(name=machine)
+            q = q.filter_by(label=machine)
         if cpuname or cpuvendor or cpuspeed is not None:
             subq = Cpu.get_matching_query(session, name=cpuname,
                                           vendor=cpuvendor, speed=cpuspeed,

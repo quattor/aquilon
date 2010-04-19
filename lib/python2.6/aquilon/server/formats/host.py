@@ -94,6 +94,6 @@ class HostMachineList(list):
 
 class HostMachineListFormatter(ListFormatter):
     def csv_fields(self, host):
-        return (host.fqdn, host.machine.name)
+        return (host.fqdn, host.machine.label)
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()

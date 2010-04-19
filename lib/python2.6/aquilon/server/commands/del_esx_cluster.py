@@ -45,7 +45,7 @@ class CommandDelESXCluster(BrokerCommand):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         cluster = str(dbcluster.name)
         if dbcluster.machines:
-            machines = ", ".join([m.name for m in dbcluster.machines])
+            machines = ", ".join([m.label for m in dbcluster.machines])
             raise ArgumentError("%s is still in use by virtual machines: %s." %
                                 (format(dbcluster), machines))
         if dbcluster.hosts:

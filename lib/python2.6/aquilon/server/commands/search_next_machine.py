@@ -40,7 +40,7 @@ class CommandSearchNextMachine(BrokerCommand):
 
     def render(self, session, machine, start, number, fullname, pack,
                **arguments):
-        result = search_next(session=session, cls=Machine, attr=Machine.name,
+        result = search_next(session=session, cls=Machine, attr=Machine.label,
                              value=machine, start=start, pack=pack)
         if number:
             return str(result)

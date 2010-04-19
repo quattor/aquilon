@@ -91,8 +91,9 @@ def create_machine(session, machine, dblocation, dbmodel,
                                 "defaults, please specify --memory (in MB)." %
                                 dbmodel.name)
 
-    dbmachine = Machine(location=dblocation, model=dbmodel, name=machine,
-            cpu=dbcpu, cpu_quantity=cpucount, memory=memory, serial_no=serial)
+    dbmachine = Machine(location=dblocation, model=dbmodel, label=machine,
+                        cpu=dbcpu, cpu_quantity=cpucount, memory=memory,
+                        serial_no=serial)
     session.add(dbmachine)
 
     if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node' \
