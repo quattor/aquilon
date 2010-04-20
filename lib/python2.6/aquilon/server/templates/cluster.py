@@ -106,6 +106,15 @@ class PlenaryClusterObject(Plenary):
         lines.append("'/system/cluster/down_hosts_threshold' = %d;" %
                      self.dbcluster.down_hosts_threshold)
         lines.append('')
+        # Only use system names here to avoid circular dependencies.
+        # Other templates that needs to look up the underlying values use:
+        # foreach(idx; host; value("/system/cluster/members")) {
+        #     v = value("//" + host + "/system/foo/bar/baz");
+        # );
+        lines.append("'/system/cluster/members' = list(%s);" %
+                     ", ".join(["'%s'" % member.fqdn
+                                for member in self.dbcluster.hosts]))
+        lines.append('')
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
             pmac = PlenaryMachineInfo(machine)
