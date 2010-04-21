@@ -38,7 +38,6 @@ import textwrap
 import pdb
 import sys
 
-
 def cmdName():
     return os.path.basename(sys.argv[0])
 
@@ -271,7 +270,7 @@ class command(Element):
 # --------------------------------------------------------------------------- #
 
     def shortHelp(self):
-        lines = textwrap.wrap(" ".join([ o.shortHelp() for o in self.optgroups ]))
+        lines = textwrap.wrap(" ".join([o.shortHelp() for o in self.optgroups]))
 
         if len(lines) > 0:
             return "\n".join([lines[0]] + [ "    " + l for l in lines[1:] ])
@@ -288,8 +287,12 @@ class command(Element):
         cmd += self.shortHelp()
         res = cmd + "\n\n"
 
-        if (len(self.help) > 0):
-            res = res + "\n".join(["    " + l for l in textwrap.wrap(self.help)]) + "\n\n"
+        paragraphs = re.split('\n\n+', self.help)
+        formatted = []
+        for para in paragraphs:
+            lines = "\n".join(["    " + l for l in textwrap.wrap(para)])
+            formatted.append(lines)
+        res = res + "\n\n".join(formatted) + "\n\n"
 
         for og in self.optgroups:
             res = res + og.recursiveHelp(indentlevel + 1) + "\n"
@@ -539,12 +542,17 @@ class OptParser (object):
             element = option(name, attributes)
         elif (name == "transport"):
             element = transport(name, attributes)
+        elif (name == "p"):
+            element = "\n"
         else:
             element = Element(name, attributes)
 
         if (self.__nodeStack):
             parent = self.__nodeStack[-1]
-            parent.add(element)
+            if isinstance(element, Element):
+                parent.add(element)
+            else:
+                parent.help += element
         else:
             self.__root = element
 
