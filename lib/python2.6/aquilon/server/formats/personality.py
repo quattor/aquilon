@@ -71,11 +71,8 @@ class PersonalityFormatter(ObjectFormatter):
                        (personality.archetype.name, personality.name))
         if has_threshold:
             details.append(indent + "  Threshold: %s" % threshold)
-        for item in personality.service_list:
-            details.append(indent + "  Required Service: %s"
-                    % item.service.name)
-            if item.comments:
-                details.append(indent + "    Comments: %s" % item.comments)
+        for service in personality.services:
+            details.append(indent + "  Required Service: %s" % service.name)
         if personality.comments:
             details.append(indent + "  Comments: %s" % personality.comments)
         return "\n".join(details)
