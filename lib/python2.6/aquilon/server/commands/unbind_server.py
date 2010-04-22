@@ -29,8 +29,6 @@
 """Contains the logic for `aq unbind server`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer

@@ -29,8 +29,6 @@
 """Contains the logic for `aq del model`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Vendor, Model

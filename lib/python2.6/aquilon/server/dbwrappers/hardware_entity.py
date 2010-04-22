@@ -29,8 +29,6 @@
 """Wrappers to make getting and using hardware entities simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import HardwareEntity
 from aquilon.server.dbwrappers.location import get_location

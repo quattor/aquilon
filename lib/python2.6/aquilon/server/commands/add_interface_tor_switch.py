@@ -30,8 +30,6 @@
     Duplicates logic used in `aq add interface --chassis`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Interface, TorSwitch
 from aquilon.aqdb.model.network import get_net_id_from_ip

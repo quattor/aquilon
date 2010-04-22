@@ -29,8 +29,6 @@
 """Wrappers to make getting and using hosts simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Host, DnsDomain
 from aquilon.server.dbwrappers.system import (get_system,
