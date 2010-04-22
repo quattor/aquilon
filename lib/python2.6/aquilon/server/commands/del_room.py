@@ -40,5 +40,3 @@ class CommandDelRoom(CommandDelLocation):
     def render(self, session, room, **arguments):
         return CommandDelLocation.render(self, session=session, name=room,
                                          type='room', **arguments)
-
-

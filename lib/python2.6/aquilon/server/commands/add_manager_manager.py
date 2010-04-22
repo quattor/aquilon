@@ -40,5 +40,3 @@ class CommandAddManagerManager(CommandAddManager):
     """
 
     required_parameters = ["manager", "hostname"]
-
-

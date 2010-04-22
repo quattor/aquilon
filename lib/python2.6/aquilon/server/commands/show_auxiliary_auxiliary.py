@@ -40,5 +40,3 @@ class CommandShowAuxiliaryAuxiliary(BrokerCommand):
 
     def render(self, session, auxiliary, **kwargs):
         return get_system(session, auxiliary, Auxiliary, 'Auxiliary')
-
-

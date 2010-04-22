@@ -92,7 +92,3 @@ personality_service_map.primary_key.name='prsnlty_svc_map_pk'
 personality_service_map.append_constraint(
     UniqueConstraint('personality_id', 'service_instance_id', 'location_id',
                      name='%s_loc_inst_uk'%(_ABV)))
-
-
-
-

@@ -80,5 +80,3 @@ for f in os.listdir(_thisdir):
                         logging.getLogger(modulename)
                 __all__.append(moduleshort)
                 break
-
-

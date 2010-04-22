@@ -37,5 +37,3 @@ class CommandShowMachineMachine(CommandShowMachine):
     """The base class already has the necessary logic to handle this."""
 
     required_parameters = ["machine"]
-
-

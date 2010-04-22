@@ -55,5 +55,3 @@ class CommandBindClient(BrokerCommand):
         chooser.write_plenary_templates()
 
         return
-
-

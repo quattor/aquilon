@@ -39,5 +39,3 @@ class CommandShowChassisAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return session.query(Chassis).all()
-
-

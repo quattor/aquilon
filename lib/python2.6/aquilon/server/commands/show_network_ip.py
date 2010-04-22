@@ -40,5 +40,3 @@ class CommandShowNetworkIP(CommandShowNetwork):
     """
     
     required_parameters = ["ip"]
-
-

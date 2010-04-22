@@ -55,5 +55,3 @@ class CommandDelDnsDomain(BrokerCommand):
         dsdb_runner.delete_dns_domain(dns_domain)
 
         return
-
-

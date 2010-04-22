@@ -96,5 +96,3 @@ class CommandShowPersonality(BrokerCommand):
         if not m:
             return None
         return int(m.group(1))
-
-

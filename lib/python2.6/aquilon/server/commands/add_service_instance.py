@@ -40,5 +40,3 @@ class CommandAddServiceInstance(CommandAddService):
     """
 
     required_parameters = ["service", "instance"]
-
-

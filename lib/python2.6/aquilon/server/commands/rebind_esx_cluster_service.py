@@ -41,5 +41,3 @@ class CommandRebindESXClusterService(CommandBindESXClusterService):
     def render(self, session, **arguments):
         arguments["force"] = True
         return CommandBindESXClusterService.render(self, session, **arguments)
-
-

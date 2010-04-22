@@ -44,5 +44,3 @@ class CommandUpdateArchetype(BrokerCommand):
         dbarchetype.is_compileable = bool(compilable)
         session.add(dbarchetype)
         return
-
-

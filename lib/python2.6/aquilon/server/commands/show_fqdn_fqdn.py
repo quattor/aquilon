@@ -39,5 +39,3 @@ class CommandShowFqdnFqdn(BrokerCommand):
 
     def render(self, session, fqdn, **kwargs):
         return get_system(session, fqdn)
-
-

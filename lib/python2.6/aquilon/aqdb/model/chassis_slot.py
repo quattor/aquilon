@@ -66,5 +66,3 @@ chassis_slot = ChassisSlot.__table__
 chassis_slot.primary_key.name='chassis_slot_pk'
 
 table = chassis_slot
-
-

@@ -48,5 +48,3 @@ class CommandDelArchetype(BrokerCommand):
         # All clear
         session.delete(dbarch)
         return
-
-

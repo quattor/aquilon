@@ -40,5 +40,3 @@ class CommandShowHostMachineListArchetype(CommandShowHostMachineList):
     """
 
     required_parameters = ["archetype"]
-
-

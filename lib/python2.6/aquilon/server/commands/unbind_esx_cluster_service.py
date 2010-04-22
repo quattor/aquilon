@@ -58,5 +58,3 @@ class CommandUnbindESXClusterService(BrokerCommand):
         plenary = PlenaryCluster(dbcluster, logger=logger)
         plenary.write()
         return
-
-

@@ -38,5 +38,3 @@ class CommandShowManagerAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return SimpleSystemList(session.query(Manager).all())
-
-

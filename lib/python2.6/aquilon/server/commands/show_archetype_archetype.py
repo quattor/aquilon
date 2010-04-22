@@ -37,5 +37,3 @@ class CommandShowArchetypeArchetype(BrokerCommand):
 
     def render(self, session, archetype, **arguments):
         return Archetype.get_unique(session, archetype, compel=True)
-
-

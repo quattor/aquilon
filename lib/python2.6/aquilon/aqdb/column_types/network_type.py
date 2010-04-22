@@ -59,5 +59,3 @@ class NetworkType(sqlalchemy.types.TypeDecorator):
 
     def copy(self):
         return NetworkType(self.impl.length)
-
-

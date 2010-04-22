@@ -72,5 +72,3 @@ hardware_entity.primary_key.name='hardware_entity_pk'
 Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
 
 table = hardware_entity
-
-

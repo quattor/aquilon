@@ -89,5 +89,3 @@ class ChunkedHTTPResponse(httplib.HTTPResponse):
 class ChunkedHTTPConnection(httplib.HTTPConnection):
 
     response_class = ChunkedHTTPResponse
-
-

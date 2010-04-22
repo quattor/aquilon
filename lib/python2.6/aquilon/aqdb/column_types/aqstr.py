@@ -48,5 +48,3 @@ class AqStr(sqlalchemy.types.TypeDecorator):
 
     def copy(self):
         return AqStr(self.impl.length)
-
-

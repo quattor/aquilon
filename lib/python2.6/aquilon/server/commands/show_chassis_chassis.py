@@ -40,5 +40,3 @@ class CommandShowChassisChassis(BrokerCommand):
 
     def render(self, session, chassis, **arguments):
         return get_system(session, chassis, Chassis, 'Chassis')
-
-

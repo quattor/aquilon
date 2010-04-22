@@ -44,5 +44,3 @@ class CommandAddESXClusterAlignedService(BrokerCommand):
                                       comments=comments)
         session.add(dbcas)
         return
-
-

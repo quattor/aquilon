@@ -76,5 +76,3 @@ class CommandBindServer(BrokerCommand):
         # XXX: Need to recompile...
 
         return
-
-

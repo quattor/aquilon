@@ -38,5 +38,3 @@ class CommandShowAuxiliaryAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return SimpleSystemList(session.query(Auxiliary).all())
-
-

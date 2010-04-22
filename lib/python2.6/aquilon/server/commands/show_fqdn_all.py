@@ -38,5 +38,3 @@ class CommandShowFqdnAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return SimpleSystemList(session.query(System).all())
-
-

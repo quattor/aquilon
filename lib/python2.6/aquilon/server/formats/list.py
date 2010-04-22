@@ -79,5 +79,3 @@ class ListFormatter(ObjectFormatter):
                 ) + "</li>\n</ul>\n"
 
 ObjectFormatter.handlers[list] = ListFormatter()
-
-

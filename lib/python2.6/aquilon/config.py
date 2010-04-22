@@ -100,5 +100,3 @@ if __name__=='__main__':
         print "[%s]" % section
         for (name, value) in config.items(section):
             print "%s=%s" % (name, value)
-
-

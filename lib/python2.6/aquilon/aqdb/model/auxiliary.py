@@ -53,5 +53,3 @@ auxiliary = Auxiliary.__table__
 auxiliary.primary_key.name='aux_pk'
 
 table = auxiliary
-
-

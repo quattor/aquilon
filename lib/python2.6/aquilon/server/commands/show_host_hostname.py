@@ -39,5 +39,3 @@ class CommandShowHostHostname(BrokerCommand):
 
     def render(self, session, hostname, **kwargs):
         return hostname_to_host(session, hostname)
-
-

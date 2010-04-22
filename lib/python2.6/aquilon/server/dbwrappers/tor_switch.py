@@ -39,5 +39,3 @@ def get_tor_switch(session, tor_switch):
     if not isinstance(dbsystem, TorSwitch):
         raise ArgumentError("%s is not a ToR switch." % tor_switch)
     return dbsystem
-
-

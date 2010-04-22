@@ -40,5 +40,3 @@ class CommandShowManagerManager(BrokerCommand):
 
     def render(self, session, manager, **kwargs):
         return get_system(session, manager, Manager, 'Manager')
-
-

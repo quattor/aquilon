@@ -55,5 +55,3 @@ class CommandShowLocationType(BrokerCommand):
                 raise NotFoundException("%s %s not found." %
                                         (type.capitalize(), name))
         return query.order_by([Location.location_type, Location.name]).all()
-
-

@@ -47,5 +47,3 @@ class CommandSearchNextShort(BrokerCommand):
         if number:
             return str(result)
         return "%s%d.%s" % (short, result, dbdns_domain.name)
-
-

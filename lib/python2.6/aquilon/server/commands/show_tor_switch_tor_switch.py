@@ -37,5 +37,3 @@ class CommandShowTorSwitchTorSwitch(CommandShowTorSwitch):
     """The base class already has the necessary logic to handle this."""
 
     required_parameters = ["tor_switch"]
-
-

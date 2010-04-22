@@ -51,5 +51,3 @@ class CommandShowOS(BrokerCommand):
         if not oslist:
             raise NotFoundException("No matching operating system.")
         return oslist
-
-

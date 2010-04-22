@@ -44,5 +44,3 @@ class CommandAddInterfaceHostname(CommandAddInterfaceMachine):
         arguments['machine'] = dbhost.machine.name
         return CommandAddInterfaceMachine.render(self, session=session,
                                                  **arguments)
-
-

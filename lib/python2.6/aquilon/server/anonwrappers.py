@@ -69,5 +69,3 @@ class AnonSite(server.Site):
                 self._escape(request.getHeader("referer") or "-"),
                 self._escape(request.getHeader("user-agent") or "-"))
             self.logFile.write(line)
-
-

@@ -53,5 +53,3 @@ manager = Manager.__table__
 manager.primary_key.name = 'mgr_pk'
 
 table = manager
-
-

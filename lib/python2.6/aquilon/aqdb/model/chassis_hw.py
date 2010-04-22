@@ -57,5 +57,3 @@ chassis_hw = ChassisHw.__table__
 chassis_hw.primary_key.name='chassis_hw_pk'
 
 table = chassis_hw
-
-

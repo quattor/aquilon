@@ -43,5 +43,3 @@ class CommandDelOS(BrokerCommand):
                                           archetype=dbarchetype, compel=True)
         session.delete(dbos)
         return
-
-

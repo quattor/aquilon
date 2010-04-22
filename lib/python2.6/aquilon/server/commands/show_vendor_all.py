@@ -39,5 +39,3 @@ class CommandShowVendorAll(BrokerCommand):
     def render(self, session, **arguments):
         vlist = session.query(Vendor).order_by(Vendor.name).all()
         return vlist
-
-

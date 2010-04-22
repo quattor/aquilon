@@ -44,5 +44,3 @@ class CommandShowRequestAuditID(CommandShowRequest):
         return CommandShowRequest.render(self, requestid=status.requestid,
                                          request=request, logger=logger,
                                          **arguments)
-
-

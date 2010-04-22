@@ -59,5 +59,3 @@ class CommandUpdateServiceInstance(BrokerCommand):
         plenary.write()
 
         return
-
-

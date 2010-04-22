@@ -41,5 +41,3 @@ class CommandShowDnsDomainDnsDomain(BrokerCommand):
     def render(self, session, dns_domain, **arguments):
         return DNSDomainList([DnsDomain.get_unique(session, dns_domain,
                                                    compel=True)])
-
-

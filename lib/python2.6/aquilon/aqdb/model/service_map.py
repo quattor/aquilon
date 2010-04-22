@@ -78,6 +78,3 @@ service_map.append_constraint(
                      name='svc_map_loc_inst_uk'))
 
 table = service_map
-
-
-

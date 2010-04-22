@@ -40,5 +40,3 @@ class CommandRebindClient(CommandBindClient):
     def render(self, *args, **arguments):
         arguments["force"] = True
         return CommandBindClient.render(self, *args, **arguments)
-
-

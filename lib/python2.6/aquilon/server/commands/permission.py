@@ -47,5 +47,3 @@ class CommandPermission(BrokerCommand):
         dbuser.role = dbrole
         session.add(dbuser)
         return
-
-

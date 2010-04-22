@@ -45,5 +45,3 @@ class CommandUpdateInterfaceHostname(CommandUpdateInterfaceMachine):
         return CommandUpdateInterfaceMachine.render(self, session=session,
                                                     hostname=hostname,
                                                     **arguments)
-
-

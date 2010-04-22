@@ -56,5 +56,3 @@ chassis = Chassis.__table__
 chassis.primary_key.name='chassis_pk'
 
 table = chassis
-
-
