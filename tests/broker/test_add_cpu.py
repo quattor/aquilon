@@ -47,6 +47,10 @@ class TestAddCpu(TestBrokerCommand):
         command = "add cpu --cpu utcpu --vendor intel --speed 1000 --comments 'unit test cpu'"
         self.noouttest(command.split(" "))
 
+    def testaddutcpuagain(self):
+        command = "add cpu --cpu utcpu --vendor intel --speed 1000 --comments 'unit test cpu'"
+        self.badrequesttest(command.split(" "))
+
     def testverifyaddutcpu(self):
         command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
         out = self.commandtest(command.split(" "))

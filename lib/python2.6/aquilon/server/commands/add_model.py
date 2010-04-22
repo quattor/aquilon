@@ -31,16 +31,16 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
-from aquilon.server.dbwrappers.cpu import get_cpu
-from aquilon.aqdb.model import Vendor, Model, MachineSpecs
+from aquilon.aqdb.model import Vendor, Model, MachineSpecs, Cpu
 
 
 class CommandAddModel(BrokerCommand):
 
     required_parameters = ["model", "vendor", "type"]
 
-    def render(self, session, model, vendor, type, cpuname, cpunum, memory,
-               disktype, diskcontroller, disksize, nics, comments, **arguments):
+    def render(self, session, model, vendor, type, cpuname, cpuvendor, cpuspeed,
+               cpunum, memory, disktype, diskcontroller, disksize, nics,
+               comments, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         Model.get_unique(session, name=model, vendor=dbvendor, preclude=True)
 
@@ -58,6 +58,7 @@ class CommandAddModel(BrokerCommand):
 
         if cpuname:
             memory = force_int("memory", memory)
+            cpuspeed = force_int("cpuspeed", cpuspeed)
             cpunum = force_int("cpunum", cpunum)
             disksize = force_int("disksize", disksize)
             nics = force_int("nics", nics)
@@ -67,8 +68,9 @@ class CommandAddModel(BrokerCommand):
         session.add(dbmodel)
         session.flush()
 
-        if cpuname:
-            dbcpu = get_cpu(session, cpuname)
+        if cpuname or cpuvendor or cpuspeed:
+            dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
+                                   speed=cpuspeed, compel=True)
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
                                            cpu_quantity=cpunum, memory=memory,
                                            disk_type=disktype,

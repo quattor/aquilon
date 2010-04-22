@@ -29,8 +29,6 @@
 """Contains the logic for `aq update machine`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  UnimplementedError, IncompleteError)
 from aquilon.server.broker import BrokerCommand, force_int
@@ -138,18 +136,11 @@ class CommandUpdateMachine(BrokerCommand):
                                      dbmodel.machine_type))
             dbmachine.model = dbmodel
 
-        if cpuname and cpuvendor and cpuspeed:
-            cpuspeed = force_int("cpuspeed", cpuspeed)
-            q = session.query(Cpu).filter_by(name=cpuname, speed=cpuspeed)
-            q = q.join('vendor').filter_by(name=cpuvendor)
-            try:
-                dbcpu = q.one()
-            except InvalidRequestError, e:
-                raise ArgumentError("Could not uniquely identify a CPU with name %s, speed %s, and vendor %s: %s" %
-                        (cpuname, cpuspeed, cpuvendor, e))
+        if cpuname or cpuvendor or cpuspeed:
+            dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
+                                   speed=force_int("cpuspeed", cpuspeed),
+                                   compel=True)
             dbmachine.cpu = dbcpu
-        elif cpuname or cpuvendor or cpuspeed:
-            raise UnimplementedError("Can only update a machine with an exact cpu (--cpuname, --cpuvendor, and --cpuspeed).")
 
         if cpucount:
             cpucount = force_int("cpucount", cpucount)

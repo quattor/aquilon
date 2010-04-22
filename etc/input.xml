@@ -913,6 +913,8 @@
          <option name="nics" type="string">number of NIC interfaces</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
+         <option name="cpuspeed" type="string">CPU speed, if the name is not unique</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />

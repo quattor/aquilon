@@ -136,13 +136,29 @@ class TestUpdateMachine(TestBrokerCommand):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
             "--serial", "USNKPDZ407"])
 
+    def testupdateut3c1n4cpubadspeed(self):
+        self.badrequesttest(["update", "machine", "--machine", "ut3c1n4",
+            "--cpuspeed", "not-a-number"])
+
+    def testupdateut3c1n4cpubadvendor(self):
+        self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
+            "--cpuvendor", "no-such-vendor"])
+
+    def testupdateut3c1n4cpubadname(self):
+        self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
+            "--cpuname", "no-such-cpu"])
+
+    def testupdateut3c1n4cpureal(self):
+        self.noouttest(["update", "machine", "--machine", "ut3c1n4",
+            "--cpuname", "xeon_3000"])
+
     def testverifyupdateut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: Cpu xeon_3000 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USNKPDZ407", command)
 
@@ -163,11 +179,11 @@ class TestUpdateMachine(TestBrokerCommand):
             command)
         # 1st cpu
         self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
+            """"cpu" = list(create("hardware/cpu/intel/xeon_3000"),""",
             command)
         # 2nd cpu
         self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_2660"));""",
+            """create("hardware/cpu/intel/xeon_3000"));""",
             command)
 
     def testclearchassis(self):
