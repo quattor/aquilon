@@ -90,25 +90,24 @@ def restrict_tor_offsets(dbnetwork, ip):
 
 def generate_ip(session, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None,
-                **kwargs):
-    if not (ip or ipfromip or ipfromsystem or autoip):
+                compel=False, **kwargs):
+    ip_options = [ip, ipfromip, ipfromsystem, autoip]
+    numopts = sum([1 if opt else 0 for opt in ip_options])
+    if numopts > 1:
+        raise ArgumentError("Only one of --ip, --ipfromip, --ipfromsystem "
+                            "and --autoip can be specified.")
+    elif numopts == 0:
+        if compel:
+            raise ArgumentError("Please specify one of the --ip, --ipfromip, "
+                                "--ipfromsystem, and --autoip parameters.")
         return None
+
     if ip:
-        if ipfromip:
-            raise ArgumentError("Cannot specify both --ip and --ipfromip")
-        if ipfromsystem:
-            raise ArgumentError("Cannot specify both --ip and --ipfromsystem")
-        if autoip:
-            raise ArgumentError("Cannot specify both --ip and --autoip")
         return ip
+
     dbsystem = None
     dbnetwork = None
     if autoip:
-        if ipfromip:
-            raise ArgumentError("Cannot specify both --autoip and --ipfromip")
-        if ipfromsystem:
-            raise ArgumentError("Cannot specify both --autoip and "
-                                "--ipfromsystem")
         if not dbinterface:
             raise ArgumentError("No interface available to automatically "
                                 "generate an IP.")
@@ -143,10 +142,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
                 raise ArgumentError("No switch found in the discovery table "
                                     "for mac %s" % dbinterface.mac)
             dbsystem = dbom.switch
+
     if ipfromsystem:
-        if ipfromip:
-            raise ArgumentError("Cannot specify both --ipfromsystem and "
-                                "--ipfromip")
         # Assumes one system entry, not necessarily correct.
         dbsystem = get_system(session, ipfromsystem)
 

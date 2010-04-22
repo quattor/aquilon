@@ -94,11 +94,7 @@ class CommandAddManager(BrokerCommand):
                                 (dbinterface.name, dbmachine.name,
                                  dbinterface.system.fqdn))
 
-        ip = generate_ip(session, dbinterface, **arguments)
-        if not ip:
-            raise ArgumentError("add_manager requires any of the --ip, "
-                                "--ipfromip, --ipfromsystem, --autoip "
-                                "parameters")
+        ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
 

@@ -76,11 +76,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
                                 mac=mac, interface_type='oa', **extra)
         session.add(dbinterface)
 
-        ip = generate_ip(session, dbinterface, **arguments)
-        if not ip:
-            raise ArgumentError("add_interface --chassis requires any of "
-                                "the --ip, --ipfromip, --ipfromsystem, "
-                                "--autoip parameters")
+        ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
         dbchassis.ip = ip
