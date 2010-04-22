@@ -37,7 +37,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 
 
-class CommandAddDynamicRange(BrokerCommand):
+class CommandDelDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
