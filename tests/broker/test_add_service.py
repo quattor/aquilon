@@ -52,6 +52,12 @@ class TestAddService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
 
+    def testdelserviceinuse(self):
+        command = "del service --service afs"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Cannot remove service afs with instances "
+                         "defined.", command)
+
     def testaddextraafsinstance(self):
         command = "add service --service afs --instance q.ln.ms.com"
         self.noouttest(command.split(" "))

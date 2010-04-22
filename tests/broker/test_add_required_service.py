@@ -104,6 +104,13 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: chooser2", command)
         self.matchoutput(out, "Service: chooser3", command)
 
+    def testverifyaddrequiredpersonalitychooser1(self):
+        command = "show service --service chooser1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+            "Required for Personality: unixeng-test Archetype: aquilon",
+            command)
+
     def testaddrequiredutsvc(self):
         command = ["add_required_service", "--personality=compileserver",
                    "--service=utsvc", "--archetype=aquilon"]

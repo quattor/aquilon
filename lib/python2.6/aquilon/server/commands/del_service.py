@@ -29,59 +29,40 @@
 """Contains the logic for `aq del service`."""
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.service import get_service
-from aquilon.aqdb.model import (ServiceInstance, ServiceMap,
-                                 PersonalityServiceMap)
-from aquilon.server.templates.service import (PlenaryService,
-                                              PlenaryServiceInstance)
+from aquilon.server.templates.service import PlenaryService
+from aquilon.aqdb.model import Service
 
 
 class CommandDelService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, instance, **arguments):
-        # This should fail nicely if the service is required for an archetype.
-        dbservice = get_service(session, service)
-        if not instance:
-            if dbservice.instances:
-                raise ArgumentError("Cannot remove service with instances defined.")
+    def render(self, session, logger, service, **arguments):
+        dbservice = Service.get_unique(session, service, compel=True)
 
-            session.delete(dbservice)
-            session.flush()
+        if dbservice.archetypes:
+            msg = ", ".join([archetype.name for archetype in
+                             dbservice.archetypes])
+            raise ArgumentError("Cannot remove service %s, it is required by "
+                                "the following archetypes: %s." %
+                                (dbservice.name, msg))
+        if dbservice.personalities:
+            msg = ", ".join(["%s (%s)" % (personality.name,
+                                          personality.archetype.name)
+                             for personality in dbservice.personalities])
+            raise ArgumentError("Cannot remove service %s, it is required by "
+                                "the following personalities: %s." %
+                                (dbservice.name, msg))
+        if dbservice.instances:
+            raise ArgumentError("Cannot remove service %s with instances "
+                                "defined." % dbservice.name)
 
-            plenary_info = PlenaryService(dbservice, logger=logger)
-            plenary_info.remove()
+        session.delete(dbservice)
+        session.flush()
 
-            return
+        plenary_info = PlenaryService(dbservice, logger=logger)
+        plenary_info.remove()
 
-        dbsi = session.query(ServiceInstance).filter_by(
-                name=instance, service=dbservice).first()
-
-        if dbsi:
-            if dbsi.client_count > 0:
-                raise ArgumentError("instance has clients and cannot be deleted.")
-            if dbsi.servers:
-                raise ArgumentError("instance is still being provided by servers.")
-
-            # Check the service map and remove any mappings
-            for dbmap in session.query(ServiceMap).filter_by(
-                    service_instance=dbsi).all():
-                session.delete(dbmap)
-            for dbmap in session.query(PersonalityServiceMap).filter_by(
-                    service_instance=dbsi).all():
-                session.delete(dbmap)
-
-            session.delete(dbsi)
-            session.flush()
-
-            plenary_info = PlenaryServiceInstance(dbservice, dbsi,
-                                                  logger=logger)
-            plenary_info.remove()
-        else:
-            raise NotFoundException("No such service instance")
-
-        # FIXME: Cascade to relevant objects...
         return
