@@ -29,7 +29,7 @@
 """Contains the logic for `aq del required service --personality`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
@@ -47,9 +47,9 @@ class CommandDelRequiredServicePersonality(BrokerCommand):
         try:
             dbpsli = session.query(PersonalityServiceListItem).filter_by(
                     service=dbservice, personality=dbpersonality).one()
-        except InvalidRequestError, e:
+        except NoResultFound:
             raise NotFoundException("Could not find required service %s "
-                                    "for %s %s: %s" %
-                                    (service, archetype, personality, e))
+                                    "for %s %s." %
+                                    (service, archetype, personality))
         session.delete(dbpsli)
         return

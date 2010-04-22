@@ -29,7 +29,7 @@
 """Contains the logic for `aq add location`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon import const
 from aquilon.exceptions_ import ArgumentError
@@ -62,10 +62,9 @@ class CommandAddLocation(BrokerCommand):
         try:
             dbparent = session.query(Location).filter_by(name=parentname,
                     location_type=parenttype).one()
-        except InvalidRequestError:
-            raise ArgumentError(
-                    "Parent %s %s not found."
-                    % (parenttype.capitalize(), parentname))
+        except NoResultFound:
+            raise ArgumentError("Parent %s %s not found." %
+                                (parenttype.capitalize(), parentname))
         # Incoming looks like 'city', need the City class.
         location_type = globals()[type.capitalize()]
         if not issubclass(location_type, Location):

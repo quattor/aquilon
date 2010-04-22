@@ -56,12 +56,15 @@ class TestOrganization(TestBrokerCommand):
         command = "del organization --organization example"
         self.noouttest(command.split(" "))
 
+    def testdelexorgagain(self):
+        command = "del organization --organization example"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Company example not found.", command)
+
     def testverifydelexorg(self):
         command = "show organization --organization example"
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Not Found: Location type='company' name='example' not found: No row was found for one()",
-                         command)
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Company example not found.", command)
 
 
 if __name__=='__main__':

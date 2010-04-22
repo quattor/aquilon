@@ -71,7 +71,7 @@ class TestSearchHost(TestBrokerCommand):
     def testmachineunavailable(self):
         command = "search host --machine machine-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Machine machine-does-not-exist not found",
+        self.matchoutput(out, "Machine 'machine-does-not-exist' not found",
                          command)
 
     def testdnsdomainavailable(self):
@@ -267,7 +267,7 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --service utsvc " \
                   "--instance service-instance-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Service utsvc instance "
+        self.matchoutput(out, "Service utsvc, instance "
                               "service-instance-does-not-exist not found",
                          command)
 
@@ -350,7 +350,7 @@ class TestSearchHost(TestBrokerCommand):
     def testlocationunavailable(self):
         command = "search host --building building-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Building 'building-does-not-exist' not found",
+        self.matchoutput(out, "Building building-does-not-exist not found",
                          command)
 
     def testclusteravailable(self):

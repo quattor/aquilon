@@ -29,17 +29,19 @@
 """Wrapper to make getting a model simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Model
 
 
 def get_model(session, model):
     try:
         dbmodel = session.query(Model).filter_by(name=model).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Model %s not found: %s" % (model, e))
+    except NoResultFound:
+        raise NotFoundException("Model %s not found." % model)
+    except MultipleResultsFound:
+        raise ArgumentError("There are multiple models with name %s." % model)
     return dbmodel
 
 

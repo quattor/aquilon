@@ -279,7 +279,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = ["search_esx_cluster",
                    "--cluster_building=building-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Building 'building-does-not-exist' not found",
+        self.matchoutput(out, "Building building-does-not-exist not found",
                          command)
 
     def testvmhostlocationavailable(self):
@@ -294,7 +294,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = ["search_esx_cluster",
                    "--vmhost_rack=rack-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Rack 'rack-does-not-exist' not found",
+        self.matchoutput(out, "Rack rack-does-not-exist not found",
                          command)
 
 

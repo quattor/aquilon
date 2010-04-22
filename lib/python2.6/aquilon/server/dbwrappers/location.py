@@ -29,7 +29,7 @@
 """Wrapper to make getting a location simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon import const
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -56,7 +56,12 @@ def get_location(session, **kwargs):
     try:
         dblocation = session.query(Location).filter_by(
                 name=kwargs[argname], location_type=location_type).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("%s '%s' not found: %s"
-                % (location_type.capitalize(), kwargs[location_type], e))
+    except NoResultFound:
+        raise NotFoundException("%s %s not found." %
+                                (location_type.capitalize(),
+                                 kwargs[location_type]))
+    except MultipleResultsFound:
+        raise ArgumentError("There are multiple matches for %s %s." %
+                            (location_type.capitalize(),
+                             kwargs[location_type]))
     return dblocation

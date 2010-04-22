@@ -60,8 +60,13 @@ class TestUpdateInterface(TestBrokerCommand):
                         "--ip", self.net.unknown[0].usable[12].ip, "--boot"])
 
     def testupdateut3c5n10eth2(self):
-        self.badrequesttest(["update", "interface", "--interface", "eth2",
+        self.notfoundtest(["update", "interface", "--interface", "eth2",
             "--machine", "ut3c5n10", "--boot"])
+
+    def testupdatebadhost(self):
+        # Use host name instead of machine name
+        self.notfoundtest(["update", "interface", "--interface", "eth0",
+                           "--machine", "unittest02.one-nyp.ms.com"])
 
     def testverifyupdateut3c5n10interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"

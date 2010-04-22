@@ -29,7 +29,7 @@
 """Contains the logic for `aq del required service`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
@@ -46,9 +46,9 @@ class CommandDelRequiredService(BrokerCommand):
         try:
             dbsli = session.query(ServiceListItem).filter_by(
                     service=dbservice, archetype=dbarchetype).one()
-        except InvalidRequestError, e:
-            raise NotFoundException("Could not find required service %s for %s: %s"
-                    % (service, archetype, e))
+        except NoResultFound:
+            raise NotFoundException("Could not find required service %s for %s."
+                    % (service, archetype))
         session.delete(dbsli)
         session.refresh(dbarchetype)
         return

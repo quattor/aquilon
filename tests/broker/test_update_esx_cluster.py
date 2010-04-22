@@ -149,7 +149,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--archetype=windows"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Personality esx_server in Archetype windows "
+                         "Personality esx_server of archetype windows "
                          "not found",
                          command)
 

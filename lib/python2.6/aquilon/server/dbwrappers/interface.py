@@ -33,11 +33,11 @@ To an extent, this has become a dumping ground for any common ip methods.
 """
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.column_types.IPV4 import dq_to_int
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, Machine, ObservedMac, System,
@@ -48,19 +48,25 @@ from aquilon.server.dbwrappers.system import get_system
 # FIXME: interface type?  interfaces for hardware entities in general?
 def get_interface(session, interface, machine, mac):
     q = session.query(Interface)
+    errmsg = []
+    if interface:
+        errmsg.append("named " + interface)
+        q = q.filter_by(name=interface)
     if machine:
+        errmsg.append("of machine " + machine)
         q = q.filter(Interface.hardware_entity_id==Machine.machine_id)
         q = q.filter(Machine.name==machine)
-    if interface:
-        q = q.filter_by(name=interface)
     if mac:
+        errmsg.append("having MAC address " + mac)
         q = q.filter_by(mac=mac)
 
     try:
         dbinterface = q.one()
-    except InvalidRequestError, e:
-        raise ArgumentError("Interface not found, make sure it has been "
-                            "specified uniquely: %s" % e)
+    except NoResultFound:
+        raise NotFoundException("Interface %s not found." % " ".join(errmsg))
+    except MultipleResultsFound:
+        raise ArgumentError("There are multiple interfaces %s." %
+                            " ".join(errmsg))
     return dbinterface
 
 def restrict_tor_offsets(dbnetwork, ip):
@@ -259,16 +265,16 @@ def verify_port_group(dbmachine, port_group):
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id)
         q = q.filter_by(switch=dbswitch)
-        vlans = q.all()
-        if not vlans:
+        try:
+            dbobserved_vlan = q.one()
+        except NoResultFound:
             raise ArgumentError("Cannot verify port group availability: "
                                 "no record for VLAN %s on switch %s" %
                                 (vlan_id, dbswitch.fqdn))
-        if len(vlans) > 1:
+        except MultipleResultsFound:
             raise InternalError("Too many subnets found for VLAN %s "
                                 "on switch %s" %
                                 (vlan_id, dbswitch.fqdn))
-        dbobserved_vlan = vlans[0]
         if dbobserved_vlan.is_at_guest_capacity:
             raise ArgumentError("Port group %s is full for switch %s" %
                                 (dbvi.port_group,

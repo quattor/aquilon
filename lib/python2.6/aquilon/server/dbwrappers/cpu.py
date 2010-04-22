@@ -29,7 +29,7 @@
 """Wrapper to make getting a cpu simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Cpu, Vendor
@@ -39,8 +39,10 @@ from aquilon.aqdb.model import Cpu, Vendor
 def get_cpu(session, cpu):
     try:
         dbcpu = session.query(Cpu).filter_by(name=cpu).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Cpu %s not uniquely identified: %s" % (cpu, e))
+    except NoResultFound:
+        raise NotFoundException("CPU %s not found." % cpu)
+    except MultipleResultsFound:
+        raise ArgumentError("There are multiple CPUs with name %s." % cpu)
     return dbcpu
 
 def get_unique_cpu(session, name=None, vendor=None, speed=None):
@@ -57,10 +59,11 @@ def get_unique_cpu(session, name=None, vendor=None, speed=None):
         dbcpuvendor = Vendor.get_unique(session, vendor, compel=True)
         q = q.filter_by(vendor=dbcpuvendor)
         error['vendor'] = dbcpuvendor.name
-    cpus = q.all()
-    if not cpus:
+    try:
+        cpu = q.one()
+    except NoResultFound, e:
         error_msg = " with %s" % error if error else ''
         raise NotFoundException("No matching CPU found%s." % error_msg)
-    if len(cpus) > 1:
-        raise ArgumentError("Could not uniquely identify CPU.")
-    return cpus[0]
+    except MultipleResultsFound, e:
+        raise ArgumentError("There are multiple CPUs matching the parameters.")
+    return cpu

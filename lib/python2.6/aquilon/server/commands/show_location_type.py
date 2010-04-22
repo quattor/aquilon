@@ -29,7 +29,7 @@
 """Contains the logic for `aq show location --type`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
@@ -51,10 +51,9 @@ class CommandShowLocationType(BrokerCommand):
         if name and type:
             try:
                 return query.one()
-            except InvalidRequestError, e:
-                raise NotFoundException(
-                        "Location type='%s' name='%s' not found: %s"
-                        % (type, name, e))
+            except NoResultFound:
+                raise NotFoundException("%s %s not found." %
+                                        (type.capitalize(), name))
         return query.all()
 
 

@@ -29,7 +29,7 @@
 """Wrapper to make getting a service instance simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import BuildItem, ServiceInstance
@@ -39,9 +39,11 @@ def get_service_instance(session, dbservice, instance):
     try:
         dbsi = session.query(ServiceInstance).filter_by(
                 service=dbservice, name=instance).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Service %s instance %s not found (try `aq add service --service %s --instance %s` to add it)"
-                % (dbservice.name, instance, dbservice.name, instance))
+    except NoResultFound:
+        raise NotFoundException("Service %s, instance %s not found.  Try `aq "
+                                "add service --service %s --instance %s` to "
+                                "add it." % (dbservice.name, instance,
+                                             dbservice.name, instance))
     return dbsi
 
 def get_client_service_instances(session, dbclient):
