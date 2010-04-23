@@ -409,10 +409,10 @@ class TestUpdateMachine(TestBrokerCommand):
     def testfailmissingcluster(self):
         command = ["update_machine", "--machine=evm1",
                    "--cluster=cluster-does-not-exist"]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Could not find cluster named "
-                         "'cluster-does-not-exist'",
+                         "Cluster with name of 'cluster-does-not-exist' not "
+                         "found.",
                          command)
 
     def testfailchangemetacluster(self):

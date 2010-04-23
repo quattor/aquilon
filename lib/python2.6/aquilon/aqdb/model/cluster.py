@@ -312,6 +312,7 @@ class ClusterAlignedService(Base):
         to cut.
     """
     __tablename__ = _CRS
+    _class_label = 'Cluster Aligned Service'
 
     service_id = Column(Integer, ForeignKey('service.id',
                                             name='%s_svc_fk'%(_ABV),
@@ -338,6 +339,8 @@ class ClusterServiceBinding(Base):
         Makes bindings of service instances to clusters
     """
     __tablename__ = _CSB
+    _class_label = 'Cluster Service Binding'
+
     cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
                                             name='%s_cluster_fk'%(_CAB),
                                             ondelete='CASCADE'),

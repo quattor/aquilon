@@ -46,9 +46,7 @@ class CommandManageCluster(BrokerCommand):
         # FIXME: Need to verify that this server handles this domain?
         dbdomain = verify_domain(session, domain,
                 self.config.get("broker", "servername"))
-        dbcluster = session.query(Cluster).filter_by(name=cluster).first()
-        if not dbcluster:
-            raise NotFoundException("cluster '%s' not found" % cluster)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         old_domain = dbcluster.domain.name
         plenaries = PlenaryCollection(logger=logger)

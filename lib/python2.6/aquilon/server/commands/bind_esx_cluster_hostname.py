@@ -43,9 +43,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
     def render(self, session, logger, hostname, cluster, force=False,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
-        dbcluster = EsxCluster.get_unique(session, cluster)
-        if not dbcluster:
-            raise NotFoundException("ESX Cluster '%s' not found." % cluster)
+        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         if dbhost.personality != dbcluster.personality:
             raise ArgumentError("Host archetype %s personality %s does not "
                                 "match cluster archetype %s personality %s" %

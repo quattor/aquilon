@@ -39,13 +39,9 @@ class CommandRebindMetaCluster(BrokerCommand):
     required_parameters = ["metacluster", "cluster"]
 
     def render(self, session, logger, metacluster, cluster, **arguments):
-        dbcluster = Cluster.get_unique(session, cluster)
-        if not dbcluster:
-            raise NotFoundException("Cluster '%s' not found." % cluster)
-        dbmetacluster = MetaCluster.get_unique(session, metacluster)
-        if not dbmetacluster:
-            raise NotFoundException("MetaCluster '%s' not found." %
-                                    metacluster)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        dbmetacluster = MetaCluster.get_unique(session, metacluster,
+                                               compel=True)
         old_metacluster = None
         if dbcluster.metacluster and dbcluster.metacluster != dbmetacluster:
             if dbcluster.machines:

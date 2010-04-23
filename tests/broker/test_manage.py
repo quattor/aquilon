@@ -110,7 +110,7 @@ class TestManage(TestBrokerCommand):
         command = ["manage", "--cluster", "cluster-does-not-exist",
                    "--domain", "changetest1"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
                          command)
 
     def testmanagecluster(self):

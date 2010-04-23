@@ -42,11 +42,7 @@ class CommandMakeCluster(BrokerCommand):
     required_parameters = ["cluster"]
 
     def render(self, session, logger, cluster, keepbindings, **arguments):
-        dbcluster = Cluster.get_unique(session, cluster)
-        if not dbcluster:
-            raise NotFoundException("Cluster '%s' not found." % cluster)
-
-
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if not dbcluster.personality.archetype.is_compileable:
             raise ArgumentError("Cluster %s is not a compilable archetype "
                                 "(%s)" %

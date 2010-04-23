@@ -31,9 +31,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.dns_domain import get_dns_domain
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import System
+from aquilon.aqdb.model import System, DnsDomain
 
 
 class CommandDelDnsDomain(BrokerCommand):
@@ -41,7 +40,7 @@ class CommandDelDnsDomain(BrokerCommand):
     required_parameters = ["dns_domain"]
 
     def render(self, session, logger, dns_domain, **arguments):
-        dbdns_domain = get_dns_domain(session, dns_domain)
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
         dbsystem = session.query(System).filter_by(
                 dns_domain=dbdns_domain).first()

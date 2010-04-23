@@ -64,9 +64,7 @@ class CommandSearchMachine(BrokerCommand):
         elif cpuname or cpuvendor or cpuspeed:
             q = q.join('cpu')
             if cpuvendor:
-                dbvendor = Vendor.get_unique(session, cpuvendor)
-                if not dbvendor:
-                    raise ArgumentError("Vendor '%s' not found." % cpuvendor)
+                dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
                 q = q.filter_by(vendor=dbvendor)
             if cpuspeed:
                 cpuspeed = force_int("cpuspeed", cpuspeed)
@@ -81,9 +79,7 @@ class CommandSearchMachine(BrokerCommand):
             memory = force_int("memory", memory)
             q = q.filter_by(memory=memory)
         if cluster:
-            dbcluster = Cluster.get_unique(session, cluster)
-            if not dbcluster:
-                raise ArgumentError("Cluster '%s' not found." % cluster)
+            dbcluster = Cluster.get_unique(session, cluster, compel=True)
             q = q.join('_cluster')
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()

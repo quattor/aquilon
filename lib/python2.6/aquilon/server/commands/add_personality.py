@@ -46,12 +46,8 @@ class CommandAddPersonality(BrokerCommand):
             raise ArgumentError("name '%s' is not valid"% personality)
 
         dbarchetype = get_archetype(session, archetype)
-
-        existing = session.query(Personality).filter_by(
-            name=personality,archetype=dbarchetype).first()
-
-        if existing:
-            raise ArgumentError("personality '%s' already exists" % personality)
+        Personality.get_unique(session, archetype=dbarchetype, name=personality,
+                               preclude=True)
 
         dbpersona = Personality(name=personality, archetype=dbarchetype)
 

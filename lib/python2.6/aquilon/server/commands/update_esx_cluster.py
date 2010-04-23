@@ -49,9 +49,7 @@ class CommandUpdateESXCluster(BrokerCommand):
                max_members, vm_to_host_ratio, tor_switch, fix_location,
                down_hosts_threshold, comments, **arguments):
         cluster_type = 'esx'
-        dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
-        if not dbcluster:
-            raise NotFoundException("cluster '%s' not found" % cluster)
+        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
 
         cluster_updated = False
         location_changed = False

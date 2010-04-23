@@ -36,6 +36,7 @@ from aquilon.aqdb.model import Location
 class Company(Location):
     """ Company is a subtype of location """
     __tablename__ = 'company'
+    _class_label = 'Organization'
     __mapper_args__ = {'polymorphic_identity':'company'}
     id = Column(Integer, ForeignKey('location.id',
                                     name='company_loc_fk',

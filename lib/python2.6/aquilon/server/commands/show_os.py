@@ -42,7 +42,7 @@ class CommandShowOS(BrokerCommand):
         if osversion:
             q = q.filter_by(version=osversion)
         if archetype:
-            dbarchetype = Archetype.get_unique(session, archetype)
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             q = q.filter_by(archetype=dbarchetype)
         oslist = q.all()
         if not oslist:

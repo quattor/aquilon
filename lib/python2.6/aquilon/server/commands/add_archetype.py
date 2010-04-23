@@ -45,9 +45,7 @@ class CommandAddArchetype(BrokerCommand):
                     "service", "servicedata"]:
             raise ArgumentError("name '%s' is reserved" % archetype)
 
-        existing = session.query(Archetype).filter_by(name=archetype).first()
-        if existing:
-            raise ArgumentError("archetype '%s' already exists" % archetype)
+        Archetype.get_unique(session, archetype, preclude=True)
 
         dbarch = Archetype(name=archetype)
 

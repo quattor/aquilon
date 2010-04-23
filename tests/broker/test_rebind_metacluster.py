@@ -56,7 +56,7 @@ class TestRebindMetaCluster(TestBrokerCommand):
                    "--metacluster=metacluster-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "MetaCluster 'metacluster-does-not-exist' not found.",
+                         "Metacluster 'metacluster-does-not-exist' not found.",
                          command)
 
     def testfailfullmetacluster(self):

@@ -44,10 +44,8 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, hostname, cluster, **arguments):
+        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
-        dbcluster = EsxCluster.get_unique(session, cluster)
-        if not dbcluster:
-            raise NotFoundException("ESX Cluster '%s' not found." % cluster)
         if not dbhost.cluster:
             raise ArgumentError("Host '%s' not bound to a cluster." % hostname)
         if dbhost.cluster != dbcluster:

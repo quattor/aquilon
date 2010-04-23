@@ -164,10 +164,7 @@ class CommandUpdateMachine(BrokerCommand):
             if not dbmachine.cluster:
                 raise ArgumentError("Cannot add an existing machine to "
                                     "a cluster.")
-            dbcluster = Cluster.get_unique(session, name=cluster)
-            if not dbcluster:
-                raise ArgumentError("Could not find cluster named '%s'" %
-                                    cluster)
+            dbcluster = Cluster.get_unique(session, name=cluster, compel=True)
             if dbcluster.metacluster != dbmachine.cluster.metacluster:
                 raise ArgumentError("Cannot move machine to a new "
                                     "metacluster: Current metacluster %s "

@@ -78,7 +78,7 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         command = "update metacluster --metacluster metacluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "metacluster 'metacluster-does-not-exist' not found",
+                         "Metacluster 'metacluster-does-not-exist' not found",
                          command)
 
     def testfailreducemaxmembers(self):

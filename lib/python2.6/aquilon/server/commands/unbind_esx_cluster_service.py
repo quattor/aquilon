@@ -44,17 +44,10 @@ class CommandUnbindESXClusterService(BrokerCommand):
         cluster_type = 'esx'
         dbservice = get_service(session, service)
         dbinstance = get_service_instance(session, dbservice, instance)
-        dbcluster = EsxCluster.get_unique(session, cluster)
-        if not dbcluster:
-            raise NotFoundException("%s cluster '%s' not found." %
-                                    (cluster_type, cluster))
-        dbcsb = ClusterServiceBinding.get_unique(session,
-            cluster_id=dbcluster.id, service_instance_id=dbinstance.id)
-        if not dbcsb:
-            raise ArgumentError("Service %s instance %s is not bound to "
-                                "%s cluster %s." %
-                                (dbservice.name, dbinstance.name,
-                                 cluster_type, dbcluster.name))
+        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
+        dbcsb = ClusterServiceBinding.get_unique(session, cluster=dbcluster,
+                                                 service_instance=dbinstance,
+                                                 compel=True)
         if dbservice in [cas.service for cas in dbcluster.required_services]:
             raise ArgumentError("Cannot remove cluster service instance "
                                 "binding for %s cluster aligned service %s." %

@@ -40,11 +40,8 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
     def render(self, session, metacluster, max_members, max_shares, comments,
                **arguments):
-        q = session.query(MetaCluster).filter_by(name=metacluster)
-        dbmetacluster = q.first()
-        if not dbmetacluster:
-            raise NotFoundException("metacluster '%s' not found" % metacluster)
-
+        dbmetacluster = MetaCluster.get_unique(session, metacluster,
+                                               compel=True)
         max_members = force_int("max_members", max_members)
         if max_members is not None:
             if len(dbmetacluster.members) > max_members:

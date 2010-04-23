@@ -197,7 +197,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["update_esx_cluster", "--cluster=cluster-does-not-exist",
                    "--comments=test should fail"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "ESX Cluster 'cluster-does-not-exist' not found",
                          command)
 
     # FIXME: Need tests for plenary templates

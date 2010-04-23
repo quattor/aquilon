@@ -72,9 +72,7 @@ class TestAddHost(TestBrokerCommand):
     def testshowhostbaddomain(self):
         command = "show host --hostname aquilon00.one-nyp"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out,
-                "DNS domain 'one-nyp' for 'aquilon00.one-nyp' not found",
-                command)
+        self.matchoutput(out, "DNS Domain 'one-nyp' not found.", command)
 
     def testverifyunittest02proto(self):
         command = "show host --hostname unittest02.one-nyp.ms.com --format proto"

@@ -52,7 +52,7 @@ class TestSearchMachine(TestBrokerCommand):
 
     def testclusterunavailable(self):
         command = "search machine --cluster cluster-does-not-exist"
-        out = self.badrequesttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
                          command)
 
@@ -119,7 +119,7 @@ class TestSearchMachine(TestBrokerCommand):
 
     def testparialcpufailvendor(self):
         command = ["search_machine", "--cpuvendor=vendor-does-not-exist"]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found.",
                          command)
 

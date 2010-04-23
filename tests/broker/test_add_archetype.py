@@ -51,7 +51,7 @@ class TestAddArchetype(TestBrokerCommand):
     def testaddexisting(self):
         command = "add archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "archetype 'aquilon' already exists", command)
+        self.matchoutput(out, "Archetype 'aquilon' already exists", command)
 
     def testaddbadname(self):
         command = "add archetype --archetype oops@!"

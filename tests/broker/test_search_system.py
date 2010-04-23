@@ -54,7 +54,7 @@ class TestSearchSystem(TestBrokerCommand):
     def testfqdnunavailablefakedomain(self):
         command = "search system --fqdn unittest00.does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "DNS domain 'does-not-exist.ms.com'", command)
+        self.matchoutput(out, "DNS Domain 'does-not-exist.ms.com'", command)
 
     def testfqdnavailablefull(self):
         command = "search system --fqdn unittest00.one-nyp.ms.com --fullinfo"
@@ -76,7 +76,7 @@ class TestSearchSystem(TestBrokerCommand):
     def testdnsdomainunavailable(self):
         command = "search system --dnsdomain does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "DnsDomain does-not-exist.ms.com not found",
+        self.matchoutput(out, "DNS Domain 'does-not-exist.ms.com' not found",
                          command)
 
     def testshortnameavailable(self):

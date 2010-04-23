@@ -42,9 +42,7 @@ class CommandDelESXCluster(BrokerCommand):
     required_parameters = [ "cluster" ]
 
     def render(self, session, logger, cluster, **arguments):
-        dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
-        if not dbcluster:
-            raise NotFoundException("No cluster with name '%s'" % cluster)
+        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         cluster = str(dbcluster.name)
         if dbcluster.machines:
             raise ArgumentError("Cluster still in use by virtual machines: %s"
@@ -75,5 +73,3 @@ class CommandDelESXCluster(BrokerCommand):
                     logger=logger)
 
         return
-
-

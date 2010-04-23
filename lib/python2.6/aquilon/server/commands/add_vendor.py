@@ -41,9 +41,7 @@ class CommandAddVendor(BrokerCommand):
         if (not valid.match(vendor)):
             raise ArgumentError("vendor name '%s' is not valid" % vendor)
 
-        existing = session.query(Vendor).filter_by(name=vendor).first()
-        if existing:
-            raise ArgumentError("vendor '%s' already exists" % vendor)
+        Vendor.get_unique(session, vendor, preclude=True)
 
         dbv = Vendor(name=vendor)
         session.add(dbv)

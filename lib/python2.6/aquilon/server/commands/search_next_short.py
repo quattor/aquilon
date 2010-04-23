@@ -30,8 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import System
-from aquilon.server.dbwrappers.dns_domain import get_dns_domain
+from aquilon.aqdb.model import System, DnsDomain
 from aquilon.server.dbwrappers.search import search_next
 
 
@@ -41,7 +40,7 @@ class CommandSearchNextShort(BrokerCommand):
 
     def render(self, session, short, dns_domain, start, number, fullname, pack,
                **arguments):
-        dbdns_domain = get_dns_domain(session, dns_domain)
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         result = search_next(session=session, cls=System, attr=System.name,
                              value=short, dns_domain=dbdns_domain,
                              start=start, pack=pack)

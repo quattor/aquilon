@@ -41,9 +41,7 @@ class CommandCompile(BrokerCommand):
     requires_readonly = True
 
     def render(self, session, logger, domain, user, **arguments):
-        d = session.query(Domain).filter_by(name=domain).all()
-        if (len(d) != 1):
-            raise NotFoundException("Domain '%s' not found"%domain)
-        dom = TemplateDomain(d[0], logger=logger)
+        dbdomain = Domain.get_unique(session, domain, compel=True)
+        dom = TemplateDomain(dbdomain, logger=logger)
         dom.compile(session)
         return

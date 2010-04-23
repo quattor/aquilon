@@ -33,13 +33,13 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.server.dbwrappers.machine import create_machine, get_machine
+from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster,
-                                MachineClusterMember)
+                                Machine, MachineClusterMember)
 
 
 class CommandAddMachine(BrokerCommand):
@@ -97,14 +97,10 @@ class CommandAddMachine(BrokerCommand):
             raise ArgumentError("Virtual machines must be assigned to a "
                                 "cluster.")
 
-        try:
-            m = get_machine(session, machine)
-            raise ArgumentError("The machine '%s' already exists"%machine)
-        except NotFoundException:
-            pass
-
+        Machine.get_unique(session, machine, preclude=True)
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
-                                   cpuname, cpuvendor, cpuspeed, cpucount, memory, serial)
+                                   cpuname, cpuvendor, cpuspeed, cpucount,
+                                   memory, serial)
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,

@@ -55,7 +55,7 @@ class TestSearchHost(TestBrokerCommand):
     def testfqdnunavailablefakedomain(self):
         command = "search host --hostname unittest00.does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "DNS domain 'does-not-exist.ms.com'", command)
+        self.matchoutput(out, "DNS Domain 'does-not-exist.ms.com'", command)
 
     def testfqdnavailablefull(self):
         command = "search host --hostname unittest00.one-nyp.ms.com --fullinfo"
@@ -83,7 +83,7 @@ class TestSearchHost(TestBrokerCommand):
     def testdnsdomainunavailable(self):
         command = "search host --dnsdomain does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "DnsDomain does-not-exist.ms.com not found",
+        self.matchoutput(out, "DNS Domain 'does-not-exist.ms.com' not found",
                          command)
 
     def testshortnameavailable(self):
@@ -363,13 +363,13 @@ class TestSearchHost(TestBrokerCommand):
 
     def testclusterunavailable(self):
         command = "search host --cluster cluster-does-not-exist"
-        out = self.badrequesttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
                          command)
 
     def testclusterunavailablefull(self):
         command = "search host --fullinfo --cluster cluster-does-not-exist"
-        out = self.badrequesttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
                          command)
 

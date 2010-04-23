@@ -44,10 +44,8 @@ class CommandBindESXClusterService(BrokerCommand):
                **arguments):
         cluster_type = 'esx'
         dbcluster = Cluster.get_unique(session,
-                                       name=cluster, cluster_type=cluster_type)
-        if not dbcluster:
-            raise NotFoundException("%s cluster '%s' not found." %
-                                    (cluster_type, cluster))
+                                       name=cluster, cluster_type=cluster_type,
+                                       compel=True)
         dbservice = get_service(session, service)
         chooser = Chooser(dbcluster, logger=logger, required_only=False)
         if instance:
