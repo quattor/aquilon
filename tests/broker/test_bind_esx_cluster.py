@@ -75,6 +75,15 @@ class TestBindESXCluster(TestBrokerCommand):
             self.matchoutput(out, "Member: evh%s.aqd-unittest.ms.com" %i,
                              command)
 
+    def testverifycat(self):
+        command = "cat --cluster utecl1"
+        out = self.commandtest(command.split())
+        for i in range(1, 5):
+            self.searchoutput(out,
+                              "'/system/cluster/members' = list\([^\)]*"
+                              "'evh%s.aqd-unittest.ms.com'[^\)]*\);" % i,
+                              command)
+
     def testfailmissingcluster(self):
         command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster", "cluster-does-not-exist"]
@@ -189,8 +198,6 @@ class TestBindESXCluster(TestBrokerCommand):
             cluster = "utecl%d" % (5 + ((i - 1) / 4))
             self.successtest(["bind_esx_cluster",
                               "--hostname", host, "--cluster", cluster])
-
-    # FIXME: Also test plenary files.
 
 
 if __name__=='__main__':

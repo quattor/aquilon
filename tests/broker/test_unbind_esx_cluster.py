@@ -59,6 +59,11 @@ class TestUnbindESXCluster(TestBrokerCommand):
                             "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                             "--cluster", "utecl1"])
 
+    def testverifycat(self):
+        command = "cat --cluster utecl1"
+        out = self.commandtest(command.split())
+        self.matchoutput(out, "'/system/cluster/members' = list();", command)
+
     def testunbindutecl2(self):
         for i in [1, 5]:
             self.noouttest(["unbind_esx_cluster",
@@ -141,8 +146,6 @@ class TestUnbindESXCluster(TestBrokerCommand):
             cluster = "utecl%d" % (5 + ((i - 1) / 4))
             self.noouttest(["unbind_esx_cluster",
                             "--hostname", host, "--cluster", cluster])
-
-    # FIXME: Also test plenary files.
 
 
 if __name__=='__main__':
