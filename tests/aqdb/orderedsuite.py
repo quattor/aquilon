@@ -27,17 +27,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""
-Module for testing the aqdb commands.
-"""
+"""Test module for rebuilding the database."""
 import os
-import sys
-import unittest
 
 from utils import load_classpath
 load_classpath()
 
-from test_rebuild import TestRebuild
+import nose
+import unittest
+
+from subprocess import Popen
+from aquilon.config import Config
+
+class TestRebuild(unittest.TestCase):
+    def testrebuild(self):
+        env = {}
+        for (key, value) in os.environ.items():
+            env[key] = value
+        env["AQDCONF"] = Config().baseconfig
+
+        cmd = ['./build_db.py', '--delete', '--populate']
+
+        _DIR = os.path.dirname(os.path.realpath(__file__))
+        p = Popen(cmd, stdout=1, stderr=2, env=env, cwd=_DIR)
+        (out, err) = p.communicate()
+
+        self.assertEqual(p.returncode, 0,
+                         "Database rebuild failed with returncode %s:\n"
+                         "STDOUT:\n%s\nSTDERR:\n%s\n" %
+                         (p.returncode, out, err))
+
+    def runTest(self):
+        self.testrebuild()
 
 class DatabaseTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
@@ -45,7 +66,5 @@ class DatabaseTestSuite(unittest.TestSuite):
         self.addTest(unittest.TestLoader().loadTestsFromTestCase(TestRebuild))
 
 
-if __name__=='__main__':
-    import nose
+if __name__ == '__main__':
     nose.runmodule()
-

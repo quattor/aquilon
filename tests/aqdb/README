@@ -1,0 +1,16 @@
+To execute the full automated aqdb test suite, invoke the 'runose' command in
+this directory, while you are sitting in this directory since it uses the
+nose default of looking in the cwd for tests to run.
+
+If you are performing iterative testing where you don't need a clean db 
+rebuild *everytime* you run a test, run with --no-rebuild. Don't let this 
+rebuild behavior be an excuse not to write tear_down() functions that remove
+any data created, this breaks things and makes tests less usable for all.
+
+Permissions are significant to nose's automated test collections. By default,
+nose will *NOT* run any module that is executable. 
+
+The things that are executable in this directory, especially build_db, 
+runnose, test_campus_populate, orderedsuite and test_utils are executable so
+that they won't run as a part of the fully automated noserun system.
+

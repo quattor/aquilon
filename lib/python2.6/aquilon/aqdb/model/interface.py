@@ -28,15 +28,30 @@
 # TERMS THAT MAY APPLY.
 """Classes and Tables relating to network interfaces"""
 
+#Note: any changes to this class definition and it's constraints
+#should always be reviewed by DHCP Eng.
+
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint, Boolean)
-from sqlalchemy.orm import relation #, synonym
+from sqlalchemy.orm import relation, backref, validates
 
-from aquilon.aqdb.column_types import AqMac, AqStr
+from aquilon.aqdb.column_types import AqMac, AqStr, Enum
 from aquilon.aqdb.model import Base, System, HardwareEntity
 
+INTERFACE_TYPES = ('public', 'management', 'oa') #, 'transit')
+
+def _validate_mac(kw):
+    """ Prevents null MAC addresses in certain cases.
+
+        If an interface is bootable or type 'management' we require it """
+
+    msg = 'Bootable and Management interfaces require a MAC address'
+    if kw.get('bootable') or kw.get('interface_type') == 'management':
+        if kw.get('mac') is None:
+            raise ValueError(msg)
+    return True
 
 class Interface(Base):
     """ In this design, interface is really just a name/type pair, AND the
@@ -54,7 +69,8 @@ class Interface(Base):
 
     bootable = Column(Boolean, nullable=False, default=False)
 
-    interface_type = Column(AqStr(32), nullable=False) #TODO: index or delete
+    interface_type = Column(Enum(32, INTERFACE_TYPES),
+                            nullable=False) #TODO: index? Delete?
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                                     name='IFACE_HW_ENT_FK',
@@ -73,39 +89,31 @@ class Interface(Base):
 
     comments = Column('comments', String(255), nullable=True)
 
-    hardware_entity = relation(HardwareEntity, backref='interfaces',
-                               passive_deletes=True)
+    hardware_entity = relation(HardwareEntity, lazy=False,
+                               backref=backref('interfaces'))
 
-    system = relation(System, backref='interfaces', passive_deletes=True)
+    system = relation(System, backref='interfaces')
 
-    # This is experimental code which will code in use later on
-    # remember to change the column name to mymac above, also in unique index
-    # below the class definition
-    #def _get_mac(self):
-    #    return self.mymac
-    #
-    #def _set_mac(self, mac=None):
-    #    if self.bootable == True and mac is None:
-    #        msg = 'Bootable interfaces require a MAC address'
-    #        raise ArgumentError(msg)
-    #    self.mymac=mac
-    #
-    #mac = synonym('mymac', descriptor=property(_get_mac, _set_mac))
+    @validates('mac')
+    def validate_mac(self, key, value):
+        temp_dict = {'bootable': self.bootable, 'mac': value,
+                     'interface_type': self.interface_type}
+        _validate_mac(temp_dict)
+        return value
 
     def __init__(self, **kw): # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
-            where the interface is bootable
+            where the interface is bootable or is of type 'management'
         """
-
-        if 'bootable' in kw and kw['bootable'] == True:
-            if not kw['mac']:
-                msg = 'Bootable interfaces require a MAC address'
-                raise ValueError(msg)
+        _validate_mac(kw)
         super(Interface, self).__init__(**kw)
 
-    # We'll need seperate python classes for each subtype if we want to
-    # use single table inheritance like this.
-    #__mapper_args__ = {'polymorphic_on' : interface_type}
+    def __str__(self):
+        return 'Interface {0} for {1} {2}'.format(
+            self.name, self.hardware_entity.hardware_entity_type,
+            self.hardware_entity.hardware_name)
+
+    #TODO: __repr__ when interface is simplified by dns changes
 
 interface = Interface.__table__ # pylint: disable-msg=C0103, E1101
 interface.primary_key.name = 'interface_pk'
@@ -114,5 +122,3 @@ interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
 
 interface.append_constraint(
     UniqueConstraint('hardware_entity_id', 'name', name='iface_hw_name_uk'))
-
-table = interface # pylint: disable-msg=C0103

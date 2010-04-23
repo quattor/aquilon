@@ -1,5 +1,4 @@
 #!/usr/bin/env python2.6
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010  Contributor
 #
@@ -27,10 +26,13 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+""" A collection of testing utilities for the AQDB package """
+import os
+import sys
+import inspect
+
 def load_classpath():
     """ Sets up the class path for aquilon """
-    import os
-    import sys
 
     _DIR = os.path.dirname(os.path.realpath(__file__))
     _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
@@ -48,7 +50,7 @@ def load_classpath():
 def commit(sess):
     try:
         sess.commit()
-    except Exception,e:
+    except Exception, e:
         sess.rollback()
         raise e
 
@@ -56,5 +58,14 @@ def add(sess, obj):
     try:
         sess.add(obj)
     except Exception, e:
-         sess.rollback()
-         raise e
+        sess.rollback()
+        raise e
+
+def create(sess, obj):
+    add(sess, obj)
+    commit(sess)
+
+def func_name():
+    """ return the calling file and function name for useful assert messages """
+    frame = inspect.stack()[1]
+    return '%s.%s()' % (os.path.basename(frame[1]).rstrip('.py'), frame[3])

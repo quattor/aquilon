@@ -28,30 +28,19 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ tests network """
-from utils import add, commit, load_classpath
+from utils import load_classpath
 load_classpath()
 
-#import aquilon.aqdb.depends
-
-from aquilon.aqdb.model import Network, Location, Building
+from aquilon.aqdb.model import Network
 from aquilon.aqdb.db_factory import DbFactory
-
-from nose.tools import raises
 
 db = DbFactory()
 sess = db.Session()
-net = sess.query(Network).first()
+net = sess.query(Network).filter(Network.cidr != 32).first()
+
 
 def setup():
-    print 'set up'
-    clean_up()
-
-def teardown():
-    print 'tear down'
-    clean_up()
-
-def clean_up():
-    pass
+    assert net, 'no network in test_network'
 
 def test_location():
     assert net.location

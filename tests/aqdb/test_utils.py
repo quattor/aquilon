@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,37 +27,21 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Test module for rebuilding the database."""
-import os
 
-from utils import load_classpath
-load_classpath()
+""" Some quick meta-tests for our utility library """
+
+import utils
+utils.load_classpath()
 
 import nose
-import unittest
+from nose.tools import eq_
 
-from subprocess import Popen
-from aquilon.config import Config
+def test_func_name():
+    eq_(utils.func_name(), 'test_utils.test_func_name()')
 
+    print '\ntests.aqdb.utils.func_name returns %s' % utils.func_name()
 
-class TestRebuild(unittest.TestCase):
-    def testrebuild(self):
-        env = {}
-        for (key, value) in os.environ.items():
-            env[key] = value
-        env["AQDCONF"] = Config().baseconfig
+#TODO: test the nose plugin with the recipe in it
 
-        cmd = ['./build_db.py', '--delete', '--populate']
-
-        _DIR = os.path.dirname(os.path.realpath(__file__))
-        p = Popen(cmd, stdout=1, stderr=2, env=env, cwd=_DIR)
-        (out, err) = p.communicate()
-
-        self.assertEqual(p.returncode, 0,
-                         "Database rebuild failed with returncode %s:\n"
-                         "STDOUT:\n%s\nSTDERR:\n%s\n" %
-                         (p.returncode, out, err))
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     nose.runmodule()

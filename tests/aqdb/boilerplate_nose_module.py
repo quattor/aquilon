@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2010 Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,30 +27,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-
 """ DESCRIBE ME """
-from utils import load_classpath, add, commit
+import logging
+log = logging.getLogger('nose.plugins.aqdb')
 
+from utils import load_classpath, add, commit, create, func_name
 load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import SOMETHING 
+#from aquilon.aqdb.model import SOMETHING
 
-from nose.tools import raises
+#from nose.tools import raises, eq_
 
 db = DbFactory()
 sess = db.Session()
 
-def clean_up():
+def setup():
     pass
 
-def setup():
-    print 'set up'
-    clean_up()
-
 def teardown():
-    print 'tear down'
-    clean_up()
+    pass
 
 
 if __name__ == "__main__":
