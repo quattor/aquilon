@@ -66,7 +66,9 @@ class CommandAddManager(BrokerCommand):
         dbinterfaces = q.all()
 
         if len(dbinterfaces) > 1:
-            raise ArgumentError("Could not uniquely determine an interface.  Please use --interface or --mac to specify the correct interface to use.")
+            raise ArgumentError("Could not uniquely determine an interface.  "
+                                "Please use --interface or --mac to specify "
+                                "the correct interface to use.")
         if len(dbinterfaces) == 1:
             dbinterface = dbinterfaces[0]
         elif interface and mac:

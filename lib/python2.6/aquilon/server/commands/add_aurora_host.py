@@ -81,8 +81,10 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbbuilding = session.query(Building).filter_by(
                         name=building).first()
                 if not dbbuilding:
-                    raise ArgumentError("Failed to find building %s for node %s, please add an Aurora machine manually and follow with add_host." %
-                            building, machine)
+                    raise ArgumentError("Failed to find building %s for "
+                                        "node %s, please add an Aurora "
+                                        "machine manually and follow with "
+                                        "add_host." % (building, machine))
                 rack = building + rid
                 dbrack = session.query(Rack).filter_by(name=rack).first()
                 if not dbrack:
@@ -131,11 +133,17 @@ class CommandAddAuroraHost(CommandAddHost):
                     dbbuilding = session.query(Building).filter_by(
                             name=building).first()
                     if not dbbuilding:
-                        raise ArgumentError("Failed to find building %s for node %s, please add an Aurora machine manually and follow with add_host." %
-                                (building, dsdb_lookup))
+                        raise ArgumentError("Failed to find building %s for "
+                                            "node %s, please add an Aurora "
+                                            "machine manually and follow "
+                                            "with add_host." %
+                                            (building, dsdb_lookup))
                 else:
-                    raise ArgumentError("Failed to determine building from sys_loc output for %s, please add an Aurora machine manually and follow with add_host: %s" %
-                            (dsdb_lookup, out))
+                    raise ArgumentError("Failed to determine building from "
+                                        "sys_loc output for %s, please add "
+                                        "an Aurora machine manually and "
+                                        "follow with add_host: %s" %
+                                        (dsdb_lookup, out))
                 dblocation = dbbuilding
 
             dbmachine = create_machine(session, machine, dblocation, dbmodel,
