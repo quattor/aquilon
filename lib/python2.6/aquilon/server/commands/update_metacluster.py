@@ -44,22 +44,22 @@ class CommandUpdateMetaCluster(BrokerCommand):
                                                compel=True)
         max_members = force_int("max_members", max_members)
         if max_members is not None:
-            if len(dbmetacluster.members) > max_members:
-                raise ArgumentError("metacluster %s already exceeds %s "
-                                    "max_members with %s clusters currently "
-                                    "bound" %
-                                    (dbmetacluster.name, max_members,
-                                     len(dbmetacluster.members)))
+            current_members = len(dbmetacluster.members)
+            if max_members < current_members:
+                raise ArgumentError("Metacluster %s has %d clusters bound, "
+                                    "which exceeds the requested limit %d." %
+                                    (dbmetacluster.name, current_members,
+                                     max_members))
             dbmetacluster.max_clusters = max_members
 
         max_shares = force_int("max_shares", max_shares)
         if max_shares is not None:
             current_shares = len(dbmetacluster.shares)
             if max_shares < current_shares:
-                raise ArgumentError("Cannot set max_shares to %s: Metacluster "
-                                    "%s has %s shares already attached." %
-                                    (max_shares, dbmetacluster.name,
-                                     current_shares))
+                raise ArgumentError("Metacluster %s has %d shares attached, "
+                                    "which exceeds the requested limit %d." %
+                                    (dbmetacluster.name, current_shares,
+                                     max_shares))
             dbmetacluster.max_shares = max_shares
 
         if comments is not None:

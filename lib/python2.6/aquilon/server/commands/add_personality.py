@@ -42,7 +42,8 @@ class CommandAddPersonality(BrokerCommand):
     def render(self, session, logger, personality, archetype, **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(personality)):
-            raise ArgumentError("name '%s' is not valid"% personality)
+            raise ArgumentError("Personality name '%s' is not valid." %
+                                personality)
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         Personality.get_unique(session, archetype=dbarchetype, name=personality,

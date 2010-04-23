@@ -47,7 +47,7 @@ def get_location(session, **kwargs):
             lookup = "organization" # temporary until locations in DB restructured
         if kwargs.get(lookup):
             if location_type:
-                raise ArgumentError("Single location can not be both %s and %s"
+                raise ArgumentError("Single location can not be both %s and %s."
                         % (lookup, location_type))
             location_type = lt
             argname = lookup

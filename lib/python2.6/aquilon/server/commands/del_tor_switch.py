@@ -79,6 +79,6 @@ class CommandDelTorSwitch(BrokerCommand):
             try:
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
-                raise ArgumentError("Could not remove tor_switch from dsdb: %s"
-                                    % e)
+                raise ArgumentError("Could not remove ToR switch from DSDB: "
+                                    "%s" % e)
         return

@@ -65,7 +65,7 @@ class TestDelDynamicRange(TestBrokerCommand):
                    "--endip=%s" % self.net.tor_net2[0].usable[-3].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "No system found with IP address '%s'" %
+                         "No system found with IP address %s" %
                          self.net.tor_net2[0].usable[1].ip,
                          command)
 
@@ -75,7 +75,7 @@ class TestDelDynamicRange(TestBrokerCommand):
                    "--endip=%s" % self.net.tor_net2[0].usable[-2].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "No system found with IP address '%s'" %
+                         "No system found with IP address %s" %
                          self.net.tor_net2[0].usable[-2].ip,
                          command)
 

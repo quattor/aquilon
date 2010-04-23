@@ -51,7 +51,7 @@ class CommandDelCpu(BrokerCommand):
         try:
             session.delete(dbcpu)
         except InvalidRequestError, e:
-            raise ArgumentError("Could not del cpu: %s" % e)
+            raise ArgumentError("Could not delete CPU: %s" % e)
         return
 
 

@@ -258,7 +258,7 @@ class TestReconfigure(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Changing archetype also requires "
-                         "specifying personality.",
+                         "specifying --personality.",
                          command)
 
     def testmissingrequiredservice(self):
@@ -417,7 +417,8 @@ class TestReconfigure(TestBrokerCommand):
         scratchfile = self.writescratch("missingosversion", "".join(hosts))
         command = ["reconfigure", "--hostlist", scratchfile, "--osname=linux"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Please specify version for OS 'linux'", command)
+        self.matchoutput(out, "Please specify --osversion for OS linux",
+                         command)
 
     def testhostlistnoosname(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
@@ -426,8 +427,8 @@ class TestReconfigure(TestBrokerCommand):
                    "--osversion=4.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Must specify osname to use with "
-                         "version '4.0.1-x86_64'",
+                         "Please specify --osname to use with "
+                         "OS version 4.0.1-x86_64",
                          command)
 
     def testhostlistnoosarchetype(self):
@@ -437,8 +438,8 @@ class TestReconfigure(TestBrokerCommand):
                    "--osname=linux", "--osversion=4.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Must specify archetype for OS with "
-                         "name 'linux' and version '4.0.1-x86_64'",
+                         "Please specify --archetype for OS "
+                         "linux, version 4.0.1-x86_64",
                          command)
 
     def testhostlistnopersonalityarchetype(self):
@@ -448,7 +449,7 @@ class TestReconfigure(TestBrokerCommand):
                    "--personality=generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Please specify archetype for personality 'generic'",
+                         "Please specify --archetype for personality generic",
                          command)
 
     def testemptyhostlist(self):

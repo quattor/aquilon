@@ -40,10 +40,10 @@ class CommandAddArchetype(BrokerCommand):
     def render(self, session, archetype, **kwargs):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(archetype)):
-            raise ArgumentError("name '%s' is not valid" % archetype)
+            raise ArgumentError("Archetype name '%s' is not valid." % archetype)
         if archetype in ["hardware", "machine", "pan", "t",
                     "service", "servicedata"]:
-            raise ArgumentError("name '%s' is reserved" % archetype)
+            raise ArgumentError("Archetype name %s is reserved." % archetype)
 
         Archetype.get_unique(session, archetype, preclude=True)
 

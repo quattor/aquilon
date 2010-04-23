@@ -69,7 +69,7 @@ class CommandPxeswitch(BrokerCommand):
         elif configure:
             args.append('--configurelist')
         else:
-            raise ArgumentError("Missing required boot/install/status/firmware/configure parameter.")
+            raise ArgumentError("No action requested.")
 
         servers = dict()
         groups = dict()
@@ -85,13 +85,13 @@ class CommandPxeswitch(BrokerCommand):
                                                compel=True)
                 bootbi = get_host_build_item(session, dbhost, dbservice)
                 if not bootbi:
-                    failed.append("%s: host has no bootserver" % host)
+                    failed.append("%s: Host has no bootserver." % host)
                 else:
                     if bootbi.service_instance.name in groups:
                         groups[bootbi.service_instance.name].append(dbhost)
                     else:
                         # for that instance, find what servers are bound to it.
-                        servers[bootbi.service_instance.name] = [s.system.fqdn 
+                        servers[bootbi.service_instance.name] = [s.system.fqdn
                           for s in bootbi.service_instance.servers]
                         groups[bootbi.service_instance.name] = [dbhost]
 
@@ -101,16 +101,16 @@ class CommandPxeswitch(BrokerCommand):
                 failed.append("%s: %s" % (host, ae))
 
         if failed:
-            raise ArgumentError("invalid hosts in list:\n%s" % 
+            raise ArgumentError("Invalid hosts in list:\n%s" %
                                 "\n".join(failed))
 
-        for (group,hostlist) in groups.items():
+        for (group, hostlist) in groups.items():
             # create temporary file, point aii-installfe at that file.
             groupargs = args[:]
             with NamedTemporaryFile() as tmpfile:
                 tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
-               
+
                 groupargs.append(tmpfile.name)
 
                 groupargs.append("--servers")

@@ -72,7 +72,9 @@ class CommandDelHost(BrokerCommand):
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):
                 deptext = "\n".join(["  %s"%d for d in deps])
-                raise ArgumentError("cannot delete host '%s' due to the following dependencies:\n%s"%(hostname, deptext))
+                raise ArgumentError("Cannot delete host %s due to the "
+                                    "following dependencies:\n%s." %
+                                    (hostname, deptext))
 
             archetype = dbhost.archetype.name
             dbmachine = dbhost.machine
@@ -98,8 +100,8 @@ class CommandDelHost(BrokerCommand):
                     dsdb_runner = DSDBRunner(logger=logger)
                     dsdb_runner.delete_host_details(ip)
                 except ProcessException, e:
-                    raise ArgumentError("Could not remove host %s from dsdb: %s" %
-                            (hostname, e))
+                    raise ArgumentError("Could not remove host %s from "
+                                        "DSDB: %s" % (hostname, e))
 
             session.refresh(dbmachine)
             # Past the point of no return... commit the transaction so

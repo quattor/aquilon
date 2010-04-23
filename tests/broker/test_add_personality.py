@@ -285,14 +285,14 @@ class TestAddPersonality(TestBrokerCommand):
     def testshowarchetypeunavailable(self):
         command = "show personality --archetype archetype-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype 'archetype-does-not-exist'", command)
+        self.matchoutput(out, "Archetype archetype-does-not-exist", command)
 
     def testshowarchetypeunavailable2(self):
         command = ["show", "personality",
                    "--archetype", "archetype-does-not-exist",
                    "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Archetype 'archetype-does-not-exist'", command)
+        self.matchoutput(out, "Archetype archetype-does-not-exist", command)
 
     def testshowpersonalityunavailable(self):
         command = ["show", "personality", "--archetype", "aquilon",
@@ -374,15 +374,15 @@ class TestAddPersonality(TestBrokerCommand):
         command = ["add_personality", "--personality", "this is a bad; name",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "name 'this is a bad; name' is not valid",
-                         command)
+        self.matchoutput(out, "Personality name 'this is a bad; name' is "
+                         "not valid", command)
 
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality with Archetype aquilon and name of "
-                         "'inventory' already exists.", command)
+                         "inventory already exists.", command)
 
     def testaddesxserver(self):
         command = "add personality --personality esx_server --archetype vmhost"

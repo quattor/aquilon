@@ -260,7 +260,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
             # of "nasti show share --csv" is in CSV format (why it
             # doesn't provide the same format as the dumpfile is
             # beyond me). We need a CSV parser...
-            raise NotFoundException("share '%s' cannot be found in NAS maps" %
+            raise NotFoundException("Share %s cannot be found in NAS maps." %
                                     self.name)
         lines.append("'server' = '%(server)s';" % self.__dict__)
         lines.append("'mountpoint' = '%(mount)s';" % self.__dict__)

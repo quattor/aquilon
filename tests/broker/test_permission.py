@@ -59,6 +59,13 @@ class TestPermission(TestBrokerCommand):
                 "UserPrincipal: testusernobody@is1.morgan [role: nobody]",
                 command)
 
+    def testverifynohostpart(self):
+        command = ["permission", "--principal", "testusernobody",
+                   "--role", "nobody", "--createuser"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "User principal 'testusernobody' is not valid.",
+                         command)
+
     def testpermissionoperations(self):
         command = "permission --principal testuseroperations@is1.morgan --role operations --createuser"
         self.noouttest(command.split(" "))

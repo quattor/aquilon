@@ -47,7 +47,7 @@ class TestBindServerConstraints(TestBrokerCommand):
         command = "del host --hostname unittest00.one-nyp.ms.com"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
-                         "cannot delete host 'unittest00.one-nyp.ms.com' due "
+                         "Cannot delete host unittest00.one-nyp.ms.com due "
                          "to the following dependencies:",
                          command)
         self.matchoutput(out,

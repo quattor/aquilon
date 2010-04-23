@@ -70,8 +70,8 @@ class CommandReconfigureHostlist(BrokerCommand):
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if personality:
             if not archetype:
-                raise ArgumentError("Please specify archetype for "
-                                    "personality '%s'" % personality)
+                raise ArgumentError("Please specify --archetype for "
+                                    "personality %s." % personality)
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
@@ -79,15 +79,15 @@ class CommandReconfigureHostlist(BrokerCommand):
             raise ArgumentError("Please use --osname and --osversion to "
                                 "specify a new OS.")
         if osname and not osversion:
-            raise ArgumentError("Please specify version for OS '%s'" % osname)
+            raise ArgumentError("Please specify --osversion for OS %s." %
+                                osname)
         if osversion:
             if not osname:
-                raise ArgumentError("Must specify osname to use with "
-                                    "version '%s'" % osversion)
+                raise ArgumentError("Please specify --osname to use with "
+                                    "OS version %s." % osversion)
             if not archetype:
-                raise ArgumentError("Must specify archetype for OS with "
-                                    "name '%s' and version '%s'" %
-                                    (osname, osversion))
+                raise ArgumentError("Please specify --archetype for OS "
+                                    "%s, version %s." % (osname, osversion))
             dbos = OperatingSystem.get_unique(session, name=osname,
                                               version=osversion,
                                               archetype=dbarchetype,

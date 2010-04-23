@@ -50,8 +50,8 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
 
         if dbtor_switch.ip:
-            raise ArgumentError("TorSwitch %s already has an interface with an ip address." %
-                                dbtor_switch.fqdn)
+            raise ArgumentError("ToR switch %s already has an interface with "
+                                "an IP address." % dbtor_switch.fqdn)
 
         extra = {}
         if comments:
@@ -61,13 +61,14 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         q = q.filter_by(name=interface, hardware_entity=dbtor_switch.tor_switch_hw)
         prev = q.first()
         if prev:
-            raise ArgumentError("tor_switch %s already has an interface named %s"
-                    % (dbtor_switch.fqdn, interface))
+            raise ArgumentError("ToR switch %s already has an interface "
+                                "named %s." % (dbtor_switch.fqdn, interface))
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:
             msg = describe_interface(session, prev)
-            raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+            raise ArgumentError("MAC address %s is already in use: %s." %
+                                (mac, msg))
 
         dbinterface = Interface(name=interface,
                                 hardware_entity=dbtor_switch.tor_switch_hw,
@@ -92,5 +93,5 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         try:
             dsdb_runner.add_host(dbinterface)
         except ProcessException, e:
-            raise ArgumentError("Could not add tor_switch to dsdb: %s" % e)
+            raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
         return

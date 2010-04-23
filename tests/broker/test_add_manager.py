@@ -117,7 +117,7 @@ class TestAddManager(TestBrokerCommand):
                    "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--mac", self.net.unknown[0].usable[7].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "already has an interface with mac", command)
+        self.matchoutput(out, "already has an interface with MAC", command)
 
     def testfailaddunittest12bmc(self):
         command = ["add", "manager", "--ip", self.net.unknown[0].usable[0].ip,
@@ -127,7 +127,7 @@ class TestAddManager(TestBrokerCommand):
                    "--mac", self.net.unknown[0].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mac '%s' already in use" %
+                         "MAC address %s is already in use" %
                          self.net.unknown[0].usable[0].mac,
                          command)
 

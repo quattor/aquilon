@@ -103,14 +103,14 @@ class TestManage(TestBrokerCommand):
                    "--domain", "changetest1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "cluster nodes must be managed at the cluster level",
+                         "Cluster nodes must be managed at the cluster level",
                          command)
 
     def testmanagemissingcluster(self):
         command = ["manage", "--cluster", "cluster-does-not-exist",
                    "--domain", "changetest1"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
     def testmanagecluster(self):

@@ -45,7 +45,7 @@ class CommandMakeCluster(BrokerCommand):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if not dbcluster.personality.archetype.is_compileable:
             raise ArgumentError("Cluster %s is not a compilable archetype "
-                                "(%s)" %
+                                "(%s)." %
                                 (cluster,
                                  dbcluster.personality.archetype.name))
 

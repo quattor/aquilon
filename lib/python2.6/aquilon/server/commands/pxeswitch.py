@@ -49,7 +49,7 @@ class CommandPxeswitch(BrokerCommand):
         dbservice = Service.get_unique(session, "bootserver", compel=True)
         bootbi = get_host_build_item(session, dbhost, dbservice)
         if not bootbi:
-            raise ArgumentError("host has no bootserver")
+            raise ArgumentError("Host %s has no bootserver." % hostname)
         # for that instance, find what servers are bound to it.
         servers = [s.system.fqdn for s in bootbi.service_instance.servers]
 
@@ -66,7 +66,7 @@ class CommandPxeswitch(BrokerCommand):
         elif configure:
             args.append('--configure')
         else:
-            raise ArgumentError("Missing required boot or install parameter.")
+            raise ArgumentError("No action requested.")
 
         args.append(dbhost.fqdn)
 

@@ -55,7 +55,7 @@ class TestSearchHost(TestBrokerCommand):
     def testfqdnunavailablefakedomain(self):
         command = "search host --hostname unittest00.does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "DNS Domain 'does-not-exist.ms.com'", command)
+        self.matchoutput(out, "DNS Domain does-not-exist.ms.com", command)
 
     def testfqdnavailablefull(self):
         command = "search host --hostname unittest00.one-nyp.ms.com --fullinfo"
@@ -71,7 +71,7 @@ class TestSearchHost(TestBrokerCommand):
     def testmachineunavailable(self):
         command = "search host --machine machine-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Machine 'machine-does-not-exist' not found",
+        self.matchoutput(out, "Machine machine-does-not-exist not found",
                          command)
 
     def testdnsdomainavailable(self):
@@ -83,7 +83,7 @@ class TestSearchHost(TestBrokerCommand):
     def testdnsdomainunavailable(self):
         command = "search host --dnsdomain does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "DNS Domain 'does-not-exist.ms.com' not found",
+        self.matchoutput(out, "DNS Domain does-not-exist.ms.com not found",
                          command)
 
     def testshortnameavailable(self):
@@ -104,7 +104,7 @@ class TestSearchHost(TestBrokerCommand):
     def testdomainunavailable(self):
         command = "search host --domain domain-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Domain 'domain-does-not-exist' not found",
+        self.matchoutput(out, "Domain domain-does-not-exist not found",
                          command)
 
     def testarchetypeavailable(self):
@@ -116,7 +116,7 @@ class TestSearchHost(TestBrokerCommand):
     def testarchetypeunavailable(self):
         command = "search host --archetype archetype-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype 'archetype-does-not-exist' not found",
+        self.matchoutput(out, "Archetype archetype-does-not-exist not found",
                          command)
 
     def testbuildstatusavailable(self):
@@ -214,7 +214,7 @@ class TestSearchHost(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Personality with ", command)
         self.matchoutput(out, "Archetype aquilon", command)
-        self.matchoutput(out, "name of 'personality-does-not-exist'", command)
+        self.matchoutput(out, "name of personality-does-not-exist", command)
 
     def testpersonalityunavailable2(self):
         # Will only get an error if archetype is specified
@@ -231,9 +231,9 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --osname os-does-not-exist --osversion foo --archetype aquilon"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Operating System with ", command)
-        self.matchoutput(out, "version of 'foo'", command)
+        self.matchoutput(out, "version of foo", command)
         self.matchoutput(out, "Archetype aquilon", command)
-        self.matchoutput(out, "name of 'os-does-not-exist'", command)
+        self.matchoutput(out, "name of os-does-not-exist", command)
 
     def testosnameonly(self):
         command = "search host --osname linux"
@@ -254,7 +254,7 @@ class TestSearchHost(TestBrokerCommand):
     def testserviceunavailable(self):
         command = "search host --service service-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Service 'service-does-not-exist' not found",
+        self.matchoutput(out, "Service service-does-not-exist not found",
                          command)
 
     def testserviceinstanceavailable(self):
@@ -318,7 +318,7 @@ class TestSearchHost(TestBrokerCommand):
     def testvendorunavailable(self):
         command = "search host --vendor vendor-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found",
+        self.matchoutput(out, "Vendor vendor-does-not-exist not found",
                          command)
 
     def testmachinetypeavailable(self):
@@ -364,13 +364,13 @@ class TestSearchHost(TestBrokerCommand):
     def testclusterunavailable(self):
         command = "search host --cluster cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
     def testclusterunavailablefull(self):
         command = "search host --fullinfo --cluster cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
 

@@ -147,7 +147,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             (short, dns_domain) = host.split('.', 1)
             dbdns_domain = DnsDomain.get_unique(session, dns_domain)
             if not dbdns_domain:
-                msg = "Skipping host %s: No AQDB entry for DNS domain '%s'" % \
+                msg = "Skipping host %s: No AQDB entry for DNS domain %s." % \
                         (host, dns_domain)
                 failed.append(msg)
                 logger.info(msg)
@@ -158,21 +158,21 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 # If these are invalid there should have been a deletion
                 # attempt above.
                 if not existing.interfaces:
-                    msg = "Skipping host %s: Host already exists but has " % \
+                    msg = "Skipping host %s: Host already exists but has " \
                             "no interface attached." % host
                     failed.append(msg)
                     logger.info(msg)
                 elif existing.interfaces[0].mac != mac:
                     msg = "Skipping host %s: Host already exists but with " \
-                            "MAC %s and not MAC %s" % \
+                            "MAC address %s and not %s." % \
                             (host, existing.interfaces[0].mac, mac)
                     failed.append(msg)
                     logger.info(msg)
                 continue
             dbinterface = session.query(Interface).filter_by(mac=mac).first()
             if not dbinterface:
-                msg = "Skipping host %s: MAC %s is not present in AQDB" % \
-                        (host, mac)
+                msg = "Skipping host %s: MAC address %s is not present in " \
+                        "AQDB." % (host, mac)
                 failed.append(msg)
                 logger.info(msg)
                 continue
@@ -180,15 +180,16 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             q = q.filter_by(id=dbinterface.hardware_entity.id)
             dbmachine = q.first()
             if not dbmachine:
-                msg = "Skipping host %s: the AQDB interface with mac %s is " \
-                        "tied to hardware %s instead of a virtual machine" % \
+                msg = "Skipping host %s: The AQDB interface with MAC address " \
+                        "%s is tied to hardware %s instead of a virtual " \
+                        "machine." % \
                         (host, mac, dbinterface.hardware_entity.hardware_name)
                 failed.append(msg)
                 logger.info(msg)
                 continue
             if dbinterface.system:
-                msg = "Skipping host %s: the AQDB interface with mac %s is " \
-                        "already tied to %s" % \
+                msg = "Skipping host %s: The AQDB interface with MAC address " \
+                        "%s is already tied to %s." % \
                         (host, mac, dbinterface.system.fqdn)
                 failed.append(msg)
                 logger.info(msg)
@@ -201,7 +202,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             session.add(dbhost)
             dbinterface.system = dbhost
             session.add(dbinterface)
-            success.append("Added host entry for %s (%s)" %
+            success.append("Added host entry for %s (%s)." %
                            (dbhost.machine.name, dbhost.fqdn))
             if dbmachine.cluster:
                 clusters.add(dbmachine.cluster)

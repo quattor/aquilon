@@ -47,8 +47,8 @@ class CommandMapService(BrokerCommand):
 
         if archetype is None and personality:
             # Can't get here with the standard aq client.
-            raise ArgumentError("specifying personality requires you to "
-                                "also specify archetype")
+            raise ArgumentError("Specifying --personality requires you to "
+                                "also specify --archetype.")
 
         if archetype is not None and personality is not None:
             dbpersona = get_personality(session, archetype, personality)

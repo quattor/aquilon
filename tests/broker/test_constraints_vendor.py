@@ -56,7 +56,7 @@ class TestVendorConstraints(TestBrokerCommand):
     def testdelvendorwithcpu(self):
         command = "del vendor --vendor intel"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "in use by a cpu", command)
+        self.matchoutput(out, "in use by a CPU", command)
 
     def testverifydelvendorwithcpu(self):
         command = ["show_vendor", "--vendor=intel"]

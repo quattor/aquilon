@@ -54,13 +54,14 @@ class CommandAddMachine(BrokerCommand):
         if chassis:
             dbchassis = get_system(session, chassis)
             if not isinstance(dbchassis, Chassis):
-                raise ArgumentError("The system '%s' is not a chassis." %
+                raise ArgumentError("The system %s is not a chassis." %
                         chassis)
             if slot is None:
                 raise ArgumentError("The --chassis option requires a --slot.")
             slot = force_int("slot", slot)
             if dblocation and dblocation != dbchassis.chassis_hw.location:
-                raise ArgumentError("Location %s %s conflicts with chassis location %s %s" %
+                raise ArgumentError("Location %s %s conflicts with chassis "
+                                    "location %s %s." %
                                     (dblocation.location_type,
                                      dblocation.name,
                                      dbchassis.chassis_hw.location.location_type,
@@ -73,7 +74,8 @@ class CommandAddMachine(BrokerCommand):
 
         if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
                                         'aurora_node', 'virtual_machine']:
-            raise ArgumentError("The add_machine command cannot add machines of type '%(type)s'.  Try 'add %(type)s'." %
+            raise ArgumentError("The add_machine command cannot add machines "
+                                "of type %(type)s.  Try 'add %(type)s'." %
                     {"type": dbmodel.machine_type})
 
         if cluster:
@@ -87,7 +89,7 @@ class CommandAddMachine(BrokerCommand):
             if dblocation and dbcluster.location_constraint != dblocation:
                 raise ArgumentError(
                     "Cannot override cluster location %s %s "
-                    "with location %s %s" %
+                    "with location %s %s." %
                     (dbcluster.location_constraint.location_type,
                      dbcluster.location_constraint.name,
                      dblocation.location_type,

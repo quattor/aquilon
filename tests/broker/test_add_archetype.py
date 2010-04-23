@@ -46,17 +46,17 @@ class TestAddArchetype(TestBrokerCommand):
     def testaddreservedname(self):
         command = "add archetype --archetype hardware"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "name 'hardware' is reserved", command)
+        self.matchoutput(out, "Archetype name hardware is reserved", command)
 
     def testaddexisting(self):
         command = "add archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Archetype 'aquilon' already exists", command)
+        self.matchoutput(out, "Archetype aquilon already exists", command)
 
     def testaddbadname(self):
         command = "add archetype --archetype oops@!"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "name 'oops@!' is not valid", command)
+        self.matchoutput(out, "Archetype name 'oops@!' is not valid", command)
 
     def testaddutarchetype1(self):
         command = "add archetype --archetype utarchetype1"

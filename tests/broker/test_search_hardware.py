@@ -87,7 +87,7 @@ class TestSearchHardware(TestBrokerCommand):
     def testvendorunavailable(self):
         command = "search hardware --vendor vendor-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found",
+        self.matchoutput(out, "Vendor vendor-does-not-exist not found",
                          command)
 
     def testmachinetypeavailable(self):

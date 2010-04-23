@@ -103,7 +103,7 @@ class CommandUpdateModel(BrokerCommand):
         # can always add those transitions later.
         if arguments['machine_type'] is not None:
             raise UnimplementedError("Cannot (yet) change a model's "
-                                     "machine_type.")
+                                     "machine type.")
 
         if comments:
             dbmodel.comments = comments

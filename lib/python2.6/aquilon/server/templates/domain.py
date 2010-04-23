@@ -107,7 +107,7 @@ class TemplateDomain(object):
                     self.logger.info("creating %s" % d)
                     os.makedirs(d, mode=0770)
                 except OSError, e:
-                    raise ArgumentError("failed to mkdir %s: %s" % (d, e))
+                    raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
 
         if (only):
             objectlist = [ only ]

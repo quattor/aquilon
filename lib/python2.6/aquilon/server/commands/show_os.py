@@ -46,7 +46,7 @@ class CommandShowOS(BrokerCommand):
             q = q.filter_by(archetype=dbarchetype)
         oslist = q.all()
         if not oslist:
-            raise NotFoundException("No matching operating system")
+            raise NotFoundException("No matching operating system.")
         return oslist
 
 

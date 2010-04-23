@@ -47,8 +47,8 @@ class CommandDelRequiredService(BrokerCommand):
             dbsli = session.query(ServiceListItem).filter_by(
                     service=dbservice, archetype=dbarchetype).one()
         except NoResultFound:
-            raise NotFoundException("Could not find required service %s for %s."
-                    % (service, archetype))
+            raise NotFoundException("Service %s required for archetype %s "
+                                    "not found." % (service, archetype))
         session.delete(dbsli)
         session.refresh(dbarchetype)
         return

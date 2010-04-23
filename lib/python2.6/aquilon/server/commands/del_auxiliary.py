@@ -52,8 +52,9 @@ class CommandDelAuxiliary(BrokerCommand):
             # Check dependencies, translate into user-friendly message
             dbauxiliary = get_system(session, auxiliary)
             if not isinstance(dbauxiliary, Auxiliary):
-                raise ArgumentError("%s '%s' is not Auxiliary." % (
-                                    dbauxiliary.system_type, dbauxiliary.fqdn))
+                raise ArgumentError("%s %s is not auxiliary." % (
+                                    dbauxiliary.system_type.capitalize(),
+                                    dbauxiliary.fqdn))
 
             # FIXME: Look for System dependencies...
 
@@ -72,7 +73,7 @@ class CommandDelAuxiliary(BrokerCommand):
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
-                raise ArgumentError("Could not remove host %s from dsdb: %s" %
+                raise ArgumentError("Could not remove host %s from DSDB: %s" %
                             (auxiliary, e))
             # Past the point of no return here (DSDB has been updated)...
             # probably not much of an issue if writing the plenary failed.

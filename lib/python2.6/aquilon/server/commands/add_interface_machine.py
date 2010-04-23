@@ -64,7 +64,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         prev = session.query(Interface).filter_by(
                 name=interface,hardware_entity=dbmachine).first()
         if prev:
-            raise ArgumentError("machine %s already has an interface named %s"
+            raise ArgumentError("Machine %s already has an interface named %s."
                     % (machine, interface))
 
         itype = 'public'
@@ -79,8 +79,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if mac:
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev and prev.hardware_entity == dbmachine:
-                raise ArgumentError("machine %s already has an interface "
-                                    "with mac %s" % (dbmachine.name, mac))
+                raise ArgumentError("Machine %s already has an interface "
+                                    "with MAC address %s." %
+                                    (dbmachine.name, mac))
             # Is the conflicting interface something that can be
             # removed?  It is if:
             # - we are currently attempting to add a management interface
@@ -108,7 +109,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                              dummy_ip, old_network)
             elif prev:
                 msg = describe_interface(session, prev)
-                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+                raise ArgumentError("MAC address %s is already in use: %s." %
+                                    (mac, msg))
         elif automac:
             mac = self.generate_mac(session, dbmachine)
         else:
@@ -207,8 +209,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.delete_host_details(old_ip)
         except ProcessException, e:
-            raise ArgumentError("Could not remove host entry with ip %s from dsdb: %s" %
-                                (old_ip, e))
+            raise ArgumentError("Could not remove host entry with IP address "
+                                "%s from DSDB: %s" % (old_ip, e))
 
     def consolidate_names(self, session, logger, dbmachine, dummy_machine_name,
                           pending_removals):
@@ -276,11 +278,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         """
         if dbmachine.model.machine_type != "virtual_machine":
-            raise ArgumentError("Can only automatically generate mac "
+            raise ArgumentError("Can only automatically generate MAC "
                                 "addresses for virtual hardware.")
         if not dbmachine.cluster or dbmachine.cluster.cluster_type != 'esx':
-            raise UnimplementedError("MAC auto-generation has only been "
-                                     "enabled for ESX clusters.")
+            raise UnimplementedError("MAC address auto-generation has only "
+                                     "been enabled for ESX Clusters.")
         # FIXME: These values should probably be configurable.
         mac_prefix_esx = "00:50:56"
         mac_start_esx = "01:20:00"
@@ -323,7 +325,7 @@ class MACAddress(object):
             if value is None:
                 value = long(address.replace(':', ''), 16)
         elif value is None:
-            raise ValueError("Must specify either address or value")
+            raise ValueError("Must specify either address or value.")
         self.address = address
         self.value = value
 

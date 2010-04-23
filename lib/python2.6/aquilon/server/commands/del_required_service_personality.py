@@ -48,8 +48,8 @@ class CommandDelRequiredServicePersonality(BrokerCommand):
             dbpsli = session.query(PersonalityServiceListItem).filter_by(
                     service=dbservice, personality=dbpersonality).one()
         except NoResultFound:
-            raise NotFoundException("Could not find required service %s "
-                                    "for %s %s." %
+            raise NotFoundException("Service %s required for personality "
+                                    "%s, archetype %s not found." %
                                     (service, archetype, personality))
         session.delete(dbpsli)
         return

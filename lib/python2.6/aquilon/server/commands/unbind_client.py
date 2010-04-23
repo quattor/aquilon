@@ -48,7 +48,8 @@ class CommandUnbindClient(BrokerCommand):
         for item in (dbhost.archetype.service_list +
                      dbhost.personality.service_list):
             if item.service.name == service:
-                raise ArgumentError("cannot unbind a required service. Perhaps you want to rebind?")
+                raise ArgumentError("Cannot unbind a required service. "
+                                    "Perhaps you want to rebind?")
 
         dbservice = Service.get_unique(session, service, compel=True)
         dbtemplate = get_host_build_item(session, dbhost, dbservice)

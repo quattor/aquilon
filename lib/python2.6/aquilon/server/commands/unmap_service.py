@@ -50,8 +50,8 @@ class CommandUnmapService(BrokerCommand):
         if personality:
             if not archetype:
                 # Can't get here with the standard aq client.
-                raise ArgumentError("specifying personality requires you to "
-                                    "also specify archetype")
+                raise ArgumentError("Specifying --personality requires you to "
+                                    "also specify --archetype.")
             dbarchetype = Archetype.get_unique(session, archetype,
                                                compel=True)
             dbpersonality = Personality.get_unique(session,

@@ -74,7 +74,8 @@ class CommandUpdateMachine(BrokerCommand):
                                                            logger=logger))
             dbmachine.location = dbchassis.chassis_hw.location
             if slot is None:
-                raise ArgumentError("Option --chassis requires --slot information")
+                raise ArgumentError("Option --chassis requires --slot "
+                                    "information.")
             slot = force_int("slot", slot)
             self.adjust_slot(session, logger,
                              dbmachine, dbchassis, slot, multislot)
@@ -83,11 +84,11 @@ class CommandUpdateMachine(BrokerCommand):
             for dbslot in dbmachine.chassis_slot:
                 if dbchassis and dbslot.chassis != dbchassis:
                     raise ArgumentError("Machine in multiple chassis, please "
-                                        "use --chassis argument")
+                                        "use --chassis argument.")
                 dbchassis = dbslot.chassis
             if not dbchassis:
                 raise ArgumentError("Option --slot requires --chassis "
-                                    "information")
+                                    "information.")
             slot = force_int("slot", slot)
             self.adjust_slot(session, logger,
                              dbmachine, dbchassis, slot, multislot)
@@ -98,7 +99,8 @@ class CommandUpdateMachine(BrokerCommand):
                 dbcl = dbslot.chassis.chassis_hw.location
                 if dbcl != dblocation:
                     if chassis or slot is not None:
-                        raise ArgumentError("Location %s %s conflicts with chassis %s location %s %s" % (
+                        raise ArgumentError("Location %s %s conflicts with "
+                                            "chassis %s location %s %s." % (
                                             dblocation.location_type,
                                             dblocation.name,
                                             dbslot.chassis.fqdn,
@@ -119,7 +121,7 @@ class CommandUpdateMachine(BrokerCommand):
                                             'workstation', 'aurora_node',
                                             'virtual_machine']:
                 raise ArgumentError("The update_machine command cannot update "
-                                    "machines of type '%s'." %
+                                    "machines of type %s." %
                                     dbmodel.machine_type)
             # We probably could do this by forcing either cluster or
             # location data to be available as appropriate, but really?
@@ -127,7 +129,7 @@ class CommandUpdateMachine(BrokerCommand):
             if dbmodel.machine_type != dbmachine.model.machine_type and \
                'virtual_machine' in [dbmodel.machine_type,
                                      dbmachine.model.machine_type]:
-                raise ArgumentError("Cannot change machine from %s to %s" %
+                raise ArgumentError("Cannot change machine from %s to %s." %
                                     (dbmachine.model.machine_type,
                                      dbmodel.machine_type))
             dbmachine.model = dbmodel
@@ -167,7 +169,7 @@ class CommandUpdateMachine(BrokerCommand):
             if dbcluster.metacluster != dbmachine.cluster.metacluster:
                 raise ArgumentError("Cannot move machine to a new "
                                     "metacluster: Current metacluster %s "
-                                    "does not match new metacluster %s" %
+                                    "does not match new metacluster %s." %
                                     (dbmachine.cluster.metacluster.name,
                                      dbcluster.metacluster.name))
             old_cluster = dbmachine.cluster
@@ -246,8 +248,8 @@ class CommandUpdateMachine(BrokerCommand):
         if dbslot:
             if dbslot.machine:
                 raise ArgumentError("Chassis %s slot %d already has machine "
-                                    "%s" % (dbchassis.fqdn, slot,
-                                            dbslot.machine.name))
+                                    "%s." % (dbchassis.fqdn, slot,
+                                             dbslot.machine.name))
             dbslot.machine = dbmachine
             session.add(dbslot)
         else:

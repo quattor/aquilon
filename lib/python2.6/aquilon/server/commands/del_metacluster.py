@@ -41,8 +41,9 @@ class CommandDelMetaCluster(BrokerCommand):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
         if dbmetacluster.members:
-            raise ArgumentError("Metacluster still in use by clusters: %s" %
-                                ", ".join([c.name
-                                           for c in dbmetacluster.members]))
+            raise ArgumentError("Metacluster %s is still in use by clusters: "
+                                "%s." %
+                                (metacluster, ", ".join([c.name for c in
+                                                         dbmetacluster.members])))
         session.delete(dbmetacluster)
         return

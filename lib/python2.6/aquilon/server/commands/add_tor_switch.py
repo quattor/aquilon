@@ -56,8 +56,9 @@ class CommandAddTorSwitch(BrokerCommand):
         dbmodel = get_model(session, model)
 
         if dbmodel.machine_type not in ['tor_switch']:
-            raise ArgumentError("The add_tor_switch command cannot add machines of type '%s'.  Try 'add machine'." %
-                    dbmodel.machine_type)
+            raise ArgumentError("The add_tor_switch command cannot add "
+                                "machines of type %s.  Try 'add machine'." %
+                                dbmodel.machine_type)
 
         if rack:
             dblocation = get_location(session, rack=rack)
@@ -72,7 +73,7 @@ class CommandAddTorSwitch(BrokerCommand):
         else:
             raise ArgumentError("Need to specify an existing --rack or "
                                 "provide --rackid, --rackrow and --rackcolumn "
-                                "along with --building or --room")
+                                "along with --building or --room.")
 
         (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                              tor_switch)
@@ -91,7 +92,8 @@ class CommandAddTorSwitch(BrokerCommand):
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev:
                 msg = describe_interface(session, prev)
-                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+                raise ArgumentError("MAC address %s is already in use: %s." %
+                                    (mac, msg))
 
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
@@ -111,5 +113,5 @@ class CommandAddTorSwitch(BrokerCommand):
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
-                raise ArgumentError("Could not add tor_switch to dsdb: %s" % e)
+                raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
         return

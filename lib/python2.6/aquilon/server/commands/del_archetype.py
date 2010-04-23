@@ -42,8 +42,8 @@ class CommandDelArchetype(BrokerCommand):
 
         # Check dependencies
         if session.query(Personality).filter_by(archetype=dbarch).first():
-            raise ArgumentError("archetype '%s' is in use and "
-                                "cannot be deleted" % archetype)
+            raise ArgumentError("Archetype %s is still in use and cannot be "
+                                "deleted." % archetype)
 
         # All clear
         session.delete(dbarch)

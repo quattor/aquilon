@@ -41,8 +41,7 @@ class CommandAddMetaCluster(BrokerCommand):
                **arguments):
         validate_basic("metacluster", metacluster)
         if metacluster.strip().lower() == 'global':
-            raise ArgumentError("Cannot create metacluster named 'global': "
-                                "name reserved.")
+            raise ArgumentError("Metacluster name global is reserved.")
 
         MetaCluster.get_unique(session, metacluster, preclude=True)
 

@@ -39,7 +39,7 @@ class CommandShowRequestAuditID(CommandShowRequest):
     def render(self, auditid, request, logger, **arguments):
         status = logger.get_status()
         if not status:
-            raise NotFoundException("auditid %s not found" % auditid)
+            raise NotFoundException("Audit ID %s not found." % auditid)
         arguments.pop("requestid")
         return CommandShowRequest.render(self, requestid=status.requestid,
                                          request=request, logger=logger,

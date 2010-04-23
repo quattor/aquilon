@@ -54,7 +54,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --cluster cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "ESX Cluster 'cluster-does-not-exist' not found.",
+                         "ESX Cluster cluster-does-not-exist not found.",
                          command)
 
     def testmetaclusteravailable(self):
@@ -69,7 +69,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --metacluster metacluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Metacluster 'metacluster-does-not-exist' "
+                         "Metacluster metacluster-does-not-exist "
                          "not found.",
                          command)
 
@@ -91,7 +91,7 @@ class TestSearchESXCluster(TestBrokerCommand):
                    "--esx_hostname=host-does-not-exist.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Host 'host-does-not-exist.aqd-unittest.ms.com' "
+                         "Host host-does-not-exist.aqd-unittest.ms.com "
                          "not found",
                          command)
 
@@ -103,7 +103,7 @@ class TestSearchESXCluster(TestBrokerCommand):
     def testvmunavailable(self):
         command = "search esx cluster --virtual_machine machine-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Machine 'machine-does-not-exist' not found",
+        self.matchoutput(out, "Machine machine-does-not-exist not found",
                          command)
 
     def testguestavailable(self):
@@ -116,7 +116,7 @@ class TestSearchESXCluster(TestBrokerCommand):
                    "--guest=host-does-not-exist.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Host 'host-does-not-exist.aqd-unittest.ms.com' "
+                         "Host host-does-not-exist.aqd-unittest.ms.com "
                          "not found",
                          command)
 
@@ -131,7 +131,7 @@ class TestSearchESXCluster(TestBrokerCommand):
     def testdomainunavailable(self):
         command = "search esx cluster --domain domain-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Domain 'domain-does-not-exist' not found.",
+        self.matchoutput(out, "Domain domain-does-not-exist not found.",
                          command)
 
     def testarchetypeavailable(self):
@@ -145,7 +145,7 @@ class TestSearchESXCluster(TestBrokerCommand):
     def testarchetypeunavailable(self):
         command = "search esx cluster --archetype archetype-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype 'archetype-does-not-exist' not found",
+        self.matchoutput(out, "Archetype archetype-does-not-exist not found",
                          command)
 
     def testpersonalityavailable(self):
@@ -172,7 +172,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality with ", command)
         self.matchoutput(out, "Archetype vmhost", command)
-        self.matchoutput(out, "name of 'personality-does-not-exist'", command)
+        self.matchoutput(out, "name of personality-does-not-exist", command)
 
     def testpersonalityunavailable2(self):
         # Will only get an error if archetype is specified
@@ -211,8 +211,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --service service-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Service with name of 'service-does-not-exist' "
-                         "not found",
+                         "Service with name of service-does-not-exist not found",
                          command)
 
     def testserviceinstanceavailable(self):
@@ -232,7 +231,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
                          "ServiceInstance with name of "
-                         "'service-instance-does-not-exist' and "
+                         "service-instance-does-not-exist and "
                          "Service esx_management_server not found.",
                          command)
 
@@ -263,7 +262,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
                          "Service Instance with name of "
-                         "'share-does-not-exist' and "
+                         "share-does-not-exist and "
                          "Service nas_disk_share not found.",
                          command)
 

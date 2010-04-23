@@ -48,10 +48,11 @@ def parse_system(session, system):
         raise ArgumentError("No fully qualified name specified.")
     (short, dot, dns_domain) = system.partition(".")
     if not dns_domain:
-        raise ArgumentError(
-                "'%s' invalid, name must be fully qualified." % system)
+        raise ArgumentError("System name '%s' is not valid, it must be fully "
+                            "qualified." % system)
     if not short:
-        raise ArgumentError("'%s' invalid, missing host name." % system)
+        raise ArgumentError("System name '%s' is not valid, missing host "
+                            "name." % system)
     dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
     return (short, dbdns_domain)
 
@@ -62,7 +63,7 @@ def get_system_from_parts(session, short, dbdns_domain, system_type=System,
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
         dbsystem = q.first()
         if not dbsystem:
-            raise NotFoundException("%s '%s.%s' not found" %
+            raise NotFoundException("%s %s.%s not found." %
                                     (system_label, short, dbdns_domain.name))
     except InvalidRequestError, e:
         raise AquilonError("Failed to find %s %s.%s: %s" %
@@ -74,8 +75,8 @@ def parse_system_and_verify_free(session, system):
     q = session.query(System)
     dbsystem = q.filter_by(name=short, dns_domain=dbdns_domain).first()
     if dbsystem:
-        # FIXME: This should be more descriptive.
-        raise ArgumentError("System '%s' already exists." % system)
+        raise ArgumentError("%s %s already exists." %
+                            (dbsystem.system_type.capitalize(), dbsystem.name))
     return (short, dbdns_domain)
 
 def search_system_query(session, system_type=System, **kwargs):

@@ -49,11 +49,12 @@ class CommandAddDisk(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
         if (len(d) != 0):
-            raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))
+            raise ArgumentError("Machine %s already has a disk named %s." %
+                                (machine,disk))
 
         if type not in controller_types:
-            raise ArgumentError("%s is not a valid controller type %s" %
-                                (type, controller_types))
+            raise ArgumentError("%s is not a valid controller type, use one "
+                                "of: %s." % (type, ", ".join(controller_types)))
 
         capacity = force_int("capacity", capacity)
         if share:
@@ -61,8 +62,8 @@ class CommandAddDisk(BrokerCommand):
                                            compel=True)
             dbshare = get_service_instance(session, dbservice, share)
             if not re.compile("\d+:\d+$").match(address):
-                raise ArgumentError("disk address '%s' is illegal: must be " \
-                                    "\d+:\d+ (e.g. 0:0)" % address)
+                raise ArgumentError("Disk address '%s' is not valid, it must "
+                                    "match \d+:\d+ (e.g. 0:0)." % address)
             if dbmachine.cluster and dbmachine.cluster.metacluster:
                 dbmetacluster = dbmachine.cluster.metacluster
                 shares = dbmetacluster.shares
@@ -70,7 +71,7 @@ class CommandAddDisk(BrokerCommand):
                    len(shares) >= dbmetacluster.max_shares:
                     raise ArgumentError("Adding a disk on a new share for %s "
                                         "would exceed the metacluster's "
-                                        "max_shares (%s)" %
+                                        "max_shares (%s)." %
                                         (dbmetacluster.name,
                                          dbmetacluster.max_shares))
             dbdisk = NasDisk(machine=dbmachine,

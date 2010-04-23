@@ -43,7 +43,8 @@ class CommandAddOrganization(BrokerCommand):
             org = session.query(Location).filter_by(location_type='company',
                                                     name=organization).first()
             if org:
-                raise ArgumentError("Organization '%s' already exists" % organization)
+                raise ArgumentError("Organization %s already exists." %
+                                    organization)
 
         dborg = Company(name=organization, fullname=fullname, comments=comments)
         session.add(dborg)

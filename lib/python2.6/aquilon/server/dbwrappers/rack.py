@@ -41,7 +41,7 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
                        building=None, room=None, fullname=None, comments=None):
     dblocation = get_location(session, building=building, room=room)
     if not dblocation or not dblocation.building:
-        raise ArgumentError("No parent (building or room) given for rack.")
+        raise ArgumentError("No parent (building or room) given for the rack.")
     dbbuilding = dblocation.building
 
     # The database contains normalized values so we have to normalize the input

@@ -89,7 +89,7 @@ class TestBindESXCluster(TestBrokerCommand):
                    "--cluster", "cluster-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "ESX Cluster 'cluster-does-not-exist' not found.",
+                         "ESX Cluster cluster-does-not-exist not found.",
                          command)
 
     def testfailbadarchetype(self):
@@ -129,8 +129,8 @@ class TestBindESXCluster(TestBrokerCommand):
                    "--service=esx_management_server", "--instance=ut.a"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Cluster with cluster_type of 'esx' and name of "
-                         "'cluster-does-not-exist' not found.",
+                         "Cluster with cluster_type of esx and name of "
+                         "cluster-does-not-exist not found.",
                          command)
 
     def testfailbindservicenotrebind(self):

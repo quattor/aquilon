@@ -90,7 +90,7 @@ def restrict_tor_offsets(dbnetwork, ip):
     for offset in offsets:
         if thisip == netip + offset:
             raise ArgumentError("The IP address %s is reserved for dynamic "
-                                "dhcp for a tor_switch on subnet %s" %
+                                "DHCP for a ToR switch on subnet %s." %
                                 (ip, dbnetwork.ip))
     return
 
@@ -116,7 +116,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     if autoip:
         if not dbinterface:
             raise ArgumentError("No interface available to automatically "
-                                "generate an IP.")
+                                "generate an IP address.")
         if dbinterface.port_group:
             # This could either be an interface from a virtual machine
             # or an interface on an ESX vmhost.
@@ -127,14 +127,14 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             elif getattr(dbinterface.hardware_entity, "host", None):
                 dbcluster = dbinterface.hardware_entity.host.cluster
             if not dbcluster:
-                raise ArgumentError("Can only automatically assign an IP to "
-                                    "an interface with a port group on "
-                                    "virtual machines or ESX hosts.")
+                raise ArgumentError("Can only automatically assign an IP "
+                                    "address to an interface with a port "
+                                    "group on virtual machines or ESX hosts.")
             if not dbcluster.switch:
-                raise ArgumentError("Cannot automatically assign an IP to "
-                                    "an interface with a port group since "
-                                    "cluster %s is not associated with a "
-                                    "switch" % dbcluster.switch)
+                raise ArgumentError("Cannot automatically assign an IP "
+                                    "address to an interface with a port group "
+                                    "since cluster %s is not associated with a "
+                                    "switch." % dbcluster.switch)
             vlan_id = VlanInfo.get_vlan_id(session, dbinterface.port_group)
             dbnetwork = ObservedVlan.get_network(session, vlan_id=vlan_id,
                                                  switch=dbcluster.switch,
@@ -146,7 +146,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             dbom = q.first()
             if not dbom:
                 raise ArgumentError("No switch found in the discovery table "
-                                    "for mac %s" % dbinterface.mac)
+                                    "for MAC address %s." % dbinterface.mac)
             dbsystem = dbom.switch
 
     if ipfromsystem:
@@ -162,8 +162,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         # Could be slightly more intelligent here, and check to see if
         # there is an IP, and then fix the network setting.
         if not dbnetwork:
-            raise ArgumentError("Could not determine network to use for"
-                                "%s" % dbsystem.fqdn)
+            raise ArgumentError("Could not determine network to use for %s." %
+                                dbsystem.fqdn)
 
     if dbnetwork.network_type == 'tor_net':
         start = 8
@@ -185,7 +185,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             if session.query(System).filter_by(ip=ip).first():
                 continue
             return ip
-        raise ArgumentError("No available IP found on network %s" %
+        raise ArgumentError("No available IP addresses found on network %s." %
                             dbnetwork.ip)
     elif ipalgorithm == 'max':
         # Find the highest IP defined in the subnet, and add one.
@@ -199,14 +199,14 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         if i < start:
             return pool[start]
         if (i + 1) >= len(pool):
-            raise ArgumentError("No remaining IPs found on network %s.  "
-                                "%s [%s] has the highest address." %
+            raise ArgumentError("No remaining IP addresses found on network "
+                                "%s.  %s [%s] has the highest address." %
                                 (dbnetwork.ip, first.fqdn, first.ip))
         return pool[i + 1]
-    raise ArgumentError("Unknown algorithm '%s'" % ipalgorithm)
+    raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
 
 def describe_interface(session, interface):
-    description = ["%s interface %s has mac %s and boot=%s" %
+    description = ["%s interface %s has MAC address %s and boot=%s" %
                    (interface.interface_type, interface.name, interface.mac,
                     interface.bootable)]
     hw = interface.hardware_entity
@@ -215,10 +215,10 @@ def describe_interface(session, interface):
         description.append("is attached to machine %s" % hw.name)
     elif hw_type == 'tor_switch_hw':
         if hw.tor_switch:
-            description.append("is attached to tor_switch %s" %
+            description.append("is attached to ToR switch %s" %
                                ",".join([ts.fqdn for ts in hw.tor_switch]))
         else:
-            description.append("is attached to unnamed tor_switch hardware")
+            description.append("is attached to unnamed ToR switch hardware")
     elif hw_type == 'chassis_hw':
         if hw.chassis_hw:
             description.append("is attached to chassis %s" %
@@ -231,10 +231,12 @@ def describe_interface(session, interface):
         description.append("points to system %s" % interface.system.fqdn)
     systems = session.query(System).filter_by(mac=interface.mac).all()
     if len(systems) == 1 and systems[0] != interface.system:
-        description.append("but mac is in use by '%s'" % systems[0].fqdn)
+        description.append("but MAC address %s is in use by %s" % 
+                           (interface.mac, systems[0].fqdn))
     if len(systems) > 1:
-        description.append("and mac is in use by '%s'" %
-                           ",".join([s.fqdn for s in systems]))
+        description.append("and MAC address %s is in use by %s" %
+                           (interface.mac,
+                            ", ".join([s.fqdn for s in systems])))
     return ", ".join(description)
 
 def verify_port_group(dbmachine, port_group):
@@ -260,7 +262,7 @@ def verify_port_group(dbmachine, port_group):
         dbswitch = dbmachine.cluster.switch
         if not dbswitch:
             raise ArgumentError("Cannot verify port group availability: "
-                                "no tor_switch record for cluster %s" %
+                                "no ToR switch record for cluster %s." %
                                 dbmachine.cluster)
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id)
@@ -269,14 +271,14 @@ def verify_port_group(dbmachine, port_group):
             dbobserved_vlan = q.one()
         except NoResultFound:
             raise ArgumentError("Cannot verify port group availability: "
-                                "no record for VLAN %s on switch %s" %
+                                "no record for VLAN %s on switch %s." %
                                 (vlan_id, dbswitch.fqdn))
         except MultipleResultsFound:
             raise InternalError("Too many subnets found for VLAN %s "
-                                "on switch %s" %
+                                "on switch %s." %
                                 (vlan_id, dbswitch.fqdn))
         if dbobserved_vlan.is_at_guest_capacity:
-            raise ArgumentError("Port group %s is full for switch %s" %
+            raise ArgumentError("Port group %s is full for switch %s." %
                                 (dbvi.port_group,
                                  dbobserved_vlan.switch.fqdn))
     elif dbmachine.host and dbmachine.host.cluster and \
@@ -285,7 +287,7 @@ def verify_port_group(dbmachine, port_group):
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id, switch=dbswitch)
         if not q.count():
-            raise ArgumentError("VLAN %s not found for switch %s" %
+            raise ArgumentError("VLAN %s not found for switch %s." %
                                 (dbvi.vlan_id, dbswitch.fqdn))
     return dbvi.port_group
 
@@ -295,7 +297,7 @@ def choose_port_group(dbmachine):
                             "portgroup entry for virtual hardware.")
     if not dbmachine.cluster.switch:
         raise ArgumentError("Cannot automatically allocate port group:"
-                            " no tor_switch record for cluster %s" %
+                            " no ToR switch record for cluster %s." %
                             dbmachine.cluster)
     for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
         if dbobserved_vlan.vlan_type != 'user':
@@ -303,5 +305,5 @@ def choose_port_group(dbmachine):
         if dbobserved_vlan.is_at_guest_capacity:
             continue
         return dbobserved_vlan.port_group
-    raise ArgumentError("No available user port groups on switch %s" %
+    raise ArgumentError("No available user port groups on switch %s." %
                         dbmachine.cluster.switch.fqdn)

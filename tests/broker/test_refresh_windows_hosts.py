@@ -88,22 +88,22 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         self.matchoutput(err,
                          "Skipping host badhost2.domain-does-not-exist.ms.com:"
                          " No AQDB entry for DNS domain "
-                         "'domain-does-not-exist.ms.com'",
+                         "domain-does-not-exist.ms.com",
                          command)
         self.matchoutput(err,
                          "Skipping host badhost3.msad.ms.com: "
-                         "MAC 02:00:00:00:00:00 is not present in AQDB",
+                         "MAC address 02:00:00:00:00:00 is not present in AQDB",
                          command)
         self.matchoutput(err,
-                         "Skipping host badhost4.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:0b is tied to "
-                         "hardware ut3c5.aqd-unittest.ms.com instead of a "
+                         "Skipping host badhost4.msad.ms.com: The AQDB "
+                         "interface with MAC address 02:02:04:02:01:0b is tied "
+                         "to hardware ut3c5.aqd-unittest.ms.com instead of a "
                          "virtual machine",
                          command)
         self.matchoutput(err,
-                         "Skipping host badhost5.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:0a is already "
-                         "tied to unittest01.one-nyp.ms.com",
+                         "Skipping host badhost5.msad.ms.com: The AQDB "
+                         "interface with MAC address 02:02:04:02:01:0a is "
+                         "already tied to unittest01.one-nyp.ms.com",
                          command)
         self.matchoutput(err,
                          "Added host entry for evm3 (desktop1.msad.ms.com)",
@@ -144,22 +144,22 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         self.matchoutput(err,
                          "Skipping host badhost2.domain-does-not-exist.ms.com:"
                          " No AQDB entry for DNS domain "
-                         "'domain-does-not-exist.ms.com'",
+                         "domain-does-not-exist.ms.com",
                          command)
         self.matchoutput(err,
                          "Skipping host badhost3.msad.ms.com: "
-                         "MAC 02:00:00:00:00:00 is not present in AQDB",
+                         "MAC address 02:00:00:00:00:00 is not present in AQDB",
                          command)
         self.matchoutput(err,
-                         "Skipping host badhost4.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:0b is tied to "
-                         "hardware ut3c5.aqd-unittest.ms.com instead of a "
+                         "Skipping host badhost4.msad.ms.com: The AQDB "
+                         "interface with MAC address 02:02:04:02:01:0b is tied "
+                         "to hardware ut3c5.aqd-unittest.ms.com instead of a "
                          "virtual machine",
                          command)
         self.matchoutput(err,
-                         "Skipping host badhost5.msad.ms.com: the AQDB "
-                         "interface with mac 02:02:04:02:01:0a is already "
-                         "tied to unittest01.one-nyp.ms.com",
+                         "Skipping host badhost5.msad.ms.com: The AQDB "
+                         "interface with MAC address 02:02:04:02:01:0a is "
+                         "already tied to unittest01.one-nyp.ms.com",
                          command)
         self.matchoutput(err,
                          "Added host entry for evm3 (desktop1.msad.ms.com)",

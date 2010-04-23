@@ -50,7 +50,7 @@ class CommandDelServiceInstance(BrokerCommand):
         if dbsi.servers:
             msg = ", ".join([item.system.fqdn for item in dbsi.servers])
             raise ArgumentError("Service %s, instance %s is still being "
-                                "provided by servers: %s" %
+                                "provided by servers: %s." %
                                 (dbservice.name, dbsi.name, msg))
 
         # Check the service map and remove any mappings

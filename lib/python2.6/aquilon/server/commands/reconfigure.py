@@ -57,7 +57,7 @@ class CommandReconfigure(CommandMake):
         if archetype and archetype != dbhost.archetype.name:
             if not personality:
                 raise ArgumentError("Changing archetype also requires "
-                                    "specifying personality.")
+                                    "specifying --personality.")
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             # TODO: Once OS is a first class object this block needs
             # to check that either OS is also being reset or that the
@@ -81,7 +81,7 @@ class CommandReconfigure(CommandMake):
                    dbhost.cluster.personality != dbpersonality:
                     raise ArgumentError("Cannot change personality of host %s "
                                         "while it is a member of "
-                                        "%s cluster %s" %
+                                        "%s cluster %s." %
                                         (dbhost.fqdn,
                                          dbhost.cluster.cluster_type,
                                          dbhost.cluster.name))

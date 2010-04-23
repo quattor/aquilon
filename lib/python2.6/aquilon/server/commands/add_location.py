@@ -57,8 +57,8 @@ class CommandAddLocation(BrokerCommand):
             # FIXME: Technically this is coming in with an http PUT,
             # which should try to adjust state and succeed if everything
             # is alright.
-            raise ArgumentError("%s '%s' already exists."
-                    % (type.capitalize(), name))
+            raise ArgumentError("%s %s already exists."
+                                % (type.capitalize(), name))
         try:
             dbparent = session.query(Location).filter_by(name=parentname,
                     location_type=parenttype).one()
@@ -68,7 +68,8 @@ class CommandAddLocation(BrokerCommand):
         # Incoming looks like 'city', need the City class.
         location_type = globals()[type.capitalize()]
         if not issubclass(location_type, Location):
-            raise ArgumentError("%s is not a known location type" % type)
+            raise ArgumentError("%s is not a known location type." %
+                                type.capitalize())
 
         # Figure out if it is valid to add this type of child to the parent...
         found_parent = False
@@ -86,10 +87,10 @@ class CommandAddLocation(BrokerCommand):
                 # We saw the parent earlier - life is good.
                 found_new = True
                 break
-            raise ArgumentError("type %s cannot be a parent of %s" %
-                    (parenttype, type))
+            raise ArgumentError("Type %s cannot be a parent of %s." %
+                    (parenttype.capitalize(), type.capitalize()))
         if not found_new:
-            raise ArgumentError("unknown type %s" % type)
+            raise ArgumentError("Unknown type %s." % type.capitalize())
 
         optional_args = {}
         # XXX: The fullname used to be nullable... adding hack...

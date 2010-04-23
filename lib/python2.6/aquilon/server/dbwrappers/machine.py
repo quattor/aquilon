@@ -59,7 +59,8 @@ def create_machine(session, machine, dblocation, dbmodel,
             q = q.join('vendor').filter_by(name=cpuvendor.lower())
         cpulist = q.all()
         if not cpulist:
-            raise ArgumentError("Could not find a cpu with the given attributes.")
+            raise ArgumentError("Could not find a CPU with the given "
+                                "attributes.")
         if len(cpulist) == 1:
             # Found it exactly.
             dbcpu = cpulist[0]
@@ -70,9 +71,11 @@ def create_machine(session, machine, dblocation, dbmodel,
                     or (cpuspeed and dbcpu.speed != cpuspeed)
                     or (cpuvendor and
                         dbcpu.vendor.name != cpuvendor.lower())):
-                raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
+                raise ArgumentError("Could not uniquely identify a CPU with "
+                                    "the attributes given.")
         else:
-            raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
+            raise ArgumentError("Could not uniquely identify a CPU with the "
+                                "attributes given.")
 
     if cpucount is None:
         if dbmodel.machine_specs:

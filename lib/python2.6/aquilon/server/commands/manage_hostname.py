@@ -45,9 +45,9 @@ class CommandManageHostname(BrokerCommand):
         dbdomain = Domain.get_unique(session, domain, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if dbhost.cluster:
-            raise ArgumentError("cluster nodes must be managed at the "
-                                "cluster level; this host is a member of the "
-                                "cluster " + dbhost.cluster.name)
+            raise ArgumentError("Cluster nodes must be managed at the "
+                                "cluster level; this host is a member of "
+                                "cluster %s." % dbhost.cluster.name)
 
         old_domain = dbhost.domain.name
 

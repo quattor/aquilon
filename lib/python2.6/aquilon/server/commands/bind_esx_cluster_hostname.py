@@ -46,7 +46,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         if dbhost.personality != dbcluster.personality:
             raise ArgumentError("Host archetype %s personality %s does not "
-                                "match cluster archetype %s personality %s" %
+                                "match cluster archetype %s personality %s." %
                                 (dbhost.personality.archetype.name,
                                  dbhost.personality.name,
                                  dbcluster.personality.archetype.name,
@@ -55,17 +55,16 @@ class CommandBindESXClusterHostname(BrokerCommand):
            dbcluster.location_constraint not in \
            dbhost.machine.location.parents:
             raise ArgumentError("Host location %s %s is not within cluster "
-                                "location %s %s" %
-                                (dbhost.machine.location.location_type,
+                                "location %s %s." %
+                                (dbhost.machine.location.location_type.capitalize(),
                                  dbhost.machine.location.name,
-                                 dbcluster.location_constraint.location_type,
+                                 dbcluster.location_constraint.location_type.capitalize(),
                                  dbcluster.location_constraint.name))
         if dbhost.cluster and dbhost.cluster != dbcluster:
             if not force:
-                raise ArgumentError("Host '%s' is already bound to %s cluster "
-                                    "'%s'." %
-                                    (hostname, dbhost.cluster.cluster_type,
-                                     dbhost.cluster.name))
+                raise ArgumentError("Host %s is already bound to %s cluster %s."
+                                    % (hostname, dbhost.cluster.cluster_type,
+                                       dbhost.cluster.name))
             old_cluster = dbhost.cluster
             dbhcm = HostClusterMember.get_unique(session,
                                                  cluster_id=old_cluster.id,
@@ -81,7 +80,7 @@ class CommandBindESXClusterHostname(BrokerCommand):
         if not dbhost.cluster:
             if dbhost.domain != dbcluster.domain:
                 raise ArgumentError("Host %s domain %s does not match "
-                                    "%s cluster %s domain %s" %
+                                    "%s cluster %s domain %s." %
                                     (dbhost.fqdn, dbhost.domain.name,
                                      dbcluster.cluster_type, dbcluster.name,
                                      dbcluster.domain.name))

@@ -48,7 +48,7 @@ class TestDelVendor(TestBrokerCommand):
         command = ["del_vendor", "--vendor=vendor-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Vendor 'vendor-does-not-exist' not found.",
+                         "Vendor vendor-does-not-exist not found",
                          command)
 
     def testdelutvendor(self):

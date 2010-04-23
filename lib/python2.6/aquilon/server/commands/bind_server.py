@@ -54,7 +54,8 @@ class CommandBindServer(BrokerCommand):
                 # The right thing would generally be writing to stderr for
                 # a CLI (either raw or csv), and some sort of generic error
                 # page for a web client.
-                raise ArgumentError("Server %s is already bound to service %s instance %s" %
+                raise ArgumentError("Server %s is already bound to service %s "
+                                    "instance %s." %
                                     (hostname, service, instance))
         positions = []
         for dbserver in dbinstance.servers:

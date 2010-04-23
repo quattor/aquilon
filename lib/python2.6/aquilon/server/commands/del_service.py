@@ -45,19 +45,17 @@ class CommandDelService(BrokerCommand):
         if dbservice.archetypes:
             msg = ", ".join([archetype.name for archetype in
                              dbservice.archetypes])
-            raise ArgumentError("Cannot remove service %s, it is required by "
-                                "the following archetypes: %s." %
-                                (dbservice.name, msg))
+            raise ArgumentError("Service %s is still required by the following "
+                                "archetypes: %s." % (dbservice.name, msg))
         if dbservice.personalities:
             msg = ", ".join(["%s (%s)" % (personality.name,
                                           personality.archetype.name)
                              for personality in dbservice.personalities])
-            raise ArgumentError("Cannot remove service %s, it is required by "
-                                "the following personalities: %s." %
-                                (dbservice.name, msg))
+            raise ArgumentError("Service %s is still required by the following "
+                                "personalities: %s." % (dbservice.name, msg))
         if dbservice.instances:
-            raise ArgumentError("Cannot remove service %s with instances "
-                                "defined." % dbservice.name)
+            raise ArgumentError("Service %s still has instances defined and "
+                                "cannot be deleted." % dbservice.name)
 
         session.delete(dbservice)
         session.flush()

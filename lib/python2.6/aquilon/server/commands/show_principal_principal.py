@@ -44,6 +44,4 @@ class CommandShowPrincipal(BrokerCommand):
             return get_or_create_user_principal(
                     session, principal, False, False)
         except ArgumentError, e:
-            raise NotFoundException("UserPrincipal %s not found" % principal)
-
-
+            raise NotFoundException("User principal %s not found." % principal)
