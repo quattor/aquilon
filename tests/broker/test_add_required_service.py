@@ -47,6 +47,10 @@ class TestAddRequiredService(TestBrokerCommand):
         command = "add required service --service afs --archetype aquilon"
         self.noouttest(command.split(" "))
 
+    def testaddrequiredafsduplicate(self):
+        command = "add required service --service afs --archetype aquilon"
+        self.badrequesttest(command.split(" "))
+
     def testaddrequireddns(self):
         command = "add required service --service dns --archetype aquilon"
         self.noouttest(command.split(" "))
@@ -83,6 +87,14 @@ class TestAddRequiredService(TestBrokerCommand):
             command = ["add_required_service", "--service", service,
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
+
+    def testaddrequiredpersonalityduplicate(self):
+        command = ["add_required_service", "--service", "chooser1",
+                   "--archetype", "aquilon", "--personality", "unixeng-test"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Service chooser1 is already required by "
+                         "personality unixeng-test, archetype aquilon.",
+                         command)
 
     def testverifyaddrequiredpersonality(self):
         command = ["show_personality", "--archetype=aquilon",

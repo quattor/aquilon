@@ -29,6 +29,7 @@
 """Contains the logic for `aq add required service`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Archetype, Service, ServiceListItem
 
@@ -40,8 +41,11 @@ class CommandAddRequiredService(BrokerCommand):
     def render(self, session, service, archetype, comments, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, name=service, compel=True)
-        ServiceListItem.get_unique(session, archetype=dbarchetype,
-                                   service=dbservice, preclude=True)
+        # Provide a better error message than preclude=True would give
+        if ServiceListItem.get_unique(session, archetype=dbarchetype,
+                                      service=dbservice):
+            raise ArgumentError("Service %s is already required by archetype "
+                                "%s" % (service, archetype))
         dbsli = ServiceListItem(archetype=dbarchetype, service=dbservice,
                                 comments=comments)
         session.add(dbsli)
