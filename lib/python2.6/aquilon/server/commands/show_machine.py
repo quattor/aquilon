@@ -29,10 +29,11 @@
 """Contains the logic for `aq show machine`."""
 
 
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Machine, Model
+from aquilon.utils import force_int
 
 
 class CommandShowMachine(BrokerCommand):

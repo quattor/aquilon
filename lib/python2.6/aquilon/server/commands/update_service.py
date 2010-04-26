@@ -30,11 +30,12 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
+from aquilon.utils import force_int
 
 
 class CommandAddService(BrokerCommand):

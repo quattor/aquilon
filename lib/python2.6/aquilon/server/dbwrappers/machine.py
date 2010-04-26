@@ -33,7 +33,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Cpu, LocalDisk, Machine
-from aquilon.server.broker import force_int
+from aquilon.utils import force_int
 
 
 def create_machine(session, machine, dblocation, dbmodel,

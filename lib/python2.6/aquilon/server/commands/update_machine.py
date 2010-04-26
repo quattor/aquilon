@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  UnimplementedError, IncompleteError)
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
@@ -42,6 +42,7 @@ from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model,
                                 Cluster, MachineClusterMember, Machine)
+from aquilon.utils import force_int
 
 
 class CommandUpdateMachine(BrokerCommand):

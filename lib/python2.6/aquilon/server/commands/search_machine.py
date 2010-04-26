@@ -32,12 +32,13 @@
 from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
 from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster, Service,
                                 ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
+from aquilon.utils import force_int
 
 
 class CommandSearchMachine(BrokerCommand):

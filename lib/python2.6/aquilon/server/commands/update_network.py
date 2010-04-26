@@ -30,12 +30,12 @@
 
 import re
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException)
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model import Network
-from aquilon.utils import force_ipv4
+from aquilon.utils import force_int, force_ipv4
 
 class CommandUpdateNetwork(BrokerCommand):
 

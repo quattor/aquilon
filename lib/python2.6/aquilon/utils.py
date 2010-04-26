@@ -36,7 +36,6 @@ import os
 import signal
 
 from ipaddr import IPv4Address, IPv4IpValidationError
-
 from aquilon.exceptions_ import ArgumentError
 
 def kill_from_pid_file(pid_file):
@@ -105,3 +104,13 @@ def force_ipv4(label, value):
         return IPv4Address(value)
     except IPv4IpValidationError, e:
         raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
+
+def force_int(label, value):
+    """Utility method to force incoming values to int and wrap errors."""
+    if value is None:
+        return None
+    try:
+        result = int(value)
+    except ValueError, e:
+        raise ArgumentError("Expected an integer for %s." % label)
+    return result

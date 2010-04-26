@@ -33,11 +33,12 @@ import re
 
 from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.utils import force_int
 
 class CommandAddDisk(BrokerCommand):
 

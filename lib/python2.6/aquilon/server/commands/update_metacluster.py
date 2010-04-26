@@ -28,10 +28,11 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, validate_basic, force_int
+from aquilon.server.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
+from aquilon.utils import force_int
 
 
 class CommandUpdateMetaCluster(BrokerCommand):

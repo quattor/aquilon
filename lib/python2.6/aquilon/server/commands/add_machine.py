@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.system import get_system
@@ -39,6 +39,7 @@ from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model,
                                 Machine, MachineClusterMember)
+from aquilon.utils import force_int
 
 
 class CommandAddMachine(BrokerCommand):

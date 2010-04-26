@@ -29,9 +29,10 @@
 """Contains the logic for `aq search observed mac`."""
 
 
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import ObservedMac
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
+from aquilon.utils import force_int
 
 
 class CommandObservedMac(BrokerCommand):

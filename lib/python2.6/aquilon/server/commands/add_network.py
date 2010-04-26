@@ -32,11 +32,12 @@ from ipaddr import (IPv4Network, IPv4IpValidationError,
                     IPv4NetmaskValidationError)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname
 from aquilon.aqdb.model.network import (Network, _mask_to_cidr,
                                         get_net_id_from_ip)
+from aquilon.utils import force_int
 
 class CommandAddNetwork(BrokerCommand):
 

@@ -29,8 +29,9 @@
 """Contains the logic for `aq add cpu`."""
 
 
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu, Vendor
+from aquilon.utils import force_int
 
 
 class CommandAddCpu(BrokerCommand):

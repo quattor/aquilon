@@ -32,8 +32,9 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.utils import force_int
 
 
 class CommandDelDisk(BrokerCommand):

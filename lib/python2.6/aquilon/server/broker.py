@@ -370,17 +370,6 @@ class BrokerCommand(object):
         return True
 
 
-# FIXME: This utility method may be better suited elsewhere.
-def force_int(label, value):
-    """Utility method to force incoming values to int and wrap errors."""
-    if value is None:
-        return None
-    try:
-        result = int(value)
-    except ValueError, e:
-        raise ArgumentError("Expected an integer for %s: %s" % (label, e))
-    return result
-
 ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
 
 # FIXME: This utility method may be better suited elsewhere.

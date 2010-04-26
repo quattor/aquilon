@@ -31,7 +31,7 @@
 
 import re
 
-from aquilon.server.broker import force_int
+from aquilon.utils import force_int
 
 int_re = re.compile(r'(\d+)')
 
