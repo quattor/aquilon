@@ -108,6 +108,17 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["update_esx_cluster", "--cluster=utecl1", "--rack=ut10"]
         self.noouttest(command)
 
+    def testupdateutecl1switch(self):
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--tor_switch=ut01ga1s04.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testupdateutecl1switchfail(self):
+        # Try something that is not a tor_switch
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--tor_switch=unittest02.one-nyp.ms.com"]
+        self.badrequesttest(command)
+
     def testfailupdatelocation(self):
         command = ["update_esx_cluster", "--cluster=utecl1", "--rack=ut3"]
         out = self.badrequesttest(command)
@@ -178,6 +189,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+                         command)
+        self.matchoutput(out, "ToR Switch: ut01ga1s04.aqd-unittest.ms.com",
                          command)
 
     def testfailmissingcluster(self):

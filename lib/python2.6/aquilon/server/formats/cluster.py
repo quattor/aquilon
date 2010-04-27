@@ -56,6 +56,9 @@ class ClusterFormatter(ObjectFormatter):
                            len(cluster.machines))
             details.append(indent + "  ESX VMHost count: %s" %
                            len(cluster.hosts))
+            if cluster.switch:
+                details.append(indent + "  ToR Switch: %s" %
+                               cluster.switch.fqdn)
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         details.append(self.redirect_raw(cluster.domain, indent + "  "))
         for dbsi in cluster.service_bindings:

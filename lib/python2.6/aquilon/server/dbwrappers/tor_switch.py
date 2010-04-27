@@ -29,9 +29,7 @@
 """Wrapper to make getting a machine simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import TorSwitch
 from aquilon.server.dbwrappers.system import get_system
 
