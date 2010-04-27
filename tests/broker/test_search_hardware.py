@@ -116,6 +116,23 @@ class TestSearchHardware(TestBrokerCommand):
         command = "search hardware --mac 02:02:c7:62:10:04"
         self.noouttest(command.split(" "))
 
+    def testlocation(self):
+        command = "search hardware --building np"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "nyaqd1", command)
+        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
+
+    def testlocationexact(self):
+        command = "search hardware --building np --exact_location"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "nyaqd1", command)
+        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
+
+    def testlocationunavailable(self):
+        command = "search hardware --building building-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "not found", command)
+
     def testall(self):
         command = "search hardware --all"
         out = self.commandtest(command.split(" "))

@@ -42,7 +42,11 @@ def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
             HardwareEntity.__mapper__.polymorphic_map.values())
     dblocation = get_location(session, **kwargs)
     if dblocation:
-        q = q.filter_by(location=dblocation)
+        if kwargs.get('exact_location'):
+            q = q.filter_by(location=dblocation)
+        else:
+            childids = dblocation.offspring_ids()
+            q = q.filter(HardwareEntity.location_id.in_(childids))
     model = kwargs.get('model', None)
     vendor = kwargs.get('vendor', None)
     machine_type = kwargs.get('machine_type', None)

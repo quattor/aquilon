@@ -57,9 +57,15 @@ class TestSearchMachine(TestBrokerCommand):
                          command)
 
     def testlocation(self):
+        command = "search machine --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evm", command)
+        self.matchoutput(out, "ut", command)
+
+    def testlocationexact(self):
         # Should only show virtual machines, since all the physical machines
         # are at the rack level and this search is exact.
-        command = "search machine --building ut"
+        command = "search machine --building ut --exact_location"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "evm", command)
         self.matchclean(out, "ut", command)

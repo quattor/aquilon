@@ -361,6 +361,33 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
 
+    def testlocationbuilding(self):
+        command = "search host --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh1.aqd-unittest.ms.com", command)
+
+    def testlocationcampus(self):
+        command = "search host --campus ny"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh1.aqd-unittest.ms.com", command)
+
+    def testlocationcomplex(self):
+        command = "search host --building ut --personality inventory"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
+
     def testlocationunavailable(self):
         command = "search host --building building-does-not-exist"
         out = self.notfoundtest(command.split(" "))

@@ -151,9 +151,9 @@
       could be machines, top of rack switches, chassis, or any other hardware
       tracked by AQDB.
       <p/>
-      Note that location searches are exact-only.  That is, if searching
-      for a machine in a rack, and the rack is in the requested building,
-      the search will not return the machine.
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
       <optgroup name="search_hardware_opts" mandatory="True" fields="any">
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
@@ -166,12 +166,14 @@
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="exact_location" type="boolean">match the location exactly</option>
          <option name="all" type="boolean">list all hardware</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
@@ -185,9 +187,9 @@
       <p/>
       (See search_hardware for a more general hardware search.)
       <p/>
-      Note that location searches are exact-only.  That is, if searching
-      for a machine in a rack, and the rack is in the requested building,
-      the search will not return the machine.
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
       <optgroup name="search_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string">machine name (exact)</option>
          <option name="cpuname" type="string">cpu name</option>
@@ -208,12 +210,14 @@
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="exact_location" type="boolean">match the location exactly</option>
          <option name="all" type="boolean">list all hardware</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
@@ -244,6 +248,10 @@
 
    <command name="search_host">
       Shows any information available for the matching hosts.
+      <p/>
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
       <optgroup name="search_host_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">fully qualified domain name</option>
          <option name="machine" type="string">node name</option>
@@ -269,17 +277,19 @@
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
             <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
          </optgroup>
-         <optgroup name="search_hardware_location_opts" fields="any">
+         <optgroup name="search_host_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
 	    <option name="continent" type="string">Continent</option>
 	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
 	    <option name="city" type="string">City</option>
 	    <option name="building" type="string">Building</option>
 	    <option name="room" type="string">Room</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="exact_location" type="boolean">match the location exactly</option>
          <option name="all" type="boolean">list all systems</option>
       </optgroup>
       <optgroup name="search_host_prefs" mandatory="False">
@@ -297,6 +307,11 @@
       (esx_hostname, vmhost_rack, etc.).  3 - those that match against
       the virtual machines running on the cluster (virtual_machine,
       guest).
+      <p/>
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --cluster_exact_location and --vmhost_exact_location options can be used
+      to override this behavior.
       <optgroup name="search_cluster_opts" mandatory="True" fields="any">
          <option name="cluster" type="string">cluster name</option>
          <option name="metacluster" type="string">metacluster name</option>
@@ -318,23 +333,27 @@
 	    <option name="cluster_hub" type="string">Cluster Hub</option>
 	    <option name="cluster_continent" type="string">Cluster Continent</option>
 	    <option name="cluster_country" type="string">Cluster Country</option>
+	    <option name="cluster_campus" type="string">Cluster Campus</option>
 	    <option name="cluster_city" type="string">Cluster City</option>
 	    <option name="cluster_building" type="string">Cluster Building</option>
 	    <option name="cluster_room" type="string">Cluster Room</option>
 	    <option name="cluster_rack" type="string">Cluster Rack</option>
 	    <option name="cluster_desk" type="string">Cluster Desk</option>
          </optgroup>
+         <option name="cluster_exact_location" type="boolean">match the cluster location exactly</option>
          <optgroup name="search_vmhost_location_opts" fields="any">
 	    <option name="vmhost_organization" type="string">vmhost Organization</option>
 	    <option name="vmhost_hub" type="string">vmhost Hub</option>
 	    <option name="vmhost_continent" type="string">vmhost Continent</option>
 	    <option name="vmhost_country" type="string">vmhost Country</option>
+	    <option name="vmhost_campus" type="string">vmhost Campus</option>
 	    <option name="vmhost_city" type="string">vmhost City</option>
 	    <option name="vmhost_building" type="string">vmhost Building</option>
 	    <option name="vmhost_room" type="string">vmhost Room</option>
 	    <option name="vmhost_rack" type="string">vmhost Rack</option>
 	    <option name="vmhost_desk" type="string">vmhost Desk</option>
          </optgroup>
+         <option name="vmhost_exact_location" type="boolean">match the vmhost location exactly</option>
          <option name="all" type="boolean">list all ESX clusters</option>
       </optgroup>
       <optgroup name="search_cluster_prefs" mandatory="False">
@@ -446,6 +465,10 @@
       <p/>
       The 'csv' format contains the following fields, in this order:
       Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
+      <p/>
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
       <optgroup name="show_network_Input" mandatory="True" fields="any">
          <option name="network" type="string" conflicts="">Network name</option>
          <option name="ip" type="string" conflicts="">IP address</option>
@@ -468,6 +491,7 @@
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
+         <option name="exact_location" type="boolean">match the location exactly</option>
       </optgroup>
       <transport method="get" path="network" />
    </command>

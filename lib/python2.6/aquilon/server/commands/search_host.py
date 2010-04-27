@@ -120,7 +120,11 @@ class CommandSearchHost(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.join(['machine'])
-            q = q.filter_by(location=dblocation)
+            if arguments.get('exact_location'):
+                q = q.filter_by(location=dblocation)
+            else:
+                childids = dblocation.offspring_ids()
+                q = q.filter(Machine.location_id.in_(childids))
             q = q.reset_joinpoint()
         if model or vendor or machine_type:
             subq = Model.get_matching_query(session, name=model, vendor=vendor,

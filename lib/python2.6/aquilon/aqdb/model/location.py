@@ -29,12 +29,14 @@
 """ How we represent location data in Aquilon """
 
 from datetime import datetime
+from collections import deque
 
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint, text)
 
 from sqlalchemy.orm import relation, backref, object_session
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr
 
@@ -132,14 +134,43 @@ class Location(Base):
             node.parent = self
             self.sublocations[node] = node
 
-    @property
-    def children(self):
-        s = text("""select * from location
-                    where id != %d
-                    connect by parent_id = prior id
-                    start with id = %d""" % (self.id, self.id))
-
-        return object_session(self).query(Location).from_statement(s).all()
+    def offspring_ids(self, exclude_self=False):
+        session = object_session(self)
+        # We have two implementations here: the first is fast but
+        # Oracle-specific, the second is slower but works with any database
+        if session.connection().dialect.name == 'oracle':
+            # TODO: we could optimize this case a bit more by returning a
+            # subquery instead of the list of IDs, but unfortunately
+            # from_statement(...).subquery() does not seem to work
+            where = "WHERE id != :startid" if exclude_self else ""
+            s = text("""SELECT id FROM location
+                        %s
+                        CONNECT BY parent_id = PRIOR id
+                        START WITH id = :startid""" % where)
+            q = session.query(Location.id).from_statement(s)
+            q = q.params(startid=self.id)
+            ids = [item.id for item in q.all()]
+            # TODO: There is a limitation of having at most 1000 items in a
+            # "SELECT WHERE IN (...)" clause in Oracle. Solving the subquery
+            # issue would also solve this one
+            if len(ids) > 1000:
+                raise ArgumentError("The specified location constraint "
+                                    "produced too many results. Either "
+                                    "specify something smaller, or use "
+                                    "--exact_location.")
+            return ids
+        else:
+            queue = deque([self.id])
+            offsprings = []
+            while queue:
+                node_id = queue.popleft()
+                offsprings.append(node_id)
+                q = session.query(Location.id).filter_by(parent_id=node_id)
+                children = [item.id for item in q.all()]
+                queue.extend(children)
+            if exclude_self:
+                offsprings.remove(self.id)
+            return offsprings
 
     def sysloc(self):
         components = ['building', 'city', 'continent']
@@ -147,14 +178,6 @@ class Location(Base):
             if component not in self.p_dict:
                 return None
         return str('.'.join([str(self.p_dict[item]) for item in components]))
-
-    def typed_children(self, typ):
-        s = text("""select * from location
-                    where location_type = '%s'
-                    connect by parent_id = prior id
-                    start with id = %d""" % (typ, self.id))
-
-        return object_session(self).query(Location).from_statement(s).all()
 
     def get_parts(self):
         parts = list(self.parents)
