@@ -62,7 +62,7 @@ class TestAddMachine(TestBrokerCommand):
     def testverifydelmodel(self):
         # This should be in test_del_model.py but when that is run there are no
         # more machines defined...
-        command = "del model --name hs21-8853l5u --vendor ibm"
+        command = "del model --model hs21-8853l5u --vendor ibm"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Model hs21-8853l5u is still in use and cannot "
                          "be deleted.", command)

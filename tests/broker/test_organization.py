@@ -44,7 +44,7 @@ from brokertest import TestBrokerCommand
 class TestOrganization(TestBrokerCommand):
 
     def testaddexorg(self):
-        command = "add organization --name example --fullname 'Example, Inc'"
+        command = "add organization --organization example --fullname 'Example, Inc'"
         self.noouttest(command.split(" "))
 
     def testverifyaddexorg(self):

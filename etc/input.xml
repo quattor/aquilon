@@ -189,7 +189,7 @@
       for a machine in a rack, and the rack is in the requested building,
       the search will not return the machine.
       <optgroup name="search_machine_opts" mandatory="True" fields="any">
-         <option name="name" type="string">machine name (exact)</option>
+         <option name="machine" type="string">machine name (exact)</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
          <option name="cpuspeed" type="string">cpu speed</option>
@@ -851,7 +851,7 @@
    <command name="add_model">
       Add a new model
       <optgroup name="add_model_opts" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new model</option>
+         <option name="model" type="string">Name of the new model</option>
          <option name="vendor" type="string">Vendor name</option>
          <option name="type" type="string">Machine type name</option>
       </optgroup>
@@ -867,13 +867,13 @@
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/model/%(vendor)s/%(name)s" />
+      <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />
    </command>
 
    <command name="show_model">
       Show a model
       <optgroup name="show_model_opts" mandatory="True" fields="any">
-         <option name="name" type="string">Name of the model</option>
+         <option name="model" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
          <option name="type" type="string">Machine type name</option>
          <option name="all" type="boolean">Show all models</option>
@@ -887,11 +887,11 @@
       If updating the CPU, usually cpuname will be enough to specify a CPU
       uniquely but vendor and speed can be given as well if needed.
       <optgroup name="update_model_specifier" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the model to update</option>
+         <option name="model" type="string">Name of the model to update</option>
          <option name="vendor" type="string">Vendor name</option>
       </optgroup>
       <optgroup name="update_model_values" mandatory="False">
-         <option name="newname" type="string">Change model name</option>
+         <option name="newmodel" type="string">Change model name</option>
          <option name="newvendor" type="string">Change model vendor</option>
          <option name="machine_type" type="string">Machine type name</option>
          <option name="cpuname" type="string">CPU name</option>
@@ -906,16 +906,16 @@
          <option name="comments" type="string">Comments</option>
          <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
       </optgroup>
-      <transport method="post" path="hardware/model/%(vendor)s/%(name)s" />
+      <transport method="post" path="hardware/model/%(vendor)s/%(model)s" />
    </command>
 
    <command name="del_model">
       Decomission model
       <optgroup name="del_model_opts" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the model</option>
+         <option name="model" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
       </optgroup>
-      <transport method="delete" path="hardware/model/%(vendor)s/%(name)s" />
+      <transport method="delete" path="hardware/model/%(vendor)s/%(model)s" />
    </command>
 
    <command name="add_interface">
@@ -1588,7 +1588,7 @@
          <option name="type" type="string">Location type</option>
       </optgroup>
       <optgroup name="show_location_optional" mandatory="False" fields="all">
-         <option name="name" type="string">Host name</option>
+         <option name="name" type="string">Location name</option>
       </optgroup>
       <transport trigger="type" method="get" path="location/%(type)s" />
       <transport trigger="name" method="get" path="location/%(type)s/%(name)s" />
@@ -1661,7 +1661,7 @@
    <command name="update_rack">
       Update the row and column parameters for a rack.
       <optgroup name="update_rack_input" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the rack</option>
+         <option name="rack" type="string">Name of the rack</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="row" type="string">Row of the tile location</option>
@@ -1669,186 +1669,186 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="post" path="location/rack/%(name)s" />
+      <transport method="post" path="location/rack/%(rack)s" />
    </command>
 
    <command name="show_rack">
       Show the rack list, or details about a particular rack.
       <optgroup name="show_rack_opts" mandatory="True" fields="any">
-         <option name="name" type="string" conflicts="all">rack name</option>
-         <option name="all" type="boolean" conflicts="name">all</option>
+         <option name="rack" type="string" conflicts="all">rack name</option>
+         <option name="all" type="boolean" conflicts="rack">all</option>
       </optgroup>
       <transport method="get" path="location/rack" />
-      <transport trigger="name" method="get" path="location/rack/%(name)s" />
+      <transport trigger="rack" method="get" path="location/rack/%(rack)s" />
    </command>
 
    <command name="del_rack">
       Delete a rack. See also del_location.
       <optgroup name="del_rack_opts" mandatory="True" fields="all">
-         <option name="name" type="string">rack name</option>
+         <option name="rack" type="string">rack name</option>
       </optgroup>
-      <transport method="delete" path="location/rack/%(name)s" />
+      <transport method="delete" path="location/rack/%(rack)s" />
    </command>
 
    <command name="add_building">
       Add a new building to the database. See also add_location.
       <optgroup name="add_building_input" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new building</option>
+         <option name="building" type="string">Name of the new building</option>
          <option name="city" type="string">Name of the city that contains the building</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_building/%(city)s/%(name)s" />
+      <transport method="put" path="location/add_building/%(city)s/%(building)s" />
    </command>
 
    <command name="show_building">
       Show the building list, or details about a particular building.
       <optgroup name="show_building_opts">
-         <option name="name" type="string">building name</option>
+         <option name="building" type="string">building name</option>
       </optgroup>
       <transport method="get" path="location/building" />
-      <transport trigger="name" method="get" path="location/building/%(name)s" />
+      <transport trigger="building" method="get" path="location/building/%(building)s" />
    </command>
 
    <command name="del_building">
       Delete a building. See also del_location.
       <optgroup name="del_building_opts" mandatory="True" fields="all">
-         <option name="name" type="string">building name</option>
+         <option name="building" type="string">building name</option>
       </optgroup>
-      <transport method="delete" path="location/building/%(name)s" />
+      <transport method="delete" path="location/building/%(building)s" />
    </command>
 
    <command name="add_room">
       Add a new room to the database. See also add_location.
       <optgroup name="add_room_input" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new room</option>
+         <option name="room" type="string">Name of the new room</option>
          <option name="building" type="string">Name of the building that contains the room</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_room/%(building)s/%(name)s" />
+      <transport method="put" path="location/add_room/%(building)s/%(room)s" />
    </command>
 
    <command name="show_room">
       Show the room list, or details about a particular room.
       <optgroup name="show_room_opts" mandatory="True" fields="any">
-         <option name="name" type="string">room name</option>
+         <option name="room" type="string">room name</option>
          <option name="all" type="boolean">show all</option>
       </optgroup>
       <transport method="get" path="location/room" />
-      <transport trigger="name" method="get" path="location/room/%(name)s" />
+      <transport trigger="room" method="get" path="location/room/%(room)s" />
    </command>
 
    <command name="del_room">
       Delete a room. See also del_location.
       <optgroup name="del_room_opts" mandatory="True" fields="all">
-         <option name="name" type="string">room name</option>
+         <option name="room" type="string">room name</option>
       </optgroup>
-      <transport method="delete" path="location/room/%(name)s" />
+      <transport method="delete" path="location/room/%(room)s" />
    </command>
 
    <command name="show_campus">
       Show the list of campuses, or details about a particular campus.
       <optgroup name="show_campus_opts" mandatory="True" fields="any">
-         <option name="name" type="string">campus name</option>
+         <option name="campus" type="string">campus name</option>
          <option name="all" type="boolean">show all campuses</option>
       </optgroup>
       <transport method="get" path="location/campus" />
-      <transport trigger="name" method="get" path="location/campus/%(name)s" />
+      <transport trigger="campus" method="get" path="location/campus/%(campus)s" />
    </command>
 
    <command name="add_city">
       Add a new city to the database. See also add_location.
       <optgroup name="add_city_options" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new city</option>
+         <option name="city" type="string">Name of the new city</option>
          <option name="country" type="string">Name of the country that contains the city</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_city/%(country)s/%(name)s" />
+      <transport method="put" path="location/add_city/%(country)s/%(city)s" />
    </command>
 
    <command name="show_city">
       Show the list of cities, or details about a particular city.
       <optgroup name="show_city_opts">
-         <option name="name" type="string">city name</option>
+         <option name="city" type="string">city name</option>
       </optgroup>
       <transport method="get" path="location/city" />
-      <transport trigger="name" method="get" path="location/city/%(name)s" />
+      <transport trigger="city" method="get" path="location/city/%(city)s" />
    </command>
 
    <command name="del_city">
       Delete a city. See also del_location.
       <optgroup name="del_city_opts" mandatory="True" fields="all">
-         <option name="name" type="string">city name</option>
+         <option name="city" type="string">city name</option>
       </optgroup>
-      <transport method="delete" path="location/city/%(name)s" />
+      <transport method="delete" path="location/city/%(city)s" />
    </command>
 
    <command name="add_country">
       Add a new country to the database. See also add_location.
       <optgroup name="add_country_options" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new country</option>
+         <option name="country" type="string">Name of the new country</option>
          <option name="continent" type="string">Name of the continent that contains the country</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_country/%(continent)s/%(name)s" />
+      <transport method="put" path="location/add_country/%(continent)s/%(country)s" />
    </command>
 
    <command name="show_country">
       Show the list of countries, or details about a particular country.
       <optgroup name="show_country_opts">
-         <option name="name" type="string">country name</option>
+         <option name="country" type="string">country name</option>
       </optgroup>
       <transport method="get" path="location/country" />
-      <transport trigger="name" method="get" path="location/country/%(name)s" />
+      <transport trigger="country" method="get" path="location/country/%(country)s" />
    </command>
 
    <command name="del_country">
       Delete a country. See also del_location.
       <optgroup name="del_country_opts" mandatory="True" fields="all">
-         <option name="name" type="string">country name</option>
+         <option name="country" type="string">country name</option>
       </optgroup>
-      <transport method="delete" path="location/country/%(name)s" />
+      <transport method="delete" path="location/country/%(country)s" />
    </command>
 
    <command name="add_continent">
       Add a new continent to the database. See also add_location.
       <optgroup name="add_continent_options" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new continent</option>
+         <option name="continent" type="string">Name of the new continent</option>
          <option name="hub" type="string">Name of the hub, which the continent belongs to</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_continent/%(hub)s/%(name)s" />
+      <transport method="put" path="location/add_continent/%(hub)s/%(continent)s" />
    </command>
 
    <command name="show_continent">
       Show the list of continents, or details about a particular continent.
       <optgroup name="show_continent_opts">
-         <option name="name" type="string">continent name</option>
+         <option name="continent" type="string">continent name</option>
       </optgroup>
       <transport method="get" path="location/continent" />
-      <transport trigger="name" method="get" path="location/continent/%(name)s" />
+      <transport trigger="continent" method="get" path="location/continent/%(continent)s" />
    </command>
 
    <command name="del_continent">
       Delete a continent. See also del_location.
       <optgroup name="del_continent_opts" mandatory="True" fields="all">
-         <option name="name" type="string">continent name</option>
+         <option name="continent" type="string">continent name</option>
       </optgroup>
-      <transport method="delete" path="location/continent/%(name)s" />
+      <transport method="delete" path="location/continent/%(continent)s" />
    </command>
 
    <command name="add_organization">
@@ -1884,31 +1884,31 @@
    <command name="add_hub">
       Add a new hub to the database. See also add_location.
       <optgroup name="add_hub_options" mandatory="True" fields="all">
-         <option name="name" type="string">Name of the new hub</option>
+         <option name="hub" type="string">Name of the new hub</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive (region) name</option>
          <option name="organization" type="string">The owning organization of the hub</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_hub/%(name)s" />
+      <transport method="put" path="location/add_hub/%(hub)s" />
    </command>
 
    <command name="show_hub">
       Show the list of hubs, or details about a particular hub.
       <optgroup name="show_hub_opts">
-         <option name="name" type="string">hub name</option>
+         <option name="hub" type="string">hub name</option>
       </optgroup>
       <transport method="get" path="location/hub" />
-      <transport trigger="name" method="get" path="location/hub/%(name)s" />
+      <transport trigger="hub" method="get" path="location/hub/%(hub)s" />
    </command>
 
    <command name="del_hub">
       Delete a hub. See also del_location.
       <optgroup name="del_hub_opts" mandatory="True" fields="all">
-         <option name="name" type="string">hub name</option>
+         <option name="hub" type="string">hub name</option>
       </optgroup>
-      <transport method="delete" path="location/hub/%(name)s" />
+      <transport method="delete" path="location/hub/%(hub)s" />
    </command>
 
   <command name="add_archetype">

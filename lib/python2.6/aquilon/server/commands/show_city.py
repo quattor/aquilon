@@ -39,6 +39,5 @@ class CommandShowCity(CommandShowLocationType):
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                type='city', **arguments)
-
-
+                                              type='city', name=None,
+                                              **arguments)

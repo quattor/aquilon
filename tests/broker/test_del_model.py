@@ -44,31 +44,31 @@ from brokertest import TestBrokerCommand
 class TestDelModel(TestBrokerCommand):
 
     def testdeluttorswitch(self):
-        command = "del model --name uttorswitch --vendor hp"
+        command = "del model --model uttorswitch --vendor hp"
         self.noouttest(command.split(" "))
 
     def testverifydeluttorswitch(self):
-        command = "show model --name uttorswitch"
+        command = "show model --model uttorswitch"
         self.notfoundtest(command.split(" "))
 
     def testdelutblade(self):
-        command = "del model --name utblade --vendor aurora_vendor"
+        command = "del model --model utblade --vendor aurora_vendor"
         self.noouttest(command.split(" "))
 
     def testverifydelutblade(self):
-        command = "show model --name utblade"
+        command = "show model --model utblade"
         self.notfoundtest(command.split(" "))
 
     def testdelutmedium(self):
-        command = ["del_model", "--name=utmedium", "--vendor=utvendor"]
+        command = ["del_model", "--model=utmedium", "--vendor=utvendor"]
         self.noouttest(command)
 
     def testverifydelutmedium(self):
-        command = "show model --name utmedium"
+        command = "show model --model utmedium"
         self.notfoundtest(command.split(" "))
 
     def testdelutlarge(self):
-        command = ["del_model", "--name=utlarge", "--vendor=utvendor"]
+        command = ["del_model", "--model=utlarge", "--vendor=utvendor"]
         self.noouttest(command)
 
 

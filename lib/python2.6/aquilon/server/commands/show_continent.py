@@ -39,6 +39,5 @@ class CommandShowContinent(CommandShowLocationType):
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                type='continent', **arguments)
-
-
+                                              type='continent', name=None,
+                                              **arguments)

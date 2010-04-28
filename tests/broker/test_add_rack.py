@@ -48,7 +48,7 @@ class TestAddRack(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testverifyaddut3(self):
-        command = "show rack --name ut3"
+        command = "show rack --rack ut3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Row: a", command)
@@ -59,7 +59,7 @@ class TestAddRack(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testverifyaddnp997(self):
-        command = "show rack --name np997"
+        command = "show rack --rack np997"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: np997", command)
         self.matchoutput(out, "Row: zz", command)
@@ -70,7 +70,7 @@ class TestAddRack(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testverifynp909(self):
-        command = "show rack --name np909"
+        command = "show rack --rack np909"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: np909", command)
         self.matchoutput(out, "Row: 99", command)

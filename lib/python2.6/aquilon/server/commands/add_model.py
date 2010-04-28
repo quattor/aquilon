@@ -37,12 +37,12 @@ from aquilon.aqdb.model import Vendor, Model, MachineSpecs
 
 class CommandAddModel(BrokerCommand):
 
-    required_parameters = ["name", "vendor", "type"]
+    required_parameters = ["model", "vendor", "type"]
 
-    def render(self, session, name, vendor, type,
+    def render(self, session, model, vendor, type,
                cputype, cpunum, mem, disktype, diskcontroller, disksize, nics,
                comments, **arguments):
-        dbmodel = session.query(Model).filter_by(name=name).first()
+        dbmodel = session.query(Model).filter_by(name=model).first()
         if dbmodel is not None:
             raise ArgumentError('Specified model already exists')
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
@@ -61,7 +61,7 @@ class CommandAddModel(BrokerCommand):
             disksize = force_int("disksize", disksize)
             nics = force_int("nics", nics)
 
-        dbmodel = Model(name=name, vendor=dbvendor, machine_type=type,
+        dbmodel = Model(name=model, vendor=dbvendor, machine_type=type,
                 comments=comments)
         session.add(dbmodel)
         session.flush()

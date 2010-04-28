@@ -36,11 +36,11 @@ from aquilon.aqdb.model import Vendor, Model, HardwareEntity
 
 class CommandDelModel(BrokerCommand):
 
-    required_parameters = ["name", "vendor"]
+    required_parameters = ["model", "vendor"]
 
-    def render(self, session, logger, name, vendor, **arguments):
+    def render(self, session, logger, model, vendor, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
-        dbmodel = Model.get_unique(session, name=name, vendor=dbvendor,
+        dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    compel=True)
 
         hw = session.query(HardwareEntity).filter_by(model=dbmodel).first()

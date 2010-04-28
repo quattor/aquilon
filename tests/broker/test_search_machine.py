@@ -86,7 +86,7 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "ut9s03p1", command)
 
     def testfullinfo(self):
-        command = "search machine --name evm1 --fullinfo"
+        command = "search machine --machine evm1 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Virtual_machine: evm1", command)
         self.matchoutput(out, "Hosted by esx cluster: utecl1", command)

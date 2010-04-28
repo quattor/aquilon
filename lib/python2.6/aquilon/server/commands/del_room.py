@@ -35,10 +35,10 @@ from aquilon.server.commands.del_location import CommandDelLocation
 
 class CommandDelRoom(CommandDelLocation):
 
-    required_parameters = ["name"]
+    required_parameters = ["room"]
 
-    def render(self, session, name, **arguments):
-        return CommandDelLocation.render(self, session=session, name=name,
+    def render(self, session, room, **arguments):
+        return CommandDelLocation.render(self, session=session, name=room,
                                          type='room', **arguments)
 
 

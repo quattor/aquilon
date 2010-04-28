@@ -39,11 +39,11 @@ from aquilon.server.templates.base import PlenaryCollection
 
 class CommandUpdateRack(BrokerCommand):
 
-    required_parameters = ["name"]
+    required_parameters = ["rack"]
 
-    def render(self, session, logger, name, row, column, fullname, comments,
+    def render(self, session, logger, rack, row, column, fullname, comments,
                **arguments):
-        dbrack = get_location(session, rack=name)
+        dbrack = get_location(session, rack=rack)
         if row is not None:
             dbrack.rack_row = row
         if column is not None:

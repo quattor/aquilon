@@ -39,6 +39,5 @@ class CommandShowBuilding(CommandShowLocationType):
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                type='building', **arguments)
-
-
+                                              type='building', name=None,
+                                              **arguments)

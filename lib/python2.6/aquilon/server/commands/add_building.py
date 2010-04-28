@@ -35,12 +35,10 @@ from aquilon.server.commands.add_location import CommandAddLocation
 
 class CommandAddBuilding(CommandAddLocation):
 
-    required_parameters = ["name", "city"]
+    required_parameters = ["building", "city"]
 
-    def render(self, session, name, city, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='building', fullname=fullname,
-                parentname=city, parenttype='city',
-                comments=comments, **arguments)
-
-
+    def render(self, session, building, city, fullname, comments, **arguments):
+        return CommandAddLocation.render(self, session=session, name=building,
+                                         type='building', fullname=fullname,
+                                         parentname=city, parenttype='city',
+                                         comments=comments, **arguments)

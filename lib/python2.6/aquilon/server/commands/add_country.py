@@ -35,12 +35,11 @@ from aquilon.server.commands.add_location import CommandAddLocation
 
 class CommandAddCountry(CommandAddLocation):
 
-    required_parameters = ["name", "continent"]
+    required_parameters = ["country", "continent"]
 
-    def render(self, session, name, continent, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='country', fullname=fullname,
-                parentname=continent, parenttype='continent',
-                comments=comments, **arguments)
-
-
+    def render(self, session, country, continent, fullname, comments, **arguments):
+        return CommandAddLocation.render(self, session=session, name=country,
+                                         type='country', fullname=fullname,
+                                         parentname=continent,
+                                         parenttype='continent',
+                                         comments=comments, **arguments)

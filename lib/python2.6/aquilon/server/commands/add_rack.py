@@ -37,11 +37,9 @@ class CommandAddRack(BrokerCommand):
 
     required_parameters = ["rackid", "building", "row", "column"]
 
-    def render(self, session, rackid, building, row, column, fullname,
-            comments, **arguments):
+    def render(self, session, rackid, building, row, column, fullname, comments,
+               **arguments):
         get_or_create_rack(session=session, rackid=rackid, rackrow=row,
                            rackcolumn=column, building=building,
                            fullname=fullname, comments=comments)
         return
-
-

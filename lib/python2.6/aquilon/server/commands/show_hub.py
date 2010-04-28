@@ -38,7 +38,5 @@ class CommandShowHub(CommandShowLocationType):
     required_parameters = []
 
     def render(self, session, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                type='hub', **arguments)
-
-
+        return CommandShowLocationType.render(self, session=session, type='hub',
+                                              name=None, **arguments)

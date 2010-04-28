@@ -44,21 +44,21 @@ from brokertest import TestBrokerCommand
 class TestAddRoom(TestBrokerCommand):
 
     def testaddutroom1(self):
-        command = "add room --name utroom1 --building ut"
+        command = "add room --room utroom1 --building ut"
         self.noouttest(command.split(" "))
 
     def testverifyaddutroom1(self):
-        command = "show room --name utroom1"
+        command = "show room --room utroom1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom1", command)
 
     def testaddutroom2(self):
-        command = ["add_room", "--name=utroom2", "--building=ut",
+        command = ["add_room", "--room=utroom2", "--building=ut",
                    "--fullname=UT pod1"]
         self.noouttest(command)
 
     def testverifyaddutroom2(self):
-        command = "show room --name utroom2"
+        command = "show room --room utroom2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom2", command)
         self.matchoutput(out, "Fullname: UT pod1", command)

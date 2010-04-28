@@ -37,5 +37,3 @@ class CommandShowLocationName(CommandShowLocationType):
     """The superclass can already handle this case."""
 
     required_parameters = ["type", "name"]
-
-

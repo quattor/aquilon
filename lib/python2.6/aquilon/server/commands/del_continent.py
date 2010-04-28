@@ -35,10 +35,8 @@ from aquilon.server.commands.del_location import CommandDelLocation
 
 class CommandDelContinent(CommandDelLocation):
 
-    required_parameters = ["name"]
+    required_parameters = ["continent"]
 
-    def render(self, session, name, **arguments):
-        return CommandDelLocation.render(self, session=session, name=name,
-                type='continent', **arguments)
-
-
+    def render(self, session, continent, **arguments):
+        return CommandDelLocation.render(self, session=session, name=continent,
+                                         type='continent', **arguments)

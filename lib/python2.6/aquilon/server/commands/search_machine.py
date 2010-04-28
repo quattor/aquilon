@@ -44,11 +44,11 @@ class CommandSearchMachine(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, name, cpuname, cpuvendor, cpuspeed, cpucount,
+    def render(self, session, machine, cpuname, cpuvendor, cpuspeed, cpucount,
                memory, cluster, share, fullinfo, **arguments):
         q = search_hardware_entity_query(session, Machine, **arguments)
-        if name:
-            q = q.filter_by(name=name)
+        if machine:
+            q = q.filter_by(name=machine)
         if cpuname and cpuvendor and cpuspeed:
             dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
             cpuspeed = force_int("cpuspeed", cpuspeed)

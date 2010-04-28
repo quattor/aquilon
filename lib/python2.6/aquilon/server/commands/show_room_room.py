@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,19 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show rack --name`."""
+"""Contains the logic for `aq show room --room`."""
 
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowRackName(CommandShowLocationType):
+class CommandShowRoomRoom(CommandShowLocationType):
 
-    required_parameters = ["name"]
+    required_parameters = ["room"]
 
-    def render(self, session, name, **arguments):
-        return CommandShowLocationType.render(self, session=session, name=name,
-                type='rack', **arguments)
-
-
+    def render(self, session, room, **arguments):
+        return CommandShowLocationType.render(self, session=session,
+                                              type='room', name=room,
+                                              **arguments)
