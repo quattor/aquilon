@@ -43,6 +43,11 @@ from aquilon.utils import confirm
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exceptions import SQLError, DatabaseError as SaDBError
+from sqlalchemy.interfaces import PoolListener
+
+class UnsafeSQLiteListener(PoolListener):
+    def connect(self, dbapi_con, con_record):
+        dbapi_con.execute('pragma synchronous=OFF')
 
 class DbFactory(object):
     __shared_state = {}
@@ -97,7 +102,14 @@ class DbFactory(object):
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
-            self.engine = create_engine(self.dsn)
+            if self.config.has_option("database", "disable_fsync") and \
+               self.config.getboolean("database", "disable_fsync"):
+                self.engine = create_engine(self.dsn,
+                                            listeners=[UnsafeSQLiteListener()])
+                log = logging.getLogger('aqdb.db_factory')
+                log.info("SQLite is operating in unsafe mode!")
+            else:
+                self.engine = create_engine(self.dsn)
             connection = self.engine.connect()
             connection.close()
             self.vendor = 'sqlite'
