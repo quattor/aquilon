@@ -36,8 +36,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.server.dbwrappers.model import get_model
-from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw,
+from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw, Model,
                                  ChassisSlot, Machine, DnsDomain)
 
 
@@ -71,7 +70,8 @@ class CommandAddAuroraHost(CommandAddHost):
             machine = dsdb_lookup
 
         # Create a machine
-        dbmodel = get_model(session, "aurora_model")
+        dbmodel = Model.get_unique(session, name="aurora_model",
+                                   vendor="aurora_vendor", compel=True)
         dbmachine = session.query(Machine).filter_by(name=machine).first()
         dbslot = None
         if not dbmachine:
@@ -95,7 +95,10 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbchassis = session.query(Chassis).filter_by(
                         name=chassis, dns_domain=dbdns_domain).first()
                 if not dbchassis:
-                    dbchassis_model = get_model(session, 'aurora_chassis_model')
+                    dbchassis_model = Model.get_unique(session,
+                                                       name="aurora_chassis_model",
+                                                       vendor="aurora_vendor",
+                                                       compel=True)
                     dbchassis_hw = ChassisHw(location=dbrack,
                                              model=dbchassis_model)
                     session.add(dbchassis_hw)

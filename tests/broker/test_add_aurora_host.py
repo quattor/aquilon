@@ -85,6 +85,11 @@ class TestAddAuroraHost(TestBrokerCommand):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
 
+    def testshowmachine(self):
+        command = "show machine --model aurora_model"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Aurora_node: nyaqd1", command)
+
     def testcatmachine(self):
         command = "cat --machine %s" % self.aurora_without_node
         out = self.badrequesttest(command.split(" "))

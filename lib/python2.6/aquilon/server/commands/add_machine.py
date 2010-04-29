@@ -32,13 +32,12 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster,
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model,
                                 Machine, MachineClusterMember)
 
 
@@ -47,9 +46,9 @@ class CommandAddMachine(BrokerCommand):
     required_parameters = ["machine", "model"]
 
     # arguments will contain one of --chassis --rack or --desk
-    def render(self, session, logger, machine, model, serial, chassis, slot,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory,
-               cluster, user, **arguments):
+    def render(self, session, logger, machine, model, vendor, serial, chassis,
+               slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
+               user, **arguments):
         dblocation = get_location(session, **arguments)
         if chassis:
             dbchassis = get_system(session, chassis)
@@ -70,7 +69,8 @@ class CommandAddMachine(BrokerCommand):
         elif slot is not None:
             raise ArgumentError("The --slot option requires a --chassis.")
 
-        dbmodel = get_model(session, model)
+        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                   compel=True)
 
         if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
                                         'aurora_node', 'virtual_machine']:

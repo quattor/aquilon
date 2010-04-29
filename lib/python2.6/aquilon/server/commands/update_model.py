@@ -65,8 +65,7 @@ class CommandUpdateModel(BrokerCommand):
                 if value is not None:
                     arguments[arg] = force_int(arg, value)
 
-        dbvendor = Vendor.get_unique(session, vendor, compel=True)
-        dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
+        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
         if leave_existing and (newmodel or newvendor):

@@ -139,7 +139,8 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--type=blade"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Specified model already exists", command)
+        self.matchoutput(out, "Model utblade, vendor aurora_vendor already "
+                         "exists.", command)
 
 
 if __name__=='__main__':

@@ -41,10 +41,8 @@ class CommandAddModel(BrokerCommand):
 
     def render(self, session, model, vendor, type, cpuname, cpunum, memory,
                disktype, diskcontroller, disksize, nics, comments, **arguments):
-        dbmodel = session.query(Model).filter_by(name=model).first()
-        if dbmodel is not None:
-            raise ArgumentError('Specified model already exists')
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
+        Model.get_unique(session, name=model, vendor=dbvendor, preclude=True)
 
         # Specifically not allowing new models to be added that are of
         # type aurora_node - that is only meant for the dummy aurora_model.

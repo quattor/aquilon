@@ -301,24 +301,20 @@ class TestSearchHost(TestBrokerCommand):
     def testmodelunavailable(self):
         command = "search host --model model-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model model-does-not-exist not found",
+        self.matchoutput(out, "Model model-does-not-exist not found.",
                          command)
 
     def testmodelvendorconflict(self):
         command = "search host --model vb1205xm --vendor dell"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "vendor dell conflicts with model vb1205xm "
-                         "where vendor is verari",
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model vb1205xm, vendor dell not found.",
                          command)
 
     def testmodelmachinetypeconflict(self):
         command = "search host --model vb1205xm --machine_type virtual_machine"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "machine_type virtual_machine conflicts with "
-                         "model vb1205xm where machine_type is blade",
-                         command)
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model vb1205xm, machine_type "
+                         "virtual_machine not found.", command)
 
     def testvendoravailable(self):
         command = "search host --vendor dell"
@@ -338,7 +334,9 @@ class TestSearchHost(TestBrokerCommand):
 
     def testmachinetypeunavailable(self):
         command = "search host --machine_type machine_type-does-not-exist"
-        self.noouttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model machine_type "
+                         "machine_type-does-not-exist not found.", command)
 
     def testserialavailable(self):
         command = "search host --serial 99C5553"

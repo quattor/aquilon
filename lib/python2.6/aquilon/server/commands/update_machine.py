@@ -35,7 +35,6 @@ from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  UnimplementedError, IncompleteError)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
@@ -43,7 +42,7 @@ from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model,
                                 Cluster, MachineClusterMember, Machine)
 
 
@@ -51,8 +50,8 @@ class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, model, serial, chassis, slot,
-               clearchassis, multislot, cluster,
+    def render(self, session, logger, machine, model, vendor, serial,
+               chassis, slot, clearchassis, multislot, cluster,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                user, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
@@ -113,10 +112,15 @@ class CommandUpdateMachine(BrokerCommand):
                                                            logger=logger))
             dbmachine.location = dblocation
 
-        if model:
+        if model or vendor:
             # If overriding model, should probably overwrite default
             # machine specs as well.
-            dbmodel = get_model(session, model)
+            if not model:
+                model = dbmachine.model.name
+            if not vendor:
+                vendor = dbmachine.model.vendor.name
+            dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                       compel=True)
             if dbmodel.machine_type not in ['blade', 'rackmount',
                                             'workstation', 'aurora_node',
                                             'virtual_machine']:
