@@ -150,8 +150,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--archetype=windows"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Personality esx_desktop of archetype windows "
-                         "not found",
+                         "Personality esx_desktop, archetype windows not found",
                          command)
 
     def testfailupdatemaxmembers(self):

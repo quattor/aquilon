@@ -31,8 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, PersonalityServiceListItem
-from aquilon.server.dbwrappers.personality import get_personality
+from aquilon.aqdb.model import Personality, Service, PersonalityServiceListItem
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
@@ -41,7 +40,8 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
 
     def render(self, session, service, archetype, personality, comments,
                **arguments):
-        dbpersonality = get_personality(session, archetype, personality)
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         # Provide a better error message than preclude=True would give
         if PersonalityServiceListItem.get_unique(session,

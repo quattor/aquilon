@@ -303,7 +303,7 @@ class TestAddPersonality(TestBrokerCommand):
         command = ["show", "personality", "--archetype", "aquilon",
                    "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality personality-does-not-exist of "
+        self.matchoutput(out, "Personality personality-does-not-exist, "
                          "archetype aquilon not found.", command)
 
     def testshowpersonalityunavailable2(self):

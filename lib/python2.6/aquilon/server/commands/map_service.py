@@ -30,9 +30,9 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import (Personality, Service, ServiceMap,
+                                PersonalityServiceMap)
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 
 
@@ -51,7 +51,8 @@ class CommandMapService(BrokerCommand):
                                 "also specify --archetype.")
 
         if archetype is not None and personality is not None:
-            dbpersona = get_personality(session, archetype, personality)
+            dbpersona = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
             dbmap = session.query(PersonalityServiceMap)
             dbmap = dbmap.filter_by(personality=dbpersona).filter_by(
                 location=dblocation, service_instance=dbinstance).first()

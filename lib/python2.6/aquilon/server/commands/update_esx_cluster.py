@@ -29,10 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand, force_int, force_ratio
-from aquilon.aqdb.model import EsxCluster
+from aquilon.aqdb.model import EsxCluster, Personality
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
@@ -98,7 +97,9 @@ class CommandUpdateESXCluster(BrokerCommand):
                 personality = dbcluster.personality.name
             if not archetype:
                 archetype = dbcluster.personality.archetype.name
-            dbpersonality = get_personality(session, archetype, personality)
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
             # It would be nice to reconfigure all the hosts here.  That
             # would take some refactoring of the present code.
             for dbhost in dbcluster.hosts:

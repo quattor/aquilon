@@ -31,10 +31,9 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.aqdb.model import BuildItem, OperatingSystem
+from aquilon.aqdb.model import BuildItem, OperatingSystem, Personality
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
@@ -59,7 +58,9 @@ class CommandMake(BrokerCommand):
             if not arch:
                 arch = dbhost.archetype.name
 
-            dbpersonality = get_personality(session, arch, personality)
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=arch,
+                                                   compel=True)
             if dbhost.cluster and \
                dbhost.cluster.personality != dbpersonality:
                 raise ArgumentError("Cannot change personality of host %s "
