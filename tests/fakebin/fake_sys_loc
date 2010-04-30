@@ -1,0 +1,17 @@
+#!/bin/sh
+
+CHECK=$1
+
+if [ "$CHECK" = "nyaqd1" ] ; then
+	echo "nyaqd1 np.ny.na"
+	exit 0
+fi
+
+if [ "$CHECK" = "pissp1" ] ; then
+	echo "pissp1 pi.ny.na"
+	exit 0
+fi
+
+echo "Unknown sysloc for $CHECK at /ms/dist/aurora/bin/sys_loc line 62." >&2
+exit 0
+
