@@ -34,9 +34,8 @@ import re
 from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service
+from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
@@ -47,7 +46,7 @@ class CommandAddDisk(BrokerCommand):
     def render(self, session, logger, machine, disk, type, capacity, share,
                address, comments, user, **arguments):
 
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
         if (len(d) != 0):
             raise ArgumentError("machine %s already has a disk named %s"%(machine,disk))

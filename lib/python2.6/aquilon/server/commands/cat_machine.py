@@ -31,8 +31,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
+from aquilon.aqdb.model import Machine
 
 
 class CommandCatMachine(BrokerCommand):
@@ -40,7 +40,7 @@ class CommandCatMachine(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, generate, **kwargs):
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
         if dbmachine.model.machine_type not in ['blade', 'virtual_machine',
                                                 'workstation', 'rackmount']:
             raise ArgumentError("Plenary file not available for %s machines." %

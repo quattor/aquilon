@@ -33,10 +33,9 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
-                                OperatingSystem, Service, Vendor)
+                                OperatingSystem, Service, Vendor, Machine)
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
@@ -54,7 +53,7 @@ class CommandSearchHost(BrokerCommand):
             arguments['fqdn'] = hostname
         q = search_system_query(session, Host, **arguments)
         if machine:
-            dbmachine = get_machine(session, machine)
+            dbmachine = Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(machine=dbmachine)
         if domain:
             dbdomain = Domain.get_unique(session, domain, compel=True)

@@ -36,13 +36,6 @@ from aquilon.aqdb.model import Cpu, LocalDisk, Machine
 from aquilon.server.broker import force_int
 
 
-def get_machine(session, machine):
-    try:
-        dbmachine = session.query(Machine).filter_by(name=machine).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Machine %s not found: %s" % (machine, e))
-    return dbmachine
-
 def create_machine(session, machine, dblocation, dbmodel,
         cpuname, cpuvendor, cpuspeed, cpucount, memory, serial):
     if cpuspeed is not None:

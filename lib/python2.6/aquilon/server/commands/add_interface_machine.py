@@ -37,7 +37,6 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException,
 from aquilon.aqdb.model import Interface, Machine, Manager
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.interface import (describe_interface,
                                                  verify_port_group,
                                                  choose_port_group)
@@ -55,7 +54,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     def render(self, session, logger, interface, machine, mac, automac,
                pg, autopg, comments, **arguments):
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
         extra = {}
         if interface == 'eth0':
             extra['bootable'] = True

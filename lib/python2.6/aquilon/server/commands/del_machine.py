@@ -31,10 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.aqdb.model import Machine
 
 
 class CommandDelMachine(BrokerCommand):
@@ -42,7 +42,7 @@ class CommandDelMachine(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, **arguments):
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
 
         plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
         dbcluster = dbmachine.cluster

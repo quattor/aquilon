@@ -36,7 +36,6 @@ from aquilon.exceptions_ import (ArgumentError, NotFoundException,
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
@@ -45,7 +44,7 @@ from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot,
-                                Cluster, MachineClusterMember)
+                                Cluster, MachineClusterMember, Machine)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -56,7 +55,7 @@ class CommandUpdateMachine(BrokerCommand):
                clearchassis, multislot, cluster,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                user, **arguments):
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
         plenaries = PlenaryCollection(logger=logger)
 
         if clearchassis:

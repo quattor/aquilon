@@ -31,14 +31,13 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets,
                                                  describe_interface)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Host, Interface, Auxiliary
+from aquilon.aqdb.model import Host, Interface, Auxiliary, Machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
@@ -51,7 +50,7 @@ class CommandAddAuxiliary(BrokerCommand):
     def render(self, session, logger, hostname, machine, auxiliary, interface,
                mac, comments, user, **arguments):
         if machine:
-            dbmachine = get_machine(session, machine)
+            dbmachine = Machine.get_unique(session, machine, compel=True)
         if hostname:
             dbhost = hostname_to_host(session, hostname)
             if machine and dbhost.machine != dbmachine:
