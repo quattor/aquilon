@@ -28,9 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Vendor
 from aquilon.server.broker import BrokerCommand
+from aquilon.aqdb.model import Vendor
 
 
 class CommandShowVendorVendor(BrokerCommand):
@@ -38,10 +37,4 @@ class CommandShowVendorVendor(BrokerCommand):
     required_parameters = [ "vendor" ]
 
     def render(self, session, vendor, **arguments):
-        dbvendor = session.query(Vendor).filter_by(name=vendor).first()
-        if not dbvendor:
-            raise NotFoundException("Could not find vendor with name '%s'." %
-                                    vendor)
-        return dbvendor
-
-
+        return Vendor.get_unique(session, vendor, compel=True)

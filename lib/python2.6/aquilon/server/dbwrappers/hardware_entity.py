@@ -30,10 +30,9 @@
 
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity, Vendor
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.server.dbwrappers.vendor import get_vendor
 
 
 def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
@@ -63,7 +62,7 @@ def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
     if kwargs.get('vendor') or kwargs.get('machine_type'):
         q = q.join(['model'])
         if kwargs.get('vendor'):
-            dbvendor = get_vendor(session, kwargs['vendor'])
+            dbvendor = Vendor.get_unique(session, kwargs['vendor'], compel=True)
             q = q.filter_by(vendor=dbvendor)
         if kwargs.get('machine_type'):
             q = q.filter_by(machine_type=kwargs['machine_type'])
