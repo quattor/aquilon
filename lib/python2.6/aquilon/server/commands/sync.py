@@ -71,9 +71,9 @@ class CommandSync(BrokerCommand):
                 resolve the conflict locally before re-attempting to deploy.
             ''' %(e.out,e.err))
         finally:
+            lock_queue.release(key)
             run_command(["git-update-server-info"],
                         path=domaindir, env=git_env, logger=logger)
-            lock_queue.release(key)
         remote_command = """env PATH="%s:$PATH" NO_PROXY=* git pull""" % (
                 self.config.get("broker", "git_path"))
         return str(remote_command)

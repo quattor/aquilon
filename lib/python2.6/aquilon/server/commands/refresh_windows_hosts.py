@@ -51,16 +51,18 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         key = SyncKey(data="windows", logger=logger)
         lock_queue.acquire(key)
         try:
-            self.refresh_windows_hosts(session, logger, clusters)
-            if dryrun:
-                session.rollback()
-                return
+            try:
+                self.refresh_windows_hosts(session, logger, clusters)
+                if dryrun:
+                    session.rollback()
+                    return
+            finally:
+                if not dryrun:
+                    # Commit whatever was successful regardless of overall
+                    # success/failure.  Need to be able to release the sync
+                    # lock before taking a compile lock.
+                    session.commit()
         finally:
-            if not dryrun:
-                # Commit whatever was successful regardless of overall
-                # success/failure.  Need to be able to release the sync lock
-                # before taking a compile lock.
-                session.commit()
             lock_queue.release(key)
         if clusters:
             plenaries = PlenaryCollection(logger=logger)
