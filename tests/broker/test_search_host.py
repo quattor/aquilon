@@ -104,7 +104,7 @@ class TestSearchHost(TestBrokerCommand):
     def testdomainunavailable(self):
         command = "search host --domain domain-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Domain domain-does-not-exist not found",
+        self.matchoutput(out, "Domain 'domain-does-not-exist' not found",
                          command)
 
     def testarchetypeavailable(self):

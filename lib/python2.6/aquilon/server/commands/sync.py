@@ -33,9 +33,9 @@ import os
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.processes import run_command
+from aquilon.aqdb.model import Domain
 
 
 class CommandSync(BrokerCommand):
@@ -45,8 +45,7 @@ class CommandSync(BrokerCommand):
 
     def render(self, session, logger, domain, **arguments):
         # Verify that it exists before attempting the sync.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         domaindir = os.path.join(self.config.get("broker", "templatesdir"),
                 dbdomain.name)
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),

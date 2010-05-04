@@ -30,7 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
+from aquilon.aqdb.model import Domain
 
 
 class CommandGet(BrokerCommand):
@@ -40,8 +40,7 @@ class CommandGet(BrokerCommand):
 
     def render(self, session, domain, **arguments):
         # Verify that it exists before returning the command to pull.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         remote_command = """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {
                 "path":self.config.get("broker", "git_path"),
                 "url":self.config.get("broker", "git_templates_url"),

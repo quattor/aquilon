@@ -31,7 +31,6 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.archetype import get_archetype
@@ -40,7 +39,7 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Host, OperatingSystem
+from aquilon.aqdb.model import Domain, Host, OperatingSystem
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -55,8 +54,7 @@ class CommandAddHost(BrokerCommand):
     def render(self, session, logger, hostname, machine, archetype,
                personality, domain, buildstatus, comments, osname, osversion,
                skip_dsdb_check=False, **arguments):
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         if buildstatus:
             dbstatus = get_status(session, buildstatus)
         else:

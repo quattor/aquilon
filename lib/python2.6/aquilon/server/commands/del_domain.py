@@ -33,10 +33,10 @@ import os
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import remove_dir
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.domain import TemplateDomain
+from aquilon.aqdb.model import Domain
 
 
 class CommandDelDomain(BrokerCommand):
@@ -47,8 +47,7 @@ class CommandDelDomain(BrokerCommand):
         # FIXME: This will fail if the domain does not exist.  We might
         # want to allow the directory to be deleted anyway, assuming it
         # is a valid domain name and az_check passes.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         session.refresh(dbdomain)
         if dbdomain.hosts:
             raise ArgumentError("Cannot delete domain %s while hosts are still attached."
