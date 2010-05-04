@@ -42,10 +42,10 @@ class CommandShowActiveLocks(BrokerCommand):
     def render(self, debug, **arguments):
         retval = []
         for key in lock_queue.queue[:]:
-            description = ""
+            description = "Defunct lock: "
             if hasattr(key.logger, "get_status"):
                 status = key.logger.get_status()
-                if status.description:
+                if status and status.description:
                     description = status.description + ' '
             retval.append("%s%s %s" % (description, key.state, key))
         return "\n".join(retval)
