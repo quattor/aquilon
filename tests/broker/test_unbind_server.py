@@ -48,6 +48,14 @@ class TestUnbindServer(TestBrokerCommand):
             "--hostname", "unittest02.one-nyp.ms.com",
             "--service", "utsvc", "--all"])
 
+    def testunbinddns(self):
+        self.noouttest(["unbind", "server",
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--service", "dns", "--all"])
+        self.noouttest(["unbind", "server",
+                        "--hostname", "nyaqd1.ms.com",
+                        "--service", "dns", "--all"])
+
     # Should have already been unbound...
     # Hmm... this (as implemented) actually returns 0.  Kind of a pointless
     # test case, at least for now.

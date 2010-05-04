@@ -85,6 +85,28 @@ class TestPrebindServer(TestBrokerCommand):
                 self.noouttest(["bind", "server", "--hostname", server,
                                 "--service", service, "--instance", instance])
 
+    def testbinddns(self):
+        self.noouttest(["bind", "server",
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--service", "dns", "--instance", "nyinfratest"])
+        self.noouttest(["bind", "server",
+                        "--hostname", "nyaqd1.ms.com",
+                        "--service", "dns", "--instance", "nyinfratest"])
+
+    def testcatdns(self):
+        command = "cat --service dns --instance nyinfratest"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "'servers' = list('nyaqd1.ms.com', "
+                         "'unittest02.one-nyp.ms.com');",
+                         command)
+        # Hard-coding the internal ip address for nyaqd1 is horrible....
+        # couldn't think of a better way to test this code path though.
+        self.matchoutput(out,
+                         "'server_ips' = list('10.184.155.249', '%s');" %
+                         self.net.unknown[0].usable[0].ip,
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)

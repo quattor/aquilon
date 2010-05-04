@@ -154,6 +154,10 @@ class PlenaryServiceInstanceToplevel(Plenary):
         lines.append("'servers' = list(%s);" %
                      ", ".join(["'%s'" % fqdn for fqdn
                                 in self.dbinstance.server_fqdns]))
+        if self.service == 'dns':
+            lines.append("'server_ips' = list(%s);" %
+                         ", ".join(["'%s'" % ip for ip
+                                    in self.dbinstance.server_ips]))
 
 
 class PlenaryServiceInstanceServer(Plenary):
