@@ -33,10 +33,10 @@ from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
                                             get_host_build_item)
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.host import PlenaryHost
+from aquilon.aqdb.model import Service
 
 
 class CommandUnbindClient(BrokerCommand):
@@ -50,7 +50,7 @@ class CommandUnbindClient(BrokerCommand):
             if item.service.name == service:
                 raise ArgumentError("cannot unbind a required service. Perhaps you want to rebind?")
 
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         dbtemplate = get_host_build_item(session, dbhost, dbservice)
         if dbtemplate:
             logger.info("Removing client binding")

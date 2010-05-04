@@ -30,10 +30,9 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.service_instance import get_service_instance, get_client_service_instances
-from aquilon.aqdb.model import ServiceInstance
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.formats.service_instance import ServiceInstanceList
 
 
@@ -45,7 +44,7 @@ class CommandShowServiceService(BrokerCommand):
         instance = arguments.get("instance", None)
         dbserver = server and get_system(session, server) or None
         dbclient = client and get_system(session, client) or None
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         if dbserver:
             return ServiceInstanceList(
                 session.query(ServiceInstance).filter_by(service=dbservice).join(

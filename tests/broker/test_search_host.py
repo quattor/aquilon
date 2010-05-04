@@ -254,7 +254,7 @@ class TestSearchHost(TestBrokerCommand):
     def testserviceunavailable(self):
         command = "search host --service service-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Service service-does-not-exist not found",
+        self.matchoutput(out, "Service 'service-does-not-exist' not found",
                          command)
 
     def testserviceinstanceavailable(self):

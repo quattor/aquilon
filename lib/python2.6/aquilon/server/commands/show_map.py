@@ -31,8 +31,7 @@
 
 from aquilon.exceptions_ import UnimplementedError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
-from aquilon.server.dbwrappers.service import get_service
+from aquilon.aqdb.model import Service, ServiceMap, PersonalityServiceMap
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.formats.service_map import ServiceMapList
@@ -44,7 +43,8 @@ class CommandShowMap(BrokerCommand):
 
     def render(self, session, service, instance, archetype, personality,
                **arguments):
-        dbservice = service and get_service(session, service) or None
+        dbservice = service and Service.get_unique(session, service,
+                                                   compel=True) or None
         dblocation = get_location(session, **arguments)
         queries = []
         # The current logic basically shoots for exact match when given

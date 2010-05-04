@@ -30,8 +30,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
-from aquilon.server.dbwrappers.service import get_service
+from aquilon.aqdb.model import Service, ServiceMap, PersonalityServiceMap
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.service_instance import get_service_instance
@@ -42,7 +41,7 @@ class CommandMapService(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality, **kwargs):
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         dblocation = get_location(session, **kwargs)
         dbinstance = get_service_instance(session, dbservice, instance)
 

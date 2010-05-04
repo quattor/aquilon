@@ -42,7 +42,7 @@ class CommandUnmapService(BrokerCommand):
 
     def render(self, session, service, instance, archetype, personality,
                **arguments):
-        dbservice = Service.get_unique(session, name=service, compel=True)
+        dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = ServiceInstance.get_unique(session, service=dbservice,
                                                 name=instance, compel=True)
         dblocation = get_location(session, **arguments)

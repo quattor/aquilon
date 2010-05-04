@@ -35,9 +35,9 @@ from tempfile import NamedTemporaryFile
 from aquilon.exceptions_ import NameServiceError, ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import run_command
 from aquilon.server.logger import CLIENT_INFO
+from aquilon.aqdb.model import Service
 
 
 class CommandPxeswitch(BrokerCommand):
@@ -81,7 +81,8 @@ class CommandPxeswitch(BrokerCommand):
             try:
                 dbhost = hostname_to_host(session, host)
                 # Find what "bootserver" instance we're bound to
-                dbservice = get_service(session, "bootserver")
+                dbservice = Service.get_unique(session, "bootserver",
+                                               compel=True)
                 bootbi = get_host_build_item(session, dbhost, dbservice)
                 if not bootbi:
                     failed.append("%s: host has no bootserver" % host)

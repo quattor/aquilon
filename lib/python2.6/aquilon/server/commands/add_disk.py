@@ -35,9 +35,8 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Disk, LocalDisk, NasDisk
+from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
@@ -59,7 +58,8 @@ class CommandAddDisk(BrokerCommand):
 
         capacity = force_int("capacity", capacity)
         if share:
-            dbservice = get_service(session, "nas_disk_share")
+            dbservice = Service.get_unique(session, "nas_disk_share",
+                                           compel=True)
             dbshare = get_service_instance(session, dbservice, share)
             if not re.compile("\d+:\d+$").match(address):
                 raise ArgumentError("disk address '%s' is illegal: must be " \

@@ -32,9 +32,9 @@
 from aquilon.exceptions_ import IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.services import Chooser
+from aquilon.aqdb.model import Service
 
 class CommandBindClient(BrokerCommand):
 
@@ -43,7 +43,7 @@ class CommandBindClient(BrokerCommand):
     def render(self, session, logger, hostname, service, instance, force=False,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbhost, logger=logger, required_only=False)
         if instance:
             dbinstance = get_service_instance(session, dbservice, instance)
