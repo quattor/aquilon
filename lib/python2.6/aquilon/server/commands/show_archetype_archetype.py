@@ -29,13 +29,13 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.aqdb.model import Archetype
 
 class CommandShowArchetypeArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, **arguments):
-        return get_archetype(session, archetype)
+        return Archetype.get_unique(session, archetype, compel=True)
 
 

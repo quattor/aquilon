@@ -31,14 +31,12 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Archetype, Personality
 
 def get_personality(session, archetype, personality):
+    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
     try:
-        dbarchetype = get_archetype(session, archetype)
-
         dbpersonality = session.query(Personality).filter_by(
             name=personality,archetype=dbarchetype).one()
 

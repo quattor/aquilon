@@ -33,8 +33,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceListItem
-from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.aqdb.model import Archetype, Service, ServiceListItem
 
 
 class CommandDelRequiredService(BrokerCommand):
@@ -42,7 +41,7 @@ class CommandDelRequiredService(BrokerCommand):
     required_parameters = ["service", "archetype"]
 
     def render(self, session, service, archetype, **arguments):
-        dbarchetype = get_archetype(session, archetype)
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         try:
             dbsli = session.query(ServiceListItem).filter_by(

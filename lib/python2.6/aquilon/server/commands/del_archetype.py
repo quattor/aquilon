@@ -29,9 +29,8 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality
+from aquilon.aqdb.model import Archetype, Personality
 
 
 class CommandDelArchetype(BrokerCommand):
@@ -39,7 +38,7 @@ class CommandDelArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, **kwargs):
-        dbarch = get_archetype(session, archetype)
+        dbarch = Archetype.get_unique(session, archetype, compel=True)
 
         # Check dependencies
         if session.query(Personality).filter_by(archetype=dbarch).first():

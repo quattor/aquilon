@@ -31,11 +31,10 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.make import CommandMake
-from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.aqdb.model import BuildItem
+from aquilon.aqdb.model import BuildItem, Archetype
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -59,7 +58,7 @@ class CommandReconfigure(CommandMake):
             if not personality:
                 raise ArgumentError("Changing archetype also requires "
                                     "specifying personality.")
-            dbarchetype = get_archetype(session, archetype)
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             # TODO: Once OS is a first class object this block needs
             # to check that either OS is also being reset or that the
             # OS is valid for the new archetype.

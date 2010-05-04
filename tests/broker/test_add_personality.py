@@ -285,14 +285,14 @@ class TestAddPersonality(TestBrokerCommand):
     def testshowarchetypeunavailable(self):
         command = "show personality --archetype archetype-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype archetype-does-not-exist", command)
+        self.matchoutput(out, "Archetype 'archetype-does-not-exist'", command)
 
     def testshowarchetypeunavailable2(self):
         command = ["show", "personality",
                    "--archetype", "archetype-does-not-exist",
                    "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Archetype archetype-does-not-exist", command)
+        self.matchoutput(out, "Archetype 'archetype-does-not-exist'", command)
 
     def testshowpersonalityunavailable(self):
         command = ["show", "personality", "--archetype", "aquilon",

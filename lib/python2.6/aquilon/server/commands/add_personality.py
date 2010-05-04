@@ -30,8 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.model import Personality
+from aquilon.aqdb.model import Archetype, Personality
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.templates.personality import PlenaryPersonality
 import re
@@ -45,7 +44,7 @@ class CommandAddPersonality(BrokerCommand):
         if (not valid.match(personality)):
             raise ArgumentError("name '%s' is not valid"% personality)
 
-        dbarchetype = get_archetype(session, archetype)
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         Personality.get_unique(session, archetype=dbarchetype, name=personality,
                                preclude=True)
 
