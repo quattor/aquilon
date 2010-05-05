@@ -103,6 +103,24 @@ class TestPxeswitch(TestBrokerCommand):
             # We would like to test more of the output... we need something
             # special for aii-shellfe however...
 
+    def testconfigurelisterror(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["host-does-not-exist.ms.com\n",
+                          "host.domain-does-not-exist.ms.com\n",
+                          "pissp1.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --configure" % f.name
+            out = self.badrequesttest(command.split(" "))
+            self.matchoutput(out, "Invalid hosts in list:", command)
+            self.matchoutput(out, "host-does-not-exist.ms.com: Host "
+                             "host-does-not-exist.ms.com not found.",
+                             command)
+            self.matchoutput(out, "domain-does-not-exist.ms.com: DNS Domain "
+                             "domain-does-not-exist.ms.com not found.",
+                             command)
+            self.matchoutput(out, "pissp1.ms.com: Host has no bootserver.",
+                             command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPxeswitch)

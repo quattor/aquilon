@@ -32,7 +32,8 @@ from __future__ import with_statement
 from socket import gethostbyname
 from tempfile import NamedTemporaryFile
 
-from aquilon.exceptions_ import NameServiceError, ArgumentError
+from aquilon.exceptions_ import (NameServiceError, ArgumentError,
+                                 NotFoundException)
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.processes import run_command
