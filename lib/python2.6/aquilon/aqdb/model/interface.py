@@ -35,10 +35,11 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint, Boolean)
-from sqlalchemy.orm import relation, backref, validates
+from sqlalchemy.orm import relation, backref, validates, object_session
+from sqlalchemy.sql.expression import desc
 
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
-from aquilon.aqdb.model import Base, System, HardwareEntity
+from aquilon.aqdb.model import Base, System, HardwareEntity, ObservedMac
 
 INTERFACE_TYPES = ('public', 'management', 'oa') #, 'transit')
 
@@ -100,6 +101,14 @@ class Interface(Base):
                      'interface_type': self.interface_type}
         _validate_mac(temp_dict)
         return value
+
+    @property
+    def last_observation(self):
+        session = object_session(self)
+        q = session.query(ObservedMac)
+        q = q.filter_by(mac_address=self.mac)
+        q = q.order_by(desc(ObservedMac.last_seen))
+        return q.first()
 
     def __init__(self, **kw): # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
