@@ -104,8 +104,8 @@ class TestSearchMachine(TestBrokerCommand):
     def testexactcpufailvendor(self):
         command = ["search_machine", "--cpuname=xeon_2500", "--cpuspeed=2500",
                    "--cpuvendor=vendor-does-not-exist"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found.",
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found",
                          command)
 
     def testfailexactcpu(self):
@@ -120,7 +120,7 @@ class TestSearchMachine(TestBrokerCommand):
     def testparialcpufailvendor(self):
         command = ["search_machine", "--cpuvendor=vendor-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found.",
+        self.matchoutput(out, "Vendor 'vendor-does-not-exist' not found",
                          command)
 
     def testpartialcpu(self):
