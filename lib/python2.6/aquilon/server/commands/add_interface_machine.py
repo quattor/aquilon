@@ -145,8 +145,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
-                logger.client_info("Could not reserve IP %s for %s in dsdb: "
-                                   "%s" % (dbmanager.ip, dbmanager.fqdn, e))
+                logger.client_info("Could not reserve IP address %s for %s "
+                                   "in DSDB: %s" %
+                                   (dbmanager.ip, dbmanager.fqdn, e))
                 dbinterface.system = None
                 session.add(dbinterface)
                 session.remove(dbmanager)
@@ -216,20 +217,20 @@ class CommandAddInterfaceMachine(BrokerCommand):
                           pending_removals):
         short = dbmachine.name[:-1]
         if short != dummy_machine_name[:-1]:
-            logger.client_info("Not altering name of machine '%s', name of "
-                               "machine being removed '%s' is too different" %
+            logger.client_info("Not altering name of machine %s, name of "
+                               "machine being removed %s is too different." %
                                (dbmachine.name, dummy_machine_name))
             return
         if not dbmachine.name[-1].isalpha():
-            logger.client_info("Not altering name of machine '%s', name does "
+            logger.client_info("Not altering name of machine %s, name does "
                                "not end with a letter." % dbmachine.name)
             return
         if session.query(Machine).filter_by(name=short).first():
-            logger.client_info("Not altering name of machine '%s', target "
-                               "name '%s' is already in use" %
+            logger.client_info("Not altering name of machine %s, target "
+                               "name %s is already in use." %
                                (dbmachine.name, short))
             return
-        logger.client_info("Renaming machine '%s' as '%s'" %
+        logger.client_info("Renaming machine %s to %s." %
                            (dbmachine.name, short))
         pending_removals.append(PlenaryMachineInfo(dbmachine, logger=logger))
         dbmachine.name = short
@@ -238,14 +239,14 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     def add_manager(self, session, logger, dbmachine, old_ip, old_network):
         if not old_ip:
-            logger.client_info("No IP available for system being removed, "
-                               "not auto-creating manager for %s" %
+            logger.client_info("No IP address available for system being "
+                               "removed, not auto-creating manager for %s." %
                                dbmachine.name)
             return
         if not dbmachine.host:
             logger.client_info("Machine %s is not linked to a host, not "
-                               "auto-creating manager for %s with IP %s" %
-                               (dbmachine.name, old_ip))
+                               "auto-creating manager for %s with IP address "
+                               "%s." % (dbmachine.name, old_ip))
             return
         dbhost = dbmachine.host
         manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
@@ -254,7 +255,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                                                  manager)
         except ArgumentError, e:
             logger.client_info("Could not create manager with name %s and "
-                               "ip %s for machine %s: %s" %
+                               "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.name, e))
             return
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,

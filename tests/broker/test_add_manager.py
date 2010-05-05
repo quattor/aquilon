@@ -139,7 +139,7 @@ class TestAddManager(TestBrokerCommand):
                    "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--mac", self.net.unknown[0].usable[8].mac]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Renaming machine 'ut3s01p1a' as 'ut3s01p1'",
+        self.matchoutput(err, "Renaming machine ut3s01p1a to ut3s01p1.",
                          command)
 
     # Test that the interface cannot be removed as long as the manager exists

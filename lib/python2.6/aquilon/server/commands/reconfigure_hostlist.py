@@ -179,14 +179,14 @@ class CommandReconfigureHostlist(BrokerCommand):
                                            logger=logger)])
         try:
             lock_queue.acquire(key)
-            logger.client_info("writing %s plenary templates", len(templates))
+            logger.client_info("Writing %s plenary templates.", len(templates))
             for template in templates:
                 logger.debug("Writing %s", template)
                 template.write(locked=True)
             td = TemplateDomain(dbdomain, logger=logger)
             out = td.compile(session, locked=True)
         except:
-            logger.client_info("restoring plenary templates")
+            logger.client_info("Restoring plenary templates.")
             for template in templates:
                 logger.debug("Restoring %s", template)
                 template.restore_stash()
