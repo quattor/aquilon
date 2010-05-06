@@ -45,7 +45,8 @@ class CommandPxeswitch(BrokerCommand):
     required_parameters = ["list"]
 
     def render(self, session, logger, list,
-               install, localboot, status, firmware, configure, **arguments):
+               install, localboot, status, firmware, configure, blindbuild,
+               **arguments):
 
         user = self.config.get("broker", "installfe_user")
         command = self.config.get("broker", "installfe")
@@ -68,8 +69,10 @@ class CommandPxeswitch(BrokerCommand):
             args.append('--firmwarelist')
         elif configure:
             args.append('--configurelist')
+        elif blindbuild:
+            args.append('--livecd')
         else:
-            raise ArgumentError("Missing required boot/install/status/firmware/configure parameter.")
+            raise ArgumentError("Missing required target parameter.")
 
         servers = dict()
         groups = dict()

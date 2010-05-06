@@ -43,7 +43,8 @@ class CommandPxeswitch(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname,
-               install, localboot, status, firmware, configure, **arguments):
+               install, localboot, status, firmware, configure, blindbuild,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = get_service(session, "bootserver")
@@ -65,8 +66,10 @@ class CommandPxeswitch(BrokerCommand):
             args.append('--firmware')
         elif configure:
             args.append('--configure')
+        elif blindbuild:
+            args.append('--livecd')
         else:
-            raise ArgumentError("Missing required boot or install parameter.")
+            raise ArgumentError("Missing required target parameter.")
 
         args.append(dbhost.fqdn)
 

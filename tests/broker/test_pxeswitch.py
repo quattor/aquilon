@@ -92,6 +92,11 @@ class TestPxeswitch(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "--configure", command)
 
+    def testblindbuildunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --blindbuild"
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--livecd", command)
+
     def testconfigurelist(self):
         with NamedTemporaryFile() as f:
             f.writelines(["unittest02.one-nyp.ms.com\n",
@@ -102,6 +107,15 @@ class TestPxeswitch(TestBrokerCommand):
             self.matchoutput(err, "--configure", command)
             # We would like to test more of the output... we need something
             # special for aii-shellfe however...
+
+    def testblindbuildlist(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --blindbuild" % f.name
+            (out, err) = self.successtest(command.split(" "))
+            self.matchoutput(err, "--livecd", command)
 
 
 if __name__=='__main__':
