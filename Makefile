@@ -4,7 +4,9 @@ QACOMMENT = -comment cmrs=qa
 QCELLS = q.ny,q.ln,q.hk,q.tk
 TCM_COMMENT = "-comment tcm FILL IT IN NOW"
 PYTHON_DEFAULT = /usr/bin/env python2.6
-PYTHON = /ms/dist/python/PROJ/core/2.6.4/bin/python
+#PYTHON = /ms/dist/python/PROJ/core/2.6.4/bin/python
+PYTHON_CLIENT_PROD = /ms/dist/python/PROJ/core/2.6.4/bin/python
+PYTHON_SERVER_PROD = /ms/dist/python/PROJ/core/2.6.4-64/bin/python
 
 MPR    := $(shell echo $(PWD) | awk -F/ '{print $$(NF-3), $$(NF-2), $$(NF-1)}')
 META   = $(word 1,$(MPR))
@@ -46,9 +48,19 @@ PYC_FILES := $(shell find lib -name '*.py' | sed -e 's,\.py,\.pyc,')
 FILES = $(BIN_FILES) $(LIB_FILES) $(MAN_FILES) $(ETC_FILES) $(PYC_FILES)
 INSTALLFILES = $(addprefix $(COMMON),$(FILES))
 
-$(COMMON)bin/%: bin/%.py
+#$(COMMON)bin/%: bin/%.py
+#	@mkdir -p `dirname $@`
+#	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON)\1,' <$< >$@
+#	chmod $(PERMS) $@
+
+$(COMMON)bin/aq: bin/aq.py
 	@mkdir -p `dirname $@`
-	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON)\1,' <$< >$@
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_CLIENT_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
+$(COMMON)bin/twistd: bin/twistd.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
 $(COMMON)%.pyc: $(COMMON)%.py
