@@ -33,6 +33,7 @@
 import os
 import sys
 import unittest
+import socket
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -100,11 +101,15 @@ class TestPrebindServer(TestBrokerCommand):
                          "'servers' = list('nyaqd1.ms.com', "
                          "'unittest02.one-nyp.ms.com');",
                          command)
-        # Hard-coding the internal ip address for nyaqd1 is horrible....
-        # couldn't think of a better way to test this code path though.
+        # Relying on 'nyaqd1.ms.com' to be in DNS isn't going to work
+        # in other locations.  A better choice might be one of the
+        # root servers (a.root-servers.net) but there's no sane way
+        # to add that to the database right now.  Maybe post DNS
+        # revamp.
         self.matchoutput(out,
-                         "'server_ips' = list('10.184.155.249', '%s');" %
-                         self.net.unknown[0].usable[0].ip,
+                         "'server_ips' = list('%s', '%s');" %
+                         (socket.gethostbyname('nyaqd1.ms.com'),
+                          self.net.unknown[0].usable[0].ip),
                          command)
 
 
