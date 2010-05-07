@@ -77,11 +77,14 @@ class TestManage(TestBrokerCommand):
         self.matchoutput(out, "Domain: changetest1", command)
 
     def testverifycleanup(self):
-        command = [self.config.get("broker", "basedir"),
+        basedir = self.config.get("broker", "basedir")
+        command = [basedir,
                    "-name", "unittest02.one-nyp.ms.com*",
                    "-path", "*/unittest/*"]
-        out = self.findcommand(command)
-        self.matchclean("".join(out), "unittest",
+        # basedir may contain the string ".../unittest/..."
+        out = ["BASEDIR" + name[len(basedir):] for name in
+               self.findcommand(command)]
+        self.matchclean(" ".join(out), "/unittest/",
                         "find %s" % " ".join(command))
 
     def testmanageunittest00(self):
