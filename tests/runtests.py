@@ -137,7 +137,7 @@ if profile:
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
 with open(makefile) as f:
-    prod_python_re = re.compile(r'^PYTHON\s*=\s*(.*?)\s*$')
+    prod_python_re = re.compile(r'^PYTHON_SERVER_PROD\s*=\s*(.*?)\s*$')
     for line in f.readlines():
         m = prod_python_re.search(line)
         if m:
