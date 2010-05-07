@@ -139,9 +139,9 @@ class Network(Base):
 network = Network.__table__
 network.primary_key.name = 'network_pk'
 
-table = network
-
 network.append_constraint(UniqueConstraint('ip', name='net_ip_uk'))
+
+network.info['unique_fields'] = ['ip']
 
 Index('net_loc_id_idx', network.c.location_id)
 

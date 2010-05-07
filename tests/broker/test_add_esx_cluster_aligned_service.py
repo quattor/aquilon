@@ -53,8 +53,7 @@ class TestAddESXClusterAlignedService(TestBrokerCommand):
                    "--service=service-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Service with name of service-does-not-exist "
-                         "not found",
+                         "Service service-does-not-exist not found",
                          command)
 
     def testverifyaddalignedservices(self):

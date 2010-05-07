@@ -44,8 +44,7 @@ class Continent(Location):
 
 continent = Continent.__table__
 continent.primary_key.name='continent_pk'
-
-table = continent
+continent.info['unique_fields'] = ['name']
 
 
 @monkeypatch(continent)

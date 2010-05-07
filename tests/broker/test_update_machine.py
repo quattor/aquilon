@@ -411,8 +411,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--cluster=cluster-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Cluster with name of cluster-does-not-exist not "
-                         "found.",
+                         "Cluster cluster-does-not-exist not found.",
                          command)
 
     def testfailchangemetacluster(self):

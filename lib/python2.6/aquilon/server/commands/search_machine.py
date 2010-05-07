@@ -52,7 +52,7 @@ class CommandSearchMachine(BrokerCommand):
         if cpuname and cpuvendor and cpuspeed:
             dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
             cpuspeed = force_int("cpuspeed", cpuspeed)
-            dbcpu = Cpu.get_unique(session, vendor_id=dbvendor.id,
+            dbcpu = Cpu.get_unique(session, vendor=dbvendor,
                                    name=cpuname, speed=cpuspeed)
             if not dbcpu:
                 raise ArgumentError("CPU vendor='%s' name='%s' speed='%s' "

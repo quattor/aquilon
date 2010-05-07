@@ -66,9 +66,8 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                     % (hostname, dbhost.cluster.cluster_type,
                                        dbhost.cluster.name))
             old_cluster = dbhost.cluster
-            dbhcm = HostClusterMember.get_unique(session,
-                                                 cluster_id=old_cluster.id,
-                                                 host_id=dbhost.id)
+            dbhcm = HostClusterMember.get_unique(session, cluster=old_cluster,
+                                                 host=dbhost)
             session.delete(dbhcm)
             session.flush()
             session.refresh(dbhost)

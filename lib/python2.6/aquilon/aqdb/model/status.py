@@ -60,10 +60,10 @@ class Status(Base):
         return str(self.name)
 
 status = Status.__table__
-table  = Status.__table__
 
 status.primary_key.name='%s_pk'%(_TN)
 status.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
+status.info['unique_fields'] = ['name']
 
 @monkeypatch(status)
 def populate(sess, *args, **kw):

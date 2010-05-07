@@ -44,5 +44,4 @@ class Desk(Location):
 
 desk = Desk.__table__
 desk.primary_key.name='desk_pk'
-
-table = desk
+desk.info['unique_fields'] = ['name']

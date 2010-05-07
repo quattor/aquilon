@@ -303,8 +303,8 @@ class TestAddPersonality(TestBrokerCommand):
         command = ["show", "personality", "--archetype", "aquilon",
                    "--personality", "personality-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality personality-does-not-exist",
-                         command)
+        self.matchoutput(out, "Personality personality-does-not-exist of "
+                         "archetype aquilon not found.", command)
 
     def testshowpersonalityunavailable2(self):
         command = ["show", "personality",
@@ -386,8 +386,8 @@ class TestAddPersonality(TestBrokerCommand):
         command = ["add_personality", "--personality", "inventory",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Personality with Archetype aquilon and name of "
-                         "inventory already exists.", command)
+        self.matchoutput(out, "Personality inventory, archetype aquilon "
+                         "already exists.", command)
 
     def testaddesxserver(self):
         command = "add personality --personality esx_server --archetype vmhost"

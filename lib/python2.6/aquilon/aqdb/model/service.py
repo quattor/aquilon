@@ -83,10 +83,10 @@ class Service(Base):
         return 'service/%s' % (self.name)
 
 service = Service.__table__
-table   = service
 
 service.primary_key.name = 'service_pk'
 service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))
+service.info['unique_fields'] = ['name']
 
 
 _SLI = 'service_list_item'
@@ -124,6 +124,7 @@ service_list_item = ServiceListItem.__table__
 service_list_item.primary_key.name='svc_list_item_pk'
 service_list_item.append_constraint(
     UniqueConstraint('archetype_id', 'service_id', name='svc_list_svc_uk'))
+service_list_item.info['unique_fields'] = ['archetype', 'service']
 
 Index('srvlst_archtyp_idx', service_list_item.c.archetype_id)
 
@@ -158,5 +159,6 @@ class PersonalityServiceListItem(Base):
 
 personality_service_list_item = PersonalityServiceListItem.__table__
 personality_service_list_item.primary_key.name='%s_pk' % (_ABV)
+personality_service_list_item.info['unique_fields'] = ['personality', 'service']
 
 Index('%s_prsnlty_idx' % (_ABV), personality_service_list_item.c.personality_id)

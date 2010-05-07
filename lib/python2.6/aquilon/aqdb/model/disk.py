@@ -83,7 +83,7 @@ disk = Disk.__table__
 disk.primary_key.name='%s_pk'% (_TN)
 disk.append_constraint(UniqueConstraint('machine_id', 'device_name',
                                         name='disk_mach_dev_name_uk'))
-table = disk
+disk.info['unique_fields'] = ['machine', 'device_name']
 
 class LocalDisk(Disk):
     __mapper_args__ = {'polymorphic_identity': 'local'}

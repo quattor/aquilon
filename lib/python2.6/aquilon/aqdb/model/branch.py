@@ -70,6 +70,7 @@ class Branch(Base):
 branch = Branch.__table__
 branch.primary_key.name = 'branch_pk'
 branch.append_constraint(UniqueConstraint('name', name='branch_uk'))
+branch.info['unique_fields'] = ['name']
 
 table = branch
 
@@ -95,6 +96,7 @@ class Domain(Branch):
 
 domain = Domain.__table__
 domain.primary_key.name = 'domain_pk'
+domain.info['unique_fields'] = ['name']
 Domain.tracked_branch = relation(Branch, uselist=False, backref='trackers',
         primaryjoin=Domain.tracked_branch_id == Branch.id)
 
@@ -113,6 +115,7 @@ class Sandbox(Branch):
 
 sandbox = Sandbox.__table__
 sandbox.primary_key.name = 'sandbox_pk'
+sandbox.info['unique_fields'] = ['name']
 
 
 @monkeypatch(domain)

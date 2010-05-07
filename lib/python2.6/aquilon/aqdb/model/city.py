@@ -45,8 +45,7 @@ class City(Location):
 
 city = City.__table__
 city.primary_key.name='city_pk'
-
-table = city
+city.info['unique_fields'] = ['name']
 
 
 @monkeypatch(city)

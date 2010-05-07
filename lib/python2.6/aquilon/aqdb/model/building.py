@@ -46,8 +46,7 @@ class Building(Location):
 
 building = Building.__table__
 building.primary_key.name='building_pk'
-
-table = building
+building.info['unique_fields'] = ['name']
 
 
 @monkeypatch(building)

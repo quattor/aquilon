@@ -53,11 +53,11 @@ class Vendor(Base):
     comments = Column(String(255), nullable=True)
 
 vendor = Vendor.__table__
-table = Vendor.__table__
 
 vendor.primary_key.name = '%s_pk' % (_TN)
 vendor.append_constraint(
     UniqueConstraint('name', name='%s_uk' % _TN))
+vendor.info['unique_fields'] = ['name']
 
 
 @monkeypatch(vendor)

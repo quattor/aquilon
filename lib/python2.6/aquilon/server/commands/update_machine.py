@@ -174,7 +174,8 @@ class CommandUpdateMachine(BrokerCommand):
                                      dbcluster.metacluster.name))
             old_cluster = dbmachine.cluster
             dbmcm = MachineClusterMember.get_unique(session,
-                cluster_id=dbmachine.cluster.id, machine_id=dbmachine.id)
+                                                    cluster=dbmachine.cluster,
+                                                    machine=dbmachine)
             session.delete(dbmcm)
             session.flush()
             # Without these refreshes the MCM creation below fails...

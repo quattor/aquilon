@@ -49,7 +49,8 @@ class CommandRebindMetaCluster(BrokerCommand):
                                     "while virtual machines are attached.")
             old_metacluster = dbcluster.metacluster
             dbmcm = MetaClusterMember.get_unique(session,
-                metacluster_id=old_metacluster.id, cluster_id=dbcluster.id)
+                                                 metacluster=old_metacluster,
+                                                 cluster=dbcluster)
             session.delete(dbmcm)
             session.refresh(dbcluster)
             session.refresh(old_metacluster)

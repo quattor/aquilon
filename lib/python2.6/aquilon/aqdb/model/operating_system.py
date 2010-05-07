@@ -76,11 +76,11 @@ class OperatingSystem(Base):
 
 
 operating_system = OperatingSystem.__table__
-table = operating_system
 
 operating_system.primary_key.name = '%s_pk'% (_ABV)
 operating_system.append_constraint(
     UniqueConstraint('name', 'version', 'archetype_id', name='%s_uk'% (_TN)))
+operating_system.info['unique_fields'] = ['name', 'version', 'archetype']
 
 
 @monkeypatch(operating_system)

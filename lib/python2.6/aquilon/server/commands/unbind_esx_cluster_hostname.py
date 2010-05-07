@@ -53,9 +53,8 @@ class CommandUnbindESXClusterHostname(BrokerCommand):
                                 "not ESX Cluster %s." %
                                 (hostname, dbhost.cluster.cluster_type,
                                  dbhost.cluster.name, cluster))
-        dbhcm = HostClusterMember.get_unique(session,
-                                             cluster_id=dbcluster.id,
-                                             host_id=dbhost.id)
+        dbhcm = HostClusterMember.get_unique(session, cluster=dbcluster,
+                                             host=dbhost)
         session.delete(dbhcm)
         session.flush()
 

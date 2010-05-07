@@ -57,7 +57,7 @@ class Archetype(Base):
     services = association_proxy('_services', 'service')
 
 archetype = Archetype.__table__
-table = Archetype.__table__
+archetype.info['unique_fields'] = ['name']
 
 archetype.primary_key.name='%s_pk'%(_ABV)
 archetype.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))

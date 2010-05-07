@@ -119,8 +119,7 @@ class Cluster(Base):
 cluster = Cluster.__table__
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
-
-table = cluster
+cluster.info['unique_fields'] = ['name']
 
 
 class EsxCluster(Cluster):
@@ -224,6 +223,7 @@ class EsxCluster(Cluster):
 
 esx_cluster = EsxCluster.__table__
 esx_cluster.primary_key.name = 'esx_cluster_pk'
+esx_cluster.info['unique_fields'] = ['name']
 
 
 _HCM = 'host_cluster_member'
@@ -278,6 +278,7 @@ hcm = HostClusterMember.__table__
 hcm.primary_key.name = '%s_pk'% (_HCM)
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
+hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
@@ -311,6 +312,7 @@ mcm = MachineClusterMember.__table__
 mcm.primary_key.name = '%s_pk'% (_MCM)
 mcm.append_constraint(UniqueConstraint('machine_id',
                                        name='machine_cluster_member_uk'))
+mcm.info['unique_fields'] = ['cluster', 'machine']
 
 Machine.cluster = association_proxy('_cluster', 'cluster')
 
@@ -344,6 +346,7 @@ class ClusterAlignedService(Base):
 
 cas = ClusterAlignedService.__table__
 cas.primary_key.name = '%s_pk'% (_ABV)
+cas.info['unique_fields'] = ['cluster_type', 'service']
 
 _CSB = 'cluster_service_binding'
 _CAB = 'clstr_svc_bndg'
@@ -392,3 +395,4 @@ class ClusterServiceBinding(Base):
 
 csb = ClusterServiceBinding.__table__
 csb.primary_key.name = '%s_pk'% (_CSB)
+csb.info['unique_fields'] = ['cluster', 'service_instance']

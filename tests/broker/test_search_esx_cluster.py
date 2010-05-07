@@ -69,8 +69,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --metacluster metacluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Metacluster metacluster-does-not-exist "
-                         "not found.",
+                         "Metacluster metacluster-does-not-exist not found.",
                          command)
 
     def testclusteravailablefull(self):
@@ -170,9 +169,8 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = ["search_esx_cluster", "--archetype=vmhost",
                    "--personality=personality-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality with ", command)
-        self.matchoutput(out, "Archetype vmhost", command)
-        self.matchoutput(out, "name of personality-does-not-exist", command)
+        self.matchoutput(out, "Personality personality-does-not-exist, "
+                         "archetype vmhost not found.", command)
 
     def testpersonalityunavailable2(self):
         # Will only get an error if archetype is specified
@@ -211,7 +209,7 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --service service-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Service with name of service-does-not-exist not found",
+                         "Service service-does-not-exist not found",
                          command)
 
     def testserviceinstanceavailable(self):
@@ -261,9 +259,8 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --share share-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
-                         "Service Instance with name of "
-                         "share-does-not-exist and "
-                         "Service nas_disk_share not found.",
+                         "Service Instance share-does-not-exist, service "
+                         "nas_disk_share not found.",
                          command)
 
     def testclusterlocationavailable(self):

@@ -57,13 +57,14 @@ class Model(Base):
 
     vendor = relation(Vendor)
 
+
 model = Model.__table__
 model.primary_key.name = 'model_pk'
 
 model.append_constraint(UniqueConstraint('name', 'vendor_id',
                                    name='model_name_vendor_uk'))
 
-table = model
+model.info['unique_fields'] = ['name', 'vendor', 'machine_type']
 
 
 @monkeypatch(model)

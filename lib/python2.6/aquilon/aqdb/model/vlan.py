@@ -79,16 +79,18 @@ class VlanInfo(Base):
             self.__class__.__name__, self.vlan_id, self.port_group,
             self.vlan_type)
 
-VlanInfo.__table__.primary_key.name = '%s_pk' % _VTN
-VlanInfo.__table__.append_constraint(
+vlaninfo = VlanInfo.__table__
+vlaninfo.primary_key.name = '%s_pk' % _VTN
+vlaninfo.append_constraint(
     UniqueConstraint('port_group', name='%s_port_group_uk' % _VTN))
+vlaninfo.info['unique_fields'] = ['port_group']
 
 #CheckConstraint doesn't upper case names by default
-VlanInfo.__table__.append_constraint(
+vlaninfo.append_constraint(
     CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
                     name=('%s_max_vlan_id' % _VTN).upper()))
 
-@monkeypatch(VlanInfo.__table__)
+@monkeypatch(vlaninfo)
 def populate(sess, **kw):
     if sess.query(VlanInfo).count() == 0:
         for i in VLAN_INFO:
