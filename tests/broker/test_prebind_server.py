@@ -33,6 +33,7 @@
 import os
 import sys
 import unittest
+import socket
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -84,6 +85,32 @@ class TestPrebindServer(TestBrokerCommand):
                 instance = "ut.%s" % n
                 self.noouttest(["bind", "server", "--hostname", server,
                                 "--service", service, "--instance", instance])
+
+    def testbinddns(self):
+        self.noouttest(["bind", "server",
+                        "--hostname", "unittest02.one-nyp.ms.com",
+                        "--service", "dns", "--instance", "nyinfratest"])
+        self.noouttest(["bind", "server",
+                        "--hostname", "nyaqd1.ms.com",
+                        "--service", "dns", "--instance", "nyinfratest"])
+
+    def testcatdns(self):
+        command = "cat --service dns --instance nyinfratest"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "'servers' = list('nyaqd1.ms.com', "
+                         "'unittest02.one-nyp.ms.com');",
+                         command)
+        # Relying on 'nyaqd1.ms.com' to be in DNS isn't going to work
+        # in other locations.  A better choice might be one of the
+        # root servers (a.root-servers.net) but there's no sane way
+        # to add that to the database right now.  Maybe post DNS
+        # revamp.
+        self.matchoutput(out,
+                         "'server_ips' = list('%s', '%s');" %
+                         (socket.gethostbyname('nyaqd1.ms.com'),
+                          self.net.unknown[0].usable[0].ip),
+                         command)
 
 
 if __name__=='__main__':

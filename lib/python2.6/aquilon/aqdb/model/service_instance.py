@@ -29,6 +29,7 @@
 """ see class.__doc__ for description """
 
 from datetime import datetime
+import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
@@ -92,6 +93,29 @@ class ServiceInstance(Base):
         q = q.options(contains_eager(System.dns_domain))
         q = q.order_by(DnsDomain.name, System.name)
         return [sys.fqdn for sys in q.all()]
+
+    @property
+    def server_ips(self):
+        session = object_session(self)
+        q = session.query(System)
+        q = q.join(['sislist'])
+        q = q.filter_by(service_instance=self)
+        q = q.reset_joinpoint()
+        q = q.outerjoin(System.dns_domain)
+        q = q.options(contains_eager(System.dns_domain))
+        q = q.order_by(DnsDomain.name, System.name)
+        ips = []
+        for system in q.all():
+            if system.ip:
+                ips.append(system.ip)
+                continue
+            try:
+                ips.append(socket.gethostbyname(system.fqdn))
+            except socket.gaierror:
+                # For now this fails silently.  It may be correct to raise
+                # an error here but the timing could be unpredictable.
+                pass
+        return ips
 
     @classmethod
     def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices):
