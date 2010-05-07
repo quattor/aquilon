@@ -44,9 +44,13 @@ from aquilon.aqdb.model import Service
 class CommandPxeswitch(BrokerCommand):
 
     required_parameters = ["list"]
+    _option_map = {'status':'--statuslist', 'configure':'--configurelist',
+                   'localboot':'--bootlist', 'install':'--installlist',
+                   'firmware':'--firmwarelist', 'blindbuild':'--livecdlist'}
 
     def render(self, session, logger, list,
-               install, localboot, status, firmware, configure, **arguments):
+               install, localboot, status, firmware, configure, blindbuild,
+               **arguments):
 
         user = self.config.get("broker", "installfe_user")
         command = self.config.get("broker", "installfe")
@@ -58,19 +62,6 @@ class CommandPxeswitch(BrokerCommand):
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log" % logdir)
-
-        if localboot:
-            args.append('--bootlist')
-        elif install:
-            args.append('--installlist')
-        elif status:
-            args.append('--statuslist')
-        elif firmware:
-            args.append('--firmwarelist')
-        elif configure:
-            args.append('--configurelist')
-        else:
-            raise ArgumentError("No action requested.")
 
         servers = dict()
         groups = dict()
@@ -111,8 +102,13 @@ class CommandPxeswitch(BrokerCommand):
             with NamedTemporaryFile() as tmpfile:
                 tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
-
-                groupargs.append(tmpfile.name)
+               
+                for (option, mapped) in self._option_map.items():
+                    if locals()[option]:
+                        groupargs.append(mapped)
+                        groupargs.append(tmpfile.name)
+                if groupargs[-1] == command:
+                    raise ArgumentError("Missing required target parameter.")
 
                 groupargs.append("--servers")
                 groupargs.append(" ".join(["%s@%s" % (user,s) for s in servers[group]]))

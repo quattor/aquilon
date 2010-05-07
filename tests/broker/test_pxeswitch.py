@@ -92,6 +92,11 @@ class TestPxeswitch(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "--configure", command)
 
+    def testblindbuildunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --blindbuild"
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--livecd", command)
+
     def testconfigurelist(self):
         with NamedTemporaryFile() as f:
             f.writelines(["unittest02.one-nyp.ms.com\n",
@@ -120,6 +125,55 @@ class TestPxeswitch(TestBrokerCommand):
                              command)
             self.matchoutput(out, "pissp1.ms.com: Host has no bootserver.",
                              command)
+
+    def testblindbuildlist(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --blindbuild" % f.name
+            (out, err) = self.successtest(command.split(" "))
+            self.matchoutput(err, "--livecdlist", command)
+
+    def teststatusconflictconfigure(self):
+        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
+                   "--status", "--configure"]
+        self.badoptiontest(command)
+
+    def teststatusconflictinstall(self):
+        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
+                   "--status", "--install"]
+        self.badoptiontest(command)
+
+    def teststatusconflictinstalllist(self):
+        command = ["pxeswitch", "--list=does-not-actually-exist",
+                   "--status", "--install"]
+        self.badoptiontest(command)
+
+    def testinstallconflictfirmware(self):
+        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
+                   "--firmware", "--install"]
+        self.badoptiontest(command)
+
+    def testallowconfigureinstall(self):
+        command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
+                   "--configure", "--install"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "--configure unittest02.one-nyp.ms.com", command)
+        self.matchoutput(err, "--install unittest02.one-nyp.ms.com", command)
+        self.matchclean(err, "--firmware", command)
+
+    def testallowconfigureblindbuildlist(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = ["pxeswitch", "--list", f.name,
+                       "--configure", "--blindbuild"]
+            (out, err) = self.successtest(command)
+            self.matchoutput(err, "--configurelist", command)
+            self.matchoutput(err, "--livecdlist", command)
+            self.matchclean(err, "--firmware", command)
 
 
 if __name__=='__main__':

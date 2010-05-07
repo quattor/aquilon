@@ -41,9 +41,13 @@ from aquilon.aqdb.model import Service
 class CommandPxeswitch(BrokerCommand):
 
     required_parameters = ["hostname"]
+    _option_map = {'status':'--status', 'configure':'--configure',
+                   'localboot':'--boot', 'install':'--install',
+                   'firmware':'--firmware', 'blindbuild':'--livecd'}
 
     def render(self, session, logger, hostname,
-               install, localboot, status, firmware, configure, **arguments):
+               status, configure, localboot, install, firmware, blindbuild,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = Service.get_unique(session, "bootserver", compel=True)
@@ -55,20 +59,13 @@ class CommandPxeswitch(BrokerCommand):
 
         command = self.config.get("broker", "installfe")
         args = [command]
-        if localboot:
-            args.append('--boot')
-        elif install:
-            args.append('--install')
-        elif status:
-            args.append('--status')
-        elif firmware:
-            args.append('--firmware')
-        elif configure:
-            args.append('--configure')
-        else:
-            raise ArgumentError("No action requested.")
 
-        args.append(dbhost.fqdn)
+        for (option, mapped) in self._option_map.items():
+            if locals()[option]:
+                args.append(mapped)
+                args.append(dbhost.fqdn)
+        if args[-1] == command:
+            raise ArgumentError("Missing required target parameter.")
 
         args.append("--cfgfile")
         args.append("/dev/null")
