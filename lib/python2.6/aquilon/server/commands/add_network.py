@@ -27,8 +27,6 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import (ArgumentError, NotFoundException)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
@@ -52,7 +50,8 @@ class CommandAddNetwork(BrokerCommand):
             dbnetwork = network and get_network_byname(session, network) or None
             dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
             if dbnetwork:
-                raise ArgumentError('Network already exists')
+                raise ArgumentError("Network %s with IP address %s already "
+                                    "exists." % (dbnetwork.name, dbnetwork.ip))
         except NotFoundException, e:
             pass
 
@@ -64,14 +63,16 @@ class CommandAddNetwork(BrokerCommand):
             elif no.match(discovered):
                 discovered = "n"
             else:
-                raise ArgumentError('Did not recognise supplied argument to discovered flag: "%s"' % discovered)
+                raise ArgumentError("Did not recognise supplied argument to "
+                                    "--discovered flag: '%s'." % discovered)
         if discoverable:
             if yes.match(discoverable):
                 discoverable = "y"
             elif no.match(discoverable):
                 discoverable = "n"
             else:
-                raise ArgumentError('Did not recognise supplied argument to discoverable flag: "%s"' % discoverable)
+                raise ArgumentError("Did not recognise supplied argument to "
+                                    "--discoverable flag: '%s'." % discoverable)
 
         # This *really* needs better documentation...
         mask = force_int("mask", mask)

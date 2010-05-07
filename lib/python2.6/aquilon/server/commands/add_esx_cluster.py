@@ -31,12 +31,11 @@
 from aquilon.server.broker import (BrokerCommand, validate_basic,
                                    force_int, force_ratio)
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
-                                MetaClusterMember)
+                                MetaClusterMember, Domain)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 
 
@@ -55,14 +54,15 @@ class CommandAddESXCluster(BrokerCommand):
             # domain must always be set.
             domain = self.config.get("broker", "default_domain")
 
-        dbdomain = verify_domain(session, domain,
-                                 self.config.get("broker", "servername"))
-
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         dblocation = get_location(session, **arguments)
         if not dblocation:
-            raise ArgumentError("cluster requires a location constraint")
+            raise ArgumentError("Adding a cluster requires a location "
+                                "constraint.")
         if not dblocation.campus:
-            raise ArgumentError("location '%s' is not within a campus" %dblocation.name)
+            raise ArgumentError("%s %s is not within a campus." %
+                                (dblocation.location_type.capitalize(),
+                                 dblocation.name))
 
         Cluster.get_unique(session, cluster, preclude=True)
 

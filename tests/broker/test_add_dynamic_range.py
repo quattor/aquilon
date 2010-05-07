@@ -59,7 +59,7 @@ class TestAddDynamicRange(TestBrokerCommand):
                    "--dns_domain=dns_domain_does_not_exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "DNS Domain 'dns_domain_does_not_exist' not found",
+                         "DNS Domain dns_domain_does_not_exist not found",
                          command)
 
     def testaddrange(self):
@@ -123,7 +123,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The IP address %s is reserved for dynamic "
-                         "dhcp for a tor_switch on subnet %s" %
+                         "DHCP for a ToR switch on subnet %s" %
                          (self.net.tor_net2[1].reserved[0].ip,
                           self.net.tor_net2[1].ip),
                          command)

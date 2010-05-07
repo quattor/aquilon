@@ -29,10 +29,9 @@
 
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, Service
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.services import Chooser
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 
 
@@ -43,12 +42,9 @@ class CommandBindESXClusterService(BrokerCommand):
     def render(self, session, logger, cluster, service, instance, force=False,
                **arguments):
         cluster_type = 'esx'
-        dbcluster = Cluster.get_unique(session,
-                                       name=cluster, cluster_type=cluster_type)
-        if not dbcluster:
-            raise NotFoundException("%s cluster '%s' not found." %
-                                    (cluster_type, cluster))
-        dbservice = get_service(session, service)
+        dbcluster = Cluster.get_unique(session, name=cluster,
+                                       cluster_type=cluster_type, compel=True)
+        dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbcluster, logger=logger, required_only=False)
         if instance:
             dbinstance = get_service_instance(session, dbservice, instance)
@@ -60,5 +56,3 @@ class CommandBindESXClusterService(BrokerCommand):
         chooser.write_plenary_templates()
 
         return
-
-

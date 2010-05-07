@@ -45,7 +45,8 @@ class CommandDelPersonality(BrokerCommand):
         # Check dependencies
         dbhosts = session.query(Host).filter_by(personality=dbpersona).first()
         if dbhosts:
-            raise ArgumentError("personality '%s' is in use and cannot be deleted" % personality)
+            raise ArgumentError("Personality %s is still in use and cannot be "
+                                "deleted." % personality)
 
         # All clear
         plenary = PlenaryPersonality(dbpersona, logger=logger)

@@ -40,9 +40,7 @@ class CommandCatCluster(BrokerCommand):
     required_parameters = ["cluster"]
 
     def render(self, generate, session, logger, cluster, **kwargs):
-        dbcluster = Cluster.get_unique(session, cluster)
-        if not dbcluster:
-            raise NotFoundException("Cluster '%s' not found." % cluster)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
         plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
         if generate:
             lines = []

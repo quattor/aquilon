@@ -29,6 +29,8 @@
 """Utility/creation wrapper to avoid duplicating code."""
 
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Rack
 from aquilon.server.broker import force_int
@@ -39,7 +41,7 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
                        building=None, room=None, fullname=None, comments=None):
     dblocation = get_location(session, building=building, room=room)
     if not dblocation or not dblocation.building:
-        raise ArgumentError("No parent (building or room) given for rack.")
+        raise ArgumentError("No parent (building or room) given for the rack.")
     dbbuilding = dblocation.building
 
     # The database contains normalized values so we have to normalize the input
@@ -59,9 +61,9 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
         rack = rackid
     else:
         rack = dbbuilding.name + rackid
-    dbrack = session.query(Rack).filter_by(name=rack).first()
 
-    if dbrack:
+    try:
+        dbrack = session.query(Rack).filter_by(name=rack).one()
         if rackrow is not None and rackrow != dbrack.rack_row:
             raise ArgumentError("Found rack with name %s but the current row %s does not match given row %s." %
                     (dbrack.name, dbrack.rack_row, rackrow))
@@ -69,6 +71,8 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn,
             raise ArgumentError("Found rack with name %s but the current column %s does not match given column %s." %
                     (dbrack.name, dbrack.rack_column, rackcolumn))
         return dbrack
+    except NoResultFound:
+        pass
 
     if fullname is None:
         fullname = rack

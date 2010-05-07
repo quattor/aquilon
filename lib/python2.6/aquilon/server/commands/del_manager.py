@@ -69,7 +69,7 @@ class CommandDelManager(BrokerCommand):
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.delete_host_details(ip)
             except ProcessException, e:
-                raise ArgumentError("Could not remove host %s from dsdb: %s" %
+                raise ArgumentError("Could not remove host %s from DSDB: %s" %
                             (manager, e))
             # Past the point of no return here (DSDB has been updated)...
             # probably not much of an issue if writing the plenary failed.

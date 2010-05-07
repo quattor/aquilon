@@ -42,9 +42,9 @@ class CommandAddOS(BrokerCommand):
                **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(osname)):
-            raise ArgumentError("OS name '%s' is not valid" % osname)
+            raise ArgumentError("OS name '%s' is not valid." % osname)
         if not valid.match(osversion):
-            raise ArgumentError("OS version '%s' is not valid" % osversion)
+            raise ArgumentError("OS version '%s' is not valid." % osversion)
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         OperatingSystem.get_unique(session, name=osname, version=osversion,

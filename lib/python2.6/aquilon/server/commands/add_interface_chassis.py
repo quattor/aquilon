@@ -30,8 +30,6 @@
     Duplicates logic used in `aq add interface --tor_switch`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Interface, Chassis
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -52,8 +50,8 @@ class CommandAddInterfaceChassis(BrokerCommand):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')
 
         if dbchassis.ip:
-            raise ArgumentError("Chassis %s already has an interface with an ip address." %
-                                dbchassis.fqdn)
+            raise ArgumentError("Chassis %s already has an interface with an "
+                                "IP address." % dbchassis.fqdn)
 
         extra = {}
         if comments:
@@ -63,24 +61,21 @@ class CommandAddInterfaceChassis(BrokerCommand):
         q = q.filter_by(name=interface, hardware_entity=dbchassis.chassis_hw)
         prev = q.first()
         if prev:
-            raise ArgumentError("chassis %s already has an interface named %s"
+            raise ArgumentError("Chassis %s already has an interface named %s."
                     % (dbchassis.fqdn, interface))
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:
             msg = describe_interface(session, prev)
-            raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+            raise ArgumentError("MAC address %s is already in use: %s." %
+                                (mac, msg))
 
         dbinterface = Interface(name=interface,
                                 hardware_entity=dbchassis.chassis_hw,
                                 mac=mac, interface_type='oa', **extra)
         session.add(dbinterface)
 
-        ip = generate_ip(session, dbinterface, **arguments)
-        if not ip:
-            raise ArgumentError("add_interface --chassis requires any of "
-                                "the --ip, --ipfromip, --ipfromsystem, "
-                                "--autoip parameters")
+        ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
         dbchassis.ip = ip
@@ -98,5 +93,5 @@ class CommandAddInterfaceChassis(BrokerCommand):
         try:
             dsdb_runner.add_host(dbinterface)
         except ProcessException, e:
-            raise ArgumentError("Could not add hostname to dsdb: %s" % e)
+            raise ArgumentError("Could not add hostname to DSDB: %s" % e)
         return

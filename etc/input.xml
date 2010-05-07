@@ -736,6 +736,7 @@
       <optgroup name="optional_opts">
          <option name="interface" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
          <option name="mac" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="auxiliary/%(auxiliary)s" />
@@ -803,6 +804,7 @@
          <option name="manager" type="string">Fully qualified name for the manager interface</option>
          <option name="interface" type="string">Specify the management interface to use, if there is more than one.</option>
          <option name="mac" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport trigger="manager" method="put" path="manager/%(manager)s" />
@@ -952,6 +954,7 @@
          <option name="ipfromip" type="string" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
          <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="boolean" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
          <option name="pg" type="string" conflicts="autopg">portgroup</option>
          <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
       </optgroup>

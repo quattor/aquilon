@@ -47,13 +47,26 @@ class TestServiceConstraints(TestBrokerCommand):
         command = ["del_required_service", "--service=ntp",
                    "--archetype=windows", "--personality=desktop"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Could not find required service", command)
+        self.matchoutput(out, "Service ntp required for personality windows, "
+                         "archetype desktop not found.", command)
 
     def testdelservicewithinstances(self):
+        command = "del service --service unmapped"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Service unmapped still has instances defined "
+                         "and cannot be deleted.", command)
+
+    def testdelarchetyperequiredservice(self):
         command = "del service --service aqd"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "Cannot remove service with instances defined",
+        self.matchoutput(out, "Service aqd is still required by the following "
+                         "archetypes: aquilon.", command)
+
+    def testdelpersonalityrequiredservice(self):
+        command = "del service --service chooser1"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Service chooser1 is still required by the "
+                         "following personalities: unixeng-test (aquilon).",
                          command)
 
     def testverifydelservicewithinstances(self):
@@ -64,14 +77,19 @@ class TestServiceConstraints(TestBrokerCommand):
     def testdelserviceinstancewithservers(self):
         command = "del service --service aqd --instance ny-prod"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "instance is still being provided by servers",
-                         command)
+        self.matchoutput(out, "Service aqd, instance ny-prod is still being "
+                         "provided by servers", command)
 
     def testverifydelserviceinstancewithservers(self):
         command = "show service --service aqd --instance ny-prod"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: aqd Instance: ny-prod", command)
+
+    def testdelserviceinstancewithclients(self):
+        command = "del service --service utsvc --instance utsi1"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Service utsvc, instance utsi1 still has "
+                         "clients and cannot be deleted", command)
 
 
 if __name__=='__main__':

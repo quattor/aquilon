@@ -29,9 +29,7 @@
 """Wrapper to make getting a machine simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import TorSwitch
 from aquilon.server.dbwrappers.system import get_system
 
@@ -39,7 +37,7 @@ from aquilon.server.dbwrappers.system import get_system
 def get_tor_switch(session, tor_switch):
     dbsystem = get_system(session, tor_switch)
     if not isinstance(dbsystem, TorSwitch):
-        raise ArgumentError("'%s' is not a tor_switch." % tor_switch)
+        raise ArgumentError("%s is not a ToR switch." % tor_switch)
     return dbsystem
 
 

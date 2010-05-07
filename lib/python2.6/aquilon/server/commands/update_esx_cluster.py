@@ -49,9 +49,7 @@ class CommandUpdateESXCluster(BrokerCommand):
                max_members, vm_to_host_ratio, tor_switch, fix_location,
                down_hosts_threshold, comments, **arguments):
         cluster_type = 'esx'
-        dbcluster = session.query(EsxCluster).filter_by(name=cluster).first()
-        if not dbcluster:
-            raise NotFoundException("cluster '%s' not found" % cluster)
+        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
 
         cluster_updated = False
         location_changed = False
@@ -64,18 +62,19 @@ class CommandUpdateESXCluster(BrokerCommand):
         if dblocation:
             errors = []
             if not dblocation.campus:
-                errors.append("location %s '%s' is not within a campus" %
-                              (dblocation.location_type, dblocation.name))
+                errors.append("%s %s is not within a campus." %
+                              (dblocation.location_type.capitalize(),
+                               dblocation.name))
             for host in dbcluster.hosts:
                 if host.machine.location != dblocation and \
                    dblocation not in host.machine.location.parents:
-                    errors.append("Host %s has location %s %s" % (host.fqdn,
+                    errors.append("Host %s has location %s %s." % (host.fqdn,
                         host.machine.location.location_type.capitalize(),
                         host.machine.location.name))
             if errors:
-                raise ArgumentError("Cannot set %s cluster %s location "
-                                    "constraint to %s %s: %s" %
-                                    (cluster_type, dbcluster.name,
+                raise ArgumentError("Cannot set ESX Cluster %s location "
+                                    "constraint to %s %s:\n%s" %
+                                    (dbcluster.name,
                                      dblocation.location_type.capitalize(),
                                      dblocation.name, "\n".join(errors)))
             if dbcluster.location_constraint != dblocation:
@@ -107,19 +106,22 @@ class CommandUpdateESXCluster(BrokerCommand):
                 if dbhost.personality != dbpersonality:
                     invalid_hosts.append(dbhost)
                 if invalid_hosts:
-                    raise ArgumentError("Cannot change cluster personality "
-                                        "while containing members of a "
-                                        "different personality: %s" %
-                                        invalid_hosts)
+                    msg = ", ".join([host.fqdn for host in invalid_hosts])
+                    raise ArgumentError("Cannot change the personality of "
+                                        "ESX Cluster %s while the following "
+                                        "members have different personalities: "
+                                        "%s." % (dbcluster.name, msg))
             dbcluster.personality = dbpersonality
             cluster_updated = True
 
         max_members = force_int("max_members", max_members)
         if max_members is not None:
-            if max_members < len(dbcluster.hosts):
-                raise ArgumentError("Could not set cluster max_members to %s "
-                                    "as value already exceeded (%s)." %
-                                    (max_members, len(dbcluster.hosts)))
+            current_members = len(dbcluster.hosts)
+            if max_members < current_members:
+                raise ArgumentError("ESX Cluster %s has %d hosts bound, "
+                                    "which exceeds the requested limit %d." %
+                                    (dbcluster.name, current_members,
+                                     max_members))
             dbcluster.max_hosts = max_members
             cluster_updated = True
 

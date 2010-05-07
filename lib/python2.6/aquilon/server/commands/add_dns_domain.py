@@ -48,7 +48,7 @@ class CommandAddDnsDomain(BrokerCommand):
         pattern = '(' + label + '\.' + ')*' + label + '$'
         valid = re.compile(pattern)
         if not valid.match(dns_domain) or len(dns_domain) > 255:
-            raise ArgumentError("DNS domain name '%s' is not valid" % dns_domain)
+            raise ArgumentError("DNS domain name '%s' is not valid." % dns_domain)
 
         dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
         session.add(dbdns_domain)

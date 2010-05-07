@@ -34,9 +34,9 @@ from socket import gethostbyname
 from aquilon.exceptions_ import NameServiceError, ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import run_command
 from aquilon.server.logger import CLIENT_INFO
+from aquilon.aqdb.model import Service
 
 class CommandPxeswitch(BrokerCommand):
 
@@ -46,10 +46,10 @@ class CommandPxeswitch(BrokerCommand):
                install, localboot, status, firmware, configure, **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
-        dbservice = get_service(session, "bootserver")
+        dbservice = Service.get_unique(session, "bootserver", compel=True)
         bootbi = get_host_build_item(session, dbhost, dbservice)
         if not bootbi:
-            raise ArgumentError("host has no bootserver")
+            raise ArgumentError("Host %s has no bootserver." % hostname)
         # for that instance, find what servers are bound to it.
         servers = [s.system.fqdn for s in bootbi.service_instance.servers]
 
@@ -66,7 +66,7 @@ class CommandPxeswitch(BrokerCommand):
         elif configure:
             args.append('--configure')
         else:
-            raise ArgumentError("Missing required boot or install parameter.")
+            raise ArgumentError("No action requested.")
 
         args.append(dbhost.fqdn)
 

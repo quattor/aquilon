@@ -73,7 +73,8 @@ class CommandAddManager(BrokerCommand):
             dbinterface = session.query(Interface).filter_by(mac=mac).first()
             if dbinterface:
                 msg = describe_interface(session, dbinterface)
-                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+                raise ArgumentError("MAC address %s is already in use: %s." %
+                                    (mac, msg))
             q = session.query(Interface)
             q = q.filter_by(hardware_entity=dbmachine, name=interface)
             dbinterface = q.first()
@@ -90,15 +91,11 @@ class CommandAddManager(BrokerCommand):
             raise ArgumentError("No management interface found.")
 
         if dbinterface.system:
-            raise ArgumentError("Interface '%s' of machine '%s' already provides '%s'" %
-                                (dbinterface.name, dbmachine.name,
-                                 dbinterface.system.fqdn))
+            raise ArgumentError("Interface %s of machine %s already provides "
+                                "%s." % (dbinterface.name, dbmachine.name,
+                                         dbinterface.system.fqdn))
 
-        ip = generate_ip(session, dbinterface, **arguments)
-        if not ip:
-            raise ArgumentError("add_manager requires any of the --ip, "
-                                "--ipfromip, --ipfromsystem, --autoip "
-                                "parameters")
+        ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
 
@@ -123,7 +120,7 @@ class CommandAddManager(BrokerCommand):
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
-                raise ArgumentError("Could not add host to dsdb: %s" % e)
+                raise ArgumentError("Could not add host to DSDB: %s" % e)
         except:
             plenary_info.restore_stash()
             raise

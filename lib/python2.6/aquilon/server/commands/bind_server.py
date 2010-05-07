@@ -30,10 +30,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ServiceInstanceServer
+from aquilon.aqdb.model import Service, ServiceInstanceServer
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.service import PlenaryServiceInstance
 
@@ -45,7 +44,7 @@ class CommandBindServer(BrokerCommand):
     def render(self, session, logger, hostname, service, instance, user,
                force=False, **arguments):
         dbsystem = get_system(session, hostname)
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
         for dbserver in dbinstance.servers:
             if dbserver.system.id == dbsystem.id:
@@ -55,7 +54,8 @@ class CommandBindServer(BrokerCommand):
                 # The right thing would generally be writing to stderr for
                 # a CLI (either raw or csv), and some sort of generic error
                 # page for a web client.
-                raise ArgumentError("Server %s is already bound to service %s instance %s" %
+                raise ArgumentError("Server %s is already bound to service %s "
+                                    "instance %s." %
                                     (hostname, service, instance))
         positions = []
         for dbserver in dbinstance.servers:

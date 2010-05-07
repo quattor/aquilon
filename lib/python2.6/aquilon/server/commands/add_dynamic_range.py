@@ -48,8 +48,8 @@ class CommandAddDynamicRange(BrokerCommand):
         startnet = get_net_id_from_ip(session, startip)
         endnet = get_net_id_from_ip(session, endip)
         if startnet != endnet:
-            raise ArgumentError("IPs '%s' (%s) and '%s' (%s) must be on the "
-                                "same subnet" %
+            raise ArgumentError("IP addresses %s (%s) and %s (%s) must be on "
+                                "the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         q = session.query(System)
@@ -58,7 +58,7 @@ class CommandAddDynamicRange(BrokerCommand):
         q = q.order_by(asc(System.ip))
         conflicts = q.all()
         if conflicts:
-            raise ArgumentError("Cannot allocate IP range because the "
+            raise ArgumentError("Cannot allocate IP address range because the "
                                 "following hosts already exist:\n" +
                                 "\n".join(["%s (%s)" % (c.fqdn, c.ip)
                                            for c in conflicts]))

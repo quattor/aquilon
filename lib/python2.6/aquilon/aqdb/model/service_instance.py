@@ -49,6 +49,7 @@ class ServiceInstance(Base):
         dictated by the application they run """
 
     __tablename__  = _TN
+    _class_label = 'Service Instance'
 
     id = Column(Integer, Sequence('%s_id_seq'%(_TN)), primary_key=True)
     service_id = Column(Integer, ForeignKey('service.id',
@@ -196,6 +197,9 @@ class ServiceInstance(Base):
     def __repr__(self):
         return '(%s) %s %s'% (self.__class__.__name__,
                               self.service.name, self.name)
+
+    def __str__(self):
+        return "Service Instance %s/%s" % (self.service.name, self.name)
 
 service_instance = ServiceInstance.__table__
 table = ServiceInstance.__table__

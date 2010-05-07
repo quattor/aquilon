@@ -29,19 +29,12 @@
 """Wrapper to make getting a machine simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Cpu, LocalDisk, Machine
 from aquilon.server.broker import force_int
 
-
-def get_machine(session, machine):
-    try:
-        dbmachine = session.query(Machine).filter_by(name=machine).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Machine %s not found: %s" % (machine, e))
-    return dbmachine
 
 def create_machine(session, machine, dblocation, dbmodel,
         cpuname, cpuvendor, cpuspeed, cpucount, memory, serial):
@@ -66,7 +59,8 @@ def create_machine(session, machine, dblocation, dbmodel,
             q = q.join('vendor').filter_by(name=cpuvendor.lower())
         cpulist = q.all()
         if not cpulist:
-            raise ArgumentError("Could not find a cpu with the given attributes.")
+            raise ArgumentError("Could not find a CPU with the given "
+                                "attributes.")
         if len(cpulist) == 1:
             # Found it exactly.
             dbcpu = cpulist[0]
@@ -77,9 +71,11 @@ def create_machine(session, machine, dblocation, dbmodel,
                     or (cpuspeed and dbcpu.speed != cpuspeed)
                     or (cpuvendor and
                         dbcpu.vendor.name != cpuvendor.lower())):
-                raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
+                raise ArgumentError("Could not uniquely identify a CPU with "
+                                    "the attributes given.")
         else:
-            raise ArgumentError("Could not uniquely identify a cpu with the attributes given.")
+            raise ArgumentError("Could not uniquely identify a CPU with the "
+                                "attributes given.")
 
     if cpucount is None:
         if dbmodel.machine_specs:

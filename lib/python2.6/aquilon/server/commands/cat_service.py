@@ -30,9 +30,9 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.templates.service import (PlenaryServiceToplevel,
                                               PlenaryServiceClientDefault)
+from aquilon.aqdb.model import Service
 
 
 class CommandCatService(BrokerCommand):
@@ -40,7 +40,7 @@ class CommandCatService(BrokerCommand):
     required_parameters = ["service"]
 
     def render(self, session, logger, service, default, generate, **kwargs):
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         if default:
             plenary_info = PlenaryServiceClientDefault(dbservice,
                                                        logger=logger)
@@ -52,5 +52,3 @@ class CommandCatService(BrokerCommand):
             return "\n".join(lines)
         else:
             return plenary_info.read()
-
-

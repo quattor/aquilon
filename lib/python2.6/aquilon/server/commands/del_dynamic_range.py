@@ -37,7 +37,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 
 
-class CommandAddDynamicRange(BrokerCommand):
+class CommandDelDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
@@ -55,8 +55,8 @@ class CommandAddDynamicRange(BrokerCommand):
         startnet = get_net_id_from_ip(session, startip)
         endnet = get_net_id_from_ip(session, endip)
         if startnet != endnet:
-            raise ArgumentError("IPs '%s' (%s) and '%s' (%s) must be on the "
-                                "same subnet" %
+            raise ArgumentError("IP addresses %s (%s) and %s (%s) must be "
+                                "on the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
         q = session.query(System)
         q = q.filter(System.ip >= startip)
@@ -66,11 +66,9 @@ class CommandAddDynamicRange(BrokerCommand):
         if not existing:
             raise ArgumentError("Nothing found in range.")
         if existing[0].ip != startip:
-            raise ArgumentError("No system found with IP address '%s'" %
-                                startip)
+            raise ArgumentError("No system found with IP address %s." % startip)
         if existing[-1].ip != endip:
-            raise ArgumentError("No system found with IP address '%s'" %
-                                endip)
+            raise ArgumentError("No system found with IP address %s." % endip)
         invalid = [s for s in existing if s.system_type != 'dynamic_stub']
         if invalid:
             raise ArgumentError("The range contains non-dynamic systems:\n" +

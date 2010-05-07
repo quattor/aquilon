@@ -354,8 +354,8 @@ class TestAddService(TestBrokerCommand):
                    "--instance=share-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "share 'share-does-not-exist' cannot be found "
-                         "in NAS maps",
+                         "Share share-does-not-exist cannot be found "
+                         "in NAS maps.",
                          command)
 
 

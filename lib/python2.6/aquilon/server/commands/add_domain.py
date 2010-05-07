@@ -51,7 +51,7 @@ class CommandAddDomain(BrokerCommand):
 
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(domain)):
-            raise ArgumentError("domain name '%s' is not valid"%domain)
+            raise ArgumentError("Domain name '%s' is not valid." % domain)
 
         # For now, succeed without error if the domain already exists.
         dbdomain = session.query(Domain).filter_by(name=domain).first()

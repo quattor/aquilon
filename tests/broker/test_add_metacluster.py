@@ -62,7 +62,7 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testfailaddexisting(self):
         command = "add metacluster --metacluster utmc1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Metacluster 'utmc1' already exists", command)
+        self.matchoutput(out, "Metacluster utmc1 already exists", command)
 
     def testaddutmc2(self):
         command = ["add_metacluster", "--metacluster=utmc2",
@@ -115,7 +115,7 @@ class TestAddMetaCluster(TestBrokerCommand):
     def testfailglobal(self):
         command = "add metacluster --metacluster global"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "name reserved", command)
+        self.matchoutput(out, "name global is reserved", command)
 
 
 if __name__=='__main__':

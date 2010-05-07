@@ -30,8 +30,6 @@
     Duplicates logic used in `aq add interface --chassis`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Interface, TorSwitch
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -52,8 +50,8 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
 
         if dbtor_switch.ip:
-            raise ArgumentError("TorSwitch %s already has an interface with an ip address." %
-                                dbtor_switch.fqdn)
+            raise ArgumentError("ToR switch %s already has an interface with "
+                                "an IP address." % dbtor_switch.fqdn)
 
         extra = {}
         if comments:
@@ -63,24 +61,21 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         q = q.filter_by(name=interface, hardware_entity=dbtor_switch.tor_switch_hw)
         prev = q.first()
         if prev:
-            raise ArgumentError("tor_switch %s already has an interface named %s"
-                    % (dbtor_switch.fqdn, interface))
+            raise ArgumentError("ToR switch %s already has an interface "
+                                "named %s." % (dbtor_switch.fqdn, interface))
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:
             msg = describe_interface(session, prev)
-            raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+            raise ArgumentError("MAC address %s is already in use: %s." %
+                                (mac, msg))
 
         dbinterface = Interface(name=interface,
                                 hardware_entity=dbtor_switch.tor_switch_hw,
                                 mac=mac, interface_type='oa', **extra)
         session.add(dbinterface)
 
-        ip = generate_ip(session, dbinterface, **arguments)
-        if not ip:
-            raise ArgumentError("add_interface --tor_switch requires any of "
-                                "the --ip, --ipfromip, --ipfromsystem, "
-                                "--autoip parameters")
+        ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(dbnetwork, ip)
         dbtor_switch.ip = ip
@@ -98,5 +93,5 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         try:
             dsdb_runner.add_host(dbinterface)
         except ProcessException, e:
-            raise ArgumentError("Could not add tor_switch to dsdb: %s" % e)
+            raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
         return

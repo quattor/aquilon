@@ -49,14 +49,14 @@ def _describe_uniqueness_request(description_info):
                 # Do something more interesting than str()?
                 extras.append(str(v))
             else:
-                extras.append("%s of '%s'" % (k, v))
+                extras.append("%s of %s" % (k, v))
         kwstr = " and ".join(extras)
     if kwargs and args:
-        criteria = " '%s' with %s" % (args[0], kwstr)
+        criteria = " %s with %s" % (args[0], kwstr)
     elif kwargs:
         criteria = " with %s" % kwstr
     elif args:
-        criteria = " '%s'" % args[0]
+        criteria = " %s" % args[0]
     else:
         criteria = ""
     return "%s%s" % (cls._get_class_label(), criteria)

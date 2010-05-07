@@ -127,7 +127,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Cluster 'utecl1' already exists", command)
+        self.matchoutput(out, "Cluster utecl1 already exists", command)
 
     def testfailaddnoncampus(self):
         command = ["add_esx_cluster", "--cluster=uteclfail",
@@ -135,7 +135,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=2",
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "location 'us' is not within a campus", command)
+        self.matchoutput(out, "Country us is not within a campus", command)
 
     def testfailmetaclusternotfound(self):
         command = ["add_esx_cluster", "--cluster=utecl999",
@@ -144,7 +144,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Metacluster 'metacluster-does-not-exist' not found",
+                         "Metacluster metacluster-does-not-exist not found",
                          command)
 
     def testfailinvalidname(self):
@@ -275,7 +275,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testfailcatmissingcluster(self):
         command = "cat --cluster=cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found.",
                          command)
 
 

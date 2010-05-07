@@ -29,22 +29,26 @@
 """Wrapper to make getting a network type simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Network
 
 
 def get_network_byname(session, netname):
     try:
         dbnetwork = session.query(Network).filter_by(name=netname).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Network %s not found: %s" % (netname, e))
+    except NoResultFound:
+        raise NotFoundException("Network %s not found." % netname)
+    # FIXME: network names should be unique
+    except MultipleResultsFound:
+        raise ArgumentError("There are multiple networks with name %s." %
+                            netname)
     return dbnetwork
 
 def get_network_byip(session, ipaddr):
     try:
         dbnetwork = session.query(Network).filter_by(ip=ipaddr).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Network with address %s not found: %s" % (ipaddr, e))
+    except NoResultFound:
+        raise NotFoundException("Network with address %s not found." % ipaddr)
     return dbnetwork

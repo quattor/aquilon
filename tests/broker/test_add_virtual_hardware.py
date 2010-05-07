@@ -106,7 +106,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--type", "sata", "--capacity", "15",
                    "--share", "test_share_9", "--address", "badaddress"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "disk address 'badaddress' is illegal", command)
+        self.matchoutput(out, "Disk address 'badaddress' is not valid", command)
 
     def test_160_failaddmaxshares(self):
         # Number 9 should trip the limit.
@@ -347,7 +347,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["add_machine", "--machine=ut9s03p51",
                    "--cluster=cluster-does-not-exist", "--model=utmedium"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
     # FIXME: Add a test for add_machine that tries to use a non vmhost cluster.

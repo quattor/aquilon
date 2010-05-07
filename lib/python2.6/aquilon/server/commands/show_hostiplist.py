@@ -31,8 +31,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
-from aquilon.server.dbwrappers.archetype import get_archetype
-from aquilon.aqdb.model import System
+from aquilon.aqdb.model import Archetype, System
 
 
 class CommandShowHostIPList(BrokerCommand):
@@ -44,7 +43,7 @@ class CommandShowHostIPList(BrokerCommand):
         # of whether we want hosts...
         #archetype = arguments.get("archetype", None)
         #if archetype:
-        #    dbarchetype = get_archetype(session, archetype)
+        #    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         iplist = HostIPList()
         q = session.query(System)
         # Outer-join in all the subclasses so that each access of

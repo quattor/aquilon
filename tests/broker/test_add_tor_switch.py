@@ -87,7 +87,7 @@ class TestAddTorSwitch(TestBrokerCommand):
             "--machine", "ut3gd1r02.aqd-unittest.ms.com",
             "--rack", "ut3", "--model", "uttorswitch"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "cannot add machines of type 'tor_switch'",
+        self.matchoutput(out, "cannot add machines of type tor_switch",
                          command)
 
     def testverifyrejectut3gd1r02(self):
@@ -100,7 +100,7 @@ class TestAddTorSwitch(TestBrokerCommand):
             "--tor_switch", "ut3gd1r03.aqd-unittest.ms.com",
             "--rack", "ut3", "--model", "hs21-8853l5u"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "cannot add machines of type 'blade'", command)
+        self.matchoutput(out, "cannot add machines of type blade", command)
 
     def testverifyrejectut3gd1r03(self):
         command = "show tor_switch --tor_switch ut3gd1r03.aqd-unittest.ms.com"
@@ -281,7 +281,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                    "--ip", self.net.tor_net[0].usable[0].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mac '%s' already in use" %
+                         "MAC address %s is already in use" %
                          self.net.tor_net[0].usable[0].mac,
                          command)
 

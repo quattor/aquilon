@@ -31,10 +31,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.aqdb.model import Machine
 
 
 class CommandDelMachine(BrokerCommand):
@@ -42,18 +42,20 @@ class CommandDelMachine(BrokerCommand):
     required_parameters = ["machine"]
 
     def render(self, session, logger, machine, **arguments):
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
 
         plenary_machine = PlenaryMachineInfo(dbmachine, logger=logger)
         dbcluster = dbmachine.cluster
 
         if dbmachine.host:
-            raise ArgumentError("Cannot delete machine %s while it is in use (host: %s)"
-                    % (dbmachine.name, dbmachine.host.fqdn))
+            raise ArgumentError("Machine %s is still in use by host %s and "
+                                "cannot be deleted." %
+                                (dbmachine.name, dbmachine.host.fqdn))
         if dbmachine.auxiliaries:
-            raise ArgumentError("Cannot delete machine %s while it is in use (auxiliaries: %s)"
-                                % (dbmachine, ",".join(
-                                    [a.fqdn for a in dbmachine.auxiliaries])))
+            raise ArgumentError("Machine %s is still in use by auxiliaries: "
+                                "%s." %
+                                (dbmachine, ", ".join([a.fqdn for a in
+                                                       dbmachine.auxiliaries])))
         for iface in dbmachine.interfaces:
             logger.info("Before deleting machine '%s', "
                         "removing interface '%s' [%s] boot=%s)" %

@@ -32,17 +32,13 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
-                                OperatingSystem)
+from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
+                                OperatingSystem, Service, Vendor, Machine)
 from aquilon.server.dbwrappers.system import search_system_query
-from aquilon.server.dbwrappers.domain import get_domain
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.model import get_model
-from aquilon.server.dbwrappers.vendor import get_vendor
 
 
 class CommandSearchHost(BrokerCommand):
@@ -57,10 +53,10 @@ class CommandSearchHost(BrokerCommand):
             arguments['fqdn'] = hostname
         q = search_system_query(session, Host, **arguments)
         if machine:
-            dbmachine = get_machine(session, machine)
+            dbmachine = Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(machine=dbmachine)
         if domain:
-            dbdomain = get_domain(session, domain)
+            dbdomain = Domain.get_unique(session, domain, compel=True)
             q = q.filter_by(domain=dbdomain)
 
         if archetype:
@@ -99,7 +95,7 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if service:
-            dbservice = get_service(session, service)
+            dbservice = Service.get_unique(session, service, compel=True)
             if instance:
                 dbsi = get_service_instance(session, dbservice, instance)
                 q = q.join('build_items')
@@ -137,7 +133,7 @@ class CommandSearchHost(BrokerCommand):
         elif vendor or machine_type:
             q = q.join(['machine', 'model'])
             if vendor:
-                dbvendor = get_vendor(session, vendor)
+                dbvendor = Vendor.get_unique(session, vendor, compel=True)
                 q = q.filter_by(vendor=dbvendor)
             if machine_type:
                 q = q.filter_by(machine_type=machine_type)
@@ -147,9 +143,7 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter_by(serial_no=serial)
             q = q.reset_joinpoint()
         if cluster:
-            dbcluster = Cluster.get_unique(session, cluster)
-            if not dbcluster:
-                raise ArgumentError("Cluster '%s' not found." % cluster)
+            dbcluster = Cluster.get_unique(session, cluster, compel=True)
             q = q.join('_cluster')
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()

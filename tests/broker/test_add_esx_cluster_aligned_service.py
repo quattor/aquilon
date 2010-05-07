@@ -53,7 +53,7 @@ class TestAddESXClusterAlignedService(TestBrokerCommand):
                    "--service=service-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Service with name of 'service-does-not-exist' "
+                         "Service with name of service-does-not-exist "
                          "not found",
                          command)
 
@@ -76,7 +76,7 @@ class TestAddESXClusterAlignedService(TestBrokerCommand):
                    "--cluster_type=cluster_type-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Cluster type 'cluster_type-does-not-exist' "
+                         "Cluster type cluster_type-does-not-exist "
                          "not found.",
                          command)
 

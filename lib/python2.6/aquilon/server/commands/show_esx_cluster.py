@@ -41,8 +41,7 @@ class CommandShowESXCluster(BrokerCommand):
             q = q.filter_by(name=cluster)
         dbclusters = q.all()
         if cluster and not dbclusters:
-            raise NotFoundException("Could not find cluster with name '%s'." %
-                                    cluster)
+            raise NotFoundException("ESX Cluster %s not found." % cluster)
         return dbclusters
 
 

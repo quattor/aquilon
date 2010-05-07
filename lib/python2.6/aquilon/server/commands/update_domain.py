@@ -32,7 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
-from aquilon.server.dbwrappers.domain import get_domain
+from aquilon.aqdb.model import Domain
 
 
 class CommandUpdateDomain(BrokerCommand):
@@ -41,7 +41,7 @@ class CommandUpdateDomain(BrokerCommand):
 
     def render(self, session, domain, comments, owner, compiler, user,
                **arguments):
-        dbdomain = get_domain(session, domain)
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         if owner:
             dbowner = get_or_create_user_principal(session, owner,
                                                    createuser=False,

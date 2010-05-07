@@ -37,7 +37,6 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException,
 from aquilon.aqdb.model import Interface, Machine, Manager
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.machine import get_machine
 from aquilon.server.dbwrappers.interface import (describe_interface,
                                                  verify_port_group,
                                                  choose_port_group)
@@ -55,7 +54,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     def render(self, session, logger, interface, machine, mac, automac,
                pg, autopg, comments, **arguments):
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
         extra = {}
         if interface == 'eth0':
             extra['bootable'] = True
@@ -65,7 +64,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         prev = session.query(Interface).filter_by(
                 name=interface,hardware_entity=dbmachine).first()
         if prev:
-            raise ArgumentError("machine %s already has an interface named %s"
+            raise ArgumentError("Machine %s already has an interface named %s."
                     % (machine, interface))
 
         itype = 'public'
@@ -80,8 +79,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if mac:
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev and prev.hardware_entity == dbmachine:
-                raise ArgumentError("machine %s already has an interface "
-                                    "with mac %s" % (dbmachine.name, mac))
+                raise ArgumentError("Machine %s already has an interface "
+                                    "with MAC address %s." %
+                                    (dbmachine.name, mac))
             # Is the conflicting interface something that can be
             # removed?  It is if:
             # - we are currently attempting to add a management interface
@@ -109,7 +109,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                              dummy_ip, old_network)
             elif prev:
                 msg = describe_interface(session, prev)
-                raise ArgumentError("Mac '%s' already in use: %s" % (mac, msg))
+                raise ArgumentError("MAC address %s is already in use: %s." %
+                                    (mac, msg))
         elif automac:
             mac = self.generate_mac(session, dbmachine)
         else:
@@ -144,8 +145,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
             try:
                 dsdb_runner.add_host(dbinterface)
             except ProcessException, e:
-                logger.client_info("Could not reserve IP %s for %s in dsdb: "
-                                   "%s" % (dbmanager.ip, dbmanager.fqdn, e))
+                logger.client_info("Could not reserve IP address %s for %s "
+                                   "in DSDB: %s" %
+                                   (dbmanager.ip, dbmanager.fqdn, e))
                 dbinterface.system = None
                 session.add(dbinterface)
                 session.remove(dbmanager)
@@ -208,27 +210,27 @@ class CommandAddInterfaceMachine(BrokerCommand):
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.delete_host_details(old_ip)
         except ProcessException, e:
-            raise ArgumentError("Could not remove host entry with ip %s from dsdb: %s" %
-                                (old_ip, e))
+            raise ArgumentError("Could not remove host entry with IP address "
+                                "%s from DSDB: %s" % (old_ip, e))
 
     def consolidate_names(self, session, logger, dbmachine, dummy_machine_name,
                           pending_removals):
         short = dbmachine.name[:-1]
         if short != dummy_machine_name[:-1]:
-            logger.client_info("Not altering name of machine '%s', name of "
-                               "machine being removed '%s' is too different" %
+            logger.client_info("Not altering name of machine %s, name of "
+                               "machine being removed %s is too different." %
                                (dbmachine.name, dummy_machine_name))
             return
         if not dbmachine.name[-1].isalpha():
-            logger.client_info("Not altering name of machine '%s', name does "
+            logger.client_info("Not altering name of machine %s, name does "
                                "not end with a letter." % dbmachine.name)
             return
         if session.query(Machine).filter_by(name=short).first():
-            logger.client_info("Not altering name of machine '%s', target "
-                               "name '%s' is already in use" %
+            logger.client_info("Not altering name of machine %s, target "
+                               "name %s is already in use." %
                                (dbmachine.name, short))
             return
-        logger.client_info("Renaming machine '%s' as '%s'" %
+        logger.client_info("Renaming machine %s to %s." %
                            (dbmachine.name, short))
         pending_removals.append(PlenaryMachineInfo(dbmachine, logger=logger))
         dbmachine.name = short
@@ -237,14 +239,14 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     def add_manager(self, session, logger, dbmachine, old_ip, old_network):
         if not old_ip:
-            logger.client_info("No IP available for system being removed, "
-                               "not auto-creating manager for %s" %
+            logger.client_info("No IP address available for system being "
+                               "removed, not auto-creating manager for %s." %
                                dbmachine.name)
             return
         if not dbmachine.host:
             logger.client_info("Machine %s is not linked to a host, not "
-                               "auto-creating manager for %s with IP %s" %
-                               (dbmachine.name, old_ip))
+                               "auto-creating manager for %s with IP address "
+                               "%s." % (dbmachine.name, old_ip))
             return
         dbhost = dbmachine.host
         manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
@@ -253,7 +255,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                                                  manager)
         except ArgumentError, e:
             logger.client_info("Could not create manager with name %s and "
-                               "ip %s for machine %s: %s" %
+                               "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.name, e))
             return
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,
@@ -277,11 +279,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         """
         if dbmachine.model.machine_type != "virtual_machine":
-            raise ArgumentError("Can only automatically generate mac "
+            raise ArgumentError("Can only automatically generate MAC "
                                 "addresses for virtual hardware.")
         if not dbmachine.cluster or dbmachine.cluster.cluster_type != 'esx':
-            raise UnimplementedError("MAC auto-generation has only been "
-                                     "enabled for ESX clusters.")
+            raise UnimplementedError("MAC address auto-generation has only "
+                                     "been enabled for ESX Clusters.")
         # FIXME: These values should probably be configurable.
         mac_prefix_esx = "00:50:56"
         mac_start_esx = "01:20:00"
@@ -324,7 +326,7 @@ class MACAddress(object):
             if value is None:
                 value = long(address.replace(':', ''), 16)
         elif value is None:
-            raise ValueError("Must specify either address or value")
+            raise ValueError("Must specify either address or value.")
         self.address = address
         self.value = value
 

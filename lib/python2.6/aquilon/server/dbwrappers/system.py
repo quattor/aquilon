@@ -33,7 +33,6 @@ from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import DnsDomain, System
-from aquilon.server.dbwrappers.dns_domain import get_dns_domain
 from aquilon.server.dbwrappers.network import get_network_byip
 
 
@@ -49,19 +48,12 @@ def parse_system(session, system):
         raise ArgumentError("No fully qualified name specified.")
     (short, dot, dns_domain) = system.partition(".")
     if not dns_domain:
-        raise ArgumentError(
-                "'%s' invalid, name must be fully qualified." % system)
+        raise ArgumentError("System name '%s' is not valid, it must be fully "
+                            "qualified." % system)
     if not short:
-        raise ArgumentError("'%s' invalid, missing host name." % system)
-    try:
-        q = session.query(DnsDomain)
-        dbdns_domain = q.filter_by(name=dns_domain).first()
-        if not dbdns_domain:
-            raise NotFoundException("DNS domain '%s' for '%s' not found"
-                    % (dns_domain, system))
-    except InvalidRequestError, e:
-        raise AquilonError("DNS domain '%s' for '%s' not found: %s" %
-                           (dns_domain, system, e))
+        raise ArgumentError("System name '%s' is not valid, missing host "
+                            "name." % system)
+    dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
     return (short, dbdns_domain)
 
 def get_system_from_parts(session, short, dbdns_domain, system_type=System,
@@ -71,7 +63,7 @@ def get_system_from_parts(session, short, dbdns_domain, system_type=System,
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
         dbsystem = q.first()
         if not dbsystem:
-            raise NotFoundException("%s '%s.%s' not found" %
+            raise NotFoundException("%s %s.%s not found." %
                                     (system_label, short, dbdns_domain.name))
     except InvalidRequestError, e:
         raise AquilonError("Failed to find %s %s.%s: %s" %
@@ -83,8 +75,8 @@ def parse_system_and_verify_free(session, system):
     q = session.query(System)
     dbsystem = q.filter_by(name=short, dns_domain=dbdns_domain).first()
     if dbsystem:
-        # FIXME: This should be more descriptive.
-        raise ArgumentError("System '%s' already exists." % system)
+        raise ArgumentError("%s %s already exists." %
+                            (dbsystem.system_type.capitalize(), dbsystem.name))
     return (short, dbdns_domain)
 
 def search_system_query(session, system_type=System, **kwargs):
@@ -97,7 +89,8 @@ def search_system_query(session, system_type=System, **kwargs):
         (short, dbdns_domain) = parse_system(session, kwargs['fqdn'])
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
     if kwargs.get('dnsdomain', None):
-        dbdns_domain = get_dns_domain(session, kwargs['dnsdomain'])
+        dbdns_domain = DnsDomain.get_unique(session, kwargs['dnsdomain'],
+                                            compel=True)
         q = q.filter_by(dns_domain=dbdns_domain)
     if kwargs.get('shortname', None):
         q = q.filter_by(name=kwargs['shortname'])

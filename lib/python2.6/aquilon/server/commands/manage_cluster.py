@@ -29,8 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, Domain
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import PlenaryCollection
@@ -44,11 +43,8 @@ class CommandManageCluster(BrokerCommand):
 
     def render(self, session, logger, domain, cluster, **arguments):
         # FIXME: Need to verify that this server handles this domain?
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
-        dbcluster = session.query(Cluster).filter_by(name=cluster).first()
-        if not dbcluster:
-            raise NotFoundException("cluster '%s' not found" % cluster)
+        dbdomain = Domain.get_unique(session, domain, compel=True)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         old_domain = dbcluster.domain.name
         plenaries = PlenaryCollection(logger=logger)

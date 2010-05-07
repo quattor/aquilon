@@ -29,11 +29,11 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import IncompleteError, ArgumentError
+from aquilon.aqdb.model import Domain
 
 
 class CommandManageHostname(BrokerCommand):
@@ -42,13 +42,12 @@ class CommandManageHostname(BrokerCommand):
 
     def render(self, session, logger, domain, hostname, **arguments):
         # FIXME: Need to verify that this server handles this domain?
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if dbhost.cluster:
-            raise ArgumentError("cluster nodes must be managed at the "
-                                "cluster level; this host is a member of the "
-                                "cluster " + dbhost.cluster.name)
+            raise ArgumentError("Cluster nodes must be managed at the "
+                                "cluster level; this host is a member of "
+                                "cluster %s." % dbhost.cluster.name)
 
         old_domain = dbhost.domain.name
 

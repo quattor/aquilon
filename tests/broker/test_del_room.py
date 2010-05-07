@@ -53,11 +53,17 @@ class TestDelRoom(TestBrokerCommand):
 
     def testverifydelutroom1(self):
         command = "show room --name utroom1"
-        self.notfoundtest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Room utroom1 not found.", command)
 
     def testverifydelutroom2(self):
         command = "show room --name utroom2"
         self.notfoundtest(command.split(" "))
+
+    def testdelroomnotexist(self):
+        command = "del room --name room-does-not-exist"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Room room-does-not-exist not found.", command)
 
 
 if __name__=='__main__':

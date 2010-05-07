@@ -35,9 +35,9 @@ import logging
 
 import xml.etree.ElementTree as ET
 
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import write_file
 from aquilon.server.logger import CLIENT_INFO
+from aquilon.aqdb.model import Service
 
 LOGGER = logging.getLogger('aquilon.server.templates.index')
 
@@ -135,7 +135,7 @@ def build_index(config, session, profilesdir, clientNotify=True,
             if service.strip():
                 try:
                     # service may be unknown
-                    srvinfo = get_service(session, service)
+                    srvinfo = Service.get_unique(session, service, compel=True)
                     for instance in srvinfo.instances:
                         for fqdn in instance.server_fqdns:
                             service_modules[fqdn] = 1

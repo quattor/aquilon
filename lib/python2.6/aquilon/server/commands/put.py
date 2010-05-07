@@ -35,9 +35,9 @@ from base64 import b64decode
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.processes import write_file, remove_file, run_command
+from aquilon.aqdb.model import Domain
 
 
 class CommandPut(BrokerCommand):
@@ -47,8 +47,7 @@ class CommandPut(BrokerCommand):
 
     def render(self, session, logger, domain, bundle, **arguments):
         # Verify that it exists before writing to the filesystem.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
 
         (handle, filename) = mkstemp()
         contents = b64decode(bundle)

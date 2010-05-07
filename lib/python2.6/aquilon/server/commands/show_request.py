@@ -66,7 +66,7 @@ class CommandShowRequest(BrokerCommand):
     def render(self, requestid, request, logger, debug, **arguments):
         status = logger.get_status()
         if not status:
-            raise NotFoundException("requestid %s not found" % requestid)
+            raise NotFoundException("Request ID %s not found." % requestid)
         if debug:
             loglevel = DEBUG
         else:

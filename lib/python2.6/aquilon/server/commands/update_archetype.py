@@ -29,7 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.aqdb.model import Archetype
 
 
 class CommandUpdateArchetype(BrokerCommand):
@@ -37,7 +37,7 @@ class CommandUpdateArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, compilable, **kwargs):
-        dbarchetype = get_archetype(session, archetype)
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         # The method signature will probably need to change if/when
         # more flags are supported.

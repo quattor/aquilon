@@ -29,20 +29,18 @@
 """Wrapper to make getting a personality simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.dbwrappers.archetype import get_archetype
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Archetype, Personality
 
 def get_personality(session, archetype, personality):
+    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
     try:
-        dbarchetype = get_archetype(session, archetype)
-
         dbpersonality = session.query(Personality).filter_by(
             name=personality,archetype=dbarchetype).one()
 
-    except InvalidRequestError, e:
-        raise NotFoundException("Personality %s in Archetype %s not found: %s"
-                % (personality, archetype, e))
+    except NoResultFound:
+        raise NotFoundException("Personality %s of archetype %s not found." %
+                                (personality, archetype))
     return dbpersonality

@@ -108,18 +108,29 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["update_esx_cluster", "--cluster=utecl1", "--rack=ut10"]
         self.noouttest(command)
 
+    def testupdateutecl1switch(self):
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--tor_switch=ut01ga1s04.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testupdateutecl1switchfail(self):
+        # Try something that is not a tor_switch
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--tor_switch=unittest02.one-nyp.ms.com"]
+        self.badrequesttest(command)
+
     def testfailupdatelocation(self):
         command = ["update_esx_cluster", "--cluster=utecl1", "--rack=ut3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot set esx cluster utecl1 location constraint "
-                         "to Rack ut3: Host",
+                         "Cannot set ESX Cluster utecl1 location constraint "
+                         "to Rack ut3:",
                          command)
 
     def testfailupdatenoncampus(self):
         command = ["update_esx_cluster", "--cluster=utecl1", "--country=us"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "location country 'us' is not within a campus",
+        self.matchoutput(out, "Country us is not within a campus",
                          command)
 
     def testfailupdatepersonality(self):
@@ -127,8 +138,9 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=esx_desktop"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot change cluster personality while containing "
-                         "members of a different personality:",
+                         "Cannot change the personality of ESX Cluster utecl1 "
+                         "while the following members have different "
+                         "personalities: ",
                          command)
 
     def testfailupdatearchetype(self):
@@ -138,14 +150,17 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--archetype=windows"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Personality esx_server in Archetype windows "
+                         "Personality esx_server of archetype windows "
                          "not found",
                          command)
 
     def testfailupdatemaxmembers(self):
         command = ["update_esx_cluster", "--cluster=utecl1", "--max_members=0"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "value already exceeded", command)
+        self.matchoutput(out,
+                         "ESX Cluster utecl1 has 3 hosts bound, which exceeds "
+                         "the requested limit 0.",
+                         command)
 
     def testfailupdateratio(self):
         command = ["update_esx_cluster", "--cluster=utecl1",
@@ -179,12 +194,14 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
                          command)
+        self.matchoutput(out, "ToR Switch: ut01ga1s04.aqd-unittest.ms.com",
+                         command)
 
     def testfailmissingcluster(self):
         command = ["update_esx_cluster", "--cluster=cluster-does-not-exist",
                    "--comments=test should fail"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "cluster 'cluster-does-not-exist' not found",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
     # FIXME: Need tests for plenary templates

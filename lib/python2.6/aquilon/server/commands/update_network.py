@@ -29,8 +29,6 @@
 """Contains the logic for `aq update machine`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import (ArgumentError, NotFoundException)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
@@ -49,7 +47,7 @@ class CommandUpdateNetwork(BrokerCommand):
             dbnetwork = network and get_network_byname(session, network) or None
             dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
             if not dbnetwork:
-                raise NotFoundException('No valid network supplied')
+                raise NotFoundException('No valid network supplied.')
             networks.append(dbnetwork)
         else:
             q = session.query(Network)
@@ -60,7 +58,8 @@ class CommandUpdateNetwork(BrokerCommand):
                 q = q.filter_by(location=dblocation)
             networks.extend(q.all())
             if len(networks) <= 0:
-                raise NotFoundException('No existing networks with the specified network type or location')
+                raise NotFoundException("No existing networks found with the "
+                                        "specified network type or location.")
 
         yes = re.compile("^(true|yes|y|1|on|enabled)$", re.I)
         no = re.compile("^(false|no|n|0|off|disabled)$", re.I)
@@ -70,14 +69,16 @@ class CommandUpdateNetwork(BrokerCommand):
             elif no.match(discovered):
                 discovered = "n"
             else:
-                raise ArgumentError('Did not recognise supplied argument to discovered flag: "%s"' % discovered)
+                raise ArgumentError("Did not recognise supplied argument to "
+                                    "--discovered flag: '%s'." % discovered)
         if discoverable:
             if yes.match(discoverable):
                 discoverable = "y"
             elif no.match(discoverable):
                 discoverable = "n"
             else:
-                raise ArgumentError('Did not recognise supplied argument to discoverable flag: "%s"' % discoverable)
+                raise ArgumentError("Did not recognise supplied argument to "
+                                    "--discoverable flag: '%s'." % discoverable)
 
         for net in networks:
             if discoverable:

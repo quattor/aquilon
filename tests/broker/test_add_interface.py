@@ -155,7 +155,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--mac", self.net.unknown[0].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mac '%s' already in use: " %
+                         "MAC address %s is already in use: " %
                          self.net.unknown[0].usable[0].mac,
                          command)
 
@@ -164,7 +164,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--automac", "--machine", "ut3c1n4"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Can only automatically generate mac "
+                         "Can only automatically generate MAC "
                          "addresses for virtual hardware.",
                          command)
 
@@ -213,7 +213,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mac '%s' already in use: " %
+                         "MAC address %s is already in use: " %
                          self.net.unknown[0].usable[6].mac,
                          command)
 
@@ -250,7 +250,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mac '%s' already in use: " %
+                         "MAC address %s is already in use: " %
                          self.net.tor_net[0].usable[0].mac,
                          command)
 
@@ -354,7 +354,7 @@ class TestAddInterface(TestBrokerCommand):
                          command)
 
     def testadd_bootable_no_mac(self):
-        """ if name == 'eth0' its bootable. without a mac should fail. """
+        """ if name == 'eth0' its bootable. without a MAC should fail. """
         command = ["add", "interface", "--interface", "eth0", "--machine",
                    "ut9s03p1"]
         out = self.badrequesttest(command)
@@ -363,7 +363,7 @@ class TestAddInterface(TestBrokerCommand):
                          command)
 
     def testadd_no_mac(self):
-        """ if it's named eth1 it should work with no mac address """
+        """ if it's named eth1 it should work with no MAC address """
         self.noouttest(["add", "interface",
                         "--interface", "eth1", "--machine", "ut8s02p3"])
 

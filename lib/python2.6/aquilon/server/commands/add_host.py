@@ -31,16 +31,14 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.server.dbwrappers.machine import get_machine
-from aquilon.server.dbwrappers.archetype import get_archetype
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Host, OperatingSystem
+from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
+                                Machine)
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -55,15 +53,14 @@ class CommandAddHost(BrokerCommand):
     def render(self, session, logger, hostname, machine, archetype,
                personality, domain, buildstatus, comments, osname, osversion,
                skip_dsdb_check=False, **arguments):
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         if buildstatus:
             dbstatus = get_status(session, buildstatus)
         else:
             dbstatus = get_status(session, "build")
-        dbmachine = get_machine(session, machine)
+        dbmachine = Machine.get_unique(session, machine, compel=True)
 
-        dbarchetype = get_archetype(session, archetype)
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not personality:
             if dbarchetype.name == 'aquilon':
                 personality = 'inventory'
@@ -92,7 +89,10 @@ class CommandAddHost(BrokerCommand):
                 osversion = 'generic'
         else:
             if not osname or not osversion:
-                raise ArgumentError("Can not determine a sensible default OS for archetype %s. Please use osname and osversion parameters" % (dbarchetype.name))
+                raise ArgumentError("Can not determine a sensible default OS "
+                                    "for archetype %s. Please use the "
+                                    "--osname and --osversion parameters." %
+                                    (dbarchetype.name))
 
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,
@@ -100,11 +100,12 @@ class CommandAddHost(BrokerCommand):
 
         if (dbmachine.model.machine_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):
-            raise ArgumentError("Machines of aurora_node can only be added with archetype aurora")
+            raise ArgumentError("Machines of type aurora_node can only be "
+                                "added with archetype aurora.")
 
         session.refresh(dbmachine)
         if dbmachine.host:
-            raise ArgumentError("Machine '%s' is already allocated to host '%s'." %
+            raise ArgumentError("Machine %s is already allocated to host %s." %
                     (dbmachine.name, dbmachine.host.fqdn))
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
@@ -118,7 +119,9 @@ class CommandAddHost(BrokerCommand):
                 if interface.bootable:
                     if dbinterface:
                         # FIXME: Is this actually a problem?
-                        raise ArgumentError("Multiple public interfaces on machine '%s' are marked bootable" % machine)
+                        raise ArgumentError("Multiple public interfaces on "
+                                            "machine %s are marked bootable." %
+                                            machine)
                     dbinterface = interface
             if dbinterface:
                 mac = dbinterface.mac
@@ -163,7 +166,7 @@ class CommandAddHost(BrokerCommand):
                     try:
                         fields = dsdb_runner.show_host(hostname)
                     except ProcessException, e:
-                        raise ArgumentError("Could not find host in dsdb: %s" % e)
+                        raise ArgumentError("Could not find host in DSDB: %s" % e)
             elif not dbhost.ip:
                 logger.info("No IP for %s, not adding to DSDB." % dbhost.fqdn)
             else:
@@ -171,7 +174,7 @@ class CommandAddHost(BrokerCommand):
                 try:
                     dsdb_runner.add_host(dbinterface)
                 except ProcessException, e:
-                    raise ArgumentError("Could not add host to dsdb: %s" % e)
+                    raise ArgumentError("Could not add host to DSDB: %s" % e)
         except:
             plenaries.restore_stash()
             raise

@@ -55,13 +55,14 @@ class CommandFlush(BrokerCommand):
             lock_queue.acquire(key)
 
             if services or all:
-                logger.client_info("flushing services")
+                logger.client_info("Flushing services.")
                 for dbservice in session.query(Service).all():
                     try:
                         plenary_info = PlenaryService(dbservice)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        failed.append("service %s failed: %s" % (dbservice.name, e))
+                        failed.append("Service %s failed: %s" %
+                                      (dbservice.name, e))
                         continue
 
                     for dbinst in dbservice.instances:
@@ -69,22 +70,23 @@ class CommandFlush(BrokerCommand):
                             plenary_info = PlenaryServiceInstance(dbservice, dbinst)
                             written += plenary_info.write(locked=True)
                         except Exception, e:
-                            failed.append("service %s instance %s failed: %s" % (dbservice.name, dbinst.name, e))
+                            failed.append("Service %s instance %s failed: %s" %
+                                          (dbservice.name, dbinst.name, e))
                             continue
 
             if personalities or all:
-                logger.client_info("flushing personalities")
+                logger.client_info("Flushing personalities.")
                 for persona in session.query(Personality).all():
                     try:
                         plenary_info = PlenaryPersonality(persona)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        failed.append("personality %s failed: %s" %
+                        failed.append("Personality %s failed: %s" %
                                       (persona.name, e))
                         continue
 
             if machines or all:
-                logger.client_info("flushing machines")
+                logger.client_info("Flushing machines.")
                 for machine in session.query(Machine).all():
                     try:
                         plenary_info = PlenaryMachineInfo(machine)
@@ -94,11 +96,11 @@ class CommandFlush(BrokerCommand):
                         if machine.host:
                             label = "%s (host: %s)" % (machine.name,
                                                        machine.host.fqdn)
-                        failed.append("machine %s failed: %s" % (label, e))
+                        failed.append("Machine %s failed: %s" % (label, e))
                         continue
 
             if hosts or all:
-                logger.client_info("flushing hosts")
+                logger.client_info("Flushing hosts.")
                 for d in session.query(Domain).all():
                     for h in d.hosts:
                         if not h.archetype.is_compileable:
@@ -110,22 +112,24 @@ class CommandFlush(BrokerCommand):
                             pass
                             #logger.client_info("Not flushing host: %s" % e)
                         except Exception, e:
-                            failed.append("host %s in domain %s failed: %s" %(h.fqdn,d.name,e))
+                            failed.append("Host %s in domain %s failed: %s" %
+                                          (h.fqdn,d.name,e))
 
             if clusters or all:
-                logger.client_info("flushing clusters")
+                logger.client_info("Flushing clusters.")
                 for clus in session.query(Cluster).all():
                     try:
                         plenary = PlenaryCluster(clus)
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("%s cluster %s failed: %s" %
-                                      (clus.cluster_type, clus.name, e))
+                                      (clus.cluster_type.capitalize(),
+                                       clus.name, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this
             # count and should be reasonably close... :)
-            logger.client_info("flushed %d/%d templates" %
+            logger.client_info("Flushed %d/%d templates." %
                                (written, written + len(failed)))
             if failed:
                 raise PartialError(success, failed)

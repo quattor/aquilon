@@ -29,7 +29,7 @@
 """Wrapper to make getting a status simpler."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Status
@@ -38,9 +38,8 @@ from aquilon.aqdb.model import Status
 def get_status(session, status):
     try:
         dbstatus = session.query(Status).filter_by(name=status).one()
-    except InvalidRequestError, e:
-        raise NotFoundException("Status %s not found (try one of %s): %s" %
-                (status, session.query(Status).all(), e))
+    except NoResultFound:
+        msg = ", ".join([st.name for st in session.query(Status).all()])
+        raise NotFoundException("Status %s not found.  Try one of: %s." %
+                                (status, msg))
     return dbstatus
-
-

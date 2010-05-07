@@ -88,7 +88,7 @@ class TestAddAuxiliary(TestBrokerCommand):
                    "--mac", self.net.tor_net[0].reserved[0].mac,
                    "--ip", self.net.tor_net[0].reserved[0].ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "reserved for dynamic dhcp", command)
+        self.matchoutput(out, "reserved for dynamic DHCP", command)
 
     def testverifyrejectsixthip(self):
         command = "show machine --machine ut3c1n4"
@@ -104,7 +104,7 @@ class TestAddAuxiliary(TestBrokerCommand):
                    "--mac", self.net.tor_net[0].reserved[1].mac,
                    "--ip", self.net.tor_net[0].reserved[1].ip]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "reserved for dynamic dhcp", command)
+        self.matchoutput(out, "reserved for dynamic DHCP", command)
 
     def testverifyrejectseventhip(self):
         command = "show machine --machine ut3c1n4"
@@ -119,7 +119,7 @@ class TestAddAuxiliary(TestBrokerCommand):
                    "--ip", self.net.tor_net[0].usable[0].ip]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Mac '%s' already in use" %
+                         "MAC address %s is already in use" %
                          self.net.tor_net[0].usable[0].mac,
                          command)
 

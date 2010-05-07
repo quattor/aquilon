@@ -39,17 +39,10 @@ class CommandDelESXClusterAlignedService(BrokerCommand):
 
     def render(self, session, service, **arguments):
         cluster_type = 'esx'
-        dbservice = Service.get_unique(session, name=service)
-        if not dbservice:
-            raise NotFoundException("Service '%s' not found" % service)
+        dbservice = Service.get_unique(session, name=service, compel=True)
         dbcas = ClusterAlignedService.get_unique(session,
-                                                 service_id=dbservice.id,
-                                                 cluster_type=cluster_type)
-        if not dbcas:
-            raise NotFoundException("Could not find cluster aligned service "
-                                    "'%s' for %s clusters" %
-                                    (service, cluster_type))
+                                                 service=dbservice,
+                                                 cluster_type=cluster_type,
+                                                 compel=True)
         session.delete(dbcas)
         return
-
-

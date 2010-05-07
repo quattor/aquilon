@@ -47,12 +47,12 @@ class TestAddVendor(TestBrokerCommand):
     def testaddexisting(self):
         command = "add vendor --vendor intel"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "vendor 'intel' already exists", command)
+        self.matchoutput(out, "Vendor intel already exists", command)
 
     def testaddbadname(self):
         command = "add vendor --vendor oops@!"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "vendor name 'oops@!' is not valid", command)
+        self.matchoutput(out, "Vendor name 'oops@!' is not valid", command)
 
     def testaddutvendor(self):
         command = "add vendor --vendor utvendor"

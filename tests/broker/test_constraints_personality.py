@@ -46,7 +46,7 @@ class TestPersonalityConstraints(TestBrokerCommand):
     def testdelpersonalitywithhost(self):
         command = "del personality --personality inventory --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "is in use and cannot be deleted", command)
+        self.matchoutput(out, "is still in use and cannot be deleted", command)
 
     def testverifydelpersonalitywithhostfailed(self):
         command = ["show_personality", "--personality=inventory",

@@ -124,7 +124,7 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
                    "--machine_type=rackmount"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "Cannot (yet) change a model's machine_type",
+        self.matchoutput(out, "Cannot (yet) change a model's machine type",
                          command)
 
     def test_301_leavevendor(self):
@@ -142,7 +142,7 @@ class TestUpdateModel(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Model with ", command)
         self.matchoutput(out, "Vendor utvendor", command)
-        self.matchoutput(out, "name of 'utmedium'", command)
+        self.matchoutput(out, "name of utmedium", command)
         self.matchoutput(out, "already exists", command)
 
     def test_310_updatename(self):

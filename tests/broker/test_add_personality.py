@@ -374,14 +374,15 @@ class TestAddPersonality(TestBrokerCommand):
         command = ["add_personality", "--personality", "this is a bad; name",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "name 'this is a bad; name' is not valid",
-                         command)
+        self.matchoutput(out, "Personality name 'this is a bad; name' is "
+                         "not valid", command)
 
     def testaddduplicate(self):
         command = ["add_personality", "--personality", "inventory",
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "already exists", command)
+        self.matchoutput(out, "Personality with Archetype aquilon and name of "
+                         "inventory already exists.", command)
 
     def testaddesxserver(self):
         command = "add personality --personality esx_server --archetype vmhost"

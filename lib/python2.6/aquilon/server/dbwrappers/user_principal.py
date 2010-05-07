@@ -50,7 +50,7 @@ def get_or_create_user_principal(session, user,
     principal = user
     m = principal_re.match(user)
     if not m:
-        raise ArgumentError("Could not parse user principal '%s'" % user)
+        raise ArgumentError("User principal '%s' is not valid." % user)
     realm = m.group(2)
     user = m.group(1)
     m = host_re.match(principal)
@@ -73,8 +73,9 @@ def get_or_create_user_principal(session, user,
     dbnobody = session.query(Role).filter_by(name='nobody').first()
     if not dbrealm:
         if not createrealm:
-            raise ArgumentError("Could not find realm '%s' to create principal '%s', use --createrealm to create a new record for the realm."
-                    % (realm, principal))
+            raise ArgumentError("Could not find realm %s to create principal "
+                                "%s, use --createrealm to create a new record "
+                                "for the realm." % (realm, principal))
         LOGGER.info("Realm %s did not exist, creating..." % realm)
         dbrealm = Realm(name=realm)
         session.add(dbrealm)
@@ -88,8 +89,9 @@ def get_or_create_user_principal(session, user,
     dbuser = q.first()
     if not dbuser:
         if not createuser:
-            raise ArgumentError("Could not find principal '%s' to permission, use --createuser to create a new record for the principal."
-                    % principal)
+            raise ArgumentError("Could not find principal %s to permission, "
+                                "use --createuser to create a new record for "
+                                "the principal." % principal)
         LOGGER.info("User %s did not exist in realm %s, creating..." %
                     (user, realm))
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)

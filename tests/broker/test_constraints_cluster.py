@@ -46,8 +46,8 @@ class TestClusterConstraints(TestBrokerCommand):
     def testdelclusterwithmachines(self):
         command = "del esx cluster --cluster utecl1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Cluster still in use by virtual machines",
-                         command)
+        self.matchoutput(out, "ESX Cluster utecl1 is still in use by virtual "
+                         "machines", command)
 
     def testverifydelclusterwithmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]

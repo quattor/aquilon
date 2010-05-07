@@ -110,7 +110,7 @@ class TestMakeCluster(TestBrokerCommand):
     def testfailmissingcluster(self):
         command = ["make_cluster", "--cluster=cluster-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Cluster 'cluster-does-not-exist' not found.",
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found.",
                          command)
 
     def testmakeutmc4(self):

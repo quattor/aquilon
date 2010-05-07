@@ -46,7 +46,8 @@ class TestMetaClusterConstraints(TestBrokerCommand):
     def testdelmetaclusterwithclusters(self):
         command = "del metacluster --metacluster utmc1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Metacluster still in use by clusters", command)
+        self.matchoutput(out, "Metacluster utmc1 is still in use by clusters",
+                         command)
 
     def testfailrebindmetacluster(self):
         command = ["rebind_metacluster", "--cluster=utecl1",

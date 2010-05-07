@@ -33,8 +33,8 @@ import os
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.dbwrappers.domain import verify_domain
 from aquilon.server.processes import run_command
+from aquilon.aqdb.model import Domain
 
 
 class CommandDeploy(BrokerCommand):
@@ -46,8 +46,7 @@ class CommandDeploy(BrokerCommand):
         """ This currently ignores the 'to' parameter."""
 
         # Verify that it exists before trying to deploy it.
-        dbdomain = verify_domain(session, domain,
-                self.config.get("broker", "servername"))
+        dbdomain = Domain.get_unique(session, domain, compel=True)
         domaindir = os.path.join(self.config.get("broker", "templatesdir"),
                 dbdomain.name)
         git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
@@ -60,5 +59,3 @@ class CommandDeploy(BrokerCommand):
                         path=self.config.get("broker", "kingdir"))
             raise ArgumentError("\n%s%s" %(e.out,e.err))
         return
-
-

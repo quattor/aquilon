@@ -125,7 +125,8 @@ class CommandPollTorSwitch(BrokerCommand):
                         # Cisco
                         mac_label = 'Mac'
                     else:
-                        raise AquilonError("Invalid CheckNet header, no field for mac address." % e)
+                        raise AquilonError("Invalid CheckNet header, no field "
+                                           "for MAC address.")
                 if not port_label:
                     if 'fdbSrcPort' in reader.fieldnames:
                         # BNT
@@ -134,7 +135,8 @@ class CommandPollTorSwitch(BrokerCommand):
                         # Cisco
                         port_label = 'dot1dTpFdbPort'
                     else:
-                        raise AquilonError("Invalid CheckNet header, no field for source port." % e)
+                        raise AquilonError("Invalid CheckNet header, no field "
+                                           "for source port.")
                 mac = row.get(mac_label, None)
                 port = row.get(port_label, None)
                 if mac is None or port is None or \
@@ -157,8 +159,8 @@ class CommandPollTorSwitch(BrokerCommand):
 
     def poll_vlan(self, session, logger, switch, now):
         if not switch.ip:
-            raise ArgumentError("Cannot poll VLAN info for a switch without "
-                                "a registered IP address [%s]" % switch.fqdn)
+            raise ArgumentError("Cannot poll VLAN info for switch %s without "
+                                "a registered IP address." % switch.fqdn)
         vlans = session.query(ObservedVlan).filter_by(switch=switch).all()
         for vlan in vlans:
             session.delete(vlan)

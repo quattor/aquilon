@@ -29,13 +29,10 @@
 """Contains the logic for `aq unbind server`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
+from aquilon.aqdb.model import Service, ServiceInstance, ServiceInstanceServer
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import PlenaryServiceInstance
@@ -48,7 +45,7 @@ class CommandUnbindServer(BrokerCommand):
     def render(self, session, logger, hostname, service, instance, user,
                **arguments):
         dbsystem = get_system(session, hostname)
-        dbservice = get_service(session, service)
+        dbservice = Service.get_unique(session, service, compel=True)
         if instance:
             dbinstances = [get_service_instance(session, dbservice, instance)]
         else:

@@ -38,7 +38,7 @@ class CommandShowClusterType(BrokerCommand):
     def render(self, session, cluster_type, **arguments):
         if cluster_type:
             if cluster_type.lower() != 'esx':
-                raise NotFoundException("Cluster type '%s' not found." %
+                raise NotFoundException("Cluster type %s not found." %
                                         cluster_type)
         cluster_types = [ClusterType('esx')]
         for ct in cluster_types:

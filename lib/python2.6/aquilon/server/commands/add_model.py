@@ -29,13 +29,10 @@
 """Contains the logic for `aq add model`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
-from aquilon.server.dbwrappers.vendor import get_vendor
 from aquilon.server.dbwrappers.cpu import get_cpu
-from aquilon.aqdb.model import Model, MachineSpecs
+from aquilon.aqdb.model import Vendor, Model, MachineSpecs
 
 
 class CommandAddModel(BrokerCommand):
@@ -48,15 +45,15 @@ class CommandAddModel(BrokerCommand):
         dbmodel = session.query(Model).filter_by(name=name).first()
         if dbmodel is not None:
             raise ArgumentError('Specified model already exists')
-        dbvendor = get_vendor(session, vendor)
+        dbvendor = Vendor.get_unique(session, vendor, compel=True)
 
         # Specifically not allowing new models to be added that are of
         # type aurora_node - that is only meant for the dummy aurora_model.
         allowed_types = ["blade", "rackmount", "workstation", "tor_switch",
                          "chassis", "virtual_machine"]
         if type not in allowed_types:
-            raise ArgumentError("The model's machine type must be one of %s" %
-                                allowed_types)
+            raise ArgumentError("The model's machine type must be one of: %s." %
+                                ", ".join(allowed_types))
 
         if cputype:
             mem = force_int("mem", mem)

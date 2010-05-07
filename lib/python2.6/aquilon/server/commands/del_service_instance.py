@@ -29,16 +29,42 @@
 """Contains a wrapper for `aq del service --instance`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_service import CommandDelService
+from aquilon.server.dbwrappers.service_instance import get_service_instance
+from aquilon.aqdb.model import Service, ServiceMap, PersonalityServiceMap
+from aquilon.server.templates.service import PlenaryServiceInstance
 
 
-class CommandDelServiceInstance(CommandDelService):
-    """ CommandDelService already has all the necessary logic to
-        handle the extra instance parameter.
-
-    """
+class CommandDelServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
+    def render(self, session, logger, service, instance, **arguments):
+        dbservice = Service.get_unique(session, service, compel=True)
+        dbsi = get_service_instance(session, dbservice, instance)
+        if dbsi.client_count > 0:
+            raise ArgumentError("Service %s, instance %s still has clients and "
+                                "cannot be deleted." %
+                                (dbservice.name, dbsi.name))
+        if dbsi.servers:
+            msg = ", ".join([item.system.fqdn for item in dbsi.servers])
+            raise ArgumentError("Service %s, instance %s is still being "
+                                "provided by servers: %s." %
+                                (dbservice.name, dbsi.name, msg))
 
+        # Check the service map and remove any mappings
+        for dbmap in session.query(ServiceMap).filter_by(
+                service_instance=dbsi).all():
+            session.delete(dbmap)
+        for dbmap in session.query(PersonalityServiceMap).filter_by(
+                service_instance=dbsi).all():
+            session.delete(dbmap)
+
+        session.delete(dbsi)
+        session.flush()
+
+        plenary_info = PlenaryServiceInstance(dbservice, dbsi, logger=logger)
+        plenary_info.remove()
+
+        return

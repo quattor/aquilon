@@ -29,11 +29,9 @@
 """Contains the logic for `aq del model`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Vendor, Model
+from aquilon.aqdb.model import Vendor, Model, HardwareEntity
 
 
 class CommandDelModel(BrokerCommand):
@@ -44,7 +42,11 @@ class CommandDelModel(BrokerCommand):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         dbmodel = Model.get_unique(session, name=name, vendor=dbvendor,
                                    compel=True)
-        # FIXME: Add a nice error message if the model is in use.
+
+        hw = session.query(HardwareEntity).filter_by(model=dbmodel).first()
+        if hw:
+            raise ArgumentError("Model %s is still in use and cannot be "
+                                "deleted." % dbmodel.name)
         if dbmodel.machine_specs:
             # FIXME: Log some details...
             logger.info("Before deleting model %s %s '%s', "

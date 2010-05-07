@@ -106,7 +106,7 @@ class TestUnbindClient(TestBrokerCommand):
     def testrejectunbindrequired(self):
         command = "unbind client --hostname unittest02.one-nyp.ms.com --service afs"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "cannot unbind a required service", command)
+        self.matchoutput(out, "Cannot unbind a required service", command)
 
 
 if __name__=='__main__':

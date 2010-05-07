@@ -41,8 +41,7 @@ class CommandShowMetaCluster(BrokerCommand):
             q = q.filter_by(name=metacluster)
         dbmetaclusters = q.all()
         if metacluster and not dbmetaclusters:
-            raise NotFoundException("Could not find metacluster "
-                                    "with name '%s'." % metacluster)
+            raise NotFoundException("Metacluster %s not found." % metacluster)
         return dbmetaclusters
 
 

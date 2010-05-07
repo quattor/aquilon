@@ -32,12 +32,13 @@ from __future__ import with_statement
 from socket import gethostbyname
 from tempfile import NamedTemporaryFile
 
-from aquilon.exceptions_ import NameServiceError, ArgumentError
+from aquilon.exceptions_ import (NameServiceError, ArgumentError,
+                                 NotFoundException)
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
-from aquilon.server.dbwrappers.service import get_service
 from aquilon.server.processes import run_command
 from aquilon.server.logger import CLIENT_INFO
+from aquilon.aqdb.model import Service
 
 
 class CommandPxeswitch(BrokerCommand):
@@ -69,7 +70,7 @@ class CommandPxeswitch(BrokerCommand):
         elif configure:
             args.append('--configurelist')
         else:
-            raise ArgumentError("Missing required boot/install/status/firmware/configure parameter.")
+            raise ArgumentError("No action requested.")
 
         servers = dict()
         groups = dict()
@@ -81,16 +82,17 @@ class CommandPxeswitch(BrokerCommand):
             try:
                 dbhost = hostname_to_host(session, host)
                 # Find what "bootserver" instance we're bound to
-                dbservice = get_service(session, "bootserver")
+                dbservice = Service.get_unique(session, "bootserver",
+                                               compel=True)
                 bootbi = get_host_build_item(session, dbhost, dbservice)
                 if not bootbi:
-                    failed.append("%s: host has no bootserver" % host)
+                    failed.append("%s: Host has no bootserver." % host)
                 else:
                     if bootbi.service_instance.name in groups:
                         groups[bootbi.service_instance.name].append(dbhost)
                     else:
                         # for that instance, find what servers are bound to it.
-                        servers[bootbi.service_instance.name] = [s.system.fqdn 
+                        servers[bootbi.service_instance.name] = [s.system.fqdn
                           for s in bootbi.service_instance.servers]
                         groups[bootbi.service_instance.name] = [dbhost]
 
@@ -100,16 +102,16 @@ class CommandPxeswitch(BrokerCommand):
                 failed.append("%s: %s" % (host, ae))
 
         if failed:
-            raise ArgumentError("invalid hosts in list:\n%s" % 
+            raise ArgumentError("Invalid hosts in list:\n%s" %
                                 "\n".join(failed))
 
-        for (group,hostlist) in groups.items():
+        for (group, hostlist) in groups.items():
             # create temporary file, point aii-installfe at that file.
             groupargs = args[:]
             with NamedTemporaryFile() as tmpfile:
                 tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
-               
+
                 groupargs.append(tmpfile.name)
 
                 groupargs.append("--servers")

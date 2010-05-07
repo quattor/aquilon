@@ -48,9 +48,9 @@ class TestAddOS(TestBrokerCommand):
         command = "add os --archetype aquilon --osname linux --osversion 4.0.1-x86_64"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Operating System with", command)
-        self.matchoutput(out, "version of '4.0.1-x86_64'", command)
+        self.matchoutput(out, "version of 4.0.1-x86_64", command)
         self.matchoutput(out, "Archetype aquilon", command)
-        self.matchoutput(out, "name of 'linux'", command)
+        self.matchoutput(out, "name of linux", command)
         self.matchoutput(out, " already exists.", command)
 
     def testaddbadname(self):
