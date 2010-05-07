@@ -31,6 +31,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint, Boolean)
 from sqlalchemy.orm import relation, deferred
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base
 from aquilon.utils import monkeypatch
@@ -52,6 +53,8 @@ class Archetype(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
+
+    services = association_proxy('_services', 'service')
 
 archetype = Archetype.__table__
 table = Archetype.__table__

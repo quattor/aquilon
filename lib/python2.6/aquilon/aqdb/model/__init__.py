@@ -81,13 +81,12 @@ from aquilon.aqdb.model.interface import Interface
 from aquilon.aqdb.model.auxiliary import Auxiliary
 
 #SERVICE
-from aquilon.aqdb.model.service import Service
+from aquilon.aqdb.model.service import (Service, ServiceListItem,
+                                        PersonalityServiceListItem)
 from aquilon.aqdb.model.service_instance import ServiceInstance, BuildItem
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 from aquilon.aqdb.model.service_map import ServiceMap
-from aquilon.aqdb.model.service_list_item import ServiceListItem
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
-from aquilon.aqdb.model.personality_service_list_item import PersonalityServiceListItem
 
 #NasDisk depends on ServiceInstance
 from aquilon.aqdb.model.disk import Disk, LocalDisk, NasDisk

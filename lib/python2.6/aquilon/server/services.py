@@ -449,10 +449,10 @@ class HostChooser(Chooser):
         self.personality = self.dbhost.personality
         self.required_services = set()
         """Stores interim service instance lists."""
-        for item in self.archetype.service_list:
-            self.required_services.add(item.service)
-        for item in self.personality.service_list:
-            self.required_services.add(item.service)
+        for service in self.archetype.services:
+            self.required_services.add(service)
+        for service in self.personality.services:
+            self.required_services.add(service)
         q = self.session.query(BuildItem).filter_by(host=self.dbhost)
         self.original_service_build_items = q.all()
         """Cache of the build_items related to services."""

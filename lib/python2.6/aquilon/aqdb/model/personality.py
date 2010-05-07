@@ -33,6 +33,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation
 from sqlalchemy.orm.session import object_session
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Archetype
@@ -55,6 +56,8 @@ class Personality(Base):
     comments = Column(String(255), nullable=True)
 
     archetype = relation(Archetype, backref='personality', uselist=False)
+
+    services = association_proxy('_services', 'service')
 
     def __repr__(self):
         s = ("<" + self.__class__.__name__ + " name ='" + self.name +

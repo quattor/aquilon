@@ -43,6 +43,13 @@ class ServiceFormatter(ObjectFormatter):
             max_clients = "Unlimited"
         details.append(indent + "  Default Maximum Client Count: %s" %
                        max_clients)
+        for archetype in service.archetypes:
+            details.append(indent + "  Required for Archetype: " +
+                           archetype.name)
+        for personality in service.personalities:
+            details.append(indent +
+                           "  Required for Personality: %s Archetype: %s" %
+                           (personality.name, personality.archetype.name))
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:

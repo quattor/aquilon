@@ -42,11 +42,8 @@ class ArchetypeFormatter(ObjectFormatter):
         if len(flags) != 0:
             flagstr = " [" + " ".join(flags) + "]"
         details = [indent + "Archetype: %s%s" % (archetype.name, flagstr)]
-        for item in archetype.service_list:
-            details.append(indent + "  Required Service: %s"
-                    % item.service.name)
-            if item.comments:
-                details.append(indent + "    Comments: %s" % item.comments)
+        for service in archetype.services:
+            details.append(indent + "  Required Service: %s" % service.name)
         if archetype.comments:
             details.append(indent + "  Comments: %s" % archetype.comments)
         return "\n".join(details)

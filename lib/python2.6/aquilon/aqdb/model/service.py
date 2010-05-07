@@ -44,18 +44,28 @@ from datetime import datetime
 import re
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import Base, Host, Archetype, Personality
 from aquilon.aqdb.column_types.aqstr import AqStr
 
+def _service_archetype_append(archetype):
+    """ creator function for ServiceItemList """
+    return ServiceItemList(archetype=archetype)
+
+def _service_personality_append(personality):
+    """ creator function for ServiceItemList """
+    return ServiceItemList(personality=personality)
+
+_TN = 'service'
 class Service(Base):
     """ SERVICE: composed of a simple name of a service consumable by
         OTHER hosts. Applications that run on a system like ssh are
         personalities or features, not services. """
 
-    __tablename__  = 'service'
+    __tablename__  = _TN
 
     id = Column(Integer, Sequence('service_id_seq'), primary_key=True)
     name = Column(AqStr(64), nullable=False)
@@ -63,12 +73,90 @@ class Service(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
+    archetypes = association_proxy('_archetypes', 'archetype',
+                                   creator=_service_archetype_append)
+    personalities = association_proxy('_personalities', 'personality',
+                                      creator=_service_personality_append)
+
     @property
     def cfg_path(self):
-        return 'service/%s'% (self.name)
+        return 'service/%s' % (self.name)
 
 service = Service.__table__
-table   = Service.__table__
+table   = service
 
 service.primary_key.name = 'service_pk'
 service.append_constraint(UniqueConstraint('name', name='svc_name_uk'))
+
+
+_SLI = 'service_list_item'
+class ServiceListItem(Base):
+    """ Service list item is an individual member of a service list, defined
+        in configuration. They represent requirements for baseline archetype
+        builds. Think of things like 'dns', 'syslog', etc. that you'd need just
+        to get a host up and running...that's what these represent. """
+
+    __tablename__ = _SLI
+    _class_label = 'Required Service'
+
+    id = Column(Integer, Sequence('service_list_item_id_seq'),
+                           primary_key=True)
+
+    service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
+                                            name='sli_svc_fk',
+                                            ondelete='CASCADE'),
+                        nullable=False)
+
+    archetype_id = Column(Integer, ForeignKey('archetype.id',
+                                              name='sli_arctype_fk',
+                                              ondelete='CASCADE'),
+                          nullable=False)
+
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
+
+    archetype = relation(Archetype, uselist=False, lazy=False,
+                         backref=backref('_services', cascade='all'))
+    service = relation(Service, uselist=False, lazy=False,
+                       backref=backref('_archetypes', cascade='all'))
+
+service_list_item = ServiceListItem.__table__
+service_list_item.primary_key.name='svc_list_item_pk'
+service_list_item.append_constraint(
+    UniqueConstraint('archetype_id', 'service_id', name='svc_list_svc_uk'))
+
+Index('srvlst_archtyp_idx', service_list_item.c.archetype_id)
+
+
+_PSLI = 'personality_service_list_item'
+_ABV = 'prsnlty_sli'
+class PersonalityServiceListItem(Base):
+    """ A personality service list item is an individual member of a list
+       of required services for a given personality. They represent required
+       services that need to be assigned/selected in order to build
+       hosts in said personality """
+
+    __tablename__ = _PSLI
+
+    service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
+                                               name='%s_svc_fk' % (_ABV),
+                                               ondelete='CASCADE'),
+                           primary_key=True)
+
+    personality_id = Column(Integer, ForeignKey('personality.id',
+                                                 name='sli_prsnlty_fk',
+                                                 ondelete='CASCADE'),
+                             primary_key=True)
+
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
+
+    personality = relation(Personality, uselist=False, lazy=False,
+                           backref=backref('_services', cascade='all'))
+    service = relation(Service, uselist=False, lazy=False,
+                       backref=backref('_personalities', cascade='all'))
+
+personality_service_list_item = PersonalityServiceListItem.__table__
+personality_service_list_item.primary_key.name='%s_pk' % (_ABV)
+
+Index('%s_prsnlty_idx' % (_ABV), personality_service_list_item.c.personality_id)
