@@ -44,6 +44,8 @@ class CommandAddService(BrokerCommand):
     def render(self, session, logger, service, instance, comments,
                **arguments):
         dbservice = session.query(Service).filter_by(name=service).first()
+        if dbservice and instance is None:
+            raise ArgumentError("Service %s already exists." % dbservice.name)
         if not dbservice:
             dbservice = Service(name=service)
             session.add(dbservice)
@@ -51,24 +53,14 @@ class CommandAddService(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryService(dbservice, logger=logger))
 
-        if not instance:
-            session.flush()
-            plenaries.write()
-            return
+        if instance:
+            ServiceInstance.get_unique(session, service=dbservice,
+                                       name=instance, preclude=True)
+            dbsi = ServiceInstance(service=dbservice, name=instance)
+            session.add(dbsi)
+            plenaries.append(PlenaryServiceInstance(dbservice, dbsi,
+                                                    logger=logger))
 
-        if ServiceInstance.get_unique(session, service_id=dbservice.id,
-                                      name=instance):
-            raise ArgumentError("Service %s instance %s already exists." %
-                                (dbservice.name, instance))
-
-        dbsi = ServiceInstance(service=dbservice, name=instance)
-        session.add(dbsi)
         session.flush()
-
-        # By definition, we don't need to then recompile, since nothing
-        # can be using this service yet.
-        plenaries.append(PlenaryServiceInstance(dbservice, dbsi,
-                                                logger=logger))
         plenaries.write()
-
         return

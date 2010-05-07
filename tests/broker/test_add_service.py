@@ -47,6 +47,14 @@ class TestAddService(TestBrokerCommand):
         command = "add service --service afs --instance q.ny.ms.com"
         self.noouttest(command.split(" "))
 
+    def testaddduplicateservice(self):
+        command = "add service --service afs"
+        self.badrequesttest(command.split(" "))
+
+    def testaddduplicateinstance(self):
+        command = "add service --service afs --instance q.ny.ms.com"
+        self.badrequesttest(command.split(" "))
+
     def testverifyaddafsinstance(self):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
