@@ -567,22 +567,26 @@
    </command>
 
    <command name="add_disk">
-      Add a new disk to a machine
+      Add a new disk to a machine.
+      <p/>
+      The controller type must be one of: ide, scsi, sata, sas, cciss.
+      <p/>
+      Examples of valid disk names: hda, hdb (IDE); sda, sdb (SCSI, SATA), c0d0 (CCISS).
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
-         <option name="machine" type="string">machine ID</option>
-         <option name="disk" type="string">device name of the disk (like sda)</option>
+         <option name="machine" type="string">Machine name</option>
+	 <option name="disk" type="string">Disk/device name</option>
          <optgroup name="controller_opts" fields="any">
-            <option name="controller" type="string" conflicts="type">type of the disk</option>
-            <option name="type" type="string" conflicts="controller">[Deprecated] type of the disk</option>
+            <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
+	    <option name="type" type="string" conflicts="controller">[Deprecated] Type of the controller/interface</option>
          </optgroup>
          <optgroup name="size_opts" fields="any">
-            <option name="size" type="string" conflicts="capacity">capacity of the disk (GB)</option>
-            <option name="capacity" type="string" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
+            <option name="size" type="string" conflicts="capacity">Capacity of the disk (GB)</option>
+            <option name="capacity" type="string" conflicts="size">[Deprecated] Capacity of the disk (GB)</option>
          </optgroup>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
-         <option name="share" type="string">share name (an instance of nas_disk_share service)</option>
-         <option name="address" type="string">bus address (e.g. 0:0)</option>
+         <option name="share" type="string">Share name (an instance of nas_disk_share service)</option>
+         <option name="address" type="string">Bus address (e.g. 0:0)</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
