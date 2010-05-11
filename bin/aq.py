@@ -397,6 +397,11 @@ if __name__ == "__main__":
         res = conn.getresponse()
 
     except (httplib.HTTPException, socket.error), e:
+        # noauth connections
+        if not hasattr(conn, "getError"):
+            print >>sys.stderr, "Error: %s" % e
+            sys.exit(1)
+        # KNC connections
         msg = conn.getError()
         if msg.find('Connection refused') >= 0:
             print >>sys.stderr, "Failed to connect to %(aqhost)s port %(aqport)s: Connection refused." % globalOptions
