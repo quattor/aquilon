@@ -98,6 +98,8 @@ class RequestStatus(object):
                 continue
             if v == 'True':
                 massaged.append(" --%s" % k)
+            elif v is None:
+                pass
             else:
                 massaged.append(" --%s=%s" % (k, v))
         description = '[%s] %s: aq %s%s' % (id, user, command,
