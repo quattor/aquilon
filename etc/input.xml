@@ -856,7 +856,10 @@
          <option name="type" type="string">Machine type name</option>
       </optgroup>
       <optgroup name="default_config_opts" mandatory="False" fields="all">
-         <option name="cputype" type="string">CPU type</option>
+         <optgroup name="cpu_spec" mandatory="False" fields="any">
+            <option name="cputype" type="string" conflicts="cpuname">[Deprecated] CPU type</option>
+            <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
+         </optgroup>
          <option name="cpunum" type="string">CPU count</option>
          <option name="mem" type="string">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
