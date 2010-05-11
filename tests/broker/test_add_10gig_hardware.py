@@ -176,7 +176,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_210_verifyaux(self):
         command = ["search_system", "--type=auxiliary",
-                   "--dnsdomain=aqd-unittest.ms.com",
+                   "--dns_domain=aqd-unittest.ms.com",
                    "--networkip", self.net.vm_storage_net[0].ip]
         out = self.commandtest(command)
         for i in range(1, 25):

@@ -228,7 +228,7 @@
       tracked by AQDB.
       <optgroup name="search_system_opts" mandatory="True" fields="any">
          <option name="fqdn" type="string">fully qualified domain name</option>
-         <option name="dnsdomain" type="string">DNS domain</option>
+         <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
          <option name="type" type="string">System type (host, chassis, tor_switch, manager, auxiliary)</option>
          <option name="ip" type="string">IP address</option>
@@ -247,7 +247,7 @@
       <optgroup name="search_host_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">fully qualified domain name</option>
          <option name="machine" type="string">node name</option>
-         <option name="dnsdomain" type="string">DNS domain</option>
+         <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
          <option name="domain" type="string">template domain</option>
          <option name="archetype" type="string">archetype (aquilon, windows, aurora)</option>
