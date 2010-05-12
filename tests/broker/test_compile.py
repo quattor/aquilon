@@ -81,6 +81,13 @@ class TestCompile(TestBrokerCommand):
         # that the numbers a/b (for processing) are different.
         self.matchoutput(err, "11/11 compiled", command)
 
+    def test_300_compilehost(self):
+        command = "compile --hostname unittest02.one-nyp.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        # This should have been compiled above...
+        self.matchoutput(err, "0/1 object template(s) being processed",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCompile)
