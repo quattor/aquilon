@@ -240,7 +240,10 @@ class BrokerCommand(object):
                 # Obliterating the scoped_session - next call to session()
                 # will create a new one.
                 if "session" in kwargs:
-                    self.dbf.Session.remove()
+                    if self.is_lock_free:
+                        self.dbf.NLSession.remove()
+                    else:
+                        self.dbf.Session.remove()
                 self._remove_status(kwargs)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__
