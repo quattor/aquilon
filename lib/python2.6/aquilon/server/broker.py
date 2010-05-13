@@ -244,7 +244,7 @@ class BrokerCommand(object):
                         self.dbf.NLSession.remove()
                     else:
                         self.dbf.Session.remove()
-                self._remove_status(kwargs)
+                self._cleanup_logger(kwargs)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__
         updated_render.__doc__ = command.__doc__
@@ -306,7 +306,7 @@ class BrokerCommand(object):
         self._audit(message_status=status, **command_kwargs)
         return command_kwargs
 
-    def _remove_status(self, command_kwargs):
+    def _cleanup_logger(self, command_kwargs):
         logger = command_kwargs.get("logger", None)
         if logger:
             if self.command == "show_request":
@@ -316,6 +316,7 @@ class BrokerCommand(object):
                 # Clear the auditid dictionary.
                 logger.debug("Server finishing request.")
                 logger.remove_status_by_auditid(self.catalog)
+            logger.close_handlers()
 
     @property
     def is_lock_free(self):
