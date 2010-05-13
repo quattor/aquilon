@@ -75,11 +75,17 @@ class RequestLogger(Logger):
     def remove_status_by_auditid(self, catalog):
         for handler in self.get_handlers_with_status():
             catalog.remove_by_auditid(handler.status)
+            # We must call close() otherwise the handler will not be removed
+            # from logging._handlers and logging._handlerList
+            handler.close()
             self.removeHandler(handler)
 
     def remove_status_by_requestid(self, catalog):
         for handler in self.get_handlers_with_status():
             catalog.remove_by_requestid(handler.status)
+            # We must call close() otherwise the handler will not be removed
+            # from logging._handlers and logging._handlerList
+            handler.close()
             self.removeHandler(handler)
 
     def client_info(self, msg, *args, **kwargs):
