@@ -104,6 +104,7 @@ from test_add_10gig_hardware import TestAdd10GigHardware
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
+from test_change_status import TestChangeStatus
 from test_refresh_windows_hosts import TestRefreshWindowsHosts
 from test_constraints_chooser import TestChooserConstraints
 from test_flush import TestFlush
@@ -220,6 +221,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
+                TestChangeStatus,
                 TestRefreshWindowsHosts,
                 TestChooserConstraints,
                 TestFlush, TestCompile,

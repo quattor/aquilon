@@ -1419,6 +1419,16 @@
       <transport trigger="hostlist" method="post" path="command/reconfigure/hostlist" />
    </command>
 
+   <command name="change_status">
+      Update the buildstatus for a host and recompile its profile.
+      This command does not verify the service bindings of the host.
+      <optgroup name="change_status_options" mandatory="True" fields="all">
+         <option name="hostname" type="string">Host name</option>
+         <option name="buildstatus" type="string">Update host buildstatus to 'build', 'ready', or 'failed'</option>
+      </optgroup>
+      <transport method="put" path="host/%(hostname)s/buildstatus/%(buildstatus)s" />
+   </command>
+
    <command name="add_domain">
       Add a new template domain. This is for testing changes to the templates. The
       new domain will have no hosts when it is freshly created and you should use
