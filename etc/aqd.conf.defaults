@@ -148,6 +148,9 @@ windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
 # See comments in aquilon.server.resources.set_thread_pool_size
 twisted_thread_pool_size = 100
 vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
+# The knc daemon can be run by the broker for development purposes.
+# Will default to True until we migrate to a new configuration in prod.
+run_knc = True
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

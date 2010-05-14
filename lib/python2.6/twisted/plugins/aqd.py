@@ -58,6 +58,7 @@ from aquilon.server.anonwrappers import AnonSite
 
 class Options(usage.Options):
     optFlags = [["noauth", None, "Do not start the knc listener."],
+                ["authonly", None, "Only use knc, do not start an open port."],
                 ["usesock", None, "use a unix socket to connect"]]
     optParameters = [["config", None, None, "Configuration file to use."],
                      ["coverage", None, None, "Code Coverage file to create."]]
@@ -126,13 +127,36 @@ class AQDMaker(object):
     options = Options
 
     def makeService(self, options):
+        # Start up coverage ASAP.
         if options["coverage"]:
             write_test = open(options['coverage'], 'w')
             write_test.close()
             coverage.erase()
             coverage.start()
 
+        # Get the config object.
         config = Config(configfile=options["config"])
+
+        # Helper for finishing off the coverage report.
+        def stop_coverage():
+            log.msg("Finishing coverage")
+            coverage.stop()
+            sourcefiles = []
+            aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
+                                          "lib", "python2.6", "aquilon")
+            sourcefiles = []
+            for dirpath, dirname, filenames in os.walk(aquilon_srcdir):
+                for filename in filenames:
+                    if not filename.endswith('.py'):
+                        continue
+                    sourcefiles.append(os.path.join(dirpath, filename))
+            output = open(options["coverage"], 'w')
+            coverage.report(sourcefiles, file=output)
+            output.close()
+
+        # Make sure the coverage report gets generated.
+        if options["coverage"]:
+            reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
         # Set up the environment...
         m = Modulecmd()
@@ -182,57 +206,45 @@ class AQDMaker(object):
         if options["usesock"]:
             return strports.service("unix:%s/aqdsock" % sockdir, openSite)
 
+        # Return before firing up knc.
+        openport = config.get("broker", "openport")
         if options["noauth"]:
-            return strports.service(config.get("broker", "openport"), openSite)
+            return strports.service(openport, openSite)
 
         sockname = os.path.join(sockdir, "kncsock")
+        # This flag controls whether or not this process will start up
+        # and monitor knc.  Except for noauth mode knc has to be running,
+        # but this process doesn't have to be the thing that starts it up.
+        if config.getboolean("broker", "run_knc"):
+            mon = ProcessMonitor()
+            # FIXME: Should probably run krb5_keytab here as well.
+            # and/or verify that the keytab file exists.
+            mon.addProcess("knc", ["/usr/bin/env",
+                "KRB5_KTNAME=FILE:/var/spool/keytabs/%s"
+                % config.get("broker", "user"),
+                config.get("broker", "knc"), "-lS", sockname,
+                config.get("broker", "kncport")])
+            mon.startService()
+            reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
+
+        # This socket is created by twisted and only accessed by knc as
+        # connections come in.
         if os.path.exists(sockname):
             try:
                 log.msg("Attempting to remove old socket '%s'" % sockname)
                 os.remove(sockname)
                 log.msg("Succeeded removing old socket.")
             except OSError, e:
-                log.msg("Could not remove old socket '%s': %s" % (sockname, e))
-
-        mon = ProcessMonitor()
-        # FIXME: Should probably run krb5_keytab here as well.
-        # and/or verify that the keytab file exists.
-        mon.addProcess("knc", ["/usr/bin/env",
-            "KRB5_KTNAME=FILE:/var/spool/keytabs/%s"
-            % config.get("broker", "user"),
-            config.get("broker", "knc"), "-lS", sockname,
-            config.get("broker", "kncport")])
-        mon.startService()
-        reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
-
-        def stop_coverage():
-            log.msg("Finishing coverage")
-            coverage.stop()
-            sourcefiles = []
-            aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
-                                          "lib", "python2.6", "aquilon")
-            sourcefiles = []
-            for dirpath, dirname, filenames in os.walk(aquilon_srcdir):
-                for filename in filenames:
-                    if not filename.endswith('.py'):
-                        continue
-                    sourcefiles.append(os.path.join(dirpath, filename))
-            output = open(options["coverage"], 'w')
-            coverage.report(sourcefiles, file=output)
-            output.close()
-
-        if options["coverage"]:
-            reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
+                log.msg("Could not remove old socket '%s': %s" %
+                        (sockname, e))
 
         unixsocket = "unix:%s" % sockname
         kncSite = KNCSite( restServer )
 
-        # Not sure if we want to do this... if not, can just go back to
-        # returning strports.service() for a single service.
         multiService = MultiService()
         multiService.addService(strports.service(unixsocket, kncSite))
-        multiService.addService(strports.service(
-            config.get("broker", "openport"), openSite))
+        if not options["authonly"]:
+            multiService.addService(strports.service(openport, openSite))
         return multiService
 
 serviceMaker = AQDMaker()
