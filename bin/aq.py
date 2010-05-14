@@ -331,7 +331,10 @@ if __name__ == "__main__":
 
     status_thread = None
     # Kick off a thread to (potentially) get status...
-    if command == "show_request" or not globalOptions.get("quiet"):
+    # Spare a second connection to the server for read-only commands that use
+    # the "GET" method
+    if command == "show_request" or (transport.method != "get" and \
+                                     not globalOptions.get("quiet")):
         status_thread = StatusThread(host, port, authuser, **commandOptions)
 
     if command == "show_request":
