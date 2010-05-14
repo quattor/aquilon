@@ -76,11 +76,28 @@ class RequestLogger(Logger):
         for handler in self.get_handlers_with_status():
             catalog.remove_by_auditid(handler.status)
             self.removeHandler(handler)
+            # We must call close() otherwise the handler will not be removed
+            # from logging._handlers and logging._handlerList
+            handler.close()
 
     def remove_status_by_requestid(self, catalog):
         for handler in self.get_handlers_with_status():
             catalog.remove_by_requestid(handler.status)
             self.removeHandler(handler)
+            # We must call close() otherwise the handler will not be removed
+            # from logging._handlers and logging._handlerList
+            handler.close()
+
+    def close_handlers(self):
+        """This method must be called or the handlers will leak memory.
+
+        One of the remove_status commands should be called first in
+        order to correctly clean up the status object.
+
+        """
+        for handler in self.handlers[:]:
+            self.removeHandler(handler)
+            handler.close()
 
     def client_info(self, msg, *args, **kwargs):
         """
