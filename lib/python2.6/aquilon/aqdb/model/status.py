@@ -38,7 +38,7 @@ from aquilon.aqdb.model import Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-_statuses = ['blind', 'build', 'ready']
+_statuses = ['blind', 'build', 'ready', 'failed', 'install']
 
 _TN = 'status'
 
