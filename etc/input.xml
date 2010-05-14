@@ -394,11 +394,15 @@
    </command>
 
    <command name="compile">
-    Compile anything that is out-of-date within a specified domain.
-    <optgroup name="compile_input" mandatory="True" fields="all">
-      <option name="domain" type="string">Domain name</option>
-    </optgroup>
-    <transport method="post" path="compile"/>
+      Compile anything that is out-of-date within a specified domain or
+      only for the specified host.  Only out of date profiles will be
+      compiled.
+      <optgroup name="compile_input" mandatory="True" fields="any">
+         <option name="domain" type="string" conflicts="hostname">Domain name</option>
+      <option name="hostname" type="string" conflicts="domain">FQDN</option>
+      </optgroup>
+      <transport method="post" path="compile"/>
+      <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
    </command>
 
    <command name="show_domain">
