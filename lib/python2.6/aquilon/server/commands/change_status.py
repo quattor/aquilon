@@ -57,12 +57,13 @@ class CommandChangeStatus(BrokerCommand):
 
         plenary = PlenaryHost(dbhost, logger=logger)
         # Force a host lock as pan might overwrite the profile...
-        key = CompileKey(domain=dbhost.domain.name, profile=dbhost.fqdn,
+        key = CompileKey(domain=dbhost.branch.name, profile=dbhost.fqdn,
                          logger=logger)
         try:
             lock_queue.acquire(key)
             plenary.write(locked=True)
-            td = TemplateDomain(dbhost.domain, logger=logger)
+            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+                                logger=logger)
             out = td.compile(session, only=dbhost.fqdn, locked=True)
         except IncompleteError, e:
             raise ArgumentError("Run aq make for host %s first." % dbhost.fqdn)
