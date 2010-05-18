@@ -86,6 +86,8 @@ class TestAddESXCluster(TestBrokerCommand):
         self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
                           command)
         self.matchclean(out, "include { 'service", command)
+        self.matchoutput(out, "include { 'personality/esx_server/config' };",
+                         command)
 
     def testaddutecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
