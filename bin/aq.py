@@ -44,6 +44,7 @@ import subprocess
 import socket
 import httplib
 import uuid
+import csv
 from time import sleep
 from threading import Thread
 
@@ -54,6 +55,9 @@ from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
 
+# Stolen from aquilon.server.formats.fomatters
+csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
+                     doublequote=True, lineterminator='\n')
 
 class RESTResource(object):
     def __init__(self, httpconnection, uri):
@@ -145,6 +149,45 @@ class CustomAction(object):
             commandOptions["bundle"] = b64encode(file(filename).read())
         finally:
             os.unlink(filename)
+
+
+def create_sandbox(pageData, noexec=False):
+    output = pageData.splitlines()
+    if not output or not output[0].strip():
+        # The 'add' command may have no output if --noget was used,
+        # but the 'get' command should always have something...
+        return 0
+    reader = csv.reader(output, dialect='aquilon')
+    for row in reader:
+        (template_king_url, sandbox_name, user_base) = row[0:3]
+        break
+    if not os.path.exists(user_base):
+        print >>sys.stderr, "Cannot access user directory '%s'.  " \
+                "Is the share mounted and visible?" % user_base
+        return 1
+    sandbox_dir = os.path.join(user_base, sandbox_name)
+    if os.path.exists(sandbox_dir):
+        # This check is done broker-side as well.  This code should be
+        # exercised rarely (and probably never).
+        print >>sys.stderr, "Sandbox directory '%s' already exists.  " \
+                "Use `git fetch` to update it or remove the directory " \
+                "and run `aq get`." % sandbox_dir
+        return 1
+    cmd = ("git", "clone", "--branch", sandbox_name,
+           template_king_url, sandbox_name)
+    if noexec:
+        print "cd '%s'" % user_base
+        print " ".join(["'%s'" % c for c in cmd])
+        return 0
+    try:
+        p = subprocess.Popen(cmd, cwd=user_base, stdin=None, stdout=1, stderr=2)
+    except OSError, e:
+        print >>sys.stderr, "Could not execute %s: %s" % (cmd, e)
+        return 1
+    exit_status = p.wait()
+    if exit_status == 0:
+        print "Created sandbox: %s" % sandbox_dir
+    return exit_status
 
 
 class StatusThread(Thread):
@@ -443,7 +486,9 @@ if __name__ == "__main__":
                 sys.exit(1)
 
             exit_status = proc.wait()
-
+    elif transport.expect == 'sandbox':
+        noexec = globalOptions.get('noexec')
+        exit_status = create_sandbox(pageData, noexec=noexec)
     else:
         format = globalOptions.get("format", None)
         if format == "proto" or format == "csv":

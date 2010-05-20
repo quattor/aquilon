@@ -1541,7 +1541,7 @@
          <option name="noget" type="boolean">Do not automatically create the user-controlled sandbox, only the branch server-side.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="post" path="sandbox/command/add" expect="command"/>
+      <transport method="post" path="sandbox/command/add" expect="sandbox"/>
    </command>
 
    <command name="get">
@@ -1551,7 +1551,7 @@
       <optgroup name="get mandatory" mandatory="True" fields="all">
          <option name="sandbox" type="string">Name of the sandbox</option>
       </optgroup>
-      <transport method="post" path="sandbox/command/get" expect="command"/>
+      <transport method="post" path="sandbox/command/get" expect="sandbox"/>
    </command>
 
    <command name="publish">

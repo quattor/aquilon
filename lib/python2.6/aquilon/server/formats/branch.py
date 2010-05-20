@@ -65,3 +65,18 @@ class SandboxFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Sandbox] = SandboxFormatter()
+
+
+class RemoteSandbox(object):
+    def __init__(self, template_king_url, sandbox_name, user_base):
+        self.template_king_url = template_king_url
+        self.sandbox_name = sandbox_name
+        self.user_base = user_base
+
+
+class RemoteSandboxFormatter(ObjectFormatter):
+    def csv_fields(self, remote_sandbox):
+        return (remote_sandbox.template_king_url, remote_sandbox.sandbox_name,
+                remote_sandbox.user_base)
+
+ObjectFormatter.handlers[RemoteSandbox] = RemoteSandboxFormatter()

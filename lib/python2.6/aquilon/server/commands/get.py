@@ -35,12 +35,15 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
 from aquilon.server.processes import run_command
 from aquilon.exceptions_ import ArgumentError
+from aquilon.server.formats.branch import RemoteSandbox
 
 
 class CommandGet(BrokerCommand):
 
     required_parameters = ["sandbox"]
     requires_readonly = True
+    default_style = "csv"
+    requires_format = True
 
     # If updating this argument list also update CommandAddSandbox.
     def render(self, session, logger, dbuser, sandbox, **arguments):
@@ -78,12 +81,8 @@ class CommandGet(BrokerCommand):
                 remove_dir(userdir)
                 raise e
 
-        remote_command = """cd '%(dir)s' && env PATH="%(path)s:$PATH" NO_PROXY=* git clone --branch '%(domain)s' '%(url)s' '%(domain)s'""" % {
-                "dir":userdir,
-                "path":self.config.get("broker", "git_path"),
-                "url":self.config.get("broker", "git_templates_url"),
-                "domain":dbsandbox.name}
-        return str(remote_command)
+        return RemoteSandbox(self.config.get("broker", "git_templates_url"),
+                             dbsandbox.name, userdir)
 
     def force_my_sandbox(self, session, logger, dbuser, sandbox):
         (author, slash, name) = sandbox.partition('/')

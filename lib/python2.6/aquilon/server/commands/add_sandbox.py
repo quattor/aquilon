@@ -19,6 +19,8 @@ class CommandAddSandbox(CommandGet):
     required_parameters = ["sandbox"]
     # Need to override CommandGet which has this as True...
     requires_readonly = False
+    default_style = "csv"
+    requires_format = True
 
     def render(self, session, logger, dbuser, sandbox, start, noget, comments,
                **arguments):
@@ -56,9 +58,8 @@ class CommandAddSandbox(CommandGet):
                 logger=logger, path=self.config.get("broker", "kingdir"))
 
         if noget:
-            # The client will try to execute an empty string here, which
-            # is harmless.
-            return
+            # The client knows to interpret an empty response as no action.
+            return []
 
         return CommandGet.render(self, session=session, logger=logger,
                                  dbuser=dbuser, sandbox=sandbox)
