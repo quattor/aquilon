@@ -139,26 +139,12 @@ class Location(Base):
         # We have two implementations here: the first is fast but
         # Oracle-specific, the second is slower but works with any database
         if session.connection().dialect.name == 'oracle':
-            # TODO: we could optimize this case a bit more by returning a
-            # subquery instead of the list of IDs, but unfortunately
-            # from_statement(...).subquery() does not seem to work
-            where = "WHERE id != :startid" if exclude_self else ""
+            where = "WHERE id != %d" % self.id if exclude_self else ""
             s = text("""SELECT id FROM location
                         %s
                         CONNECT BY parent_id = PRIOR id
-                        START WITH id = :startid""" % where)
-            q = session.query(Location.id).from_statement(s)
-            q = q.params(startid=self.id)
-            ids = [item.id for item in q.all()]
-            # TODO: There is a limitation of having at most 1000 items in a
-            # "SELECT WHERE IN (...)" clause in Oracle. Solving the subquery
-            # issue would also solve this one
-            if len(ids) > 1000:
-                raise ArgumentError("The specified location constraint "
-                                    "produced too many results. Either "
-                                    "specify something smaller, or use "
-                                    "--exact_location.")
-            return ids
+                        START WITH id = %d""" % (where, self.id))
+            return s
         else:
             queue = deque([self.id])
             offsprings = []
