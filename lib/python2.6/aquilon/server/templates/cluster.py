@@ -89,6 +89,9 @@ class PlenaryClusterObject(Plenary):
         if hasattr(self, fname):
             getattr(self, fname)(lines)
         lines.append("")
+        lines.append("include { 'personality/%s/config' };" %
+                     self.dbcluster.personality.name)
+        lines.append("")
         lines.append("include { 'archetype/cluster/final' };");
 
     def body_esx(self, lines):
