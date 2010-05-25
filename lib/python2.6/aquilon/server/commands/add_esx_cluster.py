@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import (BrokerCommand, validate_basic,
-                                   force_ratio)
+from aquilon.server.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
                                 MetaClusterMember, Domain, Personality)
 from aquilon.exceptions_ import ArgumentError
@@ -37,7 +36,7 @@ from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
-from aquilon.utils import force_int
+from aquilon.utils import force_int, force_ratio
 
 
 class CommandAddESXCluster(BrokerCommand):

@@ -34,9 +34,12 @@
 """
 import os
 import signal
+import re
 
 from ipaddr import IPv4Address, IPv4IpValidationError
 from aquilon.exceptions_ import ArgumentError
+
+ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
 
 def kill_from_pid_file(pid_file):
     if os.path.isfile(pid_file):
@@ -114,3 +117,16 @@ def force_int(label, value):
     except ValueError, e:
         raise ArgumentError("Expected an integer for %s." % label)
     return result
+
+def force_ratio(label, value):
+    """Utility method to force incoming values to int ratio and wrap errors."""
+    if value is None:
+        return (None, None)
+    m = ratio_re.search(value)
+    if not m:
+        raise ArgumentError("Expected a ratio like 1:2 for %s but got '%s'" %
+                            (label, value))
+    (left, right) = m.groups()
+    if right is None:
+        right = 1
+    return (int(left), int(right))

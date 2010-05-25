@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, force_ratio
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, Personality
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
@@ -38,7 +38,7 @@ from aquilon.server.templates.machine import (PlenaryMachineInfo,
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.utils import force_int
+from aquilon.utils import force_int, force_ratio
 
 
 class CommandUpdateESXCluster(BrokerCommand):
