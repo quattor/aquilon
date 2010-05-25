@@ -191,6 +191,20 @@ class Base(object):
                                                 ", ".join(desc))
                 raise ArgumentError(msg)
 
+    @classmethod
+    def get_matching_query(cls, session, *args, **kwargs):
+        compel = kwargs.get('compel', False)
+        query = session.query(cls.__table__.c.id)
+        (query, desc) = cls._selection_helper(session, query, *args, **kwargs)
+        if compel:
+            obj = query.first()
+            if obj is None:
+                msg = "%s %s not found." % (cls._get_class_label(),
+                                            ", ".join(desc))
+                _raise_custom(compel, NotFoundException, msg)
+        return query.subquery()
+
+
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)
 Base = declarative_base(cls=Base)
 
