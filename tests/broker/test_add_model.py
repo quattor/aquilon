@@ -46,7 +46,7 @@ class TestAddModel(TestBrokerCommand):
     def testadduttorswitch(self):
         command = ["add_model", "--name=uttorswitch", "--vendor=hp",
                    "--type=tor_switch", "--cputype=xeon_2500", "--cpunum=1",
-                   "--mem=8192", "--disktype=local", "--diskcontroller=scsi",
+                   "--memory=8192", "--disktype=local", "--diskcontroller=scsi",
                    "--disksize=36", "--nics=4"]
         self.noouttest(command)
 
@@ -107,6 +107,7 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Type: blade", command)
 
     def testaddutmedium(self):
+        # Use the old --mem name here
         command = ["add_model", "--name=utmedium", "--vendor=utvendor",
                    "--type=virtual_machine", "--cputype=xeon_2500",
                    "--cpunum=1", "--mem=8192", "--disktype=nas",
@@ -116,7 +117,7 @@ class TestAddModel(TestBrokerCommand):
     def testaddutlarge(self):
         command = ["add_model", "--name=utlarge", "--vendor=utvendor",
                    "--type=virtual_machine", "--cputype=xeon_2660",
-                   "--cpunum=4", "--mem=16384", "--disktype=nas",
+                   "--cpunum=4", "--memory=16384", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
         self.noouttest(command)
 

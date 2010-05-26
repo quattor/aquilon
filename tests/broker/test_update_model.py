@@ -58,7 +58,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_100_updateexisting(self):
         command = ["update_model", "--name=utmedium", "--vendor=utvendor",
-                   "--cpuname=utcpu", "--cpunum=1", "--mem=4096", "--nics=1",
+                   "--cpuname=utcpu", "--cpunum=1", "--memory=4096", "--nics=1",
                    "--disksize=45", "--diskcontroller=scsi"]
         self.noouttest(command)
 
@@ -198,7 +198,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_700_failnospecs(self):
         command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
-                   "--mem=8192"]
+                   "--memory=8192"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Missing required parameters to store", command)
 
@@ -209,7 +209,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_800_addspecs(self):
         command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
-                   "--cpuname=utcpu", "--cpunum=2", "--mem=8192",
+                   "--cpuname=utcpu", "--cpunum=2", "--memory=8192",
                    "--disktype=local", "--diskcontroller=scsi",
                    "--disksize=30", "--nics=2", "--leave_existing"]
         self.noouttest(command)
