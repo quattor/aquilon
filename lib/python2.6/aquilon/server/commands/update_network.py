@@ -35,7 +35,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model import Network
-from aquilon.utils import force_int, force_ipv4
+from aquilon.utils import force_boolean, force_ipv4
 
 class CommandUpdateNetwork(BrokerCommand):
 
@@ -63,33 +63,15 @@ class CommandUpdateNetwork(BrokerCommand):
                 raise NotFoundException("No existing networks found with the "
                                         "specified network type or location.")
 
-        yes = re.compile("^(true|yes|y|1|on|enabled)$", re.I)
-        no = re.compile("^(false|no|n|0|off|disabled)$", re.I)
-        if discovered:
-            if yes.match(discovered):
-                discovered = "y"
-            elif no.match(discovered):
-                discovered = "n"
-            else:
-                raise ArgumentError("Did not recognise supplied argument to "
-                                    "--discovered flag: '%s'." % discovered)
-        if discoverable:
-            if yes.match(discoverable):
-                discoverable = "y"
-            elif no.match(discoverable):
-                discoverable = "n"
-            else:
-                raise ArgumentError("Did not recognise supplied argument to "
-                                    "--discoverable flag: '%s'." % discoverable)
+        discovered = force_boolean("--discovered", discovered)
+        discoverable = force_boolean("--discoverable", discoverable)
 
         for net in networks:
-            if discoverable:
-                if discoverable == "y":
-                    net.is_discoverable = True
-                elif discoverable == "n":
-                    net.is_discoverable = False
-            if discovered:
-                if discovered == "y":
-                    net.is_discovered = True
-                elif discovered == "n":
-                    net.is_discovered = False
+            if discoverable is not None:
+                net.is_discoverable = discoverable
+            if discovered is not None:
+                net.is_discovered = discovered
+            session.add(net)
+
+        session.flush()
+        return

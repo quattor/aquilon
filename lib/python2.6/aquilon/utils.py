@@ -40,6 +40,8 @@ from ipaddr import IPv4Address, IPv4IpValidationError
 from aquilon.exceptions_ import ArgumentError
 
 ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
+yes_re = re.compile("^(true|yes|y|1|on|enabled)$", re.I)
+no_re = re.compile("^(false|no|n|0|off|disabled)$", re.I)
 
 def kill_from_pid_file(pid_file):
     if os.path.isfile(pid_file):
@@ -130,3 +132,13 @@ def force_ratio(label, value):
     if right is None:
         right = 1
     return (int(left), int(right))
+
+def force_boolean(label, value):
+    """Utility method to force incoming values to boolean and wrap errors."""
+    if value is None:
+        return None
+    if yes_re.match(value):
+        return True
+    if no_re.match(value):
+        return False
+    raise ArgumentError("Expected a boolean value for %s." % label)
