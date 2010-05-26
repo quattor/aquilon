@@ -41,10 +41,20 @@ from aquilon.server.templates.machine import PlenaryMachineInfo
 
 class CommandAddDisk(BrokerCommand):
 
-    required_parameters = ["machine", "disk", "type", "capacity"]
+    # FIXME: add "controller" and "size" once the deprecated alternatives are
+    # removed
+    required_parameters = ["machine", "disk"]
 
-    def render(self, session, logger, machine, disk, type, capacity, share,
+    def render(self, session, logger, machine, disk, controller, size, share,
                address, comments, user, **arguments):
+
+        # Handle deprecated arguments
+        if arguments.get("type", None):
+            controller = arguments["type"]
+        if arguments.get("capacity", None):
+            size = arguments["capacity"]
+        if not size or not controller:
+            raise ArgumentError("Please specify both --size and --controller.")
 
         dbmachine = Machine.get_unique(session, machine, compel=True)
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
@@ -52,11 +62,12 @@ class CommandAddDisk(BrokerCommand):
             raise ArgumentError("Machine %s already has a disk named %s." %
                                 (machine,disk))
 
-        if type not in controller_types:
+        if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
-                                "of: %s." % (type, ", ".join(controller_types)))
+                                "of: %s." % (controller,
+                                             ", ".join(controller_types)))
 
-        capacity = force_int("capacity", capacity)
+        size = force_int("size", size)
         if share:
             dbservice = Service.get_unique(session, "nas_disk_share",
                                            compel=True)
@@ -76,14 +87,15 @@ class CommandAddDisk(BrokerCommand):
                                          dbmetacluster.max_shares))
             dbdisk = NasDisk(machine=dbmachine,
                              device_name=disk,
-                             controller_type=type,
+                             controller_type=controller,
                              service_instance=dbshare,
-                             capacity=capacity,
+                             capacity=size,
                              address=address,
                              comments=comments)
         else:
             dbdisk = LocalDisk(machine=dbmachine, device_name=disk,
-                controller_type=type, capacity=capacity, comments=comments)
+                               controller_type=controller, capacity=size,
+                               comments=comments)
         try:
             session.add(dbdisk)
         except InvalidRequestError, e:

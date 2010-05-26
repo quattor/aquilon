@@ -40,21 +40,28 @@ class CommandDelDisk(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, disk, type, capacity, all, user,
-               **arguments):
+    def render(self, session, logger, machine, disk, controller, size, all,
+               user, **arguments):
+
+        # Handle deprecated arguments
+        if arguments.get("type", None):
+            controller = arguments["type"]
+        if arguments.get("capacity", None):
+            size = arguments["capacity"]
+
         dbmachine = Machine.get_unique(session, machine, compel=True)
         q = session.query(Disk).filter_by(machine=dbmachine)
         if disk:
             q = q.filter_by(device_name=disk)
-        if type:
-            if type not in controller_types:
+        if controller:
+            if controller not in controller_types:
                 raise ArgumentError("%s is not a valid controller type, use "
-                                    "one of: %s." %
-                                    (type, ", ".join(controller_types)))
-            q = q.filter_by(controller_type=type)
-        if capacity:
-            capacity = force_int("capacity", capacity)
-            q = q.filter_by(capacity=capacity)
+                                    "one of: %s." % (controller,
+                                                     ", ".join(controller_types)))
+            q = q.filter_by(controller_type=controller)
+        if size:
+            size = force_int("size", size)
+            q = q.filter_by(capacity=size)
         results = q.all()
         if len(results) == 1:
             session.delete(results[0])
