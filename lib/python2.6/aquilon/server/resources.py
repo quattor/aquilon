@@ -74,6 +74,7 @@ from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.broker import BrokerCommand
 from aquilon.server import commands
 from aquilon.server.processes import cache_version
+from aquilon.utils import force_int, force_boolean
 
 
 class ResponsePage(resource.Resource):
@@ -367,6 +368,19 @@ class RestServer(ResponsePage):
                     option_name = option.attrib["name"]
                     if option_name not in myinstance.optional_parameters:
                         myinstance.optional_parameters.append(option_name)
+                    if option.attrib.has_key("type"):
+                        paramtype = option.attrib["type"]
+                        if paramtype == "int":
+                            myinstance.parameter_checks[option_name] = force_int
+                        elif paramtype == "boolean":
+                            myinstance.parameter_checks[option_name] = force_boolean
+                        elif paramtype == "string" or paramtype == "file":
+                            pass
+                        else:
+                            log.msg("Warning: unknown option type %s" % paramtype)
+                    else:
+                        log.msg("Warning: argument type not known for %s.%s" %
+                                (myinstance.command, option_name))
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))

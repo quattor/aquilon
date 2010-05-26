@@ -192,9 +192,9 @@
          <option name="machine" type="string">machine name (exact)</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
-         <option name="cpuspeed" type="string">cpu speed</option>
-         <option name="cpucount" type="string">cpu count</option>
-         <option name="memory" type="string">memory in MB</option>
+         <option name="cpuspeed" type="int">cpu speed</option>
+         <option name="cpucount" type="int">cpu count</option>
+         <option name="memory" type="int">memory in MB</option>
          <option name="cluster" type="string">cluster name</option>
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
@@ -352,7 +352,7 @@
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
          <option name="tor_switch" type="string">FQDN of the switch</option>
-         <option name="port_number" type="string">Port number on the switch</option>
+         <option name="port_number" type="int">Port number on the switch</option>
          <option name="mac" type="string">MAC address to search for</option>
       </optgroup>
       <transport method="get" path="find/observed_mac" />
@@ -537,7 +537,7 @@
       <optgroup name="add_cpu_opts" mandatory="True" fields="all">
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
-         <option name="speed" type="string">CPU speed</option>
+         <option name="speed" type="int">CPU speed</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
@@ -551,7 +551,7 @@
          <option name="all" type="boolean">Show all cpu types</option>
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
-         <option name="speed" type="string">CPU speed</option>
+         <option name="speed" type="int">CPU speed</option>
       </optgroup>
       <transport method="get" path="find/hardware/cpu" />
    </command>
@@ -561,7 +561,7 @@
       <optgroup name="del_cpu_opts" mandatory="True" fields="all">
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
-         <option name="speed" type="string">CPU speed</option>
+         <option name="speed" type="int">CPU speed</option>
       </optgroup>
       <transport method="delete" path="hardware/cpu/%(vendor)s/%(cpu)s/%(speed)s" />
    </command>
@@ -580,8 +580,8 @@
 	    <option name="type" type="string" conflicts="controller">[Deprecated] Type of the controller/interface</option>
          </optgroup>
          <optgroup name="size_opts" fields="any">
-            <option name="size" type="string" conflicts="capacity">Capacity of the disk (GB)</option>
-            <option name="capacity" type="string" conflicts="size">[Deprecated] Capacity of the disk (GB)</option>
+            <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
+            <option name="capacity" type="int" conflicts="size">[Deprecated] Capacity of the disk (GB)</option>
          </optgroup>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
@@ -609,8 +609,8 @@
             <option name="type" type="string" conflicts="controller">[Deprecated] type of the disk</option>
          </optgroup>
          <optgroup name="size_opts" fields="any">
-            <option name="size" type="string" conflicts="capacity">capacity of the disk (GB)</option>
-            <option name="capacity" type="string" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
+            <option name="size" type="int" conflicts="capacity">capacity of the disk (GB)</option>
+            <option name="capacity" type="int" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
          </optgroup>
          <option name="all" type="boolean">remove any matching disks</option>
       </optgroup>
@@ -910,16 +910,16 @@
             <option name="cputype" type="string" conflicts="cpuname">[Deprecated] CPU type</option>
             <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
          </optgroup>
-         <option name="cpunum" type="string">CPU count</option>
-         <option name="memory" type="string">amount of installed memory (MB)</option>
+         <option name="cpunum" type="int">CPU count</option>
+         <option name="memory" type="int">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
-         <option name="disksize" type="string">installed disk capacity (GB)</option>
-         <option name="nics" type="string">number of NIC interfaces</option>
+         <option name="disksize" type="int">installed disk capacity (GB)</option>
+         <option name="nics" type="int">number of NIC interfaces</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
-         <option name="cpuspeed" type="string">CPU speed, if the name is not unique</option>
+         <option name="cpuspeed" type="int">CPU speed, if the name is not unique</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />
@@ -951,13 +951,13 @@
          <option name="machine_type" type="string">Machine type name</option>
          <option name="cpuname" type="string">CPU name</option>
          <option name="cpuvendor" type="string">CPU vendor</option>
-         <option name="cpuspeed" type="string">CPU speed</option>
-         <option name="cpunum" type="string">CPU count</option>
-         <option name="memory" type="string">amount of installed memory (MB)</option>
+         <option name="cpuspeed" type="int">CPU speed</option>
+         <option name="cpunum" type="int">CPU count</option>
+         <option name="memory" type="int">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
-         <option name="disksize" type="string">installed disk capacity (GB)</option>
-         <option name="nics" type="string">number of NIC interfaces</option>
+         <option name="disksize" type="int">installed disk capacity (GB)</option>
+         <option name="nics" type="int">number of NIC interfaces</option>
          <option name="comments" type="string">Comments</option>
          <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
       </optgroup>
@@ -1036,8 +1036,8 @@
          <option name="ip" type="string">Network IP address</option>
          <optgroup name="add_network_netmask" mandatory="True" fields="any">
             <option name="netmask" type="string" conflicts="prefixlen mask">Netmask as dotted quad</option>
-            <option name="prefixlen" type="string" conflicts="netmask mask">Network prefix length</option>
-            <option name="mask" type="string" conflicts="netmask prefixlen">Number of hosts</option>
+            <option name="prefixlen" type="int" conflicts="netmask mask">Network prefix length</option>
+            <option name="mask" type="int" conflicts="netmask prefixlen">Number of hosts</option>
          </optgroup>
          <optgroup name="add_network_location_opts" mandatory="True" fields="any">
             <option name="organization" type="string">Organization</option>
@@ -1054,8 +1054,8 @@
       </optgroup>
 
       <optgroup name="add_network_modifiers" mandatory="False" fields="any">
-         <option name="discoverable" type="string">Set network(s) updateable</option>
-         <option name="discovered" type="string">Set network(s) updated</option>
+         <option name="discoverable" type="boolean">Set network(s) updateable</option>
+         <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
          <option name="side" type="string">Network side, defaults to 'a'</option>
       </optgroup>
@@ -1095,8 +1095,8 @@
 	</optgroup>
      </optgroup>
      <optgroup name="update_network_modifiers" mandatory="True" fields="any">
-	<option name="discoverable" type="string" conflicts="">Set network(s) updateable</option>
-	<option name="discovered" type="string" conflicts="">Set network(s) updated</option>
+	<option name="discoverable" type="boolean" conflicts="">Set network(s) updateable</option>
+	<option name="discovered" type="boolean" conflicts="">Set network(s) updated</option>
     </optgroup>
      <transport method="post" path="network" />
    </command>
@@ -1199,7 +1199,7 @@
       <optgroup name="update_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <optgroup name="update_service_count" mandatory="True" fields="any">
-            <option name="max_clients" type="string" conflicts="default">Maximum number of client bindings for an instance</option>
+            <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
             <option name="default" type="boolean" conflicts="max_clients">Restore default setting</option>
          </optgroup>
       </optgroup>
@@ -2281,14 +2281,14 @@
 	 <option name="vendor" type="string">Machine vendor. Needed if the model name is not unique</option>
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="string">cpu speed</option>
-	 <option name="cpucount" type="string">cpu count</option>
-	 <option name="memory" type="string">memory in MB</option>
+	 <option name="cpuspeed" type="int">cpu speed</option>
+	 <option name="cpucount" type="int">cpu count</option>
+	 <option name="memory" type="int">memory in MB</option>
       </optgroup>
       <optgroup name="add_machine_location_opts" mandatory="True" fields="any">
 	 <optgroup name="add_machine_chassis_opts" fields="all">
             <option name="chassis" type="string">Chassis name</option>
-            <option name="slot" type="string">Chassis slot</option>
+            <option name="slot" type="int">Chassis slot</option>
          </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
@@ -2317,11 +2317,11 @@
          <option name="vendor" type="string">machine vendor</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
-         <option name="cpuspeed" type="string">cpu speed</option>
-         <option name="cpucount" type="string">cpu count</option>
-         <option name="memory" type="string">memory in MB</option>
+         <option name="cpuspeed" type="int">cpu speed</option>
+         <option name="cpucount" type="int">cpu count</option>
+         <option name="memory" type="int">memory in MB</option>
          <option name="chassis" type="string">chassis name</option>
-         <option name="slot" type="string">chassis slot</option>
+         <option name="slot" type="int">chassis slot</option>
          <option name="clearchassis" type="boolean">remove chassis and slot information</option>
          <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
          <option name="rack" type="string">rack name</option>
@@ -2349,7 +2349,7 @@
 	 <option name="all" type="boolean" conflicts="machine">all</option>
          <optgroup name="show_machine_location_opts" mandatory="False">
             <option name="chassis" type="string">Chassis name</option>
-	    <option name="slot" type="string">Chassis Slot</option>
+	    <option name="slot" type="int">Chassis Slot</option>
             <option name="rack" type="string">Rack name</option>
             <option name="desk" type="string">Desk name</option>
          </optgroup>
@@ -2409,9 +2409,9 @@
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="string">cpu speed</option>
-	 <option name="cpucount" type="string">cpu count</option>
-	 <option name="memory" type="string">memory in MB</option>
+	 <option name="cpuspeed" type="int">cpu speed</option>
+	 <option name="cpucount" type="int">cpu count</option>
+	 <option name="memory" type="int">memory in MB</option>
       </optgroup>
       <optgroup name="add_tor_switch_optional">
 	 <option name="serial" type="string">serial number</option>
@@ -2520,8 +2520,8 @@
          <option name="metacluster" type="string">Name of the new metacluster</option>
       </optgroup>
       <optgroup name="add_metacluster_options" mandatory="False">
-         <option name="max_members" type="string">Comments</option>
-         <option name="max_shares" type="string">Comments</option>
+         <option name="max_members" type="int">Comments</option>
+         <option name="max_shares" type="int">Comments</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="metacluster/%(metacluster)s" />
@@ -2543,8 +2543,8 @@
          <option name="metacluster" type="string">Name of the metacluster</option>
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
-         <option name="max_members" type="string">Comments</option>
-         <option name="max_shares" type="string">Comments</option>
+         <option name="max_members" type="int">Comments</option>
+         <option name="max_shares" type="int">Comments</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s" />
@@ -2583,7 +2583,7 @@
       <optgroup name="add_esx_cluster_req" mandatory="True" fields="all">
          <option name="cluster" type="string">Name of the new esx_cluster</option>
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
-         <option name="down_hosts_threshold">Number of vmhosts that can be down before monitoring alarms trigger</option>
+         <option name="down_hosts_threshold" type="int">Number of vmhosts that can be down before monitoring alarms trigger</option>
          <optgroup name="add_cluster_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
@@ -2603,7 +2603,7 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_esx_cluster_options" mandatory="False">
-         <option name="max_members" type="string">Comments</option>
+         <option name="max_members" type="int">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="tor_switch" type="string">ToR switch in use by the cluster</option>
          <option name="comments" type="string">Comments</option>
@@ -2633,8 +2633,8 @@
       <optgroup name="update_esx_cluster_options" mandatory="False">
          <option name="archetype" type="string">Archetype Name</option>
          <option name="personality" type="string">Personality Name</option>
-         <option name="down_hosts_threshold">Down hosts threshold</option>
-         <option name="max_members" type="string">Max allowed vmhost members</option>
+         <option name="down_hosts_threshold" type="int">Down hosts threshold</option>
+         <option name="max_members" type="int">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="tor_switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="boolean">Set the location based on cluster membership.</option>

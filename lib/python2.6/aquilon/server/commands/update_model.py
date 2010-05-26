@@ -36,7 +36,6 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Vendor, Model, Cpu, MachineSpecs, Machine, Disk
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.utils import force_int
 
 
 class CommandUpdateModel(BrokerCommand):
@@ -61,9 +60,6 @@ class CommandUpdateModel(BrokerCommand):
                        'cpuname', 'cpuvendor', 'disktype', 'diskcontroller']:
                 if value is not None:
                     arguments[arg] = value.lower().strip()
-            elif arg in ['cpuspeed', 'cpunum', 'memory', 'disksize', 'nics']:
-                if value is not None:
-                    arguments[arg] = force_int(arg, value)
 
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
@@ -153,7 +149,7 @@ class CommandUpdateModel(BrokerCommand):
             dbmodel.machine_specs.disk_type = arguments['disktype']
 
         for arg in ['diskcontroller', 'disksize']:
-            if arguments[arg]:
+            if arguments[arg] is not None:
                 self.update_disk_specs(model=dbmodel, dbmachines=dbmachines,
                                        attr=self.argument_lookup[arg],
                                        value=arguments[arg],

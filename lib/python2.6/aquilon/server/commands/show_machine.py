@@ -33,7 +33,6 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Machine, Model
-from aquilon.utils import force_int
 
 
 class CommandShowMachine(BrokerCommand):
@@ -58,8 +57,7 @@ class CommandShowMachine(BrokerCommand):
             q = q.join('chassis_slot')
             q = q.filter_by(chassis=dbchassis)
             q = q.reset_joinpoint()
-        if slot:
-            slot = force_int("slot", slot)
+        if slot is not None:
             q = q.join('chassis_slot')
             q = q.filter_by(slot_number=slot)
             q = q.reset_joinpoint()

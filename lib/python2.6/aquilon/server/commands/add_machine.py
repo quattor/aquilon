@@ -39,7 +39,6 @@ from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model,
                                 Machine, MachineClusterMember)
-from aquilon.utils import force_int
 
 
 class CommandAddMachine(BrokerCommand):
@@ -58,7 +57,6 @@ class CommandAddMachine(BrokerCommand):
                         chassis)
             if slot is None:
                 raise ArgumentError("The --chassis option requires a --slot.")
-            slot = force_int("slot", slot)
             if dblocation and dblocation != dbchassis.chassis_hw.location:
                 raise ArgumentError("Location %s %s conflicts with chassis "
                                     "location %s %s." %

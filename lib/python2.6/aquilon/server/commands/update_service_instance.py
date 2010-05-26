@@ -33,7 +33,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.templates.service import PlenaryServiceInstance
-from aquilon.utils import force_int
 
 
 class CommandAddService(BrokerCommand):
@@ -47,8 +46,8 @@ class CommandAddService(BrokerCommand):
                                           name=instance, compel=True)
         if default:
             dbsi.max_clients = None
-        elif max_clients:
-            dbsi.max_clients = force_int("max_clients", max_clients)
+        elif max_clients is not None:
+            dbsi.max_clients = max_clients
         else:
             raise ArgumentError("Missing --max_clients or --default argument "
                                 "to update service %s instance %s." %

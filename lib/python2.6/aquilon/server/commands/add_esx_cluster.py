@@ -36,7 +36,7 @@ from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
-from aquilon.utils import force_int, force_ratio
+from aquilon.utils import force_ratio
 
 
 class CommandAddESXCluster(BrokerCommand):
@@ -70,18 +70,15 @@ class CommandAddESXCluster(BrokerCommand):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
-        if not max_members:
+        if max_members is None:
             max_members = self.config.get("broker",
                                           "esx_cluster_max_members_default")
-        max_members = force_int("max_members", max_members)
 
         if vm_to_host_ratio is None:
             vm_to_host_ratio = self.config.get("broker",
                                                "esx_cluster_vm_to_host_ratio")
         (vm_count, host_count) = force_ratio("vm_to_host_ratio",
                                              vm_to_host_ratio)
-        down_hosts_threshold = force_int("down_hosts_threshold",
-                                         down_hosts_threshold)
 
         if tor_switch:
             dbtor_switch = get_tor_switch(session, tor_switch)

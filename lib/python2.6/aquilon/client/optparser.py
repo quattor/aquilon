@@ -492,7 +492,7 @@ class option(Element):
             str = 'parser.add_option("--'+self.name+'", dest="'+self.name+'"'
         if (self.type == 'boolean'):
             str = str+', action="store_true"'
-        elif (self.type == 'string'):
+        elif (self.type == 'string' or self.type == 'int'):
             str = str+', action="store"'
         elif (self.type=='file'):
             # Need type?

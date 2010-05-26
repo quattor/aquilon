@@ -38,7 +38,6 @@ from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.utils import force_int
 
 class CommandAddDisk(BrokerCommand):
 
@@ -68,7 +67,6 @@ class CommandAddDisk(BrokerCommand):
                                 "of: %s." % (controller,
                                              ", ".join(controller_types)))
 
-        size = force_int("size", size)
         if share:
             dbservice = Service.get_unique(session, "nas_disk_share",
                                            compel=True)

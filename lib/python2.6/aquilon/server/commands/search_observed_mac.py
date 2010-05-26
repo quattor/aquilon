@@ -32,7 +32,6 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import ObservedMac
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
-from aquilon.utils import force_int
 
 
 class CommandObservedMac(BrokerCommand):
@@ -45,8 +44,7 @@ class CommandObservedMac(BrokerCommand):
         if tor_switch:
             dbtor_switch = get_tor_switch(session, tor_switch)
             q = q.filter_by(switch=dbtor_switch)
-        if port_number:
-            port_number = force_int("port_number", port_number)
+        if port_number is not None:
             q = q.filter_by(port_number=port_number)
         if mac:
             q = q.filter_by(mac_address=mac)

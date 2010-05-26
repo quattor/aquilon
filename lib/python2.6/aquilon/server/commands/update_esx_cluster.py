@@ -38,7 +38,7 @@ from aquilon.server.templates.machine import (PlenaryMachineInfo,
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.utils import force_int, force_ratio
+from aquilon.utils import force_ratio
 
 
 class CommandUpdateESXCluster(BrokerCommand):
@@ -109,7 +109,6 @@ class CommandUpdateESXCluster(BrokerCommand):
             dbcluster.personality = dbpersonality
             cluster_updated = True
 
-        max_members = force_int("max_members", max_members)
         if max_members is not None:
             current_members = len(dbcluster.hosts)
             if max_members < current_members:
@@ -128,9 +127,6 @@ class CommandUpdateESXCluster(BrokerCommand):
                 host_count = dbcluster.host_count
             if down_hosts_threshold is None:
                 down_hosts_threshold = dbcluster.down_hosts_threshold
-            else:
-                down_hosts_threshold = force_int("down_hosts_threshold",
-                                                 down_hosts_threshold)
             dbcluster.verify_ratio(vm_part=vm_count, host_part=host_count,
                                    down_hosts_threshold=down_hosts_threshold)
             dbcluster.vm_count = vm_count

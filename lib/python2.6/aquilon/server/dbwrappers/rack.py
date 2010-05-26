@@ -34,7 +34,6 @@ from sqlalchemy.orm.exc import NoResultFound
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Rack
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.utils import force_int
 
 
 def get_or_create_rack(session, rackid, rackrow, rackcolumn,

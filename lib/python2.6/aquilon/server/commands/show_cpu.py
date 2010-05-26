@@ -31,7 +31,6 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu, Vendor
-from aquilon.utils import force_int
 
 
 class CommandShowCpu(BrokerCommand):
@@ -43,8 +42,7 @@ class CommandShowCpu(BrokerCommand):
         if vendor:
             dbvendor = Vendor.get_unique(session, vendor, compel=True)
             q = q.filter_by(vendor=dbvendor)
-        if speed:
-            speed = force_int("speed", speed)
+        if speed is not None:
             q = q.filter_by(speed=speed)
         q = q.join(Vendor)
         q = q.order_by([Vendor.name, Cpu.name])

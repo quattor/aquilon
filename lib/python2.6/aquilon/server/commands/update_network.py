@@ -35,7 +35,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model import Network
-from aquilon.utils import force_boolean, force_ipv4
+from aquilon.utils import force_ipv4
 
 class CommandUpdateNetwork(BrokerCommand):
 
@@ -62,9 +62,6 @@ class CommandUpdateNetwork(BrokerCommand):
             if len(networks) <= 0:
                 raise NotFoundException("No existing networks found with the "
                                         "specified network type or location.")
-
-        discovered = force_boolean("--discovered", discovered)
-        discoverable = force_boolean("--discoverable", discoverable)
 
         for net in networks:
             if discoverable is not None:

@@ -32,7 +32,6 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Vendor, Model, MachineSpecs, Cpu
-from aquilon.utils import force_int
 
 
 class CommandAddModel(BrokerCommand):
@@ -57,19 +56,12 @@ class CommandAddModel(BrokerCommand):
         if arguments.get("cputype", None):
             cpuname = arguments["cputype"]
 
-        if cpuname:
-            memory = force_int("memory", memory)
-            cpuspeed = force_int("cpuspeed", cpuspeed)
-            cpunum = force_int("cpunum", cpunum)
-            disksize = force_int("disksize", disksize)
-            nics = force_int("nics", nics)
-
         dbmodel = Model(name=model, vendor=dbvendor, machine_type=type,
-                comments=comments)
+                        comments=comments)
         session.add(dbmodel)
         session.flush()
 
-        if cpuname or cpuvendor or cpuspeed:
+        if cpuname or cpuvendor or cpuspeed is not None:
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
                                    speed=cpuspeed, compel=True)
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,

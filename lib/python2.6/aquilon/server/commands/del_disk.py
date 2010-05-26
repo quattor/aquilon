@@ -34,7 +34,6 @@ from aquilon.aqdb.model import Disk, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.utils import force_int
 
 
 class CommandDelDisk(BrokerCommand):
@@ -60,8 +59,7 @@ class CommandDelDisk(BrokerCommand):
                                     "one of: %s." % (controller,
                                                      ", ".join(controller_types)))
             q = q.filter_by(controller_type=controller)
-        if size:
-            size = force_int("size", size)
+        if size is not None:
             q = q.filter_by(capacity=size)
         results = q.all()
         if len(results) == 1:

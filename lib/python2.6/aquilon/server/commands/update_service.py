@@ -35,7 +35,6 @@ from aquilon.aqdb.model import Service
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
-from aquilon.utils import force_int
 
 
 class CommandAddService(BrokerCommand):
@@ -46,8 +45,8 @@ class CommandAddService(BrokerCommand):
         dbservice = Service.get_unique(session, name=service, compel=True)
         if default:
             dbservice.max_clients = None
-        elif max_clients:
-            dbservice.max_clients = force_int("max_clients", max_clients)
+        elif max_clients is not None:
+            dbservice.max_clients = max_clients
         else:
             raise ArgumentError("Missing --max_clients or --default argument "
                                 "to update service %s." % dbservice.name)

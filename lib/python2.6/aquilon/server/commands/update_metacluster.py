@@ -32,7 +32,6 @@ from aquilon.server.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.utils import force_int
 
 
 class CommandUpdateMetaCluster(BrokerCommand):
@@ -43,7 +42,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
                **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-        max_members = force_int("max_members", max_members)
         if max_members is not None:
             current_members = len(dbmetacluster.members)
             if max_members < current_members:
@@ -53,7 +51,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
                                      max_members))
             dbmetacluster.max_clusters = max_members
 
-        max_shares = force_int("max_shares", max_shares)
         if max_shares is not None:
             current_shares = len(dbmetacluster.shares)
             if max_shares < current_shares:

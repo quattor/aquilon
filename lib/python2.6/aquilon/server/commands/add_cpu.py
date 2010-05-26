@@ -31,7 +31,6 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu, Vendor
-from aquilon.utils import force_int
 
 
 class CommandAddCpu(BrokerCommand):
@@ -40,7 +39,6 @@ class CommandAddCpu(BrokerCommand):
 
     def render(self, session, cpu, vendor, speed, comments, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
-        speed = force_int("speed", speed)
 
         Cpu.get_unique(session, name=cpu, vendor=dbvendor, speed=speed,
                        preclude=True)
