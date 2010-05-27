@@ -48,7 +48,9 @@ from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.base import Plenary, PlenaryCollection
+from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.services import Chooser
+from aquilon.server.processes import sync_domain
 
 
 audit_id = 0
@@ -341,7 +343,8 @@ class BrokerCommand(object):
         #log.msg("Checking %s" % cls.__module__)
         for (key, item) in sys.modules[cls.__module__].__dict__.items():
             #log.msg("  Checking %s" % item)
-            if item == lock_queue:
+            if item == lock_queue or item == sync_domain or \
+               item == TemplateDomain:
                 return False
             if not isclass(item):
                 continue
