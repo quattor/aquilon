@@ -33,6 +33,7 @@ import os
 import sys
 import logging
 import optparse
+from ipaddr import IPv4Address, IPv4Network
 
 if __name__ == "__main__":
     DIR = os.path.dirname(os.path.realpath(__file__))
@@ -43,11 +44,10 @@ from sqlalchemy.exceptions import DatabaseError, IntegrityError
 from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Building, System, Network
-from aquilon.aqdb.model.network import _mask_to_cidr, get_bcast
+from aquilon.aqdb.model.network import _mask_to_cidr
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.dsdb import DsdbConnection
 from aquilon.aqdb.data_sync.net_record import NetRecord
-from aquilon.aqdb.column_types.IPV4 import dq_to_int
 
 LOGGER = logging.getLogger('aquilon.aqdb.data_sync.net_refresh')
 
@@ -106,8 +106,10 @@ class NetRefresher(object):
         for building in self.session.query(Building).all():
             buildings[building.name] = building
         for (name, ip, mask, type, bldg, side) in data:
+            cidr = _mask_to_cidr[mask]
+            ip = IPv4Address(ip)
             d[ip] = NetRecord(ip=ip, name=name, net_type=type,
-                              mask=mask, side=side, bldg=bldg,
+                              cidr=cidr, side=side, bldg=bldg,
                               location=buildings.get(bldg, None))
         return d
 
@@ -203,12 +205,8 @@ class NetRefresher(object):
                     self._error(msg + "building %s missing in aqdb" %
                                 ds[i].bldg)
                 continue
-            c = _mask_to_cidr[ds[i].mask]
             net = Network(name=ds[i].name,
-                          ip=ds[i].ip,
-                          mask=ds[i].mask,
-                          cidr=c,
-                          bcast=get_bcast(ds[i].ip, c),
+                          network=IPv4Network("%s/%s" % (ds[i].ip, ds[i].cidr)),
                           network_type=ds[i].net_type,
                           side=ds[i].side,
                           location=ds[i].location)
@@ -258,15 +256,10 @@ class NetRefresher(object):
         q = q.order_by(asc(Network.ip))
         networks = q.all()
 
-        # Caches of the int representations of the IP addresses
-        system_ips = [dq_to_int(s.ip) for s in systems]
-        network_ips = [dq_to_int(n.ip) for n in networks]
-        bcast_ips = [dq_to_int(n.bcast) for n in networks]
-
         def set_network(s, n):
             if s.network != n:
                 s.network = n
-                session.add(s)
+                self.session.add(s)
                 self._commit('updating %s [%s] with network %s' %
                              (s.fqdn, s.ip, n.ip))
 
@@ -280,20 +273,16 @@ class NetRefresher(object):
             # database objects
             sys = systems[s_index]
             net = networks[n_index]
-            # int representations of the IP addresses contained in the objects.
-            s_ip = system_ips[s_index]
-            n_ip = network_ips[n_index]
-            b_ip = bcast_ips[n_index]
             # Hopefully the common case... our system IP is in the range
             # of the current network.  Make sure the network is set
             # appropriately and move on to the next system.
-            if n_ip <= s_ip <= b_ip:
+            if sys.ip in net.network:
                 set_network(sys, net)
                 s_index += 1
                 continue
             # Our system is beyond the range of the current network, so
             # proceed to checking against the next network.
-            if s_ip > b_ip:
+            if sys.ip > net.bcast:
                 n_index += 1
                 continue
             # At this point we know our system is not in the range of

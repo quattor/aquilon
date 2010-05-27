@@ -35,6 +35,10 @@
 import os
 import signal
 
+from ipaddr import IPv4Address, IPv4IpValidationError
+
+from aquilon.exceptions_ import ArgumentError
+
 def kill_from_pid_file(pid_file):
     if os.path.isfile(pid_file):
         f = open(pid_file)
@@ -91,3 +95,13 @@ def confirm(prompt=None, resp=False):
             return True
         if ans == 'n' or ans == 'N' or ans == 'no':
             return False
+
+def force_ipv4(label, value):
+    if value is None:
+        return None
+    if isinstance(value, IPv4Address):
+        return value
+    try:
+        return IPv4Address(value)
+    except IPv4IpValidationError, e:
+        raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))

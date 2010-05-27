@@ -45,9 +45,6 @@ def setup():
 def test_location():
     assert net.location
 
-def test_addresses():
-    assert net.addresses()
-
 def test_netmask():
     assert net.netmask()
 

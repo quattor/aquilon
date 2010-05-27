@@ -34,6 +34,7 @@ from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import DnsDomain, System
 from aquilon.server.dbwrappers.network import get_network_byip
+from aquilon.utils import force_ipv4
 
 
 def get_system(session, system, system_type=System, system_label='FQDN'):
@@ -95,7 +96,8 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('shortname', None):
         q = q.filter_by(name=kwargs['shortname'])
     if kwargs.get('ip', None):
-        q = q.filter_by(ip=kwargs['ip'])
+        ip = force_ipv4("ip", kwargs['ip'])
+        q = q.filter_by(ip=ip)
     if kwargs.get('networkip', None):
         dbnetwork = get_network_byip(session, kwargs['networkip'])
         q = q.filter_by(network=dbnetwork)

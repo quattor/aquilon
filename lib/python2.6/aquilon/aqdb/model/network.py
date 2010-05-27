@@ -31,18 +31,19 @@
 from datetime import datetime
 from struct import pack
 from socket import inet_ntoa
+from ipaddr import IPv4Address, IPv4Network
 
 from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
                         UniqueConstraint, ForeignKey, Boolean, select, func)
 
 from sqlalchemy.sql import and_
+from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import relation
 
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Location
 from aquilon.aqdb.column_types import AqStr, IPV4
-from aquilon.aqdb.column_types.IPV4 import dq_to_int, get_bcast, int_to_dq
 
 #TODO: enum type for network_type, mask
 #TODO: constraint for cidr
@@ -84,8 +85,9 @@ class Network(Base):
     cidr = Column(Integer, nullable=False)
     name = Column(AqStr(255), nullable=False) #TODO: default to ip
     ip = Column(IPV4, nullable=False)
+    # We only need bcast here to make searching in the DB more efficient
     bcast = Column(IPV4, nullable=False)
-    mask = Column(Integer, nullable=False) #TODO: enum
+    mask = Column(Integer, nullable=False)    # XXX Kill this field
     side = Column(AqStr(4), nullable=True, default='a')
 
     is_discoverable = Column(Boolean, nullable=False, default=False)
@@ -96,42 +98,68 @@ class Network(Base):
 
     location = relation(Location, backref='networks')
 
+    def __init__(self, **kw):
+        args = kw.copy()
+        if "network" in kw:
+            net = args.pop("network")
+            args["ip"] = net.network
+            args["cidr"] = net.prefixlen
+            args["bcast"] = net.broadcast
+            args["mask"] = net.numhosts     # XXX Kill this fields
+        super(Base, self).__init__(**args)
+
+    def first_usable_host(self):
+        if self.network_type == 'tor_net':
+            start = 8
+        elif self.network_type == 'tor_net2':
+            start = 9
+        elif self.network_type == 'vm_storage_net':
+            start = 40
+        else:
+            start = 5
+
+        # TODO: Not sure what to do about networks like /32 and /31...
+        if self.network.numhosts < start:
+            start = 0
+
+        return self.network[start]
+
+    @property
+    def network(self):
+        return IPv4Network("%s/%s" % (self.ip, self.cidr))
+
+    @network.setter
+    def network(self, value):
+        if not isinstance(value, IPV4Network):
+            raise TypeError("An IPv4Network object is required")
+        self.ip = value.network
+        self.bcast = value.broadcast
+        self.cidr = value.prefixlen
+        self.mask = value.numhosts          # XXX Kill this field
+
+    @property
     def netmask(self):
-        bits = 0xffffffff ^ (1 << 32 - self.cidr) - 1
-        return inet_ntoa(pack('>I', bits))
-
-    def first_host(self):
-        return int_to_dq(dq_to_int(self.ip) + 1)
-
-    def last_host(self):
-        return int_to_dq(dq_to_int(self.bcast) - 1)
-
-    def addresses(self):
-        # Since range will stop one before the endpoint, passing it
-        # self.bcast effectively means that the addresses run from
-        # the network start to last_host.
-        return [int_to_dq(i) for i in range(dq_to_int(self.ip),
-                                            dq_to_int(self.bcast))]
+        return self.network.netmask
 
     @property
     def available_ip_count(self):
         # We may want to split this logic out into a separate table
         # by network type and/or mask...
-        if self.mask > 6:
+        if self.network.numhosts > 6:
             # Fallback assumption - the network ip, the gateway,
             # an ip for the router, and the broadcast are off limits.
             # We reserve two more "just in case".
-            return self.mask - 6
-        return self.mask
+            return self.network.numhosts - 6
+        return self.network.numhosts
 
     def __repr__(self):
         msg = '<Network '
 
-        if self.name != self.ip:
+        if self.name != self.network:
             msg += '%s ip=' % (self.name)
 
-        msg += '%s/%s (netmask=%s), type=%s, side=%s, located in %r>' % (
-            self.ip, self.cidr, _cidr_to_mask[self.cidr][0], self.network_type,
+        msg += '%s (netmask=%s), type=%s, side=%s, located in %r>' % (
+            str(self.network), str(self.network.netmask), self.network_type,
             self.side, self.location)
         return msg
 
@@ -150,16 +178,14 @@ def get_net_id_from_ip(s, ip):
     if ip is None:
         return None
 
-    s1 = select([func.max(network.c.ip)], and_(
-        network.c.ip <= ip, ip <= network.c.bcast))
-
-    s2 = select([network.c.id], network.c.ip == s1)
-
-    row = s.execute(s2).fetchone()
-    if not row:
+    q = s.query(Network)
+    q = q.filter(Network.ip <= ip)
+    q = q.filter(Network.bcast >= ip)
+    q = q.order_by(desc(Network.ip))
+    net = q.first()
+    if not net:
         raise ArgumentError("Could not determine network for ip %s" % ip)
-
-    return s.query(Network).get(row[0])
+    return net
 
 
 @monkeypatch(network)
@@ -204,14 +230,10 @@ def populate(sess, **kw):
                 continue
 
             kwargs['name'] = name
-            kwargs['ip'] = ip
-            kwargs['mask'] = mask
-            kwargs['cidr'] = _mask_to_cidr[mask]
-            kwargs['bcast'] = get_bcast(ip, kwargs['cidr'])
-
+            kwargs['network'] = IPv4Network("%s/%s" % (ip, _mask_to_cidr[mask]))
             kwargs['network_type'] = network_type
 
-            if network_type == 'tor_net' or 'grid access':
+            if network_type == 'tor_net' or network_type == 'grid_access':
                 kwargs['is_discoverable'] = True
 
             if side:
@@ -274,37 +296,3 @@ _mask_to_cidr = {
     1073741824 : 2,
     2147483648 : 1,
     4294967296 : 0}
-
-_cidr_to_mask = { 32: ['255.255.255.255', 1],
-    31: ['255.255.255.254', 2],
-    30: ['255.255.255.252', 4],
-    29: ['255.255.255.248', 8],
-    28: ['255.255.255.240', 16],
-    27: ['255.255.255.224', 32],
-    26: ['255.255.255.192', 64],
-    25: ['255.255.255.128', 128],
-    24: ['255.255.255.0', 256],   #/24 = class C
-    23: ['255.255.254.0', 512],
-    22: ['255.255.252.0', 1024],
-    21: ['255.255.248.0', 2048],
-    20: ['255.255.240.0', 4096],
-    19: ['255.255.224.0', 8192],
-    18: ['255.255.192.0', 16384],
-    17: ['255.255.128.0', 32768],
-    16: ['255.255.0.0', 65536],     #/16 = class B
-    15: ['255.254.0.0', 131072],
-    14: ['255.252.0.0', 262144],
-    13: ['255.248.0.0', 524288],
-    12: ['255.240.0.0', 1048576],
-    11: ['255.224.0.0', 2097152],
-    10: ['255.192.0.0', 4194304],
-    9: ['255.128.0.0', 8388608],
-    8: ['255.0.0.0', 16777216],      #/8 = class A
-    7: ['254.0.0.0', 33554432],
-    6: ['252.0.0.0', 67108864],
-    5: ['248.0.0.0', 134217728],
-    4: ['240.0.0.0', 268435456],
-    3: ['224.0.0.0', 536870912],
-    2: ['192.0.0.0', 1073741824],
-    1: ['128.0.0.0', 2147483648],
-    0: ['0.0.0.0', 4294967296]}

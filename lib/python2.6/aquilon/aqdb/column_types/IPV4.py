@@ -30,21 +30,9 @@
 
 from struct import pack, unpack
 from socket import inet_aton, inet_ntoa
+from ipaddr import IPv4Address
 
 import sqlalchemy
-
-def dq_to_int(dq):
-        return unpack('!L', inet_aton(dq))[0]
-
-def int_to_dq(n):
-    #Force incoming Decimal to a long to prevent odd issues from struct.pack()
-    return inet_ntoa(pack('!L', long(n)))
-
-def cidr_to_int(cidr):
-    return(0xffffffffL >> (32- cidr)) << (32 - cidr)
-
-def get_bcast(ip, cidr):
-    return int_to_dq( dq_to_int(ip) |  (0xffffffff - cidr_to_int(cidr)))
 
 class IPV4(sqlalchemy.types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
@@ -52,31 +40,24 @@ class IPV4(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.Integer
     impl.length = 9  # hardcoding for now, TODO: figure it out and fix
 
-    def process_bind_param(self, dq, engine):
-        if not dq:
+    def process_bind_param(self, value, engine):
+        if value is None:
+            ip = None
+        elif isinstance(value, IPv4Address):
+            ip = int(value)
+        elif isinstance(value, str):
+            ip = int(IPv4Address(value))
+        elif isinstance(value, int):
+            ip = value
+        else:
+            raise TypeError("Unknown input type: %s" % repr(value))
+        return ip
+
+    def process_result_value(self, value, engine):
+        if value is None:
             return None
-        #if column is nullable you cant raise TypeError('IPV4 cant be None')
-
-        dq = str(dq)
-        q = dq.split('.')
-
-        if len(q) != 4:
-            msg = "%r: IPv4 address invalid: should contain 4 bytes" %(dq)
-            raise TypeError(msg)
-
-        for x in q:
-            if 0 > int(x) > 255:
-                msg = (dq, " : bytes should be between 0 and 255")
-                raise TypeError(msg)
-
-        return dq_to_int(dq)
-
-    def process_result_value(self, n, engine):
-        # Force the incoming Decimal to a long to prevent odd issues when
-        # struct.pack() tries it...
-        if n is None:
-            return None
-        return int_to_dq(n)
+        else:
+            return IPv4Address(value)
 
     def copy(self):
         return IPV4(self.impl.length)

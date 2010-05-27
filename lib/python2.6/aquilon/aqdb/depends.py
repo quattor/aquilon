@@ -39,3 +39,5 @@ ms.version.addpkg('ipython', '0.10')
 ms.version.addpkg('argparse', '1.1')
 
 ms.version.addpkg('ms.modulecmd', '1.0.2')
+
+ms.version.addpkg('ipaddr', '2.0.0')

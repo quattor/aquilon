@@ -627,8 +627,9 @@
       --ipfromsystem: choose based on the subnet in use by the given system
       --autoip:       check discovery tables (filled in by aq poll)
       <p/>
-      Two algorithms are available for deriving the IP address.
-      lowest:         Use lowest available IP in the subnet.
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_host_opts" mandatory="True" fields="all">
@@ -651,7 +652,7 @@
          <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s" />
@@ -666,8 +667,9 @@
       --ipfromsystem: choose based on the subnet in use by the given system
       --autoip:       check discovery tables (filled in by aq poll)
       <p/>
-      Two algorithms are available for deriving the IP address.
-      lowest:         Use lowest available IP in the subnet.
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_aquilon_host_opts" mandatory="True" fields="all">
@@ -690,7 +692,7 @@
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="comments" type="string">Comments</option>
          <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
       </optgroup>
       <transport method="put" path="aquilon_host/%(hostname)s" />
    </command>
@@ -704,8 +706,9 @@
       --ipfromsystem: choose based on the subnet in use by the given system
       --autoip:       check discovery tables (filled in by aq poll)
       <p/>
-      Two algorithms are available for deriving the IP address.
-      lowest:         Use lowest available IP in the subnet.
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <p/>
@@ -719,7 +722,7 @@
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.  Currently defaults to 'generic'.</option>
          <option name="comments" type="string">Comments</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <optgroup name="add_host_ip_opts" mandatory="False" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -765,8 +768,9 @@
       --ipfromsystem: choose based on the subnet in use by the given system
       --autoip:       check discovery tables (filled in by aq poll)
       <p/>
-      Two algorithms are available for deriving the IP address.
-      lowest:         Use lowest available IP in the subnet.
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_aux_opts" mandatory="True" fields="all">
@@ -785,7 +789,7 @@
       <optgroup name="optional_opts">
          <option name="interface" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
          <option name="mac" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="auxiliary/%(auxiliary)s" />
@@ -836,8 +840,9 @@
       --ipfromsystem: choose based on the subnet in use by the given system
       --autoip:       check discovery tables (filled in by aq poll)
       <p/>
-      Two algorithms are available for deriving the IP address.
-      lowest:         Use lowest available IP in the subnet.
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_manager_opts" mandatory="True" fields="all">
@@ -853,7 +858,7 @@
          <option name="manager" type="string">Fully qualified name for the manager interface</option>
          <option name="interface" type="string">Specify the management interface to use, if there is more than one.</option>
          <option name="mac" type="string">Specify the management interface to use, if there is more than one.</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport trigger="manager" method="put" path="manager/%(manager)s" />
@@ -983,8 +988,9 @@
       --ipfromsystem: choose based on the subnet in use by the given system
       --autoip:       check discovery tables (filled in by aq poll)
       <p/>
-      Two algorithms are available for deriving the IP address.
-      lowest:         Use lowest available IP in the subnet.
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
       max:            Find the highest IP in use and add one.
       The default is lowest.
       <optgroup name="add_interface_opts" mandatory="True" fields="all">
@@ -1006,7 +1012,7 @@
          <option name="ipfromip" type="string" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
          <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="boolean" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.  Either lowest or max.</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="pg" type="string" conflicts="autopg">portgroup</option>
          <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
       </optgroup>

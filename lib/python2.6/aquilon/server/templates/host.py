@@ -114,7 +114,7 @@ class PlenaryToplevelHost(Plenary):
                 continue
             net = dbinterface.system.network
             # Fudge the gateway as the first available ip
-            gateway = net.first_host()
+            gateway = net.network[1]
             # We used to do this...
             #if dbinterface.bootable:
             #bootproto = "dhcp"
@@ -124,7 +124,7 @@ class PlenaryToplevelHost(Plenary):
             if dbinterface.bootable or not default_gateway:
                 default_gateway = gateway
             interfaces.append({"ip":dbinterface.system.ip,
-                    "netmask":net.netmask(),
+                    "netmask":net.netmask,
                     "broadcast":net.bcast,
                     "gateway":gateway,
                     "bootproto":bootproto,

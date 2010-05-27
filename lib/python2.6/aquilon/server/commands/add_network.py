@@ -27,12 +27,14 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+import re
+from ipaddr import IPv4Network
+
 from aquilon.exceptions_ import (ArgumentError, NotFoundException)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
-from aquilon.aqdb.model.network import Network, _mask_to_cidr, get_bcast
-import re
+from aquilon.aqdb.model.network import Network, _mask_to_cidr
 
 class CommandAddNetwork(BrokerCommand):
 
@@ -80,10 +82,7 @@ class CommandAddNetwork(BrokerCommand):
         # Okay, all looks good, let's create the network
         c = _mask_to_cidr[mask]
         net = Network(name         = network,
-                      ip           = ip,
-                      mask         = mask,
-                      cidr         = c,
-                      bcast        = get_bcast(ip, c),
+                      network      = IPv4Network("%s/%s" % (ip, c)),
                       network_type = type,
                       side         = side,
                       location     = location)

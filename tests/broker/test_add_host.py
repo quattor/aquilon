@@ -107,7 +107,21 @@ class TestAddHost(TestBrokerCommand):
                    "--osname", "linux", "--osversion", "4.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "No remaining IP addresses found on network",
+        self.matchoutput(out, "Failed to find an IP that is suitable for "
+                         "--ipalgorithm=max.  Try an other algorithm as there "
+                         "are still some free addresses.",
+                         command)
+
+    def testaddunittest16badip(self):
+        command = ["add", "host",
+                   "--hostname", "unittest16.aqd-unittest.ms.com",
+                   "--ip", "not-an-ip-address",
+                   "--machine", "ut8s02p2", "--domain", "unittest",
+                   "--buildstatus", "build", "--archetype", "aquilon",
+                   "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                   "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'not-an-ip-address' is not a valid IPv4 address",
                          command)
 
     def testaddunittest16good(self):
