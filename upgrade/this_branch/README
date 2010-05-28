@@ -20,5 +20,6 @@ Afterwards, purge the recycle bin:
 yasql $LOGIN @purge_recycle_bin
 
 In parallel with that, run the script to restructure domains:
+module load fsf/git/1.7.0
 ./template_king.sh
 
