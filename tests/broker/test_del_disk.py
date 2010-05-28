@@ -45,7 +45,7 @@ class TestDelDisk(TestBrokerCommand):
 
     def testdelut3c1n3sda(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-            "--type", "scsi", "--capacity", "68"])
+            "--controller", "scsi", "--size", "68"])
 
     def testdelut3c1n3sdb(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",

@@ -45,8 +45,8 @@ class TestAddModel(TestBrokerCommand):
 
     def testadduttorswitch(self):
         command = ["add_model", "--model=uttorswitch", "--vendor=hp",
-                   "--type=tor_switch", "--cpuname=xeon_2500", "--cpunum=1",
-                   "--mem=8192", "--disktype=local", "--diskcontroller=scsi",
+                   "--type=tor_switch", "--cputype=xeon_2500", "--cpunum=1",
+                   "--memory=8192", "--disktype=local", "--diskcontroller=scsi",
                    "--disksize=36", "--nics=4"]
         self.noouttest(command)
 
@@ -107,8 +107,9 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Type: blade", command)
 
     def testaddutmedium(self):
+        # Use the old --mem name here
         command = ["add_model", "--model=utmedium", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cpuname=xeon_2500",
+                   "--type=virtual_machine", "--cputype=xeon_2500",
                    "--cpunum=1", "--mem=8192", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=15", "--nics=1"]
         self.noouttest(command)
@@ -117,7 +118,7 @@ class TestAddModel(TestBrokerCommand):
         # This test still use --cputype to test backwards compatibility
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
                    "--type=virtual_machine", "--cputype=xeon_2660",
-                   "--cpunum=4", "--mem=16384", "--disktype=nas",
+                   "--cpunum=4", "--memory=16384", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
         self.noouttest(command)
 

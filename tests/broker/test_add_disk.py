@@ -45,11 +45,11 @@ class TestAddDisk(TestBrokerCommand):
 
     def testaddut3c5n10disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
-            "--disk", "sdb", "--type", "scsi", "--capacity", "34"])
+            "--disk", "sdb", "--controller", "scsi", "--size", "34"])
 
     def testfailaddut3c5n10disk(self):
         command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
-                   "--type=controller-does-not-exist", "--capacity=34"]
+                   "--controller=controller-does-not-exist", "--size=34"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "controller-does-not-exist is not a valid "
@@ -74,6 +74,7 @@ class TestAddDisk(TestBrokerCommand):
                           command)
 
     def testaddut3c1n3disk(self):
+        # Use the deprecated option names here
         self.noouttest(["add", "disk", "--machine", "ut3c1n3",
             "--disk", "sdb", "--type", "scsi", "--capacity", "34"])
 

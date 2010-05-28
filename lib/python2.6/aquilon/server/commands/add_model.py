@@ -39,9 +39,8 @@ class CommandAddModel(BrokerCommand):
 
     required_parameters = ["model", "vendor", "type"]
 
-    def render(self, session, model, vendor, type,
-               cpuname, cpunum, mem, disktype, diskcontroller, disksize, nics,
-               comments, **arguments):
+    def render(self, session, model, vendor, type, cpuname, cpunum, memory,
+               disktype, diskcontroller, disksize, nics, comments, **arguments):
         dbmodel = session.query(Model).filter_by(name=model).first()
         if dbmodel is not None:
             raise ArgumentError('Specified model already exists')
@@ -60,7 +59,7 @@ class CommandAddModel(BrokerCommand):
             cpuname = arguments["cputype"]
 
         if cpuname:
-            mem = force_int("mem", mem)
+            memory = force_int("memory", memory)
             cpunum = force_int("cpunum", cpunum)
             disksize = force_int("disksize", disksize)
             nics = force_int("nics", nics)
@@ -73,7 +72,7 @@ class CommandAddModel(BrokerCommand):
         if cpuname:
             dbcpu = get_cpu(session, cpuname)
             dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
-                                           cpu_quantity=cpunum, memory=mem,
+                                           cpu_quantity=cpunum, memory=memory,
                                            disk_type=disktype,
                                            controller_type=diskcontroller,
                                            disk_capacity=disksize,

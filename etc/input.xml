@@ -548,8 +548,14 @@
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">machine ID</option>
          <option name="disk" type="string">device name of the disk (like sda)</option>
-         <option name="type" type="string">type of the disk</option>
-         <option name="capacity" type="string">capacity of the disk (GB)</option>
+         <optgroup name="controller_opts" fields="any">
+            <option name="controller" type="string" conflicts="type">type of the disk</option>
+            <option name="type" type="string" conflicts="controller">[Deprecated] type of the disk</option>
+         </optgroup>
+         <optgroup name="size_opts" fields="any">
+            <option name="size" type="string" conflicts="capacity">capacity of the disk (GB)</option>
+            <option name="capacity" type="string" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
+         </optgroup>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
          <option name="share" type="string">share name (an instance of nas_disk_share service)</option>
@@ -571,8 +577,14 @@
       </optgroup>
       <optgroup name="del_disk_optional_opts" mandatory="False">
          <option name="disk" type="string">device name of the disk (like sda)</option>
-         <option name="type" type="string">type of the disk</option>
-         <option name="capacity" type="string">capacity of the disk</option>
+         <optgroup name="controller_opts" fields="any">
+            <option name="controller" type="string" conflicts="type">type of the disk</option>
+            <option name="type" type="string" conflicts="controller">[Deprecated] type of the disk</option>
+         </optgroup>
+         <optgroup name="size_opts" fields="any">
+            <option name="size" type="string" conflicts="capacity">capacity of the disk (GB)</option>
+            <option name="capacity" type="string" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
+         </optgroup>
          <option name="all" type="boolean">remove any matching disks</option>
       </optgroup>
       <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />
@@ -861,7 +873,7 @@
             <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
          </optgroup>
          <option name="cpunum" type="string">CPU count</option>
-         <option name="mem" type="string">amount of installed memory (MB)</option>
+         <option name="memory" type="string">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
          <option name="disksize" type="string">installed disk capacity (GB)</option>
@@ -901,7 +913,7 @@
          <option name="cpuvendor" type="string">CPU vendor</option>
          <option name="cpuspeed" type="string">CPU speed</option>
          <option name="cpunum" type="string">CPU count</option>
-         <option name="mem" type="string">amount of installed memory (MB)</option>
+         <option name="memory" type="string">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
          <option name="disksize" type="string">installed disk capacity (GB)</option>
@@ -1406,8 +1418,9 @@
       for the personality or the archetype are dropped unless the
       --keepbindings flag is specified.
       <optgroup name="reconfigure_options" mandatory="True" fields="any">
-         <option name="hostname" type="string" conflicts="hostlist">Host name</option>
-         <option name="hostlist" type="file" conflicts="hostname">File with one host per line</option>
+         <option name="hostname" type="string" conflicts="hostlist list">Host name</option>
+         <option name="hostlist" type="file" conflicts="hostname list">[Deprecated] File with one host per line</option>
+         <option name="list" type="file" conflicts="hostname hostlist">File with one host per line</option>
       </optgroup>
       <optgroup name="reconfigure_optional" mandatory="False">
          <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
@@ -1419,6 +1432,7 @@
          <option name="os" type="string">[Deprecated] OS to assign to host</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/reconfigure" />
+      <transport trigger="list" method="post" path="command/reconfigure/list" />
       <transport trigger="hostlist" method="post" path="command/reconfigure/hostlist" />
    </command>
 

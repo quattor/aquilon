@@ -43,7 +43,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestReconfigure(TestBrokerCommand):
-    # Note that some tests for reconfigure --hostlist appear in
+    # Note that some tests for reconfigure --list appear in
     # test_make_aquilon.py.
 
     # The unbind test has removed the service bindings for dns,
@@ -236,7 +236,7 @@ class TestReconfigure(TestBrokerCommand):
     def testmissingpersonalitytemplatehostlist(self):
         hosts = ["aquilon93.aqd-unittest.ms.com\n"]
         scratchfile = self.writescratch("missingtemplate", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon", "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
@@ -264,7 +264,7 @@ class TestReconfigure(TestBrokerCommand):
     def testmissingrequiredservice(self):
         hosts = ["aquilon91.aqd-unittest.ms.com\n"]
         scratchfile = self.writescratch("missingmap", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon",
                    "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
@@ -395,7 +395,7 @@ class TestReconfigure(TestBrokerCommand):
 #       hosts = ["unittest02.one-nyp.ms.com\n",
 #                "aquilon91.aqd-unittest.ms.com\n"]
 #       scratchfile = self.writescratch("diffdomains", "".join(hosts))
-#       command = ["reconfigure", "--hostlist", scratchfile]
+#       command = ["reconfigure", "--list", scratchfile]
 #       out = self.badrequesttest(command)
 #       self.matchoutput(out, "All hosts must be in the same domain:", command)
 #       self.matchoutput(out, "1 hosts in domain changetest1", command)
@@ -404,7 +404,7 @@ class TestReconfigure(TestBrokerCommand):
     def testhostlistos(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("bados", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--os=os-does-not-exist"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -415,7 +415,7 @@ class TestReconfigure(TestBrokerCommand):
     def testhostlistnoosversion(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosversion", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile, "--osname=linux"]
+        command = ["reconfigure", "--list", scratchfile, "--osname=linux"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Please specify --osversion for OS linux",
                          command)
@@ -423,7 +423,7 @@ class TestReconfigure(TestBrokerCommand):
     def testhostlistnoosname(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosname", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--osversion=4.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -434,7 +434,7 @@ class TestReconfigure(TestBrokerCommand):
     def testhostlistnoosarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosarchetype", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--osname=linux", "--osversion=4.0.1-x86_64"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -445,7 +445,7 @@ class TestReconfigure(TestBrokerCommand):
     def testhostlistnopersonalityarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingarchetype", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--personality=generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -455,7 +455,7 @@ class TestReconfigure(TestBrokerCommand):
     def testemptyhostlist(self):
         hosts = ["#host\n", "#does\n", "\n", "   #not   \n", "#exist\n"]
         scratchfile = self.writescratch("empty", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile]
+        command = ["reconfigure", "--list", scratchfile]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Empty hostlist.", command)
 
@@ -465,9 +465,10 @@ class TestReconfigure(TestBrokerCommand):
                  "aquilon91.aqd-unittest.ms.com\n",
                  "host.domain-does-not-exist.ms.com\n"]
         scratchfile = self.writescratch("missinghost", "".join(hosts))
+        # Use the deprecated option name here
         command = ["reconfigure", "--hostlist", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Invalid entries in hostlist:", command)
+        self.matchoutput(out, "Invalid hosts in list:", command)
         self.matchoutput(out, "host-does-not-exist.aqd-unittest.ms.com:",
                          command)
         self.matchoutput(out,

@@ -47,7 +47,7 @@ class CommandUpdateModel(BrokerCommand):
     # aqdb label.
     argument_lookup = {'cpuname':'name', 'cpuvendor':'vendor',
                        'cpuspeed':'speed', 'cpunum':'cpu_quantity',
-                       'mem':'memory', 'disktype':'disk_type',
+                       'memory':'memory', 'disktype':'disk_type',
                        'diskcontroller': 'controller_type',
                        'disksize': 'disk_capacity', 'nics':'nic_count'}
 
@@ -61,7 +61,7 @@ class CommandUpdateModel(BrokerCommand):
                        'cpuname', 'cpuvendor', 'disktype', 'diskcontroller']:
                 if value is not None:
                     arguments[arg] = value.lower().strip()
-            elif arg in ['cpuspeed', 'cpunum', 'mem', 'disksize', 'nics']:
+            elif arg in ['cpuspeed', 'cpunum', 'memory', 'disksize', 'nics']:
                 if value is not None:
                     arguments[arg] = force_int(arg, value)
 
@@ -113,7 +113,7 @@ class CommandUpdateModel(BrokerCommand):
         cpu_info = dict([(self.argument_lookup[arg], arguments[arg])
                          for arg in cpu_args])
         cpu_values = [v for v in cpu_info.values() if v is not None]
-        spec_args = ['cpunum', 'mem', 'disktype', 'diskcontroller',
+        spec_args = ['cpunum', 'memory', 'disktype', 'diskcontroller',
                      'disksize', 'nics']
         specs = dict([(self.argument_lookup[arg], arguments[arg])
                       for arg in spec_args])
@@ -139,7 +139,7 @@ class CommandUpdateModel(BrokerCommand):
                                       attr='cpu', value=dbcpu,
                                       fix_existing=fix_existing)
 
-        for arg in ['mem', 'cpunum']:
+        for arg in ['memory', 'cpunum']:
             if arguments[arg] is not None:
                 self.update_machine_specs(model=dbmodel, dbmachines=dbmachines,
                                           attr=self.argument_lookup[arg],

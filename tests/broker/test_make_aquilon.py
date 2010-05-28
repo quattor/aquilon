@@ -243,11 +243,11 @@ class TestMakeAquilon(TestBrokerCommand):
         # 81 - 90 are unixeng-test below
         # 91 - 99 are reserved for testing failure conditions
         # Note that make and reconfigure are basically the same thing for
-        # a compileable archetype, so testing reconfigure --hostlist here.
+        # a compileable archetype, so testing reconfigure --list here.
         # (This used to be a loop for make.)
         hosts = ["aquilon%d.aqd-unittest.ms.com\n" % i for i in range(61, 66)]
         scratchfile = self.writescratch("hpinventory", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile]
+        command = ["reconfigure", "--list", scratchfile]
         (out, err) = self.successtest(command)
         for hostname in hosts:
             h = hostname.strip()
@@ -257,7 +257,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakerhel5(self):
         hosts = ["aquilon%d.aqd-unittest.ms.com\n" % i for i in range(66, 71)]
         scratchfile = self.writescratch("rhel5hosts", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--buildstatus=build", "--archetype=aquilon",
                    "--osname=linux", "--osversion=5.0-x86_64"]
         (out, err) = self.successtest(command)
@@ -269,7 +269,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testmakehpunixeng(self):
         hosts = ["aquilon%d.aqd-unittest.ms.com\n" % i for i in range(81, 90)]
         scratchfile = self.writescratch("hpunixeng", "".join(hosts))
-        command = ["reconfigure", "--hostlist", scratchfile,
+        command = ["reconfigure", "--list", scratchfile,
                    "--archetype=aquilon", "--personality=unixeng-test"]
         (out, err) = self.successtest(command)
         for hostname in hosts:

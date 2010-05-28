@@ -110,8 +110,8 @@ class TestAdd10GigHardware(TestBrokerCommand):
             share = "utecl%d_share" % (5 + (i / 3))
             machine = "evm%d" % (10 + i)
             self.noouttest(["add", "disk", "--machine", machine,
-                            "--disk", "sda", "--type", "sata",
-                            "--capacity", "15", "--share", share,
+                            "--disk", "sda", "--controller", "sata",
+                            "--size", "15", "--share", share,
                             "--address", "0:0"])
 
     def test_150_verifypg(self):
