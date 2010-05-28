@@ -368,16 +368,6 @@ class RestServer(ResponsePage):
                     if option_name not in myinstance.optional_parameters:
                         myinstance.optional_parameters.append(option_name)
 
-        # FIXME: Only do this if needed...
-        # Serve up a static templates directory for git...
-        #log.msg("Checking on %s" % self.broker.templatesdir)
-        templatesdir = config.get("broker", "templatesdir")
-        if os.path.exists(templatesdir):
-            self.putChild("templates", static.File(templatesdir))
-        else:
-            log.msg("ERROR: templates directory '%s' not found, will not serve"
-                    % templatesdir)
-
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))
         self.make_required_dirs()

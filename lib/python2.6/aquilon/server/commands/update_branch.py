@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,32 +26,39 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq update domain`."""
+"""Contains the logic for `aq update branch`."""
 
 
+import re
+import os
+
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Branch
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.user_principal import (
-        get_or_create_user_principal)
-from aquilon.aqdb.model import Domain
+
+VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 
 
-class CommandUpdateDomain(BrokerCommand):
+class CommandUpdateBranch(BrokerCommand):
 
-    required_parameters = ["domain"]
+    required_parameters = ["branch"]
 
-    def render(self, session, domain, comments, owner, compiler, user,
-               **arguments):
-        dbdomain = Domain.get_unique(session, domain, compel=True)
-        if owner:
-            dbowner = get_or_create_user_principal(session, owner,
-                                                   createuser=False,
-                                                   createrealm=False)
-            dbdomain.owner = dbowner
+    def render(self, session, logger, branch, comments, compiler_version,
+               autosync, noautosync, **arguments):
+        dbbranch = Branch.get_unique(session, branch, compel=True)
         if comments:
-            dbdomain.comments = comments
-        if compiler:
-            dbdomain.compiler = compiler
-        session.add(dbdomain)
+            dbbranch.comments = comments
+        if compiler_version:
+            if not VERSION_RE.match(compiler_version):
+                raise ArgumentError("Invalid characters in compiler version")
+            compiler = self.config.get("panc", "pan_compiler", raw=True) % {
+                'version':compiler_version}
+            if not os.path.exists(compiler):
+                raise ArgumentError("Compiler not found at '%s'" % compiler)
+            dbbranch.compiler = compiler
+        if noautosync:
+            dbbranch.autosync = False
+        if autosync:
+            dbbranch.autosync = True
+        session.add(dbbranch)
         return
-
-

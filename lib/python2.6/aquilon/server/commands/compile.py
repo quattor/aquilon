@@ -30,18 +30,20 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Machine, Domain, Service
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.templates.domain import TemplateDomain
-from aquilon.exceptions_ import NotFoundException
 
 
 class CommandCompile(BrokerCommand):
 
-    required_parameters = ["domain"]
+    required_parameters = []
     requires_readonly = True
 
-    def render(self, session, logger, domain, user, **arguments):
-        dbdomain = Domain.get_unique(session, domain, compel=True)
-        dom = TemplateDomain(dbdomain, logger=logger)
+    def render(self, session, logger, domain, sandbox, **arguments):
+        (dbdomain, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     compel=True)
+        dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         dom.compile(session)
         return

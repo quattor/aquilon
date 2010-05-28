@@ -33,46 +33,28 @@ import os
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.server.processes import run_command
 from aquilon.aqdb.model import Domain
+from aquilon.server.processes import sync_domain
 
 
 class CommandSync(BrokerCommand):
 
     required_parameters = ["domain"]
-    requires_readonly = True
 
     def render(self, session, logger, domain, **arguments):
-        # Verify that it exists before attempting the sync.
         dbdomain = Domain.get_unique(session, domain, compel=True)
-        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
-                dbdomain.name)
-        git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
-            os.environ.get("PATH", ""))}
-        key = CompileKey(domain=dbdomain.name, logger=logger)
-        try:
-            lock_queue.acquire(key)
-            run_command(["git", "checkout", "master"],
-                        path=domaindir, env=git_env, logger=logger)
-            run_command(["git", "pull"],
-                        path=domaindir, env=git_env, logger=logger)
-        except ProcessException, e:
-            run_command(["git", "reset", "--hard", "origin/master"],
-                        path=domaindir, env=git_env, logger=logger)
-            raise ArgumentError('''
-                %s%s
+        if not dbdomain.tracked_branch:
+            # Could check dbdomain.trackers and sync all of them...
+            raise ArgumentError("sync requires a tracking domain")
+        if not dbdomain.tracked_branch.is_sync_valid:
+            raise ArgumentError("Tracked branch %s is set to not allow sync.  "
+                                "Run aq validate to mark it as valid." %
+                                dbdomain.tracked_branch.name)
 
-                WARNING: Your domain repository on the broker has been forcefully reset
-                because it conflicted with the latest upstream changes.  Your changes on
-                the broker are now lost, but should still be present in your local copy.
-                Please checkout master and re-run aq_sync for your domain and
-                resolve the conflict locally before re-attempting to deploy.
-            ''' %(e.out,e.err))
-        finally:
-            lock_queue.release(key)
-            run_command(["git-update-server-info"],
-                        path=domaindir, env=git_env, logger=logger)
-        remote_command = """env PATH="%s:$PATH" NO_PROXY=* git pull""" % (
-                self.config.get("broker", "git_path"))
-        return str(remote_command)
+        try:
+            sync_domain(dbdomain, logger=logger)
+        except ProcessException, e:
+            raise ArgumentError("Problem encountered updating templates for "
+                                "domain %s: %s", dbdomain.name, e)
+
+        return

@@ -34,15 +34,15 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import (Base, System, Domain, Machine, Status,
-                                Personality, OperatingSystem)
+from aquilon.aqdb.model import (Base, System, Branch, Machine, Status,
+                                Personality, OperatingSystem, UserPrincipal)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 
 class Host(System):
     """ Here's our most common kind of System, the Host. Putting a physical
         machine into a chassis and powering it up leaves it in a state with a
-        few more attributes not filled in: what Domain configures this host?
+        few more attributes not filled in: what Branch configures this host?
         What is the build/mcm 'status'? If Ownership is captured, this is the
         place for it. """
 
@@ -58,9 +58,14 @@ class Host(System):
                                             name='host_machine_fk'),
                         nullable=False)
 
-    domain_id = Column(Integer, ForeignKey('domain.id',
-                                           name='host_domain_fk'),
+    branch_id = Column(Integer, ForeignKey('branch.id',
+                                           name='host_branch_fk'),
                        nullable=False)
+
+    sandbox_author_id = Column(Integer,
+                               ForeignKey('user_principal.id',
+                                          name='host_sandbox_author_fk'),
+                               nullable=True)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
                                                 name='host_prsnlty_fk'),
@@ -75,7 +80,8 @@ class Host(System):
                                  nullable=False)
 
     machine = relation(Machine, backref=backref('host', uselist=False))
-    domain = relation(Domain, backref='hosts')
+    branch = relation(Branch, backref='hosts')
+    sandbox_author = relation(UserPrincipal, backref='sandboxed_hosts')
     personality = relation(Personality, backref='hosts')
     status = relation(Status, backref='hosts')
     operating_system = relation(OperatingSystem, uselist=False, backref='hosts')
@@ -101,6 +107,12 @@ class Host(System):
     def archetype(self):
         return self.personality.archetype
 
+    @property
+    def authored_branch(self):
+        if self.sandbox_author:
+            return "%s/%s" % (self.sandbox_author.name, self.branch.name)
+        return str(self.branch.name)
+
     def __repr__(self):
         return 'Host %s'%(self.name)
 
@@ -108,6 +120,6 @@ class Host(System):
 host = Host.__table__
 host.primary_key.name='host_pk'
 host.append_constraint(
-    UniqueConstraint('machine_id', 'domain_id', name='host_machine_domain_uk'))
+    UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
 
 table = host

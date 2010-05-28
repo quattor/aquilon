@@ -42,7 +42,8 @@ class CommandCatHostname(BrokerCommand):
     def render(self, generate, session, logger, hostname, **kwargs):
         dbhost = hostname_to_host(session, hostname)
 
-        dpath = "%s/domains/%s/profiles"%(self.config.get("broker", "builddir"), dbhost.domain.name)
+        dpath = "%s/domains/%s/profiles" % (
+            self.config.get("broker", "builddir"), dbhost.branch.name)
         if generate:
             plenary = PlenaryToplevelHost(dbhost)
             lines = []
@@ -50,5 +51,3 @@ class CommandCatHostname(BrokerCommand):
             return "\n".join(lines)
         else:
             return read_file(dpath, hostname + '.tpl', logger=logger)
-
-

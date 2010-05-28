@@ -29,6 +29,9 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the deploy domain command."""
 
+
+from __future__ import with_statement
+
 import os
 import sys
 import unittest
@@ -44,18 +47,37 @@ from brokertest import TestBrokerCommand
 class TestDeployDomain(TestBrokerCommand):
 
     def testdeploychangetest1domain(self):
-        self.noouttest(["deploy", "--domain", "changetest1"])
-        template = os.path.join(self.config.get("broker", "kingdir"),
-                "aquilon", "archetype", "base.tpl")
-        f = open(template)
-        try:
+        self.successtest(["deploy", "--source", "changetest1",
+                          "--target", "deployable"])
+
+    def testverifydeploy(self):
+        domainsdir = self.config.get("broker", "domainsdir")
+        ddir = os.path.join(domainsdir, "deployable")
+        template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
-        self.assertEqual(contents[-1], "#Added by unittest\n")
+        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+
+    def testdeploynosync(self):
+        self.successtest(["deploy", "--source", "changetest1",
+                          "--target", "prod", "--nosync"])
+
+    def testverifynosync(self):
+        domainsdir = self.config.get("broker", "domainsdir")
+        # The change should be in prod...
+        ddir = os.path.join(domainsdir, "prod")
+        template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
+            contents = f.readlines()
+        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+        # ...but not in the ut-prod tracking domain.
+        ddir = os.path.join(domainsdir, "ut-prod")
+        template = os.path.join(ddir, "aquilon", "archetype", "base.tpl")
+        with open(template) as f:
+            contents = f.readlines()
+        self.failIfEqual(contents[-1], "#Added by unittest\n")
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeployDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

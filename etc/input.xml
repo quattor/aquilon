@@ -249,7 +249,6 @@
          <option name="machine" type="string">node name</option>
          <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
-         <option name="domain" type="string">template domain</option>
          <option name="archetype" type="string">archetype (aquilon, windows, aurora)</option>
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
          <option name="ip" type="string">IP address</option>
@@ -265,6 +264,11 @@
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster name</option>
+         <optgroup name="search_host_branch" fields="any">
+            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+         </optgroup>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
@@ -299,12 +303,16 @@
          <option name="esx_hostname" type="string">fully qualified domain name of a vmhost</option>
          <option name="virtual_machine" type="string">virtual machine label (evm1)</option>
          <option name="guest" type="string">fully qualified host name of a virtual machine</option>
-         <option name="domain" type="string">template domain</option>
          <option name="archetype" type="string">archetype (vmhost)</option>
          <option name="personality" type="string">personality</option>
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+         <optgroup name="search_cluster_branch" fields="any">
+            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+         </optgroup>
          <optgroup name="search_cluster_location_opts" fields="any">
 	    <option name="cluster_organization" type="string">Cluster Organization</option>
 	    <option name="cluster_hub" type="string">Cluster Hub</option>
@@ -394,12 +402,13 @@
    </command>
 
    <command name="compile">
-      Compile anything that is out-of-date within a specified domain or
-      only for the specified host.  Only out of date profiles will be
-      compiled.
+      Compile anything that is out-of-date within a specified domain,
+      sandbox, or only for the specified host.  Only out of date profiles
+      will be compiled.
       <optgroup name="compile_input" mandatory="True" fields="any">
-         <option name="domain" type="string" conflicts="hostname">Domain name</option>
-      <option name="hostname" type="string" conflicts="domain">FQDN</option>
+         <option name="domain" type="string" conflicts="sandbox hostname">Domain name</option>
+         <option name="sandbox" type="string" conflicts="domain hostname">Name of the sandbox (given as 'author/branch')</option>
+         <option name="hostname" type="string" conflicts="domain sandbox">FQDN</option>
       </optgroup>
       <transport method="post" path="compile"/>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
@@ -407,13 +416,27 @@
 
    <command name="show_domain">
       Shows the configuration for a given domain. With the '--all' option,
-      every domain will be listed, with its configuration.
+      every domain will be listed with its configuration.
       <optgroup name="show_domain_Input" mandatory="True" fields="any">
          <option name="domain" type="string" conflicts="all">Domain name</option>
          <option name="all" type="boolean" conflicts="hostname">Select all domains</option>
       </optgroup>
       <transport trigger="all" method="get" path="domain" />
       <transport trigger="domain" method="get" path="domain/%(domain)s" />
+   </command>
+
+   <command name="show_sandbox">
+      Shows the configuration for a given sandbox.  With the '--all' option,
+      every sandbox will be listed with its configuration.
+      <optgroup name="show_sandbox_Input" mandatory="True" fields="any">
+         <option name="sandbox" type="string" conflicts="all">Sandbox name</option>
+         <option name="all" type="boolean" conflicts="hostname">Select all sandboxes</option>
+      </optgroup>
+      <optgroup name="show_sandbox_options" mandatory="False">
+         <option name="pathonly" type="boolean" conflicts="all">Show only the sandbox path</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="sandbox/command/show_all" />
+      <transport trigger="sandbox" method="get" path="sandbox/command/show" />
    </command>
 
    <command name="show_network">
@@ -608,7 +631,10 @@
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
          <option name="archetype" type="string">Archetype name</option>
-         <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <optgroup name="add_host_branch" mandatory="True" fields="any">
+            <option name="domain" type="string" conflicts="sandbox">Template (not DNS) domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -643,7 +669,10 @@
       <optgroup name="add_aquilon_host_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Fully qualified Host name</option>
          <option name="machine" type="string">Machine (Node) name</option>
-         <option name="domain" type="string">Aquilon (not DNS) domain</option>
+         <optgroup name="add_host_branch" mandatory="True" fields="any">
+            <option name="domain" type="string" conflicts="sandbox">Template (not DNS) domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
             <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
             <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
@@ -1447,12 +1476,27 @@
    </command>
 
    <command name="add_domain">
-      Add a new template domain. This is for testing changes to the templates. The
-      new domain will have no hosts when it is freshly created and you should use
-      the "manage" command in order to assign some hosts to the domain in order to
-      run complete tests.
-      <optgroup name="add domain options" mandatory="True" fields="all">
+      Add a new server-managed template domain.  Updates to these domains
+      can only be made through the broker.  A domain can either allow new
+      content to be merged in or can track another domain.
+
+      A tracking domain is useful because it can be rolled back to a
+      previous state quickly.  Such a domain is initialized to point to
+      the same commit as the branch it is tracking.
+
+      If a domain is not directly tracking another it still needs to
+      be initialized to start somewhere.  This is specified with the
+      start option.  The default is the head of the prod domain.
+
+      Either type of domain can be used with the "manage" command in
+      order to assign some hosts to the domain and run complete tests.
+      <optgroup name="add domain mandatory" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the new domain</option>
+      </optgroup>
+      <optgroup name="add domain optional" mandatory="False">
+         <option name="track" type="string" conflicts="start">Branch to track</option>
+         <option name="start" type="string" conflicts="track">Branch to use as a starting point (default: prod)</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="domain/%(domain)s" />
    </command>
@@ -1470,78 +1514,157 @@
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
 
-   <command name="update_domain">
-      Update the meta-information for a template domain.  This includes
-      domain owner, comments about the domain, and the location of the
-      pan compiler to use.
-      <p/>
-      Currently restricted to aqd-admin only.
-      <optgroup name="update_domain_mandatory" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the template domain</option>
+   <command name="update_branch">
+      Update the meta-information for a template branch.  This includes
+      comments about the domain, the version of the pan compiler to use,
+      and whether to automatically sync deployed or published changes
+      to tracking domains.
+      <optgroup name="update_branch_mandatory" mandatory="True" fields="all">
+         <option name="branch" type="string">Name of the template branch (domain or sandbox)</option>
       </optgroup>
-      <optgroup name="update_domain_options" mandatory="True" fields="any">
-         <option name="comments" type="string">Comments on the domain</option>
-         <option name="owner" type="string">Principal listed as domain owner</option>
-         <option name="compiler" type="string">Full path to the panc binary</option>
+      <optgroup name="update_branch_options" mandatory="True" fields="any">
+         <option name="comments" type="string">Comments on the branch</option>
+         <option name="compiler_version" type="string">Version of panc to use</option>
+         <option name="autosync" type="boolean" conflicts="noautosync">Set the autosync flag</option>
+         <option name="noautosync" type="boolean" conflicts="autosync">Unset the autosync flag</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s" />
+      <transport method="post" path="branch/%(branch)s" />
    </command>
 
    <command name="del_domain">
-      Removes the specified template domain. This will fail if there are hosts still being
-      managed by the domain: you must use the "manage" command to reassign those
-      hosts to other domains.
+      Removes the specified template domain.  This will fail if there are
+      hosts still being managed by the domain: you must use the "manage"
+      command to reassign those hosts to other domains.
       <optgroup name="del_domain_options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain to be deleted</option>
       </optgroup>
       <transport method="delete" path="domain/%(domain)s" />
    </command>
 
-   <command name="get">
-      Download a copy of the templates from the specified template domain. The
-      templates will be placed in the current directory.
-      <optgroup name="get options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the domain</option>
+   <command name="add_sandbox">
+      Add a new template sandbox.  This is for testing changes to the
+      templates.  The new sandbox will have no hosts when it is freshly
+      created and you should use the "manage" command in order to assign
+      some hosts to the sandbox in order to run complete tests.
+
+      After adding the sandbox branch on the broker the client will
+      automatically attempt to run a 'get' for the user.  This can be
+      disabled with the --noget flag.
+      <optgroup name="add sandbox mandatory" mandatory="True" fields="all">
+         <option name="sandbox" type="string">Name of the new sandbox</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/get" expect="command"/>
+      <optgroup name="add sandbox optional" mandatory="False">
+         <option name="start" type="string">Branch to use as a starting point (default: prod)</option>
+         <option name="noget" type="boolean">Do not automatically create the user-controlled sandbox, only the branch server-side.</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="sandbox/command/add" expect="sandbox"/>
    </command>
 
-   <command name="put">
-      Upload the templates (and all their changes) in the current directory to the
-      specified template domain. You should run "compile" on the domain afterwards to
-      confirm any changes.
-      <optgroup name="put options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the new domain</option>
+   <command name="get">
+      Create a working copy of the templates in a sandbox.  The
+      templates will be placed in a shared location that the broker
+      will still be able to read.
+      <optgroup name="get mandatory" mandatory="True" fields="all">
+         <option name="sandbox" type="string">Name of the sandbox</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/bundle" custom="create_bundle"/>
+      <transport method="post" path="sandbox/command/get" expect="sandbox"/>
+   </command>
+
+   <command name="publish">
+      Upload the template changes in the current directory to the
+      specified template sandbox branch.  This makes the changes
+      available to others for review and for the deploy command.
+      The manage and compile commands can be used before running
+      publish to test the changes.
+      <optgroup name="publish options" mandatory="True" fields="all">
+         <option name="branch" type="string">Name of the sandbox branch to update</option>
+      </optgroup>
+      <optgroup name="publish optional" mandatory="False">
+         <option name="nosync" type="boolean">Do not automatically sync tracking domains</option>
+      </optgroup>
+      <transport method="post" path="branch/%(branch)s/command/publish" custom="create_bundle" expect="command"/>
    </command>
 
    <command name="deploy">
-      Take a template domain and deploy it to production.
+      Take a template branch as a source (the name of either a domain or
+      a sandbox) and deploy its changes to the target domain specified.
+      If the target domain had been marked as invalid for syncing because
+      of a previous rollback that flag is cleared.
+      If using the nosync option follow this with the sync command to
+      pull the changes into any production domains.
       <optgroup name="deploy options" mandatory="True" fields="all">
-         <option name="domain" type="string">Name of the domain</option>
+         <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+         <option name="target" type="string">Name of the target domain</option>
       </optgroup>
-      <optgroup name="deploy to" mandatory="False" fields="all">
-         <option name="to" type="string">
-            Name of the domain to deploy to
-         </option>
+      <optgroup name="deploy optional" mandatory="False">
+         <option name="nosync" type="boolean">Do not automatically sync tracking domains</option>
+         <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/deploy" />
+      <transport method="post" path="command/deploy" />
+   </command>
+
+   <command name="validate">
+      Assert that a branch (a sandbox or a domain) can by sync'd into
+      a tracking domain.
+      Typically this is used after a rollback has been issued on a
+      tracking domain.
+      <optgroup name="validate options" mandatory="True" fields="all">
+         <option name="branch" type="string">Name of domain or sandbox</option>
+      </optgroup>
+      <optgroup name="validate optional" mandatory="False" fields="all">
+         <option name="comments" type="string">Provide a comment as to why the branch is valid</option>
+      </optgroup>
+      <transport method="post" path="branch/%(branch)s/command/validate" />
+   </command>
+
+   <command name="rollback">
+      Set a tracking domain back to a known good state.  Any valid
+      git reference (usually the SHA1 hash commit id, can be
+      abbreviated) can be given.  Alternately the lastsync option will
+      roll back to the commit in use before the domain was last sync'd.
+      The tracked domain will be flagged to not allow a sync until a
+      validate has been run or fixes have been deployed.
+      <optgroup name="rollback options" mandatory="True" fields="all">
+         <option name="domain" type="string">Name of domain or sandbox</option>
+         <optgroup name="ref options" mandatory="True" fields="any">
+            <option name="ref" type="string" conflicts="lastsync">Any valid git reference to a previous commit in the branch</option>
+            <option name="lastsync" type="boolean" conflicts="ref">Use the reference stored in AQDB of the commit in use before the last sync</option>
+         </optgroup>
+      </optgroup>
+      <transport method="post" path="domain/%(domain)s/command/rollback" />
+   </command>
+
+   <command name="del_sandbox">
+      Removes the specified sandbox branch.  This will fail if there are
+      hosts still being managed by the sandbox: you must use the "manage"
+      command to reassign those hosts to other domains.
+
+      This will not remove user-owned working directories.  A reminder
+      will be issued to clean up any such directories.
+      <optgroup name="del_sandbox_options" mandatory="True" fields="all">
+         <option name="sandbox" type="string">Name of the sandbox to be deleted</option>
+      </optgroup>
+      <transport method="post" path="sandbox/command/delete" />
    </command>
 
    <command name="manage">
       Take a host and make it build its configuration using the specified
-      template domain. This allows you to test building hosts using alternate
-      templates, or to move a host back to a default production domain once
-      testing has completed.
+      template domain or sandbox.  This allows you to test building hosts
+      using alternate templates, or to move a host back to a default
+      production domain once testing has completed.
       <optgroup name="manage options" mandatory="True" fields="all">
          <optgroup name="host_or_cluster" fields="any" mandatory="True">
             <option name="hostname" type="string">Name of the host to manage</option>
-            <option name="cluster" type="string">Name of the cluster to manage</option></optgroup>
-         <option name="domain" type="string">Name of the domain</option>
+            <option name="cluster" type="string">Name of the cluster to manage</option>
+         </optgroup>
+         <optgroup name="domain_or_sandbox" fields="any" mandatory="True">
+            <option name="domain" type="string" conflicts="sandbox">Name of the domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/manage_hostname" trigger="hostname" />
-      <transport method="post" trigger="cluster" path="domain/%(domain)s/command/manage_cluster" />
+      <transport method="post" path="command/manage_hostname" trigger="hostname" />
+      <transport method="post" trigger="cluster" path="command/manage_cluster" />
    </command>
 
    <command name="cat">
@@ -1574,13 +1697,14 @@
    </command>
 
    <command name="sync">
-      Flush all plenary templates within the specified domain. This is only required
-      if the broker has somehow become out-of-sync between the templates that live
-      on the local disk, and the state within the database.
-      <optgroup name="sync options" mandatory="True" fields="all">
+      Use this to bring the broker's working copy of a template branch up to
+      date with the information in template-king.
+      A sync is automatically run for any domains tracking a deploy
+      unless the nosync option was used.
+      <optgroup name="sync mandatory" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain</option>
       </optgroup>
-      <transport method="post" path="domain/%(domain)s/command/sync" expect="command"/>
+      <transport method="post" path="domain/%(domain)s/command/sync" />
    </command>
 
    <command name="add_location">
@@ -2039,7 +2163,8 @@
          <option name="all" type="boolean" conflicts="personality archetype">all</option>
       </optgroup>
       <optgroup name="show_personality_optional" mandatory="False">
-         <option name="domain" type="string">Domain to check for threshold information</option>
+         <option name="domain" type="string" conflicts="sandbox">Domain to check for threshold information</option>
+         <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
       </optgroup>
       <transport method="get" path="personality" />
   </command>
@@ -2448,7 +2573,10 @@
          </optgroup>
          <option name="archetype" type="string">Archetype name</option>
          <option name="personality" type="string">Personality name</option>
-         <option name="domain" type="string">Name of template domain/sandbox</option>
+         <optgroup name="branch_opts" fields="any">
+            <option name="domain" type="string" conflicts="sandbox">Name of template domain</option>
+            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_esx_cluster_options" mandatory="False">
          <option name="max_members" type="string">Comments</option>

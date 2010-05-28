@@ -38,7 +38,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
-                                ServiceInstance, Machine, Domain, TorSwitch)
+                                ServiceInstance, Machine, Branch, TorSwitch,
+                                UserPrincipal)
 
 def _cluster_machine_append(machine):
     """ creator function for MachineClusterMember """
@@ -66,9 +67,14 @@ class Cluster(Base):
                                                 name='cluster_prsnlty_fk'),
                             nullable=False)
 
-    domain_id = Column(Integer, ForeignKey('domain.id',
-                                           name='cluster_domain_fk'),
+    branch_id = Column(Integer, ForeignKey('branch.id',
+                                           name='cluster_branch_fk'),
                                            nullable=False)
+
+    sandbox_author_id = Column(Integer,
+                               ForeignKey('user_principal.id',
+                                          name='cluster_sandbox_author_fk'),
+                               nullable=True)
 
     location_constraint_id = Column(ForeignKey('location.id',
                                                name='cluster_location_fk'))
@@ -83,7 +89,8 @@ class Cluster(Base):
                                    lazy=False)
 
     personality = relation(Personality, uselist=False, lazy=False)
-    domain = relation(Domain, uselist=False, lazy=False, backref='clusters')
+    branch = relation(Branch, uselist=False, lazy=False, backref='clusters')
+    sandbox_author = relation(UserPrincipal, uselist=False)
 
     #FIXME: Is it possible to have an append that checks the max_members?
     hosts = association_proxy('_hosts', 'host', creator=_cluster_host_append)
@@ -100,6 +107,12 @@ class Cluster(Base):
     def required_services(self):
         return object_session(self).query(ClusterAlignedService).filter_by(
             cluster_type = self.cluster_type).all()
+
+    @property
+    def authored_branch(self):
+        if self.sandbox_author:
+            return "%s/%s" % (self.sandbox_author.name, self.branch.name)
+        return str(self.branch.name)
 
     __mapper_args__ = {'polymorphic_on': cluster_type}
 

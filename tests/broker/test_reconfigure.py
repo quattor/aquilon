@@ -227,7 +227,7 @@ class TestReconfigure(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template", command)
         buildfile = os.path.join(self.config.get("broker", "builddir"),
-                                 "domains", "unittest", "profiles",
+                                 "domains", "utsandbox", "profiles",
                                  "aquilon62.aqd-unittest.ms.com.tpl")
         results = self.grepcommand(["-l", "badpersonality", buildfile])
         self.failIf(results, "Found bad personality data in plenary "
@@ -242,7 +242,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out, "cannot locate template", command)
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
-            "domains", "unittest", "profiles",
+            "domains", "utsandbox", "profiles",
             "aquilon93.aqd-unittest.ms.com.tpl")))
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")

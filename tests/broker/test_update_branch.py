@@ -27,12 +27,11 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the get domain command."""
+"""Module for testing the update domain command."""
 
 import os
 import sys
 import unittest
-from subprocess import Popen
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -42,43 +41,39 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestGetDomain(TestBrokerCommand):
+class TestUpdateBranch(TestBrokerCommand):
+    # FIXME: Add some tests around (no)autosync
+    # FIXME: Verify against sandboxes
 
-    def testclearchangetest1domain(self):
-        p = Popen(("/bin/rm", "-rf",
-            os.path.join(self.scratchdir, "changetest1")), stdout=1, stderr=2)
-        rc = p.wait()
+    def testupdatedomain(self):
+        self.noouttest(["update", "branch", "--branch", "deployable",
+                        "--comments", "Updated Comments",
+                        "--compiler_version=8.2.7"])
 
-    def testclearchangetest2domain(self):
-        p = Popen(("/bin/rm", "-rf",
-            os.path.join(self.scratchdir, "changetest2")), stdout=1, stderr=2)
-        rc = p.wait()
+    def testverifyupdatedomain(self):
+        command = "show domain --domain deployable"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Domain: deployable", command)
+        self.matchoutput(out,
+                         "Compiler: "
+                         "/ms/dist/elfms/PROJ/panc/8.2.7/lib/panc.jar",
+                         command)
+        self.matchoutput(out, "Comments: Updated Comments", command)
 
-    def testclearunittestdomain(self):
-        p = Popen(("/bin/rm", "-rf",
-            os.path.join(self.scratchdir, "unittest")), stdout=1, stderr=2)
-        rc = p.wait()
+    def testbadcompilerversioncharacters(self):
+        command = ["update_branch", "--branch=changetest1",
+                   "--compiler_version=version!with@bad#characters"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid characters in compiler version",
+                         command)
 
-    def testgetchangetest1domain(self):
-        self.ignoreoutputtest(["get", "--domain", "changetest1"],
-                cwd=self.scratchdir)
-        self.assert_(os.path.exists(os.path.join(
-            self.scratchdir, "changetest1")))
-
-    def testgetchangetest2domain(self):
-        self.ignoreoutputtest(["get", "--domain", "changetest2"],
-                cwd=self.scratchdir)
-        self.assert_(os.path.exists(os.path.join(
-            self.scratchdir, "changetest2")))
-
-    def testgetunittestdomain(self):
-        self.ignoreoutputtest(["get", "--domain", "unittest"],
-                cwd=self.scratchdir)
-        self.assert_(os.path.exists(os.path.join(
-            self.scratchdir, "unittest")))
+    def testbadcompilerversion(self):
+        command = ["update_branch", "--branch=changetest1",
+                   "--compiler_version=version-does-not-exist"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Compiler not found at", command)
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestGetDomain)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBranch)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

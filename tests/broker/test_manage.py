@@ -65,16 +65,28 @@ class TestManage(TestBrokerCommand):
     def testmanageunittest02(self):
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=True)
+        user = self.config.get("unittest", "user")
         self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                        "--domain", "changetest1"])
+                        "--sandbox", "%s/changetest1" % user])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
 
     def testverifymanageunittest02(self):
+        user = self.config.get("unittest", "user")
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
-        self.matchoutput(out, "Domain: changetest1", command)
+        self.matchoutput(out, "Sandbox: %s/changetest1" % user, command)
+
+    def testmanageserver1(self):
+        self.noouttest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
+                        "--domain", "unittest"])
+
+    def testverifymanageserver1(self):
+        command = "show host --hostname server1.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Hostname: server1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Domain: unittest", command)
 
     def testverifycleanup(self):
         basedir = self.config.get("broker", "basedir")
@@ -90,42 +102,49 @@ class TestManage(TestBrokerCommand):
     def testmanageunittest00(self):
         self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
                                want_exist=True)
+        user = self.config.get("unittest", "user")
         self.noouttest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
-                        "--domain", "changetest2"])
+                        "--sandbox", "%s/changetest2" % user])
         self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
                                want_exist=False)
 
     def testverifymanageunittest00(self):
+        user = self.config.get("unittest", "user")
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "Domain: changetest2", command)
+        self.matchoutput(out, "Sandbox: %s/changetest2" % user, command)
 
     def testfailmanagevmhost(self):
+        user = self.config.get("unittest", "user")
         command = ["manage", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--domain", "changetest1"]
+                   "--sandbox", "%s/changetest1" % user]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cluster nodes must be managed at the cluster level",
                          command)
 
     def testmanagemissingcluster(self):
+        user = self.config.get("unittest", "user")
         command = ["manage", "--cluster", "cluster-does-not-exist",
-                   "--domain", "changetest1"]
+                   "--sandbox", "%s/changetest1" % user]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
     def testmanagecluster(self):
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=True)
-        command = ["manage", "--cluster", "utecl1", "--domain", "changetest1"]
+        user = self.config.get("unittest", "user")
+        command = ["manage", "--cluster", "utecl1",
+                   "--sandbox", "%s/changetest1" % user]
         self.noouttest(command)
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False)
 
     def testverifymanagecluster(self):
+        user = self.config.get("unittest", "user")
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Domain: changetest1", command)
+        self.matchoutput(out, "Sandbox: %s/changetest1" % user, command)
 
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)
@@ -133,13 +152,14 @@ class TestManage(TestBrokerCommand):
         members.sort()
         self.failUnless(members, "No hosts in output of %s." % command)
 
-        command = ["search_host", "--cluster=utecl1", "--domain=changetest1"]
+        command = ["search_host", "--cluster=utecl1",
+                   "--sandbox=%s/changetest1" % user]
         out = self.commandtest(command)
         aligned = out.splitlines()
         aligned.sort()
         self.failUnlessEqual(members, aligned,
                              "Not all utecl1 cluster members (%s) are in "
-                             "domain changetest1 (%s)." % (members, aligned))
+                             "sandbox changetest1 (%s)." % (members, aligned))
 
 
 if __name__=='__main__':

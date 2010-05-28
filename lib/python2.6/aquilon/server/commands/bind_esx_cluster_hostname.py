@@ -78,12 +78,15 @@ class CommandBindESXClusterHostname(BrokerCommand):
 
         chooser = None
         if not dbhost.cluster:
-            if dbhost.domain != dbcluster.domain:
-                raise ArgumentError("Host %s domain %s does not match "
-                                    "%s cluster %s domain %s." %
-                                    (dbhost.fqdn, dbhost.domain.name,
+            if dbhost.branch != dbcluster.branch or \
+               dbhost.sandbox_author != dbcluster.sandbox_author:
+                raise ArgumentError("Host %s %s %s does not match "
+                                    "%s cluster %s %s %s." %
+                                    (dbhost.fqdn, dbhost.branch.branch_type,
+                                     dbhost.authored_branch,
                                      dbcluster.cluster_type, dbcluster.name,
-                                     dbcluster.domain.name))
+                                     dbcluster.branch.branch_type,
+                                     dbcluster.authored_branch))
             # Check for max_members happens in aqdb layer and can throw a VE
             try:
                 dbhcm = HostClusterMember(cluster=dbcluster, host=dbhost)

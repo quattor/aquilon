@@ -133,7 +133,7 @@ def rename_non_null_check_constraints(db, debug=False, *args, **kw):
             else:
                 #TODO: use an integer value or the logger
                 if(debug):
-                    dbf.debug(rename)
+                    print str(rename)
 
                 db.safe_execute(rename)
 

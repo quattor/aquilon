@@ -1,7 +1,6 @@
-#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,41 +26,29 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the update domain command."""
+"""Contains the logic for `aq show sandbox --sandbox`."""
+
 
 import os
-import sys
-import unittest
 
-if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
-
-from brokertest import TestBrokerCommand
+from aquilon.server.broker import BrokerCommand
+from aquilon.aqdb.model import Sandbox
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.dbwrappers.sandbox import get_sandbox
 
 
-class TestUpdateDomain(TestBrokerCommand):
+class CommandShowSandboxSandbox(BrokerCommand):
 
-    def testupdatedomain(self):
-        self.noouttest(["update", "domain", "--domain", "changetest1",
-                        "--owner", "testuseraqd_admin@is1.morgan",
-                        "--comments", "Updated Comments",
-                        "--compiler",
-                        "/ms/dist/elfms/PROJ/panc/8.2.7/bin/panc"])
+    required_parameters = ["sandbox"]
 
-    def testverifyupdatedomain(self):
-        command = "show domain --domain changetest1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: changetest1", command)
-        self.matchoutput(out, "Owner: testuseraqd_admin", command)
-        self.matchoutput(out,
-                         "Compiler: /ms/dist/elfms/PROJ/panc/8.2.7/bin/panc",
-                         command)
-        self.matchoutput(out, "Comments: Updated Comments", command)
-
-
-if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDomain)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
+    def render(self, session, logger, sandbox, pathonly, **arguments):
+        (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox)
+        if not pathonly:
+            return dbsandbox
+        if not dbauthor:
+            raise ArgumentError("Must specify sandbox as author/branch "
+                                "when using --pathonly")
+        templatesdir = self.config.get("broker", "templatesdir")
+        sandboxdir = os.path.join(templatesdir, dbauthor.name,
+                                  dbsandbox.name)
+        return sandboxdir

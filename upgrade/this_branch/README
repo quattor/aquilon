@@ -1,0 +1,25 @@
+Order of execution where $LOGIN is (id@database):
+
+Zeroth, shut down the broker and snapshot the database.
+
+First, create the new tables and update existing ones:
+yasql $LOGIN @git_workflow
+
+Second, clean out some cruft from past upgrades.  This is very specific
+to the production database and won't work anywhere else:
+yasql $LOGIN @constraint_cleanup
+
+Run the constraint renamer by launching:
+AQDCONF=/etc/aqd.conf ../../lib/python2.5/aquilon/aqdb/shell.py
+
+And then:
+from aquilon.aqdb.utils import constraints
+constraints.rename_non_null_check_constraints(db, debug=True)
+
+Afterwards, purge the recycle bin:
+yasql $LOGIN @purge_recycle_bin
+
+In parallel with that, run the script to restructure domains:
+module load fsf/git/1.7.0
+./template_king.sh
+

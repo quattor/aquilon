@@ -117,8 +117,11 @@ class CommandAddAuroraHost(CommandAddHost):
                                       logger=logger)
                 except ProcessException, e:
                     # Shouldn't happen, sys_loc returns 0 even for failures
-                    raise ArgumentError("Using sys_loc to find a building for node %s failed, please add an Aurora machine manually and follow with add_host: %s" %
-                            dsdb_lookup, e)
+                    raise ArgumentError("Using sys_loc to find a building for "
+                                        "node %s failed, please add an Aurora "
+                                        "machine manually and follow with "
+                                        "add_host: %s" %
+                                        (dsdb_lookup, e))
                 m = self.sys_loc_re.search(out)
                 if m:
                     (building, city, region) = m.groups()
@@ -155,6 +158,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['osversion'] = osversion
         kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
+        kwargs['sandbox'] = None
         kwargs['machine'] = dbmachine.name
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None

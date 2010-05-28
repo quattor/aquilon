@@ -223,9 +223,10 @@ class ObjectFormatter(object):
             host_msg.fqdn = host.fqdn
         if hasattr(host, "dns_domain"):
             host_msg.dns_domain = str(host.dns_domain.name)
-        if hasattr(host, "domain"):
-            host_msg.domain.name = str(host.domain.name)
-            host_msg.domain.owner = str(host.domain.owner.name)
+        # FIXME: Add branch type and sandbox author to protobufs.
+        if hasattr(host, "branch"):
+            host_msg.domain.name = str(host.branch.name)
+            host_msg.domain.owner = str(host.branch.owner.name)
         if hasattr(host, "status"):
             host_msg.status = str(host.status.name)
         if hasattr(host, "sysloc"):

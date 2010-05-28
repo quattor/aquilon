@@ -33,6 +33,7 @@ from aquilon.server.broker import (BrokerCommand, validate_basic,
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
                                 MetaClusterMember, Domain)
 from aquilon.exceptions_ import ArgumentError
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -44,17 +45,16 @@ class CommandAddESXCluster(BrokerCommand):
     required_parameters = ["cluster", "metacluster"]
 
     def render(self, session, logger, cluster, metacluster, archetype,
-               personality, max_members, vm_to_host_ratio, domain, tor_switch,
-               down_hosts_threshold, comments, **arguments):
+               personality, max_members, vm_to_host_ratio, domain, sandbox,
+               tor_switch, down_hosts_threshold, comments, **arguments):
         validate_basic("cluster", cluster)
         cluster_type = 'esx'
 
-        if not domain:
-            # This block cannot be reached with the current client...
-            # domain must always be set.
-            domain = self.config.get("broker", "default_domain")
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     compel=True)
 
-        dbdomain = Domain.get_unique(session, domain, compel=True)
         dblocation = get_location(session, **arguments)
         if not dblocation:
             raise ArgumentError("Adding a cluster requires a location "
@@ -94,7 +94,8 @@ class CommandAddESXCluster(BrokerCommand):
                                personality=dbpersonality,
                                max_hosts=max_members,
                                vm_count=vm_count, host_count=host_count,
-                               domain=dbdomain, switch=dbtor_switch,
+                               branch=dbbranch, sandbox_author=dbauthor,
+                               switch=dbtor_switch,
                                down_hosts_threshold=down_hosts_threshold,
                                comments=comments)
         session.add(dbcluster)

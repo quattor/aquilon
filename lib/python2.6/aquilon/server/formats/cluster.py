@@ -60,7 +60,11 @@ class ClusterFormatter(ObjectFormatter):
                 details.append(indent + "  ToR Switch: %s" %
                                cluster.switch.fqdn)
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
-        details.append(self.redirect_raw(cluster.domain, indent + "  "))
+        if cluster.branch.branch_type == 'domain':
+            details.append(indent + "  Domain: %s" % cluster.branch.name)
+        else:
+            details.append(indent + "  Sandbox: %s/%s" %
+                           (cluster.sandbox_author.name, cluster.branch.name))
         for dbsi in cluster.service_bindings:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %

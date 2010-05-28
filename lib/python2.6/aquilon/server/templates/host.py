@@ -81,7 +81,8 @@ class PlenaryToplevelHost(Plenary):
         self.plenary_core = ""
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
-        self.dir = self.config.get("broker", "builddir") + "/domains/%s/profiles"%dbhost.domain.name
+        self.dir = "%s/domains/%s/profiles" % (
+            self.config.get("broker", "builddir"), dbhost.branch.name)
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -99,7 +100,7 @@ class PlenaryToplevelHost(Plenary):
         # Going with self.name instead of self.plenary_template seems like
         # the right decision here - easier to predict behavior when meshing
         # with other CompileKey generators like PlenaryMachine.
-        return CompileKey(domain=self.dbhost.domain.name, profile=self.name,
+        return CompileKey(domain=self.dbhost.branch.name, profile=self.name,
                           logger=self.logger)
 
     def body(self, lines):

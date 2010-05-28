@@ -30,32 +30,98 @@
 
 
 import os
+from tempfile import mkdtemp
 
-from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.server.processes import run_command
-from aquilon.aqdb.model import Domain
+from aquilon.aqdb.model import Domain, Branch
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.processes import run_git, remove_dir, sync_domain
+from aquilon.server.logger import CLIENT_INFO
 
 
 class CommandDeploy(BrokerCommand):
 
-    required_parameters = ["domain"]
-    requires_readonly = True
+    required_parameters = ["source", "target"]
 
-    def render(self, session, logger, domain, to, **arguments):
-        """ This currently ignores the 'to' parameter."""
+    def render(self, session, logger, source, target, nosync, dryrun,
+               **arguments):
+        # Most of the logic here is duplicated in publish
+        autosync = not nosync
+        dbsource = Branch.get_unique(session, source, compel=True)
 
-        # Verify that it exists before trying to deploy it.
-        dbdomain = Domain.get_unique(session, domain, compel=True)
-        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
-                dbdomain.name)
-        git_env={"PATH":"%s:%s" % (self.config.get("broker", "git_path"),
-                os.environ.get("PATH", ""))}
+        # The target has to be a non-tracking domain
+        dbtarget = Domain.get_unique(session, target, compel=True)
+
+        if autosync and dbtarget.tracked_branch \
+           and dbtarget.tracked_branch.autosync and dbtarget.autosync:
+            # The user probably meant to deploy to the tracked branch,
+            # but only do so if all the relevant autosync flags are
+            # positive.
+            logger.warning("Deploying to tracked branch %s and then will "
+                           "auto-sync %s" % (
+                           dbtarget.tracked_branch.name, dbtarget.name))
+            dbtarget = dbtarget.tracked_branch
+        elif dbtarget.tracked_branch:
+            raise ArgumentError("Cannot deploy to tracking domain %s.  "
+                                "Did you mean domain %s?" %
+                                (dbtarget.name, dbtarget.tracked_branch.name))
+
+        if autosync and not dbtarget.is_sync_valid and dbtarget.trackers:
+            # FIXME: Maybe raise an ArgumentError and request that the
+            # command run with --nosync?  Maybe provide a --validate flag?
+            # For now, just auto-flip (below).
+            pass
+        if not dbtarget.is_sync_valid:
+            dbtarget.is_sync_valid = True
+
+        kingdir = self.config.get("broker", "kingdir")
+        rundir = self.config.get("broker", "rundir")
+
+        tempdir = mkdtemp(prefix="deploy_", suffix="_%s" % dbsource.name,
+                          dir=rundir)
         try:
-            run_command(["git", "pull", domaindir], env=git_env, logger=logger,
-                        path=self.config.get("broker", "kingdir"))
+            run_git(["clone", "--shared", "--branch", dbtarget.name,
+                     kingdir, dbtarget.name],
+                    path=tempdir, logger=logger)
+            temprepo = os.path.join(tempdir, dbtarget.name)
+            # Should this use --no-ff?
+            try:
+                run_git(["merge", "origin/%s" % dbsource.name],
+                        path=temprepo, logger=logger, loglevel=CLIENT_INFO)
+            except ProcessException, e:
+                # No need to re-print e, output should have gone to client
+                # immediately via the logger.
+                raise ArgumentError("Failed to merge changes from %s into %s" %
+                                    (dbsource.name, dbtarget.name))
+            # FIXME: Run tests before pushing back to template-king.
+            # Use a different try/except and a specific error message.
+
+            if dryrun:
+                session.rollback()
+                return
+
+            run_git(["push", "origin", dbtarget.name],
+                    path=temprepo, logger=logger)
+        finally:
+            remove_dir(tempdir, logger=logger)
+
+        # What to do about errors here and below... rolling back
+        # doesn't seem appropriate as there's something more
+        # fundamentally wrong with the repos.
+        try:
+            sync_domain(dbtarget, logger=logger)
         except ProcessException, e:
-            run_command(["git", "reset", "--hard"], env=git_env, logger=logger,
-                        path=self.config.get("broker", "kingdir"))
-            raise ArgumentError("\n%s%s" %(e.out,e.err))
+            logger.warn("Error syncing domain %s: %s" % (dbtarget.name, e))
+
+        if nosync or not dbtarget.autosync:
+            return
+
+        for domain in dbtarget.trackers:
+            if not domain.autosync:
+                continue
+            try:
+                sync_domain(domain, logger=logger)
+            except ProcessException, e:
+                logger.warn("Error syncing domain %s: %s" % (domain.name, e))
+
         return

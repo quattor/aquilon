@@ -66,7 +66,8 @@ class TestAddPersonality(TestBrokerCommand):
                         command)
 
     def testverifyutpersonalitynothreshold(self):
-        command = ["show_personality", "--domain=changetest1",
+        user = self.config.get("unittest", "user")
+        command = ["show_personality", "--sandbox=%s/changetest1" % user,
                    "--archetype=aquilon", "--personality=utpersonality"]
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
@@ -83,7 +84,8 @@ class TestAddPersonality(TestBrokerCommand):
                         command)
 
     def testverifyshowpersonalityallnothreshold(self):
-        command = "show personality --all --domain changetest1"
+        user = self.config.get("unittest", "user")
+        command = "show personality --all --sandbox %s/changetest1" % user
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: utpersonality Archetype: aquilon",
                          command)
@@ -189,7 +191,8 @@ class TestAddPersonality(TestBrokerCommand):
                     "Found a threshold defined when none expected.")
 
     def testverifyshowutpersonalityprotonothreshold(self):
-        command = ["show_personality", "--domain=changetest1",
+        user = self.config.get("unittest", "user")
+        command = ["show_personality", "--sandbox=%s/changetest1" % user,
                    "--archetype=aquilon", "--personality=utpersonality",
                    "--format=proto"]
         out = self.commandtest(command)
@@ -200,8 +203,10 @@ class TestAddPersonality(TestBrokerCommand):
         self.failUnlessEqual(personality.threshold, -1)
 
     def testverifyshowpersonalityallprotonothreshold(self):
-        command = "show personality --all --domain changetest1 --format=proto"
-        out = self.commandtest(command.split(" "))
+        user = self.config.get("unittest", "user")
+        command = ["show_personality", "--all",
+                   "--sandbox=%s/changetest1" % user, "--format=proto"]
+        out = self.commandtest(command)
         pl = self.parse_personality_msg(out)
         archetypes = {}
         found_threshold = False
@@ -226,7 +231,7 @@ class TestAddPersonality(TestBrokerCommand):
                              "Got threshold %s for aquilon/utpersonality" %
                              archetypes["aquilon"]["utpersonality"].threshold)
         self.failUnless(found_threshold,
-                        "No thresholds defined in domain changetest1.")
+                        "No thresholds defined in sandbox changetest1.")
 
     def testverifyshowutpersonalityprotothreshold(self):
         command = ["show_personality", "--domain=unittest",

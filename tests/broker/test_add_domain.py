@@ -43,35 +43,70 @@ from brokertest import TestBrokerCommand
 
 class TestAddDomain(TestBrokerCommand):
 
-    def testaddunittestdomain(self):
-        self.noouttest(["add", "domain", "--domain", "unittest"])
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "unittest")))
+    def test_000_fixprod(self):
+        proddir = os.path.join(self.config.get("broker", "domainsdir"), "prod")
+        if not os.path.exists(proddir):
+            kingdir = self.config.get("broker", "kingdir")
+            self.gitcommand(["clone", kingdir, proddir])
 
-    def testverifyaddunittestdomain(self):
-        command = "show domain --domain unittest"
-        out = self.commandtest(command.split(" "))
+    def test_000_fixnyprod(self):
+        kingdir = self.config.get("broker", "kingdir")
+        (out, err) = self.gitcommand(["branch"], cwd=kingdir)
+        if out.find("ny-prod") < 0:
+            self.gitcommand(["branch", "--track", "ny-prod", "prod"],
+                            cwd=kingdir)
+        nydir = os.path.join(self.config.get("broker", "domainsdir"),
+                             "ny-prod")
+        if not os.path.exists(nydir):
+            self.gitcommand(["clone", kingdir, nydir])
+
+    def test_100_addunittest(self):
+        command = ["add_domain", "--domain=unittest", "--track=utsandbox",
+                   "--comments", "aqd unit test tracking domain"]
+        self.successtest(command)
+        self.failUnless(os.path.exists(os.path.join(
+            self.config.get("broker", "domainsdir"), "unittest")))
+
+    def test_100_addutprod(self):
+        command = ["add_domain", "--domain=ut-prod", "--track=prod"]
+        self.successtest(command)
+        self.failUnless(os.path.exists(os.path.join(
+            self.config.get("broker", "domainsdir"), "ut-prod")))
+
+    def test_100_adddeployable(self):
+        command = ["add_domain", "--domain=deployable", "--start=prod"]
+        self.successtest(command)
+        self.failUnless(os.path.exists(os.path.join(
+            self.config.get("broker", "domainsdir"), "deployable")))
+
+    def test_200_verifyunittest(self):
+        command = ["show_domain", "--domain=unittest"]
+        out = self.commandtest(command)
         self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Tracking: sandbox utsandbox", command)
+        self.matchoutput(out, "Comments: aqd unit test tracking domain",
+                         command)
 
-    def testaddchangetest1domain(self):
-        self.noouttest(["add", "domain", "--domain", "changetest1"])
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "changetest1")))
+    def test_200_verifyutprod(self):
+        command = ["show_domain", "--domain=ut-prod"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Tracking: domain prod", command)
 
-    def testverifyaddchangetest1domain(self):
-        command = "show domain --domain changetest1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: changetest1", command)
+    def test_200_verifydeployable(self):
+        command = ["show_domain", "--domain=deployable"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Domain: deployable", command)
+        self.matchclean(out, "Tracking:", command)
 
-    def testaddchangetest2domain(self):
-        self.noouttest(["add", "domain", "--domain", "changetest2"])
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "changetest2")))
-
-    def testverifyaddchangetest2domain(self):
-        command = "show domain --domain changetest2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: changetest2", command)
+    def test_900_verifyall(self):
+        command = ["show_domain", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Domain: prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Domain: deployable", command)
+        self.matchclean(out, "Sandbox: utsandbox", command)
 
 
 if __name__=='__main__':

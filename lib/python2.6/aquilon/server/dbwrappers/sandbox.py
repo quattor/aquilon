@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2008,2009  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,20 +26,20 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Domain formatter."""
+"""Wrapper to make getting a sandbox simpler."""
 
 
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import Domain
+from aquilon.aqdb.model import Sandbox
+from aquilon.server.dbwrappers.user_principal import get_user_principal
 
 
-class DomainFormatter(ObjectFormatter):
-    def format_raw(self, domain, indent=""):
-        details = [indent + "Domain: %s" % domain.name]
-        details.append(indent + "  Owner: %s" % domain.owner.name)
-        details.append(indent + "  Compiler: %s" % domain.compiler)
-        if domain.comments:
-            details.append(indent + "  Comments: %s" % domain.comments)
-        return "\n".join(details)
-
-ObjectFormatter.handlers[Domain] = DomainFormatter()
+def get_sandbox(session, logger, sandbox):
+    """Allow an optional author field."""
+    (first, slash, second) = sandbox.partition('/')
+    if not slash:
+        dbsandbox = Sandbox.get_unique(session, first, compel=True)
+        dbauthor = None
+        return (dbsandbox, dbauthor)
+    dbsandbox = Sandbox.get_unique(session, second, compel=True)
+    dbauthor = get_user_principal(session, first)
+    return (dbsandbox, dbauthor)

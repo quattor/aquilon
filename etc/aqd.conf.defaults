@@ -43,18 +43,18 @@
 # Best practice is to only override as necessary.
 
 [DEFAULT]
-basedir = /var/quattor
+basedir = /var
 environment = prod
 # The broker does not rely on 'user' for anything security-related...
 # user = # config.py supplies os.environ.get("USER") as a default
 # srcdir = # config.py supplies a custom _get_srcdir() as a default
 # hostname = # config.py supplies socket.gethostname() as a default
-quattordir = %(basedir)s
+quattordir = %(basedir)s/quattor
 
 # database defaults cannot (yet) be in the general [database] section,
 # and must be here.
 logdir = %(quattordir)s/logs
-dbdir = %(basedir)s/aquilondb
+dbdir = %(quattordir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
@@ -100,11 +100,14 @@ umask = 0022
 kncport = 6900
 openport = 6901
 templateport = %(openport)s
-git_templates_url = http://%(servername)s/templates
+git_templates_url = git://%(servername)s/quattor/template-king
+git_daemon_basedir = %(basedir)s
+run_git_daemon = False
 builddir = %(quattordir)s/cfg
 compiletooldir = %(srcdir)s/etc
 kingdir = %(quattordir)s/template-king
 templatesdir = %(quattordir)s/templates
+domainsdir = %(quattordir)s/domains
 rundir = %(quattordir)s/run
 sockdir = %(rundir)s/sockets
 logdir = %(quattordir)s/logs
@@ -115,10 +118,9 @@ depsdir = %(quattordir)s/deps
 hostsdir = %(quattordir)s/hosts
 plenarydir = %(quattordir)s/plenary
 swrepdir = %(quattordir)s/swrep
-git_path = /ms/dist/fsf/PROJ/git/1.5.4.2/bin
+git_path = /ms/dist/fsf/PROJ/git/1.7.0/bin
 git = %(git_path)s/git
 dsdb = /ms/dist/aurora/PROJ/dsdb/4.4.2/bin/dsdb
-domain_default_panc = /ms/dist/elfms/PROJ/panc/prod/lib/panc.jar
 ant_contrib_jar = /ms/dist/msjava/PROJ/ant-contrib/1.0b2/common/lib/ant-contrib.jar
 javadir = /ms/dist/msjava/PROJ/sunjdk/1.6.0_14/bin
 knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
@@ -134,8 +136,7 @@ CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
 aurora_host_domain = ny-prod
 windows_host_domain = ny-prod
-panc_batch_size = 1000
-panc_formatter = pan
+default_domain_start = prod
 authorization_mailgroup = aqd-eng@morganstanley.com
 esx_cluster_max_members_default = 8
 esx_cluster_vm_to_host_ratio = 16:1
@@ -151,6 +152,18 @@ vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 # The knc daemon can be run by the broker for development purposes.
 # Will default to True until we migrate to a new configuration in prod.
 run_knc = True
+mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
+
+[panc]
+default_version = prod
+version = %(default_version)s
+# The update_domain command expects to be able to read this value
+# in raw mode and set the version variable itself.
+pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
+# Number of templates to cache in memory during compiles
+batch_size = 1000
+# Option passed to panc the output format that it uses
+formatter = pan
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

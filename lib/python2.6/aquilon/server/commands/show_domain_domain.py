@@ -38,4 +38,4 @@ class CommandShowDomainDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, domain, **arguments):
-        return [Domain.get_unique(session, domain, compel=True)]
+        return Domain.get_unique(session, domain, compel=True)

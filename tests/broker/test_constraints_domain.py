@@ -43,16 +43,28 @@ from brokertest import TestBrokerCommand
 
 class TestDomainConstraints(TestBrokerCommand):
 
-    def testdeldomainwithhost(self):
-        command = "del domain --domain unittest"
+    def testdelsandboxwithhost(self):
+        command = "del sandbox --sandbox utsandbox"
         self.badrequesttest(command.split(" "))
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "unittest")))
+        # This wouldn't get deleted anyway, but doesn't hurt to verify.
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        self.assert_(os.path.exists(sandboxdir))
+
+    def testverifydelsandboxwithhostfailed(self):
+        command = "show sandbox --sandbox utsandbox"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Sandbox: utsandbox", command)
+
+    def testdeldomainwithhost(self):
+        command = "del domain --domain ny-prod"
+        self.badrequesttest(command.split(" "))
+        domainsdir = self.config.get("broker", "domainsdir")
+        self.assert_(os.path.exists(os.path.join(domainsdir, "ny-prod")))
 
     def testverifydeldomainwithhostfailed(self):
-        command = "show domain --domain unittest"
+        command = "show domain --domain ny-prod"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Domain: ny-prod", command)
 
 
 if __name__=='__main__':

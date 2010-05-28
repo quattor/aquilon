@@ -34,7 +34,7 @@ from os import environ as os_environ
 import logging
 
 from aquilon.config import Config
-from aquilon.exceptions_ import (ArgumentError, ProcessException)
+from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
 from aquilon.server.processes import run_command
 from aquilon.server.templates.index import build_index
 from aquilon.server.locks import lock_queue, CompileKey
@@ -45,16 +45,19 @@ LOGGER = logging.getLogger('aquilon.server.templates.domain')
 
 class TemplateDomain(object):
 
-    def __init__(self, dom, logger=LOGGER):
-        self.domain = dom
+    def __init__(self, domain, author=None, logger=LOGGER):
+        self.domain = domain
+        self.author = author
         self.logger = logger
 
     def directories(self):
         """Return a list of directories required for compiling this domain"""
         config = Config()
         dirs = []
-        dirs.append(os.path.join(config.get("broker", "templatesdir"),
-                    self.domain.name))
+
+        if self.domain.branch_type == 'domain':
+            dirs.append(os.path.join(config.get("broker", "domainsdir"),
+                                     self.domain.name))
 
         dirs.append(os.path.join(config.get("broker", "quattordir"),
                                  "cfg",
@@ -95,10 +98,21 @@ class TemplateDomain(object):
         output (as a string) of the compile
         """
 
+        config = Config()
+
+        if self.domain.branch_type == 'sandbox':
+            if not self.author:
+                raise InternalError("Missing required author to compile "
+                                    "sandbox %s" % self.domain.name)
+            sandboxdir = os.path.join(config.get("broker", "templatesdir"),
+                                      self.author.name, self.domain.name)
+            if not os.path.exists(sandboxdir):
+                raise ArgumentError("Sandbox directory '%s' does not exist." %
+                                    sandboxdir)
+
         self.logger.info("preparing domain %s for compile" % self.domain.name)
 
         # Ensure that the compile directory is in a good state.
-        config = Config()
         outputdir = config.get("broker", "profilesdir")
 
         for d in self.directories() + self.outputdirs():
@@ -112,7 +126,18 @@ class TemplateDomain(object):
         if (only):
             objectlist = [ only ]
         else:
-            objectlist = self.domain.hosts
+            q = session.query(Host)
+            q = q.filter_by(branch=self.domain, sandbox_author=self.author)
+            hosts = q.all()
+            q = session.query(Cluster)
+            q = q.filter_by(branch=self.domain, sandbox_author=self.author)
+            clusters = q.all()
+            objectlist = hosts + clusters
+            if self.author:
+                # Need to restrict to the subset of the sandbox managed
+                # by this author.
+                only = " ".join([h.fqdn for h in hosts] +
+                                ["cluster/%s" % c.name for c in clusters])
 
         if (len(objectlist) == 0):
             return 'no hosts: nothing to do'
@@ -127,14 +152,16 @@ class TemplateDomain(object):
         args.append("-Dbasedir=%s" % config.get("broker", "quattordir"))
         args.append("-Dpanc.jar=%s" % self.domain.compiler)
         args.append("-Dpanc.formatter=%s" %
-                    config.get("broker", "panc_formatter"))
+                    config.get("panc", "formatter"))
         args.append("-Ddomain=%s" % self.domain.name)
         args.append("-Ddistributed.profiles=%s" %
                     config.get("broker", "profilesdir"))
         args.append("-Dpanc.batch.size=%s" %
-                    config.get("broker", "panc_batch_size"))
+                    config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
                     config.get("broker", "ant_contrib_jar"))
+        if self.domain.branch_type == 'sandbox':
+            args.append("-Ddomain.templates=%s" % sandboxdir)
         if (only):
             # Use -Dforce.build=true?
             args.append("-Dobject.profile=%s" % only)
@@ -147,8 +174,8 @@ class TemplateDomain(object):
         out = ''
         try:
             if not locked:
-                # FIXME: The git workflow branch has a more sophisticated
-                # notion of objectlist... revisit this in that branch.
+                # We could optimize for the case where len(objectlist) == 1
+                # to not take a whole domain compile key.
                 key = CompileKey(domain=self.domain.name, logger=self.logger)
                 lock_queue.acquire(key)
             self.logger.info("starting compile")

@@ -34,23 +34,26 @@ import re
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.aqdb.model import Archetype, Personality, Domain
+from aquilon.aqdb.model import Archetype, Personality
 from aquilon.server.formats.personality import (ThresholdedPersonality,
                                                 PersonalityList)
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 
 
 class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, personality, archetype, domain, **arguments):
-        if domain:
-            dbdomain = Domain.get_unique(session, domain, compel=True)
+    def render(self, session, logger,
+               personality, archetype, domain, sandbox, **arguments):
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox)
         if archetype and personality:
             dbpersonality = get_personality(session, archetype, personality)
-            if not domain:
+            if not dbbranch:
                 return dbpersonality
-            threshold = self.get_threshold(dbpersonality, dbdomain)
+            threshold = self.get_threshold(dbpersonality, dbbranch, dbauthor)
             return ThresholdedPersonality(dbpersonality, threshold)
         q = session.query(Personality)
         if archetype:
@@ -59,22 +62,26 @@ class CommandShowPersonality(BrokerCommand):
         if personality:
             q = q.filter_by(name=personality)
         results = PersonalityList()
-        if not domain:
+        if not dbbranch:
             results.extend(q.all())
             return results
         for dbpersonality in q.all():
             # In theory the results here could be inconsistent if the
             # domain is being written to.  In practice... it's not worth
             # taking out the compile lock to ensure consistency.
-            threshold = self.get_threshold(dbpersonality, dbdomain)
+            threshold = self.get_threshold(dbpersonality, dbbranch, dbauthor)
             results.append(ThresholdedPersonality(dbpersonality, threshold))
         return results
 
     threshold_re = re.compile(r'^\s*"threshold"\s*=\s*(\d+)\s*;\s*$', re.M)
 
-    def get_threshold(self, dbpersonality, dbdomain):
-        domaindir = os.path.join(self.config.get("broker", "templatesdir"),
-                dbdomain.name)
+    def get_threshold(self, dbpersonality, dbbranch, dbauthor):
+        if dbbranch.branch_type == 'sandbox':
+            domaindir = os.path.join(self.config.get("broker", "templatesdir"),
+                                     dbauthor.name, dbbranch.name)
+        else:
+            domaindir = os.path.join(self.config.get("broker", "domainsdir"),
+                                     dbbranch.name)
         template = os.path.join(domaindir, dbpersonality.archetype.name,
                                 "personality", dbpersonality.name,
                                 "espinfo.tpl")

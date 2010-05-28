@@ -90,25 +90,53 @@ class TestBrokerStart(unittest.TestCase):
         # FIXME: If it fails, either cat the log file, or tell the user to try
         # running '%s -bn aqd --config %s'%(twistd, config.baseconfig)
 
-    def testrsynctemplateking(self):
+    def testclonetemplateking(self):
         config = Config()
-        # Duplicated from runtests.py
-        p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-                   "--exclude=.git/config",
-                   os.path.join(config.get("unittest", "template_king_path"),
-                                ""),
-                   config.get("broker", "kingdir")),
-                  stdout=PIPE, stderr=PIPE)
+        source = config.get("unittest", "template_base")
+        dest = config.get("broker", "kingdir")
+        p = Popen(("/bin/rm", "-rf", dest), stdout=1, stderr=2)
+        rc = p.wait()
+        self.assertEqual(rc, 0,
+                         "Failed to clear old template-king directory '%s'" %
+                         dest)
+        env = {}
+        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
+                                 os.environ.get("PATH", ""))
+        p = Popen(("git", "clone", "--bare", source, dest),
+                  env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,
-                         "Non-zero return code for rsync of template-king, "
+                         "Non-zero return code for clone of template-king, "
                          "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                          % (out, err))
-        p = Popen(("rsync", "-avP", "-e", "ssh",
-                   config.get("unittest", "template_king_config"),
-                   os.path.join(config.get("broker", "kingdir"), ".git")),
-                  stdout=1, stderr=2)
+        # This value needs to be defined if pointing at something other
+        # than a branch named 'prod'.
+        # Not using has_option as anyone trying this out should probably
+        # update their configs setting it to either an empty value or
+        # 'master'.
+        old_branch = config.get("unittest", "template_old_branch")
+        if not old_branch:
+            return
+        p = Popen(("git", "branch", "-m", old_branch, 'prod'),
+                  env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
+        (out, err) = p.communicate()
+        # Ignore out/err unless we get a non-zero return code, then log it.
+        self.assertEqual(p.returncode, 0,
+                         "Non-zero return code for clone of template-king, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (out, err))
+        return
+
+    def testrsyncswrep(self):
+        config = Config()
+        swrep_repository_host = config.get("unittest", "swrep_repository_host")
+        # The swrep/repository is currently *only* synced here at the top level.
+        p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
+                   "%s:/var/quattor/swrep/repository" % swrep_repository_host,
+                   config.get("broker", "swrepdir")),
+                  stdout=PIPE, stderr=PIPE)
+        rc = p.wait()
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,

@@ -29,20 +29,70 @@
 """Contains the logic for `aq get`."""
 
 
+import os
+
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Domain
+from aquilon.aqdb.model import Sandbox
+from aquilon.server.processes import run_command
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.formats.branch import RemoteSandbox
 
 
 class CommandGet(BrokerCommand):
 
-    required_parameters = ["domain"]
+    required_parameters = ["sandbox"]
     requires_readonly = True
+    default_style = "csv"
+    requires_format = True
 
-    def render(self, session, domain, **arguments):
-        # Verify that it exists before returning the command to pull.
-        dbdomain = Domain.get_unique(session, domain, compel=True)
-        remote_command = """env PATH="%(path)s:$PATH" NO_PROXY=* git clone '%(url)s/%(domain)s/.git' '%(domain)s' && cd '%(domain)s' && ( env PATH="%(path)s:$PATH" git checkout -b '%(domain)s' || true )""" % {
-                "path":self.config.get("broker", "git_path"),
-                "url":self.config.get("broker", "git_templates_url"),
-                "domain":dbdomain.name}
-        return str(remote_command)
+    # If updating this argument list also update CommandAddSandbox.
+    def render(self, session, logger, dbuser, sandbox, **arguments):
+        sandbox = self.force_my_sandbox(session, logger, dbuser, sandbox)
+        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
+
+        if not dbuser:
+            raise AuthorizationException("Cannot get a sandbox without"
+                                         " an authenticated connection.")
+
+        userdir = os.path.join(self.config.get("broker", "templatesdir"),
+                               dbuser.name)
+        sandboxdir = os.path.join(userdir, dbsandbox.name)
+        if os.path.exists(sandboxdir):
+            raise ArgumentError("Directory '%s' already exists.  Use git "
+                                "fetch within the directory to update it." %
+                                sandboxdir)
+
+        if not os.path.exists(userdir):
+            try:
+                logger.client_info("creating %s" % userdir)
+                os.makedirs(userdir, mode=0775)
+            except OSError, e:
+                raise ArgumentError("failed to mkdir %s: %s" % (userdir, e))
+
+            args = [self.config.get("broker", "mean")]
+            args.append("chown")
+            args.append("-owner")
+            args.append("%s" % dbuser.name)
+            args.append("-path")
+            args.append("%s" % userdir)
+            try:
+                run_command(args, logger=logger)
+            except ProcessException, e:
+                remove_dir(userdir)
+                raise e
+
+        return RemoteSandbox(self.config.get("broker", "git_templates_url"),
+                             dbsandbox.name, userdir)
+
+    def force_my_sandbox(self, session, logger, dbuser, sandbox):
+        (author, slash, name) = sandbox.partition('/')
+        if not slash:
+            return sandbox
+        # User used the name/branch syntax - that's fine.  They can't
+        # do anything on behalf of anyone else, though, so error if the
+        # user given is anyone else.
+        if author.strip().lower() != dbuser.name:
+            raise ArgumentError("User '%s' cannot add or get a sandbox on "
+                                "behalf of '%s'." %
+                                (dbuser.name, author))
+        return name

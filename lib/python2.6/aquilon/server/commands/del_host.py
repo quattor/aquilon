@@ -67,7 +67,7 @@ class CommandDelHost(BrokerCommand):
             # Check dependencies, translate into user-friendly message
             dbhost = hostname_to_host(session, hostname)
             ph = PlenaryHost(dbhost, logger=logger)
-            domain = dbhost.domain.name
+            domain = dbhost.branch.name
             fqdn   = dbhost.fqdn
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):

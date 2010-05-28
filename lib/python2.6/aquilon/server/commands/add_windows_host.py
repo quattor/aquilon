@@ -42,5 +42,6 @@ class CommandAddWindowsHost(CommandAddHost):
         kwargs['osname'] = 'windows'
         kwargs['osversion'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "windows_host_domain")
+        kwargs['sandbox'] = None
         # The superclass already contains the logic to handle this case.
         return CommandAddHost.render(self, *args, **kwargs)

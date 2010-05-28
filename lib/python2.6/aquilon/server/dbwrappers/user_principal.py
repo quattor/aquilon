@@ -34,7 +34,7 @@ import logging
 
 from sqlalchemy.orm import eagerload
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import Role, Realm, UserPrincipal
 from aquilon.server.dbwrappers.host import hostname_to_host
 
@@ -99,3 +99,12 @@ def get_or_create_user_principal(session, user,
         if commitoncreate:
             session.commit()
     return dbuser
+
+def get_user_principal(session, user):
+    """Ignore the realm.  This should probably be re-thought."""
+    dbusers = session.query(UserPrincipal).filter_by(name=user).all()
+    if len(dbusers) > 1:
+        raise InternalError("More than one user found for name %s" % user)
+    if len(dbusers) == 0:
+        raise NotFoundException("User '%s' not found." % user)
+    return dbusers[0]

@@ -29,6 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
@@ -38,25 +39,31 @@ from aquilon.aqdb.model import Domain
 
 class CommandManageHostname(BrokerCommand):
 
-    required_parameters = ["domain", "hostname"]
+    required_parameters = ["hostname"]
 
-    def render(self, session, logger, domain, hostname, **arguments):
-        # FIXME: Need to verify that this server handles this domain?
-        dbdomain = Domain.get_unique(session, domain, compel=True)
+    def render(self, session, logger, hostname, domain, sandbox, **arguments):
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     compel=True)
+
         dbhost = hostname_to_host(session, hostname)
         if dbhost.cluster:
             raise ArgumentError("Cluster nodes must be managed at the "
                                 "cluster level; this host is a member of "
                                 "cluster %s." % dbhost.cluster.name)
 
-        old_domain = dbhost.domain.name
+        old_branch = dbhost.branch.name
 
-        dbhost.domain = dbdomain
+        dbhost.branch = dbbranch
+        dbhost.sandbox_author = dbauthor
         session.add(dbhost)
         session.flush()
         plenary_host = PlenaryHost(dbhost, logger=logger)
 
         # We're crossing domains, need to lock everything.
+        # XXX: There's a directory per domain.  Do we need subdirectories
+        # for different authors for a sandbox?
         key = CompileKey(logger=logger)
         try:
             lock_queue.acquire(key)
@@ -72,7 +79,7 @@ class CommandManageHostname(BrokerCommand):
                 # It would be nice to flag the state in the the host?
                 pass
 
-            plenary_host.cleanup(old_domain, locked=True)
+            plenary_host.cleanup(old_branch, locked=True)
         except:
             # This will not restore the cleaned up files.  That's OK.
             # They will be recreated as needed.

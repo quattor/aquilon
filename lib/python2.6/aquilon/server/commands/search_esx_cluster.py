@@ -35,9 +35,10 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (EsxCluster, MetaCluster, Archetype,
-                                Personality, Domain, Machine,
+                                Personality, Machine,
                                 Service, ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 
 
@@ -45,9 +46,10 @@ class CommandSearchESXCluster(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, cluster, metacluster,
+    def render(self, session, logger, cluster, metacluster,
                esx_hostname, virtual_machine, guest,
-               domain, archetype, personality, service, instance, share,
+               archetype, personality, service, instance, share,
+               domain, sandbox, branch,
                fullinfo, **arguments):
         q = session.query(EsxCluster)
         if cluster:
@@ -74,9 +76,14 @@ class CommandSearchESXCluster(BrokerCommand):
             q = q.join(['_machines', 'machine'])
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
-        if domain:
-            dbdomain = Domain.get_unique(session, domain, compel=True)
-            q = q.filter_by(domain=dbdomain)
+
+        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                     domain=domain,
+                                                     sandbox=sandbox,
+                                                     branch=branch)
+        if dbbranch:
+            q = q.filter_by(branch=dbbranch)
+            q = q.filter_by(sandbox_author=dbauthor)
 
         if archetype:
             # Added to the searches as appropriate below.

@@ -35,7 +35,7 @@
 	<!-- swrep = auto-generated templates for the rpms -->
 	<property name="swrep" location="${basedir}/swrep" />
 	<!-- templates/${domain} = domain template source repo -->
-	<property name="domain.templates" location="${basedir}/templates/${domain}" />
+	<property name="domain.templates" location="${basedir}/domains/${domain}" />
 
 	<!-- objects/*.tpl = working object tpls, copied from source.profiles -->
 	<property name="global.profiles" location="${basedir}/objects" />

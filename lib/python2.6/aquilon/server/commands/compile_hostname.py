@@ -41,6 +41,7 @@ class CommandCompileHostname(BrokerCommand):
 
     def render(self, session, logger, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        dom = TemplateDomain(dbhost.domain, logger=logger)
+        dom = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+                             logger=logger)
         dom.compile(session, only=dbhost.fqdn)
         return

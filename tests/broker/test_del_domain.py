@@ -43,38 +43,37 @@ from brokertest import TestBrokerCommand
 
 class TestDelDomain(TestBrokerCommand):
 
-    def testdelunittestdomain(self):
-        command = "del domain --domain unittest"
-        self.noouttest(command.split(" "))
-        self.assert_(not os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "unittest")))
+    def test_delutprod(self):
+        command = ["del_domain", "--domain=ut-prod"]
+        self.successtest(command)
+        self.failIf(os.path.exists(os.path.join(
+            self.config.get("broker", "domainsdir"), "ut-prod")))
 
-    def testverifydelunittestdomain(self):
-        command = "show domain --domain unittest"
-        self.notfoundtest(command.split(" "))
+    def test_verifydelutprod(self):
+        command = ["show_domain", "--domain=ut-prod"]
+        self.notfoundtest(command)
 
-    def testdelchangetest1domain(self):
-        command = "del domain --domain changetest1"
-        self.noouttest(command.split(" "))
-        self.assert_(not os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "changetest1")))
+    def test_delunittest(self):
+        command = ["del_domain", "--domain=unittest"]
+        self.successtest(command)
+        self.failIf(os.path.exists(os.path.join(
+            self.config.get("broker", "domainsdir"), "unittest")))
 
-    def testverifydelchangetest1domain(self):
-        command = "show domain --domain changetest1"
-        self.notfoundtest(command.split(" "))
+    def test_verifydelutqa(self):
+        command = ["show_domain", "--domain=unittest"]
+        self.notfoundtest(command)
 
-    def testdelchangetest2domain(self):
-        command = "del domain --domain changetest2"
-        self.noouttest(command.split(" "))
-        self.assert_(not os.path.exists(os.path.join(
-            self.config.get("broker", "templatesdir"), "changetest2")))
+    def test_deldeployable(self):
+        command = ["del_domain", "--domain=deployable"]
+        self.successtest(command)
+        self.failIf(os.path.exists(os.path.join(
+            self.config.get("broker", "domainsdir"), "deployable")))
 
-    def testverifydelchangetest2domain(self):
-        command = "show domain --domain changetest2"
-        self.notfoundtest(command.split(" "))
+    def test_verifydeldeployable(self):
+        command = ["show_domain", "--domain=deployable"]
+        self.notfoundtest(command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

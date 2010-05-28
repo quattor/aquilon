@@ -3,22 +3,22 @@
 # For an example (and working) development default, see aqd.conf.dev.
 
 [DEFAULT]
-basedir = /var/quattor
-quattordir = %(basedir)s
+basedir = /var
+quattordir = %(basedir)s/quattor
 logdir = %(quattordir)s/logs
-dbdir = %(basedir)s/aquilondb
+dbdir = %(quattordir)s/aquilondb
 dblogfile = %(logdir)s/aqdb.log
 
 [database_oracle]
 dbuser = cdb
 environment = prod
-server = LNPO_AQUILON_NY
+server = NYPO_AQUILON
 
 [database]
 database_section = database_oracle
 
 [broker]
-git_templates_url = http://%(servername)s/templates
 umask = 0022
 server_notifications = cdb2sql bootserver
 client_notifications = yes
+templatesdir = /v/campus/ny/appl/aquilon/aqd/data/templates
