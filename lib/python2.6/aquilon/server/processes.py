@@ -44,7 +44,8 @@ from subprocess import Popen, PIPE
 from tempfile import mkstemp
 from threading import Thread
 
-from aquilon.exceptions_ import ProcessException, AquilonError, ArgumentError
+from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
+                                 InternalError)
 from aquilon.config import Config
 
 LOGGER = logging.getLogger('aquilon.server.processes')
@@ -290,6 +291,12 @@ class DSDBRunner(object):
         out = run_command(command,env=self.getenv())
         return
 
+    def update_host_mac(self, fqdn, mac):
+        command = [self.config.get("broker", "dsdb"),
+                   "update", "host", "-host_name", fqdn, "-status", "aq",
+                   "-ethernet_address", mac]
+        return run_command(command, env=self.getenv(), logger=self.logger)
+
     def delete_host_details(self, ip):
         try:
             out = run_command([self.config.get("broker", "dsdb"),
@@ -314,6 +321,46 @@ class DSDBRunner(object):
 #        raise ArgumentError("No boot interface found for host to delete from dsdb.")
 
     def update_host(self, dbinterface, oldinfo):
+        """Update a dsdb host entry.
+
+        The calling code (the aq update_interface command) treats the
+        hostname and interface name as unchanging.  There is an
+        update_host dsdb command that lets the mac address (and comments,
+        if we kept them) change.
+
+        Any other changes have to be done by removing the old DSDB
+        entry and adding a new one.
+
+        """
+        if not dbinterface.system:
+            # Can't actually get here - the calling code verifies that
+            # the interface is attached to a system.
+            raise InternalError("Cannot update interface %s on %s that is not "
+                                "associated with a DNS Record." %
+                                (dbinterface.name,
+                                 dbinterface.hardware_entity.hardware_name))
+        if not dbinterface.system.ip:
+            # This may not be relevant for an update...
+            raise ArgumentError("No ip address found for '%s' to update dsdb."
+                                % dbinterface.system.fqdn)
+        if dbinterface.name != oldinfo["name"] or \
+           dbinterface.system.ip != oldinfo["ip"]:
+            # Fall back to deleting the host entry and re-adding it.
+            return self.update_host_force(dbinterface, oldinfo)
+        if not dbinterface.mac:
+            # Nothing to do.  There is no aq command that will let you
+            # remove a mac address without replacing it.
+            return
+        try:
+            return self.update_host_mac(dbinterface.system.fqdn,
+                                        dbinterface.mac)
+        except ProcessException, e:
+            self.logger.info("Failed updating dsdb entry for %s with MAC %s." %
+                             (dbinterface.system.fqdn, dbinterface.mac))
+            raise
+        return
+
+    def update_host_force(self, dbinterface, oldinfo):
         """This gets tricky.  On a basic level, we want to remove the
         old information from dsdb and then re-add it.
 
