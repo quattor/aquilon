@@ -75,7 +75,7 @@ def get_branch_dependencies(dbbranch):
     if dbbranch.trackers:
         ret.append("%s %s is tracked by %s." %
                    (dbbranch.branch_type, dbbranch.name,
-                    [t.name for t in dbbranch.trackers]))
+                    [str(t.name) for t in dbbranch.trackers]))
     return ret
 
 def remove_branch(config, logger, dbbranch):
