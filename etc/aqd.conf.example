@@ -3,10 +3,10 @@
 # For an example (and working) development default, see aqd.conf.dev.
 
 [DEFAULT]
-basedir = /var/quattor
-quattordir = %(basedir)s
+basedir = /var
+quattordir = %(basedir)s/quattor
 logdir = %(quattordir)s/logs
-dbdir = %(basedir)s/aquilondb
+dbdir = %(quattordir)s/aquilondb
 dblogfile = %(logdir)s/aqdb.log
 
 [database_oracle]
