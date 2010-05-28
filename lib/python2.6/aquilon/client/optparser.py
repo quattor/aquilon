@@ -38,7 +38,6 @@ import textwrap
 import pdb
 import sys
 
-
 def cmdName():
     return os.path.basename(sys.argv[0])
 
@@ -49,6 +48,26 @@ def read_file(option, opt, value, parser):
     except Exception, e:
         raise OptionValueError("Error opening '%s' for %s: %s" %
                                (value, opt, e))
+
+def get_term_width():
+    width = None
+    try:
+        import fcntl, termios, struct
+        # The help is printed to stderr, so only check that for being a terminal
+        if os.isatty(sys.stderr.fileno()):
+            res = fcntl.ioctl(sys.stderr.fileno(), termios.TIOCGWINSZ,
+                              struct.pack("HHHH", 0, 0, 0, 0))
+            width = struct.unpack("HHHH", res)[1]
+    except:
+        pass
+    if width is None:
+        try:
+            width = int(os.environ["COLUMNS"])
+        except:
+            pass
+    if width is None or width < 80:
+        width = 80
+    return width
 
 
 # =========================================================================== #
@@ -92,11 +111,11 @@ class Element(object):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp (self, indentlevel):
+    def recursiveHelp (self, indentlevel, width=None):
         res = self.help
 
         for child in self.children:
-            res = res + child.recursiveHelp(indentlevel)
+            res = res + child.recursiveHelp(indentlevel, width=width)
         return res
 
 # =========================================================================== #
@@ -117,7 +136,7 @@ class commandline(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def populateParser(self, command, parser):
+    def populateParser(self, command, parser, width=None):
         # add global options
         self.__allcommands.genOptions(parser)
 
@@ -125,20 +144,22 @@ class commandline(Element):
             # add command-specific options
             self.__commandlist[command].genOptions(parser)
             # and set command-specific usage message
-            parser.usage = self.__commandlist[command].recursiveHelp(0)
+            parser.usage = self.__commandlist[command].recursiveHelp(0,
+                width=width)
         else:
-            parser.usage = self.__allcommands.recursiveHelp(0)
+            parser.usage = self.__allcommands.recursiveHelp(0, width=width)
 
 # --------------------------------------------------------------------------- #
 
-    def commandList(self):
-        res = self.help + "\nGlobal options:\n" + self.__allcommands.recursiveHelp(0)
+    def commandList(self, width=None):
+        res = self.help + "\nGlobal options:\n"
+        res += self.__allcommands.recursiveHelp(0, width=width)
         res += "Available commands are:"
 
         commands = self.__commandlist.keys()
         commands.sort()
         maxlen = max([len(s) for s in commands]) + 4
-        columns = 75 / maxlen
+        columns = (width - 4) / maxlen
         rows = len(commands) / columns + 1
 
         for row in xrange(rows):
@@ -163,16 +184,18 @@ class commandline(Element):
                 (res, found) = self.__allcommands.check(command, options)
             return None, res
 
+        width = get_term_width()
+
         # handle help pseudocommand
         if (command.find('help') != -1):
             helpfor = command[5:]
             if (self.__commandlist.has_key(helpfor)):
-                print self.__commandlist[helpfor].recursiveHelp(0)
+                print self.__commandlist[helpfor].recursiveHelp(0, width=width)
                 exit(0)
             else:
                 if helpfor:
                     print "The command '%s' is not known to this server." % helpfor
-                print self.commandList()
+                print self.commandList(width=width)
                 exit(0)
 
         if (self.__commandlist.has_key(command)):
@@ -180,13 +203,14 @@ class commandline(Element):
 
             # print help if --help is on the command line
             if options.help:
-                print self.__commandlist[command].recursiveHelp(0)
+                print self.__commandlist[command].recursiveHelp(0, width=width)
                 exit(0)
 
             commandElement = self.__commandlist[command]
             (res, found) = commandElement.check(command, options)
         else:
-            raise ParsingError('Command '+command+' is not known!',self.commandList())
+            raise ParsingError('Command ' + command + ' is not known!',
+                               self.commandList(width=width))
 
         transport = None
         for t in commandElement.transports:
@@ -201,12 +225,13 @@ class commandline(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp(self, indentlevel):
+    def recursiveHelp(self, indentlevel, width=None):
         res = self.help
-        res += "\nGlobal options:\n" + self.__allcommands.recursiveHelp(indentlevel)
+        res += "\nGlobal options:\n"
+        res += self.__allcommands.recursiveHelp(indentlevel, width=width)
         res += "\nValid commands are:\n"
         for k in self.__commandlist.keys():
-            res = res + self.__commandlist[k].recursiveHelp(indentlevel)
+            res += self.__commandlist[k].recursiveHelp(indentlevel, width=width)
         return res
 
 # --------------------------------------------------------------------------- #
@@ -241,7 +266,7 @@ class command(Element):
             try:
                 (res, found) = optgroup.check(command, options)
             except ParsingError, e:
-                e.help = self.recursiveHelp(0)
+                e.help = self.recursiveHelp(0, width=get_term_width())
                 raise e
             result.update(res)
         # check for conflicts
@@ -270,8 +295,9 @@ class command(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def shortHelp(self):
-        lines = textwrap.wrap(" ".join([ o.shortHelp() for o in self.optgroups ]))
+    def shortHelp(self, width=None):
+        lines = textwrap.wrap(" ".join([o.shortHelp() for o in self.optgroups]),
+                              width)
 
         if len(lines) > 0:
             return "\n".join([lines[0]] + [ "    " + l for l in lines[1:] ])
@@ -281,18 +307,23 @@ class command(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp(self, indentlevel):
+    def recursiveHelp(self, indentlevel, width=None):
         cmd = cmdName() + " "
         if self.name != "*":
             cmd += self.name.replace("_", " ") + " "
-        cmd += self.shortHelp()
+        shortwidth = width - len(cmd) if width else None
+        cmd += self.shortHelp(width=shortwidth)
         res = cmd + "\n\n"
 
-        if (len(self.help) > 0):
-            res = res + "\n".join(["    " + l for l in textwrap.wrap(self.help)]) + "\n\n"
+        paragraphs = re.split('\n\n+', self.help)
+        formatted = []
+        for para in paragraphs:
+            lines = "\n".join(["    " + l for l in textwrap.wrap(para, width - 4)])
+            formatted.append(lines)
+        res += "\n\n".join(formatted) + "\n\n"
 
         for og in self.optgroups:
-            res = res + og.recursiveHelp(indentlevel + 1) + "\n"
+            res += og.recursiveHelp(indentlevel + 1, width=width) + "\n"
 
         return res
 
@@ -391,11 +422,12 @@ class optgroup(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp(self, indentlevel):
+    def recursiveHelp(self, indentlevel, width=None):
         whitespace = " " * (4 * (indentlevel))
         res = whitespace + self.help
+        width -= 4 * indentlevel
         for o in self.options:
-            res += o.recursiveHelp(indentlevel + 1)
+            res += o.recursiveHelp(indentlevel + 1, width=width)
         return res
 
 # =========================================================================== #
@@ -490,11 +522,11 @@ class option(Element):
 
 # --------------------------------------------------------------------------- #
 
-    def recursiveHelp(self, indentlevel):
+    def recursiveHelp(self, indentlevel, width=None):
         whitespace = " " * (4 * indentlevel)
         help = self.help if len(self.help) else "\n"
 
-        helplines = textwrap.wrap(help, 40)
+        helplines = textwrap.wrap(help, width - 36)
         res = whitespace + "%*s %s\n" % (-35 + 4 * indentlevel, self.shortHelp(), helplines[0])
         for line in helplines[1:]:
             res = res + " " * 36 + line + "\n"
@@ -539,12 +571,17 @@ class OptParser (object):
             element = option(name, attributes)
         elif (name == "transport"):
             element = transport(name, attributes)
+        elif (name == "p"):
+            element = "\n"
         else:
             element = Element(name, attributes)
 
         if (self.__nodeStack):
             parent = self.__nodeStack[-1]
-            parent.add(element)
+            if isinstance(element, Element):
+                parent.add(element)
+            else:
+                parent.help += element
         else:
             self.__root = element
 
@@ -596,15 +633,17 @@ class OptParser (object):
             command_words.append(arg)
         command = '_'.join(command_words)
 
-        self.__root.populateParser(command, self.parser)
+        width = get_term_width()
+
+        self.__root.populateParser(command, self.parser, width=width)
         (opts, args) = self.parser.parse_args(args)
 
         if (not args):
             if opts.help:
                 # verbose help if we were given no command but have --help
-                self.parser.usage = self.__root.recursiveHelp(0)
+                self.parser.usage = self.__root.recursiveHelp(0, width=width)
             else:
-                self.parser.usage = self.__root.commandList()
+                self.parser.usage = self.__root.commandList(width=width)
 
             self.parser.error('Please specify a command')
 
