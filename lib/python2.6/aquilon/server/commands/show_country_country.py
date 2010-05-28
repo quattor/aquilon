@@ -26,19 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show continent --name`."""
+"""Contains the logic for `aq show country --country`."""
 
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowContinentName(CommandShowLocationType):
+class CommandShowCountryCountry(CommandShowLocationType):
 
-    required_parameters = ["name"]
+    required_parameters = ["country"]
 
-    def render(self, session, name, **arguments):
-        return CommandShowLocationType.render(self, session=session, name=name,
-                type='continent', **arguments)
-
-
+    def render(self, session, country, **arguments):
+        return CommandShowLocationType.render(self, session=session,
+                                              type='country', name=country,
+                                              **arguments)

@@ -39,6 +39,5 @@ class CommandShowRack(CommandShowLocationType):
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                type='rack', **arguments)
-
-
+                                              type='rack', name=None,
+                                              **arguments)

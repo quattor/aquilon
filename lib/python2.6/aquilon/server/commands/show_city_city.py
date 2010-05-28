@@ -26,19 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show hub --name`."""
+"""Contains the logic for `aq show city --city`."""
 
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowHubName(CommandShowLocationType):
+class CommandShowCityCity(CommandShowLocationType):
 
-    required_parameters = ["name"]
+    required_parameters = ["city"]
 
-    def render(self, session, name, **arguments):
-        return CommandShowLocationType.render(self, session=session, name=name,
-                type='hub', **arguments)
-
-
+    def render(self, session, city, **arguments):
+        return CommandShowLocationType.render(self, session=session,
+                                              type='city', name=city,
+                                              **arguments)

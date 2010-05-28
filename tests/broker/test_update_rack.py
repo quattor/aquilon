@@ -44,20 +44,20 @@ from brokertest import TestBrokerCommand
 class TestUpdateRack(TestBrokerCommand):
     # Was row a column 3
     def testupdateut3(self):
-        self.noouttest(["update", "rack", "--name", "ut3", "--row", "b"])
+        self.noouttest(["update", "rack", "--rack", "ut3", "--row", "b"])
 
     # Was row g column 2
     def testupdateut8(self):
-        self.noouttest(["update", "rack", "--name", "ut8", "--column", "8"])
+        self.noouttest(["update", "rack", "--rack", "ut8", "--column", "8"])
 
     # Was row g column 3
     def testupdateut9(self):
-        self.noouttest(["update", "rack", "--name", "ut9", "--row", "h",
+        self.noouttest(["update", "rack", "--rack", "ut9", "--row", "h",
                         "--column", "9", "--fullname", "My Rack",
                         "--comments", "Testing a rack update"])
 
     def testverifyupdateut9(self):
-        command = "show rack --name ut9"
+        command = "show rack --rack ut9"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: ut9", command)
         self.matchoutput(out, "Fullname: My Rack", command)
@@ -67,12 +67,12 @@ class TestUpdateRack(TestBrokerCommand):
 
     # Was row zz column 99
     def testupdatenp997(self):
-        self.noouttest(["update", "rack", "--name", "np997", "--row", "xx",
+        self.noouttest(["update", "rack", "--rack", "np997", "--row", "xx",
                         "--column", "77", "--fullname", "My Other Rack",
                         "--comments", "Testing another rack update"])
 
     def testverifyupdatenp997(self):
-        command = "show rack --name np997"
+        command = "show rack --rack np997"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: np997", command)
         self.matchoutput(out, "Fullname: My Other Rack", command)
@@ -82,17 +82,17 @@ class TestUpdateRack(TestBrokerCommand):
 
     # Was row yy column 88
     def testupdatenp998(self):
-        self.noouttest(["update", "rack", "--name", "np998", "--row", "vv",
+        self.noouttest(["update", "rack", "--rack", "np998", "--row", "vv",
                         "--column", "66"])
 
     def testfailrow(self):
-        command = ["update", "rack", "--name", "np999", "--row", "a-b"]
+        command = ["update", "rack", "--rack", "np999", "--row", "a-b"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "must be alphanumeric", command)
 
     def testalphacolumn(self):
         """ we now accept characters for rack columns   """
-        command = ["update", "rack", "--name", "np999", "--column", "a"]
+        command = ["update", "rack", "--rack", "np999", "--column", "a"]
         err = self.noouttest(command)
 
     def testverifyshowallcsv(self):

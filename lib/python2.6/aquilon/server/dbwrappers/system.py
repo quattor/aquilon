@@ -88,8 +88,8 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('fqdn', None):
         (short, dbdns_domain) = parse_system(session, kwargs['fqdn'])
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
-    if kwargs.get('dnsdomain', None):
-        dbdns_domain = DnsDomain.get_unique(session, kwargs['dnsdomain'],
+    if kwargs.get('dns_domain', None):
+        dbdns_domain = DnsDomain.get_unique(session, kwargs['dns_domain'],
                                             compel=True)
         q = q.filter_by(dns_domain=dbdns_domain)
     if kwargs.get('shortname', None):

@@ -35,10 +35,8 @@ from aquilon.server.commands.del_location import CommandDelLocation
 
 class CommandDelRack(CommandDelLocation):
 
-    required_parameters = ["name"]
+    required_parameters = ["rack"]
 
-    def render(self, session, name, **arguments):
-        return CommandDelLocation.render(self, session=session, name=name,
-                type='rack', **arguments)
-
-
+    def render(self, session, rack, **arguments):
+        return CommandDelLocation.render(self, session=session, name=rack,
+                                         type='rack', **arguments)

@@ -59,7 +59,7 @@ class TestShowCampus(TestBrokerCommand):
         self.matchoutput(out, "Fullname: Virginia", command)
 
     def testshowcampusvi(self):
-        command = "show campus --name vi"
+        command = "show campus --campus vi"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Campus: vi", command)
         self.matchoutput(out, "Fullname: Virginia", command)

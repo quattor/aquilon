@@ -39,6 +39,5 @@ class CommandShowRoom(CommandShowLocationType):
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                                              type='room', **arguments)
-
-
+                                              type='room', name=None,
+                                              **arguments)

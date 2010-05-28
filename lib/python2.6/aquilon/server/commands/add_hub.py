@@ -37,9 +37,9 @@ from aquilon.aqdb.model import Company
 
 class CommandAddHub(CommandAddLocation):
 
-    required_parameters = ["name"]
+    required_parameters = ["hub"]
 
-    def render(self, session, organization, name, fullname, comments, **arguments):
+    def render(self, session, organization, hub, fullname, comments, **arguments):
         organization = organization or self.config.get("broker",
                                                        "default_organization")
         if not organization:
@@ -49,9 +49,8 @@ class CommandAddHub(CommandAddLocation):
         # This is not strictly neccessary, but gives a nicer error message
         Company.get_unique(session, organization, compel=True)
 
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='hub', fullname=fullname,
-                parentname=organization, parenttype='company',
-                comments=comments, **arguments)
-
-
+        return CommandAddLocation.render(self, session=session, name=hub,
+                                         type='hub', fullname=fullname,
+                                         parentname=organization,
+                                         parenttype='company',
+                                         comments=comments, **arguments)

@@ -35,12 +35,10 @@ from aquilon.server.commands.add_location import CommandAddLocation
 
 class CommandAddContinent(CommandAddLocation):
 
-    required_parameters = ["name", "hub"]
+    required_parameters = ["continent", "hub"]
 
-    def render(self, session, name, hub, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=name,
-                type='continent', fullname=fullname,
-                parentname=hub, parenttype='hub',
-                comments=comments, **arguments)
-
-
+    def render(self, session, continent, hub, fullname, comments, **arguments):
+        return CommandAddLocation.render(self, session=session, name=continent,
+                                         type='continent', fullname=fullname,
+                                         parentname=hub, parenttype='hub',
+                                         comments=comments, **arguments)

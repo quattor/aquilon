@@ -121,14 +121,14 @@ class TestAdd10GigHardware(TestBrokerCommand):
             else:
                 port_group = "user-v71%d" % ((i - 9) / 2)
             machine = "evm%d" % (i + 10)
-            command = ["search_machine", "--name", machine,
+            command = ["search_machine", "--machine", machine,
                        "--pg", port_group]
             out = self.commandtest(command)
             self.matchoutput(out, machine, command)
 
     # Utility method...
     def verifypg(self):
-        command = ["search_machine", "--name=evm10", "--pg=user-v710"]
+        command = ["search_machine", "--machine=evm10", "--pg=user-v710"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm10", command)
 
@@ -176,7 +176,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_210_verifyaux(self):
         command = ["search_system", "--type=auxiliary",
-                   "--dnsdomain=aqd-unittest.ms.com",
+                   "--dns_domain=aqd-unittest.ms.com",
                    "--networkip", self.net.vm_storage_net[0].ip]
         out = self.commandtest(command)
         for i in range(1, 25):

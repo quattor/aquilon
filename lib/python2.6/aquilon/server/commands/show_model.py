@@ -37,10 +37,10 @@ class CommandShowModel(BrokerCommand):
     """ This is more like a 'search' command than a 'show' command, and
         will probably be converted at some time in the future."""
 
-    def render(self, session, name, vendor, type, **arguments):
+    def render(self, session, model, vendor, type, **arguments):
         q = session.query(Model)
-        if name is not None:
-            q = q.filter(Model.name.like(name + '%'))
+        if model is not None:
+            q = q.filter(Model.name.like(model + '%'))
         if vendor is not None:
             q = q.join('vendor').filter(Vendor.name.like(vendor + '%'))
             q = q.reset_joinpoint()

@@ -75,13 +75,13 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testdnsdomainavailable(self):
-        command = "search host --dnsdomain aqd-unittest.ms.com"
+        command = "search host --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testdnsdomainunavailable(self):
-        command = "search host --dnsdomain does-not-exist.ms.com"
+        command = "search host --dns_domain does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "DNS Domain does-not-exist.ms.com not found",
                          command)

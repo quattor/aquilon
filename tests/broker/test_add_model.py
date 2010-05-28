@@ -44,14 +44,14 @@ from brokertest import TestBrokerCommand
 class TestAddModel(TestBrokerCommand):
 
     def testadduttorswitch(self):
-        command = ["add_model", "--name=uttorswitch", "--vendor=hp",
-                   "--type=tor_switch", "--cputype=xeon_2500", "--cpunum=1",
+        command = ["add_model", "--model=uttorswitch", "--vendor=hp",
+                   "--type=tor_switch", "--cpuname=xeon_2500", "--cpunum=1",
                    "--mem=8192", "--disktype=local", "--diskcontroller=scsi",
                    "--disksize=36", "--nics=4"]
         self.noouttest(command)
 
     def testverifyadduttorswitch(self):
-        command = "show model --name uttorswitch"
+        command = "show model --model uttorswitch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
         self.matchoutput(out, "Type: tor_switch", command)
@@ -87,54 +87,55 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
     def testaddutchassis(self):
-        command = "add model --name utchassis --vendor aurora_vendor --type chassis"
+        command = "add model --model utchassis --vendor aurora_vendor --type chassis"
         self.noouttest(command.split(" "))
 
     def testverifyaddutchassis(self):
-        command = "show model --name utchassis"
+        command = "show model --model utchassis"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
         self.matchoutput(out, "Type: chassis", command)
 
     def testaddutblade(self):
-        command = "add model --name utblade --vendor aurora_vendor --type blade"
+        command = "add model --model utblade --vendor aurora_vendor --type blade"
         self.noouttest(command.split(" "))
 
     def testverifyaddutblade(self):
-        command = "show model --name utblade"
+        command = "show model --model utblade"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
         self.matchoutput(out, "Type: blade", command)
 
     def testaddutmedium(self):
-        command = ["add_model", "--name=utmedium", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cputype=xeon_2500",
+        command = ["add_model", "--model=utmedium", "--vendor=utvendor",
+                   "--type=virtual_machine", "--cpuname=xeon_2500",
                    "--cpunum=1", "--mem=8192", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=15", "--nics=1"]
         self.noouttest(command)
 
     def testaddutlarge(self):
-        command = ["add_model", "--name=utlarge", "--vendor=utvendor",
+        # This test still use --cputype to test backwards compatibility
+        command = ["add_model", "--model=utlarge", "--vendor=utvendor",
                    "--type=virtual_machine", "--cputype=xeon_2660",
                    "--cpunum=4", "--mem=16384", "--disktype=nas",
                    "--diskcontroller=sata", "--disksize=45", "--nics=1"]
         self.noouttest(command)
 
     def testverifyaddutmedium(self):
-        command = "show model --name utmedium"
+        command = "show model --model utmedium"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
         self.matchoutput(out, "Type: virtual_machine", command)
 
     def testfailauroranode(self):
-        command = ["add_model", "--name=invalid", "--vendor=aurora_vendor",
+        command = ["add_model", "--model=invalid", "--vendor=aurora_vendor",
                    "--type=aurora_node"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The model's machine type must be one of",
                          command)
 
     def testfailduplicate(self):
-        command = ["add_model", "--name=utblade", "--vendor=aurora_vendor",
+        command = ["add_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--type=blade"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Specified model already exists", command)

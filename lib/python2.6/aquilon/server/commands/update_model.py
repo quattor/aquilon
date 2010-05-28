@@ -41,7 +41,7 @@ from aquilon.server.templates.machine import PlenaryMachineInfo
 
 class CommandUpdateModel(BrokerCommand):
 
-    required_parameters = ["name", "vendor"]
+    required_parameters = ["model", "vendor"]
 
     # Quick hash of the arguments this method takes to the corresponding
     # aqdb label.
@@ -51,13 +51,13 @@ class CommandUpdateModel(BrokerCommand):
                        'diskcontroller': 'controller_type',
                        'disksize': 'disk_capacity', 'nics':'nic_count'}
 
-    def render(self, session, logger, name, vendor, newname, newvendor,
+    def render(self, session, logger, model, vendor, newmodel, newvendor,
                comments, leave_existing, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows
             # for simple equality checks below and removes the need to
             # call refresh().
-            if arg in ['newname', 'newvendor', 'machine_type',
+            if arg in ['newmodel', 'newvendor', 'machine_type',
                        'cpuname', 'cpuvendor', 'disktype', 'diskcontroller']:
                 if value is not None:
                     arguments[arg] = value.lower().strip()
@@ -66,10 +66,10 @@ class CommandUpdateModel(BrokerCommand):
                     arguments[arg] = force_int(arg, value)
 
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
-        dbmodel = Model.get_unique(session, name=name, vendor=dbvendor,
+        dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    compel=True)
 
-        if leave_existing and (newname or newvendor):
+        if leave_existing and (newmodel or newvendor):
             raise ArgumentError("Cannot update model name or vendor without "
                                 "updating any existing machines.")
 
@@ -81,19 +81,19 @@ class CommandUpdateModel(BrokerCommand):
         # setting a new vendor, a new name, or both.
         if newvendor:
             dbnewvendor = Vendor.get_unique(session, newvendor, compel=True)
-            if newname:
-                Model.get_unique(session, name=newname, vendor=dbnewvendor,
+            if newmodel:
+                Model.get_unique(session, name=newmodel, vendor=dbnewvendor,
                                  preclude=True)
             else:
                 Model.get_unique(session, name=dbmodel.name,
                                  vendor=dbnewvendor, preclude=True)
             dbmodel.vendor = dbnewvendor
-        if newname:
+        if newmodel:
             if not newvendor:
-                Model.get_unique(session, name=newname, vendor=dbmodel.vendor,
+                Model.get_unique(session, name=newmodel, vendor=dbmodel.vendor,
                                  preclude=True)
-            dbmodel.name = newname
-        if newvendor or newname:
+            dbmodel.name = newmodel
+        if newvendor or newmodel:
             q = session.query(Machine).filter_by(model=dbmodel)
             dbmachines.update(q.all())
                 

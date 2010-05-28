@@ -57,13 +57,13 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "'interface', 'sata',", command)
 
     def test_100_updateexisting(self):
-        command = ["update_model", "--name=utmedium", "--vendor=utvendor",
+        command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpunum=1", "--mem=4096", "--nics=1",
                    "--disksize=45", "--diskcontroller=scsi"]
         self.noouttest(command)
 
     def test_110_verifyspecs(self):
-        command = ["show_model", "--name=utmedium"]
+        command = ["show_model", "--model=utmedium"]
         out = self.commandtest(command)
         self.matchoutput(out, "MachineSpecs for utvendor utmedium:",
                          command)
@@ -85,7 +85,7 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "'interface', 'scsi',", command)
 
     def test_200_faildisktype(self):
-        command = ["update_model", "--name=utmedium", "--vendor=utvendor",
+        command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpuvendor=intel",
                    "--cpuspeed=1000", "--disktype=local"]
         out = self.badrequesttest(command)
@@ -93,13 +93,13 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
 
     def test_210_updatedisktype(self):
-        command = ["update_model", "--name=utmedium", "--vendor=utvendor",
+        command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=xeon_2660", "--cpuvendor=intel",
                    "--cpuspeed=2660", "--disktype=local", "--leave_existing"]
         self.noouttest(command)
 
     def test_220_verifyspecs(self):
-        command = ["show_model", "--name=utmedium"]
+        command = ["show_model", "--model=utmedium"]
         out = self.commandtest(command)
         self.matchoutput(out, "MachineSpecs for utvendor utmedium:",
                          command)
@@ -121,15 +121,15 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "'interface', 'scsi',", command)
 
     def test_300_updatetype(self):
-        command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
+        command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--machine_type=rackmount"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "Cannot (yet) change a model's machine type",
                          command)
 
     def test_301_leavevendor(self):
-        command = ["update_model", "--name=utmedium", "--vendor=utvendor",
-                   "--newname=utmedium-v1", "--leave_existing"]
+        command = ["update_model", "--model=utmedium", "--vendor=utvendor",
+                   "--newmodel=utmedium-v1", "--leave_existing"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot update model name or vendor without "
@@ -137,8 +137,8 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
 
     def test_302_dupename(self):
-        command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
-                   "--newname=utmedium", "--newvendor=utvendor"]
+        command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
+                   "--newmodel=utmedium", "--newvendor=utvendor"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Model with ", command)
         self.matchoutput(out, "Vendor utvendor", command)
@@ -146,12 +146,12 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "already exists", command)
 
     def test_310_updatename(self):
-        command = ["update_model", "--name=utmedium", "--vendor=utvendor",
-                   "--newname=utmedium-v1"]
+        command = ["update_model", "--model=utmedium", "--vendor=utvendor",
+                   "--newmodel=utmedium-v1"]
         self.noouttest(command)
 
     def test_311_verifyname(self):
-        command = ["show_model", "--name=utmedium-v1"]
+        command = ["show_model", "--model=utmedium-v1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: utvendor Model: utmedium-v1", command)
 
@@ -163,12 +163,12 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
 
     def test_320_updatevendor(self):
-        command = ["update_model", "--name=utmedium-v1", "--vendor=utvendor",
+        command = ["update_model", "--model=utmedium-v1", "--vendor=utvendor",
                    "--newvendor=virtual"]
         self.noouttest(command)
 
     def test_321_verifyvendor(self):
-        command = ["show_model", "--name=utmedium-v1"]
+        command = ["show_model", "--model=utmedium-v1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: virtual Model: utmedium-v1", command)
 
@@ -180,12 +180,12 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
 
     def test_330_restore(self):
-        command = ["update_model", "--name=utmedium-v1", "--vendor=virtual",
-                   "--newvendor=utvendor", "--newname=utmedium"]
+        command = ["update_model", "--model=utmedium-v1", "--vendor=virtual",
+                   "--newvendor=utvendor", "--newmodel=utmedium"]
         self.noouttest(command)
 
     def test_331_verifyupdate(self):
-        command = ["show_model", "--name=utmedium"]
+        command = ["show_model", "--model=utmedium"]
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
 
@@ -197,25 +197,25 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
 
     def test_700_failnospecs(self):
-        command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
+        command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--mem=8192"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Missing required parameters to store", command)
 
     def test_710_verifyfail(self):
-        command = ["show_model", "--name=utblade"]
+        command = ["show_model", "--model=utblade"]
         out = self.commandtest(command)
         self.matchclean(out, "MachineSpecs", command)
 
     def test_800_addspecs(self):
-        command = ["update_model", "--name=utblade", "--vendor=aurora_vendor",
+        command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--cpuname=utcpu", "--cpunum=2", "--mem=8192",
                    "--disktype=local", "--diskcontroller=scsi",
                    "--disksize=30", "--nics=2", "--leave_existing"]
         self.noouttest(command)
 
     def test_810_verifyspecs(self):
-        command = ["show_model", "--name=utblade"]
+        command = ["show_model", "--model=utblade"]
         out = self.commandtest(command)
         self.matchoutput(out, "MachineSpecs for aurora_vendor utblade:",
                          command)

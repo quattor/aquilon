@@ -63,7 +63,7 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testdnsdomainavailable(self):
-        command = "search system --dnsdomain aqd-unittest.ms.com"
+        command = "search system --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "np998gd1r01.aqd-unittest.ms.com", command)
@@ -74,7 +74,7 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
 
     def testdnsdomainunavailable(self):
-        command = "search system --dnsdomain does-not-exist.ms.com"
+        command = "search system --dns_domain does-not-exist.ms.com"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "DNS Domain does-not-exist.ms.com not found",
                          command)
