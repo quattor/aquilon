@@ -64,11 +64,6 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchoutput(out, "evm", command)
         self.matchclean(out, "ut", command)
 
-    def testfailcpucount(self):
-        command = "search machine --cpucount BAD"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Expected an integer for cpucount", command)
-
     def testcpucount(self):
         command = "search machine --cpucount 1"
         out = self.commandtest(command.split(" "))

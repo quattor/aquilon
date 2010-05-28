@@ -492,8 +492,10 @@ class option(Element):
             str = 'parser.add_option("--'+self.name+'", dest="'+self.name+'"'
         if (self.type == 'boolean'):
             str = str+', action="store_true"'
-        elif (self.type == 'string' or self.type == 'int'):
+        elif (self.type == 'string'):
             str = str+', action="store"'
+        elif (self.type == 'int'):
+            str = str+', action="store", type="int"'
         elif (self.type=='file'):
             # Need type?
             str = str+', action="callback", callback=read_file, type="string"'
@@ -646,6 +648,9 @@ class OptParser (object):
                 self.parser.usage = self.__root.commandList(width=width)
 
             self.parser.error('Please specify a command')
+
+        if '_'.join(args) != command:
+            self.parser.error('Extra arguments on the command line')
 
         try:
             this_is_None, globalOptions = self.__root.check(None, opts)

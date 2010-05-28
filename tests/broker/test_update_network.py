@@ -44,8 +44,10 @@ from brokertest import TestBrokerCommand
 class TestUpdateNetwork(TestBrokerCommand):
 
     def testupdatedomain(self):
+        # TODO: due to the limitations of the current argument parsing code in
+        # the client, we cannot pass False for discoverable
         self.noouttest(["update", "network", "--ip", "10.184.78.224",
-                        "--discoverable", "true"])
+                        "--discoverable"])
 
     def testverifyupdatedomain(self):
         command = "show network --ip 10.184.78.224"

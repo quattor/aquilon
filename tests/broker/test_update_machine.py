@@ -136,10 +136,6 @@ class TestUpdateMachine(TestBrokerCommand):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
             "--serial", "USNKPDZ407"])
 
-    def testupdateut3c1n4cpubadspeed(self):
-        self.badrequesttest(["update", "machine", "--machine", "ut3c1n4",
-            "--cpuspeed", "not-a-number"])
-
     def testupdateut3c1n4cpubadvendor(self):
         self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
             "--cpuvendor", "no-such-vendor"])

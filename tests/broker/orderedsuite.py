@@ -183,6 +183,7 @@ from test_del_domain import TestDelDomain
 from test_del_sandbox import TestDelSandbox
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
+from test_client_bypass import TestClientBypass
 from test_stop import TestBrokerStop
 
 
@@ -249,6 +250,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestPxeswitch, TestManage,
+                TestClientBypass,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
