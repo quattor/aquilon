@@ -54,10 +54,10 @@ class CommandShowNetwork(BrokerCommand):
                 return dbnetwork
         if type:
             q = q.filter_by(network_type = type)
-        if discoverable:
-            q = q.filter_by(is_discoverable = True)
-        if discovered:
-            q = q.filter_by(is_discovered = True)
+        if discoverable is not None:
+            q = q.filter_by(is_discoverable = discoverable)
+        if discovered is not None:
+            q = q.filter_by(is_discovered = discovered)
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
