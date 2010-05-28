@@ -41,7 +41,7 @@ from aquilon.utils import force_ratio
 
 class CommandAddESXCluster(BrokerCommand):
 
-    required_parameters = ["cluster", "metacluster"]
+    required_parameters = ["cluster", "metacluster", "down_hosts_threshold"]
 
     def render(self, session, logger, cluster, metacluster, archetype,
                personality, max_members, vm_to_host_ratio, domain, sandbox,
