@@ -175,5 +175,5 @@ class TestPollTorSwitch(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPollTorSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

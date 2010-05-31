@@ -85,7 +85,7 @@ class TestDelPersonality(TestBrokerCommand):
         command = "del personality --personality esx_server --archetype vmhost"
         self.noouttest(command.split(" "))
 
-    def testdelesxserver(self):
+    def testdelesxdesktop(self):
         command = ["del_personality",
                    "--personality=esx_desktop", "--archetype=vmhost"]
         self.noouttest(command)

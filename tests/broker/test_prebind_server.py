@@ -114,6 +114,6 @@ class TestPrebindServer(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPrebindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
