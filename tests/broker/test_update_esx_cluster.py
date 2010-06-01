@@ -62,7 +62,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
-        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchclean(out, "Comments", command)
 
@@ -82,7 +82,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
         self.matchoutput(out, "Down Hosts Threshold: 0",command)
-        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
                          command)
@@ -135,7 +135,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
     def testfailupdatepersonality(self):
         command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--archetype=vmhost", "--personality=esx_desktop"]
+                   "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change the personality of ESX Cluster utecl1 "
@@ -150,7 +150,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--archetype=windows"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Personality esx_server of archetype windows "
+                         "Personality esx_desktop of archetype windows "
                          "not found",
                          command)
 
@@ -192,7 +192,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Rack: ut10", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
-        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "ToR Switch: ut01ga1s04.aqd-unittest.ms.com",
                          command)

@@ -224,41 +224,41 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.a", "--archetype", "vmhost",
-                        "--personality", "esx_server"])
+                        "--personality", "esx_desktop"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.b", "--archetype", "vmhost",
-                        "--personality", "esx_server"])
+                        "--personality", "esx_desktop"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
-                        "--personality", "esx_server"])
+                        "--personality", "esx_desktop"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "pepper",
                         "--archetype", "vmhost",
-                        "--personality", "esx_server"])
+                        "--personality", "esx_desktop"])
 
     def testverifymapesx(self):
         command = ["show_map", "--archetype=vmhost",
-                   "--personality=esx_server", "--building=ut"]
+                   "--personality=esx_desktop", "--building=ut"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_server "
+                         "Archetype: vmhost Personality: esx_desktop "
                          "Service: esx_management_server Instance: ut.a "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_server "
+                         "Archetype: vmhost Personality: esx_desktop "
                          "Service: esx_management_server Instance: ut.b "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_server "
+                         "Archetype: vmhost Personality: esx_desktop "
                          "Service: vmseasoning Instance: salt "
                          "Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: vmhost Personality: esx_server "
+                         "Archetype: vmhost Personality: esx_desktop "
                          "Service: vmseasoning Instance: pepper "
                          "Map: Building ut",
                          command)

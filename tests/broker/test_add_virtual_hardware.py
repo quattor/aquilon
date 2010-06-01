@@ -249,7 +249,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Current vm_to_host_ratio: 8:3", command)
         self.matchoutput(out, "Virtual Machine count: 8", command)
         self.matchoutput(out, "ESX VMHost count: 3", command)
-        self.matchoutput(out, "Personality: esx_server Archetype: vmhost",
+        self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
 

@@ -166,13 +166,13 @@ class TestPublishSandbox(TestBrokerCommand):
     def testaddesxserverpersonality(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         personalitydir = os.path.join(sandboxdir, "vmhost",
-                                      "personality", "esx_server")
+                                      "personality", "esx_desktop")
         if not os.path.exists(personalitydir):
             os.makedirs(personalitydir)
         template = os.path.join(personalitydir, "espinfo.tpl")
         with open(template, 'w') as f:
             f.writelines(
-                """structure template personality/esx_server/espinfo;
+                """structure template personality/esx_desktop/espinfo;
 
 "description" = "Virtualisation Host running Server VMs";
 "class" = "INFRASTRUCTURE";
@@ -185,7 +185,7 @@ class TestPublishSandbox(TestBrokerCommand):
         template = os.path.join(personalitydir, "windows.tpl")
         with open(template, 'w') as f:
             f.writelines(
-                """structure template personality/esx_server/windows;
+                """structure template personality/esx_desktop/windows;
 
 "windows" = list(
                 nlist("day", "Fri", "start", "23:00", "duration", 48),
@@ -193,7 +193,7 @@ class TestPublishSandbox(TestBrokerCommand):
                 """)
         self.gitcommand(["add", "windows.tpl"], cwd=personalitydir)
         self.gitcommand(["commit", "-a", "-m",
-                         "added personality esx_server"],
+                         "added personality esx_desktop"],
                          cwd=sandboxdir)
 
     def testaddutmedium(self):

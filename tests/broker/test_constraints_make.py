@@ -50,7 +50,7 @@ class TestMakeConstraints(TestBrokerCommand):
         # what the test is checking...
         command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
                    "--os", "linux/4.0.1-x86_64", "--buildstatus", "ready",
-                   "--archetype", "vmhost", "--personality", "esx_desktop"]
+                   "--archetype", "vmhost", "--personality", "esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot change personality of host", command)
         self.matchoutput(out, "while it is a member of esx cluster", command)

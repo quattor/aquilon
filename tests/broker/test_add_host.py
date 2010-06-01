@@ -186,7 +186,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", "ut10s04p%d" % port,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_server"]
+                       "--archetype", "vmhost", "--personality", "esx_desktop"]
             self.noouttest(command)
 
     def testpopulate10gigrackhosts(self):
@@ -203,7 +203,7 @@ class TestAddHost(TestBrokerCommand):
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "esx_server"]
+                       "--archetype", "vmhost", "--personality", "esx_desktop"]
             self.noouttest(command)
 
     def testverifyshowhostproto(self):
