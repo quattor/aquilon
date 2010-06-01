@@ -110,22 +110,24 @@ class TestBrokerStart(unittest.TestCase):
                          "Non-zero return code for clone of template-king, "
                          "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                          % (out, err))
-        # This value needs to be defined if pointing at something other
-        # than a branch named 'prod'.
-        # Not using has_option as anyone trying this out should probably
-        # update their configs setting it to either an empty value or
-        # 'master'.
-        old_branch = config.get("unittest", "template_old_branch")
-        if not old_branch:
+        # This value can be used to test against a different branch/commit
+        # than the current 'prod'.
+        if not config.has_option("unittest", "template_alternate_prod"):
             return
-        p = Popen(("git", "branch", "-m", old_branch, 'prod'),
-                  env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
-        # Ignore out/err unless we get a non-zero return code, then log it.
-        self.assertEqual(p.returncode, 0,
-                         "Non-zero return code for clone of template-king, "
-                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                         % (out, err))
+        new_prod = config.get("unittest", "template_alternate_prod")
+        if not new_prod:
+            return
+        for domain in ['prod', 'ny-prod']:
+            p = Popen(("git", "push", ".", '+%s:%s' % (new_prod, domain)),
+                      env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
+            (out, err) = p.communicate()
+            # Ignore out/err unless we get a non-zero return code, then log it.
+            self.assertEqual(p.returncode, 0,
+                             "Non-zero return code while setting alternate "
+                             "'%s' branch locally to '%s':"
+                             "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                             "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                             % (domain, new_prod, out, err))
         return
 
     def testrsyncswrep(self):
