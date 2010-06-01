@@ -80,6 +80,16 @@ class AuthorizationBroker(object):
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
+        if dbuser.role.name == 'maintech':
+            if action not in ['pxeswitch', 'pxeswitch_list',
+                              'compile', 'compile_hostname',
+                              'update_interface_hostname',
+                              'update_interface_machine']:
+                raise AuthorizationException(
+                    "Unauthorized access attempt to %s on %s.  "
+                    "Request permission from '%s'." %
+                    (action, resource,
+                     self.config.get("broker", "authorization_mailgroup")))
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):
