@@ -77,6 +77,9 @@ class TestAddMachine(TestBrokerCommand):
             """"serialnumber" = "99C5553";""",
             command)
         self.matchoutput(out,
+            """"sysloc/dns_search_domains" = list("new-york.ms.com");""",
+            command)
+        self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
         self.matchoutput(out,

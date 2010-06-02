@@ -53,10 +53,15 @@ class PlenaryMachineInfo(Plenary):
             self.rackcol = loc.rack.rack_column
         else:
             self.rack = None
-        #if loc.campus:
-        #    self.campus = loc.campus.fullname.lower().strip().replace(" ", "-")
-        #else:
-        #    self.campus = None
+        if loc.campus:
+            self.campus = loc.campus.name
+            # TODO: We will need more complex mapping here
+            self.dns_search_domains = \
+                    [loc.campus.fullname.lower().strip().replace(" ", "-") +
+                     ".ms.com"]
+        else:
+            self.campus = None
+            self.dns_search_domains = None
         #if loc.hub:
         #   self.hub = loc.hub.fullname.lower()
         #else:
@@ -116,8 +121,11 @@ class PlenaryMachineInfo(Plenary):
 
         #if self.hub:
         #    lines.append('"sysloc/hub" = "%s";' % self.hub)
-        #if self.campus:
-        #    lines.append('"sysloc/campus" = "%s";' % self.campus)
+        if self.campus:
+            lines.append('"sysloc/campus" = "%s";' % self.campus)
+        if self.dns_search_domains:
+            list = ", ".join(['"%s"' % dom for dom in self.dns_search_domains])
+            lines.append('"sysloc/dns_search_domains" = list(%s);' % list)
 
         # Now describe the hardware
         lines.append("")
