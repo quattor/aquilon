@@ -44,6 +44,9 @@ class CommandShowOS(BrokerCommand):
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             q = q.filter_by(archetype=dbarchetype)
+        q = q.join(Archetype)
+        q = q.order_by([Archetype.name, OperatingSystem.name,
+                        OperatingSystem.version])
         oslist = q.all()
         if not oslist:
             raise NotFoundException("No matching operating system.")

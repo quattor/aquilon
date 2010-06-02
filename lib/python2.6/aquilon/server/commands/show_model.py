@@ -39,11 +39,12 @@ class CommandShowModel(BrokerCommand):
 
     def render(self, session, model, vendor, type, **arguments):
         q = session.query(Model)
+        q = q.join(Vendor)
         if model is not None:
             q = q.filter(Model.name.like(model + '%'))
         if vendor is not None:
-            q = q.join('vendor').filter(Vendor.name.like(vendor + '%'))
-            q = q.reset_joinpoint()
+            q = q.filter(Vendor.name.like(vendor + '%'))
         if type is not None:
             q = q.filter(Model.machine_type.like(type + '%'))
+        q = q.order_by([Vendor.name, Model.name])
         return q.all()

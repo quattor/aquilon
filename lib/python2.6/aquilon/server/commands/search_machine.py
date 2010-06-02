@@ -91,6 +91,7 @@ class CommandSearchMachine(BrokerCommand):
             q = q.join(['disks', (NasAlias, NasAlias.id==Disk.id)])
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
+        q = q.order_by(Machine.name)
         if fullinfo:
             return q.all()
         return SimpleHardwareEntityList(q.all())

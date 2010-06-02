@@ -49,4 +49,4 @@ class CommandObservedMac(BrokerCommand):
             q = q.filter_by(port_number=port_number)
         if mac:
             q = q.filter_by(mac_address=mac)
-        return q.all()
+        return q.order_by(ObservedMac.mac_address).all()

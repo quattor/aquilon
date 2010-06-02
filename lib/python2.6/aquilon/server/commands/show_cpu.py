@@ -45,4 +45,6 @@ class CommandShowCpu(BrokerCommand):
         if speed:
             speed = force_int("speed", speed)
             q = q.filter_by(speed=speed)
+        q = q.join(Vendor)
+        q = q.order_by([Vendor.name, Cpu.name])
         return q.all()

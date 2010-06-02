@@ -61,6 +61,8 @@ class CommandShowPersonality(BrokerCommand):
             q = q.filter_by(archetype=dbarchetype)
         if personality:
             q = q.filter_by(name=personality)
+        q = q.join(Archetype)
+        q = q.order_by([Archetype.name, Personality.name])
         results = PersonalityList()
         if not dbbranch:
             results.extend(q.all())

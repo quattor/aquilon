@@ -65,6 +65,6 @@ class CommandShowMachine(BrokerCommand):
         if model:
             dbmodel = get_model(session, model)
             q = q.filter_by(model=dbmodel)
-        return q.all()
+        return q.order_by(Machine.name).all()
 
 
