@@ -88,6 +88,25 @@ class AuthorizationBroker(object):
                               'update_interface_hostname',
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'unixops_l2':
+            if action not in ['add_host',
+                              'compile', 'compile_hostname',
+                              'reconfigure', 'change_status',
+                              'reconfigure_list', 'reconfigure_hostlist',
+                              'pxeswitch', 'pxeswitch_list',
+                              'add_interface_chassis',
+                              'add_interface_hostname',
+                              'add_interface_machine',
+                              'update_interface_hostname',
+                              'update_interface_machine',
+                              'add_machine',
+                              'update_machine', 'update_machine_hostname',
+                              'add_esx_cluster', 'update_esx_cluster',
+                              'bind_esx_cluster_hostname',
+                              'rebind_esx_cluster_hostname',
+                              'add_manager', 'add_dynamic_range', 'add_disk',
+                              'make', 'make_cluster']:
+                self.raise_auth_error(principal, action, resource)
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):
