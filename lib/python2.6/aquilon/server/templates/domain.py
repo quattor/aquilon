@@ -123,8 +123,8 @@ class TemplateDomain(object):
                 except OSError, e:
                     raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
 
-        if (only):
-            objectlist = [ only ]
+        if only:
+            objectlist = only.split(' ')
         else:
             q = session.query(Host)
             q = q.filter_by(branch=self.domain, sandbox_author=self.author)
@@ -174,9 +174,12 @@ class TemplateDomain(object):
         out = ''
         try:
             if not locked:
-                # We could optimize for the case where len(objectlist) == 1
-                # to not take a whole domain compile key.
-                key = CompileKey(domain=self.domain.name, logger=self.logger)
+                if only and len(objectlist) == 1:
+                    key = CompileKey(domain=self.domain.name, profile=only,
+                                     logger=self.logger)
+                else:
+                    key = CompileKey(domain=self.domain.name,
+                                     logger=self.logger)
                 lock_queue.acquire(key)
             self.logger.info("starting compile")
             try:
