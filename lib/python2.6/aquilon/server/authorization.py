@@ -46,6 +46,12 @@ class AuthorizationBroker(object):
         self.__dict__ = self.__shared_state
         self.config = Config()
 
+    def raise_auth_error(self, principal, action, resource):
+        auth_group = self.config.get("broker", "authorization_mailgroup")
+        raise AuthorizationException("Unauthorized access attempt by %s to %s "
+                                     "on %s.  Request permission from '%s'." %
+                                     (principal, action, resource, auth_group))
+
     # FIXME: Hard coded check for now.
     def check(self, principal, dbuser, action, resource):
         if action.startswith('show') or action.startswith('search') \
@@ -60,11 +66,7 @@ class AuthorizationBroker(object):
         if self._check_aquilonhost(principal, dbuser, action, resource):
             return True
         if dbuser.role.name == 'nobody':
-            raise AuthorizationException(
-                "Unauthorized access attempt to %s on %s.  "
-                "Request permission from '%s'." %
-                (action, resource,
-                 self.config.get("broker", "authorization_mailgroup")))
+            self.raise_auth_error(principal, action, resource)
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
@@ -85,11 +87,7 @@ class AuthorizationBroker(object):
                               'compile', 'compile_hostname',
                               'update_interface_hostname',
                               'update_interface_machine']:
-                raise AuthorizationException(
-                    "Unauthorized access attempt to %s on %s.  "
-                    "Request permission from '%s'." %
-                    (action, resource,
-                     self.config.get("broker", "authorization_mailgroup")))
+                self.raise_auth_error(principal, action, resource)
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):
