@@ -64,7 +64,8 @@ model.primary_key.name = 'model_pk'
 model.append_constraint(UniqueConstraint('name', 'vendor_id',
                                    name='model_name_vendor_uk'))
 
-model.info['unique_fields'] = ['name', 'vendor', 'machine_type']
+model.info['unique_fields'] = ['name', 'vendor']
+model.info['extra_search_fields'] = ['machine_type']
 
 
 @monkeypatch(model)

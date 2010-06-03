@@ -136,7 +136,10 @@ class Base(object):
             kwargs = {table.info['unique_fields'][0]: args[0]}
 
         desc = []
-        for field in table.info['unique_fields']:
+        fields = table.info['unique_fields']
+        if 'extra_search_fields' in table.info:
+            fields.extend(table.info['extra_search_fields'])
+        for field in fields:
             value = kwargs.pop(field, None)
             if value is None:
                 continue
