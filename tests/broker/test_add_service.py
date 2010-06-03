@@ -79,13 +79,13 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver Instance: np.test", command)
 
     def testadddnsinstance(self):
-        command = "add service --service dns --instance nyinfratest"
+        command = "add service --service dns --instance utdnsinstance"
         self.noouttest(command.split(" "))
 
     def testverifyadddnsinstance(self):
         command = "show service --service dns"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: dns Instance: nyinfratest", command)
+        self.matchoutput(out, "Service: dns Instance: utdnsinstance", command)
 
     def testaddntpinstance(self):
         command = "add service --service ntp --instance pa.ny.na"

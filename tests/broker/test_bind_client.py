@@ -68,11 +68,11 @@ class TestBindClient(TestBrokerCommand):
 
     def testbinddns(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--service", "dns", "--instance", "nyinfratest"]
+                   "--service", "dns", "--instance", "utdnsinstance"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service dns instance nyinfratest",
+                         "service dns instance utdnsinstance",
                          command)
 
     def testbindutsi1(self):
@@ -104,7 +104,7 @@ class TestBindClient(TestBrokerCommand):
     def testverifybinddns(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/dns/nyinfratest", command)
+        self.matchoutput(out, "Template: service/dns/utdnsinstance", command)
 
     def testbindbootserver(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",

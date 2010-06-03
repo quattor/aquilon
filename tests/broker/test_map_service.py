@@ -62,15 +62,15 @@ class TestMapService(TestBrokerCommand):
 
     def testmapdns(self):
         self.noouttest(["map", "service", "--hub", "ny",
-                        "--service", "dns", "--instance", "nyinfratest"])
+                        "--service", "dns", "--instance", "utdnsinstance"])
 
     def testverifymapdns(self):
         command = ["show", "map", "--hub", "ny",
-                   "--service", "dns", "--instance", "nyinfratest"]
+                   "--service", "dns", "--instance", "utdnsinstance"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Service: dns "
-                         "Instance: nyinfratest Map: Hub ny",
+                         "Instance: utdnsinstance Map: Hub ny",
                          command)
 
     def testmapaqd(self):

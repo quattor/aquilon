@@ -89,13 +89,13 @@ class TestPrebindServer(TestBrokerCommand):
     def testbinddns(self):
         self.noouttest(["bind", "server",
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--service", "dns", "--instance", "nyinfratest"])
+                        "--service", "dns", "--instance", "utdnsinstance"])
         self.noouttest(["bind", "server",
                         "--hostname", "nyaqd1.ms.com",
-                        "--service", "dns", "--instance", "nyinfratest"])
+                        "--service", "dns", "--instance", "utdnsinstance"])
 
     def testcatdns(self):
-        command = "cat --service dns --instance nyinfratest"
+        command = "cat --service dns --instance utdnsinstance"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "'servers' = list('nyaqd1.ms.com', "
