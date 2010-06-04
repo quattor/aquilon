@@ -36,3 +36,5 @@ ms.version.addpkg('coverage', '3.3.1')
 ms.version.addpkg('argparse', '1.1')
 
 ms.version.addpkg('nose', '0.11.3')
+
+ms.version.addpkg('lxml', '2.2.4')
