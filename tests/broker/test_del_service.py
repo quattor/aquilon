@@ -80,13 +80,13 @@ class TestDelService(TestBrokerCommand):
         self.matchclean(out, "Service: lemon Instance: ny-prod", command)
 
     def testdeldnsinstance(self):
-        command = "del service --service dns --instance nyinfratest"
+        command = "del service --service dns --instance utdnsinstance"
         self.noouttest(command.split(" "))
 
     def testverifydeldnsinstance(self):
         command = "show service --service dns"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: dns Instance: nyinfratest", command)
+        self.matchclean(out, "Service: dns Instance: utdnsinstance", command)
 
     # At this point, pa.ny.na still is still mapped.  del_service
     # should silently remove the mappings.

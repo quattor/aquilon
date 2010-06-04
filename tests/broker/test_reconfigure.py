@@ -99,7 +99,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'service/bootserver/np.test/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/nyinfratest/client/config' };""",
+            """include { 'service/dns/utdnsinstance/client/config' };""",
             command)
         self.matchoutput(out,
             """include { 'service/ntp/pa.ny.na/client/config' };""",
@@ -158,7 +158,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'service/bootserver/np.test/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/nyinfratest/client/config' };""",
+            """include { 'service/dns/utdnsinstance/client/config' };""",
             command)
         self.matchoutput(out,
             """include { 'service/ntp/pa.ny.na/client/config' };""",
@@ -334,7 +334,7 @@ class TestReconfigure(TestBrokerCommand):
             """include { 'service/afs/q.ny.ms.com/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/nyinfratest/client/config' };""",
+            """include { 'service/dns/utdnsinstance/client/config' };""",
             command)
         self.matchoutput(out,
             """include { 'personality/inventory/config' };""",

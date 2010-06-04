@@ -49,7 +49,7 @@ class TestShowServiceAll(TestBrokerCommand):
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
         self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
         self.matchoutput(out, "Service: bootserver Instance: np.test", command)
-        self.matchoutput(out, "Service: dns Instance: nyinfratest", command)
+        self.matchoutput(out, "Service: dns Instance: utdnsinstance", command)
         self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
 
     def testshowserviceproto(self):

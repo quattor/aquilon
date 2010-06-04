@@ -110,6 +110,7 @@ from test_refresh_windows_hosts import TestRefreshWindowsHosts
 from test_constraints_chooser import TestChooserConstraints
 from test_flush import TestFlush
 from test_compile import TestCompile
+from test_profile import TestProfile 
 from test_bind_server import TestBindServer
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
@@ -229,6 +230,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestRefreshWindowsHosts,
                 TestChooserConstraints,
                 TestFlush, TestCompile,
+                TestProfile,
                 TestBindServer,
                 TestBindClientConstraints, TestBindServerConstraints,
                 TestArchetypeConstraints, TestPersonalityConstraints,

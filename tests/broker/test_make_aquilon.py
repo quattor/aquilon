@@ -102,7 +102,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """include { 'service/bootserver/np.test/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/nyinfratest/client/config' };""",
+            """include { 'service/dns/utdnsinstance/client/config' };""",
             command)
         self.matchoutput(out,
             """include { 'service/ntp/pa.ny.na/client/config' };""",
@@ -126,7 +126,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service dns instance nyinfratest",
+                         "service dns instance utdnsinstance",
                          command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
@@ -150,7 +150,7 @@ class TestMakeAquilon(TestBrokerCommand):
     def testverifybindautodns(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Template: service/dns/nyinfratest", command)
+        self.matchoutput(out, "Template: service/dns/utdnsinstance", command)
 
     def testverifyproto(self):
         command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
@@ -212,7 +212,7 @@ class TestMakeAquilon(TestBrokerCommand):
             """include { 'service/bootserver/np.test/client/config' };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/nyinfratest/client/config' };""",
+            """include { 'service/dns/utdnsinstance/client/config' };""",
             command)
         self.matchoutput(out,
             """include { 'service/ntp/pa.ny.na/client/config' };""",
@@ -229,7 +229,7 @@ class TestMakeAquilon(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
         self.matchoutput(out, "Service: bootserver Instance: np.test", command)
-        self.matchoutput(out, "Service: dns Instance: nyinfratest", command)
+        self.matchoutput(out, "Service: dns Instance: utdnsinstance", command)
         self.matchoutput(out, "Service: ntp Instance: pa.ny.na", command)
 
     def testmakehpinventory(self):

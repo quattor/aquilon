@@ -54,11 +54,11 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
-                        "--service", "dns", "--instance", "nyinfratest"])
+                        "--service", "dns", "--instance", "utdnsinstance"])
 
     def testverifyunmapdns(self):
         command = ["show_map",
-                   "--service=dns", "--instance=nyinfratest", "--hub=ny"]
+                   "--service=dns", "--instance=utdnsinstance", "--hub=ny"]
         self.notfoundtest(command)
 
     def testunmapaqd(self):
