@@ -49,7 +49,7 @@ class TestDelDisk(TestBrokerCommand):
 
     def testdelut3c1n3sdb(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-            "--disk", "sdb"])
+            "--disk", "c0d0"])
 
     # ARG! The Disk info shows up exactly the same in the MachineSpecs.
     # Hard-coding the indent to get around that.
@@ -61,7 +61,7 @@ class TestDelDisk(TestBrokerCommand):
     def testverifydelut3c1n3sdb(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Disk: sdb", command)
+        self.matchclean(out, "Disk: c0d0", command)
 
     # This should now list the 34 GB disk that was added previously...
     def testverifycatut3c1n3disk(self):

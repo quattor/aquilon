@@ -66,33 +66,33 @@ class TestAddDisk(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r"'harddisks' = nlist\(\s*'sda', "
+                          r"'harddisks' = nlist\(\s*escape\('sda'\), "
                           r"create\('hardware/harddisk/generic/scsi',\s*"
                           r"'capacity', 68\*GB\),\s*"
-                          r"'sdb', create\('hardware/harddisk/generic/scsi',"
+                          r"escape\('sdb'\), create\('hardware/harddisk/generic/scsi',"
                           r"\s*'capacity', 34\*GB\),\s*\);",
                           command)
 
     def testaddut3c1n3disk(self):
         # Use the deprecated option names here
         self.noouttest(["add", "disk", "--machine", "ut3c1n3",
-            "--disk", "sdb", "--type", "scsi", "--capacity", "34"])
+            "--disk", "c0d0", "--type", "cciss", "--capacity", "34"])
 
     def testverifyaddut3c1n3disk(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi", command)
-        self.matchoutput(out, "Disk: sdb 34 GB scsi", command)
+        self.matchoutput(out, "Disk: c0d0 34 GB cciss", command)
 
     def testverifycatut3c1n3disk(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r"'harddisks' = nlist\(\s*'sda', "
-                          r"create\('hardware/harddisk/generic/scsi',\s*"
-                          r"'capacity', 68\*GB\),\s*"
-                          r"'sdb', create\('hardware/harddisk/generic/scsi',"
-                          r"\s*'capacity', 34\*GB\),\s*\);",
+                          r"'harddisks' = nlist\(\s*escape\('cciss/c0d0'\), "
+                          r"create\('hardware/harddisk/generic/cciss',\s*"
+                          r"'capacity', 34\*GB\),\s*"
+                          r"escape\('sda'\), create\('hardware/harddisk/generic/scsi',"
+                          r"\s*'capacity', 68\*GB\),\s*\);",
                           command)
 
 

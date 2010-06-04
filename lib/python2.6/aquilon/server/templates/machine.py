@@ -144,11 +144,14 @@ class PlenaryMachineInfo(Plenary):
 
         lines.append("'harddisks' = nlist(")
         for disk in self.dbmachine.disks:
+            devname = disk.device_name
             if disk.disk_type == 'local':
                 relpath = "hardware/harddisk/generic/%s" % disk.controller_type
                 disk_dev_info = "create('%s', \n" \
                     "                   'capacity', %d*GB)" % \
                     (relpath, disk.capacity)
+                if disk.controller_type == 'cciss':
+                    devname = "cciss/" + devname
             elif disk.disk_type == 'nas' and disk.service_instance:
                 relpath = "service/nas_disk_share/%s/client/nasinfo" % \
                     disk.service_instance.name
@@ -160,7 +163,7 @@ class PlenaryMachineInfo(Plenary):
                     "                   'path', '%s')" % \
                     (relpath, disk.capacity, disk.controller_type, \
                      disk.address, diskpath)
-            lines.append("    '%s', %s," % (disk.device_name, disk_dev_info))
+            lines.append("    escape('%s'), %s," % (devname, disk_dev_info))
         lines.append(");\n")
 
         managers = []
