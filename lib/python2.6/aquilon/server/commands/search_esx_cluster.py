@@ -83,6 +83,7 @@ class CommandSearchESXCluster(BrokerCommand):
                                                      branch=branch)
         if dbbranch:
             q = q.filter_by(branch=dbbranch)
+        if dbauthor:
             q = q.filter_by(sandbox_author=dbauthor)
 
         if archetype:
