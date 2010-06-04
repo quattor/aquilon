@@ -46,6 +46,12 @@ class AuthorizationBroker(object):
         self.__dict__ = self.__shared_state
         self.config = Config()
 
+    def raise_auth_error(self, principal, action, resource):
+        auth_group = self.config.get("broker", "authorization_mailgroup")
+        raise AuthorizationException("Unauthorized access attempt by %s to %s "
+                                     "on %s.  Request permission from '%s'." %
+                                     (principal, action, resource, auth_group))
+
     # FIXME: Hard coded check for now.
     def check(self, principal, dbuser, action, resource):
         if action.startswith('show') or action.startswith('search') \
@@ -60,11 +66,7 @@ class AuthorizationBroker(object):
         if self._check_aquilonhost(principal, dbuser, action, resource):
             return True
         if dbuser.role.name == 'nobody':
-            raise AuthorizationException(
-                "Unauthorized access attempt to %s on %s.  "
-                "Request permission from '%s'." %
-                (action, resource,
-                 self.config.get("broker", "authorization_mailgroup")))
+            self.raise_auth_error(principal, action, resource)
         # Right now, anybody in a group can do anything they want, except...
         if action in ['add_archetype', 'update_archetype', 'del_archetype',
                       'add_vendor', 'del_vendor',
@@ -80,6 +82,31 @@ class AuthorizationBroker(object):
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
+        if dbuser.role.name == 'maintech':
+            if action not in ['pxeswitch', 'pxeswitch_list',
+                              'compile', 'compile_hostname',
+                              'update_interface_hostname',
+                              'update_interface_machine']:
+                self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'unixops_l2':
+            if action not in ['add_host',
+                              'compile', 'compile_hostname',
+                              'reconfigure', 'change_status',
+                              'reconfigure_list', 'reconfigure_hostlist',
+                              'pxeswitch', 'pxeswitch_list',
+                              'add_interface_chassis',
+                              'add_interface_hostname',
+                              'add_interface_machine',
+                              'update_interface_hostname',
+                              'update_interface_machine',
+                              'add_machine',
+                              'update_machine', 'update_machine_hostname',
+                              'add_esx_cluster', 'update_esx_cluster',
+                              'bind_esx_cluster_hostname',
+                              'rebind_esx_cluster_hostname',
+                              'add_manager', 'add_dynamic_range', 'add_disk',
+                              'make', 'make_cluster']:
+                self.raise_auth_error(principal, action, resource)
         return True
 
     def _check_aquilonhost(self, principal, dbuser, action, resource):
