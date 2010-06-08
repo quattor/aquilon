@@ -28,9 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 import re
-from ipaddr import IPv4Network
+from ipaddr import (IPv4Network, IPv4IpValidationError,
+                    IPv4NetmaskValidationError)
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException)
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
@@ -38,9 +39,32 @@ from aquilon.aqdb.model.network import Network, _mask_to_cidr
 
 class CommandAddNetwork(BrokerCommand):
 
-    required_parameters = [ "network", "ip", "mask" ]
+    required_parameters = ["network", "ip"]
 
-    def render(self, session, network, mask, discovered, discoverable, ip, type, side, **arguments):
+    def render(self, session, network, ip, discovered, discoverable, type, side, **arguments):
+
+        # Handle the different ways of specifying the netmask
+        mask_options = ["netmask", "prefixlen", "mask"]
+        numopts = sum([1 if arguments.get(opt, None) else 0
+                       for opt in mask_options])
+        if numopts != 1:
+            raise ArgumentError("Exactly one of --netmask, --prefixlen and "
+                                "--mask should be specified.")
+
+        if arguments.get("netmask", None):
+            netmask = arguments["netmask"]
+        elif arguments.get("prefixlen", None):
+            # IPv4Network can handle it just fine
+            netmask = arguments["prefixlen"]
+        elif arguments.get("mask"):
+            netmask = _mask_to_cidr[force_int("mask", arguments["mask"])]
+
+        try:
+            address = IPv4Network("%s/%s" % (ip, netmask))
+        except IPv4IpValidationError, e:
+            raise ArgumentError("Failed to parse the network address: %s" % e)
+        except IPv4NetmaskValidationError, e:
+            raise ArgumentError("Failed to parse the netmask: %s" % e)
 
         location = get_location(session, **arguments)
         if not type:
@@ -49,11 +73,14 @@ class CommandAddNetwork(BrokerCommand):
             side = 'a'
 
         try:
-            dbnetwork = network and get_network_byname(session, network) or None
-            dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
-            if dbnetwork:
-                raise ArgumentError("Network %s with IP address %s already "
-                                    "exists." % (dbnetwork.name, dbnetwork.ip))
+            if network:
+                dbnetwork = get_network_byname(session, network)
+                raise ArgumentError("Network name %s is already in use by %s." %
+                                    (network, str(dbnetwork.network)))
+            dbnetwork = get_network_byip(session, address.ip)
+            # TODO Better formatting than repr()
+            raise ArgumentError("Network address %s is already in use by %s." %
+                                (str(address.ip), repr(dbnetwork)))
         except NotFoundException, e:
             pass
 
@@ -76,13 +103,9 @@ class CommandAddNetwork(BrokerCommand):
                 raise ArgumentError("Did not recognise supplied argument to "
                                     "--discoverable flag: '%s'." % discoverable)
 
-        # This *really* needs better documentation...
-        mask = force_int("mask", mask)
-
         # Okay, all looks good, let's create the network
-        c = _mask_to_cidr[mask]
         net = Network(name         = network,
-                      network      = IPv4Network("%s/%s" % (ip, c)),
+                      network      = address,
                       network_type = type,
                       side         = side,
                       location     = location)

@@ -46,7 +46,8 @@ class TestAddNetwork(TestBrokerCommand):
     def testaddnetwork(self):
         for network in self.net.all:
             command = ["add_network", "--network=%s" % network.ip,
-                       "--ip=%s" % network.ip, "--mask=%s" % network.numhosts,
+                       "--ip=%s" % network.ip,
+                       "--netmask=%s" % network.netmask,
                        "--building=ut", "--type=%s" % network.nettype]
             self.noouttest(command)
 

@@ -1025,14 +1025,19 @@
    <command name="add_network">
       Define a new network.
       <p/>
-      Specify both a name for the network and its ip and mask.  For mask,
-      use 1 for a /32, 2 for a /31, 4 for a /30, 8 for a /29, 16 for a /28,
-      32 for a /27, 64 for a /26, 128 for a /25, etc.
+      Specify both a name for the network and its address as an IP
+      address/netmask pair.  The netmask can be specified either as dotted quad
+      (like "--netmask 255.255.255.0"), as prefix length (like "--prefixlen 24"),
+      or as the number of hosts in the network (like "--mask 256").
       <optgroup name="add_network_mandatory" mandatory="True" fields="all">
          <option name="network" type="string">Network name</option>
          <option name="ip" type="string">Network IP address</option>
-         <option name="mask" type="string">Network IP mask</option>
-         <optgroup name="update_network_location_opts" mandatory="True" fields="any">
+         <optgroup name="add_network_netmask" mandatory="True" fields="any">
+            <option name="netmask" type="string" conflicts="prefixlen mask">Netmask as dotted quad</option>
+            <option name="prefixlen" type="string" conflicts="netmask mask">Network prefix length</option>
+            <option name="mask" type="string" conflicts="netmask prefixlen">Number of hosts</option>
+         </optgroup>
+         <optgroup name="add_network_location_opts" mandatory="True" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>
