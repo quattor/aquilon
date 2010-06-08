@@ -131,7 +131,7 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
         net_msg.cidr = net.cidr
-        net_msg.bcast = str(net.bcast)
+        net_msg.bcast = str(net.broadcast)
         net_msg.netmask = str(net.netmask)
         net_msg.side = str(net.side)
         net_msg.sysloc = str(net.location.sysloc())

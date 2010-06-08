@@ -125,7 +125,7 @@ class PlenaryToplevelHost(Plenary):
                 default_gateway = gateway
             interfaces.append({"ip":dbinterface.system.ip,
                     "netmask":net.netmask,
-                    "broadcast":net.bcast,
+                    "broadcast":net.broadcast,
                     "gateway":gateway,
                     "bootproto":bootproto,
                     "name":dbinterface.name})

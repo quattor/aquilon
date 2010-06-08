@@ -170,7 +170,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
 
     startip = dbnetwork.first_usable_host()
 
-    full_set = set(range(int(startip), int(dbnetwork.bcast)))
+    full_set = set(range(int(startip), int(dbnetwork.broadcast)))
     used_ips = session.query(System.ip).filter_by(network=dbnetwork).all()
     used_set = set([int(item.ip) for item in used_ips])
     free_set = full_set - used_set

@@ -34,10 +34,7 @@ from socket import inet_ntoa
 from ipaddr import IPv4Address, IPv4Network
 
 from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
-                        UniqueConstraint, ForeignKey, Boolean, select, func)
-
-from sqlalchemy.sql import and_
-from sqlalchemy.sql.expression import desc
+                        UniqueConstraint, ForeignKey, Boolean, func)
 from sqlalchemy.orm import relation
 
 from aquilon.utils import monkeypatch
@@ -85,8 +82,7 @@ class Network(Base):
     cidr = Column(Integer, nullable=False)
     name = Column(AqStr(255), nullable=False) #TODO: default to ip
     ip = Column(IPV4, nullable=False)
-    # We only need bcast here to make searching in the DB more efficient
-    bcast = Column(IPV4, nullable=False)
+    bcast = Column(IPV4, nullable=False)      # XXX Kill this field
     mask = Column(Integer, nullable=False)    # XXX Kill this field
     side = Column(AqStr(4), nullable=True, default='a')
 
@@ -107,7 +103,7 @@ class Network(Base):
             raise TypeError("Invalid type for network: %s" % repr(net))
         args["ip"] = net.network
         args["cidr"] = net.prefixlen
-        args["bcast"] = net.broadcast
+        args["bcast"] = net.broadcast       # XXX Kill this field
         args["mask"] = net.numhosts         # XXX Kill this field
         super(Base, self).__init__(**args)
 
@@ -136,13 +132,17 @@ class Network(Base):
         if not isinstance(value, IPV4Network):
             raise TypeError("An IPv4Network object is required")
         self.ip = value.network
-        self.bcast = value.broadcast
+        self.bcast = value.broadcast        # XXX Kill this field
         self.cidr = value.prefixlen
         self.mask = value.numhosts          # XXX Kill this field
 
     @property
     def netmask(self):
         return self.network.netmask
+
+    @property
+    def broadcast(self):
+        return self.network.broadcast
 
     @property
     def available_ip_count(self):
@@ -181,13 +181,15 @@ def get_net_id_from_ip(s, ip):
     if ip is None:
         return None
 
-    q = s.query(Network)
-    q = q.filter(Network.ip <= ip)
-    q = q.filter(Network.bcast >= ip)
-    q = q.order_by(desc(Network.ip))
+    # Query the last network having an address smaller than the given ip. There
+    # is no guarantee that the returned network does in fact contain the given
+    # ip, so this must be checked separately.
+    subq = s.query(func.max(Network.ip).label('net_ip')).filter(Network.ip <= ip)
+    q = s.query(Network).filter(Network.ip == subq.subquery().c.net_ip)
     net = q.first()
-    if not net:
-        raise ArgumentError("Could not determine network for ip %s" % ip)
+    if not net or not ip in net.network:
+        raise ArgumentError("Could not determine network containing IP "
+                            "address %s." % ip)
     return net
 
 

@@ -282,7 +282,7 @@ class NetRefresher(object):
                 continue
             # Our system is beyond the range of the current network, so
             # proceed to checking against the next network.
-            if sys.ip > net.bcast:
+            if sys.ip > net.broadcast:
                 n_index += 1
                 continue
             # At this point we know our system is not in the range of
