@@ -99,7 +99,8 @@ def search_system_query(session, system_type=System, **kwargs):
         ip = force_ipv4("ip", kwargs['ip'])
         q = q.filter_by(ip=ip)
     if kwargs.get('networkip', None):
-        dbnetwork = get_network_byip(session, kwargs['networkip'])
+        networkip = force_ipv4("networkip", kwargs["networkip"])
+        dbnetwork = get_network_byip(session, networkip)
         q = q.filter_by(network=dbnetwork)
     if kwargs.get('mac', None):
         q = q.filter_by(mac=kwargs['mac'])

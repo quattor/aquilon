@@ -41,7 +41,7 @@ from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import relation
 
 from aquilon.utils import monkeypatch
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Base, Location
 from aquilon.aqdb.column_types import AqStr, IPV4
 
@@ -100,12 +100,15 @@ class Network(Base):
 
     def __init__(self, **kw):
         args = kw.copy()
-        if "network" in kw:
-            net = args.pop("network")
-            args["ip"] = net.network
-            args["cidr"] = net.prefixlen
-            args["bcast"] = net.broadcast
-            args["mask"] = net.numhosts     # XXX Kill this fields
+        if "network" not in kw:
+            raise InternalError("No network in kwargs.")
+        net = args.pop("network")
+        if not isinstance(net, IPv4Network):
+            raise TypeError("Invalid type for network: %s" % repr(net))
+        args["ip"] = net.network
+        args["cidr"] = net.prefixlen
+        args["bcast"] = net.broadcast
+        args["mask"] = net.numhosts         # XXX Kill this field
         super(Base, self).__init__(**args)
 
     def first_usable_host(self):

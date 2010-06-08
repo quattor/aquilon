@@ -45,12 +45,8 @@ class IPV4(sqlalchemy.types.TypeDecorator):
             ip = None
         elif isinstance(value, IPv4Address):
             ip = int(value)
-        elif isinstance(value, str):
-            ip = int(IPv4Address(value))
-        elif isinstance(value, int):
-            ip = value
         else:
-            raise TypeError("Unknown input type: %s" % repr(value))
+            raise TypeError("Unknown input type for IPv4 column: %s" % repr(value))
         return ip
 
     def process_result_value(self, value, engine):

@@ -41,6 +41,7 @@ from aquilon.server.dbwrappers.observed_mac import (
 from aquilon.server.processes import run_command
 from aquilon.aqdb.model import (TorSwitch, HardwareEntity, ObservedMac,
                                 ObservedVlan, Network)
+from aquilon.utils import force_ipv4
 
 
 # This runs...
@@ -184,6 +185,10 @@ class CommandPollTorSwitch(BrokerCommand):
                                 "line #%d: %s error: %s" %
                                 (reader.line_num, row, e))
                     continue
+                try:
+                    network = force_ipv4("network", network)
+                except ArgumentError, e:
+                    raise InternalError(e)
                 dbnetwork = Network.get_unique(session, ip=network)
                 if not dbnetwork:
                     logger.info("Unknown network %s in output line #%d: %s" %

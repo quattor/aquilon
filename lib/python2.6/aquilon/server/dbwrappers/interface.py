@@ -157,6 +157,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
 
     if ipfromip:
         # determine network
+        ipfromip = force_ipv4("ipfromip", ipfromip)
         dbnetwork = get_net_id_from_ip(session, ipfromip)
     elif not dbnetwork:
         # Any of the other options set dbsystem...
