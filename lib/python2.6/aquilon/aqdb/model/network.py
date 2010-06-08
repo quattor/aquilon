@@ -82,8 +82,6 @@ class Network(Base):
     cidr = Column(Integer, nullable=False)
     name = Column(AqStr(255), nullable=False) #TODO: default to ip
     ip = Column(IPV4, nullable=False)
-    bcast = Column(IPV4, nullable=False)      # XXX Kill this field
-    mask = Column(Integer, nullable=False)    # XXX Kill this field
     side = Column(AqStr(4), nullable=True, default='a')
 
     is_discoverable = Column(Boolean, nullable=False, default=False)
@@ -103,8 +101,6 @@ class Network(Base):
             raise TypeError("Invalid type for network: %s" % repr(net))
         args["ip"] = net.network
         args["cidr"] = net.prefixlen
-        args["bcast"] = net.broadcast       # XXX Kill this field
-        args["mask"] = net.numhosts         # XXX Kill this field
         super(Base, self).__init__(**args)
 
     def first_usable_host(self):
@@ -132,9 +128,7 @@ class Network(Base):
         if not isinstance(value, IPV4Network):
             raise TypeError("An IPv4Network object is required")
         self.ip = value.network
-        self.bcast = value.broadcast        # XXX Kill this field
         self.cidr = value.prefixlen
-        self.mask = value.numhosts          # XXX Kill this field
 
     @property
     def netmask(self):
