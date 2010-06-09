@@ -36,29 +36,7 @@ from aquilon.aqdb.model import Host
 
 class HostFormatter(ObjectFormatter):
     protocol = "aqdsystems_pb2"
-
-    def format_raw(self, host, indent=""):
-        details = [indent + "Hostname: %s" % host.fqdn]
-        if host.ip:
-            details.append(indent + "  IP: %s" % host.ip)
-        if host.cluster:
-            details.append(indent + "  Member of %s cluster: %s"
-                    % (host.cluster.cluster_type, host.cluster.name))
-        details.append(self.redirect_raw(host.machine, indent + "  "))
-        details.append(self.redirect_raw(host.personality, indent + "  "))
-        details.append(self.redirect_raw(host.archetype, indent + "  "))
-        details.append(self.redirect_raw(host.operating_system, indent + "  "))
-        if host.branch.branch_type == 'domain':
-            details.append(indent + "  Domain: %s" % host.branch.name)
-        else:
-            details.append(indent + "  Sandbox: %s/%s" %
-                           (host.sandbox_author.name, host.branch.name))
-        details.append(self.redirect_raw(host.status, indent + "  "))
-        for build_item in host.templates:
-            details.append(indent + "  Template: %s" % build_item.cfg_path)
-        if host.comments:
-            details.append(indent + "  Comments: %s" % host.comments)
-        return "\n".join(details)
+    template_raw = "host.mako"
 
     def format_proto(self, host, skeleton=None):
         # we actually want to return a SimpleHostList of one host...
