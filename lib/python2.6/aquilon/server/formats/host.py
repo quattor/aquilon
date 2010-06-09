@@ -54,6 +54,7 @@ class SimpleHostList(list):
 
 class SimpleHostListFormatter(ListFormatter):
     protocol = "aqdsystems_pb2"
+    template_html = "simple_host_list.mako"
 
     def format_raw(self, shlist, indent=""):
         return str("\n".join([indent + host.fqdn for host in shlist]))
@@ -61,11 +62,6 @@ class SimpleHostListFormatter(ListFormatter):
     # TODO: Should probably display some useful info...
     def csv_fields(self, host):
         return (host.fqdn,)
-
-    def format_html(self, shlist):
-        return "<ul>\n%s\n</ul>\n" % "\n".join([
-            """<li><a href="/host/%(fqdn)s.html">%(fqdn)s</a></li>"""
-            % {"fqdn": host.fqdn} for host in shlist])
 
     def format_proto(self, shlist, skeleton=None):
         hostlist_msg = self.loaded_protocols[self.protocol].HostList()
