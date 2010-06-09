@@ -34,19 +34,7 @@ from aquilon.aqdb.model import Archetype
 
 
 class ArchetypeFormatter(ObjectFormatter):
-    def format_raw(self, archetype, indent=""):
-        flags = []
-        if archetype.is_compileable:
-            flags.append("compilable")
-        flagstr = ""
-        if len(flags) != 0:
-            flagstr = " [" + " ".join(flags) + "]"
-        details = [indent + "Archetype: %s%s" % (archetype.name, flagstr)]
-        for service in archetype.services:
-            details.append(indent + "  Required Service: %s" % service.name)
-        if archetype.comments:
-            details.append(indent + "  Comments: %s" % archetype.comments)
-        return "\n".join(details)
+    template_raw = "archetype.mako"
 
     def format_proto(self, archetype, skeleton=None):
         # No ArchetypeList object yet...
