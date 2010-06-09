@@ -34,10 +34,6 @@ from aquilon.aqdb.model import Status
 
 
 class StatusFormatter(ObjectFormatter):
-    def format_raw(self, status, indent=""):
-        details = [indent + "Build Status: %s" % status.name]
-        if status.comments:
-            details.append(indent + "  Comments: %s" % status.comments)
-        return "\n".join(details)
+    template_raw = "status.mako"
 
 ObjectFormatter.handlers[Status] = StatusFormatter()
