@@ -97,7 +97,7 @@ class TestBrokerCommand(unittest.TestCase):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
         kncport = self.config.get("broker", "kncport")
         if isinstance(command, list):
-            args = command[:]
+            args = [str(cmd) for cmd in command]
         else:
             args = [command]
         args.insert(0, sys.executable)
