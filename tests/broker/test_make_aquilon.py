@@ -84,7 +84,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          "nlist('ip', '%s', 'netmask', '%s', "
                          "'broadcast', '%s', 'gateway', '%s', "
                          "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[0].ip,
+                         (self.net.unknown[0].usable[0],
                           self.net.unknown[0].netmask,
                           self.net.unknown[0].broadcast,
                           self.net.unknown[0].gateway),
@@ -162,7 +162,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.failUnlessEqual(host.personality.name, 'compileserver')
         self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
         self.failUnlessEqual(host.mac, self.net.unknown[0].usable[2].mac)
-        self.failUnlessEqual(host.ip, self.net.unknown[0].usable[2].ip)
+        self.failUnlessEqual(host.ip, str(self.net.unknown[0].usable[2]))
         self.failUnlessEqual(host.archetype.name, 'aquilon')
         self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
         self.failUnlessEqual(host.domain.name, 'unittest')
@@ -184,7 +184,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          "nlist('ip', '%s', 'netmask', '%s', "
                          "'broadcast', '%s', 'gateway', '%s', "
                          "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[2].ip,
+                         (self.net.unknown[0].usable[2],
                           self.net.unknown[0].netmask,
                           self.net.unknown[0].broadcast,
                           self.net.unknown[0].gateway),
@@ -194,7 +194,7 @@ class TestMakeAquilon(TestBrokerCommand):
                          "nlist('ip', '%s', 'netmask', '%s', "
                          "'broadcast', '%s', 'gateway', '%s', "
                          "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[3].ip,
+                         (self.net.unknown[0].usable[3],
                           self.net.unknown[0].netmask,
                           self.net.unknown[0].broadcast,
                           self.net.unknown[0].gateway),
@@ -327,7 +327,7 @@ class TestMakeAquilon(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3].ip,
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
@@ -342,13 +342,13 @@ class TestMakeAquilon(TestBrokerCommand):
         host = hostlist.hosts[0]
         self.assertEqual(host.fqdn, "unittest17.aqd-unittest.ms.com")
         #still fails, but it's checked below in the for loop
-        self.assertEqual(host.ip, self.net.tor_net[0].usable[3].ip)
+        self.assertEqual(host.ip, str(self.net.tor_net[0].usable[3]))
         self.assertEqual(host.mac, self.net.tor_net[0].usable[3].mac)
         self.assertEqual(host.machine.name, "ut8s02p3")
         self.assertEqual(len(host.machine.interfaces), 2)
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, self.net.tor_net[0].usable[3].ip)
+                self.assertEqual(i.ip, str(self.net.tor_net[0].usable[3]))
                 self.assertEqual(i.mac, self.net.tor_net[0].usable[3].mac)
             elif i.device == 'eth1':
                 # Skipping IP test to avoid merge conflict

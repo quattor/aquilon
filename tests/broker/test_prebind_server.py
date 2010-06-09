@@ -109,7 +109,7 @@ class TestPrebindServer(TestBrokerCommand):
         self.matchoutput(out,
                          "'server_ips' = list('%s', '%s');" %
                          (socket.gethostbyname('nyaqd1.ms.com'),
-                          self.net.unknown[0].usable[0].ip),
+                          self.net.unknown[0].usable[0]),
                          command)
 
 

@@ -177,7 +177,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
     def test_210_verifyaux(self):
         command = ["search_system", "--type=auxiliary",
                    "--dns_domain=aqd-unittest.ms.com",
-                   "--networkip", str(self.net.vm_storage_net[0].ip)]
+                   "--networkip", self.net.vm_storage_net[0].ip]
         out = self.commandtest(command)
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
@@ -239,7 +239,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                 net_index = ((i - 10) / 2) + 6
                 usable_index = (i - 10) % 2
             hostname = "ivirt%d.aqd-unittest.ms.com" % i
-            ip = self.net.unknown[net_index].usable[usable_index].ip
+            ip = self.net.unknown[net_index].usable[usable_index]
             command = "search host --hostname %s --ip %s" % (hostname, ip)
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, hostname, command)

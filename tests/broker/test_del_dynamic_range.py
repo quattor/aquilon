@@ -46,59 +46,59 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testdeldifferentnetworks(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[1].usable[2].ip]
+                   "--startip", self.net.tor_net2[0].usable[2],
+                   "--endip", self.net.tor_net2[1].usable[2]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
     # These rely on the ip never having been used...
     def testdelnothingfound(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[-2].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[-1].ip]
+                   "--startip", self.net.tor_net2[0].usable[-2],
+                   "--endip", self.net.tor_net2[0].usable[-1]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Nothing found in range", command)
 
     def testdelnostart(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[1].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[-3].ip]
+                   "--startip", self.net.tor_net2[0].usable[1],
+                   "--endip", self.net.tor_net2[0].usable[-3]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "No system found with IP address %s" %
-                         self.net.tor_net2[0].usable[1].ip,
+                         self.net.tor_net2[0].usable[1],
                          command)
 
     def testdelnoend(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[-2].ip]
+                   "--startip", self.net.tor_net2[0].usable[2],
+                   "--endip", self.net.tor_net2[0].usable[-2]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "No system found with IP address %s" %
-                         self.net.tor_net2[0].usable[-2].ip,
+                         self.net.tor_net2[0].usable[-2],
                          command)
 
     def testdelnotdynamic(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.unknown[0].usable[7].ip,
-                   "--endip=%s" % self.net.unknown[0].usable[8].ip]
+                   "--startip", self.net.unknown[0].usable[7],
+                   "--endip", self.net.unknown[0].usable[8]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The range contains non-dynamic systems",
                          command)
         self.matchoutput(out,
                          "unittest12.aqd-unittest.ms.com (%s)" %
-                         self.net.unknown[0].usable[7].ip,
+                         self.net.unknown[0].usable[7],
                          command)
         self.matchoutput(out,
                          "unittest12r.aqd-unittest.ms.com (%s)" %
-                         self.net.unknown[0].usable[8].ip,
+                         self.net.unknown[0].usable[8],
                          command)
 
     def testdelrange(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[-3].ip]
+                   "--startip", self.net.tor_net2[0].usable[2],
+                   "--endip", self.net.tor_net2[0].usable[-3]]
         self.noouttest(command)
 
     def testverifydelrange(self):
@@ -107,8 +107,8 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def testdelendingrange(self):
         command = ["del_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[1].usable[-1].ip,
-                   "--endip=%s" % self.net.tor_net2[1].usable[-1].ip]
+                   "--startip", self.net.tor_net2[1].usable[-1],
+                   "--endip", self.net.tor_net2[1].usable[-1]]
         self.noouttest(command)
 
 

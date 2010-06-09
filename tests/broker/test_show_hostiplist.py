@@ -48,16 +48,16 @@ class TestShowHostIPList(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "unittest02.one-nyp.ms.com,%s,\n" %
-                         self.net.unknown[0].usable[0].ip,
+                         self.net.unknown[0].usable[0],
                          command)
         self.matchoutput(out,
                          "unittest00.one-nyp.ms.com,%s,\n" %
-                         self.net.unknown[0].usable[2].ip,
+                         self.net.unknown[0].usable[2],
                          command)
         self.matchoutput(out,
                          "unittest00-e1.one-nyp.ms.com,%s,"
                          "unittest00.one-nyp.ms.com" %
-                         self.net.unknown[0].usable[3].ip,
+                         self.net.unknown[0].usable[3],
                          command)
         self.matchclean(out, self.aurora_with_node, command)
         self.matchclean(out, self.aurora_without_node, command)
@@ -68,18 +68,18 @@ class TestShowHostIPList(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "unittest02.one-nyp.ms.com,%s,\n" %
-                         self.net.unknown[0].usable[0].ip,
+                         self.net.unknown[0].usable[0],
                          command)
         self.matchoutput(out,
                          "unittest00.one-nyp.ms.com,%s,\n" %
-                         self.net.unknown[0].usable[2].ip,
+                         self.net.unknown[0].usable[2],
                          command)
         # FIXME: Arguably, this shouldn't be included.  Right now,
         # archetype is a noop.
         self.matchoutput(out,
                          "unittest00-e1.one-nyp.ms.com,%s,"
                          "unittest00.one-nyp.ms.com" %
-                         self.net.unknown[0].usable[3].ip,
+                         self.net.unknown[0].usable[3],
                          command)
         self.matchclean(out, self.aurora_with_node, command)
         self.matchclean(out, self.aurora_without_node, command)

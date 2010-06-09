@@ -500,11 +500,6 @@ class DummyIP(IPv4Address):
         octets = [int(i) for i in str(self).split('.')]
         self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
 
-    # This is unnceccessary but used by many tests
-    @property
-    def ip(self):
-        return str(self)
-
 class NetworkInfo(IPv4Network):
     def __init__(self, cidr, nettype):
         super(NetworkInfo, self).__init__(cidr)

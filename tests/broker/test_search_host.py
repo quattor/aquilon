@@ -146,7 +146,7 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testipavailable(self):
-        command = "search host --ip %s" % self.net.unknown[0].usable[2].ip
+        command = "search host --ip %s" % self.net.unknown[0].usable[2]
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 

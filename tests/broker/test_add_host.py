@@ -46,7 +46,7 @@ class TestAddHost(TestBrokerCommand):
     def testaddunittest02(self):
         self.noouttest(["add", "host",
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--ip", self.net.unknown[0].usable[0].ip,
+                        "--ip", self.net.unknown[0].usable[0],
                         "--machine", "ut3c5n10", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
@@ -56,7 +56,7 @@ class TestAddHost(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[0].ip,
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[0],
                          command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -93,14 +93,14 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest15.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[1].ip,
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[1],
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
     def testaddunittest16bad(self):
         command = ["add", "host",
                    "--hostname", "unittest16.aqd-unittest.ms.com",
-                   "--ipfromip", self.net.tor_net2[1].usable[-1].ip,
+                   "--ipfromip", self.net.tor_net2[1].usable[-1],
                    "--ipalgorithm", "max",
                    "--machine", "ut8s02p2", "--domain", "unittest",
                    "--buildstatus", "build", "--archetype", "aquilon",
@@ -127,7 +127,7 @@ class TestAddHost(TestBrokerCommand):
     def testaddunittest16good(self):
         self.noouttest(["add", "host",
                         "--hostname", "unittest16.aqd-unittest.ms.com",
-                        "--ipfromip", self.net.tor_net[0].usable[0].ip,
+                        "--ipfromip", self.net.tor_net[0].usable[0],
                         "--ipalgorithm", "lowest",
                         "--machine", "ut8s02p2", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
@@ -139,7 +139,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest16.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[2].ip,
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[2],
                          command)
         self.matchoutput(out, "Personality: compileserver", command)
 
@@ -157,7 +157,7 @@ class TestAddHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3].ip,
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",
@@ -181,7 +181,7 @@ class TestAddHost(TestBrokerCommand):
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             port = i - 50
             command = ["add", "host", "--hostname", hostname,
-                       "--ip", self.net.tor_net[1].usable[port].ip,
+                       "--ip", self.net.tor_net[1].usable[port],
                        "--machine", "ut9s03p%d" % port,
                        "--sandbox", "%s/utsandbox" % user,
                        "--buildstatus", "build",
@@ -196,7 +196,7 @@ class TestAddHost(TestBrokerCommand):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
             command = ["add", "host", "--hostname", hostname,
-                       "--ip", self.net.tor_net[2].usable[port].ip,
+                       "--ip", self.net.tor_net[2].usable[port],
                        "--machine", "ut10s04p%d" % port,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
@@ -230,12 +230,12 @@ class TestAddHost(TestBrokerCommand):
         hostlist = self.parse_hostlist_msg(out, expect=1)
         host = hostlist.hosts[0]
         self.assertEqual(host.fqdn, "evh1.aqd-unittest.ms.com")
-        self.assertEqual(host.ip, self.net.tor_net[2].usable[1].ip)
+        self.assertEqual(host.ip, str(self.net.tor_net[2].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, self.net.tor_net[2].usable[1].ip)
+                self.assertEqual(i.ip, str(self.net.tor_net[2].usable[1]))
                 # We're not using this field anymore...
                 self.assertEqual(i.network_id, 0)
             elif i.device == 'eth1':
@@ -247,7 +247,7 @@ class TestAddHost(TestBrokerCommand):
     def testaddhostnousefularchetype(self):
         command = ["add", "host", "--archetype", "pserver",
                    "--hostname", "unittest01.one-nyp.ms.com",
-                   "--ip", self.net.unknown[0].usable[10].ip,
+                   "--ip", self.net.unknown[0].usable[10],
                    "--domain", "unittest", "--machine", "ut3c1n4"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Can not determine a sensible default OS", command)
