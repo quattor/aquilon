@@ -177,7 +177,12 @@ class CommandAddHost(BrokerCommand):
             else:
                 # For anything else, reserve the name and IP in DSDB.
                 try:
-                    dsdb_runner.add_host(dbinterface)
+                    args = [dbhost.fqdn, dbhost.ip]
+                    if dbinterface:
+                        args.extend([dbinterface.name, dbinterface.mac])
+                    else:
+                        args.extend([None, None])
+                    dsdb_runner.add_host_details(*args)
                 except ProcessException, e:
                     raise ArgumentError("Could not add host to DSDB: %s" % e)
         except:
