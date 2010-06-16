@@ -117,6 +117,21 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "would exceed the metacluster's max_shares",
                          command)
 
+    def test_170_failmaxclients(self):
+        command = ["update_service", "--service=nas_disk_share",
+                   "--instance=test_share_8", "--max_clients=1"]
+        self.noouttest(command)
+
+        command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
+                   "--type", "sata", "--capacity", "15",
+                   "--share", "test_share_8", "--address", "0:0"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "NAS share test_share_8 is full (1/1)", command)
+
+        command = ["update_service", "--service=nas_disk_share",
+                   "--instance=test_share_8", "--default"]
+        self.noouttest(command)
+
     def test_180_verifydiskcount(self):
         command = ["show_service", "--service=nas_disk_share",
                    "--instance=test_share_1"]

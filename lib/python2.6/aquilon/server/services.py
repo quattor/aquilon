@@ -234,9 +234,7 @@ class Chooser(object):
         """
         maxed_out_instances = set()
         for instance in self.staging_services[dbservice][:]:
-            max_clients = instance.max_clients
-            if max_clients is None:
-                max_clients = instance.service.max_clients
+            max_clients = instance.enforced_max_clients
             current_clients = instance.client_count
             if max_clients is not None and current_clients >= max_clients:
                 # We shouldn't use this instance, unless...
