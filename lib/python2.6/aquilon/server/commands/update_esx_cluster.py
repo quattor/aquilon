@@ -94,23 +94,16 @@ class CommandUpdateESXCluster(BrokerCommand):
                 cluster_updated = True
 
         if personality or archetype:
+            # This should probably run the Chooser for the cluster and all
+            # the hosts involved.
             if not personality:
                 personality = dbcluster.personality.name
             if not archetype:
                 archetype = dbcluster.personality.archetype.name
             dbpersonality = get_personality(session, archetype, personality)
-            # It would be nice to reconfigure all the hosts here.  That
-            # would take some refactoring of the present code.
             for dbhost in dbcluster.hosts:
-                invalid_hosts = []
-                if dbhost.personality != dbpersonality:
-                    invalid_hosts.append(dbhost)
-                if invalid_hosts:
-                    msg = ", ".join([host.fqdn for host in invalid_hosts])
-                    raise ArgumentError("Cannot change the personality of "
-                                        "ESX Cluster %s while the following "
-                                        "members have different personalities: "
-                                        "%s." % (dbcluster.name, msg))
+                dbhost.personality = dbpersonality
+                session.add(dbhost)
             dbcluster.personality = dbpersonality
             cluster_updated = True
 

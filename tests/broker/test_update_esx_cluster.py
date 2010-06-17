@@ -133,15 +133,31 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Country us is not within a campus",
                          command)
 
-    def testfailupdatepersonality(self):
+    def testupdatepersonality(self):
+        command = ["search_host", "--cluster=utecl1",
+                   "--personality=esx_desktop"]
+        original_hosts = self.commandtest(command).splitlines()
+        original_hosts.sort()
+        self.failUnless(original_hosts, "No hosts found using %s" % command)
+
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--archetype=vmhost", "--personality=esx_server"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Cannot change the personality of ESX Cluster utecl1 "
-                         "while the following members have different "
-                         "personalities: ",
-                         command)
+        out = self.commandtest(command)
+
+        command = ["search_host", "--cluster=utecl1",
+                   "--personality=esx_server"]
+        updated_hosts = self.commandtest(command).splitlines()
+        updated_hosts.sort()
+        self.failUnless(updated_hosts, "No hosts found using %s" % command)
+
+        self.failUnlessEqual(original_hosts, updated_hosts,
+                             "Expected only/all updated hosts %s to match the "
+                             "list of original hosts %s" %
+                             (updated_hosts, original_hosts))
+
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        out = self.commandtest(command)
 
     def testfailupdatearchetype(self):
         # If personality is not specified the current personality name
