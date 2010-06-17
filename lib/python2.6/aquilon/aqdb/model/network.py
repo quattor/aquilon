@@ -38,11 +38,11 @@ from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
 from sqlalchemy.orm import relation
 
 from aquilon.utils import monkeypatch
-from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location
 from aquilon.aqdb.column_types import AqStr, IPV4
 
-#TODO: enum type for network_type, mask
+#TODO: enum type for network_type
 #TODO: constraint for cidr
 
 
@@ -182,8 +182,8 @@ def get_net_id_from_ip(s, ip):
     q = s.query(Network).filter(Network.ip == subq.subquery().c.net_ip)
     net = q.first()
     if not net or not ip in net.network:
-        raise ArgumentError("Could not determine network containing IP "
-                            "address %s." % ip)
+        raise NotFoundException("Could not determine network containing IP "
+                                "address %s." % ip)
     return net
 
 

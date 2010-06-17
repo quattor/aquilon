@@ -34,8 +34,9 @@ from ipaddr import (IPv4Network, IPv4IpValidationError,
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
-from aquilon.aqdb.model.network import Network, _mask_to_cidr
+from aquilon.server.dbwrappers.network import get_network_byname
+from aquilon.aqdb.model.network import (Network, _mask_to_cidr,
+                                        get_net_id_from_ip)
 
 class CommandAddNetwork(BrokerCommand):
 
@@ -72,16 +73,23 @@ class CommandAddNetwork(BrokerCommand):
         if not side:
             side = 'a'
 
+        # Check if the name is free
         try:
-            if network:
-                dbnetwork = get_network_byname(session, network)
-                raise ArgumentError("Network name %s is already in use by %s." %
-                                    (network, str(dbnetwork.network)))
-            dbnetwork = get_network_byip(session, address.ip)
-            # TODO Better formatting than repr()
-            raise ArgumentError("Network address %s is already in use by %s." %
-                                (str(address.ip), repr(dbnetwork)))
-        except NotFoundException, e:
+            dbnetwork = get_network_byname(session, network)
+            raise ArgumentError("Network name %s is already used for "
+                                "address %s." %
+                                (network, str(dbnetwork.network)))
+        except NotFoundException:
+            pass
+
+        # Check if the address is free
+        try:
+            dbnetwork = get_net_id_from_ip(session, address.ip)
+            raise ArgumentError("IP address %s is part of existing network "
+                                "named %s with address %s." %
+                                (str(address.ip), dbnetwork.name,
+                                 str(dbnetwork.network)))
+        except NotFoundException:
             pass
 
         yes = re.compile("^(true|yes|y|1|on|enabled)$", re.I)

@@ -71,7 +71,7 @@ class TestAddAuxiliary(TestBrokerCommand):
                    "--auxiliary", "unittest01-e1.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--mac", "02:02:c7:62:10:04",
                    "--interface", "eth1", "--ip", "199.98.16.4"]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out, "Could not determine network", command)
 
     def testverifyrejectut3c1n4eth1(self):

@@ -51,6 +51,29 @@ class TestAddNetwork(TestBrokerCommand):
                        "--building=ut", "--type=%s" % network.nettype]
             self.noouttest(command)
 
+    def testaddnetworkdup(self):
+        # Old name, new address
+        net = self.net.all[0]
+        subnet = net.subnet()[1]
+        command = ["add", "network", "--network", net.ip,
+                   "--ip", subnet.ip, "--netmask", subnet.netmask,
+                   "--building", "ut", "--type", net.nettype]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Network name %s is already used for address "
+                         "%s." % (str(net.ip), str(net)), command)
+
+    def testaddsubnet(self):
+        # Add a subnet of an existing network
+        net = self.net.all[0]
+        subnet = net.subnet()[1]
+        command = ["add", "network", "--network", "subnet-test",
+                   "--ip", subnet.ip, "--netmask", subnet.netmask,
+                   "--building", "ut", "--type", net.nettype]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is part of existing network "
+                         "named %s with address %s." %
+                         (str(subnet.ip), str(net.ip), str(net)), command)
+
     def testshownetwork(self):
         for network in self.net.all:
             command = "show network --ip %s" % network.ip
