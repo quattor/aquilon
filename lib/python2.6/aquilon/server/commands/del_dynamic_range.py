@@ -33,8 +33,9 @@ from sqlalchemy.sql.expression import asc
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import System
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.locks import lock_queue, DeleteKey
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandDelDynamicRange(BrokerCommand):
@@ -75,6 +76,26 @@ class CommandDelDynamicRange(BrokerCommand):
                                 "\n".join(["%s (%s)" % (i.fqdn, i.ip)
                                            for i in invalid]))
 
+        stubs = {}
         for stub in existing:
+            stubs[stub.fqdn] = stub.ip
             session.delete(stub)
+        session.flush()
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        stubs_removed = {}
+        try:
+            for (fqdn, ip) in stubs.items():
+                dsdb_runner.delete_host_details(ip)
+                stubs_removed[fqdn] = ip
+        except ProcessException, e:
+            # Try to roll back anything that had succeeded...
+            for (fqdn, ip) in stubs_removed.items():
+                try:
+                    dsdb_runner.add_host_details(fqdn, ip, None, None)
+                except ProcessException, pe2:
+                    logger.client_info("Failed rolling back DSDB entry for "
+                                       "%s with IP Address %s: %s" %
+                                       (fqdn, ip, pe2))
+            raise e
         return

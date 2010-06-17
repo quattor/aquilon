@@ -34,15 +34,17 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DynamicStub, System, DnsDomain
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.column_types.IPV4 import dq_to_int, int_to_dq
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandAddDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip", "dns_domain"]
 
-    def render(self, session, startip, endip, dns_domain, prefix, **arguments):
+    def render(self, session, logger, startip, endip, dns_domain, prefix,
+               **arguments):
         if not prefix:
             prefix = 'dynamic'
         startnet = get_net_id_from_ip(session, startip)
@@ -65,6 +67,7 @@ class CommandAddDynamicRange(BrokerCommand):
 
         startint = dq_to_int(startip)
         endint = dq_to_int(endip)
+        stubs = []
         for ipint in range(startint, endint + 1):
             ip = int_to_dq(ipint)
             restrict_tor_offsets(startnet, ip)
@@ -72,6 +75,28 @@ class CommandAddDynamicRange(BrokerCommand):
             dbdynamic_stub = DynamicStub(name=name, dns_domain=dbdns_domain,
                                          ip=ip, network=startnet)
             session.add(dbdynamic_stub)
+            stubs.append(dbdynamic_stub)
+
+        if not stubs:
+            return
+
+        session.flush()
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        stubs_added = []
+        try:
+            for dbstub in stubs:
+                dsdb_runner.add_host_details(fqdn=dbstub.fqdn, ip=dbstub.ip,
+                                             name=None, mac=None)
+                stubs_added.append(dbstub)
+        except ProcessException, e:
+            # Try to roll back anything that had succeeded...
+            for dbstub in stubs_added:
+                try:
+                    dsdb_runner.delete_host_details(dbstub.ip)
+                except ProcessException, pe2:
+                    logger.client_info("Failed rolling back DSDB entry for "
+                                       "%s with IP Address %s: %s" %
+                                       (dbstub.fqdn, dbstub.ip, pe2))
+            raise e
         return
-
-
