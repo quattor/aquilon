@@ -44,7 +44,6 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, Machine, ObservedMac, System,
                                 VlanInfo, ObservedVlan)
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.utils import force_ipv4
 
 
 # FIXME: interface type?  interfaces for hardware entities in general?
@@ -90,8 +89,6 @@ def restrict_tor_offsets(dbnetwork, ip):
         # This network doesn't have enough addresses, the test is irrelevant.
         return
 
-    ip = force_ipv4("IP address", ip)
-
     if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_addresses:
         raise ArgumentError("The IP address %s is reserved for dynamic "
                             "DHCP for a ToR switch on subnet %s." %
@@ -113,7 +110,6 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         return None
 
     if ip:
-        ip = force_ipv4("ip", ip)
         return ip
 
     dbsystem = None
@@ -160,7 +156,6 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
 
     if ipfromip:
         # determine network
-        ipfromip = force_ipv4("ipfromip", ipfromip)
         dbnetwork = get_net_id_from_ip(session, ipfromip)
     elif not dbnetwork:
         # Any of the other options set dbsystem...

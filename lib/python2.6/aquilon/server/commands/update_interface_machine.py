@@ -40,7 +40,6 @@ from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Machine
-from aquilon.utils import force_ipv4
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -84,7 +83,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity)
 
         if ip:
-            ip = force_ipv4("ip", ip)
             dbnetwork = get_net_id_from_ip(session, ip)
             restrict_tor_offsets(dbnetwork, ip)
             if dbinterface.system:

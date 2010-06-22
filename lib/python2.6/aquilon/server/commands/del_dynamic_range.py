@@ -35,7 +35,6 @@ from aquilon.aqdb.model import System
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.locks import lock_queue, DeleteKey
-from aquilon.utils import force_ipv4
 from aquilon.server.processes import DSDBRunner
 
 
@@ -44,9 +43,6 @@ class CommandDelDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, **arguments):
-        startip = force_ipv4("startip", startip)
-        endip = force_ipv4("endip", endip)
-
         key = DeleteKey("system", logger=logger)
         try:
             lock_queue.acquire(key)
