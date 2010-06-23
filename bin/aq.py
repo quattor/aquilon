@@ -326,7 +326,7 @@ if __name__ == "__main__":
     # to include... for now it's just debug.
     if globalOptions.get("debug", None):
         commandOptions["debug"] = str(globalOptions["debug"])
-    if command != "show_request" and not globalOptions.get("quiet"):
+    if command != "show_request" and globalOptions.get("verbose"):
         commandOptions["requestid"] = str(uuid.uuid1())
 
     # Quote options so that they can be safely included in the URI
@@ -377,7 +377,7 @@ if __name__ == "__main__":
     # Spare a second connection to the server for read-only commands that use
     # the "GET" method
     if command == "show_request" or (transport.method != "get" and \
-                                     not globalOptions.get("quiet")):
+                                     globalOptions.get("verbose")):
         status_thread = StatusThread(host, port, authuser, **commandOptions)
 
     if command == "show_request":

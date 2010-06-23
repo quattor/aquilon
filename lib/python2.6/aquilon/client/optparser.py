@@ -590,6 +590,14 @@ class OptParser (object):
         self.__root = None
         self.parser = OptionParser (conflict_handler='resolve')
         self.parser.add_option('--help', '-h', action='store_true', default=False)
+
+        # "verbose" and "quiet" are connected, and this cannot be expressed
+        # correctly in input.xml
+        self.parser.add_option('--verbose', '-v', action='store_true',
+                               default=True)
+        self.parser.add_option('--quiet', '-q', dest='verbose',
+                               action='store_false')
+
         self.parseXml(xmlFileName)
 
 # --------------------------------------------------------------------------- #

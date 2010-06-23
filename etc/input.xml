@@ -3,12 +3,14 @@
    %prog command [subcommand] options
    <command name="*">
       <optgroup name="all commands">
-         <option name="verbose" short="v" type="flag" conflicts="quiet" default="True">
+         <!-- Note: "verbose" and "quiet" are handled specially in the code; do not
+              use "conflicts" here -->
+         <option name="verbose" short="v" type="flag" default="True">
             Verbose mode.  Contact the broker for out of band status messages
             about the request while it is being processed.  These messages
             are printed on stderr.
          </option>
-         <option name="quiet" short="q" type="flag" conflicts="verbose">
+         <option name="quiet" short="q" type="flag">
             Turn off verbose mode.  Do not make a secondary request to
             the broker for out of band status messages.
          </option>
