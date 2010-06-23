@@ -27,12 +27,15 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Base class of polymorphic hardware structures """
+
 from datetime import datetime
+from inspect import isclass
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
                         Index, String, DateTime)
 from sqlalchemy.orm import relation
 
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Base, Location, Model
 from aquilon.aqdb.column_types import AqStr, Enum
 
@@ -67,6 +70,47 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     model = relation(Model, uselist=False)
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
+
+    @classmethod
+    def get_unique(cls, sess, name, **kw):
+        """ Returns a unique HardwareEntity given session and fqdn """
+
+        compel = kw.pop('compel', False)
+        preclude = kw.pop('preclude', False)
+        hardware_type = kw.pop('hardware_type', None)
+
+        # If the hardware_type param isn't explicitly set and we have a
+        # polymorphic identity, assume we're querying only for items of our
+        # hardware_type.
+        if hardware_type:
+            if isclass(hardware_type):
+                clslabel = hardware_type._get_class_label()
+                hardware_type = hardware_type.__mapper_args__['polymorphic_identity']
+            else:
+                pcls = cls.__mapper__.polymorphic_map[hardware_type].class_
+                clslabel = pcls._get_class_label()
+        else:
+            if 'polymorphic_identity' in cls.__mapper_args__:
+                hardware_type = cls.__mapper_args__['polymorphic_identity']
+            clslabel = cls._get_class_label()
+
+        hwe = sess.query(cls).filter_by(label=name).first()
+
+        if hwe:
+            if hardware_type and hwe.hardware_type != hardware_type:
+                msg = "{0} exists, but is not a {1}.".format(hwe, hardware_type)
+                raise ArgumentError(msg)
+            if preclude:
+                raise ArgumentError('{0} already exists.'.format(hwe))
+            else:
+                return hwe
+
+        if compel and not hwe:
+            msg = "%s %s not found." % (clslabel, name)
+            raise NotFoundException(msg)
+        else:
+            return None
+
 
 hardware_entity = HardwareEntity.__table__
 hardware_entity.primary_key.name = '%s_pk' % _TN

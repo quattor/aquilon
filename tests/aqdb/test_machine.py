@@ -94,6 +94,12 @@ def test_add_machine():
     assert mchn, 'Commit machine failed'
     print mchn
 
+def test_get_unique_by_label():
+    """ test machine.get_unique """
+    mchn = Machine.get_unique(sess, NAME, compel=True)
+    assert mchn, 'get_unique failure for machine'
+    print mchn
+
 def test_del_machine():
     mchn = sess.query(Machine).filter_by(name = NAME).first()
     if mchn:
