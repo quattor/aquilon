@@ -293,10 +293,10 @@ if __name__ == "__main__":
     else:
         default_aqhost = socket.gethostname()
 
-    if globalOptions.get('noauth'):
-        default_aqport = "6901"
+    if globalOptions.get('auth') == False:
+        default_aqport = 6901
     else:
-        default_aqport = "6900"
+        default_aqport = 6900
 
     host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
             default_aqhost
@@ -357,7 +357,7 @@ if __name__ == "__main__":
         else:
             uri = uri + extension
 
-    authuser = not(globalOptions.get('noauth')) and aquser or None
+    authuser = globalOptions.get('auth') and aquser or None
     # create HTTP connection object adhering to the command line request
     if authuser:
         conn = KNCHTTPConnection(host, port, authuser)
@@ -475,7 +475,7 @@ if __name__ == "__main__":
     exit_status = 0
 
     if transport.expect == 'command':
-        if globalOptions.get('noexec'):
+        if not globalOptions.get('exec'):
             print pageData
         else:
             try:
@@ -487,7 +487,7 @@ if __name__ == "__main__":
 
             exit_status = proc.wait()
     elif transport.expect == 'sandbox':
-        noexec = globalOptions.get('noexec')
+        noexec = not globalOptions.get('exec')
         exit_status = create_sandbox(pageData, noexec=noexec)
     else:
         format = globalOptions.get("format", None)

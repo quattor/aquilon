@@ -372,7 +372,7 @@ class RestServer(ResponsePage):
                         paramtype = option.attrib["type"]
                         if paramtype == "int":
                             myinstance.parameter_checks[option_name] = force_int
-                        elif paramtype == "boolean":
+                        elif paramtype == "boolean" or paramtype == "flag":
                             myinstance.parameter_checks[option_name] = force_boolean
                         elif paramtype == "string" or paramtype == "file":
                             pass

@@ -45,16 +45,15 @@ class CommandPublish(BrokerCommand):
 
     required_parameters = ["branch", "bundle"]
 
-    def render(self, session, logger, branch, bundle, nosync, **arguments):
+    def render(self, session, logger, branch, bundle, sync, **arguments):
         # Most of the logic here is duplicated in deploy
-        autosync = not nosync
         dbsandbox = Sandbox.get_unique(session, branch, compel=True)
 
         (handle, filename) = mkstemp()
         contents = b64decode(bundle)
         write_file(filename, contents, logger=logger)
 
-        if autosync and not dbsandbox.is_sync_valid and dbsandbox.trackers:
+        if sync and not dbsandbox.is_sync_valid and dbsandbox.trackers:
             # FIXME: Maybe raise an ArgumentError and request that the
             # command run with --nosync?  Maybe provide a --validate flag?
             # For now, we just auto-flip anyway (below) making the point moot.
@@ -87,7 +86,7 @@ class CommandPublish(BrokerCommand):
             remove_dir(tempdir, logger=logger)
 
         client_command = "git fetch"
-        if nosync or not dbsandbox.autosync:
+        if not sync or not dbsandbox.autosync:
             return client_command
 
         for domain in dbsandbox.trackers:
