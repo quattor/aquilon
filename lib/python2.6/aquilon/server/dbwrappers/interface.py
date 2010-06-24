@@ -48,6 +48,7 @@ from aquilon.utils import force_ipv4
 
 
 # FIXME: interface type?  interfaces for hardware entities in general?
+# FIXME: replace me with a usable get_unique
 def get_interface(session, interface, machine, mac):
     q = session.query(Interface)
     errmsg = []
@@ -72,6 +73,16 @@ def get_interface(session, interface, machine, mac):
     return dbinterface
 
 def restrict_tor_offsets(dbnetwork, ip):
+    """ given a network and ip addr, raise an exception if the ip is reserved
+
+        Used during ip assignment as a check against grabbing an ip address
+        that we have reserved as a dynamic dhcp pool for switches (and
+        potentially other assorted devices) The remainder of addresses are to
+        be used for static assignment (for telco gear only).
+    """
+
+    #TODO: if the network type doesn't have any applicable offsets, we
+    #      probably want to reserve the first ip for the gateway on all networks
     if ip is None:
         # Simple passthrough to make calling logic easier.
         return
@@ -81,15 +92,7 @@ def restrict_tor_offsets(dbnetwork, ip):
 
     ip = force_ipv4("IP address", ip)
 
-    # TODO Move this info to the model
-    if dbnetwork.network_type == 'tor_net':
-        offsets = [6, 7]
-    elif dbnetwork.network_type == 'tor_net2':
-        offsets = [7, 8]
-    else:
-        return
-
-    if int(ip) - int(dbnetwork.ip) in offsets:
+    if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_addresses:
         raise ArgumentError("The IP address %s is reserved for dynamic "
                             "DHCP for a ToR switch on subnet %s." %
                             (ip, dbnetwork.ip))
@@ -168,7 +171,7 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             raise ArgumentError("Could not determine network to use for %s." %
                                 dbsystem.fqdn)
 
-    startip = dbnetwork.first_usable_host()
+    startip = dbnetwork.first_usable_host
 
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
     used_ips = session.query(System.ip).filter_by(network=dbnetwork).all()
@@ -225,7 +228,7 @@ def describe_interface(session, interface):
         description.append("points to system %s" % interface.system.fqdn)
     systems = session.query(System).filter_by(mac=interface.mac).all()
     if len(systems) == 1 and systems[0] != interface.system:
-        description.append("but MAC address %s is in use by %s" % 
+        description.append("but MAC address %s is in use by %s" %
                            (interface.mac, systems[0].fqdn))
     if len(systems) > 1:
         description.append("and MAC address %s is in use by %s" %

@@ -28,16 +28,16 @@
 # TERMS THAT MAY APPLY.
 """Basic module for running tests on broker commands."""
 
-
 import os
 import sys
 import unittest
 from subprocess import Popen, PIPE
 import re
-from ipaddr import IPv4Network, IPv4Address
 
 from aquilon.config import Config
-from aquilon.server import depends # fetch protobuf dependency
+from aquilon.server import depends # fetch protobuf, ipaddr dependency
+
+from ipaddr import IPv4Network, IPv4Address
 
 LOCK_RE = re.compile(r'^(acquired|releasing) '
                      r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
@@ -540,6 +540,7 @@ class DummyNetworks(object):
         self.unknown = list()
         self.tor_net = list()
         self.tor_net2 = list()
+        self.tor_net4 = list()
         self.vm_storage_net = list()
         self.all = list()
         self.unknown.append(NetworkInfo("4.2.1.0/26", "unknown"))
@@ -563,8 +564,10 @@ class DummyNetworks(object):
         self.tor_net2.append(NetworkInfo("4.2.4.0/25", "tor_net2"))
         self.tor_net2.append(NetworkInfo("4.2.4.128/25", "tor_net2"))
         self.tor_net2.append(NetworkInfo("4.2.6.192/26", "tor_net2"))
+        self.tor_net4.append(NetworkInfo("4.2.8.0/25", "tor_net4"))
         self.vm_storage_net.append(NetworkInfo("4.2.6.0/25", "vm_storage_net"))
         self.all.extend(self.unknown)
         self.all.extend(self.tor_net)
         self.all.extend(self.tor_net2)
+        self.all.extend(self.tor_net4)
         self.all.extend(self.vm_storage_net)
