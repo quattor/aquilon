@@ -38,7 +38,7 @@ class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
 
     def format_raw(self, network, indent=""):
-        netmask = network.netmask()
+        netmask = network.netmask
         sysloc = network.location.sysloc()
         details = [indent + "Network: %s" % network.name]
         details.append(indent + "IP: %s" % network.ip)
@@ -108,7 +108,16 @@ class SimpleNetworkListFormatter(ListFormatter):
     def format_raw(self, nlist, indent=""):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:
-            details.append(indent + str("\t".join([network.name, network.ip, str(network.netmask()), network.location.sysloc(), network.location.country.name, network.side, network.network_type, str(network.is_discoverable), str(network.is_discovered), str(network.comments)])))
+            details.append(indent + str("\t".join([network.name,
+                                                   str(network.ip),
+                                                   str(network.netmask),
+                                                   network.location.sysloc(),
+                                                   network.location.country.name,
+                                                   network.side,
+                                                   network.network_type,
+                                                   str(network.is_discoverable),
+                                                   str(network.is_discovered),
+                                                   str(network.comments)])))
         return "\n".join(details)
 
     def format_proto(self, nlist, skeleton=None):
@@ -122,8 +131,8 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
         net_msg.cidr = net.cidr
-        net_msg.bcast = str(net.bcast)
-        net_msg.netmask = str(net.netmask())
+        net_msg.bcast = str(net.broadcast)
+        net_msg.netmask = str(net.netmask)
         net_msg.side = str(net.side)
         net_msg.sysloc = str(net.location.sysloc())
         net_msg.location.name = str(net.location.name)
@@ -135,7 +144,7 @@ class SimpleNetworkListFormatter(ListFormatter):
             self.add_host_msg(net_msg.hosts.add(), system)
 
     def csv_fields(self, network):
-        return (network.name, network.ip, network.netmask(),
+        return (network.name, network.ip, network.netmask,
                 network.location.sysloc(), network.location.country.name,
                 network.side, network.network_type, network.comments)
 

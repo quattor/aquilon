@@ -40,6 +40,7 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.utils import force_ipv4
 
 
 class CommandAddTorSwitch(BrokerCommand):
@@ -95,6 +96,7 @@ class CommandAddTorSwitch(BrokerCommand):
                 raise ArgumentError("MAC address %s is already in use: %s." %
                                     (mac, msg))
 
+            ip = force_ipv4("ip", ip)
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
             restrict_tor_offsets(dbnetwork, ip)

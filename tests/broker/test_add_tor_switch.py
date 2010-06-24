@@ -157,14 +157,14 @@ class TestAddTorSwitch(TestBrokerCommand):
                         "--rackrow", "zz", "--rackcol", "11",
                         "--model", "rs g8000", "--interface", "xge49",
                         "--mac", self.net.tor_net[5].usable[0].mac,
-                        "--ip", self.net.tor_net[5].usable[0].ip])
+                        "--ip", self.net.tor_net[5].usable[0]])
 
     def testverifynp999gd1r01(self):
         (out, command) = self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
                                            "bnt", "rs g8000",
                                            "np999", "zz", "11")
         self.matchoutput(out,
-                         "IP: %s" % self.net.tor_net[5].usable[0].ip,
+                         "IP: %s" % self.net.tor_net[5].usable[0],
                          command)
         self.matchoutput(out,
                          "Interface: xge49 %s boot=False" %
@@ -179,7 +179,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                          "np999gd1r01.aqd-unittest.ms.com,np999,np,"
                          "bnt,rs g8000,,xge49,%s,%s" %
                          (self.net.tor_net[5].usable[0].mac,
-                          self.net.tor_net[5].usable[0].ip),
+                          self.net.tor_net[5].usable[0]),
                          command)
 
     def testverifyshowtorswitchrack(self):
@@ -239,7 +239,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                         "--rackrow", "g", "--rackcol", "2",
                         "--model", "rs g8000", "--interface", "xge49",
                         "--mac", self.net.tor_net[0].usable[0].mac,
-                        "--ip", self.net.tor_net[0].usable[0].ip])
+                        "--ip", self.net.tor_net[0].usable[0]])
 
     def testverifyut01ga1s02(self):
         self.verifyswitch("ut01ga1s02.aqd-unittest.ms.com",
@@ -252,7 +252,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                         "--rackrow", "g", "--rackcol", "3",
                         "--model", "rs g8000", "--interface", "xge49",
                         "--mac", self.net.tor_net[1].usable[0].mac,
-                        "--ip", self.net.tor_net[1].usable[0].ip])
+                        "--ip", self.net.tor_net[1].usable[0]])
 
     def testverifyut01ga1s03(self):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
@@ -265,7 +265,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                         "--rackrow", "g", "--rackcol", "4",
                         "--model", "rs g8000", "--interface", "xge49",
                         "--mac", self.net.tor_net[2].usable[0].mac,
-                        "--ip", self.net.tor_net[2].usable[0].ip])
+                        "--ip", self.net.tor_net[2].usable[0]])
 
     def testverifyut01ga1s04(self):
         self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
@@ -279,7 +279,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                    "--model", "rs g8000",
                    "--interface", "xge49",
                    "--mac", self.net.tor_net[0].usable[0].mac,
-                   "--ip", self.net.tor_net[0].usable[0].ip]
+                   "--ip", self.net.tor_net[0].usable[0]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use" %
@@ -297,7 +297,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                         "--rackrow", "k", "--rackcol", "1",
                         "--model", "rs g8000", "--interface", "xge49",
                         "--mac", self.net.tor_net2[2].usable[0].mac,
-                        "--ip", self.net.tor_net2[2].usable[0].ip])
+                        "--ip", self.net.tor_net2[2].usable[0]])
 
     def testaddut01ga2s02(self):
         self.noouttest(["add", "tor_switch",
@@ -306,7 +306,7 @@ class TestAddTorSwitch(TestBrokerCommand):
                         "--rackrow", "k", "--rackcol", "2",
                         "--model", "rs g8000", "--interface", "xge49",
                         "--mac", self.net.tor_net2[2].usable[1].mac,
-                        "--ip", self.net.tor_net2[2].usable[1].ip])
+                        "--ip", self.net.tor_net2[2].usable[1]])
 
 
 if __name__=='__main__':

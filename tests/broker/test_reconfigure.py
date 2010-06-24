@@ -81,7 +81,7 @@ class TestReconfigure(TestBrokerCommand):
                          "nlist('ip', '%s', 'netmask', '%s', "
                          "'broadcast', '%s', 'gateway', '%s', "
                          "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[0].ip,
+                         (self.net.unknown[0].usable[0],
                           self.net.unknown[0].netmask,
                           self.net.unknown[0].broadcast,
                           self.net.unknown[0].gateway),
@@ -130,7 +130,7 @@ class TestReconfigure(TestBrokerCommand):
                          "nlist('ip', '%s', 'netmask', '%s', "
                          "'broadcast', '%s', 'gateway', '%s', "
                          "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[2].ip,
+                         (self.net.unknown[0].usable[2],
                           self.net.unknown[0].netmask,
                           self.net.unknown[0].broadcast,
                           self.net.unknown[0].gateway),
@@ -140,7 +140,7 @@ class TestReconfigure(TestBrokerCommand):
                          "nlist('ip', '%s', 'netmask', '%s', "
                          "'broadcast', '%s', 'gateway', '%s', "
                          "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[3].ip,
+                         (self.net.unknown[0].usable[3],
                           self.net.unknown[0].netmask,
                           self.net.unknown[0].broadcast,
                           self.net.unknown[0].gateway),

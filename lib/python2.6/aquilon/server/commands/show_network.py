@@ -35,6 +35,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.server.formats.network import SimpleNetworkList
 from aquilon.server.formats.network import NetworkHostList
+from aquilon.utils import force_ipv4
 
 
 class CommandShowNetwork(BrokerCommand):
@@ -42,6 +43,7 @@ class CommandShowNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, ip, all, discovered, discoverable, type=False, hosts=False, **arguments):
+        ip = force_ipv4("ip", ip)
         dbnetwork = network and get_network_byname(session, network) or None
         dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
         q = session.query(Network)

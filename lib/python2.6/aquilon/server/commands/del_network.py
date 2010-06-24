@@ -30,6 +30,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model.network import Network
+from aquilon.utils import force_ipv4
 
 
 class CommandDelNetwork(BrokerCommand):
@@ -37,6 +38,7 @@ class CommandDelNetwork(BrokerCommand):
     required_parameters = ["ip"]
 
     def render(self, session, ip, **arguments):
+        ip = force_ipv4("ip", ip)
         dbnetwork = Network.get_unique(session, ip, compel=True)
         session.delete(dbnetwork)
         return

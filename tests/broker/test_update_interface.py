@@ -51,13 +51,13 @@ class TestUpdateInterface(TestBrokerCommand):
     def testupdateut3c5n10eth0ip(self):
         self.noouttest(["update", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10",
-                        "--ip", self.net.unknown[0].usable[11].ip])
+                        "--ip", self.net.unknown[0].usable[11]])
 
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
                         "--hostname", "unittest02.one-nyp.ms.com",
                         "--mac", self.net.unknown[0].usable[12].mac,
-                        "--ip", self.net.unknown[0].usable[12].ip, "--boot"])
+                        "--ip", self.net.unknown[0].usable[12], "--boot"])
 
     def testupdateut3c5n10eth2(self):
         self.notfoundtest(["update", "interface", "--interface", "eth2",

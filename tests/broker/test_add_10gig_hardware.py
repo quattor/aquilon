@@ -239,7 +239,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                 net_index = ((i - 10) / 2) + 6
                 usable_index = (i - 10) % 2
             hostname = "ivirt%d.aqd-unittest.ms.com" % i
-            ip = self.net.unknown[net_index].usable[usable_index].ip
+            ip = self.net.unknown[net_index].usable[usable_index]
             command = "search host --hostname %s --ip %s" % (hostname, ip)
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, hostname, command)

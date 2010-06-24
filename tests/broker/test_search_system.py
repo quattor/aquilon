@@ -101,7 +101,7 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
     def testipavailable(self):
-        command = "search system --ip %s" % self.net.unknown[0].usable[2].ip
+        command = "search system --ip %s" % self.net.unknown[0].usable[2]
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 

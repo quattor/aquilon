@@ -33,6 +33,7 @@
 import os
 import sys
 import unittest
+from ipaddr import IPv4Address
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -46,16 +47,16 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testadddifferentnetworks(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[1].usable[2].ip,
+                   "--startip=%s" % self.net.tor_net2[0].usable[2],
+                   "--endip=%s" % self.net.tor_net2[1].usable[2],
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
     def testaddmissingdomain(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[-3].ip,
+                   "--startip=%s" % self.net.tor_net2[0].usable[2],
+                   "--endip=%s" % self.net.tor_net2[0].usable[-3],
                    "--dns_domain=dns_domain_does_not_exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -64,8 +65,8 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def testaddrange(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[-3].ip,
+                   "--startip=%s" % self.net.tor_net2[0].usable[2],
+                   "--endip=%s" % self.net.tor_net2[0].usable[-3],
                    "--dns_domain=aqd-unittest.ms.com"]
         self.noouttest(command)
 
@@ -73,58 +74,57 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = "search_system --type=dynamic_stub"
         out = self.commandtest(command.split(" "))
         # Assume that first three octets are the same.
-        s = self.net.tor_net2[0].usable[2].ip.split('.')
-        end = self.net.tor_net2[0].usable[-3].ip.split('.')
+        start = self.net.tor_net2[0].usable[2]
+        end = self.net.tor_net2[0].usable[-3]
         checked = False
-        for i in range(int(s[-1]), int(end[-1]) + 1):
+        for i in range(int(start), int(end) + 1):
             checked = True
-            dynamic_host = "dynamic-%s-%s-%s-%s.aqd-unittest.ms.com" % \
-                    (s[0], s[1], s[2], i)
+            ip = IPv4Address(i)
+            dynamic_host = "dynamic-%s.aqd-unittest.ms.com" % \
+                str(ip).replace(".", "-")
             self.matchoutput(out, dynamic_host, command)
-            subcommand = ["search_system",
-                          "--ip=%s.%s.%s.%s" % (s[0], s[1], s[2], i),
-                          "--fqdn=%s" % dynamic_host]
+            subcommand = ["search_system", "--ip", ip, "--fqdn", dynamic_host]
             subout = self.commandtest(subcommand)
             self.matchoutput(subout, dynamic_host, command)
         self.failUnless(checked, "Problem with test algorithm or data.")
 
     def testfailalreadytaken(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[0].usable[2].ip,
-                   "--endip=%s" % self.net.tor_net2[0].usable[3].ip,
+                   "--startip", self.net.tor_net2[0].usable[2],
+                   "--endip", self.net.tor_net2[0].usable[3],
                    "--prefix=oops",
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following hosts already exist", command)
         self.matchoutput(out,
                          "dynamic-%s.aqd-unittest.ms.com (%s)" %
-                         (self.net.tor_net2[0].usable[2].ip.replace(".", "-"),
-                          self.net.tor_net2[0].usable[2].ip),
+                         (str(self.net.tor_net2[0].usable[2]).replace(".", "-"),
+                          self.net.tor_net2[0].usable[2]),
                          command)
         self.matchoutput(out,
                          "dynamic-%s.aqd-unittest.ms.com (%s)" %
-                         (self.net.tor_net2[0].usable[3].ip.replace(".", "-"),
-                          self.net.tor_net2[0].usable[3].ip),
+                         (str(self.net.tor_net2[0].usable[3]).replace(".", "-"),
+                          self.net.tor_net2[0].usable[3]),
                          command)
 
     def testaddendingrange(self):
         # Set up a network that has its final IP address taken.
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[1].usable[-1].ip,
-                   "--endip=%s" % self.net.tor_net2[1].usable[-1].ip,
+                   "--startip", self.net.tor_net2[1].usable[-1],
+                   "--endip", self.net.tor_net2[1].usable[-1],
                    "--dns_domain=aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testfailaddrestricted(self):
         command = ["add_dynamic_range",
-                   "--startip=%s" % self.net.tor_net2[1].reserved[0].ip,
-                   "--endip=%s" % self.net.tor_net2[1].reserved[1].ip,
+                   "--startip", self.net.tor_net2[1].reserved[0],
+                   "--endip", self.net.tor_net2[1].reserved[1],
                    "--dns_domain=aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The IP address %s is reserved for dynamic "
                          "DHCP for a ToR switch on subnet %s" %
-                         (self.net.tor_net2[1].reserved[0].ip,
+                         (self.net.tor_net2[1].reserved[0],
                           self.net.tor_net2[1].ip),
                          command)
 

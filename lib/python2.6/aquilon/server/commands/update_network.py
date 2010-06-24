@@ -28,13 +28,14 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq update machine`."""
 
+import re
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException)
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.aqdb.model import Network
-import re
+from aquilon.utils import force_ipv4
 
 class CommandUpdateNetwork(BrokerCommand):
 
@@ -44,6 +45,7 @@ class CommandUpdateNetwork(BrokerCommand):
         networks = []
 
         if network or ip:
+            ip = force_ipv4("ip", ip)
             dbnetwork = network and get_network_byname(session, network) or None
             dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
             if not dbnetwork:

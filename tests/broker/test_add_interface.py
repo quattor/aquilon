@@ -190,7 +190,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddinterfaceut3c5(self):
         command = ["add", "interface", "--interface", "oa",
                    "--mac", self.net.unknown[0].usable[6].mac,
-                   "--ip", self.net.unknown[0].usable[6].ip,
+                   "--ip", self.net.unknown[0].usable[6],
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         self.noouttest(command)
 
@@ -198,7 +198,7 @@ class TestAddInterface(TestBrokerCommand):
         command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[6].ip,
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[6],
                          command)
         self.matchoutput(out,
                          "Interface: oa %s boot=False" %
@@ -209,7 +209,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3c1(self):
         command = ["add", "interface", "--interface", "oa",
                    "--mac", self.net.unknown[0].usable[6].mac,
-                   "--ip", self.net.unknown[0].usable[6].ip,
+                   "--ip", self.net.unknown[0].usable[6],
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -226,7 +226,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddinterfacenp997gd1r04(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[3].usable[0].mac,
-                   "--ip", self.net.tor_net[3].usable[0].ip,
+                   "--ip", self.net.tor_net[3].usable[0],
                    "--tor_switch", "np997gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
@@ -235,7 +235,7 @@ class TestAddInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Tor_switch: np997gd1r04.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[3].usable[0].ip,
+        self.matchoutput(out, "IP: %s" % self.net.tor_net[3].usable[0],
                          command)
         self.matchoutput(out,
                          "Interface: xge49 %s boot=False" %
@@ -246,7 +246,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[0].usable[0].mac,
-                   "--ip", self.net.tor_net[0].usable[0].ip,
+                   "--ip", self.net.tor_net[0].usable[0],
                    "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

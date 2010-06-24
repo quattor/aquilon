@@ -104,10 +104,10 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.matchclean(err, "updating", command)
         self.matchclean(err, "deleting", command)
 
-    # 200 add a dummy 0.1.1.0/26 network to np
+    # 200 add a dummy 0.1.1.0/24 network to np
     def test_200_adddummynetwork(self):
         command = ["add_network", "--network=0.1.1.0", "--ip=0.1.1.0",
-                   "--mask=256", "--building=np"]
+                   "--prefixlen=24", "--building=np"]
         self.noouttest(command)
 
     # 300 add a small dynamic range to 0.1.1.0
@@ -121,7 +121,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.partialerrortest(command.split(" "))
         err = self.striplock(err)
         self.matchoutput(err,
-                         "deleting <Network 0.1.1.0/24 "
+                         "deleting <Network 0.1.1.0 ip=0.1.1.0/24 "
                          "(netmask=255.255.255.0), type=unknown, "
                          "side=a, located in Building np>",
                          command)
@@ -182,7 +182,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         err = self.striplock(err)
         self.matchoutput(err,
-                         "deleting <Network 0.1.1.0/24 "
+                         "deleting <Network 0.1.1.0 ip=0.1.1.0/24 "
                          "(netmask=255.255.255.0), type=unknown, "
                          "side=a, located in Building np>",
                          command)

@@ -27,15 +27,16 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
+from ipaddr import IPv4Address
 
 from sqlalchemy.sql.expression import asc
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DynamicStub, System, DnsDomain
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.column_types.IPV4 import dq_to_int, int_to_dq
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.utils import force_ipv4
 
 
 class CommandAddDynamicRange(BrokerCommand):
@@ -43,6 +44,9 @@ class CommandAddDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip", "dns_domain"]
 
     def render(self, session, startip, endip, dns_domain, prefix, **arguments):
+        startip = force_ipv4("startip", startip)
+        endip = force_ipv4("endip", endip)
+
         if not prefix:
             prefix = 'dynamic'
         startnet = get_net_id_from_ip(session, startip)
@@ -63,12 +67,12 @@ class CommandAddDynamicRange(BrokerCommand):
                                 "\n".join(["%s (%s)" % (c.fqdn, c.ip)
                                            for c in conflicts]))
 
-        startint = dq_to_int(startip)
-        endint = dq_to_int(endip)
-        for ipint in range(startint, endint + 1):
-            ip = int_to_dq(ipint)
+        start = IPv4Address(startip)
+        end = IPv4Address(endip)
+        for ipint in range(int(start), int(end) + 1):
+            ip = IPv4Address(ipint)
             restrict_tor_offsets(startnet, ip)
-            name = "%s-%s" % (prefix, ip.replace('.', '-'))
+            name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
             dbdynamic_stub = DynamicStub(name=name, dns_domain=dbdns_domain,
                                          ip=ip, network=startnet)
             session.add(dbdynamic_stub)

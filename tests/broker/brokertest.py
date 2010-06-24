@@ -34,6 +34,7 @@ import sys
 import unittest
 from subprocess import Popen, PIPE
 import re
+from ipaddr import IPv4Network, IPv4Address
 
 from aquilon.config import Config
 from aquilon.server import depends # fetch protobuf dependency
@@ -96,7 +97,7 @@ class TestBrokerCommand(unittest.TestCase):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
         kncport = self.config.get("broker", "kncport")
         if isinstance(command, list):
-            args = command[:]
+            args = [str(cmd) for cmd in command]
         else:
             args = [command]
         args.insert(0, sys.executable)
@@ -492,33 +493,20 @@ class TestBrokerCommand(unittest.TestCase):
         return scratchfile
 
 
-class DummyIP(object):
-    def __init__(self, parts):
-        self.ip = ".".join([str(i) for i in parts])
-        self.mac = "02:02:%02x:%02x:%02x:%02x" % parts
+class DummyIP(IPv4Address):
+    def __init__(self, *args, **kwargs):
+        super(DummyIP, self).__init__(*args, **kwargs)
 
+        octets = [int(i) for i in str(self).split('.')]
+        self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
 
-class NetworkInfo(object):
-    def __init__(self, ip, mask, nettype):
-        # Currently only good for mask in [64, 128].
-        self.ip = ip
-        self.mask = mask
+class NetworkInfo(IPv4Network):
+    def __init__(self, cidr, nettype):
+        super(NetworkInfo, self).__init__(cidr)
+
         self.nettype = nettype
-        parts = ip.split(".")
-        gateway = [int(i) for i in parts]
-        broadcast = gateway[:]
-        gateway[3] += 1
-        broadcast[3] = broadcast[3] + mask - 1
-        # Assumes gateway is first and broadcast is last.
-        self.gateway = ".".join([str(i) for i in gateway])
-        self.broadcast = ".".join([str(i) for i in broadcast])
-
-        if self.mask == 8:
-            self.netmask = "255.255.255.248"
-        if self.mask == 64:
-            self.netmask = "255.255.255.192"
-        elif self.mask == 128:
-            self.netmask = "255.255.255.128"
+        self.usable = list()
+        self.reserved = list()
 
         if nettype == 'tor_net':
             offsets = [6, 7]
@@ -529,19 +517,16 @@ class NetworkInfo(object):
         else:
             offsets = []
 
-        self.usable = list()
-        self.reserved = list()
-        usable_start = gateway[3] + 4
         for offset in offsets:
-            reserved = gateway[:]
-            reserved[3] = gateway[3] - 1 + offset
-            usable_start = reserved[3] + 1
-            self.reserved.append(DummyIP(tuple(reserved)))
-        for i in range(usable_start, broadcast[3]):
-            newip = gateway[:]
-            newip[3] = i
-            self.usable.append(DummyIP(tuple(newip)))
+            self.reserved.append(DummyIP(self[offset]))
 
+        first_usable = max(offsets or [4]) + 1
+        for i in range(first_usable, self.numhosts - 1):
+            self.usable.append(DummyIP(self[i]))
+
+    @property
+    def gateway(self):
+        return self[1]
 
 class DummyNetworks(object):
     # Borg
@@ -557,29 +542,28 @@ class DummyNetworks(object):
         self.tor_net2 = list()
         self.vm_storage_net = list()
         self.all = list()
-        self.unknown.append(NetworkInfo("4.2.1.0", 64, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.1.64", 64, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.128", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.136", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.144", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.152", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.160", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.168", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.176", 8, "unknown"))
-        self.unknown.append(NetworkInfo("4.2.6.184", 8, "unknown"))
-        self.tor_net.append(NetworkInfo("4.2.1.128", 64, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.1.192", 64, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.0", 64, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.64", 64, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.128", 64, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.2.192", 64, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.3.0", 128, "tor_net"))
-        self.tor_net.append(NetworkInfo("4.2.3.128", 128, "tor_net"))
-        self.tor_net2.append(NetworkInfo("4.2.4.0", 128, "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.4.128", 128, "tor_net2"))
-        self.tor_net2.append(NetworkInfo("4.2.6.192", 64, "tor_net2"))
-        self.vm_storage_net.append(NetworkInfo("4.2.6.0", 128,
-                                               "vm_storage_net"))
+        self.unknown.append(NetworkInfo("4.2.1.0/26", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.1.64/26", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.128/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.136/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.144/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.152/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.160/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.168/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.176/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.6.184/29", "unknown"))
+        self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.64/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.128/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.2.192/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.3.0/25", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.3.128/25", "tor_net"))
+        self.tor_net2.append(NetworkInfo("4.2.4.0/25", "tor_net2"))
+        self.tor_net2.append(NetworkInfo("4.2.4.128/25", "tor_net2"))
+        self.tor_net2.append(NetworkInfo("4.2.6.192/26", "tor_net2"))
+        self.vm_storage_net.append(NetworkInfo("4.2.6.0/25", "vm_storage_net"))
         self.all.extend(self.unknown)
         self.all.extend(self.tor_net)
         self.all.extend(self.tor_net2)

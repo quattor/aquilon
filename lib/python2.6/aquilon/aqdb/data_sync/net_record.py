@@ -29,9 +29,7 @@
 """ handy for comparing networks """
 
 
-#TODO: rename _mask_to_cidr, it's not really hidden
 from aquilon.aqdb.model import Network
-from aquilon.aqdb.model.network import get_bcast, _mask_to_cidr
 
 
 class NetRecord(object):
@@ -41,7 +39,7 @@ class NetRecord(object):
         #TODO: update comments later, it's too much noise for now
         # Only need/want dsdb bldg in case location is unmatched.
         # Even there bldg is occasionally null, so mark it optional.
-        _required = ['name', 'ip', 'mask', 'side', 'net_type']
+        _required = ['name', 'ip', 'cidr', 'side', 'net_type']
         _optional = ['bldg', 'location']
         for (k, v) in kw.iteritems():
             setattr(self, k, v)
@@ -70,7 +68,7 @@ class NetRecord(object):
 
         if (self.name.strip().lower() == other.name and
             self.net_type == other.network_type and
-            self.mask == other.mask and
+            self.cidr == other.cidr and
             self.location == other.location and
             self.side == other.side): #and
             #self.comments == other.comments):
@@ -105,13 +103,10 @@ class NetRecord(object):
             nr.info('updating network %s to type %s', dbnetwork, self.net_type)
             dbnetwork.network_type = self.net_type
 
-        if self.mask != dbnetwork.mask:
-            #calculate new cidr and new bcast
-            dbnetwork.mask = self.mask
-            dbnetwork.cidr = _mask_to_cidr[dbnetwork.mask]
-            dbnetwork.bcast = get_bcast(dbnetwork.ip, dbnetwork.cidr)
-            nr.info('updating network %s with mask %s, cidr %s, bcast %s',
-                    dbnetwork, self.mask, dbnetwork.cidr, dbnetwork.bcast)
+        if self.cidr != dbnetwork.cidr:
+            net = IPv4Network("%s/%s" % (str(dbnetwork.ip), self.cidr))
+            nr.info('updating network %s with %s', dbnetwork, net)
+            dbnetwork.network = net
 
         if self.side != dbnetwork.side:
             nr.info('updating network %s to side %s', dbnetwork, self.side)
@@ -120,5 +115,5 @@ class NetRecord(object):
         return dbnetwork
 
     def __repr__(self):
-        return '<Network %s ip=%s, type=%s, mask=%s, bldg=%s, side=%s>' % (
-            self.name, self.ip, self.net_type, self.mask, self.bldg, self.side)
+        return '<Network %s ip=%s, type=%s, cidr=%s, bldg=%s, side=%s>' % (
+            self.name, self.ip, self.net_type, self.cidr, self.bldg, self.side)
