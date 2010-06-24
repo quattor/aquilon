@@ -80,7 +80,7 @@ machine.append_constraint(
     UniqueConstraint('name',name='machine_name_uk')
 )
 
-table = machine
+machine.info['unique_fields'] = ['name']
 
 #TODO:
 #   check if it exists in dbdb minfo, and get from there if it does

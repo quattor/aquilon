@@ -31,14 +31,14 @@
 
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Machine, Model
 
 
 class CommandShowMachine(BrokerCommand):
 
-    def render(self, session, machine, model, chassis, slot, **arguments):
+    def render(self, session, machine, model, vendor, machine_type, chassis,
+               slot, **arguments):
         q = session.query(Machine)
         if machine:
             # TODO: This command still mixes search/show facilities.
@@ -62,9 +62,9 @@ class CommandShowMachine(BrokerCommand):
             q = q.join('chassis_slot')
             q = q.filter_by(slot_number=slot)
             q = q.reset_joinpoint()
-        if model:
-            dbmodel = get_model(session, model)
-            q = q.filter_by(model=dbmodel)
+        if model or vendor or machine_type:
+            subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                            machine_type=machine_type,
+                                            compel=True)
+            q = q.filter(Machine.model_id.in_(subq))
         return q.all()
-
-

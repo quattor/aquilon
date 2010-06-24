@@ -34,8 +34,8 @@ from sqlalchemy.orm import aliased
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
-from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster,
-                                Service, ServiceInstance, NasDisk, Disk)
+from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster, Service,
+                                ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
 
@@ -49,27 +49,12 @@ class CommandSearchMachine(BrokerCommand):
         q = search_hardware_entity_query(session, Machine, **arguments)
         if machine:
             q = q.filter_by(name=machine)
-        if cpuname and cpuvendor and cpuspeed:
-            dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
-            cpuspeed = force_int("cpuspeed", cpuspeed)
-            dbcpu = Cpu.get_unique(session, vendor_id=dbvendor.id,
-                                   name=cpuname, speed=cpuspeed)
-            if not dbcpu:
-                raise ArgumentError("CPU vendor='%s' name='%s' speed='%s' "
-                                    "not found." %
-                                    (dbvendor.name, cpuname, cpuspeed))
-            q = q.filter_by(cpu=dbcpu)
-        elif cpuname or cpuvendor or cpuspeed:
-            q = q.join('cpu')
-            if cpuvendor:
-                dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
-                q = q.filter_by(vendor=dbvendor)
-            if cpuspeed:
-                cpuspeed = force_int("cpuspeed", cpuspeed)
-                q = q.filter_by(speed=cpuspeed)
-            if cpuname:
-                q = q.filter_by(name=cpuname)
-            q = q.reset_joinpoint()
+        if cpuname or cpuvendor or cpuspeed:
+            subq = Cpu.get_matching_query(session, name=cpuname,
+                                          vendor=cpuvendor,
+                                          speed=force_int("cpuspeed", cpuspeed),
+                                          compel=True)
+            q = q.filter(Machine.cpu_id.in_(subq))
         if cpucount:
             cpucount = force_int("cpucount", cpucount)
             q = q.filter_by(cpu_quantity=cpucount)

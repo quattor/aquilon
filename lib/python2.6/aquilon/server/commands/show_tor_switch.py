@@ -32,14 +32,13 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import parse_system
-from aquilon.aqdb.model import TorSwitch, HardwareEntity
+from aquilon.aqdb.model import TorSwitch, HardwareEntity, Model
 
 
 class CommandShowTorSwitch(BrokerCommand):
 
-    def render(self, session, tor_switch, rack, model, **arguments):
+    def render(self, session, tor_switch, rack, model, vendor, **arguments):
         q = session.query(TorSwitch)
         if tor_switch:
             (short, dbdns_domain) = parse_system(session, tor_switch)
@@ -48,12 +47,10 @@ class CommandShowTorSwitch(BrokerCommand):
             dblocation = get_location(session, rack=rack)
             q = q.filter(TorSwitch.tor_switch_id==HardwareEntity.id)
             q = q.filter(HardwareEntity.location_id==dblocation.id)
-        if model:
-            dbmodel = get_model(session, model)
-            if dbmodel.machine_type not in ['tor_switch']:
-                raise ArgumentError(
-                        "Requested model %s is a %s, not a tor_switch." %
-                        (model, dbmodel.machine_type))
+        if model or vendor:
+            subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                            machine_type='tor_switch',
+                                            compel=True)
             q = q.filter(TorSwitch.tor_switch_id==HardwareEntity.id)
-            q = q.filter(HardwareEntity.model_id==dbmodel.id)
+            q = q.filter(HardwareEntity.model_id.in_(subq))
         return q.all()

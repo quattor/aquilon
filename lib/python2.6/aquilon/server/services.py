@@ -615,8 +615,8 @@ class ClusterChooser(Chooser):
                                     self.description,
                                     instance.service.name, instance.name)
             dbcs = ClusterServiceBinding.get_unique(self.session,
-                cluster_id=self.dbcluster.id,
-                service_instance_id=instance.id)
+                                                    cluster=self.dbcluster,
+                                                    service_instance=instance)
             if dbcs:
                 self.session.delete(dbcs)
             else:

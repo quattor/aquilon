@@ -45,8 +45,7 @@ class Room(Location):
 
 room = Room.__table__
 room.primary_key.name = 'room_pk'
-
-table = room
+room.info['unique_fields'] = ['name']
 
 
 @monkeypatch(room)

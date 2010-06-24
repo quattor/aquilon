@@ -186,5 +186,7 @@ location.primary_key.name = 'location_pk'
 location.append_constraint(
     UniqueConstraint('name', 'location_type', name='loc_name_type_uk'))
 
+location.info['unique_fields'] = ['name', 'location_type']
+
 Location.sublocations = relation('Location', backref=backref(
                                     'parent', remote_side=[location.c.id]))

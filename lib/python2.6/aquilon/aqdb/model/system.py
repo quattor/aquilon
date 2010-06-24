@@ -99,7 +99,7 @@ system.append_constraint(
 system.append_constraint(                    #systm_pt_uk means 'primary tuple'
     UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='SYSTEM_PT_UK'))
 
-table = system
+system.info['unique_fields'] = ['name', 'dns_domain']
 
 class DynamicStub(System):
     """

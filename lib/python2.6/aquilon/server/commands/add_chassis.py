@@ -31,9 +31,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Chassis, ChassisHw
+from aquilon.aqdb.model import Chassis, ChassisHw, Model
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 
 
@@ -41,12 +40,11 @@ class CommandAddChassis(BrokerCommand):
 
     required_parameters = ["chassis", "rack", "model"]
 
-    def render(self, session, chassis, rack, serial, model, comments, **arguments):
+    def render(self, session, chassis, rack, serial, model, vendor, comments, **arguments):
         (short, dbdns_domain) = parse_system_and_verify_free(session, chassis)
         dblocation = get_location(session, rack=rack)
-        dbmodel = get_model(session, model)
-        if dbmodel.machine_type not in ['chassis']:
-            raise ArgumentError("Model must be of type chassis.")
+        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                   machine_type='chassis', compel=True)
         # FIXME: Precreate chassis slots?
         dbchassis_hw = ChassisHw(location=dblocation, model=dbmodel,
                                  serial_no=serial)

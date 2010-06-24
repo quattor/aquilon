@@ -31,11 +31,10 @@
 from aquilon.server.broker import (BrokerCommand, validate_basic,
                                    force_int, force_ratio)
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
-                                MetaClusterMember, Domain)
+                                MetaClusterMember, Domain, Personality)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 
@@ -68,8 +67,8 @@ class CommandAddESXCluster(BrokerCommand):
 
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-
-        dbpersonality = get_personality(session, archetype, personality)
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
 
         if not max_members:
             max_members = self.config.get("broker",

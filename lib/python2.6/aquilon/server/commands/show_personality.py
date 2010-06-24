@@ -32,9 +32,8 @@
 import os
 import re
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.aqdb.model import Archetype, Personality
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.personality import (ThresholdedPersonality,
                                                 PersonalityList)
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -50,7 +49,9 @@ class CommandShowPersonality(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox)
         if archetype and personality:
-            dbpersonality = get_personality(session, archetype, personality)
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
             if not dbbranch:
                 return dbpersonality
             threshold = self.get_threshold(dbpersonality, dbbranch, dbauthor)

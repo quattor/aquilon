@@ -79,6 +79,7 @@ class MetaCluster(Base):
 metacluster = MetaCluster.__table__
 metacluster.primary_key.name = '%s_pk'% (_MCT)
 metacluster.append_constraint(UniqueConstraint('name', name='%s_uk'% (_MCT)))
+metacluster.info['unique_fields'] = ['name']
 
 
 _MCM = 'metacluster_member'
@@ -131,3 +132,4 @@ metamember = MetaClusterMember.__table__
 metamember.primary_key.name = '%s_pk'% (_MCM)
 metamember.append_constraint(
     UniqueConstraint('cluster_id', name='%s_uk'% (_MCM)))
+metamember.info['unique_fields'] = ['metacluster', 'cluster']

@@ -59,12 +59,13 @@ class DnsDomain(Base):
         return str(self.name)
 
 
-table = DnsDomain.__table__
+dnsdomain = DnsDomain.__table__
 
-table.primary_key.name = '%s_pk' % (_TN)
-table.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))
+dnsdomain.primary_key.name = '%s_pk' % (_TN)
+dnsdomain.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))
+dnsdomain.info['unique_fields'] = ['name']
 
-@monkeypatch(table)
+@monkeypatch(dnsdomain)
 def populate(sess, **kw):
     """ populate some well known domains """
 

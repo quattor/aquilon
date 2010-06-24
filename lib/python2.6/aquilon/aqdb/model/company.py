@@ -45,8 +45,7 @@ class Company(Location):
 
 company = Company.__table__
 company.primary_key.name='company_pk'
-
-table = company
+company.info['unique_fields'] = ['name']
 
 
 @monkeypatch(company)

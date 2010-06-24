@@ -225,9 +225,8 @@ class TestSearchHost(TestBrokerCommand):
         # Will only get this error if archetype is specified
         command = "search host --archetype aquilon --personality personality-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Personality with ", command)
-        self.matchoutput(out, "Archetype aquilon", command)
-        self.matchoutput(out, "name of personality-does-not-exist", command)
+        self.matchoutput(out, "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.", command)
 
     def testpersonalityunavailable2(self):
         # Will only get an error if archetype is specified
@@ -243,10 +242,8 @@ class TestSearchHost(TestBrokerCommand):
     def testosunavailable(self):
         command = "search host --osname os-does-not-exist --osversion foo --archetype aquilon"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Operating System with ", command)
-        self.matchoutput(out, "version of foo", command)
-        self.matchoutput(out, "Archetype aquilon", command)
-        self.matchoutput(out, "name of os-does-not-exist", command)
+        self.matchoutput(out, "Operating System os-does-not-exist, "
+                         "version foo, archetype aquilon not found.", command)
 
     def testosnameonly(self):
         command = "search host --osname linux"
@@ -304,24 +301,20 @@ class TestSearchHost(TestBrokerCommand):
     def testmodelunavailable(self):
         command = "search host --model model-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model model-does-not-exist not found",
+        self.matchoutput(out, "Model model-does-not-exist not found.",
                          command)
 
     def testmodelvendorconflict(self):
         command = "search host --model vb1205xm --vendor dell"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "vendor dell conflicts with model vb1205xm "
-                         "where vendor is verari",
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model vb1205xm, vendor dell not found.",
                          command)
 
     def testmodelmachinetypeconflict(self):
         command = "search host --model vb1205xm --machine_type virtual_machine"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "machine_type virtual_machine conflicts with "
-                         "model vb1205xm where machine_type is blade",
-                         command)
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model vb1205xm, machine_type "
+                         "virtual_machine not found.", command)
 
     def testvendoravailable(self):
         command = "search host --vendor dell"
@@ -341,7 +334,9 @@ class TestSearchHost(TestBrokerCommand):
 
     def testmachinetypeunavailable(self):
         command = "search host --machine_type machine_type-does-not-exist"
-        self.noouttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model machine_type "
+                         "machine_type-does-not-exist not found.", command)
 
     def testserialavailable(self):
         command = "search host --serial 99C5553"

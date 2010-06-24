@@ -33,8 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.make import CommandMake
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.server.dbwrappers.personality import get_personality
-from aquilon.aqdb.model import BuildItem, Archetype
+from aquilon.aqdb.model import BuildItem, Archetype, Personality
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -72,8 +71,10 @@ class CommandReconfigure(CommandMake):
                 dbstatus = get_status(session, buildstatus)
                 dbhost.status = dbstatus
             if personality:
-                dbpersonality = get_personality(session, dbarchetype.name,
-                                                personality)
+                dbpersonality = Personality.get_unique(session,
+                                                       name=personality,
+                                                       archetype=dbarchetype,
+                                                       compel=True)
                 # This check was written blind... as of this being added
                 # we don't have any non-compilable archetypes that can be
                 # a part of a cluster.

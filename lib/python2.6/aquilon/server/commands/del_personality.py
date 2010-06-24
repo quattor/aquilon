@@ -29,7 +29,6 @@
 """Contains the logic for `aq del personality`."""
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Archetype, Host
 from aquilon.server.templates.personality import PlenaryPersonality
@@ -40,7 +39,8 @@ class CommandDelPersonality(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, logger, personality, archetype, **arguments):
-        dbpersona = get_personality(session, archetype, personality)
+        dbpersona = Personality.get_unique(session, name=personality,
+                                           archetype=archetype, compel=True)
 
         # Check dependencies
         dbhosts = session.query(Host).filter_by(personality=dbpersona).first()

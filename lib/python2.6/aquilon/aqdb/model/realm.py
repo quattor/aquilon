@@ -51,10 +51,10 @@ class Realm(Base):
     comments = Column('comments', String(255), nullable=True)
 
 realm = Realm.__table__
-table = Realm.__table__
 
 realm.primary_key.name = 'realm_pk'
 realm.append_constraint(UniqueConstraint('name', name='realm_uk'))
+realm.info['unique_fields'] = ['name']
 
 
 @monkeypatch(realm)

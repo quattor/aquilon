@@ -41,9 +41,7 @@ class CommandBindESXClusterService(BrokerCommand):
 
     def render(self, session, logger, cluster, service, instance, force=False,
                **arguments):
-        cluster_type = 'esx'
-        dbcluster = Cluster.get_unique(session, name=cluster,
-                                       cluster_type=cluster_type, compel=True)
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbcluster, logger=logger, required_only=False)
         if instance:

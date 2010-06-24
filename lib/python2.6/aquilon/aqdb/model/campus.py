@@ -45,7 +45,8 @@ class Campus(Location):
 
 campus = Campus.__table__
 campus.primary_key.name = 'campus_pk'
-table = campus
+campus.info['unique_fields'] = ['name']
+
 
 class CampusDiffStruct(object):
     """ Handy for populating campuses and finding common parent for

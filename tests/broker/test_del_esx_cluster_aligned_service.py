@@ -64,15 +64,15 @@ class TestDelESXClusterAlignedService(TestBrokerCommand):
         command = ["del_esx_cluster_aligned_service",
                    "--service=service-does-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Service with name of service-does-not-exist "
-                         "not found", command)
+        self.matchoutput(out, "Service service-does-not-exist not found",
+                         command)
 
     def testfailnotaligned(self):
         command = ["del_esx_cluster_aligned_service",
                    "--service=utsvc"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Cluster Aligned Service with cluster_type of "
-                         "esx and Service utsvc not found", command)
+        self.matchoutput(out, "Cluster Aligned Service cluster_type esx, "
+                         "service utsvc not found", command)
 
 
 if __name__=='__main__':

@@ -32,14 +32,13 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.status import get_status
-from aquilon.server.dbwrappers.personality import get_personality
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
-                                Machine)
+                                Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -70,7 +69,8 @@ class CommandAddHost(BrokerCommand):
                 personality = 'inventory'
             else:
                 personality = 'generic'
-        dbpersonality = get_personality(session, archetype, personality)
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
 
         if dbarchetype.name == 'aquilon':
             # default to os linux/4.0.1-x86_64 for aquilon

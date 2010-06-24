@@ -53,7 +53,8 @@ class TestSearchHardware(TestBrokerCommand):
     def testmodelunavailable(self):
         command = "search hardware --model model-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model model-does-not-exist", command)
+        self.matchoutput(out, "Model model-does-not-exist not found.",
+                         command)
 
     def testmodelavailablefull(self):
         command = "search hardware --model poweredge_6650 --fullinfo"
@@ -62,20 +63,16 @@ class TestSearchHardware(TestBrokerCommand):
 
     def testmodelvendorconflict(self):
         command = "search hardware --model vb1205xm --vendor dell"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "vendor dell conflicts with model vb1205xm "
-                         "where vendor is verari",
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model vb1205xm, vendor dell not found.",
                          command)
 
     def testmodelmachinetypeconflict(self):
         command = ["search_hardware", "--model=vb1205xm",
                    "--machine_type=virtual_machine"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "machine_type virtual_machine conflicts with "
-                         "model vb1205xm where machine_type is blade",
-                         command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Model vb1205xm, machine_type "
+                         "virtual_machine not found.", command)
 
     def testvendoravailable(self):
         command = "search hardware --vendor verari"
@@ -97,7 +94,9 @@ class TestSearchHardware(TestBrokerCommand):
 
     def testmachinetypeunavailable(self):
         command = "search hardware --machine_type machine_type-does-not-exist"
-        self.noouttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Model machine_type "
+                         "machine_type-does-not-exist not found.", command)
 
     def testserialavailable(self):
         command = "search hardware --serial 99C5553"

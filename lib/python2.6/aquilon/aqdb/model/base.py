@@ -28,10 +28,12 @@
 # TERMS THAT MAY APPLY.
 import weakref
 from inspect import isclass
+import sys
 
 from sqlalchemy import Integer
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.properties import RelationProperty
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
@@ -39,28 +41,11 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
 
-def _describe_uniqueness_request(description_info):
-    """Helper method for constructing errors in Base.get_unique()."""
-    (cls, args, kwargs) = description_info
-    if kwargs:
-        extras = []
-        for (k, v) in kwargs.items():
-            if isinstance(v, Base):
-                # Do something more interesting than str()?
-                extras.append(str(v))
-            else:
-                extras.append("%s of %s" % (k, v))
-        kwstr = " and ".join(extras)
-    if kwargs and args:
-        criteria = " %s with %s" % (args[0], kwstr)
-    elif kwargs:
-        criteria = " with %s" % kwstr
-    elif args:
-        criteria = " %s" % args[0]
+def _raise_custom(cls, defcls, msg):
+    if isclass(cls) and issubclass(cls, Exception):
+        raise cls(msg)
     else:
-        criteria = ""
-    return "%s%s" % (cls._get_class_label(), criteria)
-
+        raise defcls(msg)
 
 class Base(object):
     """ The abstract base class for all aqdb objects """
@@ -111,152 +96,116 @@ class Base(object):
                 return getattr(self, attr).name
         return 'instance'
 
+    @classmethod
+    def _selection_helper(cls, session, query, *args, **kwargs):
+        """ Helper method for get_unique and get_matching_ids
+
+        Every class that wishes to support get_unique() must have
+        'unique_fields' defined in the table's info dictionary. 'unique_fields'
+        is a list that contains the names of fields that make the object unique.
+        Every field can be either a column or a relation. In the latter case,
+        'unique_fields' of the referenced class must contain a single field
+        only.
+        """
+
+        compel = kwargs.pop('compel', False)
+        table = cls.__table__
+        mapper = cls.__mapper__
+        caller = sys._getframe(1).f_code.co_name
+
+        if not isinstance(session, Session):
+            raise TypeError("The first argument of %s() must be an "
+                            "SQLAlchemy session." %  caller)
+
+        if 'unique_fields' not in table.info:
+            raise InternalError("Class %s is not annotated to be used with "
+                                "%s()." % (cls.__name__, caller))
+
+        # Handle positional arguments
+        if args:
+            if len(args) > 1:
+                raise InternalError("%s() does not support multiple positional"
+                                    "arguments, use named arguments." % caller)
+            if len(table.info['unique_fields']) > 1:
+                raise InternalError("The uniqueness criteria for class %s "
+                                    "includes multiple fields, positional "
+                                    "arguments cannot be used." % cls.__name__)
+            if kwargs:
+                raise InternalError("Cannot mix positional and named "
+                                    "arguments with %s()." % caller)
+            kwargs = {table.info['unique_fields'][0]: args[0]}
+
+        desc = []
+        fields = table.info['unique_fields']
+        if 'extra_search_fields' in table.info:
+            fields.extend(table.info['extra_search_fields'])
+        for field in fields:
+            value = kwargs.pop(field, None)
+            if value is None:
+                continue
+
+            # Do a lookup if the field refers to a relation but the argument
+            # given is not a DB object
+            if mapper.has_property(field):
+                rel = mapper.get_property(field)
+                if isinstance(rel, RelationProperty) and \
+                        not isinstance(value, rel.argument):
+                    value = rel.argument.get_unique(session, value,
+                                                    compel=compel)
+
+            # filter_by() would be simpler but it would not allow querying just
+            # one column
+            query = query.filter(getattr(cls, field) == value)
+
+            # Now some beautification...
+            name = value.name if hasattr(value, "name") else str(value)
+            if field == "name":
+                desc.append(name)
+            else:
+                desc.append(field + " " + name)
+
+        # Check for arguments we don't know about
+        if kwargs:
+            raise InternalError("Extra arguments to %s(): %s." %
+                                (caller, kwargs))
+        return (query, desc)
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
-        """Use the UniqueConstraints installed on the class to query.
-
-        If there is a single positional arg passed in there can be only
-        one unique constraint on the class with a single column.
-
-        Otherwise, use keyword arguments to specify all the columns
-        in the uniqueness constraint.  If using keywords some basic
-        relational magic is attempted and sqlalchemy objects can be
-        passed in.  This is preferred over passing in an id as the
-        error message will be more readable.
-
-        If compel is True a NotFoundException will be raised when no
-        result is found.  If compel is a valid exception class that type
-        of exception will be raised instead.
-
-        If preclude is True an ArgumentException will be raised when
-        a result is found.  If preclude is a valid exception class that
-        type of exception will be raised instead.
-
-        """
-
-        #Returns a far more informative error than something like
-        # "No uniqueness constraint found for <CLASS NAME>"
-        if not isinstance(session, Session):
-            msg = "get_unique's first argument must be a SQL Alchemy session"
-            raise TypeError(msg)
-
-        # Since this method expects positional args to be slurped up
-        # into args, these can't be in the method definition.  (If
-        # they were, any positional args would be slurped into whichever
-        # of these happened to have been defined first!)
-        # Before calling this command recursively these need to be
-        # re-added to kwargs.
-        compel = kwargs.pop('compel', False)
+        compel = kwargs.get('compel', False)
         preclude = kwargs.pop('preclude', False)
-        # Keep track of the original arguments for any errors that
-        # need to propogate up.
-        description_info = kwargs.pop('description_info', None)
-        if description_info is None:
-            orig_args = args[:]
-            orig_kwargs = kwargs.copy()
-            description_info = (cls, orig_args, orig_kwargs)
 
-        if len(args) > 1:
-            raise InternalError("Must use keyword arguments for get_unique "
-                                "with more than one key.")
-        unique_constraints = []
-        for constraint in cls.__table__.constraints:
-            if isinstance(constraint, UniqueConstraint):
-                unique_constraints.append(constraint)
-                continue
-            if isinstance(constraint, PrimaryKeyConstraint):
-                # This is lame.  We want to skip the regular PKCs
-                # that just cover an autoincrementing id column.
-                # There does not appear to be a good way to
-                # differentiate those, though... this is the best
-                # we have so far.
-                if len(constraint.columns) == 1 and \
-                    isinstance(list(constraint.columns)[0].type, Integer) and \
-                    [col.name for col in constraint.columns][0] not in kwargs:
-                        continue
-                unique_constraints.append(constraint)
-        if len(args) == 1 and len(unique_constraints) > 1:
-            raise InternalError("Must use kwargs for get_unique since %s has "
-                                "more than one uniqueness constraint." % cls)
-        for constraint in unique_constraints:
-            query_args = {}
-            missing = 0
-            columns = [col.name for col in constraint.columns]
-            for column_name in columns:
-                if column_name in kwargs:
-                    query_args[column_name] = kwargs[column_name]
-                    continue
-                # Allow kwargs to be sqlalchemy objects...
-                # The trick here is that we need to figure out if any of
-                # them could fill in the constraint_key that is being
-                # examined.
-                found_object = False
-                for kwarg in kwargs:
-                    if isinstance(kwargs[kwarg], Base) and \
-                       cls.__mapper__.has_property(kwarg):
-                        rel = cls.__mapper__.get_property(kwarg)
-                        if isinstance(rel, RelationProperty) and \
-                           len(rel.remote_side) == 1 and \
-                           len(rel.local_side) == 1:
-                            local_col = list(rel.local_side)[0].name
-                            remote_col = list(rel.remote_side)[0].name
-                            if column_name == local_col:
-                                query_args[local_col] = getattr(kwargs[kwarg],
-                                                                remote_col)
-                                found_object = True
-                                break
-                if found_object:
-                    continue
-                # If we don't have the constraint as a keyword argument,
-                # try to use the positional args.
-                if args:
-                    missing += 1
-                    query_args[column_name] = args[0]
-                    continue
-                # This constraint isn't going to work.  Next!
-                query_args = None
-                break
-            if missing > 1:
-                raise InternalError("Must use kwargs for get_unique since "
-                                    "uniqueness constraint for %s requires "
-                                    "%s." % (cls, constraint.columns))
-            if query_args:
-                result = session.query(cls).filter_by(**query_args).all()
-                if not result:
-                    if compel:
-                        msg = "%s not found." % _describe_uniqueness_request(
-                            description_info)
-                        if isclass(compel) and issubclass(compel, Exception):
-                            raise compel(msg)
-                        raise NotFoundException(msg)
-                    return None
-                if len(result) > 1:
-                    raise InternalError("Uniqueness constraint violated for "
-                                        "%s when querying with %s" %
-                                        (cls, query_args))
-                if preclude:
-                    msg = "%s already exists." % _describe_uniqueness_request(
-                        description_info)
-                    if isclass(preclude) and issubclass(preclude, Exception):
-                        raise preclude(msg)
-                    raise ArgumentError(msg)
-                return result[0]
+        query = session.query(cls)
+        (query, desc) = cls._selection_helper(session, query, *args, **kwargs)
+        try:
+            obj = query.one()
+            if preclude:
+                msg = "%s %s already exists." % (cls._get_class_label(),
+                                                 ", ".join(desc))
+                _raise_custom(preclude, ArgumentError, msg)
+            return obj
+        except NoResultFound:
+            if not compel:
+                return None
+            msg = "%s %s not found." % (cls._get_class_label(), ", ".join(desc))
+            _raise_custom(compel, NotFoundException, msg)
+        except MultipleResultsFound:
+                msg = "%s %s is not unique." % (cls._get_class_label(),
+                                                ", ".join(desc))
+                raise ArgumentError(msg)
 
-        if cls.__base__ != cls and hasattr(cls.__base__, '__table__'):
-            # This doesn't *really* handle polymorphic inheritance,
-            # but it seems to cover our use cases.
-            if 'polymorphic_on' in cls.__base__.__mapper_args__ and \
-               'polymorphic_identity' in cls.__mapper_args__:
-                kwargs[cls.__base__.__mapper_args__['polymorphic_on'].name] = \
-                        cls.__mapper_args__['polymorphic_identity']
-            kwargs['compel'] = compel
-            kwargs['preclude'] = preclude
-            kwargs['description_info'] = description_info
-            return cls.__base__.get_unique(session, *args, **kwargs)
-
-        raise InternalError("No uniqueness constraint found for %s " %
-                            _describe_uniqueness_request(description_info))
+    @classmethod
+    def get_matching_query(cls, session, *args, **kwargs):
+        compel = kwargs.get('compel', False)
+        query = session.query(cls.__table__.c.id)
+        (query, desc) = cls._selection_helper(session, query, *args, **kwargs)
+        if compel:
+            obj = query.first()
+            if obj is None:
+                msg = "%s %s not found." % (cls._get_class_label(),
+                                            ", ".join(desc))
+                _raise_custom(compel, NotFoundException, msg)
+        return query.subquery()
 
 
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)

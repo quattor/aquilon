@@ -32,14 +32,13 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
                                                  describe_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface
+from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -47,13 +46,14 @@ class CommandAddTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch", "model"]
 
-    def render(self, session, logger, tor_switch, model,
+    def render(self, session, logger, tor_switch, model, vendor,
                rack, building, room, rackid, rackrow, rackcolumn,
                interface, mac, ip,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                serial,
                user, **arguments):
-        dbmodel = get_model(session, model)
+        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                   machine_type='tor_switch', compel=True)
 
         if dbmodel.machine_type not in ['tor_switch']:
             raise ArgumentError("The add_tor_switch command cannot add "

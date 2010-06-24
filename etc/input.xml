@@ -913,6 +913,8 @@
          <option name="nics" type="string">number of NIC interfaces</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
+         <option name="cpuspeed" type="string">CPU speed, if the name is not unique</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />
@@ -1757,6 +1759,7 @@
 	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
       <optgroup name="optional_opts">
+	 <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">serial number</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -2264,6 +2267,7 @@
          <option name="model" type="string">machine model</option>
       </optgroup>
       <optgroup name="add_machine_specs_opts" mandatory="False">
+	 <option name="vendor" type="string">Machine vendor. Needed if the model name is not unique</option>
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
 	 <option name="cpuspeed" type="string">cpu speed</option>
@@ -2299,6 +2303,7 @@
       </optgroup>
       <optgroup name="update_machine_opts" mandatory="False" fields="any">
          <option name="model" type="string">machine model</option>
+         <option name="vendor" type="string">machine vendor</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
          <option name="cpuspeed" type="string">cpu speed</option>
@@ -2338,6 +2343,8 @@
             <option name="desk" type="string">Desk name</option>
          </optgroup>
          <option name="model" type="string">machine model</option>
+         <option name="vendor" type="string">machine vendor</option>
+         <option name="machine_type" type="string">machine type</option>
       </optgroup>
       <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />
@@ -2388,6 +2395,7 @@
          <option name="ip" type="string">IP address of the interface</option>
       </optgroup>
       <optgroup name="add_tor_switch_specs_opts" mandatory="False">
+	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
 	 <option name="cpuspeed" type="string">cpu speed</option>
@@ -2412,9 +2420,10 @@
       If the switch has multiple interfaces assigned, then there will be a
       separate line for each.
       <optgroup name="show_tor_switch_opts" mandatory="True" fields="any">
-         <option name="tor_switch" type="string">tor_switch name</option>
+         <option name="tor_switch" type="string">ToR switch name</option>
          <option name="rack" type="string">Rack name</option>
-         <option name="model" type="string">tor_switch model</option>
+         <option name="model" type="string">ToR switch model</option>
+         <option name="vendor" type="string">ToR switch vendor </option>
          <option name="all" type="boolean">show all</option>
       </optgroup>
       <transport trigger="tor_switch" method="get" path="tor_switch/%(tor_switch)s" />

@@ -99,8 +99,9 @@ class TestAddTorSwitch(TestBrokerCommand):
         command = ["add", "tor_switch",
             "--tor_switch", "ut3gd1r03.aqd-unittest.ms.com",
             "--rack", "ut3", "--model", "hs21-8853l5u"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "cannot add machines of type blade", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Model hs21-8853l5u, machine_type "
+                         "tor_switch not found.", command)
 
     def testverifyrejectut3gd1r03(self):
         command = "show tor_switch --tor_switch ut3gd1r03.aqd-unittest.ms.com"

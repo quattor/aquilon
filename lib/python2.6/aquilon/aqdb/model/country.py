@@ -43,8 +43,7 @@ class Country(Location):
 
 country = Country.__table__
 country.primary_key.name='country_pk'
-
-table = country
+country.info['unique_fields'] = ['name']
 
 
 @monkeypatch(country)

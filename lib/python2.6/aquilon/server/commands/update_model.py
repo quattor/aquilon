@@ -34,7 +34,6 @@ from sqlalchemy.orm.session import object_session
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.aqdb.model import Vendor, Model, Cpu, MachineSpecs, Machine, Disk
-from aquilon.server.dbwrappers.cpu import get_unique_cpu
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
@@ -65,8 +64,7 @@ class CommandUpdateModel(BrokerCommand):
                 if value is not None:
                     arguments[arg] = force_int(arg, value)
 
-        dbvendor = Vendor.get_unique(session, vendor, compel=True)
-        dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
+        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
         if leave_existing and (newmodel or newvendor):
@@ -126,7 +124,7 @@ class CommandUpdateModel(BrokerCommand):
                                         "machine specs for the model.  Please "
                                         "give all CPU, disk, RAM, and NIC "
                                         "count information.")
-                dbcpu = get_unique_cpu(session, **cpu_info)
+                dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
                 dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
                                                **specs)
                 session.add(dbmachine_specs)
@@ -134,7 +132,7 @@ class CommandUpdateModel(BrokerCommand):
         # Anything below that updates specs should have been verified above.
 
         if cpu_values:
-            dbcpu = get_unique_cpu(session, **cpu_info)
+            dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
             self.update_machine_specs(model=dbmodel, dbmachines=dbmachines,
                                       attr='cpu', value=dbcpu,
                                       fix_existing=fix_existing)

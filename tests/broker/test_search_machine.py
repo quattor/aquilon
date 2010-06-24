@@ -111,10 +111,9 @@ class TestSearchMachine(TestBrokerCommand):
     def testfailexactcpu(self):
         command = ["search_machine", "--cpuname=xeon_2500", "--cpuspeed=0",
                    "--cpuvendor=intel"]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "CPU vendor='intel' name='xeon_2500' speed='0' "
-                         "not found.",
+                         "Cpu xeon_2500, vendor intel, speed 0 not found.",
                          command)
 
     def testparialcpufailvendor(self):

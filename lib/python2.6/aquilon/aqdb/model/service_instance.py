@@ -202,13 +202,12 @@ class ServiceInstance(Base):
         return "Service Instance %s/%s" % (self.service.name, self.name)
 
 service_instance = ServiceInstance.__table__
-table = ServiceInstance.__table__
-
-table.info['abrev'] = _ABV
 
 service_instance.primary_key.name = 'svc_inst_pk'
 service_instance.append_constraint(
     UniqueConstraint('service_id', 'name', name='svc_inst_uk'))
+service_instance.info['abrev'] = _ABV
+service_instance.info['unique_fields'] = ['name', 'service']
 
 # This highly optimized filter is used to implement the logic in
 # ServiceInstance._universal_get_archetype_map().

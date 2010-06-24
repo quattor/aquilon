@@ -72,11 +72,11 @@ class Personality(Base):
 
 
 personality = Personality.__table__
-table = Personality.__table__
 
 personality.primary_key.name = '%s_pk' % (_ABV)
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
                                                name='%s_uk' % (_TN)))
+personality.info['unique_fields'] = ['name', 'archetype']
 
 generics = ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost', 'pserver']
 

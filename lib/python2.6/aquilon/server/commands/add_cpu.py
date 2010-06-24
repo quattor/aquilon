@@ -29,9 +29,6 @@
 """Contains the logic for `aq add cpu`."""
 
 
-from sqlalchemy.exceptions import InvalidRequestError
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand, force_int
 from aquilon.aqdb.model import Cpu, Vendor
 
@@ -43,11 +40,10 @@ class CommandAddCpu(BrokerCommand):
     def render(self, session, cpu, vendor, speed, comments, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         speed = force_int("speed", speed)
+
+        Cpu.get_unique(session, name=cpu, vendor=dbvendor, speed=speed,
+                       preclude=True)
+
         dbcpu = Cpu(name=cpu, vendor=dbvendor, speed=speed, comments=comments)
-        try:
-            session.add(dbcpu)
-        except InvalidRequestError, e:
-            raise ArgumentError("Could not add cpu: %s" % e)
+        session.add(dbcpu)
         return
-
-

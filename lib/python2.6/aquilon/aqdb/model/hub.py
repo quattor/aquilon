@@ -58,8 +58,8 @@ class Hub(Location):
 
 hub = Hub.__table__
 hub.primary_key.name='hub_pk'
+hub.info['unique_fields'] = ['name']
 
-table = hub
 
 @monkeypatch(hub)
 def populate(sess, *args, **kw):

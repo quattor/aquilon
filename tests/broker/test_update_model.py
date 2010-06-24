@@ -140,10 +140,8 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--newmodel=utmedium", "--newvendor=utvendor"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Model with ", command)
-        self.matchoutput(out, "Vendor utvendor", command)
-        self.matchoutput(out, "name of utmedium", command)
-        self.matchoutput(out, "already exists", command)
+        self.matchoutput(out, "Model utmedium, vendor utvendor already exists.",
+                         command)
 
     def test_310_updatename(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",

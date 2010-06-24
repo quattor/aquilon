@@ -33,13 +33,12 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
-                                OperatingSystem, Service, Vendor, Machine)
+                                OperatingSystem, Service, Machine, Model)
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 
 
 class CommandSearchHost(BrokerCommand):
@@ -123,28 +122,12 @@ class CommandSearchHost(BrokerCommand):
             q = q.join(['machine'])
             q = q.filter_by(location=dblocation)
             q = q.reset_joinpoint()
-        if model:
-            dbmodel = get_model(session, model)
+        if model or vendor or machine_type:
+            subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                            machine_type=machine_type,
+                                            compel=True)
             q = q.join(['machine'])
-            q = q.filter_by(model=dbmodel)
-            q = q.reset_joinpoint()
-            if machine_type and machine_type != dbmodel.machine_type:
-                raise ArgumentError("machine_type %s conflicts with model %s "
-                                    "where machine_type is %s" %
-                                    (machine_type, dbmodel.name,
-                                     dbmodel.machine_type))
-            if vendor and vendor != dbmodel.vendor.name:
-                raise ArgumentError("vendor %s conflicts with model %s "
-                                    "where vendor is %s" %
-                                    (vendor, dbmodel.name,
-                                     dbmodel.vendor.name))
-        elif vendor or machine_type:
-            q = q.join(['machine', 'model'])
-            if vendor:
-                dbvendor = Vendor.get_unique(session, vendor, compel=True)
-                q = q.filter_by(vendor=dbvendor)
-            if machine_type:
-                q = q.filter_by(machine_type=machine_type)
+            q = q.filter(Machine.model_id.in_(subq))
             q = q.reset_joinpoint()
         if serial:
             q = q.join(['machine'])

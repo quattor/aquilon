@@ -30,9 +30,8 @@
 
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.model import HardwareEntity, Vendor
+from aquilon.aqdb.model import HardwareEntity, Model
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.model import get_model
 
 
 def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
@@ -44,29 +43,13 @@ def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
     dblocation = get_location(session, **kwargs)
     if dblocation:
         q = q.filter_by(location=dblocation)
-    if kwargs.get('model', None):
-        dbmodel = get_model(session, kwargs['model'])
-        q = q.filter_by(model=dbmodel)
-        if kwargs.get('machine_type') and \
-           dbmodel.machine_type != kwargs['machine_type']:
-            raise ArgumentError("machine_type %s conflicts with model %s "
-                                "where machine_type is %s" %
-                                (kwargs['machine_type'], dbmodel.name,
-                                 dbmodel.machine_type))
-        if kwargs.get('vendor') and \
-           dbmodel.vendor.name != kwargs['vendor']:
-            raise ArgumentError("vendor %s conflicts with model %s "
-                                "where vendor is %s" %
-                                (kwargs['vendor'], dbmodel.name,
-                                 dbmodel.vendor.name))
-    if kwargs.get('vendor') or kwargs.get('machine_type'):
-        q = q.join(['model'])
-        if kwargs.get('vendor'):
-            dbvendor = Vendor.get_unique(session, kwargs['vendor'], compel=True)
-            q = q.filter_by(vendor=dbvendor)
-        if kwargs.get('machine_type'):
-            q = q.filter_by(machine_type=kwargs['machine_type'])
-        q = q.reset_joinpoint()
+    model = kwargs.get('model', None)
+    vendor = kwargs.get('vendor', None)
+    machine_type = kwargs.get('machine_type', None)
+    if model or vendor or machine_type:
+        subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                        machine_type=machine_type, compel=True)
+        q = q.filter(HardwareEntity.model_id.in_(subq))
     if kwargs.get('mac') or kwargs.get('pg'):
         q = q.join('interfaces')
         if kwargs.get('mac'):

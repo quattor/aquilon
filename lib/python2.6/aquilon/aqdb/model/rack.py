@@ -59,10 +59,13 @@ class Rack(Location):
         else:
             return value
 
-Rack.__table__.primary_key.name = 'rack_pk'
+rack = Rack.__table__
+
+rack.primary_key.name = 'rack_pk'
+rack.info['unique_fields'] = ['name']
 
 
-@monkeypatch(Rack.__table__)
+@monkeypatch(rack)
 def populate(sess, **kw):
 
     if sess.query(Rack).count() < 1:
