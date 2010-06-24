@@ -103,11 +103,16 @@ class Network(Base):
         args["cidr"] = net.prefixlen
         super(Base, self).__init__(**args)
 
+    @property
     def first_usable_host(self):
+        """ return the offset from the base address to the first usable ip """
+        #TODO: rename to first_usable_ip?
         if self.network_type == 'tor_net':
             start = 8
         elif self.network_type == 'tor_net2':
             start = 9
+        elif self.network_type == 'tor_net4':
+            start = 16
         elif self.network_type == 'vm_storage_net':
             start = 40
         else:
@@ -118,6 +123,22 @@ class Network(Base):
             start = 0
 
         return self.network[start]
+
+    @property
+    def reserved_addresses(self):
+        """returns address offsets from the base which are the reserved range"""
+
+        if self.network_type == 'tor_net':
+            return [6, 7]
+        elif self.network_type == 'tor_net2':
+            return [7, 8]
+        else:
+            return []
+        #TODO: this will be uncommented in a future release (daqscott 7/24/10)
+        #elif self.network_type == 'zebra':
+        #    return [1, 2]
+        #else:
+        #    return [1] #restrict first IP for the gateway by default
 
     @property
     def network(self):

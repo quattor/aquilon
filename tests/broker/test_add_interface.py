@@ -438,6 +438,19 @@ class TestAddInterface(TestBrokerCommand):
                           % self.net.vm_storage_net[0].usable[0].mac,
                           command)
 
+
+    # This does not test the offset functionality. These commands fail b/c
+    # the interface already has an address.
+    #
+    #def testbadtornetoffset(self):
+    #    """ ensure we can't use the reserved address space in tor_net4 """
+    #    for i in range(0,16):
+    #        cmd = ["add", "interface", "--interface", "eth1",
+    #           "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com",
+    #           "--ip",  "4.2.8.%s" % i]
+    #        out = self.badrequesttest(cmd)
+
+
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.
     # FIXME: Missing a test for a failed DSDB add_host.
