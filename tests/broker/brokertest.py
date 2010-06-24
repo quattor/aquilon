@@ -28,16 +28,16 @@
 # TERMS THAT MAY APPLY.
 """Basic module for running tests on broker commands."""
 
-
 import os
 import sys
 import unittest
 from subprocess import Popen, PIPE
 import re
-from ipaddr import IPv4Network, IPv4Address
 
 from aquilon.config import Config
-from aquilon.server import depends # fetch protobuf dependency
+from aquilon.server import depends # fetch protobuf, ipaddr dependency
+
+from ipaddr import IPv4Network, IPv4Address
 
 LOCK_RE = re.compile(r'^(acquired|releasing) '
                      r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
