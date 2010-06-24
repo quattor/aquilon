@@ -38,6 +38,6 @@ class CommandShowPrincipal(BrokerCommand):
     required_parameters = []
 
     def render(self, session, **arguments):
-        return session.query(UserPrincipal).all()
+        return session.query(UserPrincipal).order_by(UserPrincipal.name).all()
 
 

@@ -39,7 +39,7 @@ class CommandShowMetaCluster(BrokerCommand):
         q = session.query(MetaCluster)
         if metacluster:
             q = q.filter_by(name=metacluster)
-        dbmetaclusters = q.all()
+        dbmetaclusters = q.order_by(MetaCluster.name).all()
         if metacluster and not dbmetaclusters:
             raise NotFoundException("Metacluster %s not found." % metacluster)
         return dbmetaclusters

@@ -153,6 +153,7 @@ class CommandSearchESXCluster(BrokerCommand):
             q = q.filter_by(location=dblocation)
             q = q.reset_joinpoint()
 
+        q = q.order_by(EsxCluster.name)
         if fullinfo:
             return q.all()
         return SimpleClusterList(q.all())

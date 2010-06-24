@@ -59,6 +59,7 @@ class CommandShowNetwork(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
+        q = q.order_by(Network.ip)
         if hosts:
             return NetworkHostList(q.all())
         else:

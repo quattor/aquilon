@@ -67,4 +67,4 @@ class CommandShowMachine(BrokerCommand):
                                             machine_type=machine_type,
                                             compel=True)
             q = q.filter(Machine.model_id.in_(subq))
-        return q.all()
+        return q.order_by(Machine.name).all()

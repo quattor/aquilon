@@ -36,6 +36,6 @@ from aquilon.aqdb.model import Archetype
 class CommandShowArchetype(BrokerCommand):
 
     def render(self, session, **arguments):
-        return session.query(Archetype).all()
+        return session.query(Archetype).order_by(Archetype.name).all()
 
 
