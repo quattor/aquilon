@@ -37,6 +37,8 @@ from aquilon.server.formats.formatters import ObjectFormatter
 
 class ListFormatter(ObjectFormatter):
     def format_raw(self, result, indent=""):
+        if hasattr(self, "template_raw"):
+            return ObjectFormatter.format_raw(self, result, indent)
         return "\n".join([self.redirect_raw(item, indent) for item in result])
 
     def csv_fields(self, result):
@@ -70,6 +72,8 @@ class ListFormatter(ObjectFormatter):
         return strbuf.getvalue()
 
     def format_html(self, result):
+        if hasattr(self, "template_html"):
+            return ObjectFormatter.format_html(self, result)
         return "<ul>\n<li>" + "<li>\n<li>".join(
                 [self.redirect_html(item) for item in result]
                 ) + "</li>\n</ul>\n"

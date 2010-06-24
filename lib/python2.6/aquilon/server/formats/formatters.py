@@ -29,8 +29,12 @@
 """Base classes for formatting objects."""
 
 
+import os
 import csv
 import cStringIO
+from string import rstrip
+
+from mako.lookup import TemplateLookup
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError
@@ -126,6 +130,22 @@ class ObjectFormatter(object):
 
     """
 
+    mako_dir = os.path.join(config.get("broker", "srcdir"), "lib", "python2.6",
+                            "aquilon", "server", "formats", "mako")
+    # Be careful about using the module_directory and cache!
+    # Not using module_directory so that we don't have to worry about stale
+    # files hanging around on upgrade.  Race conditions in writing the files
+    # might also be an issue when we switch to multi-process.
+    # Not using cache because it only has the lifetime of the template, and
+    # because we do not have the beaker module installed.
+    lookup_raw = TemplateLookup(directories=[os.path.join(mako_dir, "raw")],
+                                imports=['from string import rstrip',
+                                         'from '
+                                         'aquilon.server.formats.formatters '
+                                         'import shift'],
+                                default_filters=['unicode', 'rstrip'])
+    lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])
+
     def __init__(self):
         if hasattr(self, "protocol"):
             if not self.protocol in self.loaded_protocols:
@@ -149,6 +169,10 @@ class ObjectFormatter(object):
             return self.protodir
 
     def format_raw(self, result, indent=""):
+        if hasattr(self, "template_raw"):
+            template = self.lookup_raw.get_template(self.template_raw)
+            return rstrip(shift(template.render(record=result, formatter=self),
+                                indent=indent))
         return indent + str(result)
 
     def csv_fields(self, result):
@@ -190,6 +214,9 @@ class ObjectFormatter(object):
         return self.format_raw(result)
 
     def format_html(self, result):
+        if hasattr(self, "template_html"):
+            template = self.lookup_html.get_template(self.template_html)
+            return template.render(record=result, formatter=self)
         return "<pre>%s</pre>" % result
 
     @staticmethod
@@ -305,3 +332,8 @@ class ObjectFormatter(object):
             sm_msg.personality.archetype.name = 'aquilon'
 
 ObjectFormatter.default_handler = ObjectFormatter()
+
+
+# Convenience method for mako templates
+def shift(result, indent="  "):
+    return "\n".join(["%s%s" % (indent, line) for line in result.splitlines()])
