@@ -60,8 +60,7 @@ class Machine(HardwareEntity):
 
     memory = Column(Integer, nullable=False, default=512)
 
-    hardware_entity = relation(HardwareEntity, uselist=False,
-                               backref='machine')
+    hardware_entity = relation(HardwareEntity, uselist=False)
 
     cpu = relation(Cpu, uselist=False)
 
