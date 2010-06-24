@@ -7,10 +7,6 @@ src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..',
                                     'lib', 'python2.6'))
 sys.path.append(src)
 
-# Need this for aquilon.server.depends to work.  An alternate solution
-# would be to flip the order and call it before aquilon.aqdb.depends.
-sys.path.insert(0, '//ms/dist/python/PROJ/ms.version/1.6-py25/lib')
-
 import aquilon.aqdb.depends
 import aquilon.server.depends
 import aquilon.client.depends
@@ -18,9 +14,9 @@ import aquilon.client.depends
 
 # Any of the above may override the default location for ms.version...
 import ms.version
-ms.version.addpkg("pylint", "0.14.0")
-ms.version.addpkg("logilab.astng", "0.17.2")
-ms.version.addpkg("logilab.common", "0.31.0")
+ms.version.addpkg("pylint", "0.20.0")
+ms.version.addpkg("logilab.astng", "0.20.0")
+ms.version.addpkg("logilab.common", "0.49.0")
 
 from pylint import lint
 

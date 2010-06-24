@@ -322,11 +322,12 @@ class DSDBRunner(object):
 
     def add_host_details(self, fqdn, ip, name, mac):
         # DSDB does not accept '/' as valid in an interface name.
-        interface = str(name).replace('/', '_')
         command = [self.config.get("broker", "dsdb"),
                     "add", "host", "-host_name", fqdn,
-                    "-ip_address", ip, "-status", "aq",
-                    "-interface_name", interface]
+                    "-ip_address", ip, "-status", "aq"]
+        if name:
+            interface = str(name).replace('/', '_')
+            command.extend(["-interface_name", interface])
         if mac:
             command.extend(["-ethernet_address", mac])
         out = run_command(command,env=self.getenv())
