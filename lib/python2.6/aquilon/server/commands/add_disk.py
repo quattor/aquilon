@@ -85,6 +85,12 @@ class CommandAddDisk(BrokerCommand):
                                         "max_shares (%s)." %
                                         (dbmetacluster.name,
                                          dbmetacluster.max_shares))
+            max_clients = dbshare.enforced_max_clients
+            current_clients = len(dbshare.nas_disks)
+            if max_clients is not None and current_clients >= max_clients:
+                raise ArgumentError("NAS share %s is full (%s/%s)" %
+                                    (dbshare.name, current_clients,
+                                     max_clients))
             dbdisk = NasDisk(machine=dbmachine,
                              device_name=disk,
                              controller_type=controller,

@@ -118,6 +118,12 @@ class ServiceInstance(Base):
                 pass
         return ips
 
+    @property
+    def enforced_max_clients(self):
+        if self.max_clients is not None:
+            return self.max_clients
+        return self.service.max_clients
+
     @classmethod
     def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices):
         """Returns dict of requested services to closest mapped instances."""
