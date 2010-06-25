@@ -146,7 +146,7 @@ class Network(Base):
 
     @network.setter
     def network(self, value):
-        if not isinstance(value, IPV4Network):
+        if not isinstance(value, IPv4Network):
             raise TypeError("An IPv4Network object is required")
         self.ip = value.network
         self.cidr = value.prefixlen
