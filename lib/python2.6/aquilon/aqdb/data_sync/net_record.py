@@ -29,6 +29,8 @@
 """ handy for comparing networks """
 
 
+from ipaddr import IPv4Network
+
 from aquilon.aqdb.model import Network
 
 
