@@ -498,6 +498,48 @@
       <transport method="get" path="network" />
    </command>
 
+   <command name="search_network">
+      Search for a network based on various criteria.
+      <p/>
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
+      The 'csv' format contains the following fields, in this order:
+      Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
+      <optgroup name="search_network_Input" mandatory="True" fields="any">
+         <option name="network" type="string">Network name</option>
+         <option name="ip" type="ipv4">IP address of the network or contained in the network</option>
+         <option name="type" type="string">Network type</option>
+         <option name="discoverable" type="boolean">Discoverable</option>
+         <option name="discovered" type="boolean">Discovered</option>
+         <option name="machine" type="string">Networks the machine is attached to</option>
+         <option name="fqdn" type="string">Network that contains the IP address for this fully qualified domain name</option>
+         <option name="cluster" type="string">Networks in use by the cluster switch</option>
+         <option name="pg" type="string">Networks assigned to the given portgroup</option>
+         <option name="exact_location" type="flag">match the location exactly</option>
+         <option name="all" type="flag">All</option>
+         <optgroup name="search_network_location_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+      </optgroup>
+      <optgroup name="search_network_prefs" mandatory="False">
+         <option name="fullinfo" type="flag">show full information for the matching networks</option>
+      </optgroup>
+      <transport method="get" path="find/network" />
+   </command>
+
    <command name="refresh_network">
       Refresh aqdb network information from dsdb.
       <p/>
