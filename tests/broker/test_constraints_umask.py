@@ -30,14 +30,12 @@
 """Module for testing constraints in commands involving the umask setting."""
 
 import os
-import sys
 import stat
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -55,4 +53,3 @@ class TestUmaskConstraints(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUmaskConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

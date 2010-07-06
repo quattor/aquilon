@@ -30,15 +30,13 @@
 """ This is needed to make sure that a server is bound to the aqd service
     before make aquilon runs."""
 
-import os
-import sys
-import unittest
+
 import socket
+import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -116,4 +114,3 @@ class TestPrebindServer(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPrebindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

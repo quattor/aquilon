@@ -30,21 +30,21 @@
 """Module for testing the make aquilon command."""
 
 import os
-import sys
-import unittest
 import re
+import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
-# This tests the "make aquilon" command, which has
-# the specific feature of auto-binding required services.
 
 class TestMakeAquilon(TestBrokerCommand):
+    """ This tests the "make aquilon" command
+
+        which has the specific feature of auto-binding required services
+    """
 
     def testmakeunittest02(self):
         command = ["make", "aquilon",

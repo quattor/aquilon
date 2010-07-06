@@ -35,9 +35,8 @@ import unittest
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(__file__))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from aquilon.config import Config
 
@@ -152,4 +151,3 @@ class TestBrokerStart(unittest.TestCase):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStart)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
