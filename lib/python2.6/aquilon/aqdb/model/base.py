@@ -64,13 +64,8 @@ class Base(object):
                           self._get_instance_label())
 
     @classmethod
-    def get_by(cls, k, v, session):
-        return session.query(cls).filter(cls.__dict__[k] == v).all()
-
-    @classmethod
     def _get_class_label(cls):
         return getattr(cls, "_class_label", cls.__name__)
-
 
     def _get_instance_label(self):
         """Subclasses can override this method or just set a property to check.
