@@ -79,10 +79,11 @@ from aquilon.aqdb.model.primary_name_association import PrimaryNameAssociation
 
 #HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
-from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
 from aquilon.aqdb.model.interface import Interface
 from aquilon.aqdb.model.auxiliary import Auxiliary
+from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo, VlanInterface
+from aquilon.aqdb.model.address_assignment import AddressAssignment
 
 #SERVICE
 from aquilon.aqdb.model.service import (Service, ServiceListItem,

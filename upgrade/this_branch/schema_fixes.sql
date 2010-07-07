@@ -1,0 +1,5 @@
+-- Add additional vlan constraints
+ALTER TABLE observed_vlan
+	ADD CONSTRAINT "OBSERVED_VLAN_MIN_VLAN_ID" CHECK ("VLAN_ID" >= 0);
+ALTER TABLE vlan_info
+	ADD CONSTRAINT "VLAN_INFO_MIN_VLAN_ID" CHECK ("VLAN_ID" >= 0);

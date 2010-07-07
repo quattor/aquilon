@@ -1,4 +1,4 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-  # pylint: disable-msg=C0301
 #
 # Copyright (C) 2008,2009,2010  Contributor
 #
@@ -70,6 +70,7 @@ class Interface(Base):
 
     mac = Column(AqMac(17), nullable=True)
 
+    # PXE boot control. Does not affect how the OS configures the interface.
     bootable = Column(Boolean, nullable=False, default=False)
 
     interface_type = Column(Enum(32, INTERFACE_TYPES),
@@ -96,6 +97,10 @@ class Interface(Base):
                                backref=backref('interfaces', cascade='all'))
 
     system = relation(System, backref=backref('interfaces'))
+
+    # There are a couple of other mappings defined in vlan.py and
+    # address_assignment.py. See the comment after VlanInterface in vlan.py for
+    # examples.
 
     def __format__(self, format_spec):
         if self.system:
@@ -125,6 +130,12 @@ class Interface(Base):
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 
+    def all_addresses(self):
+        """ Iterator returning all addresses of the interface. """
+        for vlan in self.vlan_ids:
+            for addr in self.vlans[vlan].assignments:
+                yield addr
+
     def __init__(self, **kw): # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
             where the interface is bootable or is of type 'management'
@@ -132,9 +143,20 @@ class Interface(Base):
         _validate_mac(kw)
         super(Interface, self).__init__(**kw)
 
+        # Always create the default VLAN, it makes life much simpler when
+        # converting VLAN-unaware code.
+        self.vlan_ids.append(0)
 
-interface = Interface.__table__ # pylint: disable-msg=C0103, E1101
+    def __repr__(self):
+        msg = "<{0} {1} of {2}, MAC={3}>".format(self._get_class_label(),
+                                                 self.name,
+                                                 self.hardware_entity, self.mac)
+        return msg
+
+
+interface = Interface.__table__  # pylint: disable-msg=C0103, E1101
 interface.primary_key.name = 'interface_pk'
+interface.info['unique_fields'] = ['name', 'hardware_entity']
 
 interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
 

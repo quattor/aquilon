@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import (HardwareEntity, Model, System, FutureARecord,
-                                ReservedName)
+                                ReservedName, AddressAssignment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.dbwrappers.location import get_location
@@ -89,6 +89,11 @@ def parse_primary_name(session, fqdn, ip):
     if dbdns_rec and dbdns_rec.hardware_entity:
         raise ArgumentError("{0} already exists as the primary name of "
                             "{1:l}.".format(hwname, dbdns_rec.hardware_entity))
+    if ip:
+        addr = session.query(AddressAssignment).filter_by(ip=ip).first()
+        if addr:
+            raise ArgumentError("IP address {0} is already in use by "
+                                "{1:l}.".format(ip, addr.vlan.interface))
 
     if dbdns_rec and isinstance(dbdns_rec, ReservedName) and ip:
         session.delete(dbdns_rec)
