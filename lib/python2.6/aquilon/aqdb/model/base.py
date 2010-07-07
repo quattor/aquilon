@@ -137,7 +137,8 @@ class Base(object):
             kwargs = {table.info['unique_fields'][0]: args[0]}
 
         desc = []
-        fields = table.info['unique_fields']
+        # We don't want to modify the table description below, so make a copy
+        fields = table.info['unique_fields'][:]
         if 'extra_search_fields' in table.info:
             fields.extend(table.info['extra_search_fields'])
         for field in fields:
