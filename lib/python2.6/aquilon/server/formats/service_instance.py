@@ -45,15 +45,12 @@ class ServiceInstanceFormatter(ObjectFormatter):
         for sis in si.servers:
             details.append(indent + "  Server: %s" % sis.system.fqdn)
         for map in si.service_map:
-            details.append(indent + "  Service Map: %s %s" %
-                    (map.location.location_type.capitalize(),
-                    map.location.name))
+            details.append(indent + "  Service Map: {0}".format(map.location))
         for pmap in si.personality_service_map:
             details.append(indent +
-                           "  Personality Service Map: %s %s "
+                           "  Personality Service Map: %s "
                            "(Archetype %s Personality %s)" %
-                           (pmap.location.location_type.capitalize(),
-                            pmap.location.name,
+                           (format(pmap.location),
                             pmap.personality.archetype.name,
                             pmap.personality.name))
         max_clients = si.max_clients

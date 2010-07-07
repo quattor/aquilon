@@ -110,10 +110,9 @@ class CommandReconfigureList(BrokerCommand):
                 authors[dbhost.sandbox_author] = [dbhost]
             if personality and dbhost.cluster and \
                dbhost.cluster.personality != dbpersonality:
-                failed.append("%s: Cannot change personality of host "
-                              "while it is a member of %s cluster %s" %
-                              (dbhost.fqdn, dbhost.cluster.cluster_type,
-                               dbhost.cluster.name))
+                failed.append("{0}: Cannot change personality of host "
+                              "while it is a member of "
+                              "{1}.".format(dbhost.fqdn, dbhost.cluster))
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
@@ -121,8 +120,7 @@ class CommandReconfigureList(BrokerCommand):
             keys = branches.keys()
             branch_sort = lambda x,y: cmp(len(branches[x]), len(branches[y]))
             keys.sort(cmp=branch_sort)
-            stats = ["%s hosts in %s %s" %
-                     (len(branches[branch]), branch.branch_type, branch.name)
+            stats = ["{0:d} hosts in {1}".format(len(branches[branch]), branch)
                      for branch in keys]
             raise ArgumentError("All hosts must be in the same domain or "
                                 "sandbox:\n%s" % "\n".join(stats))

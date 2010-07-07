@@ -59,10 +59,10 @@ class Personality(Base):
 
     services = association_proxy('_services', 'service')
 
-    def __repr__(self):
-        s = ("<" + self.__class__.__name__ + " name ='" + self.name +
-             "', " + str(self.archetype) + '>')
-        return s
+    def __format__(self, format_spec):
+        val = "%s %s/%s" % (self.__class__._get_class_label(),
+                            self.archetype.name, self.name)
+        return val.__format__(format_spec)
 
     @classmethod
     def by_archetype(cls, dbarchetype):

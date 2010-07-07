@@ -43,8 +43,8 @@ class CommandDelInterface(BrokerCommand):
                **arguments):
         dbinterface = get_interface(session, interface, machine, mac)
         if dbinterface.system:
-            msg = "Cannot remove interface, %s %s still exists." % (
-                dbinterface.system.system_type, dbinterface.system.fqdn)
+            msg = "Cannot remove interface, %s still exists." % \
+                format(dbinterface.system)
             raise ArgumentError(msg)
         hw_ent = dbinterface.hardware_entity
         session.delete(dbinterface)

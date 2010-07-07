@@ -189,7 +189,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-            self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
+            self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
             self.matchoutput(out,
                              "Interface: eth0 00:50:56:01:20:%02x boot=True" %
@@ -304,7 +304,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 12288 MB", command)
         self.matchoutput(out,
                          "Interface: eth0 00:50:56:01:20:00 boot=True",

@@ -173,7 +173,7 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def testverifymapwihtoutarchetype(self):
@@ -182,7 +182,7 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def testverifymapwihtoutpersonality(self):
@@ -190,7 +190,7 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def testverifypersonalitymapproto(self):

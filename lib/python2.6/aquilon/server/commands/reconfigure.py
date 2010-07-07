@@ -80,12 +80,9 @@ class CommandReconfigure(CommandMake):
                 # a part of a cluster.
                 if dbhost.cluster and \
                    dbhost.cluster.personality != dbpersonality:
-                    raise ArgumentError("Cannot change personality of host %s "
+                    raise ArgumentError("Cannot change personality of {0} "
                                         "while it is a member of "
-                                        "%s cluster %s." %
-                                        (dbhost.fqdn,
-                                         dbhost.cluster.cluster_type,
-                                         dbhost.cluster.name))
+                                        "{1}.".format(dbhost, dbhost.cluster))
                 dbhost.personality = dbpersonality
             if osname or osversion or os:
                 dbos = self.get_os(session, dbhost, osname, osversion, os)

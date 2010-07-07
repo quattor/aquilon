@@ -32,7 +32,7 @@ import sys
 
 from sqlalchemy import Integer
 from sqlalchemy.orm.session import Session
-from sqlalchemy.orm.properties import RelationProperty
+from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import UniqueConstraint, PrimaryKeyConstraint
@@ -59,9 +59,59 @@ class Base(object):
             setattr(self, k, kw[k])
 
     def __repr__(self):
-        # This functions much more like a __str__ than a __repr__...
-        return "%s %s" % (self.__class__._get_class_label(),
-                          self._get_instance_label())
+        """
+        Return an internal representation of the object.
+
+        This representation is intended mainly for debugging, and it should
+        uniquely identify the instance. The output of repr() should never be
+        sent to the client, and should only appear in server-side logs at the
+        debug level.
+        """
+        label = self.__class__.__name__
+        attrs = []
+        mapper = self.__class__.__mapper__
+        for prop in mapper.iterate_properties:
+            if not isinstance(prop, ColumnProperty):
+                continue
+            field = prop.columns[0].name
+
+            # These fields are not really interesting
+            if field == 'id' or field == 'creation_date' or field == 'comments':
+                continue
+
+            # Convert foreign IDs to names
+            if field.endswith("_id") and mapper.has_property(field[:-3]) and \
+                    isinstance(mapper.get_property(field[:-3]),
+                               RelationProperty):
+                field = field[:-3]
+            value = getattr(self, field, None)
+
+            attrs.append("%s: %s" % (field, value))
+        return "<%s %s>" % (label, ", ".join(attrs))
+
+    def __str__(self):
+        """
+        Return the most significant attribute of the object.
+
+        If the object has a single field that makes it unique, then that field
+        should be returned.
+        """
+        return str(self._get_instance_label())
+
+    def __format__(self, format_spec):
+        """
+        Return a pretty-printed representation of the object.
+
+        The output of format() should be the preferred form when referring to
+        this object in messages sent to the client. It should be readable as
+        plain text, and should uniquely identify the object.
+        """
+        val = "%s %s" % (self.__class__._get_class_label(),
+                         self._get_instance_label())
+        # This line has two nice properties: it does the unicode()/str()
+        # format_spec handling properly, and it handles the standard formatting
+        # specifiers like field width etc.
+        return val.__format__(format_spec)
 
     @classmethod
     def get_by(cls, k, v, session):

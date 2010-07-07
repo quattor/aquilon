@@ -47,12 +47,9 @@ class CommandCluster(BrokerCommand):
         if dbhost.machine.location != dbcluster.location_constraint and \
            dbcluster.location_constraint not in \
            dbhost.machine.location.parents:
-            raise ArgumentError("Host location %s %s is not within cluster "
-                                "location %s %s." %
-                                (dbhost.machine.location.location_type.capitalize(),
-                                 dbhost.machine.location.name,
-                                 dbcluster.location_constraint.location_type.capitalize(),
-                                 dbcluster.location_constraint.name))
+            raise ArgumentError("Host location {0} is not within cluster "
+                                "location {1}.".format(dbhost.machine.location,
+                                                       dbcluster.location_constraint))
         if dbhost.personality != dbcluster.personality:
             logger.client_info("Updating host %s to match cluster "
                                "archetype %s personality %s.",

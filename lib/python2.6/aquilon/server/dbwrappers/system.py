@@ -75,8 +75,7 @@ def parse_system_and_verify_free(session, system):
     q = session.query(System)
     dbsystem = q.filter_by(name=short, dns_domain=dbdns_domain).first()
     if dbsystem:
-        raise ArgumentError("%s %s already exists." %
-                            (dbsystem.system_type.capitalize(), dbsystem.name))
+        raise ArgumentError("{0} already exists.".format(dbsystem))
     return (short, dbdns_domain)
 
 def search_system_query(session, system_type=System, **kwargs):

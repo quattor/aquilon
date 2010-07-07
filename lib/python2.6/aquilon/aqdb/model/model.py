@@ -57,6 +57,11 @@ class Model(Base):
 
     vendor = relation(Vendor)
 
+    def __format__(self, format_spec):
+        val = "%s %s/%s" % (self.__class__._get_class_label(),
+                            self.vendor.name, self.name)
+        return val.__format__(format_spec)
+
 
 model = Model.__table__
 model.primary_key.name = 'model_pk'

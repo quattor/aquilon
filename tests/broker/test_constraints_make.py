@@ -53,7 +53,7 @@ class TestMakeConstraints(TestBrokerCommand):
                    "--archetype", "vmhost", "--personality", "esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot change personality of host", command)
-        self.matchoutput(out, "while it is a member of esx cluster", command)
+        self.matchoutput(out, "while it is a member of ESX Cluster", command)
 
 
 if __name__=='__main__':

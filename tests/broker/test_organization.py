@@ -50,7 +50,7 @@ class TestOrganization(TestBrokerCommand):
     def testverifyaddexorg(self):
         command = "show organization --organization example"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Company: example", command)
+        self.matchoutput(out, "Organization: example", command)
 
     def testdelexorg(self):
         command = "del organization --organization example"
@@ -59,12 +59,12 @@ class TestOrganization(TestBrokerCommand):
     def testdelexorgagain(self):
         command = "del organization --organization example"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Company example not found.", command)
+        self.matchoutput(out, "Organization example not found.", command)
 
     def testverifydelexorg(self):
         command = "show organization --organization example"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Company example not found.", command)
+        self.matchoutput(out, "Organization example not found.", command)
 
 
 if __name__=='__main__':

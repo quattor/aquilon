@@ -57,8 +57,7 @@ class CommandAddLocation(BrokerCommand):
             # FIXME: Technically this is coming in with an http PUT,
             # which should try to adjust state and succeed if everything
             # is alright.
-            raise ArgumentError("%s %s already exists."
-                                % (type.capitalize(), name))
+            raise ArgumentError("{0} already exists.".format(newlocation))
         try:
             dbparent = session.query(Location).filter_by(name=parentname,
                     location_type=parenttype).one()

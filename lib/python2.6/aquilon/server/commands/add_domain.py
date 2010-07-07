@@ -64,9 +64,8 @@ class CommandAddDomain(BrokerCommand):
             dbtracked = Branch.get_unique(session, track, compel=True)
             if getattr(dbtracked, "tracked_branch", None):
                 raise ArgumentError("Cannot nest tracking.  Try tracking "
-                                    "%s %s directly." %
-                                    (dbtracked.tracked_branch.branch_type,
-                                     dbtracked.tracked_branch.name))
+                                    "%s directly." %
+                                    format(dbtracked.tracked_branch))
             start_point = dbtracked
         else:
             if not start:

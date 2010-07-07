@@ -53,7 +53,7 @@ class CommandPxeswitch(BrokerCommand):
         dbservice = Service.get_unique(session, "bootserver", compel=True)
         bootbi = get_host_build_item(session, dbhost, dbservice)
         if not bootbi:
-            raise ArgumentError("Host %s has no bootserver." % hostname)
+            raise ArgumentError("{0} has no bootserver.".format(dbhost))
         # for that instance, find what servers are bound to it.
         servers = [s.system.fqdn for s in bootbi.service_instance.servers]
 

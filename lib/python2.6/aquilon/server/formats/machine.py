@@ -45,8 +45,8 @@ class MachineInterfacePairFormatter(ObjectFormatter):
         machine = item[0]
         interface = item[1]
 
-        details = [machine.name, machine.location.rack,
-                   machine.location.building, machine.model.vendor.name,
+        details = [machine.name, machine.location.rack.name,
+                   machine.location.building.name, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
         if interface:
             details.extend([interface.name, interface.mac])
@@ -82,9 +82,9 @@ class MachineFormatter(ObjectFormatter):
         # that will change when chassis has a corresponding hardware type.
         for location_type in const.location_types:
             if getattr(machine.location, location_type, None) is not None:
-                details.append(indent + "  %s: %s" % (
-                                    location_type.capitalize(),
-                                    getattr(machine.location, location_type)))
+                details.append(indent + "  %s: %s" %
+                               (location_type.capitalize(),
+                                getattr(machine.location, location_type).name))
                 if location_type == 'rack':
                     details.append(indent + "    Row: %s" %
                                    machine.location.rack.rack_row)

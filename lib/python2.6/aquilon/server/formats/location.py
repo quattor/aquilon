@@ -51,8 +51,7 @@ class LocationFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
             details.append(indent + "  Location Parents: [%s]" %
-                    ", ".join("%s: %s" % (p.location_type.capitalize(), p.name)
-                    for p in location.parents))
+                    ", ".join(format(p) for p in location.parents))
         return "\n".join(details)
 
     def csv_fields(self, location):

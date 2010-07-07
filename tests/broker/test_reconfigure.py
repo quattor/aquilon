@@ -386,7 +386,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
                          "Cannot change personality of host "
                          "evh1.aqd-unittest.ms.com while it is a member of "
-                         "esx cluster ",
+                         "ESX Cluster ",
                          command)
 
     # This doesn't work since the manage test comes after this one.

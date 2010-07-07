@@ -94,12 +94,9 @@ class CommandUpdateMachine(BrokerCommand):
                 dbcl = dbslot.chassis.chassis_hw.location
                 if dbcl != dblocation:
                     if chassis or slot is not None:
-                        raise ArgumentError("Location %s %s conflicts with "
-                                            "chassis %s location %s %s." % (
-                                            dblocation.location_type,
-                                            dblocation.name,
-                                            dbslot.chassis.fqdn,
-                                            dbcl.location_type, dbcl.name))
+                        raise ArgumentError("{0} conflicts with chassis {1!s} "
+                                            "location {2}.".format(dblocation,
+                                                        dbslot.chassis, dbcl))
                     else:
                         session.delete(dbslot)
             if machine_plenary_will_move(old=dbmachine.location,
@@ -238,9 +235,8 @@ class CommandUpdateMachine(BrokerCommand):
         dbslot = q.first()
         if dbslot:
             if dbslot.machine:
-                raise ArgumentError("Chassis %s slot %d already has machine "
-                                    "%s." % (dbchassis.fqdn, slot,
-                                             dbslot.machine.name))
+                raise ArgumentError("{0} slot {1} already has machine "
+                                    "{2!s}.".format(dbchassis, slot, dbslot.machine))
             dbslot.machine = dbmachine
             session.add(dbslot)
         else:

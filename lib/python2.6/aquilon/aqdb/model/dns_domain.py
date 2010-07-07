@@ -55,9 +55,6 @@ class DnsDomain(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    def __str__(self):
-        return str(self.name)
-
 
 dnsdomain = DnsDomain.__table__
 

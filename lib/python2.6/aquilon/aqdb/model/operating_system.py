@@ -57,16 +57,14 @@ class OperatingSystem(Base):
 
     archetype = relation(Archetype, backref='os', uselist=False, lazy=False)
 
+    def __format__(self, format_spec):
+        val = "%s %s/%s-%s" % (self.__class__._get_class_label(),
+                               self.archetype.name, self.name, self.version)
+        return val.__format__(format_spec)
+
     @property
     def cfg_path(self):
         return 'os/%s/%s'% (self.name, self.version)
-
-    def __repr__(self):
-        s = ("<"+self.__class__.__name__ +
-             " name="+ self.name +
-             " version=" + self.version +
-             " archetype=" + str(self.archetype) + '>')
-        return s
 
     @classmethod
     def by_archetype(cls, dbarchetype):
