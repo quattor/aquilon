@@ -86,7 +86,8 @@ class CommandAddTorSwitch(BrokerCommand):
                                                   name=interface, mac=mac,
                                                   interface_type='oa')
 
-            dbinterface.system = dbdns_rec
+            if ip:
+                dbinterface.vlans[0].addresses.append(ip)
             session.flush()
 
             dsdb_runner = DSDBRunner(logger=logger)

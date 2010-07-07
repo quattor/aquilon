@@ -63,9 +63,8 @@ class CommandAddManager(BrokerCommand):
                                               bootable=False)
 
         if dbinterface.system:
-            raise ArgumentError("Interface %s of machine %s already provides "
-                                "%s." % (dbinterface.name, dbmachine.name,
-                                         dbinterface.system.fqdn))
+            raise ArgumentError("{0} already provides {2!s}.".format(
+                dbinterface, dbinterface.system))
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)

@@ -62,6 +62,21 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testverifydelunittest00dns(self):
+        command = "show fqdn --fqdn unittest00.one-nyp.ms.com"
+        self.notfoundtest(command.split(" "))
+
+    def testverifyut3c1n3(self):
+        command = "show machine --machine ut3c1n3"
+        out = self.commandtest(command.split(" "))
+        # The primary name must be gone
+        self.matchclean(out, "Primary Name:", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        # No interface should have the IP address
+        self.matchclean(out, "Auxiliary:", command)
+        self.matchclean(out, "Provides:", command)
+        self.matchclean(out, str(self.net.unknown[0].usable[2]), command)
+
     def testdelunittest01(self):
         self.dsdb_expect_delete(self.net.unknown[0].usable[10])
         command = "del host --hostname unittest01.one-nyp.ms.com"

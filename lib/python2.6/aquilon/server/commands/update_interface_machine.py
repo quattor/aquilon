@@ -35,12 +35,11 @@ from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_switch_offsets,
                                                  verify_port_group,
                                                  choose_port_group)
-from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Machine, FutureARecord, ReservedName
+from aquilon.aqdb.model import FutureARecord, ReservedName
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -63,15 +62,17 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         """
 
         dbinterface = get_interface(session, interface, machine, None)
+        dbhw_ent = dbinterface.hardware_entity
+
         # By default, oldinfo comes from the interface being updated.
         # If swapping the boot flag, oldinfo will be updated below.
-        oldinfo = self.snapshot(dbinterface)
+        oldinfo = DSDBRunner.snapshot_iface(dbinterface)
         if arguments.get('hostname', None):
             # Hack to set an intial interface for an aurora host...
-            dbhost = dbinterface.hardware_entity.host
+            dbhost = dbhw_ent.host
             if dbhost.archetype.name == 'aurora' and \
-               dbhost.machine.primary_ip and not dbinterface.system:
-                dbinterface.system = dbhost.machine.primary_name
+               dbhw_ent.primary_ip and not dbinterface.vlans[0].addresses:
+                dbinterface.vlans[0].addresses.append(dbhw_ent.primary_ip)
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the
@@ -84,31 +85,49 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity)
 
         if ip:
+            if len(dbinterface.vlans[0].addresses) > 1:
+                raise ArgumentError("{0} has multiple addresses, "
+                                    "update_interface can't handle "
+                                    "that.".format(dbinterface))
+
             dbnetwork = get_net_id_from_ip(session, ip)
             restrict_switch_offsets(dbnetwork, ip)
-            if dbinterface.system:
-                if isinstance(dbinterface.system, ReservedName):
-                    short = dbinterface.system.name
-                    dbdns_domain = dbinterface.system.dns_domain
-                    session.delete(dbinterface.system)
+
+            if dbinterface.vlans[0].assignments:
+                assignment = dbinterface.vlans[0].assignments[0]
+                if assignment.dns_records:
+                    assignment.dns_records[0].network = dbnetwork
+                    assignment.dns_records[0].ip = ip
                     session.flush()
-                    dbinterface.system = FutureARecord(name=short,
-                                                       dns_domain=dbdns_domain,
-                                                       ip=ip)
-                    session.add(dbinterface.system)
-                else:
-                    dbinterface.system.ip = ip
-                dbinterface.system.network = dbnetwork
+                    session.expire(assignment, ['dns_records'])
+                assignment.ip = ip
+            else:
+                dbinterface.vlans[0].addresses.append(ip)
+
+            # Fix up the primary name if needed
+            if dbinterface.bootable and \
+               dbinterface.interface_type == 'public' and \
+               dbhw_ent.primary_name and isinstance(dbhw_ent.primary_name,
+                                                    ReservedName):
+                short = dbhw_ent.primary_name.name
+                dbdns_domain = dbhw_ent.primary_name.dns_domain
+                session.delete(dbhw_ent.primary_name)
+                session.flush()
+                session.expire(dbhw_ent)
+                dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                          ip=ip)
+                session.add(dbdns_rec)
+                dbhw_ent.primary_name = dbdns_rec
+
         if comments:
             dbinterface.comments = comments
         if boot:
-            # FIXME: If type == 'public', this should swing the
-            # system link!
             for i in dbinterface.hardware_entity.interfaces:
                 if i == dbinterface:
                     i.bootable = True
                 elif i.bootable:
-                    oldinfo = self.snapshot(i)
+                    # XXX Is this correct here?
+                    oldinfo = DSDBRunner.snapshot_iface(i)
                     i.bootable = False
                     session.add(i)
 
@@ -119,26 +138,18 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         if mac:
             dbinterface.mac = mac
 
-        if dbinterface.system:
-            session.add(dbinterface.system)
         session.add(dbinterface)
         session.flush()
         session.refresh(dbinterface)
-        session.refresh(dbinterface.hardware_entity)
-        if dbinterface.system:
-            session.refresh(dbinterface.system)
-        newinfo = self.snapshot(dbinterface)
+        session.refresh(dbhw_ent)
 
-        plenary_info = PlenaryMachineInfo(dbinterface.hardware_entity,
-                                          logger=logger)
+        plenary_info = PlenaryMachineInfo(dbhw_ent, logger=logger)
         key = plenary_info.get_write_key()
         try:
             lock_queue.acquire(key)
             plenary_info.write(locked=True)
 
-            if (dbinterface.system and \
-                not (dbinterface.system.system_type == 'host' and
-                     dbinterface.system.archetype.name == 'aurora')):
+            if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
                 # This relies on *not* being able to set the boot flag
                 # (directly) to false.
                 dsdb_runner = DSDBRunner(logger=logger)
@@ -152,10 +163,3 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         finally:
             lock_queue.release(key)
         return
-
-    def snapshot(self, dbinterface):
-        ip = None
-        if dbinterface.system:
-            ip = dbinterface.system.ip
-        return {"mac":dbinterface.mac, "ip":ip,
-                "boot":dbinterface.bootable, "name":dbinterface.name}

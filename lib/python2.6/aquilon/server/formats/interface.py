@@ -54,9 +54,28 @@ class InterfaceFormatter(ObjectFormatter):
 
         hw = interface.hardware_entity
         details.append(indent + "  Attached to: {0}".format(hw))
-        if interface.system:
-            details.append(indent + "  Provides: %s [%s]" %
-                           (interface.system.fqdn, interface.system.ip))
+
+        for vlan in interface.vlan_ids:
+            if vlan > 0:
+                details.append(indent + "  VLAN: %d" % vlan)
+                vindent = indent + "  "
+            else:
+                vindent = indent
+            details.append(vindent + "  DHCP enabled: %s" %
+                           (interface.vlans[vlan].dhcp_enabled))
+            for assgn in interface.vlans[vlan].assignments:
+                if assgn.fqdns:
+                    names = ", ".join(assgn.fqdns)
+                else:
+                    names = "unknown"
+
+                if assgn.label:
+                    details.append(vindent + "  Provides: %s [%s] (label: %s)" %
+                                   (names, assgn.ip, assgn.label))
+                else:
+                    details.append(vindent + "  Provides: %s [%s]" %
+                                   (names, assgn.ip))
+
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)
         return "\n".join(details)
@@ -72,20 +91,20 @@ class MissingManagersFormatter(ListFormatter):
     def format_raw(self, mmlist, indent=""):
         commands = []
         for interface in mmlist:
-            host = interface.hardware_entity.host
-            if host:
+            hwent = interface.hardware_entity
+            if hwent.fqdn:
                 # FIXME: Deal with multiple management interfaces?
                 commands.append("aq add manager --hostname '%s' --ip 'IP'" %
-                                host.fqdn)
+                                hwent.fqdn)
             else:
                 commands.append("# No host found for machine %s with management interface" %
-                                interface.hardware_entity.label)
+                                hwent.label)
         return "\n".join(commands)
 
     def csv_fields(self, interface):
-        host = interface.hardware_entity.host
-        if host:
-            return (host.fqdn,)
+        fqdn = interface.hardware_entity.fqdn
+        if fqdn:
+            return (fqdn,)
         else:
             return None
 

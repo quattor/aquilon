@@ -36,11 +36,11 @@ from aquilon.server.formats.system import SimpleSystemListFormatter
 from aquilon.aqdb.model import Switch
 
 
-class SwitchInterfacePair(tuple):
-    """Encapsulates a (switch, selected interface) pair"""
+class SwitchInterfaceTuple(tuple):
+    """Encapsulates a (switch, selected interface) triplet"""
 
 
-class SwitchInterfacePairFormatter(ObjectFormatter):
+class SwitchInterfaceTupleFormatter(ObjectFormatter):
     def csv_fields(self, item):
         switch = item[0]
         interface = item[1]
@@ -59,17 +59,18 @@ class SwitchInterfacePairFormatter(ObjectFormatter):
             details.extend([None, None])
         return details
 
-ObjectFormatter.handlers[SwitchInterfacePair] = SwitchInterfacePairFormatter()
+ObjectFormatter.handlers[SwitchInterfaceTuple] = SwitchInterfaceTupleFormatter()
 
 
-class TorSwitchInterfacePair(tuple):
+class TorSwitchInterfaceTuple(tuple):
     """Compatibility Layer for deprecated commands."""
 
 
-class TorSwitchInterfacePairFormatter(ObjectFormatter):
+class TorSwitchInterfaceTupleFormatter(ObjectFormatter):
     def csv_fields(self, item):
         switch = item[0]
         interface = item[1]
+        addr = item[2]
 
         details = [switch.fqdn,
                    switch.location.rack.name,
@@ -78,12 +79,12 @@ class TorSwitchInterfacePairFormatter(ObjectFormatter):
                    switch.model.name,
                    switch.serial_no]
         if interface:
-            details.extend([interface.name, interface.mac, interface.system.ip])
+            details.extend([addr.logical_name, interface.mac, addr.ip])
         else:
             details.extend([None, None, None])
         return details
 
-ObjectFormatter.handlers[TorSwitchInterfacePair] = TorSwitchInterfacePairFormatter()
+ObjectFormatter.handlers[TorSwitchInterfaceTuple] = TorSwitchInterfaceTupleFormatter()
 
 
 class SwitchFormatter(ObjectFormatter):
@@ -120,13 +121,14 @@ class SwitchFormatter(ObjectFormatter):
     def csv_tolist(self, switch):
         interfaces = []
         for i in switch.interfaces:
-            if not i.system:
+            # XXX What semantics do we want here?
+            if not i.mac:
                 continue
             interfaces.append(i)
         if len(interfaces):
-            return [SwitchInterfacePair((switch, i)) for i in interfaces]
+            return [SwitchInterfaceTuple((switch, i)) for i in interfaces]
         else:
-            return [SwitchInterfacePair((switch, None))]
+            return [SwitchInterfaceTuple((switch, None))]
 
 ObjectFormatter.handlers[Switch] = SwitchFormatter()
 
@@ -145,15 +147,14 @@ class TorSwitchFormatter(SwitchFormatter):
         return "switch,rack,building,vendor,model,serial,interface,mac,ip"
 
     def csv_tolist(self, switch):
-        interfaces = []
-        for i in switch.interfaces:
-            if not i.system:
-                continue
-            interfaces.append(i)
-        if len(interfaces):
-            return [TorSwitchInterfacePair((switch, i)) for i in interfaces]
+        tuples = []
+        for iface in switch.interfaces:
+            for addr in iface.all_addresses():
+                tuples.append(TorSwitchInterfaceTuple((switch, iface, addr)))
+        if len(tuples):
+            return tuples
         else:
-            return [TorSwitchInterfacePair((switch, None))]
+            return [TorSwitchInterfaceTuple((switch, None, None))]
 
 ObjectFormatter.handlers[TorSwitch] = TorSwitchFormatter()
 

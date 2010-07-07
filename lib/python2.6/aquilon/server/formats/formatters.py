@@ -286,35 +286,24 @@ class ObjectFormatter(object):
             disk_msg.disk_type = str(disk.controller_type)
 
         for i in host.machine.interfaces:
-            int_msg = host_msg.machine.interfaces.add()
-            int_msg.device = str(i.name)
-            if getattr(i, "mac", None):
-                int_msg.mac = str(i.mac)
-            if getattr(i.system, "ip", None):
-                int_msg.ip = str(i.system.ip)
-            if hasattr(i, "bootable"):
-                int_msg.bootable = i.bootable
-            # Populating network_id is pointless...
-            #if getattr(i.system, "network_id", None):
-            #    int_msg.network_id = i.system.network_id
-            if i.system:
-                int_msg.fqdn = i.system.fqdn
-
-    def add_system_msg(self, host_msg, system):
-        """ Compatibility version of the old add_host_msg, used by show_network """
-        if not isinstance(system, System):
-            raise InternalError("add_system_msg was called with {0} instead of "
-                                "a System.".format(system))
-        host_msg.hostname = str(system.name)
-        host_msg.fqdn = str(system.fqdn)
-        host_msg.dns_domain = str(system.dns_domain.name)
-        if system.ip:
-            host_msg.ip = str(system.ip)
-        for iface in system.interfaces:
-            if iface.interface_type != 'public' or not iface.bootable:
-                continue
-            host_msg.mac = str(iface.mac)
-        host_msg.type = system.system_type
+            has_addrs = False
+            for addr in i.all_addresses():
+                has_addrs = True
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = str(addr.logical_name)
+                if i.mac:
+                    int_msg.mac = str(i.mac)
+                int_msg.ip = str(addr.ip)
+                if addr.vlan == 0:
+                    int_msg.bootable = i.bootable
+                else:
+                    int_msg.bootable = False
+            # Add entries for interfaces that do not have any addresses
+            if not has_addrs:
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = str(i.name)
+                if i.mac:
+                    int_msg.mac = str(i.mac)
 
     def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)

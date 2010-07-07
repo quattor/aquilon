@@ -50,6 +50,17 @@ class CommandDelMachine(BrokerCommand):
         if dbmachine.host:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
                                 "deleted.".format(dbmachine, dbmachine.host))
+
+        addrs = []
+        for iface in dbmachine.interfaces:
+            addrs.extend(list(iface.all_addresses()))
+        if addrs:
+            addrmsg = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for
+                                 addr in addrs])
+            raise ArgumentError("{0} still provides the following addresses, "
+                                "delete them first: {1}.".format(dbmachine,
+                                                                 addrmsg))
+
         for disk in dbmachine.disks:
             # Rely on cascade delete to remove the disks.  The Oracle driver
             # can handle the additional/explicit delete request but the

@@ -134,9 +134,8 @@ class CommandAddHost(BrokerCommand):
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
         dbmachine.primary_name = dbdns_rec
-        if dbinterface:
-            dbinterface.system = dbdns_rec
-            session.add(dbinterface)
+        if ip and dbinterface and ip not in dbinterface.vlans[0].addresses:
+            dbinterface.vlans[0].addresses.append(ip)
         session.flush()
         session.refresh(dbhost)
 

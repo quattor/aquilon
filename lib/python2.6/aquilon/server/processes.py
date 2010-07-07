@@ -318,14 +318,13 @@ class DSDBRunner(object):
         return None
 
     def add_host(self, dbinterface):
-        return self.add_host_details(dbinterface.system.fqdn,
-                                     dbinterface.system.ip,
-                                     dbinterface.name, dbinterface.mac)
+        session = object_session(dbinterface)
+        for addr in dbinterface.all_addresses():
+            for fqdn in addr.fqdns:
+                self.add_host_details(fqdn, addr.ip, addr.logical_name,
+                                      dbinterface.mac)
 
     def add_host_details(self, fqdn, ip, name, mac):
-        if not ip:
-            raise ArgumentError("No ip address found for '%s' to add to dsdb."
-                                % fqdn)
         # DSDB does not accept '/' as valid in an interface name.
         command = [self.config.get("broker", "dsdb"),
                     "add", "host", "-host_name", fqdn,
@@ -367,6 +366,29 @@ class DSDBRunner(object):
 #            return
 #        raise ArgumentError("No boot interface found for host to delete from dsdb.")
 
+    @classmethod
+    def snapshot_iface(cls, dbinterface):
+        """
+        Make a snapshot of the interface parameters.
+
+        update_host() will use this snapshot to decide what has changed and
+        what DSDB commands have to be executed.
+        """
+
+        status = {}
+        # FIXME: does not work if multiple DNS A records point to the same IP
+        # address
+        for addr in dbinterface.all_addresses():
+            if addr.fqdns:
+                fqdn = addr.fqdns[0]
+            else:
+                continue
+            status[addr.logical_name] = {'name': addr.logical_name,
+                                         'mac': dbinterface.mac,
+                                         'ip': addr.ip,
+                                         'fqdn': fqdn}
+        return status
+
     def update_host(self, dbinterface, oldinfo):
         """Update a dsdb host entry.
 
@@ -379,32 +401,60 @@ class DSDBRunner(object):
         entry and adding a new one.
 
         """
-        if not dbinterface.system:
-            # Can't actually get here - the calling code verifies that
-            # the interface is attached to a system.
-            raise InternalError("Cannot update interface %s on %s that is not "
-                                "associated with a DNS Record." %
-                                (dbinterface.name,
-                                 dbinterface.hardware_entity.label))
-        if not dbinterface.system.ip:
-            # This may not be relevant for an update...
-            raise ArgumentError("No ip address found for '%s' to update dsdb."
-                                % dbinterface.system.fqdn)
-        if dbinterface.name != oldinfo["name"] or \
-           dbinterface.system.ip != oldinfo["ip"]:
-            # Fall back to deleting the host entry and re-adding it.
-            return self.update_host_force(dbinterface, oldinfo)
-        if not dbinterface.mac:
-            # Nothing to do.  There is no aq command that will let you
-            # remove a mac address without replacing it.
-            return
+        newinfo = self.snapshot_iface(dbinterface)
+
+        deletes = []
+        adds = []
+        mac_update = None
+
+        # Construct the list of operations
+        for key, attrs in oldinfo.items():
+            if key not in newinfo:
+                deletes.append(attrs)
+                continue
+            if attrs['ip'] != newinfo[key]['ip']:
+                deletes.append(attrs)
+                adds.append(newinfo[key])
+                continue
+            if attrs['mac'] != newinfo[key]['mac']:
+                mac_update = newinfo[key]
+        for key, attrs in newinfo.items():
+            if key not in oldinfo:
+                adds.append(attrs)
+
+        rollback_adds = []
+        rollback_deletes = []
         try:
-            return self.update_host_mac(dbinterface.system.fqdn,
-                                        dbinterface.mac)
+            for attrs in deletes:
+                self.delete_host_details(attrs['ip'])
+                rollback_deletes.append(attrs)
+            for attrs in adds:
+                self.add_host_details(attrs['fqdn'], attrs['ip'],
+                                      attrs['name'], attrs['mac'])
+                rollback_adds.append(attrs)
+            if mac_update:
+                self.update_host_mac(mac_update['fqdn'], mac_update['mac'])
         except ProcessException, e:
-            self.logger.info("Failed updating dsdb entry for %s with MAC %s." %
-                             (dbinterface.system.fqdn, dbinterface.mac))
-            raise
+            self.logger.info("Failed updating DSDB entry for %s with MAC %s: %s" %
+                             (dbinterface.hardware_entity.label,
+                              dbinterface.mac, e))
+            rollback_failures = []
+            for attrs in rollback_adds:
+                try:
+                    self.delete_host_details(attrs['ip'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            for attrs in rollback_deletes:
+                try:
+                    self.add_host_details(attrs['fqdn'], attrs['ip'],
+                                          attrs['name'], attrs['mac'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            msg = "DSDB update failed: %s" % e
+            if rollback_failures:
+                msg += "\n\nRollback also failed, DSDB state is inconsistent:" + \
+                        "\n".join(rollback_failures)
+            raise AquilonError(msg)
         return
 
     def update_host_force(self, dbinterface, oldinfo):

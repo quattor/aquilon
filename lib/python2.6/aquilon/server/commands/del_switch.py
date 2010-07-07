@@ -42,6 +42,20 @@ class CommandDelSwitch(BrokerCommand):
 
     def render(self, session, logger, switch, **arguments):
         dbswitch = Switch.get_unique(session, switch, compel=True)
+
+        # Check and complain if the switch has any other addresses than its
+        # primary address
+        addrs = []
+        for iface in dbswitch.interfaces:
+            for addr in iface.all_addresses():
+                if addr.ip == dbswitch.primary_ip:
+                    continue
+                addrs.append(str(addr.ip))
+        if addrs:
+            raise ArgumentError("{0} still provides the following addresses, "
+                                "delete them first: {1}.".format
+                                (dbswitch, ", ".join(addrs)))
+
         key = DeleteKey("system", logger=logger)
         try:
             lock_queue.acquire(key)

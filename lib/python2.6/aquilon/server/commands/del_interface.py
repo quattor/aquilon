@@ -42,15 +42,34 @@ class CommandDelInterface(BrokerCommand):
     def render(self, session, logger, interface, machine, mac, user,
                **arguments):
         dbinterface = get_interface(session, interface, machine, mac)
-        if dbinterface.system:
-            msg = "Cannot remove interface, {0:l} still " \
-                  "exists.".format(dbinterface.system)
-            raise ArgumentError(msg)
         hw_ent = dbinterface.hardware_entity
+
+        for addr in dbinterface.all_addresses():
+            if addr.ip != hw_ent.primary_ip:
+                continue
+
+            # If this is a machine, it is possible to delete the host to get rid
+            # of the primary name
+            if hw_ent.hardware_type == "machine":
+                msg = "  You should delete the host first."
+            else:
+                msg = ""
+
+            raise ArgumentError("{0} holds the primary address of the {1:cl}, "
+                                "therefore it cannot be deleted."
+                                "{2}".format(dbinterface, hw_ent, msg))
+
+        addrs = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for addr in
+                           dbinterface.all_addresses()])
+        if addrs:
+            raise ArgumentError("{0} still has the following addresses "
+                                "configured, delete them first: "
+                                "{1}.".format(dbinterface, addrs))
+
         session.delete(dbinterface)
         session.flush()
 
-        if hw_ent and hw_ent.hardware_type == 'machine':
+        if hw_ent.hardware_type == 'machine':
             plenary_info = PlenaryMachineInfo(hw_ent, logger=logger)
             plenary_info.write()
         return

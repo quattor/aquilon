@@ -32,9 +32,9 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster)
+                                Cluster, FutureARecord)
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.formats.network import ShortNetworkList
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
@@ -80,8 +80,10 @@ class CommandSearchNetwork(BrokerCommand):
                     q = q.filter(ObservedVlan.vlan_id.in_(vlans))
                     q = q.reset_joinpoint()
             if not vlans:
-                networks = [i.system.network.id for i in dbmachine.interfaces
-                            if i.system and i.system.network]
+                networks = []
+                for iface in dbmachine.interfaces:
+                    for addr in iface.all_addresses():
+                        networks.append(addr.network.id)
                 if not networks:
                     msg = "Machine %s has no interfaces " % dbmachine.label
                     if dbmachine.cluster:
@@ -90,8 +92,13 @@ class CommandSearchNetwork(BrokerCommand):
                     raise ArgumentError(msg)
                 q = q.filter(Network.id.in_(networks))
         if fqdn:
-            dbsystem = get_system(session, fqdn)
-            q = q.filter_by(id=dbsystem.network.id)
+            (short, dbdns_domain) = parse_fqdn(session, fqdn)
+            dnsq = session.query(FutureARecord.ip)
+            dnsq = dnsq.filter_by(name=short)
+            dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
+            networks = [get_net_id_from_ip(session, addr.ip).id for addr in
+                        dnsq.all()]
+            q = q.filter(Network.id.in_(networks))
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.switch:

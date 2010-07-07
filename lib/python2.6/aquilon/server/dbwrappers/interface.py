@@ -213,8 +213,15 @@ def describe_interface(session, interface):
                     interface.bootable)]
     hw = interface.hardware_entity
     description.append("is attached to {0:l}".format(hw))
-    if interface.system:
-        description.append("points to system %s" % interface.system.fqdn)
+    for addr in interface.all_addresses():
+        for dns_rec in addr.dns_records:
+            if addr.label:
+                description.append("has address {0:a} label {1} on VLAN "
+                                   "{2}".format(dns_rec, addr.label,
+                                                addr.vlan.vlan_id))
+            else:
+                description.append("has address {0:a} on VLAN "
+                                   "{1}".format(dns_rec, addr.vlan.vlan_id))
     ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
     if len(ifaces) == 1 and ifaces[0] != interface:
         description.append("but MAC address %s is in use by %s" %
@@ -310,8 +317,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     dbinterfaces = q.all()
 
     if preclude and dbinterfaces:
-            raise ArgumentError("Interface {0!s} of {1:l} already "
-                                "exists.".format(dbinterface, dbhw_ent))
+            raise ArgumentError("{0} already exists.".format(dbinterface))
 
     if not dbinterfaces:
         if mac:
@@ -340,15 +346,12 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         # The user input must be normalized before comparing it with a value
         # from the DB
         if mac and dbinterface.mac != normalize_mac_address(mac):
-            raise ArgumentError("Interface {0!s} of {1:l} exists, but has MAC "
-                                "address {2} instead of "
-                                "{3}.".format(dbinterface, dbhw_ent,
-                                              dbinterface.mac, mac))
+            raise ArgumentError("{0} exists, but has MAC address {1} instead "
+                                "of {2}.".format(dbinterface, dbinterface.mac,
+                                                 mac))
         if interface_type and dbinterface.interface_type != interface_type:
-            raise ArgumentError("Interface {0!s} of {1:l} is of type {2}, not "
-                                "{3}.".format(dbinterface, dbhw_ent,
-                                              dbinterface.interface_type,
-                                              interface_type))
+            raise ArgumentError("{0} is of type {1}, not {2}.".format(
+                dbinterface, dbinterface.interface_type, interface_type))
     else:
         # Since both the MAC and name are unique keys, we can arrive here only
         # if neither of them were specified. Try to match the interface based on

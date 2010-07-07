@@ -151,9 +151,9 @@ class TestAddManager(TestBrokerCommand):
         command = ["del", "interface", "--mac",
                    self.net.unknown[0].usable[8].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "manager unittest12r.aqd-unittest.ms.com still exists",
+        self.matchoutput(out, "still has the following addresses configured",
                          command)
+        self.matchoutput(out, str(self.net.unknown[0].usable[8]), command)
 
     def testverifyunittest13removed(self):
         command = "show host --hostname unittest13.one-nyp.ms.com"

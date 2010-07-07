@@ -49,8 +49,8 @@ class MachineInterfacePairFormatter(ObjectFormatter):
                    machine.model.name, machine.serial_no]
         if interface:
             details.extend([interface.name, interface.mac])
-            if interface.system:
-                details.append(interface.system.ip)
+            if machine.primary_name:
+                details.append(machine.primary_name.ip)
             else:
                 details.append(None)
         else:

@@ -32,7 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.machine import MachineMacList
 from aquilon.aqdb.model import HardwareEntity
-from sqlalchemy.orm import eagerload
+from sqlalchemy.orm import joinedload_all
 
 
 class CommandShowMachineMacList(BrokerCommand):
@@ -46,8 +46,7 @@ class CommandShowMachineMacList(BrokerCommand):
         q = session.query(HardwareEntity)
         q = q.with_polymorphic('*')
         q = q.options(eagerload('interfaces'))
-        q = q.options(eagerload('interfaces.system'))
-        q = q.options(eagerload('interfaces.system.dns_domain'))
+        q = q.options(joinedload_all('_primary_name_asc.dns_record.dns_domain'))
 
         maclist = MachineMacList()
         for hwentity in q.all():
@@ -56,9 +55,9 @@ class CommandShowMachineMacList(BrokerCommand):
                 #command would be more efficient in hand written sql
                 if intf.mac is None:
                     continue
-                entry = [intf.mac, intf.hardware_entity.label]
-                if intf.system:
-                    entry.append(intf.system.fqdn)
+                entry = [intf.mac, hwentity.label]
+                if hwentity.primary_name:
+                    entry.append(hwentity.primary_name.fqdn)
                 else:
                     entry.append("")
                 maclist.append(entry)

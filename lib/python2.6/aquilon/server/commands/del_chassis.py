@@ -40,6 +40,20 @@ class CommandDelChassis(BrokerCommand):
 
     def render(self, session, logger, chassis, **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
+
+        # Check and complain if the chassis has any other addresses than its
+        # primary address
+        addrs = []
+        for iface in dbchassis.interfaces:
+            for addr in iface.all_addresses():
+                if addr.ip == dbchassis.primary_ip:
+                    continue
+                addrs.append(str(addr.ip))
+        if addrs:
+            raise ArgumentError("{0} still provides the following addresses, "
+                                "delete them first: {1}.".format
+                                (dbchassis, ", ".join(addrs)))
+
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis)
         q = q.filter(ChassisSlot.machine_id != None)

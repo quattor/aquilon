@@ -75,16 +75,16 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
             command)
-        self.matchoutput(out,
-                         "'/system/network/interfaces/eth0' = "
-                         "nlist('ip', '%s', 'netmask', '%s', "
-                         "'broadcast', '%s', 'gateway', '%s', "
-                         "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[0],
-                          self.net.unknown[0].netmask,
-                          self.net.unknown[0].broadcast,
-                          self.net.unknown[0].gateway),
-                         command)
+        self.searchoutput(out,
+                          r"'/system/network/interfaces/eth0' = "
+                          r"nlist\(\s*'bootproto', 'static',\s*"
+                          r"'ip', '%s',\s*'netmask', '%s',\s*"
+                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
+                          (self.net.unknown[0].usable[0],
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway),
+                          command)
         self.matchoutput(out,
             """include { 'archetype/base' };""",
             command)
@@ -124,26 +124,26 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
             """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
             command)
-        self.matchoutput(out,
-                         "'/system/network/interfaces/eth0' = "
-                         "nlist('ip', '%s', 'netmask', '%s', "
-                         "'broadcast', '%s', 'gateway', '%s', "
-                         "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[2],
-                          self.net.unknown[0].netmask,
-                          self.net.unknown[0].broadcast,
-                          self.net.unknown[0].gateway),
-                         command)
-        self.matchoutput(out,
-                         "'/system/network/interfaces/eth1' = "
-                         "nlist('ip', '%s', 'netmask', '%s', "
-                         "'broadcast', '%s', 'gateway', '%s', "
-                         "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[3],
-                          self.net.unknown[0].netmask,
-                          self.net.unknown[0].broadcast,
-                          self.net.unknown[0].gateway),
-                         command)
+        self.searchoutput(out,
+                          r"'/system/network/interfaces/eth0' = "
+                          r"nlist\(\s*'bootproto', 'static',\s*"
+                          r"'ip', '%s',\s*'netmask', '%s',\s*"
+                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
+                          (self.net.unknown[0].usable[2],
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway),
+                          command)
+        self.searchoutput(out,
+                          r"'/system/network/interfaces/eth1' = "
+                          r"nlist\(\s*'bootproto', 'static',\s*"
+                          r"'ip', '%s',\s*'netmask', '%s',\s*"
+                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
+                          (self.net.unknown[0].usable[3],
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway),
+                          command)
         self.matchoutput(out,
             """include { 'archetype/base' };""",
             command)

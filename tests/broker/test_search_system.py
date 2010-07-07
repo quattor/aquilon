@@ -85,18 +85,18 @@ class TestSearchSystem(TestBrokerCommand):
         command = "search system --shortname does-not-exist"
         self.noouttest(command.split(" "))
 
-    def testtypechassis(self):
-        command = "search system --type chassis"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
-        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+#   def testtypechassis(self):
+#       command = "search system --type chassis"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
+#       self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
-    def testtypetorswitch(self):
-        # Deprecated.
-        command = "search system --type tor_switch"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+#   def testtypetorswitch(self):
+#       # Deprecated.
+#       command = "search system --type tor_switch"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
+#       self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
     def testipavailable(self):
         command = "search system --ip %s" % self.net.unknown[0].usable[2]
@@ -124,14 +124,14 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "Network with address 199.98.16.0 not found",
                          command)
 
-    def testmacavailable(self):
-        command = "search system --mac %s" % self.net.unknown[0].usable[2].mac
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+#   def testmacavailable(self):
+#       command = "search system --mac %s" % self.net.unknown[0].usable[2].mac
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
-    def testmacunavailable(self):
-        command = "search system --mac 02:02:c7:62:10:04"
-        self.noouttest(command.split(" "))
+#   def testmacunavailable(self):
+#       command = "search system --mac 02:02:c7:62:10:04"
+#       self.noouttest(command.split(" "))
 
     def testall(self):
         command = "search system --all"

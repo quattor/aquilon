@@ -76,16 +76,18 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
-        # FIXME: This is currently not working, command nees rethinking.
-        #self.matchoutput(out, "IP: %s" % self.hostip7, command)
-        self.matchoutput(out,
-                         "Interface: eth0 %s boot=False" %
-                         self.net.unknown[0].usable[11].mac.lower(),
-                         command)
-        self.matchoutput(out,
-                         "Interface: eth1 %s boot=True" %
-                         self.net.unknown[0].usable[12].mac.lower(),
-                         command)
+        self.matchoutput(out, "Interface: eth0 %s boot=False" %
+                         self.net.unknown[0].usable[11].mac.lower(), command)
+        self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[11], command)
+        self.matchoutput(out, "Interface: eth1 %s boot=True" %
+                         self.net.unknown[0].usable[12].mac.lower(), command)
+        self.matchoutput(out, "Provides: unknown [%s]" %
+                         self.net.unknown[0].usable[12], command)
+        # Verify that the primary name got updated
+        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[11], command)
+        self.matchclean(out, str(self.net.unknown[0].usable[0]), command)
 
     def testverifycatut3c5n10interfaces(self):
         #FIX ME: this doesn't really test anything at the moment: needs to be

@@ -119,10 +119,6 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 logger.info(msg)
                 continue
             dbmachine = dbhost.machine
-            for dbinterface in dbmachine.interfaces:
-                # Verify that there's only one?
-                dbinterface.system = None
-                session.add(dbinterface)
             success.append("Removed host entry for %s (%s)" %
                            (dbmachine.label, dbmachine.fqdn))
             if dbmachine.cluster:
@@ -167,17 +163,22 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             existing = System.get_unique(session, name=short,
                                          dns_domain=dbdns_domain)
             if existing:
+                if not existing.hardware_entity:
+                    msg = "Skipping host %s: It is not a primary name." % host
+                    failed.append(msg)
+                    logger.info(msg)
                 # If these are invalid there should have been a deletion
                 # attempt above.
-                if not existing.interfaces:
+                if not existing.hardware_entity.interfaces:
                     msg = "Skipping host %s: Host already exists but has " \
                             "no interface attached." % host
                     failed.append(msg)
                     logger.info(msg)
-                elif existing.interfaces[0].mac != mac:
+                elif existing.hardware_entity.interfaces[0].mac != mac:
                     msg = "Skipping host %s: Host already exists but with " \
                             "MAC address %s and not %s." % \
-                            (host, existing.interfaces[0].mac, mac)
+                            (host, existing.hardware_entity.interfaces[0].mac,
+                             mac)
                     failed.append(msg)
                     logger.info(msg)
                 continue
@@ -199,10 +200,10 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            if dbinterface.system:
+            if dbinterface.vlans[0].assignments:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is already tied to %s." % \
-                        (host, mac, dbinterface.system.fqdn)
+                        (host, mac, dbinterface.vlans[0].assignments[0].fqdns[0])
                 failed.append(msg)
                 logger.info(msg)
                 continue
@@ -220,7 +221,6 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             session.add(dbhost)
             dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
             session.add(dbdns_rec)
-            dbinterface.system = dbdns_rec
             dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %
                            (dbmachine.label, dbdns_rec.fqdn))

@@ -28,10 +28,16 @@
 # TERMS THAT MAY APPLY.
 """Host formatter."""
 
+from sqlalchemy.sql import bindparam
+from sqlalchemy.orm import contains_eager, aliased, joinedload_all
+from sqlalchemy.orm.session import object_session
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import Network
+from aquilon.aqdb.model import (Network, AddressAssignment, System,
+                                FutureARecord, DynamicStub,
+                                PrimaryNameAssociation, DnsDomain,
+                                VlanInterface, Interface, HardwareEntity)
 
 
 class NetworkFormatter(ObjectFormatter):
@@ -71,25 +77,71 @@ class NetworkHostListFormatter(ListFormatter):
 
     def format_raw(self, netlist, indent=""):
         details = []
+
+        # The query is quite complex, so construct it only once, and use
+        # bindparams to execute it multiple times
+        if netlist:
+            session = object_session(netlist[0])
+            # System and DnsRecord are used twice, so be certain which instance
+            # is used where
+            addr_dnsrec = aliased(FutureARecord, name="addr_dnsrec")
+            addr_domain = aliased(DnsDomain, name="addr_domain")
+            pna_dnsrec = aliased(System, name="pna_dnsrec")
+            pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
+
+            q = session.query(AddressAssignment)
+            q = q.filter(AddressAssignment.ip > bindparam('ip'))
+            q = q.filter(AddressAssignment.ip < bindparam('broadcast'))
+
+            # Make sure we pick up the right System/DnsRecord instance
+            q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
+            q = q.join((addr_domain, addr_dnsrec.dns_domain_id ==
+                        addr_domain.id))
+            q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
+            q = q.options(contains_eager("dns_records.dns_domain",
+                                         alias=addr_domain))
+
+            q = q.reset_joinpoint()
+            q = q.join(VlanInterface, Interface, HardwareEntity)
+            q = q.outerjoin(PrimaryNameAssociation)
+            q = q.options(contains_eager('vlan'))
+            q = q.options(contains_eager('vlan.interface'))
+            q = q.options(contains_eager('vlan.interface.hardware_entity'))
+            q = q.options(contains_eager("vlan.interface.hardware_entity."
+                                         "_primary_name_asc"))
+
+            # Make sure we pick up the right System/DnsRecord instance
+            q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
+                             pna_dnsrec.id))
+            q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id ==
+                             pna_domain.id))
+            q = q.options(contains_eager("vlan.interface.hardware_entity."
+                                         "_primary_name_asc.dns_record",
+                                         alias=pna_dnsrec))
+            q = q.options(contains_eager("vlan.interface.hardware_entity."
+                                         "_primary_name_asc.dns_record.dns_domain",
+                                        alias=pna_domain))
+
+            q = q.order_by(AddressAssignment.ip)
+
         for network in netlist:
             # we'll get the header from the existing formatter
             nfm = NetworkFormatter()
             details.append(indent + nfm.format_raw(network))
-            # XXX should sort on either host or ip, output is ugly
-            for system in network.interfaces:
-                if hasattr(system, "fqdn"):
-                    device_name = system.fqdn
-                elif hasattr(system, "name"):
-                    device_name = system.name
-                elif hasattr(system, "machine"):
-                    device_name = system.machine.label
+
+            addrs = q.params(ip=network.network.ip,
+                             broadcast=network.broadcast).all()
+            for addr in addrs:
+                iface = addr.vlan.interface
+                hw_ent = iface.hardware_entity
+                if addr.fqdns:
+                    names = ", ".join(addr.fqdns)
                 else:
-                    device_name = system.ip
-                if system.interfaces:
-                    mac = system.interfaces[0].mac
-                else:
-                    mac = None
-                details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, mac))
+                    names = "unknown"
+                details.append(indent + "  {0:c}: {0.printable_name}, "
+                               "interface: {1.logical_name}, "
+                               "MAC: {2.mac}, IP: {1.ip} ({3})".format(
+                                   hw_ent, addr, iface, names))
         return "\n".join(details)
 
     def format_proto(self, netlist, skeleton=None):
@@ -125,12 +177,27 @@ class SimpleNetworkListFormatter(ListFormatter):
         return "\n".join(details)
 
     def format_proto(self, nlist, skeleton=None):
+        if nlist:
+            session = object_session(nlist[0])
+            addrq = session.query(AddressAssignment)
+            addrq = addrq.filter(AddressAssignment.ip > bindparam('ip'))
+            addrq = addrq.filter(AddressAssignment.ip < bindparam('broadcast'))
+            addrq = addrq.options(joinedload_all('dns_records.dns_domain'))
+            addrq = addrq.join(VlanInterface, Interface)
+            addrq = addrq.options(contains_eager('vlan'))
+            addrq = addrq.options(contains_eager('vlan.interface'))
+
+            dynq = session.query(DynamicStub)
+            dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
+            dynq = dynq.filter(DynamicStub.ip < bindparam('broadcast'))
+            dynq = dynq.options(joinedload_all('dns_domain'))
+
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
-            self.add_net_msg(netlist_msg.networks.add(), n)
+            self.add_net_msg(netlist_msg.networks.add(), n, addrq, dynq)
         return netlist_msg.SerializeToString()
 
-    def add_net_msg(self, net_msg, net):
+    def add_net_msg(self, net_msg, net, addrq, dynq):
         net_msg.name = str(net.name)
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
@@ -144,8 +211,39 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.type = str(net.network_type)
         net_msg.discoverable = net.is_discoverable
         net_msg.discovered = net.is_discovered
-        for system in net.interfaces:
-            self.add_system_msg(net_msg.hosts.add(), system)
+
+        # Add interfaces that have addresses in this network
+        addrs = addrq.params(ip=net.network.ip, broadcast=net.broadcast).all()
+        for addr in addrs:
+            iface = addr.vlan.interface
+
+            host_msg = net_msg.hosts.add()
+            if iface.interface_type == 'management':
+                host_msg.type = 'manager'
+            else:
+                host_msg.type = 'host'
+
+            if addr.dns_records:
+                host_msg.hostname = str(addr.dns_records[0].name)
+                host_msg.fqdn = str(addr.dns_records[0].fqdn)
+                host_msg.dns_domain = str(addr.dns_records[0].dns_domain)
+            host_msg.ip = str(addr.ip)
+
+            # This ensures that we do not generate multiple DHCP entries if the
+            # host has multiple addresses
+            if iface.interface_type != 'public' or (iface.bootable and not
+                                                    addr.label):
+                host_msg.mac = iface.mac
+
+        # Add dynamic DHCP records
+        dynhosts = dynq.params(ip=net.network.ip, broadcast=net.broadcast).all()
+        for dynhost in dynhosts:
+            host_msg = net_msg.hosts.add()
+            host_msg.type = 'dyndns_stub'
+            host_msg.hostname = str(dynhost.name)
+            host_msg.fqdn = str(dynhost.fqdn)
+            host_msg.dns_domain = str(dynhost.dns_domain)
+            host_msg.ip = str(dynhost.ip)
 
     def csv_fields(self, network):
         return (network.name, network.ip, network.netmask,

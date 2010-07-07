@@ -322,4 +322,16 @@ CREATE TABLE address_assignment (
 	CONSTRAINT "ADDR_ASSIGN_VLAN_IP_UK" UNIQUE (vlan_interface_id, ip)
 );
 
+-- Convert system.ip to address_assignment
+INSERT INTO address_assignment (id, vlan_interface_id, ip, label, creation_date)
+	SELECT address_assignment_seq.NEXTVAL, viface.id, system.ip, '-', system.creation_date
+	FROM vlan_interface viface, interface, system
+	WHERE viface.interface_id = interface.id AND
+		viface.vlan_id = 0 AND
+		interface.system_id = system.id AND
+		system.ip IS NOT NULL;
+
+-- Drop interface.system_id
+ALTER TABLE interface DROP COLUMN system_id;
+
 QUIT;

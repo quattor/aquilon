@@ -91,6 +91,11 @@ class CommandDelHost(BrokerCommand):
                             % (fqdn, binding.cfg_path))
                 session.delete(binding)
 
+            for iface in dbmachine.interfaces:
+                for vlan in iface.vlan_ids:
+                    if ip in iface.vlans[vlan].addresses:
+                        iface.vlans[vlan].addresses.remove(ip)
+
             session.delete(dbhost)
             session.delete(dbmachine.primary_name)
             session.flush()

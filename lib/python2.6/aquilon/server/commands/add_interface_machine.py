@@ -35,7 +35,6 @@ from sqlalchemy.sql.expression import asc, desc, bindparam
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  IncompleteError, UnimplementedError)
 from aquilon.aqdb.model import Interface, Machine, Manager
-from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
@@ -94,8 +93,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
-                dummy_ip = prev.system.ip
-                old_network = prev.system.network
+                dummy_ip = prev.vlans[0].assignments[0].ip
+                old_network = prev.vlans[0].assignments[0].network
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
                 self.remove_dsdb(logger, dummy_ip)
@@ -133,8 +132,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
-            dbinterface.system = dbmanager
-            session.add(dbmanager)
+            dbinterface.vlans[0].addresses.append(dbmanager.ip)
 
         session.add(dbinterface)
         session.flush()
@@ -149,7 +147,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 logger.client_info("Could not reserve IP address %s for %s "
                                    "in DSDB: %s" %
                                    (dbmanager.ip, dbmanager.fqdn, e))
-                dbinterface.system = None
+                dbinterface.vlans[0].addresses.remove(dbmanager.ip)
                 session.add(dbinterface)
                 session.delete(dbmanager)
                 session.flush()
@@ -189,7 +187,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # The below seems too simple to warrant that, though...
         logger.info("Removing blind host '%s', machine '%s', "
                     "and interface '%s'" %
-                    (prev.system.fqdn, prev.hardware_entity.label, prev.name))
+                    (prev.hardware_entity.fqdn, prev.hardware_entity.label,
+                     prev.name))
         host_plenary_info = PlenaryHost(prev.hardware_entity.host, logger=logger)
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
@@ -260,6 +259,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,
                             machine=dbmachine,
                             ip=old_ip, network=old_network)
+        session.add(dbmanager)
         return dbmanager
 
     def generate_mac(self, session, dbmachine):

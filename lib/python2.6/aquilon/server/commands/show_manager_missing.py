@@ -28,10 +28,14 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show manager --missing`."""
 
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.sql import exists
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.interface import MissingManagersList
-from aquilon.aqdb.model import Interface
+from aquilon.aqdb.model import (Interface, VlanInterface, AddressAssignment,
+                                HardwareEntity, PrimaryNameAssociation, System,
+                                DnsDomain)
 
 
 class CommandShowManagerMissing(BrokerCommand):
@@ -39,7 +43,22 @@ class CommandShowManagerMissing(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(Interface)
         q = q.filter_by(interface_type='management')
-        q = q.filter(Interface.system==None)
-        q = q.join('hardware_entity')
+        q = q.join(VlanInterface)
+        q = q.filter(~exists().where(AddressAssignment.vlan_interface_id ==
+                                     VlanInterface.id))
+        q = q.reset_joinpoint()
+        q = q.join(HardwareEntity)
         q = q.filter_by(hardware_type='machine')
+        q = q.options(contains_eager('hardware_entity'))
+
+        # MissingManagerList wants the fqdn, so get it in one go
+        q = q.outerjoin(PrimaryNameAssociation, System, DnsDomain)
+        q = q.options(contains_eager('hardware_entity._primary_name_asc'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.'
+                                     'dns_record'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.'
+                                     'dns_record.dns_domain'))
+
+        # Order by FQDN if it exists, otherwise fall back to the label
+        q = q.order_by(System.name, DnsDomain.name, HardwareEntity.label)
         return MissingManagersList(q.all())
