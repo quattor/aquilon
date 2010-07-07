@@ -112,6 +112,7 @@ class Base(object):
         table = cls.__table__
         mapper = cls.__mapper__
         caller = sys._getframe(1).f_code.co_name
+        clslabel = cls._get_class_label()
 
         if not isinstance(session, Session):
             raise TypeError("The first argument of %s() must be an "
@@ -158,17 +159,23 @@ class Base(object):
             query = query.filter(getattr(cls, field) == value)
 
             # Now some beautification...
-            name = value.name if hasattr(value, "name") else str(value)
-            if field == "name":
-                desc.append(name)
+            poly_column = getattr(mapper, "polymorphic_on", None)
+            if poly_column is not None and poly_column.name == field:
+                # Return "Building foo" instead of "Location foo, location_type
+                # building"
+                clslabel = mapper.polymorphic_map[value].class_._get_class_label()
             else:
-                desc.append(field + " " + name)
+                name = value.name if hasattr(value, "name") else str(value)
+                if field == "name":
+                    desc.append(name)
+                else:
+                    desc.append(field + " " + name)
 
         # Check for arguments we don't know about
         if kwargs:
             raise InternalError("Extra arguments to %s(): %s." %
                                 (caller, kwargs))
-        return (query, desc)
+        return (query, clslabel, desc)
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
@@ -176,34 +183,33 @@ class Base(object):
         preclude = kwargs.pop('preclude', False)
 
         query = session.query(cls)
-        (query, desc) = cls._selection_helper(session, query, *args, **kwargs)
+        (query, clslabel, desc) = cls._selection_helper(session, query, *args,
+                                                        **kwargs)
         try:
             obj = query.one()
             if preclude:
-                msg = "%s %s already exists." % (cls._get_class_label(),
-                                                 ", ".join(desc))
+                msg = "%s %s already exists." % (clslabel, ", ".join(desc))
                 _raise_custom(preclude, ArgumentError, msg)
             return obj
         except NoResultFound:
             if not compel:
                 return None
-            msg = "%s %s not found." % (cls._get_class_label(), ", ".join(desc))
+            msg = "%s %s not found." % (clslabel, ", ".join(desc))
             _raise_custom(compel, NotFoundException, msg)
         except MultipleResultsFound:
-                msg = "%s %s is not unique." % (cls._get_class_label(),
-                                                ", ".join(desc))
+                msg = "%s %s is not unique." % (clslabel, ", ".join(desc))
                 raise ArgumentError(msg)
 
     @classmethod
     def get_matching_query(cls, session, *args, **kwargs):
         compel = kwargs.get('compel', False)
         query = session.query(cls.__table__.c.id)
-        (query, desc) = cls._selection_helper(session, query, *args, **kwargs)
+        (query, clslabel, desc) = cls._selection_helper(session, query, *args,
+                                                        **kwargs)
         if compel:
             obj = query.first()
             if obj is None:
-                msg = "%s %s not found." % (cls._get_class_label(),
-                                            ", ".join(desc))
+                msg = "%s %s not found." % (clslabel, ", ".join(desc))
                 _raise_custom(compel, NotFoundException, msg)
         return query.subquery()
 
