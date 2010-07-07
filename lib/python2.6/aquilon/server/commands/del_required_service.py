@@ -29,11 +29,9 @@
 """Contains the logic for `aq del required service`."""
 
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Archetype, Service, ServiceListItem
+from aquilon.aqdb.model import Archetype, Service
 
 
 class CommandDelRequiredService(BrokerCommand):
@@ -44,11 +42,9 @@ class CommandDelRequiredService(BrokerCommand):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         try:
-            dbsli = session.query(ServiceListItem).filter_by(
-                    service=dbservice, archetype=dbarchetype).one()
-        except NoResultFound:
+            dbservice.archetypes.remove(dbarchetype)
+        except ValueError:
             raise NotFoundException("Service %s required for archetype %s "
                                     "not found." % (service, archetype))
-        session.delete(dbsli)
         session.flush()
         return

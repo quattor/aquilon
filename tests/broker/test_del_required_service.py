@@ -44,6 +44,10 @@ class TestDelRequiredService(TestBrokerCommand):
         command = "del required service --service afs --archetype aquilon"
         self.noouttest(command.split(" "))
 
+    def testdelrequiredafsagain(self):
+        command = "del required service --service afs --archetype aquilon"
+        self.notfoundtest(command.split(" "))
+
     def testdelrequireddns(self):
         command = "del required service --service dns --archetype aquilon"
         self.noouttest(command.split(" "))
@@ -80,6 +84,11 @@ class TestDelRequiredService(TestBrokerCommand):
             command = ["del_required_service", "--service", service,
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
+
+    def testdelrequiredpersonalityagain(self):
+        command = ["del", "required", "service", "--service", "chooser1",
+                   "--archetype=aquilon", "--personality=unixeng-test"]
+        self.notfoundtest(command)
 
     def testverifydelrequiredpersonality(self):
         command = ["show_personality", "--archetype=aquilon",

@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, Service, PersonalityServiceListItem
+from aquilon.aqdb.model import Personality, Service
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
@@ -43,15 +43,9 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
-        # Provide a better error message than preclude=True would give
-        if PersonalityServiceListItem.get_unique(session,
-                                                 personality=dbpersonality,
-                                                 service=dbservice):
+        if dbpersonality in dbservice.personalities:
             raise ArgumentError("Service %s is already required by personality "
                                 "%s, archetype %s." % (service, personality,
                                                        archetype))
-        dbpsli = PersonalityServiceListItem(personality=dbpersonality,
-                                            service=dbservice,
-                                            comments=comments)
-        session.add(dbpsli)
+        dbservice.personalities.append(dbpersonality)
         return
