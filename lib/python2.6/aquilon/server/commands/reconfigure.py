@@ -34,6 +34,7 @@ from aquilon.server.commands.make import CommandMake
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.aqdb.model import BuildItem, Archetype, Personality
+from aquilon.aqdb.model.status import host_status_transitions as graph
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -42,7 +43,7 @@ class CommandReconfigure(CommandMake):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, archetype, personality, buildstatus,
+    def render(self, session, logger, hostname, archetype, personality, buildstatus,
                osname, osversion, os, **arguments):
         """There is some duplication here with make.
 
@@ -67,9 +68,24 @@ class CommandReconfigure(CommandMake):
             if not (buildstatus or personality or osname or osversion or os):
                 raise ArgumentError("Nothing to do.")
 
-            if buildstatus:
+            if buildstatus and dbhost.status.name != buildstatus:
                 dbstatus = get_status(session, buildstatus)
+                if buildstatus == "ready" and dbhost.cluster:
+                    if dbhost.cluster.status.name != "ready":
+                        logger.info("cluster is not ready, so forcing ready state to almostready")
+                        buildstatus = "almostready"
+
+                if buildstatus not in graph:
+                    raise ArgumentError("state '%s' is not valid. Try one of: %s" %
+                                        (buildstatus, ", ".join(graph.keys())))
+
+                if buildstatus not in graph[dbhost.status.name]:
+                    raise ArgumentError("cannot change state to '%s' from '%s'. Legal states are: %s" %
+                                        (buildstatus, dbhost.status.name,
+                                         ", ".join(graph[dbhost.status.name])))
                 dbhost.status = dbstatus
+
+
             if personality:
                 dbpersonality = Personality.get_unique(session,
                                                        name=personality,
@@ -94,7 +110,7 @@ class CommandReconfigure(CommandMake):
             session.add(dbhost)
             return
 
-        return CommandMake.render(self, session=session, hostname=hostname,
+        return CommandMake.render(self, session=session, logger=logger, hostname=hostname,
                                   archetype=archetype, personality=personality,
                                   osname=osname, osversion=osversion, os=os,
                                   buildstatus=buildstatus, **arguments)

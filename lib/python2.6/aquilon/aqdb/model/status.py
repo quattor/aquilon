@@ -38,7 +38,28 @@ from aquilon.aqdb.model import Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-_statuses = ['blind', 'build', 'ready', 'failed', 'install']
+# The list of possible host transitions. Note that some of these
+# transitions should not really be possible to a user,
+# however we list all possible transitions, since we want
+# to allow for sysadmins to kick a state transition that is
+# broken.
+host_status_transitions = {
+               'blind'        : ['build', 'decoed'],
+               'build'        : ['almostready','ready', 'decoed'],
+               'install'      : ['build', 'decoed'],
+               'almostready'  : ['ready', 'decoed'],
+               'ready'        : ['rebuild', 'reinstall', 'failed', 'decoed'],
+               'reinstall'    : ['rebuild', 'decoed'],
+               'rebuild'      : ['ready', 'decoed'],
+               'failed'       : ['rebuild', 'decoed'],
+               }
+
+# The list of possible cluster transitions (simpler than hosts)
+cluster_status_transitions = {
+                  'build'   : [ 'ready' ],
+                  'ready'   : [ 'rebuild' ],
+                  'rebuild' : [ 'ready' ]
+                  }
 
 _TN = 'status'
 
@@ -67,15 +88,15 @@ status.info['unique_fields'] = ['name']
 
 @monkeypatch(status)
 def populate(sess, *args, **kw):
-    from sqlalchemy import insert
     from sqlalchemy.exceptions import IntegrityError
 
-    if len(sess.query(Status).all()) < len(_statuses):
-        i=status.insert()
-        for name in _statuses:
-            try:
-                i.execute(name=name)
-            except IntegrityError:
-                pass
+    statuslist = dict(host_status_transitions, **cluster_status_transitions).keys()
 
-    assert len(sess.query(Status).all()) == len(_statuses)
+    i=status.insert()
+    for name in statuslist:
+        try:
+            i.execute(name=name)
+        except IntegrityError:
+            pass
+
+    assert len(sess.query(Status).all()) == len(statuslist)

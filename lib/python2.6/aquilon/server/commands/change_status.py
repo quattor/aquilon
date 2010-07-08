@@ -36,6 +36,7 @@ from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
+from aquilon.aqdb.model.status import host_status_transitions as graph
 
 
 class CommandChangeStatus(BrokerCommand):
@@ -45,10 +46,29 @@ class CommandChangeStatus(BrokerCommand):
     def render(self, session, logger, hostname, buildstatus, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
-        if buildstatus:
-            dbstatus = get_status(session, buildstatus)
-            dbhost.status = dbstatus
-            session.add(dbhost)
+        # almostready is a magical state that will be automatically
+        # used if the input requests us to move to 'ready', but we're
+        # in a cluster which isn't ready yet.
+        if buildstatus == "ready" and dbhost.cluster:
+            if dbhost.cluster.status.name != "ready":
+                logger.info("cluster is not ready, so forcing ready state to almostready")
+                buildstatus = "almostready"
+
+        if buildstatus == dbhost.status.name:
+            return
+
+        if buildstatus not in graph:
+            raise ArgumentError("state '%s' is not valid. Try one of: %s" %
+                                (buildstatus, ", ".join(graph.keys())))
+
+        if buildstatus not in graph[dbhost.status.name]:
+            raise ArgumentError("cannot change state to '%s' from '%s'. Legal states are: %s" %
+                                (buildstatus, dbhost.status.name,
+                                 ", ".join(graph[dbhost.status.name])))
+
+        dbstatus = get_status(session, buildstatus)
+        dbhost.status = dbstatus
+        session.add(dbhost)
 
         if not dbhost.archetype.is_compileable:
             return

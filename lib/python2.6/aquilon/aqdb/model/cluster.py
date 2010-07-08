@@ -37,7 +37,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
+from aquilon.aqdb.model import (Base, Status, Host, Service, Location, Personality,
                                 ServiceInstance, Machine, Branch, TorSwitch,
                                 UserPrincipal)
 
@@ -82,6 +82,10 @@ class Cluster(Base):
     #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, default=2, nullable=True)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    status_id = Column(Integer, ForeignKey('status.id',
+                                              name='cluster_status_fk'),
+                          nullable=False)
+    status = relation(Status, backref='clusters')
     comments      = Column(String(255))
 
     location_constraint = relation(Location,

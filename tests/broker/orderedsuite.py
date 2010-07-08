@@ -98,6 +98,7 @@ from test_make_aquilon import TestMakeAquilon
 from test_make import TestMake
 from test_make_cluster import TestMakeCluster
 from test_bind_esx_cluster import TestBindESXCluster
+from test_change_status_cluster import TestChangeClusterStatus
 from test_rebind_esx_cluster import TestRebindESXCluster
 from test_rebind_metacluster import TestRebindMetaCluster
 from test_add_virtual_hardware import TestAddVirtualHardware
@@ -222,7 +223,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
                 TestMakeAquilon, TestMakeCluster,
-                TestBindESXCluster, TestRebindESXCluster, TestMake,
+                TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster, TestMake,
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,

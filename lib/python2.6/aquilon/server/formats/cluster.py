@@ -59,6 +59,7 @@ class ClusterFormatter(ObjectFormatter):
             if cluster.switch:
                 details.append(indent + "  ToR Switch: %s" %
                                cluster.switch.fqdn)
+        details.append(indent + "  Buildstatus: %s" % cluster.status)
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         if cluster.branch.branch_type == 'domain':
             details.append(indent + "  Domain: %s" % cluster.branch.name)

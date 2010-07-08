@@ -33,7 +33,9 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.aqdb.model import EsxCluster, HostClusterMember
 from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.services import Chooser
+from aquilon.server.dbwrappers.status import get_status
 
 
 class CommandBindESXClusterHostname(BrokerCommand):
@@ -102,6 +104,17 @@ class CommandBindESXClusterHostname(BrokerCommand):
         # If this host is already bound to the cluster,
         # rewrite the plenary anyway.
 
+        # So, we're all good... one final check: if the host was "ready", but
+        # we've added this host into a "build" cluster, then we need to demote
+        # the host down to "almostready".
+        plenaryhost = None
+        if dbhost.status.name == "ready" and dbcluster.status.name == "build":
+            logger.info("cluster is still being built, so host will be demoted to 'almostready'")
+            dbstatus = get_status(session, "almostready")
+            dbhost.status = dbstatus
+            plenaryhost = PlenaryHost(dbhost, logger=logger)
+            session.add(dbhost)
+
         session.flush()
         session.refresh(dbcluster)
 
@@ -112,6 +125,9 @@ class CommandBindESXClusterHostname(BrokerCommand):
         else:
             plenary = PlenaryCluster(dbcluster, logger=logger)
             plenary.write()
+
+        if plenaryhost:
+            plenaryhost.write()
 
         return
 
