@@ -44,13 +44,6 @@ class CommandBindESXClusterHostname(BrokerCommand):
                **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-        if dbhost.personality != dbcluster.personality:
-            raise ArgumentError("Host archetype %s personality %s does not "
-                                "match cluster archetype %s personality %s." %
-                                (dbhost.personality.archetype.name,
-                                 dbhost.personality.name,
-                                 dbcluster.personality.archetype.name,
-                                 dbcluster.personality.name))
         if dbhost.machine.location != dbcluster.location_constraint and \
            dbcluster.location_constraint not in \
            dbhost.machine.location.parents:
@@ -60,6 +53,13 @@ class CommandBindESXClusterHostname(BrokerCommand):
                                  dbhost.machine.location.name,
                                  dbcluster.location_constraint.location_type.capitalize(),
                                  dbcluster.location_constraint.name))
+        if dbhost.personality != dbcluster.personality:
+            logger.client_info("Updating host %s to match cluster "
+                               "archetype %s personality %s.",
+                               dbhost.fqdn,
+                               dbcluster.personality.archetype.name,
+                               dbcluster.personality.name)
+            dbhost.personality = dbcluster.personality
         if dbhost.cluster and dbhost.cluster != dbcluster:
             if not force:
                 raise ArgumentError("Host %s is already bound to %s cluster %s."

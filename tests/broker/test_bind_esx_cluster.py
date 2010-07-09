@@ -92,12 +92,30 @@ class TestBindESXCluster(TestBrokerCommand):
                          "ESX Cluster cluster-does-not-exist not found.",
                          command)
 
-    def testfailbadarchetype(self):
-        command = ["bind_esx_cluster",
-                   "--hostname=aquilon61.aqd-unittest.ms.com",
-                   "--cluster", "utecl1"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "does not match cluster archetype", command)
+    def testbinddifferentarchetype(self):
+        # Need the host to be in the same domain for the bind to work...
+        command = ["manage", "--domain=unittest",
+                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        command = ["bind_esx_cluster", "--cluster=utecl1",
+                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         "Updating host aquilon61.aqd-unittest.ms.com to "
+                         "match cluster archetype vmhost "
+                         "personality esx_desktop",
+                         command)
+        # Restore the host.
+        command[0] = "unbind_esx_cluster"
+        out = self.commandtest(command)
+        user = self.config.get("unittest", "user")
+        command = ["manage", "--sandbox=%s/utsandbox" % user,
+                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        command = ["reconfigure",
+                   "--archetype=aquilon", "--personality=inventory",
+                   "--hostname=aquilon61.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
 
     # FIXME: This fails becuase the personality check comes first.
     # Re-enable after we can reconfigure one of the aquilon7x or aquilon9x
