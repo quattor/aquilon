@@ -96,6 +96,11 @@ def run_command(args, env=None, path=".",
             continue
         shell_env[envname] = envvalue
 
+    # Add a default value for the PATH.
+    for envname in ["PATH"]:
+        if envname not in shell_env and envname in os.environ:
+            shell_env[envname] = os.environ[envname]
+
     # Force any arguments to be strings... takes care of unicode from
     # the database.
     command_args = [str(arg) for arg in args]
