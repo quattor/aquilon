@@ -226,6 +226,24 @@ class Chooser(object):
         # Only implemented for hosts.
         pass
 
+    def get_footprint(self, instance):
+        return 1
+
+    def instance_full(self, instance, max_clients, current_clients):
+        """Check if the instance is effectively full.
+
+        This check is complicated because clusters have a larger impact
+        than a single host does.
+
+        """
+        if max_clients is None:
+            return False
+        if instance == self.original_service_instances.get(instance.service):
+            if current_clients > max_clients:
+                return True
+            return False
+        return current_clients + self.get_footprint(instance) > max_clients
+
     def choose_available_capacity(self, dbservice):
         """Verify that the available instances have spare capacity.
 
@@ -236,14 +254,7 @@ class Chooser(object):
         for instance in self.staging_services[dbservice][:]:
             max_clients = instance.enforced_max_clients
             current_clients = instance.client_count
-            if max_clients is not None and current_clients >= max_clients:
-                # We shouldn't use this instance, unless...
-                if current_clients == max_clients and \
-                   self.original_service_instances.get(dbservice) == instance:
-                    # It's OK to choose an instance right at the limit if
-                    # this host is already bound to that instance.
-                    continue
-                # Not the edge case, toss it.
+            if self.instance_full(instance, max_clients, current_clients):
                 self.staging_services[dbservice].remove(instance)
                 maxed_out_instances.add(instance)
                 self.logger.debug("Rejected service %s instance %s with "
@@ -604,6 +615,13 @@ class ClusterChooser(Chooser):
     def generate_description(self):
         return "%s cluster %s" % (self.dbcluster.cluster_type,
                                   self.dbcluster.name)
+
+    def get_footprint(self, instance):
+        """If this cluster is bound to a service, how many hosts bind?"""
+        cluster_types = instance.service.aligned_cluster_types
+        if self.dbcluster.cluster_type in cluster_types:
+            return self.dbcluster.max_hosts
+        return 0
 
     def apply_changes(self):
         """Update the cluster object with pending changes."""
