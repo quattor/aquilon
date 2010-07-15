@@ -111,6 +111,7 @@ class DynamicStub(System):
     """
     __tablename__ = 'dynamic_stub'
     __mapper_args__ = {'polymorphic_identity':'dynamic_stub'}
+    _class_label = 'Dynamic Stub'
 
     system_id = Column(Integer, ForeignKey('system.id',
                                            name='dynamic_stub_system_fk',
@@ -118,3 +119,20 @@ class DynamicStub(System):
                        primary_key=True)
 
 DynamicStub.__table__.primary_key.name='dynamic_stub_pk'
+
+class FutureARecord(System):
+    """FutureARecord is a placeholder to let us add name/IP addresses now.
+
+    This will be done differently after the DNS revamp.
+
+    """
+    __tablename__ = 'future_a_record'
+    __mapper_args__ = {'polymorphic_identity':'future_a_record'}
+    _class_label = 'DNS Record'
+
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='future_a_record_system_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
+
+FutureARecord.__table__.primary_key.name='future_a_record_pk'

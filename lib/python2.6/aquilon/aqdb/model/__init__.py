@@ -66,7 +66,7 @@ from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw
 
 #SYSTEM
-from aquilon.aqdb.model.system import System, DynamicStub
+from aquilon.aqdb.model.system import System, DynamicStub, FutureARecord
 from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.manager import Manager
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox

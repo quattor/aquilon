@@ -84,6 +84,7 @@ from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
+from test_add_address import TestAddAddress
 from test_add_dynamic_range import TestAddDynamicRange
 from test_add_host import TestAddHost
 from test_add_aquilon_host import TestAddAquilonHost
@@ -155,6 +156,7 @@ from test_del_10gig_hardware import TestDel10GigHardware
 from test_del_virtual_hardware import TestDelVirtualHardware
 from test_unbind_esx_cluster import TestUnbindESXCluster
 from test_del_dynamic_range import TestDelDynamicRange
+from test_del_address import TestDelAddress
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
@@ -217,7 +219,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
-                TestAddDynamicRange, TestAddHost,
+                TestAddAddress, TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager,
                 TestMapService, TestBindClient, TestPrebindServer,
@@ -255,7 +257,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
                 TestUnbindESXCluster,
-                TestDelDynamicRange,
+                TestDelDynamicRange, TestDelAddress,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch,
