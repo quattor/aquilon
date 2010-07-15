@@ -169,7 +169,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                         "Plenary file '%s' not created." % newpath)
 
     def test_300_failrebindhost(self):
-        command = ["rebind_esx_cluster", "--cluster=utecl1",
+        command = ["cluster", "--cluster=utecl1",
                    "--host=evh1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot support VMs", command)

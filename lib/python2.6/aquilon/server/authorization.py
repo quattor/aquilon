@@ -104,6 +104,7 @@ class AuthorizationBroker(object):
                               'add_esx_cluster', 'update_esx_cluster',
                               'bind_esx_cluster_hostname',
                               'rebind_esx_cluster_hostname',
+                              'cluster',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)

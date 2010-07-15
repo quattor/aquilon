@@ -44,54 +44,17 @@ from brokertest import TestBrokerCommand
 class TestUnbindESXCluster(TestBrokerCommand):
 
     def testfailunbindevh1(self):
+        # This test is duplicated in uncluster, but here it is testing the
+        # deprecation warning.  This test can be removed if/when the
+        # --hostname option is removed from unbind_esx_cluster.
         command = ["unbind_esx_cluster",
                    "--hostname", "evh1.aqd-unittest.ms.com",
                    "--cluster", "utecl1"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Host evh1.aqd-unittest.ms.com is bound to "
-                         "esx cluster utecl2, not ESX Cluster utecl1.",
+        (p, out, err) = self.runcommand(command)
+        self.matchoutput(err,
+                         "WARNING: unbind_esx_cluster --hostname is "
+                         "deprecated, use the uncluster command instead.",
                          command)
-
-    def testunbindutecl1(self):
-        for i in range(2, 5):
-            self.noouttest(["unbind_esx_cluster",
-                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                            "--cluster", "utecl1"])
-
-    def testverifycat(self):
-        command = "cat --cluster utecl1"
-        out = self.commandtest(command.split())
-        self.matchoutput(out, "'/system/cluster/members' = list();", command)
-
-    def testunbindutecl2(self):
-        for i in [1, 5]:
-            self.noouttest(["unbind_esx_cluster",
-                            "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                            "--cluster", "utecl2"])
-
-    def testverifyunbindhosts(self):
-        for i in range(1, 6):
-            command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
-            out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
-                             command)
-            self.matchclean(out, "Member of esx cluster", command)
-
-    def testfailmissingcluster(self):
-        command = ["unbind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "cluster-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "ESX Cluster cluster-does-not-exist not found.",
-                         command)
-
-    def testfailunboundcluster(self):
-        command = ["unbind_esx_cluster",
-                   "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "utecl1"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "not bound to a cluster", command)
 
     def testfailservicemissingcluster(self):
         command = ["unbind_esx_cluster", "--cluster", "cluster-does-not-exist",
@@ -140,15 +103,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
                    "--service=utsvc", "--instance=utsi1"]
         out = self.commandtest(command)
 
-    def testunbindutmc4(self):
-        for i in range(1, 25):
-            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
-            cluster = "utecl%d" % (5 + ((i - 1) / 4))
-            self.noouttest(["unbind_esx_cluster",
-                            "--hostname", host, "--cluster", cluster])
-
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

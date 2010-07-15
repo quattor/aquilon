@@ -28,41 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import (NotFoundException,
-                                 ArgumentError,
-                                 IncompleteError)
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import EsxCluster, HostClusterMember
-from aquilon.server.templates.base import PlenaryCollection
-from aquilon.server.templates.host import PlenaryHost
-from aquilon.server.templates.cluster import PlenaryCluster
+from aquilon.server.commands.uncluster import CommandUncluster
 
 
-class CommandUnbindESXClusterHostname(BrokerCommand):
+class CommandUnbindESXClusterHostname(CommandUncluster):
 
-    required_parameters = ["hostname", "cluster"]
-
-    def render(self, session, logger, hostname, cluster, **arguments):
-        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-        dbhost = hostname_to_host(session, hostname)
-        if not dbhost.cluster:
-            raise ArgumentError("Host %s is not bound to a cluster." % hostname)
-        if dbhost.cluster != dbcluster:
-            raise ArgumentError("Host %s is bound to %s cluster %s, "
-                                "not ESX Cluster %s." %
-                                (hostname, dbhost.cluster.cluster_type,
-                                 dbhost.cluster.name, cluster))
-        dbhcm = HostClusterMember.get_unique(session, cluster=dbcluster,
-                                             host=dbhost)
-        session.delete(dbhcm)
-        session.flush()
-
-        session.refresh(dbcluster)
-        if hasattr(dbcluster, 'verify_ratio'):
-            dbcluster.verify_ratio()
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryHost(dbhost, logger=logger))
-        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
-        plenaries.write()
+    def render(self, **arguments):
+        logger = arguments['logger']
+        logger.client_info("WARNING: unbind_esx_cluster --hostname is "
+                           "deprecated, use the uncluster command instead.")
+        return CommandUncluster.render(self, **arguments)

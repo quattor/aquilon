@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -28,12 +28,40 @@
 # TERMS THAT MAY APPLY.
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.cluster import CommandCluster
 from aquilon.server.dbwrappers.host import hostname_to_host
+from aquilon.aqdb.model import Cluster, HostClusterMember
+from aquilon.server.templates.base import PlenaryCollection
+from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.cluster import PlenaryCluster
 
 
-class CommandRebindESXClusterHostname(CommandCluster):
+class CommandUncluster(BrokerCommand):
 
-    def render(self, **arguments):
-        return CommandCluster.render(self, **arguments)
+    required_parameters = ["hostname", "cluster"]
+
+    def render(self, session, logger, hostname, cluster, **arguments):
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        dbhost = hostname_to_host(session, hostname)
+        if not dbhost.cluster:
+            raise ArgumentError("Host %s is not bound to a cluster." % hostname)
+        if dbhost.cluster != dbcluster:
+            raise ArgumentError("Host %s is bound to %s cluster %s, "
+                                "not %s cluster %s." %
+                                (hostname, dbhost.cluster.cluster_type,
+                                 dbhost.cluster.name,
+                                 dbcluster.cluster_type, dbcluster.name))
+        dbhcm = HostClusterMember.get_unique(session, cluster=dbcluster,
+                                             host=dbhost)
+        session.delete(dbhcm)
+        session.flush()
+
+        session.refresh(dbcluster)
+        if hasattr(dbcluster, 'verify_ratio'):
+            dbcluster.verify_ratio()
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryHost(dbhost, logger=logger))
+        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+        plenaries.write()
