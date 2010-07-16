@@ -146,11 +146,19 @@ class CommandSearchESXCluster(BrokerCommand):
 
         dblocation = get_location(session, **location_args['cluster_'])
         if dblocation:
-            q = q.filter_by(location_constraint=dblocation)
+            if location_args['cluster_']['exact_location']:
+                q = q.filter_by(location_constraint=dblocation)
+            else:
+                childids = dblocation.offspring_ids()
+                q = q.filter(EsxCluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['vmhost_'])
         if dblocation:
             q = q.join('_hosts', 'host', 'machine')
-            q = q.filter_by(location=dblocation)
+            if location_args['vmhost_']['exact_location']:
+                q = q.filter_by(location=dblocation)
+            else:
+                childids = dblocation.offspring_ids()
+                q = q.filter(Machine.location_id.in_(childids))
             q = q.reset_joinpoint()
 
         q = q.order_by(EsxCluster.name)

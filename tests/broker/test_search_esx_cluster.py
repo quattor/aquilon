@@ -286,6 +286,14 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl3", command)
         self.matchclean(out, "utecl4", command)
 
+    def testvmhostlocationbuilding(self):
+        command = "search esx cluster --vmhost_building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "utecl1", command)
+        self.matchoutput(out, "utecl2", command)
+        self.matchclean(out, "utecl3", command)
+        self.matchclean(out, "utecl4", command)
+
     def testvmhostlocationunavailable(self):
         command = ["search_esx_cluster",
                    "--vmhost_rack=rack-does-not-exist"]

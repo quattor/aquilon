@@ -29,12 +29,14 @@
 """ How we represent location data in Aquilon """
 
 from datetime import datetime
+from collections import deque
 
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint, text)
 
 from sqlalchemy.orm import relation, backref, object_session
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr
 
@@ -132,14 +134,29 @@ class Location(Base):
             node.parent = self
             self.sublocations[node] = node
 
-    @property
-    def children(self):
-        s = text("""select * from location
-                    where id != %d
-                    connect by parent_id = prior id
-                    start with id = %d""" % (self.id, self.id))
-
-        return object_session(self).query(Location).from_statement(s).all()
+    def offspring_ids(self, exclude_self=False):
+        session = object_session(self)
+        # We have two implementations here: the first is fast but
+        # Oracle-specific, the second is slower but works with any database
+        if session.connection().dialect.name == 'oracle':
+            where = "WHERE id != %d" % self.id if exclude_self else ""
+            s = text("""SELECT id FROM location
+                        %s
+                        CONNECT BY parent_id = PRIOR id
+                        START WITH id = %d""" % (where, self.id))
+            return s
+        else:
+            queue = deque([self.id])
+            offsprings = []
+            while queue:
+                node_id = queue.popleft()
+                offsprings.append(node_id)
+                q = session.query(Location.id).filter_by(parent_id=node_id)
+                children = [item.id for item in q.all()]
+                queue.extend(children)
+            if exclude_self:
+                offsprings.remove(self.id)
+            return offsprings
 
     def sysloc(self):
         components = ['building', 'city', 'continent']
@@ -147,14 +164,6 @@ class Location(Base):
             if component not in self.p_dict:
                 return None
         return str('.'.join([str(self.p_dict[item]) for item in components]))
-
-    def typed_children(self, typ):
-        s = text("""select * from location
-                    where location_type = '%s'
-                    connect by parent_id = prior id
-                    start with id = %d""" % (typ, self.id))
-
-        return object_session(self).query(Location).from_statement(s).all()
 
     def get_parts(self):
         parts = list(self.parents)

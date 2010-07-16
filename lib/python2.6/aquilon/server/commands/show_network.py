@@ -58,7 +58,8 @@ class CommandShowNetwork(BrokerCommand):
             q = q.filter_by(is_discovered = discovered)
         dblocation = get_location(session, **arguments)
         if dblocation:
-            q = q.filter_by(location=dblocation)
+            childids = dblocation.offspring_ids()
+            q = q.filter(Network.location_id.in_(childids))
         q = q.order_by(Network.ip)
         if hosts:
             return NetworkHostList(q.all())
