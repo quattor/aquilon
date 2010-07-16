@@ -31,13 +31,14 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import System
+from aquilon.aqdb.model import System, DynamicStub, FutureARecord
 
 
-# Should never get invoked...
 class SystemFormatter(ObjectFormatter):
     def format_raw(self, system, indent=""):
-        details = [indent + "%s: %s" % (system.system_type, system.fqdn)]
+        # This should be replaced by format()...
+        label = getattr(system, '_class_label', system.system_type)
+        details = [indent + "%s: %s" % (label, system.fqdn)]
         if system.ip:
             details.append(indent + "  IP: %s" % system.ip)
         if system.mac:
@@ -46,7 +47,11 @@ class SystemFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % system.comments)
         return "\n".join(details)
 
+# The System entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[System] = SystemFormatter()
+
+ObjectFormatter.handlers[DynamicStub] = SystemFormatter()
+ObjectFormatter.handlers[FutureARecord] = SystemFormatter()
 
 
 class SimpleSystemList(list):

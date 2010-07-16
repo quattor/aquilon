@@ -2869,4 +2869,31 @@
       <transport method="delete" path="dynamic_range/%(startip)s/%(endip)s" />
    </command>
 
+   <command name="add_address">
+      Add DNS addresses to the database.
+      <optgroup name="add_address_mandatory" mandatory="True" fields="all">
+         <option name="fqdn" type="string">A fully qualified domain name</option>
+         <option name="ip" type="ipv4">An IP Address</option>
+      </optgroup>
+      <optgroup name="add_address_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the address is in (only the default is currently accepted)</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="address_default/%(fqdn)s/%(ip)s" />
+      <transport method="put" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
+   </command>
+
+   <command name="del_address">
+      Delete an address record from the database.
+      <optgroup name="del_address_mandatory" mandatory="True" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name</option>
+         <option name="ip" type="ipv4">An IP Address</option>
+      </optgroup>
+      <optgroup name="del_address_optional" mandatory="False">
+         <option name="dns_environment" type="string">The name of the environment the address is in (only the default is currently accepted)</option>
+      </optgroup>
+      <transport method="delete" path="address_default/%(fqdn)s/%(ip)s" />
+      <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
+   </command>
+
 </commandline>
