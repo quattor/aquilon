@@ -82,6 +82,12 @@ class Service(Base):
     def cfg_path(self):
         return 'service/%s' % (self.name)
 
+    # This could be an AssociationProxy...
+    @property
+    def aligned_cluster_types(self):
+        """Types of clusters where all hosts must bind to the same instance."""
+        return [cab.cluster_type for cab in self._clusters]
+
 service = Service.__table__
 
 service.primary_key.name = 'service_pk'

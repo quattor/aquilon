@@ -35,6 +35,7 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, contains_eager
 from sqlalchemy.orm.session import object_session
+from sqlalchemy.sql.expression import or_
 
 from aquilon.aqdb.model import Base, Service, Host, System, DnsDomain
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -69,7 +70,34 @@ class ServiceInstance(Base):
 
     @property
     def client_count(self):
-        return len(self.build_items)
+        """Return the number of clients bound to this service.
+
+        The calculation is tricky if cluster aligned services are involved.
+        In that case, any clusters that are bound to the instance should count
+        as though max_members are bound.  The tricky bit is de-duplication.
+
+        """
+        cluster_types = self.service.aligned_cluster_types
+        if not cluster_types:
+            # By far, the common case.
+            return len(self.build_items)
+        from aquilon.aqdb.model import (ClusterServiceBinding, BuildItem,
+                                        Cluster)
+        session = object_session(self)
+        q = session.query(ClusterServiceBinding)
+        q = q.filter_by(service_instance=self)
+        q = q.join('cluster')
+        q = q.filter(Cluster.cluster_type.in_(cluster_types))
+        adjusted_count = 0
+        for csb in q.all():
+            adjusted_count += csb.cluster.max_hosts
+        q = session.query(BuildItem)
+        q = q.filter_by(service_instance=self)
+        q = q.outerjoin('host', '_cluster', 'cluster')
+        q = q.filter(or_(Cluster.id==None,
+                         ~Cluster.cluster_type.in_(cluster_types)))
+        adjusted_count += q.count()
+        return adjusted_count
 
     @property
     def clients(self):
