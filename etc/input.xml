@@ -26,10 +26,10 @@
             Specify output format as raw (default) or html.
          </option>
          <option name="auth" type="boolean" conflicts="usesock" default="True">
-            Connect to port without authentication (without knc).
+            Connect to aqport using knc for authentication.
          </option>
-         <option name="exec" short="n" type="boolean" default="True">
-            If the server sends back a command to run, echo it and exit.
+         <option name="exec" type="boolean" default="True">
+            Run any commands that the server sends back.
          </option>
          <option name="usesock" type="string" conflicts="noauth">
             Connect directly (noauth) to the given unix socket.
