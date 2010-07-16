@@ -50,6 +50,14 @@ class TestAdd10GigHardware(TestBrokerCommand):
             self.noouttest(["add", "machine", "--machine", machine,
                             "--cluster", cluster, "--model", "utmedium"])
 
+    def test_005_failsearchnetwork(self):
+        command = ["search_network", "--machine=evm18"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Machine evm18 has no interfaces with a portgroup or "
+                         "assigned to a network.",
+                         command)
+
     def test_010_oldlocation(self):
         for i in range(5, 11):
             command = ["show_esx_cluster", "--cluster=utecl%d" % i]
@@ -131,6 +139,11 @@ class TestAdd10GigHardware(TestBrokerCommand):
         command = ["search_machine", "--machine=evm10", "--pg=user-v710"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm10", command)
+
+    def test_155_verifysearch(self):
+        command = ["search_network", "--machine=evm10"]
+        out = self.commandtest(command)
+        self.matchoutput(out, str(self.net.unknown[2]), command)
 
     def test_160_updatenoop(self):
         command = ["update_interface", "--machine=evm10", "--interface=eth0",
