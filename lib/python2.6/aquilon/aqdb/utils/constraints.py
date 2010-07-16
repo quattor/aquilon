@@ -91,7 +91,7 @@ def rename_sys_pks(db, *args, **kw):
         for i in cons:
             #print i
             nm = '%s_pk'%(i[1])
-            rename = 'ALTER TABLE %s RENAME CONSTRAINT %s to %s'%(
+            rename = 'ALTER TABLE "%s" RENAME CONSTRAINT "%s" to "%s"' % (
                 i[1], i[0], nm)
             dbf.debug(rename)
             db.safe_execute(rename)
@@ -124,7 +124,8 @@ def rename_non_null_check_constraints(db, debug=False, *args, **kw):
             else:
                 nm = '%s_%s_NN'%(i[1], col)
 
-            rename = 'ALTER TABLE %s RENAME CONSTRAINT %s TO %s'%(i[1],i[0],nm)
+            rename = 'ALTER TABLE "%s" RENAME CONSTRAINT "%s" TO "%s"' % (
+                i[1], i[0], nm)
 
             if len(nm) > 30:
                 print '%s\n would fail, new name longer than 32 characters'%(

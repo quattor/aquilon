@@ -69,9 +69,10 @@ def get_or_create_user_principal(session, user,
     if dbuser:
         return dbuser
     # If here, need more complicated behavior...
-    dbrealm = session.query(Realm).filter_by(name=realm).first()
-    dbnobody = session.query(Role).filter_by(name='nobody').first()
-    if not dbrealm:
+    dbnobody = Role.get_unique(session, 'nobody', compel=True)
+    try:
+        dbrealm = Realm.get_unique(session, realm, compel=True)
+    except NotFoundException:
         if not createrealm:
             raise ArgumentError("Could not find realm %s to create principal "
                                 "%s, use --createrealm to create a new record "
