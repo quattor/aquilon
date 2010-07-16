@@ -442,7 +442,7 @@ class option(Element):
             self.type = 'string'
 
         if (attributes.has_key('short')):
-            self.short= attributes['short']
+            self.short = attributes['short']
         else:
             self.short = None
 
@@ -455,6 +455,22 @@ class option(Element):
             self.conflicts = attributes['conflicts'].split(' ')
         else:
             self.conflicts = []
+
+        if (attributes.has_key('default')):
+            if self.type == "boolean" or self.type == "flag":
+                if attributes["default"].lower() == "true":
+                    self.default = True
+                elif attributes["default"].lower() == "false":
+                    self.default = False
+                else:
+                    raise ParsingError("Invalid boolean default for %s" %
+                                       self.name)
+            elif self.type == "int":
+                self.default = int(attributes["default"])
+            else:
+                self.default = attributes['default']
+        else:
+            self.default = None
 
         self.help = ''
 
@@ -484,25 +500,41 @@ class option(Element):
 # --------------------------------------------------------------------------- #
 
     def genOptions(self, parser):
-        if (parser.has_option('--'+self.name)):
+        if parser.has_option('--' + self.name):
             return
-        if (self.short):
-            str = 'parser.add_option("-'+self.short+'", "--'+self.name+'", dest="'+self.name+'"'
-        else:
-            str = 'parser.add_option("--'+self.name+'", dest="'+self.name+'"'
-        if (self.type == 'boolean'):
-            str = str+', action="store_true"'
-        elif (self.type == 'string'):
-            str = str+', action="store"'
-        elif (self.type=='file'):
+        names = ["--" + self.name]
+        if self.short:
+            names.append("-" + self.short)
+
+        action=None
+        type=None
+        extra_args = {}
+
+        if self.default:
+            extra_args["default"] = self.default
+
+        if self.type == 'boolean':
+            parser.add_option(*names, dest=self.name, action="store_true",
+                              **extra_args)
+            parser.add_option("--no" + self.name, dest=self.name,
+                              action="store_false")
+        elif self.type == "flag":
+            parser.add_option(*names, dest=self.name, action="store_true",
+                              **extra_args)
+        elif self.type == 'string' or self.type == 'ipv4':
+            parser.add_option(*names, dest=self.name, action="store",
+                              **extra_args)
+        elif self.type == 'int':
+            parser.add_option(*names, dest=self.name, action="store",
+                              type="int", **extra_args)
+        elif self.type == 'file':
             # Need type?
-            str = str+', action="callback", callback=read_file, type="string"'
-        elif (self.type == 'multiple'):
-            str = str +', action="append"'
+            parser.add_option(*names, dest=self.name, action="callback",
+                              callback=read_file, type="string")
+        elif self.type == 'multiple':
+            parser.add_option(*names, dest=self.name, action="append")
         else:
-            raise ParsingError('Invalid option type: '+self.type);
-        str = str+')'
-        eval (str)
+            raise ParsingError('Invalid option type: ' + self.type);
 
 # --------------------------------------------------------------------------- #
 
@@ -517,14 +549,20 @@ class option(Element):
 # --------------------------------------------------------------------------- #
 
     def shortHelp(self):
-        return "--" + self.name + ("" if self.type not in ["string", "file"]
-                                   else " " + self.name.upper())
+        if self.type == "boolean":
+            return "--[no]" + self.name
+        elif self.type in ["string", "file", "int"]:
+            return "--" + self.name + " " + self.name.upper()
+        else:
+            return "--" + self.name
 
 # --------------------------------------------------------------------------- #
 
     def recursiveHelp(self, indentlevel, width=None):
         whitespace = " " * (4 * indentlevel)
         help = self.help if len(self.help) else "\n"
+        if self.default:
+            help += "\nDefault: %s" % self.default
 
         helplines = textwrap.wrap(help, width - 36)
         res = whitespace + "%*s %s\n" % (-35 + 4 * indentlevel, self.shortHelp(), helplines[0])
@@ -552,6 +590,14 @@ class OptParser (object):
         self.__root = None
         self.parser = OptionParser (conflict_handler='resolve')
         self.parser.add_option('--help', '-h', action='store_true', default=False)
+
+        # "verbose" and "quiet" are connected, and this cannot be expressed
+        # correctly in input.xml
+        self.parser.add_option('--verbose', '-v', action='store_true',
+                               default=True)
+        self.parser.add_option('--quiet', '-q', dest='verbose',
+                               action='store_false')
+
         self.parseXml(xmlFileName)
 
 # --------------------------------------------------------------------------- #
@@ -646,6 +692,9 @@ class OptParser (object):
                 self.parser.usage = self.__root.commandList(width=width)
 
             self.parser.error('Please specify a command')
+
+        if '_'.join(args) != command:
+            self.parser.error('Extra arguments on the command line')
 
         try:
             this_is_None, globalOptions = self.__root.check(None, opts)

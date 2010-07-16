@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.system import get_system
@@ -57,7 +57,6 @@ class CommandAddMachine(BrokerCommand):
                         chassis)
             if slot is None:
                 raise ArgumentError("The --chassis option requires a --slot.")
-            slot = force_int("slot", slot)
             if dblocation and dblocation != dbchassis.chassis_hw.location:
                 raise ArgumentError("Location %s %s conflicts with chassis "
                                     "location %s %s." %

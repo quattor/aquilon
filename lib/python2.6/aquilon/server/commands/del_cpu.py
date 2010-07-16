@@ -32,7 +32,7 @@
 from sqlalchemy.exceptions import InvalidRequestError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu
 
 
@@ -41,7 +41,6 @@ class CommandDelCpu(BrokerCommand):
     required_parameters = ["cpu", "vendor", "speed"]
 
     def render(self, session, cpu, vendor, speed, **arguments):
-        speed = force_int("speed", speed)
         dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, speed=speed,
                                compel=True)
         try:
@@ -49,5 +48,3 @@ class CommandDelCpu(BrokerCommand):
         except InvalidRequestError, e:
             raise ArgumentError("Could not delete CPU: %s" % e)
         return
-
-

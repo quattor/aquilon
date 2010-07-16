@@ -3,12 +3,14 @@
    %prog command [subcommand] options
    <command name="*">
       <optgroup name="all commands">
-         <option name="verbose" short="v" type="boolean" conflicts="quiet">
+         <!-- Note: "verbose" and "quiet" are handled specially in the code; do not
+              use "conflicts" here -->
+         <option name="verbose" short="v" type="flag" default="True">
             Verbose mode.  Contact the broker for out of band status messages
             about the request while it is being processed.  These messages
-            are printed on stderr.  This is the default.
+            are printed on stderr.
          </option>
-         <option name="quiet" short="q" type="boolean" conflicts="verbose">
+         <option name="quiet" short="q" type="flag">
             Turn off verbose mode.  Do not make a secondary request to
             the broker for out of band status messages.
          </option>
@@ -23,10 +25,10 @@
          <option name="format" short="f" type="string" conflicts="">
             Specify output format as raw (default) or html.
          </option>
-         <option name="noauth" type="boolean" conflicts="usesock">
+         <option name="auth" type="boolean" conflicts="usesock" default="True">
             Connect to port without authentication (without knc).
          </option>
-         <option name="noexec" short="n" type="boolean">
+         <option name="exec" short="n" type="boolean" default="True">
             If the server sends back a command to run, echo it and exit.
          </option>
          <option name="usesock" type="string" conflicts="noauth">
@@ -37,11 +39,11 @@
             original request completes.  This is only meant to be used
             for aqd development with a broker running with a sqlite database.
          </option>
-         <option name="aqport" type="string" conflicts="">
-            Server port to connect to
+         <option name="aqport" type="int" conflicts="">
+            Server port to connect to.
          </option>
          <option name="aqhost" type="string" conflicts="">
-            Name of the server to connect to
+            Name of the server to connect to.
          </option>
          <option name="aquser" type="string" conflicts="">
             Name of the userid running the server.  Should default correctly,
@@ -81,7 +83,7 @@
          <option name="personalities" type="boolean">flush the personality templates</option>
          <option name="clusters" type="boolean">flush the cluster templates</option>
          <option name="services" type="boolean">flush the service templates</option>
-         <option name="all" type="boolean">flush all templates</option>
+         <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
    </command>
@@ -128,7 +130,7 @@
       is provided, then the command simply outputs a listing of all known hostnames.
       <optgroup name="show_host_Input" mandatory="True" fields="any">
          <option name="hostname" type="string" conflicts="all">Host name</option>
-         <option name="all" type="boolean" conflicts="hostname">Select all hosts</option>
+         <option name="all" type="flag" conflicts="hostname">Select all hosts</option>
       </optgroup>
       <transport trigger="all" method="get" path="host" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s" />
@@ -140,7 +142,7 @@
       AQDB.
       <optgroup name="show_fqdn_opts" mandatory="True" fields="any">
          <option name="fqdn" type="string" conflicts="all">full qualified domain name</option>
-         <option name="all" type="boolean" conflicts="fqdn">select all systems</option>
+         <option name="all" type="flag" conflicts="fqdn">select all systems</option>
       </optgroup>
       <transport trigger="all" method="get" path="system" />
       <transport trigger="fqdn" method="get" path="system/%(fqdn)s" />
@@ -172,10 +174,10 @@
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
-         <option name="all" type="boolean">list all hardware</option>
+         <option name="all" type="flag">list all hardware</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
-         <option name="fullinfo" type="boolean">show full information for the matching hardware</option>
+         <option name="fullinfo" type="flag">show full information for the matching hardware</option>
       </optgroup>
       <transport method="get" path="find/hardware" />
    </command>
@@ -192,9 +194,9 @@
          <option name="machine" type="string">machine name (exact)</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
-         <option name="cpuspeed" type="string">cpu speed</option>
-         <option name="cpucount" type="string">cpu count</option>
-         <option name="memory" type="string">memory in MB</option>
+         <option name="cpuspeed" type="int">cpu speed</option>
+         <option name="cpucount" type="int">cpu count</option>
+         <option name="memory" type="int">memory in MB</option>
          <option name="cluster" type="string">cluster name</option>
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
@@ -214,10 +216,10 @@
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
-         <option name="all" type="boolean">list all hardware</option>
+         <option name="all" type="flag">list all hardware</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
-         <option name="fullinfo" type="boolean">show full information for the machine</option>
+         <option name="fullinfo" type="flag">show full information for the machine</option>
       </optgroup>
       <transport method="get" path="find/machine" />
    </command>
@@ -231,13 +233,13 @@
          <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
          <option name="type" type="string">System type (host, chassis, tor_switch, manager, auxiliary)</option>
-         <option name="ip" type="string">IP address</option>
-         <option name="networkip" type="string">Network IP address</option>
+         <option name="ip" type="ipv4">IP address</option>
+         <option name="networkip" type="ipv4">Network IP address</option>
          <option name="mac" type="string">primary mac address</option>
-         <option name="all" type="boolean">list all systems</option>
+         <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
-         <option name="fullinfo" type="boolean">show full information for the matching systems</option>
+         <option name="fullinfo" type="flag">show full information for the matching systems</option>
       </optgroup>
       <transport method="get" path="find/system" />
    </command>
@@ -251,8 +253,8 @@
          <option name="shortname" type="string">First segment of the fqdn</option>
          <option name="archetype" type="string">archetype (aquilon, windows, aurora)</option>
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
-         <option name="ip" type="string">IP address</option>
-         <option name="networkip" type="string">Network IP address</option>
+         <option name="ip" type="ipv4">IP address</option>
+         <option name="networkip" type="ipv4">Network IP address</option>
          <option name="mac" type="string">primary mac address</option>
          <option name="personality" type="string">personality</option>
          <option name="osname" type="string">osname</option>
@@ -280,10 +282,10 @@
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
-         <option name="all" type="boolean">list all systems</option>
+         <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_host_prefs" mandatory="False">
-         <option name="fullinfo" type="boolean">show full information for the matching hosts</option>
+         <option name="fullinfo" type="flag">show full information for the matching hosts</option>
       </optgroup>
       <transport method="get" path="find/host" />
    </command>
@@ -335,10 +337,10 @@
 	    <option name="vmhost_rack" type="string">vmhost Rack</option>
 	    <option name="vmhost_desk" type="string">vmhost Desk</option>
          </optgroup>
-         <option name="all" type="boolean">list all ESX clusters</option>
+         <option name="all" type="flag">list all ESX clusters</option>
       </optgroup>
       <optgroup name="search_cluster_prefs" mandatory="False">
-         <option name="fullinfo" type="boolean">show full information for the matching clusters</option>
+         <option name="fullinfo" type="flag">show full information for the matching clusters</option>
       </optgroup>
       <transport method="get" path="find/cluster/esx" />
    </command>
@@ -352,7 +354,7 @@
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
          <option name="tor_switch" type="string">FQDN of the switch</option>
-         <option name="port_number" type="string">Port number on the switch</option>
+         <option name="port_number" type="int">Port number on the switch</option>
          <option name="mac" type="string">MAC address to search for</option>
       </optgroup>
       <transport method="get" path="find/observed_mac" />
@@ -390,9 +392,9 @@
          <option name="metacluster" type="string" conflicts="machine short cluster">Metacluster prefix to check</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
-         <option name="number" type="boolean">show only the next number</option>
-         <option name="fullname" type="boolean">show the next available full name (default)</option>
-         <option name="pack" type="boolean">Return first free value</option>
+         <option name="number" type="flag">show only the next number</option>
+         <option name="fullname" type="flag">show the next available full name (default)</option>
+         <option name="pack" type="flag">Return first free value</option>
          <option name="start" type="string">Start counting at a different number than one</option>
       </optgroup>
       <transport method="get" trigger="short" path="find/next/system" />
@@ -419,7 +421,7 @@
       every domain will be listed with its configuration.
       <optgroup name="show_domain_Input" mandatory="True" fields="any">
          <option name="domain" type="string" conflicts="all">Domain name</option>
-         <option name="all" type="boolean" conflicts="hostname">Select all domains</option>
+         <option name="all" type="flag" conflicts="hostname">Select all domains</option>
       </optgroup>
       <transport trigger="all" method="get" path="domain" />
       <transport trigger="domain" method="get" path="domain/%(domain)s" />
@@ -430,10 +432,10 @@
       every sandbox will be listed with its configuration.
       <optgroup name="show_sandbox_Input" mandatory="True" fields="any">
          <option name="sandbox" type="string" conflicts="all">Sandbox name</option>
-         <option name="all" type="boolean" conflicts="hostname">Select all sandboxes</option>
+         <option name="all" type="flag" conflicts="hostname">Select all sandboxes</option>
       </optgroup>
       <optgroup name="show_sandbox_options" mandatory="False">
-         <option name="pathonly" type="boolean" conflicts="all">Show only the sandbox path</option>
+         <option name="pathonly" type="flag" conflicts="all">Show only the sandbox path</option>
       </optgroup>
       <transport trigger="all" method="get" path="sandbox/command/show_all" />
       <transport trigger="sandbox" method="get" path="sandbox/command/show" />
@@ -448,11 +450,11 @@
       Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
       <optgroup name="show_network_Input" mandatory="True" fields="any">
          <option name="network" type="string" conflicts="">Network name</option>
-         <option name="ip" type="string" conflicts="">IP address</option>
-         <option name="all" type="boolean" conflicts="">All</option>
+         <option name="ip" type="ipv4" conflicts="">IP address</option>
+         <option name="all" type="flag" conflicts="">All</option>
          <optgroup name="show_network_options" fields="any">
             <option name="type" type="string">Network type</option>
-            <option name="hosts" type="boolean">Hosts</option>
+            <option name="hosts" type="flag">Hosts</option>
             <option name="discoverable" type="boolean">Discoverable</option>
             <option name="discovered" type="boolean">Discovered</option>
          </optgroup>
@@ -484,9 +486,9 @@
       usage but is off by default for interactive use as it is slower.
       <optgroup name="refresh_network_mandatory" mandatory="True" fields="any">
          <option name="building" type="string" conflicts="all">Building name</option>
-         <option name="all" type="boolean" conflicts="building">All locations</option>
+         <option name="all" type="flag" conflicts="building">All locations</option>
       </optgroup>
-      <optgroup name="refresh_network_mandatory" mandatory="False">
+      <optgroup name="refresh_network_optional" mandatory="False">
          <option name="dryrun" type="boolean" conflicts="incremental">Report what will change</option>
          <option name="incremental" type="boolean" conflicts="dryrun">Commit every change as it is decided</option>
       </optgroup>
@@ -537,7 +539,7 @@
       <optgroup name="add_cpu_opts" mandatory="True" fields="all">
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
-         <option name="speed" type="string">CPU speed</option>
+         <option name="speed" type="int">CPU speed</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
@@ -548,10 +550,10 @@
    <command name="show_cpu">
       Show the CPU types in the database
       <optgroup name="show_cpu_opts" mandatory="True" fields="any">
-         <option name="all" type="boolean">Show all cpu types</option>
+         <option name="all" type="flag">Show all cpu types</option>
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
-         <option name="speed" type="string">CPU speed</option>
+         <option name="speed" type="int">CPU speed</option>
       </optgroup>
       <transport method="get" path="find/hardware/cpu" />
    </command>
@@ -561,7 +563,7 @@
       <optgroup name="del_cpu_opts" mandatory="True" fields="all">
          <option name="cpu" type="string">CPU type name</option>
          <option name="vendor" type="string">name of the vendor</option>
-         <option name="speed" type="string">CPU speed</option>
+         <option name="speed" type="int">CPU speed</option>
       </optgroup>
       <transport method="delete" path="hardware/cpu/%(vendor)s/%(cpu)s/%(speed)s" />
    </command>
@@ -580,8 +582,8 @@
 	    <option name="type" type="string" conflicts="controller">[Deprecated] Type of the controller/interface</option>
          </optgroup>
          <optgroup name="size_opts" fields="any">
-            <option name="size" type="string" conflicts="capacity">Capacity of the disk (GB)</option>
-            <option name="capacity" type="string" conflicts="size">[Deprecated] Capacity of the disk (GB)</option>
+            <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
+            <option name="capacity" type="int" conflicts="size">[Deprecated] Capacity of the disk (GB)</option>
          </optgroup>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
@@ -609,10 +611,10 @@
             <option name="type" type="string" conflicts="controller">[Deprecated] type of the disk</option>
          </optgroup>
          <optgroup name="size_opts" fields="any">
-            <option name="size" type="string" conflicts="capacity">capacity of the disk (GB)</option>
-            <option name="capacity" type="string" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
+            <option name="size" type="int" conflicts="capacity">capacity of the disk (GB)</option>
+            <option name="capacity" type="int" conflicts="size">[Deprecated] capacity of the disk (GB)</option>
          </optgroup>
-         <option name="all" type="boolean">remove any matching disks</option>
+         <option name="all" type="flag">remove any matching disks</option>
       </optgroup>
       <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />
       <transport method="post" path="hardware/disk/%(machine)s/command/del" />
@@ -641,10 +643,10 @@
             <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
          </optgroup>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
-            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+            <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
@@ -680,10 +682,10 @@
             <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
          </optgroup>
          <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
-            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+            <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
@@ -724,10 +726,10 @@
          <option name="comments" type="string">Comments</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <optgroup name="add_host_ip_opts" mandatory="False" fields="any">
-            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-            <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+            <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
          </optgroup>
       </optgroup>
       <transport method="put" path="windows_host/%(hostname)s" />
@@ -780,10 +782,10 @@
 	 </optgroup>
          <option name="auxiliary" type="string">Fully qualified name for the auxiliary interface</option>
 	 <optgroup name="add_aux_ip_opts" mandatory="True" fields="any">
-            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-	    <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+	    <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
 	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
@@ -800,7 +802,7 @@
       igrid123-e1.subdomain.ms.com)
       <optgroup name="show_auxiliary_opts" mandatory="True" fields="any">
          <option name="auxiliary" type="string" conflicts="all">Auxiliary name</option>
-         <option name="all" type="boolean" conflicts="auxiliary">Select all auxiliaries</option>
+         <option name="all" type="flag" conflicts="auxiliary">Select all auxiliaries</option>
       </optgroup>
       <transport trigger="all" method="get" path="auxiliary" />
       <transport trigger="auxiliary" method="get" path="auxiliary/%(auxiliary)s" />
@@ -848,10 +850,10 @@
       <optgroup name="add_manager_opts" mandatory="True" fields="all">
          <option name="hostname" type="string" conflicts="machine">Fully qualified Host name</option>
 	 <optgroup name="add_manager_ip_opts" mandatory="True" fields="any">
-            <option name="ip" type="string" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="string" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
             <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-	    <option name="autoip" type="boolean" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+	    <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
 	 </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
@@ -876,7 +878,7 @@
       necessary entries.
       <optgroup name="show_manager_opts" mandatory="True" fields="any">
          <option name="manager" type="string" conflicts="all missing">Manger name</option>
-         <option name="all" type="boolean" conflicts="manager missing">Select all managers</option>
+         <option name="all" type="flag" conflicts="manager missing">Select all managers</option>
          <option name="missing" type="boolean" conflicts="manager all">Generate commands to create missing managers</option>
       </optgroup>
       <transport trigger="all" method="get" path="manager" />
@@ -910,16 +912,16 @@
             <option name="cputype" type="string" conflicts="cpuname">[Deprecated] CPU type</option>
             <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
          </optgroup>
-         <option name="cpunum" type="string">CPU count</option>
-         <option name="memory" type="string">amount of installed memory (MB)</option>
+         <option name="cpunum" type="int">CPU count</option>
+         <option name="memory" type="int">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
-         <option name="disksize" type="string">installed disk capacity (GB)</option>
-         <option name="nics" type="string">number of NIC interfaces</option>
+         <option name="disksize" type="int">installed disk capacity (GB)</option>
+         <option name="nics" type="int">number of NIC interfaces</option>
       </optgroup>
       <optgroup name="optional_opts">
          <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
-         <option name="cpuspeed" type="string">CPU speed, if the name is not unique</option>
+         <option name="cpuspeed" type="int">CPU speed, if the name is not unique</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />
@@ -931,7 +933,7 @@
          <option name="model" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
          <option name="type" type="string">Machine type name</option>
-         <option name="all" type="boolean">Show all models</option>
+         <option name="all" type="flag">Show all models</option>
       </optgroup>
       <transport method="get" path="find/hardware/model" />
    </command>
@@ -951,13 +953,13 @@
          <option name="machine_type" type="string">Machine type name</option>
          <option name="cpuname" type="string">CPU name</option>
          <option name="cpuvendor" type="string">CPU vendor</option>
-         <option name="cpuspeed" type="string">CPU speed</option>
-         <option name="cpunum" type="string">CPU count</option>
-         <option name="memory" type="string">amount of installed memory (MB)</option>
+         <option name="cpuspeed" type="int">CPU speed</option>
+         <option name="cpunum" type="int">CPU count</option>
+         <option name="memory" type="int">amount of installed memory (MB)</option>
          <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
          <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
-         <option name="disksize" type="string">installed disk capacity (GB)</option>
-         <option name="nics" type="string">number of NIC interfaces</option>
+         <option name="disksize" type="int">installed disk capacity (GB)</option>
+         <option name="nics" type="int">number of NIC interfaces</option>
          <option name="comments" type="string">Comments</option>
          <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
       </optgroup>
@@ -1000,7 +1002,7 @@
       </optgroup>
       <optgroup name="add_interface_mac" mandatory="False">
          <option name="mac" type="string" conflicts="automac">MAC address</option>
-         <option name="automac" type="boolean" conflicts="mac">Automatically generate MAC for virtual hardware</option>
+         <option name="automac" type="flag" conflicts="mac">Automatically generate MAC for virtual hardware</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
          <option name="machine" type="string" conflicts="hostname chassis tor_switch ip ipfromip ipfromsystem autoip">Machine (node) name</option>
@@ -1010,13 +1012,13 @@
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="comments" type="string">Comments</option>
-         <option name="ip" type="string" conflicts="hostname ipfromip ipfromsystem autoip">IP address</option>
-         <option name="ipfromip" type="string" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
+         <option name="ip" type="ipv4" conflicts="hostname ipfromip ipfromsystem autoip">IP address</option>
+         <option name="ipfromip" type="ipv4" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>
          <option name="ipfromsystem" type="string" conflicts="hostname ip ipfromip autoip">choose IP address in subnet of system</option>
-         <option name="autoip" type="boolean" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
+         <option name="autoip" type="flag" conflicts="hostname ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="pg" type="string" conflicts="autopg">portgroup</option>
-         <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
+         <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -1033,11 +1035,11 @@
       or as the number of hosts in the network (like "--mask 256").
       <optgroup name="add_network_mandatory" mandatory="True" fields="all">
          <option name="network" type="string">Network name</option>
-         <option name="ip" type="string">Network IP address</option>
+         <option name="ip" type="ipv4">Network IP address</option>
          <optgroup name="add_network_netmask" mandatory="True" fields="any">
             <option name="netmask" type="string" conflicts="prefixlen mask">Netmask as dotted quad</option>
-            <option name="prefixlen" type="string" conflicts="netmask mask">Network prefix length</option>
-            <option name="mask" type="string" conflicts="netmask prefixlen">Number of hosts</option>
+            <option name="prefixlen" type="int" conflicts="netmask mask">Network prefix length</option>
+            <option name="mask" type="int" conflicts="netmask prefixlen">Number of hosts</option>
          </optgroup>
          <optgroup name="add_network_location_opts" mandatory="True" fields="any">
             <option name="organization" type="string">Organization</option>
@@ -1054,8 +1056,8 @@
       </optgroup>
 
       <optgroup name="add_network_modifiers" mandatory="False" fields="any">
-         <option name="discoverable" type="string">Set network(s) updateable</option>
-         <option name="discovered" type="string">Set network(s) updated</option>
+         <option name="discoverable" type="boolean">Set network(s) updateable</option>
+         <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
          <option name="side" type="string">Network side, defaults to 'a'</option>
       </optgroup>
@@ -1067,7 +1069,7 @@
       <p/>
       Specify the network by its IP.
       <optgroup name="del_network_mandatory" mandatory="True" fields="all">
-         <option name="ip" type="string">Network IP address</option>
+         <option name="ip" type="ipv4">Network IP address</option>
       </optgroup>
       <transport method="delete" path="network/%(ip)s" />
    </command>
@@ -1079,7 +1081,7 @@
      and/or network type.
      <optgroup name="update_network_opts" mandatory="True" fields="any">
 	<option name="network" type="string" conflicts="ip update_network_location_opts">Network name</option>
-	<option name="ip" type="string" conflicts="network update_network_location_opts">Network name</option>
+	<option name="ip" type="ipv4" conflicts="network update_network_location_opts">Network name</option>
 	<option name="type" type="string" conflicts="ip network">Network type</option>
 	<optgroup name="update_network_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
@@ -1095,8 +1097,8 @@
 	</optgroup>
      </optgroup>
      <optgroup name="update_network_modifiers" mandatory="True" fields="any">
-	<option name="discoverable" type="string" conflicts="">Set network(s) updateable</option>
-	<option name="discovered" type="string" conflicts="">Set network(s) updated</option>
+	<option name="discoverable" type="boolean" conflicts="">Set network(s) updateable</option>
+	<option name="discovered" type="boolean" conflicts="">Set network(s) updated</option>
     </optgroup>
      <transport method="post" path="network" />
    </command>
@@ -1119,10 +1121,10 @@
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="string">MAC address</option>
-         <option name="ip" type="string">IP address</option>
+         <option name="ip" type="ipv4">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
-         <option name="autopg" type="boolean" conflicts="pg">choose portgroup based on switch</option>
+         <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
@@ -1171,7 +1173,7 @@
          <option name="service" type="string">Service name</option>
          <option name="server" type="string" conflict="client">Server hostname</option>
 	 <option name="client" type="string" conflicts="server">Client hostname</option>
-	 <option name="all" type="boolean" conflicts="service">Select all services</option>
+	 <option name="all" type="flag" conflicts="service">Select all services</option>
       </optgroup>
       <optgroup name="show_service_optional_opts">
 	 <option name="instance" type="string">Service Instance</option>
@@ -1184,7 +1186,7 @@
       Show information for instances of the nas_disk_share service.
       <optgroup name="show_share_opts" mandatory="True" fields="any">
          <option name="share" type="string" conflicts="all">Share name</option>
-         <option name="all" type="boolean" conflicts="share">Select all shares</option>
+         <option name="all" type="flag" conflicts="share">Select all shares</option>
       </optgroup>
       <transport trigger="share" method="get" path="nas_disk_share/%(share)s"/>
       <transport method="get" path="nas_disk_share" />
@@ -1199,8 +1201,8 @@
       <optgroup name="update_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
          <optgroup name="update_service_count" mandatory="True" fields="any">
-            <option name="max_clients" type="string" conflicts="default">Maximum number of client bindings for an instance</option>
-            <option name="default" type="boolean" conflicts="max_clients">Restore default setting</option>
+            <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
+            <option name="default" type="flag" conflicts="max_clients">Restore default setting</option>
          </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
@@ -1281,7 +1283,7 @@
       </optgroup>
       <optgroup name="unbind_server_optional_opts" mandatory="True" fields="any">
          <option name="instance" type="string">Instance name</option>
-         <option name="all" type="boolean">Remove server from all instances of this service</option>
+         <option name="all" type="flag">Remove server from all instances of this service</option>
       </optgroup>
       <transport method="delete" path="host/%(hostname)s/server_of_service/%(service)s" />
       <transport trigger="instance" method="delete" path="host/%(hostname)s/server_of_service/%(service)s/instance/%(instance)s" />
@@ -1312,7 +1314,7 @@
       Show information about an archetype, including required services.
       <optgroup name="show_archetype_opts" mandatory="True" fields="any">
          <option name="archetype" type="string">archetype name</option>
-         <option name="all" type="boolean" conflicts="archetype">Select all services</option>
+         <option name="all" type="flag" conflicts="archetype">Select all services</option>
       </optgroup>
       <transport trigger="archetype" method="get" path="archetype/%(archetype)s" />
       <transport method="get" path="archetype" />
@@ -1381,7 +1383,7 @@
             <option name="rack" type="string">Rack</option>
             <option name="desk" type="string">Desk</option>
          </optgroup>
-         <option name="all" type="boolean">show all maps</option>
+         <option name="all" type="flag">show all maps</option>
       </optgroup>
       <transport method="get" path="show/map" />
    </command>
@@ -1439,12 +1441,12 @@
          <option name="list" type="file" conflicts="hostname">file containing hostnames</option>
       </optgroup>
       <optgroup name="pxeswitch_action" mandatory="True" fields="any">
-         <option name="status" type="boolean" conflicts="configure localboot install firmware blindbuild">display the current status of how the host will boot</option>
-         <option name="configure" type="boolean" conflicts="status">(re)initialize the pxeswitch configuration</option>
-         <option name="localboot" type="boolean" conflicts="status install firmware blindbuild">set the host to boot from local disk</option>
-         <option name="install" type="boolean" conflicts="status localboot firmware blindbuild">set the host to install from the network at next reboot</option>
-         <option name="firmware" type="boolean" conflicts="status localboot install blindbuild">set the host to boot its firmware image</option>
-         <option name="blindbuild" type="boolean" conflicts="status localboot install firmware">set the host to boot a blindbuild livecd image</option>
+         <option name="status" type="flag" conflicts="configure localboot install firmware blindbuild">display the current status of how the host will boot</option>
+         <option name="configure" type="flag" conflicts="status">(re)initialize the pxeswitch configuration</option>
+         <option name="localboot" type="flag" conflicts="status install firmware blindbuild">set the host to boot from local disk</option>
+         <option name="install" type="flag" conflicts="status localboot firmware blindbuild">set the host to install from the network at next reboot</option>
+         <option name="firmware" type="flag" conflicts="status localboot install blindbuild">set the host to boot its firmware image</option>
+         <option name="blindbuild" type="flag" conflicts="status localboot install firmware">set the host to boot a blindbuild livecd image</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
       <transport trigger="list" method="post" path="command/pxeswitch/list" />
@@ -1542,8 +1544,7 @@
       <optgroup name="update_branch_options" mandatory="True" fields="any">
          <option name="comments" type="string">Comments on the branch</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
-         <option name="autosync" type="boolean" conflicts="noautosync">Set the autosync flag</option>
-         <option name="noautosync" type="boolean" conflicts="autosync">Unset the autosync flag</option>
+         <option name="autosync" type="boolean">Set the autosync flag</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s" />
    </command>
@@ -1572,7 +1573,7 @@
       </optgroup>
       <optgroup name="add sandbox optional" mandatory="False">
          <option name="start" type="string">Branch to use as a starting point (default: prod)</option>
-         <option name="noget" type="boolean">Do not automatically create the user-controlled sandbox, only the branch server-side.</option>
+         <option name="get" type="boolean" default="False">Create the user-controlled sandbox automatically.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="sandbox/command/add" expect="sandbox"/>
@@ -1598,7 +1599,7 @@
          <option name="branch" type="string">Name of the sandbox branch to update</option>
       </optgroup>
       <optgroup name="publish optional" mandatory="False">
-         <option name="nosync" type="boolean">Do not automatically sync tracking domains</option>
+         <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
       </optgroup>
       <transport method="post" path="branch/%(branch)s/command/publish" custom="create_bundle" expect="command"/>
    </command>
@@ -1615,7 +1616,7 @@
          <option name="target" type="string">Name of the target domain</option>
       </optgroup>
       <optgroup name="deploy optional" mandatory="False">
-         <option name="nosync" type="boolean">Do not automatically sync tracking domains</option>
+         <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
       </optgroup>
       <transport method="post" path="command/deploy" />
@@ -1646,7 +1647,7 @@
          <option name="domain" type="string">Name of domain or sandbox</option>
          <optgroup name="ref options" mandatory="True" fields="any">
             <option name="ref" type="string" conflicts="lastsync">Any valid git reference to a previous commit in the branch</option>
-            <option name="lastsync" type="boolean" conflicts="ref">Use the reference stored in AQDB of the commit in use before the last sync</option>
+            <option name="lastsync" type="flag" conflicts="ref">Use the reference stored in AQDB of the commit in use before the last sync</option>
          </optgroup>
       </optgroup>
       <transport method="post" path="domain/%(domain)s/command/rollback" />
@@ -1699,7 +1700,7 @@
          <option name="cluster" type="string" conflicts="hostname machine service instance default nasinfo">Name of the machine</option>
          <option name="service" type="string" conflicts="hostname machine cluster nasinfo">Name of the service</option>
          <option name="instance" type="string" conflicts="hostname machine cluster nasinfo">Name of the service instance</option>
-	 <option name="default" type="boolean" conflicts="hostname machine cluster nasinfo">Show the default client config for the service/instance</option>
+	 <option name="default" type="flag" conflicts="hostname machine cluster nasinfo">Show the default client config for the service/instance</option>
 	 <option name="nasinfo" type="string" conflicts="hostname machine cluster service instance default">Show the default client config for the service/instance</option>
       </optgroup>
       <optgroup name="cat options" fields="any">
@@ -1835,7 +1836,7 @@
       Show the rack list, or details about a particular rack.
       <optgroup name="show_rack_opts" mandatory="True" fields="any">
          <option name="rack" type="string" conflicts="all">rack name</option>
-         <option name="all" type="boolean" conflicts="rack">all</option>
+         <option name="all" type="flag" conflicts="rack">all</option>
       </optgroup>
       <transport method="get" path="location/rack" />
       <transport trigger="rack" method="get" path="location/rack/%(rack)s" />
@@ -1896,7 +1897,7 @@
       Show the room list, or details about a particular room.
       <optgroup name="show_room_opts" mandatory="True" fields="any">
          <option name="room" type="string">room name</option>
-         <option name="all" type="boolean">show all</option>
+         <option name="all" type="flag">show all</option>
       </optgroup>
       <transport method="get" path="location/room" />
       <transport trigger="room" method="get" path="location/room/%(room)s" />
@@ -1914,7 +1915,7 @@
       Show the list of campuses, or details about a particular campus.
       <optgroup name="show_campus_opts" mandatory="True" fields="any">
          <option name="campus" type="string">campus name</option>
-         <option name="all" type="boolean">show all campuses</option>
+         <option name="all" type="flag">show all campuses</option>
       </optgroup>
       <transport method="get" path="location/campus" />
       <transport trigger="campus" method="get" path="location/campus/%(campus)s" />
@@ -2119,7 +2120,7 @@
       Show currently defined vendors.
       <optgroup name="mandatory_options" mandatory="True" fields="any">
          <option name="vendor" type="string">The name of the vendor</option>
-         <option name="all" type="boolean" conflicts="vendor">Show all vendors</option>
+         <option name="all" type="flag" conflicts="vendor">Show all vendors</option>
       </optgroup>
       <transport trigger="vendor" method="get" path="vendor/%(vendor)s" />
       <transport trigger="all" method="get" path="vendor"/>
@@ -2154,7 +2155,7 @@
          <option name="osname" type="string">The name of the operating system</option>
          <option name="osversion" type="string">The version of the operating system</option>
          <option name="archetype" type="string">The archetype to search within</option>
-         <option name="all" type="boolean">Show all operating systems</option>
+         <option name="all" type="flag">Show all operating systems</option>
       </optgroup>
       <transport method="get" path="os"/>
   </command>
@@ -2178,7 +2179,7 @@
       <optgroup name="show_personality_opts" mandatory="True" fields="any">
          <option name="personality" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
          <option name="archetype" type="string" conflicts="all">which archetype to use</option>
-         <option name="all" type="boolean" conflicts="personality archetype">all</option>
+         <option name="all" type="flag" conflicts="personality archetype">all</option>
       </optgroup>
       <optgroup name="show_personality_optional" mandatory="False">
          <option name="domain" type="string" conflicts="sandbox">Domain to check for threshold information</option>
@@ -2281,14 +2282,14 @@
 	 <option name="vendor" type="string">Machine vendor. Needed if the model name is not unique</option>
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="string">cpu speed</option>
-	 <option name="cpucount" type="string">cpu count</option>
-	 <option name="memory" type="string">memory in MB</option>
+	 <option name="cpuspeed" type="int">cpu speed</option>
+	 <option name="cpucount" type="int">cpu count</option>
+	 <option name="memory" type="int">memory in MB</option>
       </optgroup>
       <optgroup name="add_machine_location_opts" mandatory="True" fields="any">
 	 <optgroup name="add_machine_chassis_opts" fields="all">
             <option name="chassis" type="string">Chassis name</option>
-            <option name="slot" type="string">Chassis slot</option>
+            <option name="slot" type="int">Chassis slot</option>
          </optgroup>
          <option name="rack" type="string">Rack name</option>
          <option name="desk" type="string">Desk name</option>
@@ -2317,11 +2318,11 @@
          <option name="vendor" type="string">machine vendor</option>
          <option name="cpuname" type="string">cpu name</option>
          <option name="cpuvendor" type="string">cpu vendor</option>
-         <option name="cpuspeed" type="string">cpu speed</option>
-         <option name="cpucount" type="string">cpu count</option>
-         <option name="memory" type="string">memory in MB</option>
+         <option name="cpuspeed" type="int">cpu speed</option>
+         <option name="cpucount" type="int">cpu count</option>
+         <option name="memory" type="int">memory in MB</option>
          <option name="chassis" type="string">chassis name</option>
-         <option name="slot" type="string">chassis slot</option>
+         <option name="slot" type="int">chassis slot</option>
          <option name="clearchassis" type="boolean">remove chassis and slot information</option>
          <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
          <option name="rack" type="string">rack name</option>
@@ -2346,10 +2347,10 @@
       line for each.
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
          <option name="machine" type="string">machine name</option>
-	 <option name="all" type="boolean" conflicts="machine">all</option>
+	 <option name="all" type="flag" conflicts="machine">all</option>
          <optgroup name="show_machine_location_opts" mandatory="False">
             <option name="chassis" type="string">Chassis name</option>
-	    <option name="slot" type="string">Chassis Slot</option>
+	    <option name="slot" type="int">Chassis Slot</option>
             <option name="rack" type="string">Rack name</option>
             <option name="desk" type="string">Desk name</option>
          </optgroup>
@@ -2403,15 +2404,15 @@
       <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">
          <option name="interface" type="string">Interface name (like xge49)</option>
          <option name="mac" type="string">MAC address of the interface</option>
-         <option name="ip" type="string">IP address of the interface</option>
+         <option name="ip" type="ipv4">IP address of the interface</option>
       </optgroup>
       <optgroup name="add_tor_switch_specs_opts" mandatory="False">
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="cpuname" type="string">cpu name</option>
 	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="string">cpu speed</option>
-	 <option name="cpucount" type="string">cpu count</option>
-	 <option name="memory" type="string">memory in MB</option>
+	 <option name="cpuspeed" type="int">cpu speed</option>
+	 <option name="cpucount" type="int">cpu count</option>
+	 <option name="memory" type="int">memory in MB</option>
       </optgroup>
       <optgroup name="add_tor_switch_optional">
 	 <option name="serial" type="string">serial number</option>
@@ -2435,7 +2436,7 @@
          <option name="rack" type="string">Rack name</option>
          <option name="model" type="string">ToR switch model</option>
          <option name="vendor" type="string">ToR switch vendor </option>
-         <option name="all" type="boolean">show all</option>
+         <option name="all" type="flag">show all</option>
       </optgroup>
       <transport trigger="tor_switch" method="get" path="tor_switch/%(tor_switch)s" />
       <transport method="get" path="find/tor_switch" />
@@ -2500,7 +2501,7 @@
       the configuration of all DNS domains will be output.
       <optgroup name="del_dns_domain_options" mandatory="True" fields="any">
          <option name="dns_domain" type="string" conflicts="all">Name of the DNS domain</option>
-         <option name="all" type="boolean" conflicts="dns_domain">Show all DNS domains</option>
+         <option name="all" type="flag" conflicts="dns_domain">Show all DNS domains</option>
       </optgroup>
       <transport trigger="dns_domain" method="get" path="dns_domain/%(dns_domain)s" />
       <transport method="get" path="dns_domain" />
@@ -2520,8 +2521,8 @@
          <option name="metacluster" type="string">Name of the new metacluster</option>
       </optgroup>
       <optgroup name="add_metacluster_options" mandatory="False">
-         <option name="max_members" type="string">Comments</option>
-         <option name="max_shares" type="string">Comments</option>
+         <option name="max_members" type="int">Comments</option>
+         <option name="max_shares" type="int">Comments</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="metacluster/%(metacluster)s" />
@@ -2531,7 +2532,7 @@
       Show details for a metacluster.
       <optgroup name="show_metacluster_req" mandatory="True" fields="any">
          <option name="metacluster" type="string">Name of the metacluster</option>
-         <option name="all" type="boolean">Show all</option>
+         <option name="all" type="flag">Show all</option>
       </optgroup>
       <transport method="get" path="metacluster" />
       <transport method="get" trigger="metacluster" path="metacluster/%(metacluster)s" />
@@ -2543,8 +2544,8 @@
          <option name="metacluster" type="string">Name of the metacluster</option>
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
-         <option name="max_members" type="string">Comments</option>
-         <option name="max_shares" type="string">Comments</option>
+         <option name="max_members" type="int">Comments</option>
+         <option name="max_shares" type="int">Comments</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s" />
@@ -2583,7 +2584,7 @@
       <optgroup name="add_esx_cluster_req" mandatory="True" fields="all">
          <option name="cluster" type="string">Name of the new esx_cluster</option>
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
-         <option name="down_hosts_threshold">Number of vmhosts that can be down before monitoring alarms trigger</option>
+         <option name="down_hosts_threshold" type="int">Number of vmhosts that can be down before monitoring alarms trigger</option>
          <optgroup name="add_cluster_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
@@ -2603,7 +2604,7 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_esx_cluster_options" mandatory="False">
-         <option name="max_members" type="string">Comments</option>
+         <option name="max_members" type="int">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="tor_switch" type="string">ToR switch in use by the cluster</option>
          <option name="comments" type="string">Comments</option>
@@ -2615,7 +2616,7 @@
       Show details for an ESX cluster.
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
          <option name="cluster" type="string">Name of the cluster</option>
-         <option name="all" type="boolean">Name of the cluster</option>
+         <option name="all" type="flag">Show all clusters</option>
       </optgroup>
       <transport method="get" trigger="cluster" path="cluster/esx/%(cluster)s" />
       <transport method="get" path="cluster/esx" />
@@ -2633,11 +2634,11 @@
       <optgroup name="update_esx_cluster_options" mandatory="False">
          <option name="archetype" type="string">Archetype Name</option>
          <option name="personality" type="string">Personality Name</option>
-         <option name="down_hosts_threshold">Down hosts threshold</option>
-         <option name="max_members" type="string">Max allowed vmhost members</option>
+         <option name="down_hosts_threshold" type="int">Down hosts threshold</option>
+         <option name="max_members" type="int">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="tor_switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
-         <option name="fix_location" type="boolean">Set the location based on cluster membership.</option>
+         <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <optgroup name="update_cluster_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
@@ -2753,7 +2754,7 @@
       services.
       <optgroup name="show_cluster_type_opts" mandatory="True" fields="any">
          <option name="cluster_type" type="string">cluster_type name</option>
-         <option name="all" type="boolean" conflicts="cluster_type">Select all cluster types</option>
+         <option name="all" type="flag" conflicts="cluster_type">Select all cluster types</option>
       </optgroup>
       <transport trigger="cluster_type" method="get" path="cluster_type/%(cluster_type)s" />
       <transport method="get" path="cluster_type" />
@@ -2780,8 +2781,8 @@
       the form: prefix-X-X-X-X.subdomain where the X's are the components
       of the IP address.  The prefix defaults to the string 'dynamic'.
       <optgroup name="add_dynamic_range_opts" mandatory="True" fields="all">
-         <option name="startip" type="string" mandatory="True">First IP address in the range to add</option>
-         <option name="endip" type="string" mandatory="True">Last IP address in the range to add</option>
+         <option name="startip" type="ipv4" mandatory="True">First IP address in the range to add</option>
+         <option name="endip" type="ipv4" mandatory="True">Last IP address in the range to add</option>
          <option name="dns_domain" type="string" mandatory="True">DNS domain to use for the generated names</option>
       </optgroup>
       <optgroup name="add_dynamic_range_opts" mandatory="False" fields="any">
@@ -2796,8 +2797,8 @@
       If there are any allocated systems in the range that are not
       dynamic the command will fail.
       <optgroup name="del_dynamic_range_opts" mandatory="True" fields="all">
-         <option name="startip" type="string" mandatory="True">First IP address in the range to delete</option>
-         <option name="endip" type="string" mandatory="True">Last IP address in the range to delete</option>
+         <option name="startip" type="ipv4" mandatory="True">First IP address in the range to delete</option>
+         <option name="endip" type="ipv4" mandatory="True">Last IP address in the range to delete</option>
       </optgroup>
       <transport method="delete" path="dynamic_range/%(startip)s/%(endip)s" />
    </command>

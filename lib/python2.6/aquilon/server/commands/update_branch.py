@@ -44,7 +44,7 @@ class CommandUpdateBranch(BrokerCommand):
     required_parameters = ["branch"]
 
     def render(self, session, logger, branch, comments, compiler_version,
-               autosync, noautosync, **arguments):
+               autosync, **arguments):
         dbbranch = Branch.get_unique(session, branch, compel=True)
         if comments:
             dbbranch.comments = comments
@@ -56,9 +56,7 @@ class CommandUpdateBranch(BrokerCommand):
             if not os.path.exists(compiler):
                 raise ArgumentError("Compiler not found at '%s'" % compiler)
             dbbranch.compiler = compiler
-        if noautosync:
-            dbbranch.autosync = False
-        if autosync:
-            dbbranch.autosync = True
+        if autosync is not None:
+            dbbranch.autosync = autosync
         session.add(dbbranch)
         return

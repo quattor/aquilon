@@ -33,7 +33,7 @@ import re
 
 from sqlalchemy.exceptions import InvalidRequestError
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
@@ -67,7 +67,6 @@ class CommandAddDisk(BrokerCommand):
                                 "of: %s." % (controller,
                                              ", ".join(controller_types)))
 
-        size = force_int("size", size)
         if share:
             dbservice = Service.get_unique(session, "nas_disk_share",
                                            compel=True)

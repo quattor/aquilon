@@ -43,16 +43,15 @@ class CommandDeploy(BrokerCommand):
 
     required_parameters = ["source", "target"]
 
-    def render(self, session, logger, source, target, nosync, dryrun,
+    def render(self, session, logger, source, target, sync, dryrun,
                **arguments):
         # Most of the logic here is duplicated in publish
-        autosync = not nosync
         dbsource = Branch.get_unique(session, source, compel=True)
 
         # The target has to be a non-tracking domain
         dbtarget = Domain.get_unique(session, target, compel=True)
 
-        if autosync and dbtarget.tracked_branch \
+        if sync and dbtarget.tracked_branch \
            and dbtarget.tracked_branch.autosync and dbtarget.autosync:
             # The user probably meant to deploy to the tracked branch,
             # but only do so if all the relevant autosync flags are
@@ -66,7 +65,7 @@ class CommandDeploy(BrokerCommand):
                                 "Did you mean domain %s?" %
                                 (dbtarget.name, dbtarget.tracked_branch.name))
 
-        if autosync and not dbtarget.is_sync_valid and dbtarget.trackers:
+        if sync and not dbtarget.is_sync_valid and dbtarget.trackers:
             # FIXME: Maybe raise an ArgumentError and request that the
             # command run with --nosync?  Maybe provide a --validate flag?
             # For now, just auto-flip (below).
@@ -113,7 +112,7 @@ class CommandDeploy(BrokerCommand):
         except ProcessException, e:
             logger.warn("Error syncing domain %s: %s" % (dbtarget.name, e))
 
-        if nosync or not dbtarget.autosync:
+        if not sync or not dbtarget.autosync:
             return
 
         for domain in dbtarget.trackers:

@@ -32,7 +32,7 @@
 from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
 from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster, Service,
                                 ServiceInstance, NasDisk, Disk)
@@ -49,17 +49,14 @@ class CommandSearchMachine(BrokerCommand):
         q = search_hardware_entity_query(session, Machine, **arguments)
         if machine:
             q = q.filter_by(name=machine)
-        if cpuname or cpuvendor or cpuspeed:
+        if cpuname or cpuvendor or cpuspeed is not None:
             subq = Cpu.get_matching_query(session, name=cpuname,
-                                          vendor=cpuvendor,
-                                          speed=force_int("cpuspeed", cpuspeed),
+                                          vendor=cpuvendor, speed=cpuspeed,
                                           compel=True)
             q = q.filter(Machine.cpu_id.in_(subq))
-        if cpucount:
-            cpucount = force_int("cpucount", cpucount)
+        if cpucount is not None:
             q = q.filter_by(cpu_quantity=cpucount)
-        if memory:
-            memory = force_int("memory", memory)
+        if memory is not None:
             q = q.filter_by(memory=memory)
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
