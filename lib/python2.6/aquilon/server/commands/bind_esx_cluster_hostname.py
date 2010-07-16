@@ -28,91 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import EsxCluster, HostClusterMember
-from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.services import Chooser
+from aquilon.server.commands.cluster import CommandCluster
 
 
-class CommandBindESXClusterHostname(BrokerCommand):
+class CommandBindESXClusterHostname(CommandCluster):
 
-    required_parameters = ["hostname", "cluster"]
-
-    def render(self, session, logger, hostname, cluster, force=False,
-               **arguments):
-        dbhost = hostname_to_host(session, hostname)
-        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-        if dbhost.personality != dbcluster.personality:
-            raise ArgumentError("Host archetype %s personality %s does not "
-                                "match cluster archetype %s personality %s." %
-                                (dbhost.personality.archetype.name,
-                                 dbhost.personality.name,
-                                 dbcluster.personality.archetype.name,
-                                 dbcluster.personality.name))
-        if dbhost.machine.location != dbcluster.location_constraint and \
-           dbcluster.location_constraint not in \
-           dbhost.machine.location.parents:
-            raise ArgumentError("Host location %s %s is not within cluster "
-                                "location %s %s." %
-                                (dbhost.machine.location.location_type.capitalize(),
-                                 dbhost.machine.location.name,
-                                 dbcluster.location_constraint.location_type.capitalize(),
-                                 dbcluster.location_constraint.name))
-        if dbhost.cluster and dbhost.cluster != dbcluster:
-            if not force:
-                raise ArgumentError("Host %s is already bound to %s cluster %s."
-                                    % (hostname, dbhost.cluster.cluster_type,
-                                       dbhost.cluster.name))
-            old_cluster = dbhost.cluster
-            dbhcm = HostClusterMember.get_unique(session, cluster=old_cluster,
-                                                 host=dbhost)
-            session.delete(dbhcm)
-            session.flush()
-            session.refresh(dbhost)
-            session.refresh(old_cluster)
-            if hasattr(old_cluster, 'verify_ratio'):
-                old_cluster.verify_ratio()
-
-        chooser = None
-        if not dbhost.cluster:
-            if dbhost.branch != dbcluster.branch or \
-               dbhost.sandbox_author != dbcluster.sandbox_author:
-                raise ArgumentError("Host %s %s %s does not match "
-                                    "%s cluster %s %s %s." %
-                                    (dbhost.fqdn, dbhost.branch.branch_type,
-                                     dbhost.authored_branch,
-                                     dbcluster.cluster_type, dbcluster.name,
-                                     dbcluster.branch.branch_type,
-                                     dbcluster.authored_branch))
-            # Check for max_members happens in aqdb layer and can throw a VE
-            try:
-                dbhcm = HostClusterMember(cluster=dbcluster, host=dbhost)
-                session.add(dbhcm)
-            except ValueError, e:
-                raise ArgumentError(e.message)
-            session.flush()
-            session.refresh(dbhost)
-            # Enforce that service instances are set correctly for the
-            # new cluster association.
-            chooser = Chooser(dbhost, logger=logger)
-            chooser.set_required()
-            chooser.flush_changes()
-        # If this host is already bound to the cluster,
-        # rewrite the plenary anyway.
-
-        session.flush()
-        session.refresh(dbcluster)
-
-        # XXX: Why not just try a compile of the cluster here and
-        # rollback if needed?
-        if chooser:
-            chooser.write_plenary_templates()
-        else:
-            plenary = PlenaryCluster(dbcluster, logger=logger)
-            plenary.write()
-
-        return
-
-
+    def render(self, **arguments):
+        logger = arguments['logger']
+        logger.client_info("WARNING: bind_esx_cluster --hostname is "
+                           "deprecated, use the cluster command instead.")
+        return CommandCluster.render(self, **arguments)

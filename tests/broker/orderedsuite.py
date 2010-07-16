@@ -98,6 +98,7 @@ from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
 from test_make import TestMake
 from test_make_cluster import TestMakeCluster
+from test_cluster import TestCluster
 from test_bind_esx_cluster import TestBindESXCluster
 from test_rebind_esx_cluster import TestRebindESXCluster
 from test_rebind_metacluster import TestRebindMetaCluster
@@ -156,6 +157,7 @@ from test_unmap_service import TestUnmapService
 from test_del_10gig_hardware import TestDel10GigHardware
 from test_del_virtual_hardware import TestDelVirtualHardware
 from test_unbind_esx_cluster import TestUnbindESXCluster
+from test_uncluster import TestUncluster
 from test_del_dynamic_range import TestDelDynamicRange
 from test_del_address import TestDelAddress
 from test_del_manager import TestDelManager
@@ -225,7 +227,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddAuxiliary, TestAddManager,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
-                TestMakeAquilon, TestMakeCluster,
+                TestMakeAquilon, TestMakeCluster, TestCluster,
                 TestBindESXCluster, TestRebindESXCluster, TestMake,
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,
@@ -257,7 +259,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
-                TestUnbindESXCluster,
+                TestUnbindESXCluster, TestUncluster,
                 TestDelDynamicRange, TestDelAddress,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,

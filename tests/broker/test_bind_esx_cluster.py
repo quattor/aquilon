@@ -43,85 +43,16 @@ from brokertest import TestBrokerCommand
 
 class TestBindESXCluster(TestBrokerCommand):
 
-    def testbindutecl1(self):
-        for i in range(1, 5):
-            self.successtest(["bind_esx_cluster",
-                              "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                              "--cluster", "utecl1"])
-
-    def testbindutecl2(self):
-        # test_rebind_esx_cluster will also bind evh1 to utecl2.
-        for i in [5]:
-            self.successtest(["bind_esx_cluster",
-                              "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                              "--cluster", "utecl2"])
-
-    def testduplicatebindutecl1(self):
-        self.successtest(["bind_esx_cluster",
-                          "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--cluster", "utecl1"])
-
-    def testverifybindutecl1(self):
-        for i in range(1, 5):
-            command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
-            out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
-                             command)
-            self.matchoutput(out, "Member of esx cluster: utecl1", command)
-        command = "show esx cluster --cluster utecl1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl1", command)
-        for i in range(1, 5):
-            self.matchoutput(out, "Member: evh%s.aqd-unittest.ms.com" %i,
-                             command)
-
-    def testverifycat(self):
-        command = "cat --cluster utecl1"
-        out = self.commandtest(command.split())
-        for i in range(1, 5):
-            self.searchoutput(out,
-                              "'/system/cluster/members' = list\([^\)]*"
-                              "'evh%s.aqd-unittest.ms.com'[^\)]*\);" % i,
-                              command)
-
-    def testfailmissingcluster(self):
+    def testdeprecation(self):
+        # This same test exists in the test_cluster module, and can be
+        # removed here if/when the bind_esx_cluster --hostname option is
+        # removed.
         command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster", "cluster-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "ESX Cluster cluster-does-not-exist not found.",
-                         command)
-
-    def testfailbadarchetype(self):
-        command = ["bind_esx_cluster",
-                   "--hostname=aquilon61.aqd-unittest.ms.com",
-                   "--cluster", "utecl1"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "does not match cluster archetype", command)
-
-    # FIXME: This fails becuase the personality check comes first.
-    # Re-enable after we can reconfigure one of the aquilon7x or aquilon9x
-    # hosts to be archetype vmhost.
-#   def testfailbadlocation(self):
-#       command = ["bind_esx_cluster",
-#                  "--hostname=unittest00.one-nyp.ms.com",
-#                  "--cluster", "utecl1"]
-#       out = self.badrequesttest(command)
-#       self.matchoutput(out, "is not within cluster location", command)
-
-    def testfailbindtwice(self):
-        command = ["bind_esx_cluster",
-                   "--hostname=evh1.aqd-unittest.ms.com",
-                   "--cluster", "utecl2"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "is already bound", command)
-
-    def testfailmaxmembers(self):
-        command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "utecl3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "utecl3 already at maximum capacity (0)",
+        (p, out, err) = self.runcommand(command)
+        self.matchoutput(err,
+                         "WARNING: bind_esx_cluster --hostname is "
+                         "deprecated, use the cluster command instead.",
                          command)
 
     def testfailbindservicemissingcluster(self):
@@ -145,14 +76,6 @@ class TestBindESXCluster(TestBrokerCommand):
                    "--service=esx_management_server", "--instance=%s" % next]
         out = self.badrequesttest(command)
         self.matchoutput(out, "use unbind to clear first or rebind to force",
-                         command)
-
-    def testfailunmadecluster(self):
-        command = ["bind_esx_cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "utecl4"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please run `make cluster --cluster utecl4`",
                          command)
 
     def testrebindservice(self):
@@ -192,15 +115,6 @@ class TestBindESXCluster(TestBrokerCommand):
                              "Not all cluster members (%s) are aligned (%s)." %
                              (members, aligned))
 
-    def testbindutmc4(self):
-        for i in range(1, 25):
-            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
-            cluster = "utecl%d" % (5 + ((i - 1) / 4))
-            self.successtest(["bind_esx_cluster",
-                              "--hostname", host, "--cluster", cluster])
-
-
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindESXCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

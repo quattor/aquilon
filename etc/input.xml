@@ -2741,21 +2741,21 @@
    </command>
 
    <command name="bind_esx_cluster">
-      Bind a vmhost or a service instance to the named cluster.
+      Bind a service instance to the named cluster.
       <p/>
-      If binding a vmhost that is already bound to a different cluster this
-      command will fail.
+      The option to bind a vmhost to a cluster is deprecated.  Please use
+      the cluster command instead.
       <p/>
       If binding a service instance for a service that is already bound to
       a different instance this command will fail.
       <optgroup name="bind_esx_cluster_opts" mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
          <optgroup name="bind_esx_cluster_object" mandatory="True" fields="any">
-            <option name="hostname" type="string" conflicts="service">Server name</option>
             <optgroup name="bind_esx_cluster_service" mandatory="False" fields="all">
                <option name="service" type="string" conflicts="hostname">Service name</option>
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
+            <option name="hostname" type="string" conflicts="service">[Deprecated] Server name</option>
          </optgroup>
       </optgroup>
       <transport method="put" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
@@ -2763,21 +2763,21 @@
    </command>
 
    <command name="rebind_esx_cluster">
-      Bind a vmhost or a service instance to the named cluster.
+      Bind a service instance to the named cluster.
       <p/>
-      If binding a vmhost that is already bound to a different cluster that
-      binding will be removed.
+      The option to bind a vmhost to a cluster is deprecated.  Please use
+      the cluster command instead.
       <p/>
       If binding a service instance for a service that is already bound to
       a different instance the old binding will be removed.
       <optgroup name="rebind_esx_cluster_opts" mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
 	 <optgroup name="rebind_esx_cluster_object" mandatory="True" fields="any">
-            <option name="hostname" type="string" conflicts="service">Server name</option>
 	    <optgroup name="rebind_esx_cluster_service" fields="all">
                <option name="service" type="string" conflicts="hostname">Service name</option>
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
+            <option name="hostname" type="string" conflicts="service">[Deprecated] Server name</option>
          </optgroup>
       </optgroup>
       <transport method="post" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
@@ -2785,20 +2785,47 @@
    </command>
 
    <command name="unbind_esx_cluster">
-      Remove the binding of the vmhost or service instance from the named
-      cluster.
+      Remove the binding of the service instance from the named cluster.
+      <p/>
+      Use of this command to remove a host from a cluster is deprecated,
+      please use uncluster.
       <optgroup name="unbind_esx_cluster_opts" mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
 	 <optgroup name="unbind_esx_cluster_object" mandatory="True" fields="any">
-            <option name="hostname" type="string" conflicts="service">Server name</option>
 	    <optgroup name="unbind_esx_cluster_service" mandatory="False" fields="all">
                <option name="service" type="string" conflicts="hostname">Service name</option>
                <option name="instance" type="string">Service Instance</option>
             </optgroup>
+            <option name="hostname" type="string" conflicts="service">[Deprecated] Server name</option>
          </optgroup>
       </optgroup>
       <transport method="delete" trigger="hostname" path="cluster/esx/%(cluster)s/host/%(hostname)s" />
       <transport method="delete" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+   </command>
+
+   <command name="cluster">
+      Cluster a host.
+      <p/>
+      This adds the given host into the given cluster.  This is a potentially
+      destructive operation as the host will be given the personality of the
+      cluster.
+      <p/>
+      If the host is already a member of a cluster the previous membership
+      will be removed.
+      <optgroup name="cluster_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Server name</option>
+         <option name="cluster" type="string">Cluster name</option>
+      </optgroup>
+      <transport method="put" path="cluster/%(cluster)s/host/%(hostname)s" />
+   </command>
+
+   <command name="uncluster">
+      Remove the host from the named cluster.
+      <optgroup name="uncluster_opts" mandatory="True" fields="all">
+         <option name="hostname" type="string">Server name</option>
+         <option name="cluster" type="string">Cluster name</option>
+      </optgroup>
+      <transport method="delete" path="cluster/%(cluster)s/host/%(hostname)s" />
    </command>
 
    <command name="add_esx_cluster_aligned_service">
