@@ -33,7 +33,6 @@ import os
 import sys
 import unittest
 import urllib
-import socket
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -50,10 +49,11 @@ class TestClientBypass(TestBrokerCommand):
 
     def urltest(self, path, expect_status, **kwargs):
         openport = self.config.get("broker", "openport")
+        server = self.config.get("broker", "servername")
         arglist = []
         for key, value in kwargs.items():
             arglist.append("%s=%s" % (urllib.quote(key), urllib.quote(value)))
-        url = "http://" + socket.gethostname() + ":" + openport + path
+        url = "http://" + server + ":" + openport + path
         if arglist:
             url += "?" + "&".join(arglist)
         stream = urllib.urlopen(url)
