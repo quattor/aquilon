@@ -65,7 +65,7 @@ class CommandMake(BrokerCommand):
                dbhost.cluster.personality != dbpersonality:
                 raise ArgumentError("Cannot change personality of host {0} "
                                     "while it is a member of "
-                                    "{1}.".format(dbhost.fqdn, dbhost.cluster))
+                                    "{1:l}.".format(dbhost.fqdn, dbhost.cluster))
             dbhost.personality = dbpersonality
             session.add(dbhost)
 
@@ -76,8 +76,8 @@ class CommandMake(BrokerCommand):
             session.add(dbhost)
 
         if not dbhost.archetype.is_compileable:
-            raise ArgumentError("%s is not a compilable archetype (%s)." %
-                                (format(dbhost), dbhost.archetype.name))
+            raise ArgumentError("{0} is not a compilable archetype "
+                                "({1!s}).".format(dbhost, dbhost.archetype))
 
         if buildstatus:
             dbstatus = get_status(session, buildstatus)

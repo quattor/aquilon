@@ -82,10 +82,6 @@ class PersonalityServiceMap(Base):
         return self.service_instance.service
     service = property(_service)
 
-    def __repr__(self):
-        return '<%s %s for %s at %s>' % (self.__class__.__name__,
-                                         self.service_instance.service,
-                                         self.personality, self.location)
 
 personality_service_map = PersonalityServiceMap.__table__
 table = personality_service_map

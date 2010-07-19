@@ -58,8 +58,12 @@ class OperatingSystem(Base):
     archetype = relation(Archetype, backref='os', uselist=False, lazy=False)
 
     def __format__(self, format_spec):
-        val = "%s %s/%s-%s" % (self.__class__._get_class_label(),
-                               self.archetype.name, self.name, self.version)
+        if format_spec and format_spec[-1] == 'l':
+            clsname = self.__class__._get_class_label(tolower=True)
+            format_spec = format_spec[:-1]
+        else:
+            clsname = self.__class__._get_class_label()
+        val = "%s %s/%s-%s" % (clsname, self.archetype.name, self.name, self.version)
         return val.__format__(format_spec)
 
     @property

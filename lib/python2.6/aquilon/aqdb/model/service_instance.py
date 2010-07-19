@@ -65,8 +65,12 @@ class ServiceInstance(Base):
     service = relation(Service, lazy=False, uselist=False, backref='instances')
 
     def __format__(self, format_spec):
-        val = "%s %s/%s" % (self.__class__._get_class_label(),
-                            self.service.name, self.name)
+        if format_spec and format_spec[-1] == 'l':
+            clsname = self.__class__._get_class_label(tolower=True)
+            format_spec = format_spec[:-1]
+        else:
+            clsname = self.__class__._get_class_label()
+        val = "%s %s/%s" % (clsname, self.service.name, self.name)
         return val.__format__(format_spec)
 
     @property

@@ -105,9 +105,19 @@ class Base(object):
         The output of format() should be the preferred form when referring to
         this object in messages sent to the client. It should be readable as
         plain text, and should uniquely identify the object.
+
+        The format_spec argument can be a standard format specifier suitable for
+        strings, with an extension: having 'l' as the type will format the class
+        label in lower case, except all-caps abbreviations.
         """
-        val = "%s %s" % (self.__class__._get_class_label(),
-                         self._get_instance_label())
+        if format_spec and format_spec[-1] == 'l':
+            clsname = self.__class__._get_class_label(tolower=True)
+            format_spec = format_spec[:-1]
+        else:
+            clsname = self.__class__._get_class_label()
+
+        val = "%s %s" % (clsname, self._get_instance_label())
+
         # This line has two nice properties: it does the unicode()/str()
         # format_spec handling properly, and it handles the standard formatting
         # specifiers like field width etc.
@@ -118,9 +128,14 @@ class Base(object):
         return session.query(cls).filter(cls.__dict__[k] == v).all()
 
     @classmethod
-    def _get_class_label(cls):
-        return getattr(cls, "_class_label", cls.__name__)
-
+    def _get_class_label(cls, tolower=False):
+        label = getattr(cls, "_class_label", cls.__name__)
+        if tolower:
+            parts = label.split()
+            # 'Operating System' -> 'operating system', but: 'ESX Cluster' ->
+            # 'ESX cluster'
+            label = ' '.join(map(lambda x: x if x.isupper() else x.lower(), parts))
+        return label
 
     def _get_instance_label(self):
         """Subclasses can override this method or just set a property to check.

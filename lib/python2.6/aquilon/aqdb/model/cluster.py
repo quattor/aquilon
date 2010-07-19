@@ -191,7 +191,7 @@ class EsxCluster(Cluster):
             return
 
         if host_part == 0:
-            raise error("Invalid ratio of {0}:{1} for {2}.".format(
+            raise error("Invalid ratio of {0}:{1} for {2:l}.".format(
                         vm_part, host_part, self))
 
         # For calculations, assume that down_hosts_threshold vmhosts

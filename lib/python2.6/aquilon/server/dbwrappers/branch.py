@@ -67,9 +67,9 @@ def get_branch_dependencies(dbbranch):
     """
     ret = []
     if dbbranch.hosts:
-        ret.append("Hosts are still attached to {0}.".format(dbbranch))
+        ret.append("Hosts are still attached to {0:l}.".format(dbbranch))
     if dbbranch.clusters:
-        ret.append("Clusters are still attached to {0}.".format(dbbranch))
+        ret.append("Clusters are still attached to {0:l}.".format(dbbranch))
     if dbbranch.trackers:
         ret.append("%s is tracked by %s." %
                    (format(dbbranch), [str(t.name) for t in dbbranch.trackers]))

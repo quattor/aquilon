@@ -82,7 +82,7 @@ class CommandReconfigure(CommandMake):
                    dbhost.cluster.personality != dbpersonality:
                     raise ArgumentError("Cannot change personality of {0} "
                                         "while it is a member of "
-                                        "{1}.".format(dbhost, dbhost.cluster))
+                                        "{1:l}.".format(dbhost, dbhost.cluster))
                 dbhost.personality = dbpersonality
             if osname or osversion or os:
                 dbos = self.get_os(session, dbhost, osname, osversion, os)

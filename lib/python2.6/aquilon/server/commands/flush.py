@@ -112,7 +112,7 @@ class CommandFlush(BrokerCommand):
                             pass
                             #logger.client_info("Not flushing host: %s" % e)
                         except Exception, e:
-                            failed.append("{0} in {1} failed: {2}".format(h, b, e))
+                            failed.append("{0} in {1:l} failed: {2}".format(h, b, e))
 
             if clusters or all:
                 logger.client_info("Flushing clusters.")

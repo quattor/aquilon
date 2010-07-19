@@ -102,7 +102,12 @@ class Interface(Base):
             owner = self.system.fqdn
         else:
             owner = self.hardware_entity.name
-        val = "%s %s/%s" % (self.__class__._get_class_label(), owner, self.name)
+        if format_spec and format_spec[-1] == 'l':
+            clsname = self.__class__._get_class_label(tolower=True)
+            format_spec = format_spec[:-1]
+        else:
+            clsname = self.__class__._get_class_label()
+        val = "%s %s/%s" % (clsname, owner, self.name)
         return val.__format__(format_spec)
 
     @validates('mac')
