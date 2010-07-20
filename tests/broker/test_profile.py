@@ -34,6 +34,7 @@ import sys
 import unittest
 import re
 from lxml import etree
+import gzip
 
 if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -46,8 +47,10 @@ class TestProfile(TestBrokerCommand):
 
     def load_profile(self, name):
         path = os.path.join(self.config.get("broker", "profilesdir"),
-                            name + ".xml")
+                            name + self.profile_suffix)
         self.failUnless(os.path.exists(path))
+        if self.gzip_profiles:
+            path = gzip.open(path)
         tree = etree.parse(path)
         return tree
 

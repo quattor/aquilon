@@ -54,7 +54,7 @@ class TestMake(TestBrokerCommand):
 
             self.assert_(os.path.exists(os.path.join(
                 self.config.get("broker", "profilesdir"),
-                "evh1.aqd-unittest.ms.com.xml")))
+                "evh1.aqd-unittest.ms.com%s" % self.profile_suffix)))
 
             self.failUnless(os.path.exists(os.path.join(
                 self.config.get("broker", "builddir"),

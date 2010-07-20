@@ -160,6 +160,8 @@ class TemplateDomain(object):
                     config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
                     config.get("broker", "ant_contrib_jar"))
+        args.append("-Dgzip.output=%s" %
+                    config.get("panc", "gzip_output"))
         if self.domain.branch_type == 'sandbox':
             args.append("-Ddomain.templates=%s" % sandboxdir)
         if (only):
