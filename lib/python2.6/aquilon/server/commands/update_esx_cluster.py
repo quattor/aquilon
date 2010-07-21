@@ -59,6 +59,9 @@ class CommandUpdateESXCluster(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if fix_location:
             dblocation = dbcluster.minimum_location
+            if not dblocation:
+                raise ArgumentError("Cannot infer the cluster location from "
+                                    "the host locations.")
         if dblocation:
             errors = []
             if not dblocation.campus:
