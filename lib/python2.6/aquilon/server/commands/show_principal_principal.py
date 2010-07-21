@@ -35,7 +35,7 @@ from aquilon.server.dbwrappers.user_principal import (
         get_or_create_user_principal)
 
 
-class CommandShowPrincipal(BrokerCommand):
+class CommandShowPrincipalPrincipal(BrokerCommand):
 
     required_parameters = ["principal"]
 

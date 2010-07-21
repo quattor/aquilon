@@ -37,7 +37,7 @@ from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
 
 
-class CommandAddService(BrokerCommand):
+class CommandUpdateService(BrokerCommand):
 
     required_parameters = ["service"]
 
@@ -60,5 +60,3 @@ class CommandAddService(BrokerCommand):
         plenaries.write()
 
         return
-
-
