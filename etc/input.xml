@@ -1926,7 +1926,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_building/%(city)s/%(building)s" />
+      <transport method="put" path="location/building/%(building)s" />
    </command>
 
    <command name="show_building">
@@ -1956,7 +1956,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_room/%(building)s/%(room)s" />
+      <transport method="put" path="location/room/%(room)s" />
    </command>
 
    <command name="show_room">
@@ -1997,7 +1997,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_city/%(country)s/%(city)s" />
+      <transport method="put" path="location/city/%(city)s" />
    </command>
 
    <command name="show_city">
@@ -2027,7 +2027,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_country/%(continent)s/%(country)s" />
+      <transport method="put" path="location/country/%(country)s" />
    </command>
 
    <command name="show_country">
@@ -2057,7 +2057,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_continent/%(hub)s/%(continent)s" />
+      <transport method="put" path="location/continent/%(continent)s" />
    </command>
 
    <command name="show_continent">
@@ -2086,7 +2086,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_organization/%(organization)s" />
+      <transport method="put" path="location/organization/%(organization)s" />
    </command>
 
    <command name="del_organization">
@@ -2117,7 +2117,7 @@
          <option name="organization" type="string">The owning organization of the hub</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_hub/%(hub)s" />
+      <transport method="put" path="location/hub/%(hub)s" />
    </command>
 
    <command name="show_hub">
