@@ -29,11 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_esx_cluster import CommandShowESXCluster
+from aquilon.server.commands.show_esx_cluster_all import CommandShowESXClusterAll
 
 
-class CommandShowESXClusterCluster(CommandShowESXCluster):
+class CommandShowESXClusterCluster(CommandShowESXClusterAll):
 
     required_parameters = ['cluster']
-
-

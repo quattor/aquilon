@@ -285,6 +285,20 @@ class TestAddHost(TestBrokerCommand):
         self.matchoutput(out, "Template: windows/os/windows/generic/config.tpl",
                          command)
 
+    def testverifyhostall(self):
+        command = ["show", "host", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest15.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest17.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh51.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "test_aurora_default_os.ms.com", command)
+        self.matchoutput(out, "test_windows_default_os.msad.ms.com", command)
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

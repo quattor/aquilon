@@ -26,17 +26,14 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show organization`."""
+"""Contains the logic for `aq show archetype`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_location_type import CommandShowLocationType
+from aquilon.aqdb.model import Archetype
 
-class CommandShowOrganization(CommandShowLocationType):
 
-    required_parameters = []
+class CommandShowArchetypeAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='company', name=None,
-                                              **arguments)
+        return session.query(Archetype).order_by(Archetype.name).all()

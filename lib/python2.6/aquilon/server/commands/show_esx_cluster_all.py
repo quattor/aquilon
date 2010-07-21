@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,18 +26,21 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show city`."""
 
 
+from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import EsxCluster
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowCity(CommandShowLocationType):
+class CommandShowESXClusterAll(BrokerCommand):
 
-    required_parameters = []
-
-    def render(self, session, **arguments):
-        return CommandShowLocationType.render(self, session=session,
-                                              type='city', name=None,
-                                              **arguments)
+    def render(self, session, cluster, **arguments):
+        q = session.query(EsxCluster)
+        if cluster:
+            q = q.filter_by(name=cluster)
+        q = q.order_by(EsxCluster.name)
+        dbclusters = q.all()
+        if cluster and not dbclusters:
+            raise NotFoundException("ESX Cluster %s not found." % cluster)
+        return dbclusters

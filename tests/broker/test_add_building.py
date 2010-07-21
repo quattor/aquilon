@@ -52,6 +52,11 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: ut", command)
 
+    def testverifybuildingall(self):
+        command = ["show", "building", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Building: ut", command)
+
     def testverifyshowcsv(self):
         command = "show building --building ut --format=csv"
         out = self.commandtest(command.split(" "))
