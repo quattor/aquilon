@@ -33,6 +33,28 @@ import sqlalchemy
 
 from aquilon.exceptions_ import ArgumentError
 
+_unpadded_re = re.compile(r'\b([0-9a-f])\b')
+_nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
+_two_re = re.compile(r'[0-9a-f]{2}')
+_padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
+
+def normalize_mac_address(value):
+    # Allow nullable Mac Addresses, consistent with behavior of IPV4
+    if not value:
+        return None
+
+    # Strip, lower, and then use a regex for zero-padding if needed...
+    value = _unpadded_re.sub(r'0\1', str(value).strip().lower())
+    # If we have exactly twelve hex characters, add the colons.
+    if _nocolons_re.search(value):
+        value = ":".join(_two_re.findall(value))
+    # Check to make sure we're good.
+    if _padded_re.search(value):
+        return value
+    raise TypeError("Invalid format MAC address '%s'.  Please use "
+                    "00:1a:2b:3c:0d:55, 001a2b3c0d55, or 0:1a:2b:3c:d:55" %
+                    value)
+
 class AqMac(sqlalchemy.types.TypeDecorator):
     """ A type that decorates MAC address.
 
@@ -46,26 +68,11 @@ class AqMac(sqlalchemy.types.TypeDecorator):
 
     impl = sqlalchemy.types.String
 
-    unpadded_re = re.compile(r'\b([0-9a-f])\b')
-    nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
-    two_re = re.compile(r'[0-9a-f]{2}')
-    padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
-
     def process_bind_param(self, value, engine):
-        # Allow nullable Mac Addresses, consistent with behavior of IPV4
-        if not value:
-            return None
-
-        # Strip, lower, and then use a regex for zero-padding if needed...
-        value = self.unpadded_re.sub(r'0\1', str(value).strip().lower())
-        # If we have exactly twelve hex characters, add the colons.
-        if self.nocolons_re.search(value):
-            value = ":".join(self.two_re.findall(value))
-        # Check to make sure we're good.
-        if self.padded_re.search(value):
-            return value
-        raise ArgumentError("Invalid format '%s' for MAC.  Please use 00:1a:2b:3c:0d:55, 001a2b3c0d55, or 0:1a:2b:3c:d:55" %
-                value)
+        try:
+            return normalize_mac_address(value)
+        except TypeError, err:
+            raise ArgumentError(err)
 
     def process_result_value(self, value, engine):
         return value

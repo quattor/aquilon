@@ -40,6 +40,7 @@ from sqlalchemy.orm import object_session
 from sqlalchemy import sql
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
+from aquilon.aqdb.column_types.aqmac import normalize_mac_address
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, Machine, ObservedMac, System,
                                 VlanInfo, ObservedVlan)
@@ -300,3 +301,87 @@ def choose_port_group(dbmachine):
         return dbobserved_vlan.port_group
     raise ArgumentError("No available user port groups on switch %s." %
                         dbmachine.cluster.switch.fqdn)
+
+def _type_msg(interface_type, bootable):
+    if bootable is not None:
+        return "%s, %s" % ("bootable" if bootable else "non-bootable",
+                           interface_type)
+    else:
+        return interface_type
+
+def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
+                            interface_type='public', bootable=None,
+                            preclude=False, **extra_args):
+    """ Look up an existing interface or create a new one. """
+
+    q = session.query(Interface)
+    q = q.filter_by(hardware_entity=dbhw_ent)
+    # Do not filter by both name and MAC, since that would prevent discovering
+    # discrepancy between the two.
+    if name:
+        q = q.filter_by(name=name)
+    elif mac:
+        q = q.filter_by(mac=mac)
+    dbinterfaces = q.all()
+
+    if preclude and dbinterfaces:
+            raise ArgumentError("Interface {0!s} of {1:l} already "
+                                "exists.".format(dbinterface, dbhw_ent))
+
+    if not dbinterfaces:
+        if mac:
+            q = session.query(Interface)
+            q = q.filter_by(mac=mac)
+            dbinterface = q.first()
+            if dbinterface:
+                raise ArgumentError("MAC address %s is already in use: %s." %
+                                    (mac, describe_interface(session,
+                                                             dbinterface)))
+        if not name:
+            # Not enough information to create it
+            raise ArgumentError("{0} has no {1} interfaces.".format(dbhw_ent,
+                                                                    interface_type))
+        try:
+            dbinterface = Interface(name=name, hardware_entity=dbhw_ent,
+                                    interface_type=interface_type, mac=mac,
+                                    bootable=bootable, **extra_args)
+        except ValueError, err:
+            raise ArgumentError(err)
+        session.add(dbinterface)
+        session.flush()
+        session.refresh(dbinterface)
+    elif len(dbinterfaces) == 1:
+        dbinterface = dbinterfaces[0]
+        # The user input must be normalized before comparing it with a value
+        # from the DB
+        if mac and dbinterface.mac != normalize_mac_address(mac):
+            raise ArgumentError("Interface {0!s} of {1:l} exists, but has MAC "
+                                "address {2} instead of "
+                                "{3}.".format(dbinterface, dbhw_ent,
+                                              dbinterface.mac, mac))
+        if interface_type and dbinterface.interface_type != interface_type:
+            raise ArgumentError("Interface {0!s} of {1:l} is of type {2}, not "
+                                "{3}.".format(dbinterface, dbhw_ent,
+                                              dbinterface.interface_type,
+                                              interface_type))
+    else:
+        # Since both the MAC and name are unique keys, we can arrive here only
+        # if neither of them were specified. Try to match the interface based on
+        # type and boot settings.
+        dbinterface = None
+        for iface in dbinterfaces:
+            if iface.interface_type != interface_type:
+                continue
+            if bootable is not None and iface.bootable != bootable:
+                continue
+            if dbinterface:
+                type_msg = _type_msg(interface_type, bootable)
+                raise ArgumentError("{0} has multiple {1} interfaces, please "
+                                    "specify which one to "
+                                    "use.".format(dbhw_ent, type_msg))
+            dbinterface = iface
+        if not dbinterface:
+            type_msg = _type_msg(interface_type, bootable)
+            raise NotFoundException("{0} has no {1} interfaces "
+                                    "defined.".format(dbhw_ent, type_msg))
+    return dbinterface
