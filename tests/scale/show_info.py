@@ -46,7 +46,7 @@ def show_info(aqservice):
     rc = aq.wait(["show", "cpu", "--all"])
     rc = aq.wait(["show", "model", "--type", "blade"])
     rc = aq.wait(["show", "service", "--all"])
-    rc = aq.wait(["show", "archetype"])
+    rc = aq.wait(["show", "archetype", "--all"])
     rc = aq.wait(["show", "map", "--building", "np"])
     rc = aq.wait(["show", "chassis"])
     rc = aq.wait(["show", "rack", "--all"])
@@ -56,7 +56,7 @@ def show_info(aqservice):
     rc = aq.wait(["show", "continent"])
     rc = aq.wait(["show", "hub"])
     rc = aq.wait(["show", "machine", "--all"])
-    rc = aq.wait(["show", "tor_switch", "--model", "rs8000"])
+    rc = aq.wait(["show", "tor_switch", "--model", "rs g8000"])
     rc = aq.wait(["show", "principal"])
 
 
