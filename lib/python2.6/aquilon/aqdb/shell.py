@@ -53,6 +53,7 @@ if config.has_option("database", "module"):
 from aquilon.aqdb.model import *
 from aquilon.aqdb.dsdb import *
 from aquilon.aqdb.db_factory import DbFactory
+from ipaddr import IPv4Address, IPv4Network
 
 db = DbFactory()
 Base.metadata.bind = db.engine
