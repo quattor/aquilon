@@ -41,10 +41,14 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-q", "--queuesize", dest="queuesize", type="int", default=4,
                   help="Length of the parallel queue.")
-parser.add_option("-t", "--target", dest="target", type="int", default=4,
-                  help="Stop adding work when this many updates scheduled.")
+parser.add_option("-f", "--finish", dest="target", type="int", default=4,
+                  help="Finish adding work after this many updates scheduled.")
 parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
                   help="The service name to use when connecting to aqd")
+parser.add_option("-t", "--aqhost", dest="aqhost", type="string",
+                  help="The aqd host to connect to")
+parser.add_option("-p", "--aqport", dest="aqport", type="string",
+                  help="The port to use when connecting to aqd")
 (options, args) = parser.parse_args()
 
 DIR=os.path.realpath(os.path.dirname(__file__))
@@ -103,6 +107,12 @@ class WorkUnit(object):
         if options.aqservice:
             cmd.append("--aqservice")
             cmd.append(options.aqservice)
+        if options.aqhost:
+            cmd.append("--aqhost")
+            cmd.append(options.aqhost)
+        if options.aqport:
+            cmd.append("--aqport")
+            cmd.append(options.aqport)
         self.process = Popen(cmd, stdout=1, stderr=2)
         return
 

@@ -81,13 +81,13 @@ class TestNetwork(object):
 
 
 class AQRunner(object):
-    def __init__(self, aq=None, host=None, port=None, aqservice=None):
+    def __init__(self, aq=None, aqhost=None, aqport=None, aqservice=None):
         self.aq = aq or os.path.realpath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'bin', 'aq.py'))
         #self.aq = aq or "/ms/dist/aquilon/PROJ/aqd/prod/bin/aq"
-        #self.host = host or "oyidb1622"
-        self.host = host or None
-        self.port = port or None
+        #self.host = aqhost or "oyidb1622"
+        self.host = aqhost or None
+        self.port = aqport or None
         self.aqservice = aqservice or None
 
     def run(self, args, **kwargs):

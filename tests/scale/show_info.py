@@ -36,8 +36,8 @@ import sys
 from common import AQRunner
 
 
-def show_info(aqservice):
-    aq = AQRunner(aqservice=aqservice)
+def show_info(aqservice, aqhost, aqport):
+    aq = AQRunner(aqservice=aqservice, aqhost=aqhost, aqport=aqport)
     rc = aq.wait(["ping"])
     rc = aq.wait(["show", "host", "--all"])
     rc = aq.wait(["show", "domain", "--all"])
@@ -66,7 +66,10 @@ if __name__=='__main__':
     parser = OptionParser()
     parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
                       help="The service name to use when connecting to aqd")
+    parser.add_option("-t", "--aqhost", dest="aqhost", type="string",
+                      help="The aqd host to connect to")
+    parser.add_option("-p", "--aqport", dest="aqport", type="string",
+                      help="The port to use when connecting to aqd")
     (options, args) = parser.parse_args()
 
-    show_info(options.aqservice)
-
+    show_info(options.aqservice, options.aqhost, options.aqport)
