@@ -55,13 +55,21 @@ restricted_builtins = {'None': None,
                        'round': round}
 
 
-def _cluster_machine_append(machine):
-    """ creator function for MachineClusterMember """
-    return MachineClusterMember(machine=machine)
+def convert_resources(resources):
+    """ Convert a list of dicts to a dict of lists """
+    # Turn this: [{'a': 1, 'b': 1},
+    #             {'a': 2, 'b': 2}]
+    #
+    # Into this: {'a': [1, 2],
+    #             'b': [1, 2]}
+    resmap = {}
+    for res in resources:
+        for name, value in res.items():
+            if name not in resmap:
+                resmap[name] = []
+            resmap[name].append(value)
+    return resmap
 
-def _cluster_host_append(host):
-    """ creator function for HostClusterMember """
-    return HostClusterMember(host=host)
 
 #cluster is a reserved word in oracle and may not
 _TN = 'clstr'
@@ -107,15 +115,18 @@ class Cluster(Base):
     sandbox_author = relation(UserPrincipal, uselist=False)
 
     #FIXME: Is it possible to have an append that checks the max_members?
-    hosts = association_proxy('_hosts', 'host', creator=_cluster_host_append)
+    hosts = association_proxy('_hosts', 'host',
+                              creator=lambda host: HostClusterMember(host=host))
     machines = association_proxy('_machines', 'machine',
-                                 creator=_cluster_machine_append)
+                         creator=lambda mach: MachineClusterMember(machine=mach))
 
     service_bindings = association_proxy('_cluster_svc_binding',
                                          'service_instance')
 
     _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
+
+    __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
     def required_services(self):
@@ -128,7 +139,19 @@ class Cluster(Base):
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
         return str(self.branch.name)
 
-    __mapper_args__ = {'polymorphic_on': cluster_type}
+    @property
+    def personality_info(self):
+        if self.cluster_type in self.personality.cluster_infos:
+            return self.personality.cluster_infos[self.cluster_type]
+        else:
+            return None
+
+    def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
+        if max_hosts is None:
+            max_hosts = self.max_hosts
+        if len(self.hosts) > self.max_hosts:
+            raise error("{0} is over capacity of {1} hosts.".format(self,
+                                                                    max_hosts))
 
 cluster = Cluster.__table__
 cluster.primary_key.name = 'cluster_pk'
@@ -185,9 +208,83 @@ class EsxCluster(Cluster):
                 location = host.location
         return location
 
-    def verify_ratio(self, vm_part=None, host_part=None,
-                     current_vm_count=None, current_host_count=None,
-                     down_hosts_threshold=None, error=ArgumentError):
+    @property
+    def vmhost_capacity_function(self):
+        """ Return the compiled VM host capacity function """
+        info = self.personality_info
+        if info:
+            return info.compiled_vmhost_capacity_function
+        else:
+            return None
+
+    @property
+    def virtmachine_capacity_function(self):
+        """ Return the compiled virtual machine capacity function """
+        # Only identity mapping for now
+        return None
+
+    def get_total_capacity(self, down_hosts_threshold=None):
+        """ Return the total capacity available for use by virtual machines """
+        if down_hosts_threshold is None:
+            down_hosts_threshold = self.down_hosts_threshold
+
+        if len(self.hosts) <= down_hosts_threshold:
+            return {'memory': 0}
+
+        func = self.vmhost_capacity_function
+
+        # No access for anything except built-in functions
+        global_vars = {'__builtins__': restricted_builtins}
+
+        resources = []
+        for host in self.hosts:
+            # This is the list of variables we want to pass to the capacity
+            # function
+            local_vars = {'memory': host.machine.memory}
+            if func:
+                resources.append(eval(func, global_vars, local_vars))
+            else:
+                resources.append(local_vars)
+        # Convert the list of dicts to a dict of lists
+        resmap = convert_resources(resources)
+
+        # Drop the <down_hosts_threshold> largest elements from every list, and
+        # sum the rest
+        for name in resmap:
+            reslist = sorted(resmap[name])
+            if down_hosts_threshold > 0:
+                reslist = reslist[:-down_hosts_threshold]
+            resmap[name] = sum(reslist)
+        return resmap
+
+    def get_total_usage(self):
+        """ Return the amount of resources used by the virtual machines """
+        func = self.virtmachine_capacity_function
+
+        # No access for anything except built-in functions
+        global_vars = {'__builtins__': restricted_builtins}
+
+        resmap = {}
+        for machine in self.machines:
+            # This is the list of variables we want to pass to the capacity
+            # function
+            local_vars = {'memory': machine.memory}
+            if func:
+                res = eval(func, global_vars, local_vars)
+            else:
+                res = local_vars
+            for name, value in res.items():
+                if name not in resmap:
+                    resmap[name] = value
+                else:
+                    resmap[name] += value
+        return resmap
+
+    def validate(self, vm_part=None, host_part=None, current_vm_count=None,
+                 current_host_count=None, down_hosts_threshold=None,
+                 error=ArgumentError, **kwargs):
+        super(EsxCluster, self).validate(error=error, **kwargs)
+
         if vm_part is None:
             vm_part = self.vm_count
         if host_part is None:
@@ -214,7 +311,7 @@ class EsxCluster(Cluster):
 
         if adjusted_host_count <= 0:
             raise error("%s cannot support VMs with %s "
-                        "vmhosts and a down_host_threshold of %s" %
+                        "vmhosts and a down_hosts_threshold of %s" %
                         (format(self), current_host_count,
                          down_hosts_threshold))
 
@@ -227,6 +324,17 @@ class EsxCluster(Cluster):
                         "ratio %s:%s with down_hosts_threshold %s" %
                         (current_vm_count, current_host_count, format(self),
                          vm_part, host_part, down_hosts_threshold))
+
+        capacity = self.get_total_capacity()
+        usage = self.get_total_usage()
+        for name, value in usage.items():
+            # Skip resources that are not restricted
+            if name not in capacity:
+                continue
+            if value > capacity[name]:
+                raise error("{0} is over capacity regarding {1}: wanted {2}, "
+                            "but the limit is {3}.".format(self, name, value,
+                                                           capacity[name]))
         return
 
     def __init__(self, **kw):

@@ -125,8 +125,8 @@ class CommandUpdateESXCluster(BrokerCommand):
                 host_count = dbcluster.host_count
             if down_hosts_threshold is None:
                 down_hosts_threshold = dbcluster.down_hosts_threshold
-            dbcluster.verify_ratio(vm_part=vm_count, host_part=host_count,
-                                   down_hosts_threshold=down_hosts_threshold)
+            dbcluster.validate(vm_part=vm_count, host_part=host_count,
+                               down_hosts_threshold=down_hosts_threshold)
             dbcluster.vm_count = vm_count
             dbcluster.host_count = host_count
             dbcluster.down_hosts_threshold = down_hosts_threshold

@@ -173,14 +173,20 @@ class CommandUpdateMachine(BrokerCommand):
             session.flush()
             session.refresh(dbmachine)
             session.refresh(dbcluster)
-            if hasattr(dbcluster, 'verify_ratio'):
-                dbcluster.verify_ratio()
+            dbcluster.validate()
             dbmachine.location = dbcluster.location_constraint
             plenaries.append(PlenaryCluster(old_cluster, logger=logger))
             plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 
         session.add(dbmachine)
         session.flush()
+
+        # Check if the changed parameters still meet cluster capacity
+        # requiremets
+        if dbmachine.cluster:
+            dbmachine.cluster.validate()
+        if dbmachine.host and dbmachine.host.cluster:
+            dbmachine.host.cluster.validate()
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

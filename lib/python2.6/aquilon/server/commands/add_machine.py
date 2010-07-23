@@ -109,8 +109,7 @@ class CommandAddMachine(BrokerCommand):
             session.add(dbmcm)
             session.flush()
             session.refresh(dbcluster)
-            if hasattr(dbcluster, 'verify_ratio'):
-                dbcluster.verify_ratio()
+            dbcluster.validate()
 
         session.flush()
 

@@ -55,8 +55,7 @@ class CommandUncluster(BrokerCommand):
         session.flush()
 
         session.refresh(dbcluster)
-        if hasattr(dbcluster, 'verify_ratio'):
-            dbcluster.verify_ratio()
+        dbcluster.validate()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryHost(dbhost, logger=logger))

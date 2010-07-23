@@ -58,6 +58,20 @@ class ClusterFormatter(ObjectFormatter):
             if cluster.switch:
                 details.append(indent + \
                                "  {0:c}: {0.fqdn}".format(cluster.switch))
+            caps = cluster.get_total_capacity()
+            if caps:
+                capstr = ", ".join(["%s: %s" % (name, value) for name, value in
+                                    caps.items()])
+            else:
+                capstr = None
+            details.append(indent + "  Capacity limits: %s" % capstr)
+            usage = cluster.get_total_usage()
+            if usage:
+                usagestr = ", ".join(["%s: %s" % (name, value) for name, value
+                                      in usage.items()])
+            else:
+                usagestr = None
+            details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         if cluster.branch.branch_type == 'domain':
             details.append(indent + "  Domain: %s" % cluster.branch.name)

@@ -437,7 +437,7 @@ class TestUpdateMachine(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "ESX Cluster utecl3 cannot support VMs with "
-                         "0 vmhosts and a down_host_threshold of 2",
+                         "0 vmhosts and a down_hosts_threshold of 2",
                          command)
 
     def testfailaddreadmachinetocluster(self):

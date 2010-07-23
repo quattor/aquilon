@@ -66,8 +66,7 @@ class CommandCluster(BrokerCommand):
             session.flush()
             session.refresh(dbhost)
             session.refresh(old_cluster)
-            if hasattr(old_cluster, 'verify_ratio'):
-                old_cluster.verify_ratio()
+            old_cluster.validate()
 
         chooser = None
         if not dbhost.cluster:

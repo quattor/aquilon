@@ -78,6 +78,32 @@ class TestUpdatePersonality(TestBrokerCommand):
                          "The memory constraint is missing from the returned "
                          "dictionary.", command)
 
+    def testnotenoughmemory(self):
+        command = ["update", "personality", "--personality", "esx_desktop",
+                   "--archetype", "vmhost",
+                   "--vmhost_capacity_function", "{'memory': memory / 4}"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Validation failed for the following clusters:",
+                         command)
+        self.matchoutput(out,
+                         "ESX Cluster utecl1 is over capacity regarding memory",
+                         command)
+
+    def testupdatecapacity(self):
+        command = ["update", "personality", "--personality", "esx_desktop",
+                   "--archetype", "vmhost",
+                   "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
+        self.noouttest(command)
+
+    def testverifyupdatecapacity(self):
+        command = ["show", "personality", "--personality", "esx_desktop",
+                   "--archetype", "vmhost"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateArchetype)
