@@ -74,6 +74,9 @@ _long_nms['CREATION_DATE']           = 'CR_DATE'
 _long_nms['USER_PRINCIPAL_ID']       = 'USR_PRNC_ID'
 _long_nms['OPERATING_SYSTEM'] = 'OS'
 _long_nms['DOWN_HOSTS_THRESHOLD'] = 'THRSH'
+_long_nms['PERSONALITY_CLUSTER_INFO'] = 'PERS_CLSTR'
+_long_nms['PERSONALITY_CLUSTER_INFO_ID'] = 'PERS_CLSTRID'
+_long_nms['PERSONALITY_ESX_CLUSTER_INFO'] = 'PERS_ESXCLSTR'
 
 
 def rename_sys_pks(db, *args, **kw):

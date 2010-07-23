@@ -2245,6 +2245,18 @@
       <transport method="delete" path="personality/%(archetype)s/%(personality)s" />
   </command>
 
+  <command name="update_personality">
+      Updates personality information.
+      <optgroup name="update_personality_mandatory" mandatory="True" fields="all">
+         <option name="personality" type="string">The name to delete</option>
+         <option name="archetype" type="string">Which archetype to use</option>
+      </optgroup>
+      <optgroup name="update_personality_opt" mandatory="False">
+	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
+      </optgroup>
+      <transport method="post" path="personality/%(archetype)s/%(personality)s" />
+  </command>
+
   <command name="show_personality">
       Show personality details.  Specifying both name and archetype will
       uniquely identify a personality.

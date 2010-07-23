@@ -75,6 +75,11 @@ class PersonalityFormatter(ObjectFormatter):
             details.append(indent + "  Required Service: %s" % service.name)
         if personality.comments:
             details.append(indent + "  Comments: %s" % personality.comments)
+        for cltype, info in personality.cluster_infos.items():
+            details.append(indent + "  Extra settings for %s clusters:" % cltype)
+            if cltype == "esx":
+                details.append(indent + "    VM host capacity function: %s" %
+                               info.vmhost_capacity_function)
         return "\n".join(details)
 
     def format_proto(self, personality, skeleton=None):

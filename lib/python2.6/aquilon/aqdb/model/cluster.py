@@ -41,6 +41,20 @@ from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine, Branch, TorSwitch,
                                 UserPrincipal)
 
+# List of functions allowed to be used in vmhost_capacity_function
+restricted_builtins = {'None': None,
+                       'dict': dict,
+                       'divmod': divmod,
+                       'float': float,
+                       'int': int,
+                       'len': len,
+                       'long': long,
+                       'max': max,
+                       'min': min,
+                       'pow': pow,
+                       'round': round}
+
+
 def _cluster_machine_append(machine):
     """ creator function for MachineClusterMember """
     return MachineClusterMember(machine=machine)

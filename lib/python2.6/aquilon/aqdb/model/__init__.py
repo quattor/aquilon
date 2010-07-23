@@ -97,6 +97,8 @@ from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         MachineClusterMember,
                                         ClusterAlignedService,
                                         ClusterServiceBinding)
+from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
+                                                         PersonalityESXClusterInfo)
 
 from aquilon.aqdb.model.metacluster import MetaCluster, MetaClusterMember
 from aquilon.aqdb.model.machine_specs import MachineSpecs
