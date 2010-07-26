@@ -318,10 +318,12 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddverarirack(self):
         # number 100 is in use by the tor_switch.
+        # The virtual machine tests require quite a bit of memory...
         for i in range(101, 150):
             port = i - 100
             self.noouttest(["add", "machine", "--machine", "ut10s04p%d" % port,
-                            "--rack", "ut10", "--model", "vb1205xm"])
+                            "--rack", "ut10", "--model", "vb1205xm",
+                            "--memory", 81920])
 
     def testadd10gigracks(self):
         for port in range(1, 13):
