@@ -60,7 +60,7 @@ class TestAddESXCluster(TestBrokerCommand):
                                       "esx_cluster_max_members_default")
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
@@ -101,7 +101,7 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyutecl2(self):
         command = "show esx_cluster --cluster utecl2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl2", command)
+        self.matchoutput(out, "ESX Cluster: utecl2", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
@@ -169,16 +169,16 @@ class TestAddESXCluster(TestBrokerCommand):
     def testverifyshowall(self):
         command = "show esx_cluster --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl1", command)
-        self.matchoutput(out, "esx cluster: utecl2", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl2", command)
 
     def testverifyshowmetacluster(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc1", command)
-        self.matchoutput(out, "Member: esx cluster utecl1", command)
-        self.matchoutput(out, "Member: esx cluster utecl2", command)
-        self.matchclean(out, "Member: esx cluster utecl3", command)
+        self.matchoutput(out, "Member: ESX Cluster utecl1", command)
+        self.matchoutput(out, "Member: ESX Cluster utecl2", command)
+        self.matchclean(out, "Member: ESX Cluster utecl3", command)
 
     def testnotfoundesx_cluster(self):
         command = "show esx_cluster --cluster esx_cluster-does-not-exist"
@@ -197,7 +197,7 @@ class TestAddESXCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         default_ratio = self.config.get("broker",
                                         "esx_cluster_vm_to_host_ratio")
-        self.matchoutput(out, "esx cluster: utecl3", command)
+        self.matchoutput(out, "ESX Cluster: utecl3", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 0", command)
@@ -233,7 +233,7 @@ class TestAddESXCluster(TestBrokerCommand):
                                         "esx_cluster_vm_to_host_ratio")
         default_max = self.config.get("broker",
                                       "esx_cluster_max_members_default")
-        self.matchoutput(out, "esx cluster: utecl4", command)
+        self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)

@@ -90,7 +90,7 @@ class TestSearchMachine(TestBrokerCommand):
         command = "search machine --machine evm1 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Virtual_machine: evm1", command)
-        self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+        self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
 
     def testexactcpu(self):

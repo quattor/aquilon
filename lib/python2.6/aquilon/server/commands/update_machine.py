@@ -155,10 +155,9 @@ class CommandUpdateMachine(BrokerCommand):
             dbcluster = Cluster.get_unique(session, name=cluster, compel=True)
             if dbcluster.metacluster != dbmachine.cluster.metacluster:
                 raise ArgumentError("Cannot move machine to a new "
-                                    "metacluster: Current metacluster %s "
-                                    "does not match new metacluster %s." %
-                                    (dbmachine.cluster.metacluster.name,
-                                     dbcluster.metacluster.name))
+                                    "metacluster: Current {0:l} does not match "
+                                    "new {1:l}.".format(dbmachine.cluster.metacluster,
+                                                        dbcluster.metacluster))
             old_cluster = dbmachine.cluster
             dbmcm = MachineClusterMember.get_unique(session,
                                                     cluster=dbmachine.cluster,
@@ -226,9 +225,9 @@ class CommandUpdateMachine(BrokerCommand):
                                 "current chassis slot information.")
         if not multislot:
             for dbslot in dbmachine.chassis_slot:
-                logger.info("Clearing machine %s out of chassis %s slot %d" %
-                            (dbmachine.name, dbslot.chassis.fqdn,
-                             dbslot.slot_number))
+                logger.info("Clearing {0:l} out of {1:l} slot "
+                            "{2}".format(dbmachine, dbslot.chassis,
+                                         dbslot.slot_number))
                 dbslot.machine = None
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis, slot_number=slot)

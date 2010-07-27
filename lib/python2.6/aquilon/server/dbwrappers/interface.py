@@ -134,8 +134,8 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             if not dbcluster.switch:
                 raise ArgumentError("Cannot automatically assign an IP "
                                     "address to an interface with a port group "
-                                    "since cluster %s is not associated with a "
-                                    "switch." % dbcluster.switch)
+                                    "since {0} is not associated with a "
+                                    "switch.".format(dbcluster))
             vlan_id = VlanInfo.get_vlan_id(session, dbinterface.port_group)
             dbnetwork = ObservedVlan.get_network(session, vlan_id=vlan_id,
                                                  switch=dbcluster.switch,
@@ -253,9 +253,8 @@ def verify_port_group(dbmachine, port_group):
     if dbmachine.model.machine_type == "virtual_machine":
         dbswitch = dbmachine.cluster.switch
         if not dbswitch:
-            raise ArgumentError("Cannot verify port group availability: "
-                                "no ToR switch record for cluster %s." %
-                                dbmachine.cluster)
+            raise ArgumentError("Cannot verify port group availability: no ToR "
+                                "switch record for {0}.".format(dbmachine.cluster))
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id)
         q = q.filter_by(switch=dbswitch)
@@ -288,9 +287,8 @@ def choose_port_group(dbmachine):
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
     if not dbmachine.cluster.switch:
-        raise ArgumentError("Cannot automatically allocate port group:"
-                            " no ToR switch record for cluster %s." %
-                            dbmachine.cluster)
+        raise ArgumentError("Cannot automatically allocate port group: no ToR "
+                            "switch record for {0}.".format(dbmachine.cluster))
     for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
         if dbobserved_vlan.vlan_type != 'user':
             continue

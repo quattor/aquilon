@@ -76,8 +76,8 @@ class TestBindClientConstraints(TestBrokerCommand):
                    "--service=esx_management_server", "--instance=%s" % next]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "The esx cluster utecl1 is set to use service "
-                         "esx_management_server instance %s" % instance,
+                         "ESX Cluster utecl1 is set to use service "
+                         "instance esx_management_server/%s" % instance,
                          command)
 
 

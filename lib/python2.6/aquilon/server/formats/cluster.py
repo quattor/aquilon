@@ -35,8 +35,8 @@ from aquilon.aqdb.model import Cluster, EsxCluster
 
 class ClusterFormatter(ObjectFormatter):
     def format_raw(self, cluster, indent=""):
-        details = [indent + "%s cluster: %s" %
-                   (cluster.cluster_type, cluster.name)]
+        details = [indent + "%s: %s" %
+                   (cluster._get_class_label(), cluster.name)]
         if cluster.metacluster:
             details.append(indent + "  Metacluster: %s" %
                            cluster.metacluster.name)

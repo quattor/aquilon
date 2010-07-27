@@ -75,7 +75,7 @@ class TestSearchESXCluster(TestBrokerCommand):
     def testclusteravailablefull(self):
         command = "search esx cluster --cluster utecl1 --fullinfo"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
 
@@ -189,10 +189,10 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --all --fullinfo"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
-        self.matchoutput(out, "esx cluster: utecl1", command)
-        self.matchoutput(out, "esx cluster: utecl2", command)
-        self.matchoutput(out, "esx cluster: utecl3", command)
-        self.matchoutput(out, "esx cluster: utecl4", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl2", command)
+        self.matchoutput(out, "ESX Cluster: utecl3", command)
+        self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)

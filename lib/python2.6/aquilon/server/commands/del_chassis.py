@@ -47,9 +47,9 @@ class CommandDelChassis(BrokerCommand):
 
         machine_count = q.count()
         if machine_count > 0:
-            raise ArgumentError("Chassis %s is still in use by %d "
-                                "machines and cannot be deleted." %
-                                (dbchassis.fqdn, machine_count))
+            raise ArgumentError("{0} is still in use by {1} machines and "
+                                "cannot be deleted.".format(dbchassis,
+                                                            machine_count))
 
         for iface in dbchassis.interfaces:
             logger.info("Before deleting chassis '%s', "

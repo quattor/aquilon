@@ -38,8 +38,7 @@ class MetaClusterFormatter(ObjectFormatter):
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
         details.append(indent + "  Max shares: %s" % metacluster.max_shares)
         for cluster in metacluster.members:
-            details.append(indent + "  Member: %s cluster %s" %
-                           (cluster.cluster_type, cluster.name))
+            details.append(indent + "  Member: {0}".format(cluster))
         for share in metacluster.shares:
             details.append(indent + "  Share: %s" % share.name)
         if metacluster.comments:

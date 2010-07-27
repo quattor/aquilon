@@ -44,10 +44,9 @@ class CommandMakeCluster(BrokerCommand):
     def render(self, session, logger, cluster, keepbindings, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if not dbcluster.personality.archetype.is_compileable:
-            raise ArgumentError("Cluster %s is not a compilable archetype "
-                                "(%s)." %
-                                (cluster,
-                                 dbcluster.personality.archetype.name))
+            raise ArgumentError("{0} is not a compilable archetype "
+                                "({1!s}).".format(dbcluster,
+                                                  dbcluster.personality.archetype))
 
         chooser = Chooser(dbcluster, logger=logger,
                           required_only=not(keepbindings))

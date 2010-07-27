@@ -76,7 +76,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_090_verifyaddmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Virtual Machine count: 9", command)
 
     def test_100_addinterfaces(self):
@@ -186,7 +186,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
             command = "show machine --machine evm%s" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Virtual_machine: evm%s" % i, command)
-            self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+            self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
             self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
@@ -254,7 +254,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_500_verifyshow(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 8", command)
@@ -301,7 +301,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = "show machine --machine evm1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Virtual_machine: evm1", command)
-        self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+        self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)

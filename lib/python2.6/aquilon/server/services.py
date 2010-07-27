@@ -495,16 +495,15 @@ class HostChooser(Chooser):
                 #self.required_services.add(item.service)
 
     def generate_description(self):
-        return "host %s" % self.dbhost.fqdn
+        return format(self.dbhost)
 
     def choose_cluster_aligned(self, dbservice):
         if dbservice not in self.cluster_aligned_services:
             return
         if not self.cluster_aligned_services[dbservice]:
-            self.error("No instance set for %s cluster %s aligned service %s."
+            self.error("No instance set for %s aligned service %s."
                        "  Please run `make cluster --cluster %s` to resolve.",
-                       self.dbhost.cluster.cluster_type,
-                       self.dbhost.cluster.name,
+                       format(self.dbhost.cluster),
                        dbservice.name,
                        self.dbhost.cluster.name)
             return
@@ -512,13 +511,10 @@ class HostChooser(Chooser):
         # the cluster's binding.  The error message will be misleading...
         if self.cluster_aligned_services[dbservice] not in \
            self.staging_services[dbservice]:
-            self.error("The %s cluster %s is set to use service %s instance "
-                       "%s, but that instance is not in a service map for %s.",
-                       self.dbhost.cluster.cluster_type,
-                       self.dbhost.cluster.name,
-                       dbservice.name,
-                       self.cluster_aligned_services[dbservice].name,
-                       self.dbhost.fqdn)
+            self.error("{0} is set to use {1:l}, but that instance is not in a "
+                       "service map for {2}.".format(self.dbhost.cluster,
+                                                     self.cluster_aligned_services[dbservice],
+                                                     self.dbhost.fqdn))
             return
         self.logger.debug("Chose service %s instance %s because it is cluster "
                           "aligned.",
@@ -613,8 +609,7 @@ class ClusterChooser(Chooser):
                               self.description, si.cfg_path)
 
     def generate_description(self):
-        return "%s cluster %s" % (self.dbcluster.cluster_type,
-                                  self.dbcluster.name)
+        return format(self.dbcluster)
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
