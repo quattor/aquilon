@@ -64,10 +64,12 @@ class AQBroker(object):
 
     def start(self, **kwargs):
         """Start a broker with the given config."""
+        # FIXME: Make coverage configurable.
         args = [self.twistd, "--pidfile", self.pidfile,
                 "--logfile", self.logfile,
                 "aqd",
-                "--config", self.configfile, "--coverage", self.coverage]
+                # "--coverage", self.coverage,
+                "--config", self.configfile]
         p = Popen(args, stdout=1, stderr=2)
         return p.wait()
 
