@@ -31,6 +31,7 @@
 
 
 import os
+import socket
 from subprocess import Popen
 
 
@@ -86,7 +87,9 @@ class AQRunner(object):
             os.path.dirname(__file__), '..', '..', 'bin', 'aq.py'))
         #self.aq = aq or "/ms/dist/aquilon/PROJ/aqd/prod/bin/aq"
         #self.host = aqhost or "oyidb1622"
-        self.host = aqhost or None
+        # The default for dist or dev is to use prod, and we really don't
+        # want to use prod by default for these tests...
+        self.host = aqhost or socket.gethostname()
         self.port = aqport or None
         self.aqservice = aqservice or None
 
