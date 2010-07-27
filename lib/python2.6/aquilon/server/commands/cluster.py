@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import Cluster, HostClusterMember
+from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.services import Chooser
 
@@ -60,13 +60,10 @@ class CommandCluster(BrokerCommand):
             logger.client_info("Removing {0:l} from {1:l}.".format(dbhost,
                                                                    dbhost.cluster))
             old_cluster = dbhost.cluster
-            dbhcm = HostClusterMember.get_unique(session, cluster=old_cluster,
-                                                 host=dbhost)
-            session.delete(dbhcm)
+            old_cluster.hosts.remove(dbhost)
             session.flush()
             session.refresh(dbhost)
             session.refresh(old_cluster)
-            old_cluster.validate()
 
         chooser = None
         if not dbhost.cluster:
@@ -79,12 +76,8 @@ class CommandCluster(BrokerCommand):
                                                   dbcluster,
                                                   dbcluster.branch.branch_type,
                                                   dbcluster.authored_branch))
-            # Check for max_members happens in aqdb layer and can throw a VE
-            try:
-                dbhcm = HostClusterMember(cluster=dbcluster, host=dbhost)
-                session.add(dbhcm)
-            except ValueError, e:
-                raise ArgumentError(e.message)
+            # Check for max_members happens in aqdb layer
+            dbcluster.hosts.append(dbhost)
             session.flush()
             session.refresh(dbhost)
             # Enforce that service instances are set correctly for the

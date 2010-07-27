@@ -40,8 +40,8 @@ from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model,
-                                Cluster, MachineClusterMember, Machine)
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
+                                Machine)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -159,22 +159,13 @@ class CommandUpdateMachine(BrokerCommand):
                                     "new {1:l}.".format(dbmachine.cluster.metacluster,
                                                         dbcluster.metacluster))
             old_cluster = dbmachine.cluster
-            dbmcm = MachineClusterMember.get_unique(session,
-                                                    cluster=dbmachine.cluster,
-                                                    machine=dbmachine)
-            session.delete(dbmcm)
-            session.flush()
-            # Without these refreshes the MCM creation below fails...
-            # presumably because the old linkage is still cached somewhere?
-            session.refresh(dbmachine)
-            session.refresh(old_cluster)
-            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
-            session.add(dbmcm)
+            old_cluster.machines.remove(dbmachine)
+            dbmachine.location = dbcluster.location_constraint
+            dbcluster.machines.append(dbmachine)
             session.flush()
             session.refresh(dbmachine)
             session.refresh(dbcluster)
-            dbcluster.validate()
-            dbmachine.location = dbcluster.location_constraint
+            session.refresh(old_cluster)
             plenaries.append(PlenaryCluster(old_cluster, logger=logger))
             plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 

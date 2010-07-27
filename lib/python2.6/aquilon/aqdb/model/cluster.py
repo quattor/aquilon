@@ -33,6 +33,8 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm.attributes import instance_state
+from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
@@ -114,7 +116,6 @@ class Cluster(Base):
     branch = relation(Branch, uselist=False, lazy=False, backref='clusters')
     sandbox_author = relation(UserPrincipal, uselist=False)
 
-    #FIXME: Is it possible to have an append that checks the max_members?
     hosts = association_proxy('_hosts', 'host',
                               creator=lambda host: HostClusterMember(host=host))
     machines = association_proxy('_machines', 'machine',
@@ -347,6 +348,24 @@ esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
 
+class ValidateCluster(MapperExtension):
+    """ Helper class to perform validation on cluster membership changes """
+
+    def after_insert(self, mapper, connection, instance):
+        instance.cluster.validate()
+
+    def after_delete(self, mapper, connection, instance):
+        # This is a little tricky. If the instance got deleted through an
+        # association proxy, then instance.cluster will be None (although
+        # instance.cluster_id still has the right value).
+        if instance.cluster:
+            cluster = instance.cluster
+        else:
+            state = instance_state(instance)
+            cluster = state.committed_state['cluster']
+        cluster.validate()
+
+
 _HCM = 'host_cluster_member'
 class HostClusterMember(Base):
     """ Specific Class for EsxCluster vmhosts """
@@ -375,25 +394,13 @@ class HostClusterMember(Base):
         and their links also causes deleteion of hosts (BAD)
     """
     cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('_hosts', cascade='all'))
+                       backref=backref('_hosts', cascade='all, delete-orphan'))
 
     host = relation(Host, lazy=False,
-                    backref=backref('_cluster', uselist=False, cascade='all'))
+                    backref=backref('_cluster', uselist=False,
+                                    cascade='all, delete-orphan'))
 
-    def __init__(self, **kw):
-        if kw.has_key('cluster'):
-            """
-                when we append to the association proxy, there's no metacluster
-                argument which prevents this from being checked.
-            """
-            cl = kw['cluster']
-            if len(cl.hosts) >= cl.max_hosts:
-                msg = '%s already at maximum capacity (%s)'% (cl.name,
-                                                          cl.max_hosts)
-                raise ValueError(msg)
-
-        #TODO: enforce cluster members are inside the location constraint?
-        super(HostClusterMember, self).__init__(**kw)
+    __mapper_args__ = {'extension': ValidateCluster()}
 
 hcm = HostClusterMember.__table__
 hcm.primary_key.name = '%s_pk'% (_HCM)
@@ -422,12 +429,13 @@ class MachineClusterMember(Base):
 
     """ See comments for HostClusterMembers relations """
     cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('_machines', cascade='all'))
+                       backref=backref('_machines', cascade='all, delete-orphan'))
 
     machine = relation(Machine, lazy=False,
-                  backref=backref('_cluster', uselist=False, cascade='all'))
+                  backref=backref('_cluster', uselist=False,
+                                  cascade='all, delete-orphan'))
 
-    #TODO: __init__ that checks the sanity of adding new machines to clusters?
+    __mapper_args__ = {'extension': ValidateCluster()}
 
 mcm = MachineClusterMember.__table__
 mcm.primary_key.name = '%s_pk'% (_MCM)

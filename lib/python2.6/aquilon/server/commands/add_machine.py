@@ -37,8 +37,7 @@ from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model,
-                                Machine, MachineClusterMember)
+from aquilon.aqdb.model import Chassis, ChassisSlot, Cluster, Model, Machine
 
 
 class CommandAddMachine(BrokerCommand):
@@ -105,11 +104,9 @@ class CommandAddMachine(BrokerCommand):
             dbslot.machine = dbmachine
             session.add(dbslot)
         if cluster:
-            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
-            session.add(dbmcm)
+            dbcluster.machines.append(dbmachine)
             session.flush()
             session.refresh(dbcluster)
-            dbcluster.validate()
 
         session.flush()
 

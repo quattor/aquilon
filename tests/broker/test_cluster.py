@@ -139,7 +139,7 @@ class TestCluster(TestBrokerCommand):
                    "--cluster", "utecl3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "utecl3 already at maximum capacity (0)",
+                         "ESX Cluster utecl3 is over capacity of 0 hosts.",
                          command)
 
     def testfailunmadecluster(self):
