@@ -112,8 +112,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--type", "sata", "--capacity", "15",
                    "--share", "test_share_9", "--address", "0:0"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would exceed the metacluster's max_shares",
-                         command)
+        self.matchoutput(out, "Metacluster utmc1 already has the maximum "
+                         "number of shares (8).", command)
 
     def test_170_failmaxclients(self):
         command = ["update_service", "--service=nas_disk_share",

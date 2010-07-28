@@ -2633,9 +2633,10 @@
          <option name="metacluster" type="string">Name of the metacluster</option>
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
-         <option name="max_members" type="int">Comments</option>
-         <option name="max_shares" type="int">Comments</option>
+         <option name="max_members" type="int">Maximum number of clusters that can be members of this metacluster</option>
+         <option name="max_shares" type="int">Maximum number of shares that virtual machines may use</option>
          <option name="comments" type="string">Comments</option>
+         <option name="high_availability" type="boolean">Turn on high availaibility mode</option>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s" />
    </command>

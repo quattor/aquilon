@@ -67,6 +67,7 @@ class CommandAddDisk(BrokerCommand):
                                 "of: %s." % (controller,
                                              ", ".join(controller_types)))
 
+        dbmetacluster = None
         if share:
             dbservice = Service.get_unique(session, "nas_disk_share",
                                            compel=True)
@@ -74,16 +75,8 @@ class CommandAddDisk(BrokerCommand):
             if not re.compile("\d+:\d+$").match(address):
                 raise ArgumentError("Disk address '%s' is not valid, it must "
                                     "match \d+:\d+ (e.g. 0:0)." % address)
-            if dbmachine.cluster and dbmachine.cluster.metacluster:
+            if dbmachine.cluster:
                 dbmetacluster = dbmachine.cluster.metacluster
-                shares = dbmetacluster.shares
-                if dbshare not in shares and \
-                   len(shares) >= dbmetacluster.max_shares:
-                    raise ArgumentError("Adding a disk on a new share for %s "
-                                        "would exceed the metacluster's "
-                                        "max_shares (%s)." %
-                                        (dbmetacluster.name,
-                                         dbmetacluster.max_shares))
             max_clients = dbshare.enforced_max_clients
             current_clients = len(dbshare.nas_disks)
             if max_clients is not None and current_clients >= max_clients:
@@ -103,6 +96,9 @@ class CommandAddDisk(BrokerCommand):
                                comments=comments)
         try:
             session.add(dbdisk)
+            session.flush()
+            if dbmetacluster:
+                dbmetacluster.validate()
         except InvalidRequestError, e:
             raise ArgumentError("Could not add disk: %s" % e)
 

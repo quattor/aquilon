@@ -160,7 +160,8 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--metacluster=utmc3", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_desktop"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "utmc3 already at maximum capacity (0)", command)
+        self.matchoutput(out, "Metacluster utmc3 already has the maximum "
+                         "number of clusters (0).", command)
 
     def testverifyshowall(self):
         command = "show esx_cluster --all"

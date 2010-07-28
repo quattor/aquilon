@@ -34,18 +34,19 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint)
+                        ForeignKey, UniqueConstraint, Boolean)
 
 from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm.attributes import instance_state
+from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster, ServiceInstance
+from aquilon.aqdb.model.cluster import convert_resources
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-def _metacluster_member_by_cluster(cl):
-    """ creator function for metacluster members """
-    return MetaClusterMember(cluster=cl)
 
 _MCT = 'metacluster'
 class MetaCluster(Base):
@@ -62,11 +63,12 @@ class MetaCluster(Base):
     name = Column(AqStr(64), nullable=False)
     max_clusters = Column(Integer, default=2, nullable=False)
     max_shares = Column(Integer, nullable=False)
+    high_availability = Column(Boolean, default=False, nullable=False)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255))
 
-    members = association_proxy('clusters', 'cluster',
-                                creator=_metacluster_member_by_cluster)
+    members = association_proxy('_clusters', 'cluster',
+                                creator=lambda x: MetaClusterMember(cluster=x))
 
     @property
     def shares(self):
@@ -76,10 +78,90 @@ class MetaCluster(Base):
         q = q.filter_by(metacluster=self)
         return q.all()
 
+    def get_total_capacity(self):
+        # Key: building; value: list of cluster capacities inside that building
+        building_capacity = {}
+        for cluster in self.members:
+            building = cluster.location_constraint.building
+            if building not in building_capacity:
+                building_capacity[building] = {}
+            cap = cluster.get_total_capacity()
+            for name, value in cap.items():
+                if name in building_capacity[building]:
+                    building_capacity[building][name] += value
+                else:
+                    building_capacity[building][name] = value
+
+        # Convert the per-building dict of resources to per-resource list of
+        # building-provided values
+        resmap = convert_resources(building_capacity.values())
+
+        # high_availability is down_buildings_threshold == 1. So if high
+        # availability is enabled, drop the largest value from every resource
+        # list
+        for name in resmap:
+            reslist = sorted(resmap[name])
+            if self.high_availability:
+                reslist = reslist[:-1]
+            resmap[name] = sum(reslist)
+
+        return resmap
+
+    def get_total_usage(self):
+        usage = {}
+        for cluster in self.members:
+            for name, value in cluster.get_total_usage().items():
+                if name in usage:
+                    usage[name] += value
+                else:
+                    usage[name] = value
+        return usage
+
+    def validate(self, error=ArgumentError):
+        if len(self.members) > self.max_clusters:
+            raise error("{0} already has the maximum number of clusters "
+                        "({1}).".format(self, self.max_clusters))
+        if len(self.shares) > self.max_shares:
+            raise error("{0} already has the maximum number of shares "
+                        "({1}).".format(self, self.max_shares))
+
+        # Small optimization: avoid enumerating all the clusters/VMs if high
+        # availability is not enabled
+        if self.high_availability:
+            capacity = self.get_total_capacity()
+            usage = self.get_total_usage()
+            for name, value in usage.items():
+                # Skip resources that are not restricted
+                if name not in capacity:
+                    continue
+                if value > capacity[name]:
+                    raise error("{0} is over capacity regarding {1}: wanted {2}, "
+                                "but the limit is {3}.".format(self, name, value,
+                                                               capacity[name]))
+        return
+
 metacluster = MetaCluster.__table__
 metacluster.primary_key.name = '%s_pk'% (_MCT)
 metacluster.append_constraint(UniqueConstraint('name', name='%s_uk'% (_MCT)))
 metacluster.info['unique_fields'] = ['name']
+
+
+class ValidateMetaCluster(MapperExtension):
+    """ Helper class to perform validation on metacluster membership changes """
+
+    def after_insert(self, mapper, connection, instance):
+        instance.metacluster.validate()
+
+    def after_delete(self, mapper, connection, instance):
+        # This is a little tricky. If the instance got deleted through an
+        # association proxy, then instance.cluster will be None (although
+        # instance.cluster_id still has the right value).
+        if instance.metacluster:
+            metacluster = instance.metacluster
+        else:
+            state = instance_state(instance)
+            metacluster = state.committed_state['metacluster']
+        metacluster.validate()
 
 
 _MCM = 'metacluster_member'
@@ -111,22 +193,14 @@ class MetaClusterMember(Base):
     """
 
     metacluster = relation(MetaCluster, lazy='subquery', uselist=False,
-                            backref=backref('clusters', cascade='all'))
+                            backref=backref('_clusters',
+                                            cascade='all, delete-orphan'))
 
     cluster = relation(Cluster, lazy='subquery',
                        backref=backref('_metacluster', uselist=False,
-                                       cascade='all'))
+                                       cascade='all, delete-orphan'))
 
-    def __init__(self, **kw):
-        if kw.has_key('metacluster'):
-            #when we append to the association proxy, there's no metacluster arg
-            #which prevents this from being checked.
-            mc = kw['metacluster']
-            if len(mc.members) >= mc.max_clusters:
-                msg = '%s already at maximum capacity (%s)'% (mc.name,
-                                                              mc.max_clusters)
-                raise ValueError(msg)
-        super(MetaClusterMember, self).__init__(**kw)
+    __mapper_args__ = {'extension': ValidateMetaCluster()}
 
 metamember = MetaClusterMember.__table__
 metamember.primary_key.name = '%s_pk'% (_MCM)

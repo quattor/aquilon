@@ -30,7 +30,7 @@
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import MetaCluster, Cluster, MetaClusterMember
+from aquilon.aqdb.model import MetaCluster, Cluster
 from aquilon.server.templates.cluster import PlenaryCluster
 
 
@@ -48,23 +48,10 @@ class CommandRebindMetaCluster(BrokerCommand):
                 raise ArgumentError("Cannot move cluster to a new metacluster "
                                     "while virtual machines are attached.")
             old_metacluster = dbcluster.metacluster
-            dbmcm = MetaClusterMember.get_unique(session,
-                                                 metacluster=old_metacluster,
-                                                 cluster=dbcluster)
-            session.delete(dbmcm)
+            old_metacluster.members.remove(dbcluster)
             session.refresh(dbcluster)
-            session.refresh(old_metacluster)
-            session.refresh(dbmetacluster)
         if not dbcluster.metacluster:
-            # MCM init checks that max_clusters is not being exceeded.
-            try:
-                dbmcm = MetaClusterMember(metacluster=dbmetacluster,
-                                          cluster=dbcluster)
-                session.add(dbmcm)
-            except ValueError, e:
-                raise ArgumentError(e.message)
-        # If this cluster is already bound to the metacluster,
-        # attempt to rewrite the plenary anyway.
+            dbmetacluster.members.append(dbcluster)
 
         session.flush()
 
@@ -72,5 +59,3 @@ class CommandRebindMetaCluster(BrokerCommand):
         plenary.write()
 
         return
-
-

@@ -153,6 +153,8 @@ class Cluster(Base):
         if len(self.hosts) > self.max_hosts:
             raise error("{0} is over capacity of {1} hosts.".format(self,
                                                                     max_hosts))
+        if self.metacluster:
+            self.metacluster.validate()
 
 cluster = Cluster.__table__
 cluster.primary_key.name = 'cluster_pk'

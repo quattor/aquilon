@@ -29,8 +29,8 @@
 
 
 from aquilon.server.broker import BrokerCommand, validate_basic
-from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
-                                MetaClusterMember, Domain, Personality)
+from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Domain,
+                                Personality)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
@@ -93,14 +93,7 @@ class CommandAddESXCluster(BrokerCommand):
                                down_hosts_threshold=down_hosts_threshold,
                                comments=comments)
         session.add(dbcluster)
-
-        try:
-            # AQDB checks the max_members attribute.
-            dbmcm = MetaClusterMember(metacluster=dbmetacluster,
-                                      cluster=dbcluster)
-            session.add(dbmcm)
-        except ValueError, e:
-            raise ArgumentError(e.message)
+        dbmetacluster.members.append(dbcluster)
 
         session.flush()
         session.refresh(dbcluster)

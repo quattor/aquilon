@@ -60,7 +60,8 @@ class TestRebindMetaCluster(TestBrokerCommand):
         command = ["rebind_metacluster", "--cluster=utecl4",
                    "--metacluster=utmc3"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "utmc3 already at maximum capacity (0)", command)
+        self.matchoutput(out, "Metacluster utmc3 already has the maximum "
+                         "number of clusters (0).", command)
 
     def testrebindutecl3(self):
         command = ["rebind_metacluster", "--cluster=utecl3",
