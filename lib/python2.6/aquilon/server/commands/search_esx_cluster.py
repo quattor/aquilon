@@ -50,6 +50,7 @@ class CommandSearchESXCluster(BrokerCommand):
                esx_hostname, virtual_machine, guest,
                archetype, personality, service, instance, share,
                domain, sandbox, branch,
+               capacity_override,
                fullinfo, **arguments):
         q = session.query(EsxCluster)
         if cluster:
@@ -76,6 +77,8 @@ class CommandSearchESXCluster(BrokerCommand):
             q = q.join(['_machines', 'machine'])
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
+        if capacity_override:
+            q = q.filter(EsxCluster.memory_capacity != None)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,

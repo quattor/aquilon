@@ -178,6 +178,9 @@ class EsxCluster(Cluster):
     host_count = Column(Integer, default=1, nullable=False)
     down_hosts_threshold = Column(Integer, nullable=False)
 
+    # Memory capacity override
+    memory_capacity = Column(Integer, nullable=True)
+
     switch_id = Column(Integer,
                        ForeignKey('tor_switch.id',
                                   name='esx_cluster_switch_fk'),
@@ -256,6 +259,11 @@ class EsxCluster(Cluster):
             if down_hosts_threshold > 0:
                 reslist = reslist[:-down_hosts_threshold]
             resmap[name] = sum(reslist)
+
+        # Process overrides
+        if self.memory_capacity is not None:
+            resmap['memory'] = self.memory_capacity
+
         return resmap
 
     def get_total_usage(self):

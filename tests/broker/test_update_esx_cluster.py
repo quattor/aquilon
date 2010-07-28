@@ -67,6 +67,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["update_esx_cluster", "--cluster=utecl2",
                    "--max_members=97", "--vm_to_host_ratio=5:1",
                    "--comments", "ESX Cluster with a new comment",
+                   "--memory_capacity", 16384,
                    "--down_hosts_threshold=0"]
         self.noouttest(command)
 
@@ -79,10 +80,43 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
         self.matchoutput(out, "Down Hosts Threshold: 0",command)
+        self.matchoutput(out, "Capacity limits: memory: 16384", command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
                          command)
+
+    def test_220_verifysearchoverride(self):
+        command = ["search_esx_cluster", "--capacity_override"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utecl1", command)
+        self.matchoutput(out, "utecl2", command)
+        self.matchclean(out, "utecl3", command)
+        self.matchclean(out, "utecl4", command)
+        self.matchclean(out, "utecl5", command)
+
+    def test_230_failupdateutecl2(self):
+        command = ["update_esx_cluster", "--cluster", "utecl2",
+                   "--memory_capacity", 1024]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster utecl2 is over capacity regarding memory",
+                         command)
+
+    def test_240_clearoverrideutecl2(self):
+        command = ["update_esx_cluster", "--cluster", "utecl2",
+                   "--clear_overrides"]
+        self.noouttest(command)
+
+    def test_250_verifyclearoverride(self):
+        command = ["show_esx_cluster", "--cluster", "utecl2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Capacity limits: memory: 163640", command)
+
+    def test_260_verifyclearsearchoverride(self):
+        command = ["search_esx_cluster", "--capacity_override"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utecl2", command)
 
     def test_300_updateutecl3(self):
         # Testing both that an empty cluster can have its personality
@@ -208,7 +242,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
         self.matchoutput(out, "ToR Switch: ut01ga1s04.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "Capacity limits: memory: 81920", command)
+        self.matchoutput(out, "Capacity limits: memory: 78618", command)
         self.matchoutput(out, "Resources used by VMs: memory: 32768", command)
 
     def test_500_failmissingcluster(self):

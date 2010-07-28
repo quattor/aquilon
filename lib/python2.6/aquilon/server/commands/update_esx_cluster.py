@@ -47,7 +47,8 @@ class CommandUpdateESXCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, archetype, personality,
                max_members, vm_to_host_ratio, tor_switch, fix_location,
-               down_hosts_threshold, comments, **arguments):
+               down_hosts_threshold, comments, memory_capacity,
+               clear_overrides, **arguments):
         cluster_type = 'esx'
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
 
@@ -143,6 +144,16 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         if comments is not None:
             dbcluster.comments = comments
+            cluster_updated = True
+
+        if memory_capacity is not None:
+            dbcluster.memory_capacity = memory_capacity
+            dbcluster.validate()
+            cluster_updated = True
+
+        if clear_overrides is not None:
+            dbcluster.memory_capacity = None
+            dbcluster.validate()
             cluster_updated = True
 
         if not cluster_updated:
