@@ -37,8 +37,7 @@ from aquilon.aqdb.model import System, DynamicStub, FutureARecord
 class SystemFormatter(ObjectFormatter):
     def format_raw(self, system, indent=""):
         # This should be replaced by format()...
-        label = system._get_class_label()
-        details = [indent + "%s: %s" % (label, system.fqdn)]
+        details = [indent + "{0:c}: {0.fqdn}".format(system)]
         if system.ip:
             details.append(indent + "  IP: %s" % system.ip)
         if system.mac:

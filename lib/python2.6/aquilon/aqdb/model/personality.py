@@ -60,13 +60,8 @@ class Personality(Base):
     services = association_proxy('_services', 'service')
 
     def __format__(self, format_spec):
-        if format_spec and format_spec[-1] == 'l':
-            clsname = self.__class__._get_class_label(tolower=True)
-            format_spec = format_spec[:-1]
-        else:
-            clsname = self.__class__._get_class_label()
-        val = "%s %s/%s" % (clsname, self.archetype.name, self.name)
-        return val.__format__(format_spec)
+        instance = "%s/%s" % (self.archetype.name, self.name)
+        return self.format_helper(format_spec, instance)
 
     @classmethod
     def by_archetype(cls, dbarchetype):

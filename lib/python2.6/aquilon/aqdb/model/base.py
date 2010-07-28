@@ -98,6 +98,25 @@ class Base(object):
         """
         return str(self._get_instance_label())
 
+    def format_helper(self, format_spec, instance):
+        """ Common helper for formatting functions """
+        lowercase = False
+        class_only = False
+        passthrough = ""
+        for letter in format_spec:
+            if letter == "l":
+                lowercase = True
+            elif letter == "c":
+                class_only = True
+            else:
+                passthrough += letter
+
+        clsname = self.__class__._get_class_label(tolower=lowercase)
+        if class_only:
+            return clsname.__format__(passthrough)
+        val = "%s %s" % (clsname, instance)
+        return val.__format__(passthrough)
+
     def __format__(self, format_spec):
         """
         Return a pretty-printed representation of the object.
@@ -107,21 +126,15 @@ class Base(object):
         plain text, and should uniquely identify the object.
 
         The format_spec argument can be a standard format specifier suitable for
-        strings, with an extension: having 'l' as the type will format the class
-        label in lower case, except all-caps abbreviations.
+        strings, with some extensions:
+
+        - specifying the 'l' flag will format the class label in lower case,
+          except abbreviations.
+
+        - specifying the 'c' flag will return the pretty printed class name
         """
-        if format_spec and format_spec[-1] == 'l':
-            clsname = self.__class__._get_class_label(tolower=True)
-            format_spec = format_spec[:-1]
-        else:
-            clsname = self.__class__._get_class_label()
 
-        val = "%s %s" % (clsname, self._get_instance_label())
-
-        # This line has two nice properties: it does the unicode()/str()
-        # format_spec handling properly, and it handles the standard formatting
-        # specifiers like field width etc.
-        return val.__format__(format_spec)
+        return self.format_helper(format_spec, self._get_instance_label())
 
     @classmethod
     def get_by(cls, k, v, session):
@@ -132,9 +145,13 @@ class Base(object):
         label = getattr(cls, "_class_label", cls.__name__)
         if tolower:
             parts = label.split()
-            # 'Operating System' -> 'operating system', but: 'ESX Cluster' ->
-            # 'ESX cluster'
-            label = ' '.join(map(lambda x: x if x.isupper() else x.lower(), parts))
+            # 'Operating System' -> 'operating system', but:
+            # 'ESX Cluster' -> 'ESX cluster'
+            # 'ToR Switch' -> 'ToR switch'
+            #
+            # Heuristic: a word is an acronym if the last letter is in upper
+            # case
+            label = ' '.join(map(lambda x: x if x[:-1].isupper() else x.lower(), parts))
         return label
 
     def _get_instance_label(self):

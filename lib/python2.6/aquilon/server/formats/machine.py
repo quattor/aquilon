@@ -69,8 +69,8 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Allocated to host: %s [%s]"
                     % (machine.host.fqdn, machine.host.ip))
         if machine.cluster:
-            details.append(indent + "  Hosted by %s: %s"
-                    % (machine.cluster._get_class_label(), machine.cluster.name))
+            details.append(indent + \
+                           "  Hosted by {0:c}: {0.name}".format(machine.cluster))
         for manager in machine.manager:
             details.append(indent + "  Manager: %s [%s]" % (manager.fqdn,
                                                             manager.ip))
@@ -82,16 +82,15 @@ class MachineFormatter(ObjectFormatter):
         # that will change when chassis has a corresponding hardware type.
         for location_type in const.location_types:
             if getattr(machine.location, location_type, None) is not None:
-                details.append(indent + "  %s: %s" %
-                               (location_type.capitalize(),
-                                getattr(machine.location, location_type).name))
+                loc = getattr(machine.location, location_type)
+                details.append(indent + "  {0:c}: {0.name}".format(loc))
                 if location_type == 'rack':
                     details.append(indent + "    Row: %s" %
                                    machine.location.rack.rack_row)
                     details.append(indent + "    Column: %s" %
                                    machine.location.rack.rack_column)
         for slot in machine.chassis_slot:
-            details.append(indent + "  Chassis: %s" % slot.chassis.fqdn)
+            details.append(indent + "  {0:c}: {0.fqdn}".format(slot.chassis))
             details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(self.redirect_raw(machine.model, indent + "  "))
         details.append(indent + "  Cpu: %s x %d" %

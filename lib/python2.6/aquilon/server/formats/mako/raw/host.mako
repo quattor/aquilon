@@ -3,7 +3,7 @@ Hostname: ${record.fqdn}
   IP: ${record.ip}
 % endif
 % if record.cluster:
-  Member of ${record.cluster._get_class_label()}: ${record.cluster.name}
+  Member of ${"{0:c}".format(record.cluster)}: ${record.cluster.name}
 % endif
 ${formatter.redirect_raw(record.machine) | shift}
 ${formatter.redirect_raw(record.personality) | shift}
