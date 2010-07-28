@@ -28,6 +28,8 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq update personality`."""
 
+from sqlalchemy.orm import joinedload_all
+
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, PersonalityESXClusterInfo, Cluster
 from aquilon.aqdb.model.cluster import restricted_builtins
@@ -79,8 +81,19 @@ class CommandUpdatePersonality(BrokerCommand):
 
         q = session.query(Cluster)
         q = q.with_polymorphic("*")
+        # The validation will touch all member hosts/machines, so better to load
+        # them upfront
+        q = q.options(joinedload_all('_hosts.host.machine'))
+        q = q.options(joinedload_all('_machines.machine'))
         q = q.filter_by(personality=dbpersona)
         clusters = q.all()
+        failures = []
         for cluster in clusters:
-            cluster.validate()
+            try:
+                cluster.validate()
+            except ArgumentError, err:
+                failures.append(err.message)
+        if len(failures):
+            raise ArgumentError("Validation failed for the following "
+                                "clusters:\n%s" % "\n".join(failures))
         return
