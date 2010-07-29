@@ -29,8 +29,7 @@
 """Contains the logic for `aq update machine`."""
 
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException,
-                                 UnimplementedError, IncompleteError)
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import get_system
@@ -51,7 +50,7 @@ class CommandUpdateMachine(BrokerCommand):
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot, cluster,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
-               user, **arguments):
+               **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         plenaries = PlenaryCollection(logger=logger)
 
@@ -139,9 +138,9 @@ class CommandUpdateMachine(BrokerCommand):
         if cpucount is not None:
             dbmachine.cpu_quantity = cpucount
         if memory is not None:
-            dbmachine.memory=memory
+            dbmachine.memory = memory
         if serial:
-            dbmachine.serial_no=serial
+            dbmachine.serial_no = serial
 
         # FIXME: For now, if a machine has its interface(s) in a portgroup
         # this command will need to be followed by an update_interface to

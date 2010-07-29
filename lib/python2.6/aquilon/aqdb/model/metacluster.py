@@ -47,8 +47,10 @@ from aquilon.aqdb.model import Base, Cluster, ServiceInstance
 from aquilon.aqdb.model.cluster import convert_resources
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-
 _MCT = 'metacluster'
+_MCM = 'metacluster_member'
+
+
 class MetaCluster(Base):
     """
         A metacluster is a grouping of two or more clusters grouped together for
@@ -59,7 +61,7 @@ class MetaCluster(Base):
     __tablename__ = _MCT
     _class_label = "Metacluster"
 
-    id = Column(Integer, Sequence('%s_seq'%(_MCT)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _MCT), primary_key=True)
     name = Column(AqStr(64), nullable=False)
     max_clusters = Column(Integer, default=2, nullable=False)
     max_shares = Column(Integer, nullable=False)
@@ -118,6 +120,7 @@ class MetaCluster(Base):
         return usage
 
     def validate(self, error=ArgumentError):
+        """ Validate metacluster constraints """
         if len(self.members) > self.max_clusters:
             raise error("{0} already has the maximum number of clusters "
                         "({1}).".format(self, self.max_clusters))
@@ -140,9 +143,9 @@ class MetaCluster(Base):
                                                                capacity[name]))
         return
 
-metacluster = MetaCluster.__table__
-metacluster.primary_key.name = '%s_pk'% (_MCT)
-metacluster.append_constraint(UniqueConstraint('name', name='%s_uk'% (_MCT)))
+metacluster = MetaCluster.__table__  # pylint: disable-msg=C0103, E1101
+metacluster.primary_key.name = '%s_pk' % _MCT
+metacluster.append_constraint(UniqueConstraint('name', name='%s_uk' % _MCT))
 metacluster.info['unique_fields'] = ['name']
 
 
@@ -150,9 +153,11 @@ class ValidateMetaCluster(MapperExtension):
     """ Helper class to perform validation on metacluster membership changes """
 
     def after_insert(self, mapper, connection, instance):
+        """ Validate the metacluster after a new member has been added """
         instance.metacluster.validate()
 
     def after_delete(self, mapper, connection, instance):
+        """ Validate the metacluster after a member has been deleted """
         # This is a little tricky. If the instance got deleted through an
         # association proxy, then instance.cluster will be None (although
         # instance.cluster_id still has the right value).
@@ -164,19 +169,18 @@ class ValidateMetaCluster(MapperExtension):
         metacluster.validate()
 
 
-_MCM = 'metacluster_member'
 class MetaClusterMember(Base):
     """ Binds clusters to metaclusters """
     __tablename__ = _MCM
 
     metacluster_id = Column(Integer, ForeignKey('metacluster.id',
-                                                name='%s_meta_fk'% (_MCM),
+                                                name='%s_meta_fk' % _MCM,
                                                 ondelete='CASCADE'),
                             #if a metacluser is delete so is the association
                             primary_key=True)
 
     cluster_id = Column(Integer, ForeignKey('clstr.id',
-                                            name='%s_clstr_fk'% (_MCM),
+                                            name='%s_clstr_fk' % _MCM,
                                             ondelete='CASCADE'),
                         #if a cluster is deleted, so is the association
                         primary_key=True)
@@ -202,8 +206,8 @@ class MetaClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateMetaCluster()}
 
-metamember = MetaClusterMember.__table__
-metamember.primary_key.name = '%s_pk'% (_MCM)
+metamember = MetaClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+metamember.primary_key.name = '%s_pk' % _MCM
 metamember.append_constraint(
-    UniqueConstraint('cluster_id', name='%s_uk'% (_MCM)))
+    UniqueConstraint('cluster_id', name='%s_uk' % _MCM))
 metamember.info['unique_fields'] = ['metacluster', 'cluster']

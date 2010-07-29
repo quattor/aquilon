@@ -29,8 +29,7 @@
 
 
 from aquilon.server.broker import BrokerCommand, validate_basic
-from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Domain,
-                                Personality)
+from aquilon.aqdb.model import Cluster, EsxCluster, MetaCluster, Personality
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
@@ -47,7 +46,6 @@ class CommandAddESXCluster(BrokerCommand):
                personality, max_members, vm_to_host_ratio, domain, sandbox,
                tor_switch, down_hosts_threshold, comments, **arguments):
         validate_basic("cluster", cluster)
-        cluster_type = 'esx'
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,

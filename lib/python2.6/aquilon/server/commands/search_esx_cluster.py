@@ -31,7 +31,6 @@
 
 from sqlalchemy.orm import aliased
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (EsxCluster, MetaCluster, Archetype,
@@ -131,7 +130,7 @@ class CommandSearchESXCluster(BrokerCommand):
                                                  compel=True)
             NasAlias = aliased(NasDisk)
             q = q.join(['_machines', 'machine', 'disks',
-                        (NasAlias, NasAlias.id==Disk.id)])
+                        (NasAlias, NasAlias.id == Disk.id)])
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
 

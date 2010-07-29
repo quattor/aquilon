@@ -39,6 +39,7 @@ from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
+
 class CommandAddDisk(BrokerCommand):
 
     # FIXME: add "controller" and "size" once the deprecated alternatives are
@@ -46,7 +47,7 @@ class CommandAddDisk(BrokerCommand):
     required_parameters = ["machine", "disk"]
 
     def render(self, session, logger, machine, disk, controller, size, share,
-               address, comments, user, **arguments):
+               address, comments, **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):
@@ -60,7 +61,7 @@ class CommandAddDisk(BrokerCommand):
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
         if (len(d) != 0):
             raise ArgumentError("Machine %s already has a disk named %s." %
-                                (machine,disk))
+                                (machine, disk))
 
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "

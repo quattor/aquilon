@@ -28,15 +28,14 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, validate_basic
+from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import MetaCluster
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.server.dbwrappers.location import get_location
+from aquilon.exceptions_ import ArgumentError
 
 
 class CommandUpdateMetaCluster(BrokerCommand):
 
-    required_parameters = [ "metacluster" ]
+    required_parameters = ["metacluster"]
 
     def render(self, session, metacluster, max_members, max_shares,
                high_availability, comments, **arguments):

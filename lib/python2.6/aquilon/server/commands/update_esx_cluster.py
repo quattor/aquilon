@@ -30,7 +30,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, Personality
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
@@ -43,7 +43,7 @@ from aquilon.utils import force_ratio
 
 class CommandUpdateESXCluster(BrokerCommand):
 
-    required_parameters = [ "cluster" ]
+    required_parameters = ["cluster"]
 
     def render(self, session, logger, cluster, archetype, personality,
                max_members, vm_to_host_ratio, tor_switch, fix_location,

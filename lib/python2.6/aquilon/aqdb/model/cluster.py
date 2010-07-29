@@ -72,9 +72,16 @@ def convert_resources(resources):
             resmap[name].append(value)
     return resmap
 
-
-#cluster is a reserved word in oracle and may not
+# Cluster is a reserved word in Oracle
 _TN = 'clstr'
+_HCM = 'host_cluster_member'
+_MCM = 'machine_cluster_member'
+_CAS = 'cluster_aligned_service'
+_CASABV = 'clstr_alnd_svc'
+_CSB = 'cluster_service_binding'
+_CSBABV = 'clstr_svc_bndg'
+
+
 class Cluster(Base):
     """
         A group of two or more hosts for high availablility or grid capabilities
@@ -82,7 +89,7 @@ class Cluster(Base):
     """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq'%(_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     cluster_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
 
@@ -106,7 +113,7 @@ class Cluster(Base):
     #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, default=2, nullable=True)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments      = Column(String(255))
+    comments = Column(String(255))
 
     location_constraint = relation(Location,
                                    uselist=False,
@@ -131,8 +138,9 @@ class Cluster(Base):
 
     @property
     def required_services(self):
-        return object_session(self).query(ClusterAlignedService).filter_by(
-            cluster_type = self.cluster_type).all()
+        q = object_session(self).query(ClusterAlignedService)
+        q = q.filter_by(cluster_type=self.cluster_type)
+        return q.all()
 
     @property
     def authored_branch(self):
@@ -156,7 +164,7 @@ class Cluster(Base):
         if self.metacluster:
             self.metacluster.validate()
 
-cluster = Cluster.__table__
+cluster = Cluster.__table__  # pylint: disable-msg=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
@@ -170,7 +178,7 @@ class EsxCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'esx'}
     _class_label = 'ESX Cluster'
 
-    esx_cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
+    esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='esx_cluster_fk',
                                             ondelete='CASCADE'),
                             #if the cluster record is deleted so is esx_cluster
@@ -193,7 +201,7 @@ class EsxCluster(Cluster):
 
     @property
     def vm_to_host_ratio(self):
-        return '%s:%s'% (self.vm_count, self.host_count)
+        return '%s:%s' % (self.vm_count, self.host_count)
 
     @property
     def max_vm_count(self):
@@ -353,7 +361,7 @@ class EsxCluster(Cluster):
             kw['max_hosts'] = 8
         super(EsxCluster, self).__init__(**kw)
 
-esx_cluster = EsxCluster.__table__
+esx_cluster = EsxCluster.__table__  # pylint: disable-msg=C0103, E1101
 esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
@@ -376,12 +384,11 @@ class ValidateCluster(MapperExtension):
         cluster.validate()
 
 
-_HCM = 'host_cluster_member'
 class HostClusterMember(Base):
     """ Specific Class for EsxCluster vmhosts """
     __tablename__ = _HCM
 
-    cluster_id = Column(Integer, ForeignKey('%s.id'% (_TN),
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='hst_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                         #if the cluster is deleted, so is membership
@@ -412,20 +419,20 @@ class HostClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateCluster()}
 
-hcm = HostClusterMember.__table__
-hcm.primary_key.name = '%s_pk'% (_HCM)
+hcm = HostClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
-_MCM = 'machine_cluster_member'
+
 class MachineClusterMember(Base):
     """ Binds machines into clusters """
     __tablename__ = _MCM
 
-    cluster_id = Column(Integer, ForeignKey('%s.id'% (_TN),
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='mchn_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                             primary_key=True)
@@ -447,16 +454,15 @@ class MachineClusterMember(Base):
 
     __mapper_args__ = {'extension': ValidateCluster()}
 
-mcm = MachineClusterMember.__table__
-mcm.primary_key.name = '%s_pk'% (_MCM)
+mcm = MachineClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+mcm.primary_key.name = '%s_pk' % _MCM
 mcm.append_constraint(UniqueConstraint('machine_id',
                                        name='machine_cluster_member_uk'))
 mcm.info['unique_fields'] = ['cluster', 'machine']
 
 Machine.cluster = association_proxy('_cluster', 'cluster')
 
-_CRS = 'cluster_aligned_service'
-_ABV = 'clstr_alnd_svc'
+
 class ClusterAlignedService(Base):
     """
         Express services that must be the same for cluster types. As SQL Alchemy
@@ -465,11 +471,11 @@ class ClusterAlignedService(Base):
         string. As ESX is the only type for now, it's seems a reasonable corner
         to cut.
     """
-    __tablename__ = _CRS
+    __tablename__ = _CAS
     _class_label = 'Cluster Aligned Service'
 
     service_id = Column(Integer, ForeignKey('service.id',
-                                            name='%s_svc_fk'%(_ABV),
+                                            name='%s_svc_fk' % _CASABV,
                                             ondelete='CASCADE'),
                         #if the service is deleted, delete the link?
                         primary_key=True)
@@ -483,12 +489,11 @@ class ClusterAlignedService(Base):
                        backref=backref('_clusters', cascade='all'))
     #cascade deleted services to delete their being required to cluster_types
 
-cas = ClusterAlignedService.__table__
-cas.primary_key.name = '%s_pk'% (_ABV)
+cas = ClusterAlignedService.__table__  # pylint: disable-msg=C0103, E1101
+cas.primary_key.name = '%s_pk' % _CASABV
 cas.info['unique_fields'] = ['cluster_type', 'service']
 
-_CSB = 'cluster_service_binding'
-_CAB = 'clstr_svc_bndg'
+
 class ClusterServiceBinding(Base):
     """
         Makes bindings of service instances to clusters
@@ -496,14 +501,14 @@ class ClusterServiceBinding(Base):
     __tablename__ = _CSB
     _class_label = 'Cluster Service Binding'
 
-    cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
-                                            name='%s_cluster_fk'%(_CAB),
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                            name='%s_cluster_fk' % _CSBABV,
                                             ondelete='CASCADE'),
                         primary_key=True)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
-                                            name='%s_srv_inst_fk'%(_CAB)),
+                                            name='%s_srv_inst_fk' % _CSBABV),
                                  primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
@@ -532,6 +537,6 @@ class ClusterServiceBinding(Base):
     def cfg_path(self):
         return self.service_instance.cfg_path
 
-csb = ClusterServiceBinding.__table__
-csb.primary_key.name = '%s_pk'% (_CSB)
+csb = ClusterServiceBinding.__table__  # pylint: disable-msg=C0103, E1101
+csb.primary_key.name = '%s_pk' % _CSB
 csb.info['unique_fields'] = ['cluster', 'service_instance']
