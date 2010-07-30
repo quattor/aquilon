@@ -52,9 +52,6 @@ city.info['unique_fields'] = ['name']
 def populate(sess, **kw):
     """ populate our cities"""
     if sess.query(City).count() < 1:
-        if sess.query(Country).count() < 1:
-            Country.populate(sess, **kw)
-
         dsdb = kw['dsdb']
         assert dsdb, "No dsdb in kwargs for City.populate()"
 

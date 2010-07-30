@@ -37,9 +37,6 @@ from aquilon.aqdb.model import Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-_domains = ['ms.com', 'one-nyp.ms.com', 'devin1.ms.com', 'the-ha.ms.com',
-            'devin2.ms.com', 'msad.ms.com']
-
 _TN = 'dns_domain'
 
 
@@ -61,19 +58,3 @@ dnsdomain = DnsDomain.__table__
 dnsdomain.primary_key.name = '%s_pk' % (_TN)
 dnsdomain.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))
 dnsdomain.info['unique_fields'] = ['name']
-
-@monkeypatch(dnsdomain)
-def populate(sess, **kw):
-    """ populate some well known domains """
-
-    if len(sess.query(DnsDomain).all()) < 1:
-
-        for domain in _domains:
-            dmn = DnsDomain(name=domain)
-            sess.add(dmn)
-
-        try:
-            sess.commit()
-        except Exception, e:
-            sess.rollback()
-            raise e

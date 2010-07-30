@@ -116,27 +116,3 @@ class Sandbox(Branch):
 sandbox = Sandbox.__table__
 sandbox.primary_key.name = 'sandbox_pk'
 sandbox.info['unique_fields'] = ['name']
-
-
-@monkeypatch(domain)
-def populate(sess, *args, **kw):
-    if len(sess.query(Domain).all()) < 1:
-        cdb = sess.query(UserPrincipal).filter_by(name='cdb').one()
-        assert cdb, 'no cdb in populate domain'
-
-        config = Config()
-        compiler = config.get("panc", "pan_compiler")
-
-        prod = Domain(name='prod', owner=cdb, tracked_branch=None,
-                      compiler=compiler, comments='Production source domain.')
-        sess.add(prod)
-        sess.commit()
-
-        ny = Domain(name='ny-prod', owner=cdb, tracked_branch=prod,
-                    compiler=compiler,
-                    comments='The NY regional production domain')
-        sess.add(ny)
-        sess.commit()
-
-        d=sess.query(Domain).first()
-        assert d, "No domains created by populate"

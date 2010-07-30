@@ -39,9 +39,6 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 
 _ABV = 'archetype'
 
-_archetypes = ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost', 'pserver']
-_compileable = ['aquilon', 'vmhost', 'pserver']
-
 
 class Archetype(Base):
     """ Archetype names """
@@ -61,25 +58,3 @@ archetype.info['unique_fields'] = ['name']
 
 archetype.primary_key.name='%s_pk'%(_ABV)
 archetype.append_constraint(UniqueConstraint('name',name='%s_uk'%(_ABV)))
-
-
-@monkeypatch(archetype)
-def populate(sess, *args, **kw):
-    if len(sess.query(Archetype).all()) > 0:
-        return
-
-    for a_name in _archetypes:
-        a = Archetype(name=a_name)
-        if a_name in _compileable:
-            a.is_compileable = True
-
-        sess.add(a)
-
-    try:
-        sess.commit()
-    except Exception, e:
-        sess.rollback()
-        raise e
-
-    a = sess.query(Archetype).first()
-    assert(a)

@@ -39,30 +39,6 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'cpu'
 
-cpus = [['amd', 'opteron_2212', '2000'],
-        ['amd', 'opteron_2216', '2400'],
-        ['amd', 'opteron_2218', '2600'],
-        ['amd', 'opteron_248', '2200'],
-        ['amd', 'opteron_250', '2400'],
-        ['amd', 'opteron_2600', '2600'],
-        ['amd', 'opteron_275', '2200'],
-        ['amd', 'opteron_280', '2400'],
-        ['intel', 'pentium_2660', '2600'],
-        ['intel', 'core_duo', '2000'],
-        ['intel', 'l5420', 2500],
-        ['intel', 'woodcrest_2300', 2300],
-        ['intel', 'woodcrest_2660', 2660],
-        ['intel', 'xeon_2500', 2500],
-        ['intel', 'xeon_2660', 2660],
-        ['intel', 'xeon_3000', 3000],
-        ['intel', 'xeon_3100', 3100],
-        ['intel', 'xeon_3400', 3400],
-        ['intel', 'xeon_3600', 3600],
-        ['sun', 'ultrasparc_iii_i_1300', 1300],
-        ['sun', 'ultrasparc_iii_i_1600', 1600],
-        ['aurora_vendor', 'aurora_cpu', 0],
-        ['virtual', 'virtual_cpu', 0]]
-
 
 class Cpu(Base):
     """ Cpus with vendor, model name and speed (in MHz) """
@@ -87,28 +63,3 @@ cpu.primary_key.name = '%s_pk' % _TN
 cpu.append_constraint(
     UniqueConstraint('vendor_id', 'name', 'speed', name='%s_nm_speed_uk' % _TN))
 cpu.info['unique_fields'] = ['name', 'vendor', 'speed']
-
-
-@monkeypatch(cpu)
-def populate(sess, *args, **kw):
-    """ Populate some well known cpus for testing """
-    if len(sess.query(Cpu).all()) < 1:
-        import logging
-        log = logging.getLogger('aqdb.populate')
-
-        for vendor, name, speed in cpus:
-
-            vendor = sess.query(Vendor).filter_by(name=vendor).first()
-            assert vendor, "No vendor found for '%s'" % vendor
-
-            a = Cpu(vendor=vendor, name=name, speed=speed)
-            sess.add(a)
-
-        try:
-            sess.commit()
-        except Exception, e:
-            sess.rollback()
-            log.error(str(e))
-
-        cnt = len(sess.query(Cpu).all())
-        log.debug('created %s cpus' % cnt)

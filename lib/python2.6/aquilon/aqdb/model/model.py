@@ -35,7 +35,6 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
 
 from sqlalchemy.orm import relation
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Vendor
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -70,53 +69,3 @@ model.append_constraint(UniqueConstraint('name', 'vendor_id',
 
 model.info['unique_fields'] = ['name', 'vendor']
 model.info['extra_search_fields'] = ['machine_type']
-
-
-@monkeypatch(model)
-def populate(sess, **kw):
-    """ populate our well known models """
-    if sess.query(Model).count() < 1:
-
-        f = [['ibm', 'hs20-884345u', 'blade'],
-            ['ibm', 'ls20-8850pap', 'blade'],
-            ['ibm', 'hs21-8853l5u', 'blade'],
-            ['ibm', 'bce', 'chassis'],
-            ['ibm', 'bch', 'chassis'],
-            ['ibm', 'dx320-6388ac1', 'rackmount'], #one of the 4 in 1 types
-            ['ibm', 'dx320-6388dau', 'rackmount'],
-            ['hp', 'bl35p', 'blade'],
-            ['hp', 'bl465c', 'blade'],
-            ['hp', 'bl480c', 'blade'],
-            ['hp', 'bl680c', 'blade'],
-            ['hp', 'bl685c', 'blade'],
-            ['hp', 'dl145', 'rackmount'],
-            ['hp', 'dl580', 'rackmount'],
-            ['hp', 'bl45p', 'blade'],
-            ['hp', 'bl260c', 'blade'],
-            ['hp', 'c-class', 'chassis'],
-            ['hp', 'p-class', 'chassis'],
-            ['verari', 'vb1205xm', 'blade'],
-            ['sun', 'ultra-10', 'workstation'],
-            ['netapp', 'v3160', 'rackmount'],
-            ['netapp', 'v3170', 'rackmount'],
-            ['dell', 'poweredge_6850', 'rackmount'],
-            ['dell', 'poweredge_6650', 'rackmount'],
-            ['dell', 'poweredge_2650', 'rackmount'],
-            ['dell', 'poweredge_2850', 'rackmount'],
-            ['dell', 'optiplex_260', 'workstation'],
-            ['bnt', 'rs g8000', 'tor_switch'],
-            ['cisco', 'ws-c2960-48tt-l', 'tor_switch'],
-            ['aurora_vendor', 'aurora_chassis_model', 'aurora_chassis'],
-            ['aurora_vendor', 'aurora_model', 'aurora_node'],
-            ['virtual', 'vm', 'virtual_machine']]
-
-        for i in f:
-            vend = sess.query(Vendor).filter_by(name=i[0]).one()
-            m = Model(name=i[1], machine_type=i[2], vendor=vend)
-            sess.add(m)
-
-        try:
-            sess.commit()
-        except Exception, e:
-            sess.rollback()
-            print e

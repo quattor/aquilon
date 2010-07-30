@@ -36,7 +36,6 @@ from sqlalchemy.orm import relation, backref, object_session, aliased
 from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Network, TorSwitch, Machine
 
@@ -89,19 +88,6 @@ vlaninfo.info['unique_fields'] = ['port_group']
 vlaninfo.append_constraint(
     CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
                     name=('%s_max_vlan_id' % _VTN).upper()))
-
-@monkeypatch(vlaninfo)
-def populate(sess, **kw):
-    if sess.query(VlanInfo).count() == 0:
-        for i in VLAN_INFO:
-            vinfo = VlanInfo(vlan_id=i[0], port_group=i[1], vlan_type=i[2])
-            sess.add(vinfo)
-
-        try:
-            sess.commit()
-        except Exception, e:
-            sess.rollback()
-            print e
 
 _TN = 'observed_vlan'
 _ABV = 'obs_vlan'

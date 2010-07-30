@@ -53,9 +53,10 @@ import aquilon.aqdb.dsdb as dsdb_
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
 import test_campus_populate as tcp
+from loader import load_from_file
 
-ordered_locations = ['location', 'company', 'hub', 'continent', 'country',
-                     'city', 'building', 'room', 'rack', 'desk']
+ordered_locations = ['location', 'country', 'city', 'building', 'room', 'rack',
+                     'desk']
 
 
 def importName(modulename, name):
@@ -141,6 +142,8 @@ def main(*args, **kw):
     Base.metadata.create_all(checkfirst=True)
 
     if opts.populate:
+        load_from_file(s, "data/unittest.dump")
+
         # Add the current user as admin
         admin = Role.get_unique(s, "aqd_admin", compel=True)
         realm = Realm.get_unique(s, "is1.morgan", compel=True)
