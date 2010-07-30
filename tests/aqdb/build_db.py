@@ -31,6 +31,7 @@
 import sys
 import logging
 import optparse
+import getpass
 
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -138,6 +139,15 @@ def main(*args, **kw):
 
     #Create all tables upfront
     Base.metadata.create_all(checkfirst=True)
+
+    if opts.populate:
+        # Add the current user as admin
+        admin = Role.get_unique(s, "aqd_admin", compel=True)
+        realm = Realm.get_unique(s, "is1.morgan", compel=True)
+        user = UserPrincipal(name=getpass.getuser(), role=admin, realm=realm)
+        s.add(user)
+        s.commit()
+        s.expire(user)
 
     # Location doesn't work with sorted tables (only FK to parent, not to
     # its dependent parent location type. Hacking it for now with a list.
