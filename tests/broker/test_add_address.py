@@ -45,12 +45,12 @@ from brokertest import TestBrokerCommand
 
 class TestAddAddress(TestBrokerCommand):
 
-    def testbasic(self):
+    def test_100_basic(self):
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[13],
                    "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def testverifybasic(self):
+    def test_150_verifybasic(self):
         command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord13.aqd-unittest.ms.com",
@@ -58,14 +58,14 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[13],
                          command)
 
-    def testenv(self):
+    def test_200_env(self):
         default = self.config.get("broker", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--dns_environment=%s" % default]
         self.noouttest(command)
 
-    def testverifyenv(self):
+    def test_250_verifyenv(self):
         command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: arecord14.aqd-unittest.ms.com",
@@ -73,10 +73,24 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[14],
                          command)
 
-    def testfailbadenv(self):
+    def test_300_ipfromip(self):
+        command = ["add_address", "--ipalgorithm=max",
+                   "--ipfromip=%s" % self.net.unknown[0].ip,
+                   "--fqdn=arecord15.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_350_verifyipfromip(self):
+        command = ["show_fqdn", "--fqdn=arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: arecord15.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[15],
+                         command)
+
+    def test_900_failbadenv(self):
         default = self.config.get("broker", "default_dns_environment")
-        command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[15],
-                   "--fqdn=arecord15.aqd-unittest.ms.com",
+        command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[16],
+                   "--fqdn=arecord16.aqd-unittest.ms.com",
                    "--dns_environment=environment-does-not-exist"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out,

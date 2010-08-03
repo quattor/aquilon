@@ -34,7 +34,7 @@ from aquilon.server.commands.add_address_dns_environment \
 
 class CommandAddAddress(CommandAddAddressDNSEnvironment):
 
-    required_parameters = ["fqdn", "ip"]
+    required_parameters = ["fqdn"]
 
     def render(self, **kwargs):
         if not kwargs.get('dns_environment', None):

@@ -31,16 +31,17 @@ from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import System, FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import restrict_tor_offsets
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 restrict_tor_offsets)
 from aquilon.server.dbwrappers.system import parse_system
 from aquilon.server.processes import DSDBRunner
 
 
 class CommandAddAddressDNSEnvironment(BrokerCommand):
 
-    required_parameters = ["fqdn", "ip", "dns_environment"]
+    required_parameters = ["fqdn", "dns_environment"]
 
-    def render(self, session, logger, fqdn, ip, dns_environment, comments,
+    def render(self, session, logger, fqdn, dns_environment, comments,
                **arguments):
         default = self.config.get("broker", "default_dns_environment")
         if str(dns_environment).strip().lower() != default.strip().lower():
@@ -51,6 +52,10 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
         System.get_unique(session, name=short, dns_domain=dbdns_domain,
                           preclude=True)
 
+        ipargs = arguments.copy()
+        ipargs['compel'] = True
+        ipargs['dbinterface'] = None
+        ip = generate_ip(session, **ipargs)
         ipnet = get_net_id_from_ip(session, ip)
         restrict_tor_offsets(ipnet, ip)
         dbaddress = FutureARecord(name=short, dns_domain=dbdns_domain,
