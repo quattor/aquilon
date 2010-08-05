@@ -26,26 +26,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-import weakref
-from inspect import isclass
 import sys
 
-from sqlalchemy import Integer
+from inspect import isclass
+
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.properties import RelationProperty
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.schema import UniqueConstraint, PrimaryKeyConstraint
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
 
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
+
 
 def _raise_custom(cls, defcls, msg):
     if isclass(cls) and issubclass(cls, Exception):
         raise cls(msg)
     else:
         raise defcls(msg)
+
 
 class Base(object):
     """ The abstract base class for all aqdb objects """
@@ -68,17 +68,16 @@ class Base(object):
         return getattr(cls, "_class_label", cls.__name__)
 
     def _get_instance_label(self):
-        """Subclasses can override this method or just set a property to check.
+        """ Subclasses can override this method or just set a property to check
 
-        If an instance has an attribute named _instance_label, the property
-        named by that attribute will be checked for an identifier.
+            If an instance has an attribute named _instance_label, the property
+            named by that attribute will be checked for an identifier.
 
-        Without _instance_label set, the properties 'name' and 'type' are
-        checked, followed by service.name and system.name.
+            Without _instance_label set, the properties 'name' and 'type' are
+            checked, followed by service.name and system.name.
 
-        For situations more complex than just checking a property this
-        method should be overridden with the necessary logic.
-
+            For situations more complex than just checking a property this
+            method should be overridden with the necessary logic.
         """
         if hasattr(self, "_instance_label"):
             return getattr(self, getattr(self, "_instance_label"))
@@ -95,12 +94,12 @@ class Base(object):
     def _selection_helper(cls, session, query, *args, **kwargs):
         """ Helper method for get_unique and get_matching_ids
 
-        Every class that wishes to support get_unique() must have
-        'unique_fields' defined in the table's info dictionary. 'unique_fields'
-        is a list that contains the names of fields that make the object unique.
-        Every field can be either a column or a relation. In the latter case,
-        'unique_fields' of the referenced class must contain a single field
-        only.
+            Every class that wishes to support get_unique() must have
+            'unique_fields' defined in the table's info dictionary.
+            'unique_fields' is a list that contains the names of fields that
+            make the object unique. Every field can be either a column or a
+            relation. In the latter case, 'unique_fields' of the referenced
+            class must contain a single field only
         """
 
         compel = kwargs.pop('compel', False)
@@ -111,7 +110,7 @@ class Base(object):
 
         if not isinstance(session, Session):
             raise TypeError("The first argument of %s() must be an "
-                            "SQLAlchemy session." %  caller)
+                            "SQLAlchemy session." % caller)
 
         if 'unique_fields' not in table.info:
             raise InternalError("Class %s is not annotated to be used with "
@@ -193,8 +192,8 @@ class Base(object):
             msg = "%s %s not found." % (clslabel, ", ".join(desc))
             _raise_custom(compel, NotFoundException, msg)
         except MultipleResultsFound:
-                msg = "%s %s is not unique." % (clslabel, ", ".join(desc))
-                raise ArgumentError(msg)
+            msg = "%s %s is not unique." % (clslabel, ", ".join(desc))
+            raise ArgumentError(msg)
 
     @classmethod
     def get_matching_query(cls, session, *args, **kwargs):
