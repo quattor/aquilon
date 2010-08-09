@@ -41,14 +41,16 @@ class CommandUpdatePersonality(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, personality, archetype, vmhost_capacity_function,
-               **arguments):
+               vmhost_overcommit_memory, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        if vmhost_capacity_function:
+        if vmhost_capacity_function is not None or \
+                vmhost_overcommit_memory is not None:
             if not "esx" in dbpersona.cluster_infos:
                 dbpersona.cluster_infos["esx"] = PersonalityESXClusterInfo()
 
+        if vmhost_capacity_function:
             # Basic sanity tests to see if the function works
             try:
                 global_vars = {'__builtins__': restricted_builtins}
@@ -73,16 +75,20 @@ class CommandUpdatePersonality(BrokerCommand):
 
             dbpersona.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
         elif vmhost_capacity_function == "":
-            if "esx" in dbpersona.cluster_infos:
-                dbpersona.cluster_infos["esx"] = None
+            dbpersona.cluster_infos["esx"].vmhost_capacity_function = None
+
+        if vmhost_overcommit_memory:
+            if vmhost_overcommit_memory < 1:
+                raise ArgumentError("The memory overcommit factor must be >= 1.")
+            dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
         session.flush()
         session.refresh(dbpersona)
 
         q = session.query(Cluster)
         q = q.with_polymorphic("*")
-        # The validation will touch all member hosts/machines, so better to load
-        # them upfront
+        # The validation will touch all member hosts/machines, so it's better to
+        # pre-load everything
         q = q.options(joinedload_all('_hosts.host.machine'))
         q = q.options(joinedload_all('_machines.machine'))
         q = q.filter_by(personality=dbpersona)

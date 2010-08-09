@@ -120,6 +120,16 @@ def force_int(label, value):
         raise ArgumentError("Expected an integer for %s." % label)
     return result
 
+def force_float(label, value):
+    """Utility method to force incoming values to float and wrap errors."""
+    if value is None:
+        return None
+    try:
+        result = float(value)
+    except ValueError, e:
+        raise ArgumentError("Expected an floating point number for %s." % label)
+    return result
+
 def force_ratio(label, value):
     """Utility method to force incoming values to int ratio and wrap errors."""
     if value is None:

@@ -74,7 +74,7 @@ from aquilon.server.formats.formatters import ResponseFormatter
 from aquilon.server.broker import BrokerCommand
 from aquilon.server import commands
 from aquilon.server.processes import cache_version
-from aquilon.utils import force_int, force_boolean, force_ipv4
+from aquilon.utils import force_int, force_float, force_boolean, force_ipv4
 
 
 class ResponsePage(resource.Resource):
@@ -372,6 +372,8 @@ class RestServer(ResponsePage):
                         paramtype = option.attrib["type"]
                         if paramtype == "int":
                             myinstance.parameter_checks[option_name] = force_int
+                        elif paramtype == "float":
+                            myinstance.parameter_checks[option_name] = force_float
                         elif paramtype == "boolean" or paramtype == "flag":
                             myinstance.parameter_checks[option_name] = force_boolean
                         elif paramtype == "ipv4":

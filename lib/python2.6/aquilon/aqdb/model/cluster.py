@@ -246,6 +246,10 @@ class EsxCluster(Cluster):
             return {'memory': 0}
 
         func = self.vmhost_capacity_function
+        if self.personality_info:
+            overcommit = self.personality_info.vmhost_overcommit_memory
+        else:
+            overcommit = 1
 
         # No access for anything except built-in functions
         global_vars = {'__builtins__': restricted_builtins}
@@ -256,9 +260,17 @@ class EsxCluster(Cluster):
             # function
             local_vars = {'memory': host.machine.memory}
             if func:
-                resources.append(eval(func, global_vars, local_vars))
+                rec = eval(func, global_vars, local_vars)
             else:
-                resources.append(local_vars)
+                rec = local_vars
+
+            # Apply the memory overcommit factor. Force the result to be
+            # an integer since it looks better on display
+            if 'memory' in rec:
+                rec['memory'] = int(rec['memory'] * overcommit)
+
+            resources.append(rec)
+
         # Convert the list of dicts to a dict of lists
         resmap = convert_resources(resources)
 

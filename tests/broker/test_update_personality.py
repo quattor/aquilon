@@ -96,6 +96,12 @@ class TestUpdatePersonality(TestBrokerCommand):
                    "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
         self.noouttest(command)
 
+    def testupdateovercommit(self):
+        command = ["update", "personality", "--personality", "esx_desktop",
+                   "--archetype", "vmhost",
+                   "--vmhost_memory_overcommit", 1.04]
+        self.noouttest(command)
+
     def testverifyupdatecapacity(self):
         command = ["show", "personality", "--personality", "esx_desktop",
                    "--archetype", "vmhost"]
@@ -103,6 +109,7 @@ class TestUpdatePersonality(TestBrokerCommand):
         self.matchoutput(out,
                          "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
                          command)
+        self.matchoutput(out, "VM host overcommit factor: 1.04", command)
 
 
 if __name__=='__main__':

@@ -80,6 +80,8 @@ class PersonalityFormatter(ObjectFormatter):
             if cltype == "esx":
                 details.append(indent + "    VM host capacity function: %s" %
                                info.vmhost_capacity_function)
+                details.append(indent + "    VM host overcommit factor: %s" %
+                               info.vmhost_overcommit_memory)
         return "\n".join(details)
 
     def format_proto(self, personality, skeleton=None):

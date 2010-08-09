@@ -31,7 +31,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+                        Float, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, reconstructor
 from sqlalchemy.orm.collections import column_mapped_collection
 
@@ -86,6 +86,8 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
 
     _vmhost_capacity_function = Column('vmhost_capacity_function', String(255),
                                        nullable=True)
+
+    vmhost_overcommit_memory = Column(Float, nullable=False, default=1.0)
 
     # A little trickery here, as we want to cache the compiled function
     @property

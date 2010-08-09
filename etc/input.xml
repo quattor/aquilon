@@ -2254,6 +2254,7 @@
       </optgroup>
       <optgroup name="update_personality_opt" mandatory="False">
 	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
+	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
       </optgroup>
       <transport method="post" path="personality/%(archetype)s/%(personality)s" />
   </command>

@@ -111,7 +111,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_250_verifyclearoverride(self):
         command = ["show_esx_cluster", "--cluster", "utecl2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Capacity limits: memory: 163640", command)
+        self.matchoutput(out, "Capacity limits: memory: 157236", command)
 
     def test_260_verifyclearsearchoverride(self):
         command = ["search_esx_cluster", "--capacity_override"]
