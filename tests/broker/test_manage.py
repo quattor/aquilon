@@ -133,18 +133,34 @@ class TestManage(TestBrokerCommand):
                          command)
 
     def testmanagecluster(self):
+        # To compile, this needs templates from the unittest domain.
+        # This test takes advantage of the fact that those templates
+        # started in the utsandbox sandbox.
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=True)
+        command = ["search_host", "--cluster", "utecl1"]
+        hosts = self.commandtest(command).splitlines()
+        self.failUnless(hosts, "No hosts in cluster utecl1, bad test.")
+        for host in hosts:
+            self.verify_buildfiles("unittest", host, want_exist=True)
         user = self.config.get("unittest", "user")
         command = ["manage", "--cluster", "utecl1",
-                   "--sandbox", "%s/changetest1" % user]
+                   "--sandbox", "%s/utsandbox" % user]
         self.noouttest(command)
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False)
+        for host in hosts:
+            self.verify_buildfiles("unittest", host, want_exist=False)
+        command = ["compile", "--sandbox=%s/utsandbox" % user]
+        self.successtest(command)
+        self.verify_buildfiles("utsandbox", "clusters/utecl1",
+                               want_exist=True)
+        for host in hosts:
+            self.verify_buildfiles("utsandbox", host, want_exist=True)
 
     def testverifymanagecluster(self):
         user = self.config.get("unittest", "user")
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Sandbox: %s/changetest1" % user, command)
+        self.matchoutput(out, "Sandbox: %s/utsandbox" % user, command)
 
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)
@@ -153,13 +169,13 @@ class TestManage(TestBrokerCommand):
         self.failUnless(members, "No hosts in output of %s." % command)
 
         command = ["search_host", "--cluster=utecl1",
-                   "--sandbox=%s/changetest1" % user]
+                   "--sandbox=%s/utsandbox" % user]
         out = self.commandtest(command)
         aligned = out.splitlines()
         aligned.sort()
         self.failUnlessEqual(members, aligned,
                              "Not all utecl1 cluster members (%s) are in "
-                             "sandbox changetest1 (%s)." % (members, aligned))
+                             "sandbox utsandbox (%s)." % (members, aligned))
 
 
 if __name__=='__main__':
