@@ -65,7 +65,7 @@ else:
 from sqlalchemy.orm import sync
 from sqlalchemy import Table, text
 from sqlalchemy.orm.properties import PropertyLoader
-from sqlalchemy.databases.postgres import PGDialect
+
 
 __all__ = ['show_schema_graph', 'create_schema_graph']
            #, 'show_uml_graph', 'create_uml_graph']
