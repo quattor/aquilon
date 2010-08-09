@@ -30,6 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.processes import DSDBRunner
 from aquilon.server.commands.del_location import CommandDelLocation
 
 
@@ -37,6 +38,10 @@ class CommandDelCity(CommandDelLocation):
 
     required_parameters = ["city"]
 
-    def render(self, session, city, **arguments):
+    def render(self, session, logger, city, **arguments):
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.del_city(city)
+
         return CommandDelLocation.render(self, session=session, name=city,
                                          type='city', **arguments)

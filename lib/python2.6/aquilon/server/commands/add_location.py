@@ -43,62 +43,45 @@ from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
 const.location_types = ("company", "hub", "continent", "country", "campus",
                         "city", "building", "room", "rack", "desk")
 
+def add_location(session, name, fullname, type, parent_name, parent_type, comments=None):
+    """ Perform all the initialization and error checking to add a location
+
+        Returns a new location which has not been added to any session, allows
+        code reuse while also being able to run DSDB commands before commiting
+        the transactions
+    """
+    loc = Location.get_unique(session, name=name,
+                              location_type=type, preclude=True)
+
+    parent = Location.get_unique(session, name=parent_name,
+                                 location_type=parent_type, compel=True)
+
+    type_weight = const.location_types.index(type)
+    parent_weight = const.location_types.index(parent_type)
+
+    if type_weight <= parent_weight:
+        raise ArgumentError("Type %s cannot be a parent of %s." %
+                    (parent_type.capitalize(), type.capitalize()))
+
+    location_type = globals()[type.capitalize()]
+    if not issubclass(location_type, Location):
+        raise ArgumentError("%s is not a known location type." % (
+            type.capitalize()))
+
+    if not fullname:  # FIXME: should we keep doing this or demand a 5char code?
+        fullname = name
+
+    return location_type(name=name, fullname=fullname,
+                         parent=parent, comments=comments)
 
 class CommandAddLocation(BrokerCommand):
 
-    required_parameters = ["name", "fullname", "type",
-            "parentname", "parenttype", "comments"]
+    required_parameters = ["name", "fullname", "type", "parentname",
+                           "parenttype", "comments"]
 
     def render(self, session, name, fullname, type,
             parentname, parenttype, comments, **arguments):
-        newLocation = session.query(Location).filter_by(name=name,
-                location_type=type).first()
-        if newLocation:
-            # FIXME: Technically this is coming in with an http PUT,
-            # which should try to adjust state and succeed if everything
-            # is alright.
-            raise ArgumentError("{0} already exists.".format(newlocation))
-        try:
-            dbparent = session.query(Location).filter_by(name=parentname,
-                    location_type=parenttype).one()
-        except NoResultFound:
-            raise ArgumentError("Parent %s %s not found." %
-                                (parenttype.capitalize(), parentname))
-        # Incoming looks like 'city', need the City class.
-        location_type = globals()[type.capitalize()]
-        if not issubclass(location_type, Location):
-            raise ArgumentError("%s is not a known location type." %
-                                type.capitalize())
 
-        # Figure out if it is valid to add this type of child to the parent...
-        found_parent = False
-        found_new = False
-        for t in const.location_types:
-            if t == parenttype:
-                # Great, found the parent type in the list before requested type
-                found_parent = True
-                continue
-            if t != type:
-                # This item is neither parent nor new, keep going...
-                continue
-            # Moment of truth.
-            if found_parent:
-                # We saw the parent earlier - life is good.
-                found_new = True
-                break
-            raise ArgumentError("Type %s cannot be a parent of %s." %
-                    (parenttype.capitalize(), type.capitalize()))
-        if not found_new:
-            raise ArgumentError("Unknown type %s." % type.capitalize())
-
-        optional_args = {}
-        # XXX: The fullname used to be nullable... adding hack...
-        if not fullname:
-            fullname = name
-        if comments:
-            optional_args["comments"] = comments
-
-        new_location = location_type(name=name, fullname=fullname,
-                parent=dbparent, **optional_args)
-        session.add(new_location)
+        session.add(add_location(session, name, fullname, type, parentname,
+                                 parenttype, comments))
         return

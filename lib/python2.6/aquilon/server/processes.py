@@ -311,16 +311,27 @@ class DSDBRunner(object):
     def __init__(self, logger=LOGGER):
         self.config = Config()
         self.logger = logger
+        self.dsdb = self.config.get("broker", "dsdb")
 
     def getenv(self):
         if self.config.getboolean("broker", "dsdb_use_testdb"):
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
+    def add_city(self, city, country, fullname):
+        cmd = [self.dsdb, "add_city_aq", "-city_symbol", city,
+               "-country_symbol", country, "-city_name", fullname]
+        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+
+    def del_city(self, city):
+        cmd = [self.dsdb, "delete_city_aq", "-city", city]
+        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+
     def add_host(self, dbinterface):
         if not dbinterface.system.ip:
             raise ArgumentError("No ip address found for '%s' to add to dsdb." %
                                 dbinterface.system.fqdn)
+
         return self.add_host_details(dbinterface.system.fqdn,
                                      dbinterface.system.ip,
                                      dbinterface.name, dbinterface.mac)
