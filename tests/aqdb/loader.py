@@ -60,6 +60,8 @@ from aquilon.aqdb.db_factory import DbFactory
 class Lexer(shlex):
     def __init__(self, filename):
         self.filename = filename
+        self.macros = {}
+
         input = file(filename, 'rt')
         return shlex.__init__(self, input, posix=True)
 
@@ -76,6 +78,23 @@ def parse_object(session, lexer, lookup=False, verbose=False):
     token = lexer.get_token()
     if not token:
         return None
+
+    # Handle macro creation and lookup
+    if token == "@":
+        token = lexer.get_token()
+        if not token:
+            lexer.error("macro name expected.")
+
+        if lookup:
+            if token not in lexer.macros:
+                lexer.error("macro @%s is not defined." % token)
+            return lexer.macros[token]
+        else:
+            if token in lexer.macros:
+                lexer.error("macro @%s is already defined." % token)
+            obj = parse_object(session, lexer, lookup=True, verbose=verbose)
+            lexer.macros[token] = obj
+            return obj
 
     if hasattr(aquilon.aqdb.model, token):
         cls = getattr(aquilon.aqdb.model, token)
@@ -125,11 +144,16 @@ def parse_params(session, lexer, verbose=False):
             lexer.error("'=' expected.")
 
         token = lexer.get_token()
-        if hasattr(aquilon.aqdb.model, token):
+
+        object_lookup = False
+        if token == "@":
+            object_lookup = True
+        elif hasattr(aquilon.aqdb.model, token):
             cls = getattr(aquilon.aqdb.model, token)
-        else:
-            cls = None
-        if cls and isclass(cls) and issubclass(cls, aquilon.aqdb.model.Base):
+            if isclass(cls) and issubclass(cls, aquilon.aqdb.model.Base):
+                object_lookup = True
+
+        if object_lookup:
             lexer.push_token(token)
             value = parse_object(session, lexer, lookup=True, verbose=verbose)
         else:
