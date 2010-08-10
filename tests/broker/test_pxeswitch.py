@@ -97,6 +97,11 @@ class TestPxeswitch(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
         self.matchoutput(err, "--livecd", command)
 
+    def testrescueunittest02(self):
+        command = "pxeswitch --hostname unittest02.one-nyp.ms.com --rescue"
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--rescue", command)
+
     def testconfigurelist(self):
         with NamedTemporaryFile() as f:
             f.writelines(["unittest02.one-nyp.ms.com\n",
@@ -134,6 +139,15 @@ class TestPxeswitch(TestBrokerCommand):
             command = "pxeswitch --list %s --blindbuild" % f.name
             (out, err) = self.successtest(command.split(" "))
             self.matchoutput(err, "--livecdlist", command)
+
+    def testrescuelist(self):
+        with NamedTemporaryFile() as f:
+            f.writelines(["unittest02.one-nyp.ms.com\n",
+                          "unittest00.one-nyp.ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --rescue" % f.name
+            (out, err) = self.successtest(command.split(" "))
+            self.matchoutput(err, "--rescuelist", command)
 
     def teststatusconflictconfigure(self):
         command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",

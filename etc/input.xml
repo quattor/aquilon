@@ -1507,12 +1507,13 @@
          <option name="list" type="file" conflicts="hostname">file containing hostnames</option>
       </optgroup>
       <optgroup name="pxeswitch_action" mandatory="True" fields="any">
-         <option name="status" type="flag" conflicts="configure localboot install firmware blindbuild">display the current status of how the host will boot</option>
+         <option name="status" type="flag" conflicts="configure localboot install firmware blindbuild rescue">display the current status of how the host will boot</option>
          <option name="configure" type="flag" conflicts="status">(re)initialize the pxeswitch configuration</option>
-         <option name="localboot" type="flag" conflicts="status install firmware blindbuild">set the host to boot from local disk</option>
-         <option name="install" type="flag" conflicts="status localboot firmware blindbuild">set the host to install from the network at next reboot</option>
-         <option name="firmware" type="flag" conflicts="status localboot install blindbuild">set the host to boot its firmware image</option>
-         <option name="blindbuild" type="flag" conflicts="status localboot install firmware">set the host to boot a blindbuild livecd image</option>
+         <option name="localboot" type="flag" conflicts="status install firmware blindbuild rescue">set the host to boot from local disk</option>
+         <option name="install" type="flag" conflicts="status localboot firmware blindbuild rescue">set the host to install from the network at next reboot</option>
+         <option name="firmware" type="flag" conflicts="status localboot install blindbuild rescue">set the host to boot its firmware image</option>
+         <option name="blindbuild" type="flag" conflicts="status localboot install firmware rescue">set the host to boot a blindbuild livecd image</option>
+         <option name="rescue" type="flag" conflicts="status localboot install firmware blindbuild">set the host to boot a rescue image</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
       <transport trigger="list" method="post" path="command/pxeswitch/list" />
