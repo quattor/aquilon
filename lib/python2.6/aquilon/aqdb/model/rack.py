@@ -63,26 +63,3 @@ rack = Rack.__table__
 
 rack.primary_key.name = 'rack_pk'
 rack.info['unique_fields'] = ['name']
-
-
-@monkeypatch(rack)
-def populate(sess, **kw):
-
-    if sess.query(Rack).count() < 1:
-
-        if sess.query(Building).count() > 0:
-            Building.__table__.populate(sess, **kw)
-
-        try:
-            np = sess.query(Building).filter_by(name='np').one()
-        except Exception, e:
-            print e
-
-        rack_name = 'np3'
-        a = Rack(name=rack_name, fullname='Rack %s'%(rack_name), parent=np)
-        sess.add(a)
-
-        try:
-            sess.commit()
-        except Exception, e:
-            print e

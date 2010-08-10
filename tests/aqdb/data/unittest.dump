@@ -77,8 +77,8 @@ Domain(name="ny-prod", owner=UserPrincipal(name="cdb"),
 
 Company(name="ms", fullname="Morgan Stanley")
 
-Hub(name="ln", fullname="Europe", parent=Company(name="ms"))
 Hub(name="hk", fullname="Non-Japan-Asia", parent=Company(name="ms"))
+Hub(name="ln", fullname="Europe", parent=Company(name="ms"))
 Hub(name="ny", fullname="Americas", parent=Company(name="ms"))
 
 Continent(name="af", fullname="Africa", parent=Hub(name="ln"))
@@ -88,7 +88,29 @@ Continent(name="eu", fullname="Europe", parent=Hub(name="ln"))
 Continent(name="na", fullname="North America", parent=Hub(name="ny"))
 Continent(name="sa", fullname="South America", parent=Hub(name="ny"))
 
-# Countries, cities and buildings are populated from DSDB
+Country(name="gb", fullname="Great Britain", parent=Continent(name="eu"))
+Country(name="us", fullname="USA", parent=Continent(name="na"))
+
+Campus(name="ln", fullname="London", parent=Country(name="gb"))
+Campus(name="ny", fullname="New York", parent=Country(name="us"))
+Campus(name="vi", fullname="Virginia", parent=Country(name="us"))
+
+City(name="ln", fullname="London", parent=Campus(name="ln"))
+City(name="ny", fullname = "New York", parent=Campus(name="ny"))
+
+Building(name="hq", fullname="1585 Broadway, NY, NY 10036", parent=City(name="ny"))
+Building(name="np", fullname="1 NY Plaza", parent=City(name="ny"))
+Building(name="oy", fullname="Unit D, Green Lane, Hounslow, Middlesex", parent=City(name="ln"))
+Building(name="pi", fullname="1 Pierrepont Plaza, Brooklyn, NY 11201", parent=City(name="ny"))
+Building(name="ut", fullname="Unit test building", parent=City(name="ny"))
+
+@hq Building(name="hq")
+@np Building(name="np")
+@oy Building(name="oy")
+@pi Building(name="pi")
+@ut Building(name="ut")
+
+Room(name="utroom2", fullname="UT pod1", parent=@ut)
 
 Archetype(name="aegis")
 Archetype(name="aquilon", is_compileable=True)

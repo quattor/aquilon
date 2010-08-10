@@ -49,12 +49,7 @@ class TestAddRoom(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom1", command)
 
-    def testaddutroom2(self):
-        command = ["add_room", "--room=utroom2", "--building=ut",
-                   "--fullname=UT pod1"]
-        self.noouttest(command)
-
-    def testverifyaddutroom2(self):
+    def testverifyutroom2(self):
         command = "show room --room utroom2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom2", command)

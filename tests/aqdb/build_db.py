@@ -52,11 +52,7 @@ from aquilon.aqdb.model import *
 import aquilon.aqdb.dsdb as dsdb_
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
-import test_campus_populate as tcp
 from loader import load_from_file
-
-ordered_locations = ['location', 'country', 'city', 'building', 'room', 'rack',
-                     'desk']
 
 
 def importName(modulename, name):
@@ -152,45 +148,13 @@ def main(*args, **kw):
         s.commit()
         s.expire(user)
 
-    # Location doesn't work with sorted tables (only FK to parent, not to
-    # its dependent parent location type. Hacking it for now with a list.
-    # These don't change a lot, and we'll go to a single table inheritance
-    # perhaps sometime soon, which eliminates the extra loop
-    for module_name in ordered_locations:
-        pkg_name = 'aquilon.aqdb.model'
-        try:
-            mod = importName(pkg_name, module_name)
-        except ImportError, e:
-            log.error('Failed to import %s\n' % (module_name, str(e)))
-            sys.exit(9)
-
-        if hasattr(mod, 'populate') and opts.populate:
-            #log.debug('populating %s' % tbl.name)
-            mod.populate(s, **kwargs)
-
     #New loop: over sorted tables in Base.metadata.
     for tbl in Base.metadata.sorted_tables:
         #this might be a place to set schema if needed (for DB2)
-        #skip locations: they're handled separately above
-        if tbl.name in ordered_locations:
-            continue
 
         if hasattr(tbl, 'populate') and opts.populate:
             #log.debug('populating %s' % tbl.name)
             tbl.populate(s, **kwargs)
-
-    #CAMPUS
-    if opts.populate:
-        try:
-            cps = tcp.TestCampusPopulate(s, **kwargs)
-            cps.setUp()
-            cps.testPopulate()
-        except Exception, e:
-            log.error('problem populating campuses')
-            log.error(str(e))
-            sys.exit(9)
-            #TODO: death on fail an option
-
 
     #CONSTRAINTS
     if db.dsn.startswith('oracle'):

@@ -46,32 +46,3 @@ class City(Location):
 city = City.__table__
 city.primary_key.name='city_pk'
 city.info['unique_fields'] = ['name']
-
-
-@monkeypatch(city)
-def populate(sess, **kw):
-    """ populate our cities"""
-    if sess.query(City).count() < 1:
-        dsdb = kw['dsdb']
-        assert dsdb, "No dsdb in kwargs for City.populate()"
-
-        cntry= {}
-        for c in sess.query(Country).all():
-            cntry[c.name] = c
-
-        for row in dsdb.dump('city'):
-            try:
-                p = cntry[str(row[2])]
-            except KeyError, e:
-                log.error('couldnt find country %s'%(str(row[2])))
-                continue
-
-            a = City(name = str(row[0]),
-                        fullname = str(row[1]),
-                        parent = p)
-            sess.add(a)
-
-    try:
-        sess.commit()
-    except Exception, e:
-        print e

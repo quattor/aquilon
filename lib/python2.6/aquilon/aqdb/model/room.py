@@ -46,20 +46,3 @@ class Room(Location):
 room = Room.__table__
 room.primary_key.name = 'room_pk'
 room.info['unique_fields'] = ['name']
-
-
-@monkeypatch(room)
-def populate(sess, **kwargs):
-    """Populate skeleton database with some room information."""
-
-    if len(sess.query(Room).all()) > 0:
-        return
-
-    if sess.query(Building).count() < 1:
-        Building.populate(sess, **kw)
-
-    devin1 = Building.get_unique(sess, 'dd')
-    if devin1:
-        pod3 = Room(name='ddroom3', fullname='Devin Pod 3', parent=devin1)
-        sess.add(pod3)
-    sess.commit()
