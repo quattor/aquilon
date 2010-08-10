@@ -180,9 +180,10 @@ def create_schema_graph(tables=None,
             if is_inheritance:
                 edge = edge[::-1]
             graph_edge = pydot.Edge(
-                headlabel="+ %s"%fk.column.name, taillabel='+ %s'%fk.parent.name,
-                arrowhead=is_inheritance and 'none' or 'odot' ,
-                arrowtail=(fk.parent.primary_key or
+                headlabel = "+ %s" % fk.column.name,
+                taillabel = '+ %s' % fk.parent.name,
+                arrowhead = is_inheritance and 'none' or 'odot' ,
+                arrowtail = (fk.parent.primary_key or
                            fk.parent.unique) and 'empty' or 'crow' ,
                 fontname=font, *edge, **relation_kwargs)
 
@@ -190,23 +191,23 @@ def create_schema_graph(tables=None,
             graph.add_edge(graph_edge)
     return graph
 
-def create_dot_file(meta, image_name='/tmp/aqdb_schema.dot'):
+def write_schema_dot(meta, image_name='/tmp/aqdb_schema.dot'):
     graph = create_schema_graph(metadata=meta)
     graph.write(image_name)
 
-def show_uml_graph(db,image_name='/tmp/aqdb_uml.png', *args, **kw):
+def write_uml_png(image_name='/tmp/aqdb_uml.png', *args, **kw):
     ios = cStringIO.StringIO(create_uml_graph(
         [class_mapper(c) for c in Base._decl_class_registry.itervalues()])).create_png()
     Image.open(ios).save(image_name)
 
-def show_schema_graph(db, image_name = "/tmp/aqdb_schema.png", *args, **kwargs):
-    ios = cStringIO.StringIO(create_schema_graph(metadata=db.meta).create_png())
+def write_schema_png(meta, image_name = "/tmp/aqdb_schema.png", *args, **kwargs):
+    ios = cStringIO.StringIO(create_schema_graph(metadata=meta).create_png())
     Image.open(ios).save(image_name)
 
 def _render_table_record(table, metadata, show_indexes, show_datatypes):
     def format_col_type(col):
         try:
-            return col.type.get_col_spec()
+            return col.type
         except NotImplementedError:
             return str(col.type)
 
@@ -223,7 +224,6 @@ def _render_table_record(table, metadata, show_indexes, show_datatypes):
 
 def _mk_label(mapper, show_operations, show_attributes,
               show_datatypes, bordersize):
-#TODO: use template strings for these
     html = '''
 <<TABLE CELLSPACING="0" CELLPADDING="1" BORDER="0" CELLBORDER="%s" ALIGN="LEFT"
 ><TR><TD><FONT POINT-SIZE="10">%s</FONT></TD></TR>'''%(
@@ -257,15 +257,3 @@ def _mk_label(mapper, show_operations, show_attributes,
         func.__module__ == mapper.class_.__module__)
     html+= '</TABLE>>'
     return html
-
-
-""" from aquilon.aqdb.utils.schema2dot import create_schema_graph,
-                                           create_uml_graph,
-                                           show_schema_graph,
-                                           show_uml_graph)
-def write_uml_graph(db, image_name = "aqdb_classes.dot"):
-    Base.metadata = db.meta
-    graph = create_uml_graph(
-              [class_mapper(c) for c in Base._decl_class_registry.itervalues()])
-    graph.write_dot(name)
-"""
