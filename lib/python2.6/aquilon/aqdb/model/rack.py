@@ -51,8 +51,8 @@ class Rack(Location):
     @validates('rack_row', 'rack_column')
     def check_rack_coordinates(self, key, value):
         """ validates the row and column arguments """
-        value = value.strip()
-        if not str(value).isalnum():
+        value = str(value).strip()
+        if not value.isalnum():
             msg = "the value '%s' for %s must be alphanumeric" % (
                 value, key)
             raise ArgumentError(msg)
