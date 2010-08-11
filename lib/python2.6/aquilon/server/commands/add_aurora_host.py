@@ -81,8 +81,10 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbbuilding = session.query(Building).filter_by(
                         name=building).first()
                 if not dbbuilding:
-                    raise ArgumentError("Failed to find building %s for node %s, please add an Aurora machine manually and follow with add_host." %
-                            building, machine)
+                    raise ArgumentError("Failed to find building %s for "
+                                        "node %s, please add an Aurora machine "
+                                        "manually and follow with add_host." %
+                                        (building, machine))
                 rack = building + rid
                 dbrack = session.query(Rack).filter_by(name=rack).first()
                 if not dbrack:
