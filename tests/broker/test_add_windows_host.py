@@ -60,6 +60,9 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Build Status: build", command)
+        self.matchoutput(out,
+                         "Template: windows/os/windows/generic/config.tpl",
+                         command)
 
 
 if __name__=='__main__':

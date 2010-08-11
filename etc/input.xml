@@ -789,6 +789,7 @@
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.  Currently defaults to 'generic'.</option>
+         <option name="osversion" type="string">Operating system version.  Default 'generic'.</option>
          <option name="comments" type="string">Comments</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <optgroup name="add_host_ip_opts" mandatory="False" fields="any">

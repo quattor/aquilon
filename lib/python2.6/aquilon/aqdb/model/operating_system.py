@@ -100,8 +100,10 @@ def populate(sess, *args, **kw):
         sess.add(os_obj)
 
     win = Archetype.get_unique(sess, 'windows')
-    win_obj=OperatingSystem(archetype=win, name='windows', version='generic')
-    sess.add(win_obj)
+    for ver in ['generic', 'nt51', 'nt52e', 'nt52s', 'nt61e', 'x64nt51',
+                'x64nt52e', 'x64nt52s', 'nt64nt61e', 'x64nt61se', 'x64nt61ss']:
+        win_obj=OperatingSystem(archetype=win, name='windows', version=ver)
+        sess.add(win_obj)
 
     vmhost = Archetype.get_unique(sess, 'vmhost')
     for ver in ['4.0.0']:
