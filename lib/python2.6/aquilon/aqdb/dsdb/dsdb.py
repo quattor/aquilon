@@ -116,7 +116,7 @@ class DsdbConnection(object):
     def close(self):
         self.syb.close()
 
-if __name__ == '__main__':
+def test():
     db = DsdbConnection()
     assert db, "No dsdb connection"
 
@@ -127,13 +127,17 @@ if __name__ == '__main__':
     #for i in ops:
     #    print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
 
-    host = 'cwipm1'
-    print "getting pod of '%s'"%(host)
-    print 'host %s is in the "%s" pod'%(host,db.get_host_pod(host))
+    #host = 'cwipm1'
+    #print "getting pod of '%s'"%(host)
+    #print 'host %s is in the "%s" pod'%(host,db.get_host_pod(host))
 
     #print 'buildings in ny campus:'
     #print db.dump('buildings_by_campus', campus='ny')
     #print ' '
-
+    from pprint import pprint
+    pprint(db.dump('transaction_log'))
 
     db.close()
+
+if __name__ == '__main__':
+    test() # for now
