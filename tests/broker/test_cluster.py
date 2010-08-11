@@ -157,6 +157,17 @@ class TestCluster(TestBrokerCommand):
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
 
+    def testbindhaclusters(self):
+        for i in range(25, 49):
+            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
+            cluster = "utecl%d" % (11 + ((i - 25) / 12))
+            self.successtest(["cluster",
+                              "--hostname", host, "--cluster", cluster])
+            host = "evh%s.one-nyp.ms.com" % (i + 50)
+            cluster = "npecl%d" % (11 + ((i - 25) / 12))
+            self.successtest(["cluster",
+                              "--hostname", host, "--cluster", cluster])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCluster)

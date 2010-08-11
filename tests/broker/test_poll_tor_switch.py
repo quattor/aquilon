@@ -170,6 +170,14 @@ class TestPollTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 712: %s" % self.net.unknown[8].ip, command)
         self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[9].ip, command)
 
+    def testpollut01ga2s03(self):
+        self.noouttest(["poll", "tor_switch",
+                        "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com"])
+
+    def testpollnp01ga2s03(self):
+        self.noouttest(["poll", "tor_switch",
+                        "--tor_switch", "np01ga2s03.one-nyp.ms.com"])
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPollTorSwitch)

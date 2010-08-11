@@ -226,12 +226,20 @@ class TestMapService(TestBrokerCommand):
                         "--service", "esx_management_server",
                         "--instance", "ut.b", "--archetype", "vmhost",
                         "--personality", "esx_desktop"])
+        self.noouttest(["map", "service", "--building", "np",
+                        "--service", "esx_management_server",
+                        "--instance", "np", "--archetype", "vmhost",
+                        "--personality", "esx_desktop"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
                         "--personality", "esx_desktop"])
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "pepper",
+                        "--archetype", "vmhost",
+                        "--personality", "esx_desktop"])
+        self.noouttest(["map", "service", "--building", "np",
+                        "--service", "vmseasoning", "--instance", "sugar",
                         "--archetype", "vmhost",
                         "--personality", "esx_desktop"])
 

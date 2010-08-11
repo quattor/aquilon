@@ -66,8 +66,12 @@ class TestDelVirtualHardware(TestBrokerCommand):
         for i in range(1, 10):
             self.noouttest(["del", "machine", "--machine", "evm%s" % i])
 
+    def test_710_delutmc5_utmc6(self):
+        for i in range(50, 115):
+            self.noouttest(["del", "machine", "--machine", "evm%d" % i])
+
     def test_800_verifydelmachines(self):
-        for i in range(1, 10):
+        for i in range(1, 10) + range(90, 115):
             command = "show machine --machine evm%s" %i
             self.notfoundtest(command.split(" "))
 

@@ -332,6 +332,14 @@ class TestAddMachine(TestBrokerCommand):
             self.noouttest(["add", "machine", "--machine", "ut12s02p%d" % port,
                             "--rack", "ut12", "--model", "vb1205xm"])
 
+    def testaddharacks(self):
+        # Machines for metacluster high availability testing
+        for port in range(1, 25):
+            for rack in ["ut13", "np13"]:
+                self.noouttest(["add", "machine",
+                                "--machine", "%ss03p%d" % (rack, port),
+                                "--rack", rack, "--model", "vb1205xm"])
+
     def testverifymachineall(self):
         command = ["show", "machine", "--all"]
         out = self.commandtest(command)

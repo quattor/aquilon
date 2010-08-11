@@ -96,6 +96,42 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          "which exceeds the requested limit 6.",
                          command)
 
+    def testfailhabuilding(self):
+        command = ["update_metacluster", "--metacluster", "utmc1",
+                   "--high_availability"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Metacluster utmc1 is over capacity regarding memory",
+                         command)
+        self.matchoutput(out, "but the limit is 0.", command)
+
+    def testha(self):
+        command = ["update_metacluster", "--metacluster", "utmc5",
+                   "--high_availability"]
+        self.noouttest(command)
+
+    def testfailhacapacity(self):
+        command = ["update_metacluster", "--metacluster", "utmc6",
+                   "--high_availability"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Metacluster utmc6 is over capacity regarding memory",
+                         command)
+
+    def testverifyutmc5(self):
+        command = ["show", "metacluster", "--metacluster", "utmc5"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(out, "Capacity limits: memory: 225590", command)
+        self.matchoutput(out, "Resources used by VMs: memory: 163840", command)
+        self.matchoutput(out, "High availability enabled: True", command)
+
+    def testverifyutmc6(self):
+        command = ["show", "metacluster", "--metacluster", "utmc6"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(out, "Capacity limits: memory: 451180", command)
+        self.matchoutput(out, "Resources used by VMs: memory: 307200", command)
+        self.matchoutput(out, "High availability enabled: False", command)
+
     # FIXME: Need tests for plenary templates
 
 

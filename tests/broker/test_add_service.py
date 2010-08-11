@@ -271,6 +271,8 @@ class TestAddService(TestBrokerCommand):
         self.noouttest(command.split(" "))
         command = "add service --service esx_management_server --instance ut.b"
         self.noouttest(command.split(" "))
+        command = "add service --service esx_management_server --instance np"
+        self.noouttest(command.split(" "))
 
     def testverifyesxmanagement(self):
         command = "show service --service esx_management_server"
@@ -280,11 +282,15 @@ class TestAddService(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Service: esx_management_server Instance: ut.b",
                          command)
+        self.matchoutput(out, "Service: esx_management_server Instance: np",
+                         command)
 
     def testaddvmseasoning(self):
         command = "add service --service vmseasoning --instance salt"
         self.noouttest(command.split(" "))
         command = "add service --service vmseasoning --instance pepper"
+        self.noouttest(command.split(" "))
+        command = "add service --service vmseasoning --instance sugar"
         self.noouttest(command.split(" "))
 
     def testverifyvmseasoning(self):
@@ -305,6 +311,13 @@ class TestAddService(TestBrokerCommand):
         for i in range(5, 11):
             self.noouttest(["add_service", "--service=nas_disk_share",
                             "--instance=utecl%d_share" % i])
+
+    def testaddhashares(self):
+        for i in range(11, 13):
+            self.noouttest(["add_service", "--service=nas_disk_share",
+                            "--instance=utecl%d_share" % i])
+            self.noouttest(["add_service", "--service=nas_disk_share",
+                            "--instance=npecl%d_share" % i])
 
     def testverifydiskcount(self):
         command = ["show_service", "--service=nas_disk_share",

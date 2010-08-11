@@ -67,6 +67,13 @@ class TestAdd10GigHardware(TestBrokerCommand):
                        "--fix_location"]
             self.noouttest(command)
 
+    def test_025_fixlocation(self):
+        for i in range(11, 13):
+            for building in ["np", "ut"]:
+                cluster = "%secl%d" % (building, i)
+                self.noouttest(["update_esx_cluster", "--cluster", cluster,
+                                "--fix_location"])
+
     def test_030_newlocation(self):
         for i in range(5, 8):
             command = ["show_esx_cluster", "--cluster=utecl%d" % i]
@@ -84,6 +91,11 @@ class TestAdd10GigHardware(TestBrokerCommand):
         for i in range(8, 11):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
                             "--tor_switch=ut01ga2s02.aqd-unittest.ms.com"])
+        for i in range(11, 13):
+            self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
+                            "--tor_switch=ut01ga2s03.aqd-unittest.ms.com"])
+            self.noouttest(["update_esx_cluster", "--cluster=npecl%d" % i,
+                            "--tor_switch=np01ga2s03.one-nyp.ms.com"])
 
     def test_100_addinterfaces(self):
         # Skip index 8 and 17 - these will fail.

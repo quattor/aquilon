@@ -71,6 +71,29 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "cluster conflicts with rack", command)
 
+    def test_050_addutmc5machines(self):
+        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2, need
+        # enough machines not to fit in one cluster
+        for i in range(50, 90):
+            if i < 70:
+                cluster = "utecl11"
+            else:
+                cluster = "npecl11"
+            self.noouttest(["add", "machine", "--machine", "evm%s" % i,
+                            "--cluster", cluster, "--model", "utmedium"])
+
+    def test_051_addutmc6machines(self):
+        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2, need
+        # just enough machines to fit in one cluster
+        for i in range(90, 115):
+            if i < 105:
+                cluster = "utecl12"
+            else:
+                cluster = "npecl12"
+            self.noouttest(["add", "machine", "--machine", "evm%s" % i,
+                            "--cluster", cluster, "--model", "utmedium",
+                            "--memory", 12288])
+
     def test_090_verifyaddmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
@@ -90,6 +113,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # This should now fill in the 'hole' between 7 and 9
         self.noouttest(["add", "interface", "--machine", "evm8",
                         "--interface", "eth0", "--automac"])
+
+    def test_125_addutmc5utmc6interfaces(self):
+        for i in range(50, 90) + range(90, 115):
+            machine = "evm%d" % i
+            self.noouttest(["add_interface", "--machine", machine,
+                            "--interface", "eth0", "--automac"])
 
     def test_130_adddisks(self):
         # The first 8 shares should work...

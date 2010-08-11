@@ -99,7 +99,7 @@ class TestUpdatePersonality(TestBrokerCommand):
     def testupdateovercommit(self):
         command = ["update", "personality", "--personality", "esx_desktop",
                    "--archetype", "vmhost",
-                   "--vmhost_memory_overcommit", 1.04]
+                   "--vmhost_overcommit_memory", 1.04]
         self.noouttest(command)
 
     def testverifyupdatecapacity(self):

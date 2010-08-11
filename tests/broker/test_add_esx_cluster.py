@@ -271,6 +271,34 @@ class TestAddESXCluster(TestBrokerCommand):
                        "--archetype=vmhost", "--personality=esx_desktop"]
             self.noouttest(command)
 
+    def testaddutmc5(self):
+        command = ["add_esx_cluster", "--cluster=utecl11",
+                   "--metacluster=utmc5", "--rack=ut13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+        command = ["add_esx_cluster", "--cluster=npecl11",
+                   "--metacluster=utmc5", "--rack=np13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+
+    def testaddutmc6(self):
+        command = ["add_esx_cluster", "--cluster=utecl12",
+                   "--metacluster=utmc6", "--rack=ut13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+        command = ["add_esx_cluster", "--cluster=npecl12",
+                   "--metacluster=utmc6", "--rack=np13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+
     def testfailcatmissingcluster(self):
         command = "cat --cluster=cluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))

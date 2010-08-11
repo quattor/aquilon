@@ -132,6 +132,8 @@ class TestDelService(TestBrokerCommand):
         self.noouttest(command.split(" "))
         command = "del service --service esx_management_server --instance ut.b"
         self.noouttest(command.split(" "))
+        command = "del service --service esx_management_server --instance np"
+        self.noouttest(command.split(" "))
         command = "del service --service esx_management_server"
         self.noouttest(command.split(" "))
 
@@ -144,6 +146,8 @@ class TestDelService(TestBrokerCommand):
         self.noouttest(command.split(" "))
         command = "del service --service vmseasoning --instance pepper"
         self.noouttest(command.split(" "))
+        command = "del service --service vmseasoning --instance sugar"
+        self.noouttest(command.split(" "))
         command = "del service --service vmseasoning"
         self.noouttest(command.split(" "))
 
@@ -155,6 +159,13 @@ class TestDelService(TestBrokerCommand):
         for i in range(5, 11):
             self.noouttest(["del_service", "--service=nas_disk_share",
                             "--instance=utecl%d_share" % i])
+
+    def testdelhashares(self):
+        for i in range(11, 13):
+            self.noouttest(["del_service", "--service=nas_disk_share",
+                            "--instance=utecl%d_share" % i])
+            self.noouttest(["del_service", "--service=nas_disk_share",
+                            "--instance=npecl%d_share" % i])
 
     def testdelnasshares(self):
         for i in range(1, 10):

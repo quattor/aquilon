@@ -143,6 +143,13 @@ class TestDelMachine(TestBrokerCommand):
             command = "del machine --machine ut12s02p%d" % port
             self.noouttest(command.split(" "))
 
+    def testdelharacks(self):
+        # Machines for metacluster high availability testing
+        for port in range(1, 25):
+            for rack in ["ut13", "np13"]:
+                machine = "%ss03p%d" % (rack, port)
+                self.noouttest(["del_machine", "--machine", machine])
+
     # FIXME: Add a test for deleting a machine with only auxiliaries.
 
 

@@ -173,6 +173,18 @@ class TestDelHost(TestBrokerCommand):
             (out, err) = self.successtest(command)
             self.assertEmptyOut(out, command)
 
+    def testdelhaclusterhosts(self):
+        for i in range(25, 49):
+            port = i - 24
+            hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
+            command = ["del", "host", "--hostname", hostname]
+            (out, err) = self.successtest(command)
+            self.assertEmptyOut(out, command)
+
+            hostname = "evh%d.one-nyp.ms.com" % (i + 50)
+            command = ["del", "host", "--hostname", hostname]
+            (out, err) = self.successtest(command)
+            self.assertEmptyOut(out, command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

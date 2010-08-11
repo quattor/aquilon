@@ -73,7 +73,7 @@ class TestCompile(TestBrokerCommand):
         # the number we're looking for based on everything. It might
         # be better to look for the objects being processed and checking
         # that the numbers a/b (for processing) are different.
-        self.matchoutput(err, "11/11 compiled", command)
+        self.matchoutput(err, "15/15 compiled", command)
 
     def test_300_compilehost(self):
         command = "compile --hostname unittest02.one-nyp.ms.com"

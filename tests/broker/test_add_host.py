@@ -217,6 +217,28 @@ class TestAddHost(TestBrokerCommand):
                        "--archetype", "vmhost", "--personality", "esx_desktop"]
             self.noouttest(command)
 
+    def testpopulatehaclusterhosts(self):
+        for i in range(25, 49):
+            port = i - 24
+
+            hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
+            machine = "ut13s03p%d" % port
+            command = ["add", "host", "--hostname", hostname, "--autoip",
+                       "--machine", machine,
+                       "--domain", "unittest", "--buildstatus", "build",
+                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+            self.noouttest(command)
+
+            hostname = "evh%d.one-nyp.ms.com" % (i + 50)
+            machine = "np13s03p%d" % port
+            command = ["add", "host", "--hostname", hostname, "--autoip",
+                       "--machine", machine,
+                       "--domain", "unittest", "--buildstatus", "build",
+                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--archetype", "vmhost", "--personality", "esx_desktop"]
+            self.noouttest(command)
+
     def testverifyshowhostproto(self):
         # We had a bug where a dangling interface with no IP address
         # assigned would cause show host --format=proto to fail...
