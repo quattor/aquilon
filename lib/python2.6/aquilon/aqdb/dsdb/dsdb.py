@@ -30,9 +30,7 @@
 """ For dsdb/sybase specific functionality and access"""
 
 import os
-import sys
 import ms.version
-from copy import copy
 
 ms.version.addpkg('sybase', '0.39-15.0.0.17')
 import Sybase
@@ -43,7 +41,6 @@ class DsdbConnection(object):
     """ Wraps connections to DSDB """
     def __init__(self, fake=False, *args, **kw):
 
-        #TODO: failover support
         self.region = (os.environ.get('SYS_REGION') or None)
         if self.region == 'eu':
             self.dsn = 'LNP_DSDB11'
@@ -53,32 +50,32 @@ class DsdbConnection(object):
             self.dsn = 'TKP_DSDB11'
         else:
             self.dsn = 'NYP_DSDB11'
-        assert self.dsn
+        assert self.dsn, "Cannot determine DSDB instance to use for region %s" % self.region
 
         self.syb = Sybase.connect(self.dsn, 'dsdb_guest', 'dsdb_guest',
-                                  'dsdb', auto_commit = '0')
-        assert self.syb._is_connected
+                                  'dsdb', auto_commit='0')
+        assert self.syb._is_connected, "Cannot connect to %s" % self.dsn
 
-    def run_query(self,sql):
-        """Runs query sql. Note use runSybaseProc to call a stored procedure.
+    def run_query(self, sql):
+        """ Runs query sql. Note use runSybaseProc to call a stored procedure.
             Parameters:
                 sql - SQL to run
             Returns:
-                Sybase cursor object"""
+                Sybase cursor object """
         rs = self.syb.cursor()
         try:
-           rs.execute(sql)
-           return rs
+            rs.execute(sql)
+            return rs
         except Sybase.DatabaseError, e:
             print e
 
     def run_proc(self, proc, parameters):
-        """Runs procedure with supplied parameters.
+        """ Runs a stored procedure with supplied parameters.
             Parameters:
                 proc - Proc to call
                 paramaters - List of parameters to the stored proc.
             Returns:
-                Sybase cursor object"""
+                Sybase cursor object """
         rs = self.syb.cursor()
         try:              #not so sure we need all the fancyness
             rs.callproc(proc, parameters)
@@ -90,30 +87,29 @@ class DsdbConnection(object):
         sql = dt[data_type]
 
         if data_type == 'buildings_by_campus':
-            campus=kw.pop('campus')
+            campus = kw.pop('campus')
             if not campus:
                 raise ValueError('buildings_by_campus requires campus kwarg')
             sql += "'%s'"% (campus)
-        try:
-            return self.run_query(sql).fetchall()
-        except Exception,e:
-            print e
+
+        return self.run_query(sql).fetchall()
+
 
     def get_network_by_sysloc(self, loc):
-        """ append a sysloc to the base query, get networks"""
+        """ append a sysloc to the base query, get networks """
         s = "    AND location = '%s' \n    ORDER BY A.net_ip_addr" % (loc)
         sql = '\n'.join([dt['net_base'], s])
 
         data = self.run_query(sql)
         return data.fetchall() if data else None
 
-    def get_host_pod(self,host):
+    def get_host_pod(self, host):
         sql    = """
         SELECT boot_path FROM network_host A, bootparam B
         WHERE A.host_name   =  \'%s\'
           AND A.machine_id  =  B.machine_id
           AND B.boot_key    =  \'podname\'
-          AND B.state       >= 0"""%(host)
+          AND B.state       >= 0""" % host
 
         return self.run_query(sql).fetchall()[0][0]
 
@@ -121,25 +117,23 @@ class DsdbConnection(object):
         self.syb.close()
 
 if __name__ == '__main__':
-    from pprint import pprint
-
     db = DsdbConnection()
-    assert db
+    assert db, "No dsdb connection"
 
-    print db.get_network_by_sysloc('np.ny.na')
+    #print db.get_network_by_sysloc('np.ny.na')
 
-    ops = ('country','city') #a few ones for testing
+    #ops = ('country','city') #a few ones for testing
 
     #for i in ops:
     #    print 'Dump(%s) from dsdb:\n%s\n'%(i, db.dump(i))
 
     host = 'cwipm1'
-    print "getting host data for '%s'"%(host)
+    print "getting pod of '%s'"%(host)
     print 'host %s is in the "%s" pod'%(host,db.get_host_pod(host))
 
-    print 'buildings in ny campus:'
-    pprint(db.dump('buildings_by_campus', campus='ny'), indent =4)
-    print ' '
+    #print 'buildings in ny campus:'
+    #print db.dump('buildings_by_campus', campus='ny')
+    #print ' '
 
 
     db.close()
