@@ -130,10 +130,7 @@ dispatch_tbl['host_info'] = """ SELECT
            AND A.host_name = 'HOST' """
 
 dispatch_tbl['transaction_log'] = """
-    SET ROWCOUNT 10
-
     SELECT A.log_created, B.user_name, A.transaction_info
     FROM transaction_log A, user_info B
     WHERE B.user_id = A.uid
-
-    SET ROWCOUNT 0"""
+    """
