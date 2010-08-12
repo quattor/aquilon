@@ -161,14 +161,7 @@ class Network(Base):
 
     @property
     def available_ip_count(self):
-        # We may want to split this logic out into a separate table
-        # by network type and/or mask...
-        if self.network.numhosts > 6:
-            # Fallback assumption - the network ip, the gateway,
-            # an ip for the router, and the broadcast are off limits.
-            # We reserve two more "just in case".
-            return self.network.numhosts - 6
-        return self.network.numhosts
+        return int(self.broadcast) - int(self.first_usable_host)
 
     def __repr__(self):
         msg = '<Network '
