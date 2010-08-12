@@ -90,7 +90,8 @@ status.info['unique_fields'] = ['name']
 def populate(sess, *args, **kw):
     from sqlalchemy.exceptions import IntegrityError
 
-    statuslist = dict(host_status_transitions, **cluster_status_transitions).keys()
+    statuslist = set(host_status_transitions.keys() +
+                     cluster_status_transitions.keys())
 
     i=status.insert()
     for name in statuslist:

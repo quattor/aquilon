@@ -51,7 +51,8 @@ class CommandChangeStatus(BrokerCommand):
         # in a cluster which isn't ready yet.
         if buildstatus == "ready" and dbhost.cluster:
             if dbhost.cluster.status.name != "ready":
-                logger.info("cluster is not ready, so forcing ready state to almostready")
+                logger.info("cluster is not ready, so forcing " +
+                            "state to almostready")
                 buildstatus = "almostready"
 
         if buildstatus == dbhost.status.name:
@@ -62,7 +63,8 @@ class CommandChangeStatus(BrokerCommand):
                                 (buildstatus, ", ".join(graph.keys())))
 
         if buildstatus not in graph[dbhost.status.name]:
-            raise ArgumentError("cannot change state to '%s' from '%s'. Legal states are: %s" %
+            raise ArgumentError("cannot change state to '%s' from '%s'. " +
+                                "Legal states are: %s" %
                                 (buildstatus, dbhost.status.name,
                                  ", ".join(graph[dbhost.status.name])))
 
