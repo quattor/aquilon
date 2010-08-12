@@ -201,6 +201,13 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
+            if dbmachine.host:
+                msg = "Skipping host %s: The AQDB interface with MAC address " \
+                        "%s is already tied to %s." % \
+                        (host, mac, dbmachine.host.fqdn)
+                failed.append(msg)
+                logger.info(msg)
+                continue
             dbhost = Host(machine=dbmachine, branch=dbdomain,
                           status=dbstatus, mac=mac, ip=None, network=None,
                           name=short, dns_domain=dbdns_domain,
