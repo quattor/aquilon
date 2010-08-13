@@ -43,11 +43,10 @@ class CommandPxeswitch(BrokerCommand):
     required_parameters = ["hostname"]
     _option_map = {'status':'--status', 'configure':'--configure',
                    'localboot':'--boot', 'install':'--install',
+                   'rescue':'--rescue',
                    'firmware':'--firmware', 'blindbuild':'--livecd'}
 
-    def render(self, session, logger, hostname,
-               status, configure, localboot, install, firmware, blindbuild,
-               **arguments):
+    def render(self, session, logger, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = Service.get_unique(session, "bootserver", compel=True)
@@ -61,7 +60,7 @@ class CommandPxeswitch(BrokerCommand):
         args = [command]
 
         for (option, mapped) in self._option_map.items():
-            if locals()[option]:
+            if arguments[option]:
                 args.append(mapped)
                 args.append(dbhost.fqdn)
         if args[-1] == command:

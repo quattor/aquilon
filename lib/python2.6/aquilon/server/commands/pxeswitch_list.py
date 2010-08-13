@@ -45,12 +45,10 @@ class CommandPxeswitchList(BrokerCommand):
     required_parameters = ["list"]
     _option_map = {'status':'--statuslist', 'configure':'--configurelist',
                    'localboot':'--bootlist', 'install':'--installlist',
+                   'rescue':'--rescuelist',
                    'firmware':'--firmwarelist', 'blindbuild':'--livecdlist'}
 
-    def render(self, session, logger, list,
-               install, localboot, status, firmware, configure, blindbuild,
-               **arguments):
-
+    def render(self, session, logger, list, **arguments):
         user = self.config.get("broker", "installfe_user")
         command = self.config.get("broker", "installfe")
         args = [command]
@@ -103,7 +101,7 @@ class CommandPxeswitchList(BrokerCommand):
                 tmpfile.flush()
 
                 for (option, mapped) in self._option_map.items():
-                    if locals()[option]:
+                    if arguments[option]:
                         groupargs.append(mapped)
                         groupargs.append(tmpfile.name)
                 if groupargs[-1] == command:
