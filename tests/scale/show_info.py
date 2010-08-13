@@ -48,16 +48,16 @@ def show_info(aqservice, aqhost, aqport):
     rc = aq.wait(["show", "service", "--all"])
     rc = aq.wait(["show", "archetype", "--all"])
     rc = aq.wait(["show", "map", "--building", "np"])
-    rc = aq.wait(["show", "chassis"])
+    rc = aq.wait(["show", "chassis", "--all"])
     rc = aq.wait(["show", "rack", "--all"])
-    rc = aq.wait(["show", "building"])
-    rc = aq.wait(["show", "city"])
-    rc = aq.wait(["show", "country"])
-    rc = aq.wait(["show", "continent"])
-    rc = aq.wait(["show", "hub"])
+    rc = aq.wait(["show", "building", "--all"])
+    rc = aq.wait(["show", "city", "--all"])
+    rc = aq.wait(["show", "country", "--all"])
+    rc = aq.wait(["show", "continent", "--all"])
+    rc = aq.wait(["show", "hub", "--all"])
     rc = aq.wait(["show", "machine", "--all"])
     rc = aq.wait(["show", "tor_switch", "--model", "rs g8000"])
-    rc = aq.wait(["show", "principal"])
+    rc = aq.wait(["show", "principal", "--all"])
 
 
 if __name__=='__main__':
