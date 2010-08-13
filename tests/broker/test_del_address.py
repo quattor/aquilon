@@ -65,6 +65,11 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def testcleanup(self):
+        command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[15],
+                   "--fqdn=arecord15.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
     def testfailbadenv(self):
         default = self.config.get("broker", "default_dns_environment")
         command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[15],

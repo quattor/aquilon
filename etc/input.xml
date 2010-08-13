@@ -2906,16 +2906,31 @@
 
    <command name="add_address">
       Add DNS addresses to the database.
+      <p/>
+      The IP address can be derived based on aqdb availabililty using:
+      --ipfromip:     choose a free IP address in the subnet of the given ip
+      --ipfromsystem: choose based on the subnet in use by the given system
+      <p/>
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
+      max:            Find the highest IP in use and add one.
+      The default is lowest.
       <optgroup name="add_address_mandatory" mandatory="True" fields="all">
          <option name="fqdn" type="string">A fully qualified domain name</option>
-         <option name="ip" type="ipv4">An IP Address</option>
+         <optgroup name="add_address_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem">choose IP address in subnet</option>
+            <option name="ipfromsystem" type="string" conflicts="ip ipfromip">choose IP address in subnet of system</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_address_optional" mandatory="False">
          <option name="dns_environment" type="string">The name of the environment the address is in (only the default is currently accepted)</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="address_default/%(fqdn)s/%(ip)s" />
-      <transport method="put" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
+      <transport method="post" path="address_default/%(fqdn)s" />
+      <transport method="post" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
    </command>
 
    <command name="del_address">
