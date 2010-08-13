@@ -48,4 +48,4 @@ class CommandShowActiveLocks(BrokerCommand):
                 if status and status.description:
                     description = status.description + ' '
             retval.append("%s%s %s" % (description, key.state, key))
-        return "\n".join(retval)
+        return str("\n".join(retval))
