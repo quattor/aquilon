@@ -215,6 +215,29 @@ class TestPublishSandbox(TestBrokerCommand):
         self.gitcommand(["commit", "-a", "-m", "added model utmedium"],
                         cwd=sandboxdir)
 
+    def testaddutcpu(self):
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        cpudir = os.path.join(sandboxdir, "hardware", "cpu", "intel")
+        if not os.path.exists(cpudir):
+            os.makedirs(cpudir)
+        template = os.path.join(cpudir, "utcpu.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines(
+                """structure template hardware/cpu/intel/utcpu;
+
+"manufacturer" = "Intel";
+"vendor" = "Intel";
+"model" = "utcpu";
+"speed" = "1000*MHz";
+"arch" = "x86_64";
+                """)
+        finally:
+            f.close()
+        self.gitcommand(["add", "utcpu.tpl"], cwd=cpudir)
+        self.gitcommand(["commit", "-a", "-m", "added cpu utcpu"],
+                        cwd=sandboxdir)
+
     def testpublishutsandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         self.ignoreoutputtest(["publish", "--branch", "utsandbox"],
