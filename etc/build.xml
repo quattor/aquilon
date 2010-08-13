@@ -17,6 +17,7 @@
 	<property name="ant-contrib.version" value="1.0b2" />
 	<property name="ant-contrib.jar" location="/ms/dist/msjava/PROJ/ant-contrib/${ant-contrib.version}/common/lib/ant-contrib.jar" />
 	<property name="force.build" value="false" />
+	<property name="gzip.output" value="false" />
 
 	<!--
 	Be careful of the clean.dep.files property... if it is set at
@@ -43,6 +44,11 @@
 	<property name="compiled.profiles" location="${basedir}/build/xml/${domain}" />
 	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
+
+	<!-- Profiles will have a .gz suffix if gzip output is requested. -->
+	<condition property="profile.suffix" value=".xml.gz" else=".xml">
+		<istrue value="${gzip.output}" />
+	</condition>
 
 	<!--
 	Note that the old 'deps' directory was only needed for the
@@ -109,10 +115,10 @@
 		<for list="${object.profile}" delimiter=" " param="profile">
 			<sequential>
 				<var name="source.includes" value="${source.includes} @{profile}.tpl" />
-				<var name="compiled.includes" value="${compiled.includes} @{profile}.xml" />
+				<var name="compiled.includes" value="${compiled.includes} @{profile}${profile.suffix}" />
 			</sequential>
 		</for>
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}" formatter="${panc.formatter}">
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
 			<path refid="pan.objectloadpath" />
 			<fileset dir="${source.profiles}" includes="${source.includes}" />
 		</panc>
@@ -128,7 +134,7 @@
 
 	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
 		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*.tpl" />
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}" formatter="${panc.formatter}">
+		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
 			<path refid="pan.objectloadpath" />
 			<fileset refid="source.fileset" />
 		</panc>
@@ -145,7 +151,7 @@
 			CoreTypes/selectors.html#scriptselector
 			OptionalTasks/script.html
 			-->
-			<fileset dir="${compiled.profiles}" includes="**/*.xml">
+			<fileset dir="${compiled.profiles}" includes="**/*${profile.suffix}">
 				<scriptselector language="javascript"> <![CDATA[
 					importClass(java.io.File);
 					// importClass(java.lang.System);
@@ -155,7 +161,8 @@
 					// This could be more rigorous...
 					var base = thisfile.substring(prefix.length());
 					var source = self.getProject().getProperty("source.profiles");
-					var counterpart = new File(source, base.replaceAll(".xml$", ".tpl"));
+					var suffix = self.getProject().getProperty("profile.suffix").toString();
+					var counterpart = new File(source, base.replaceAll(suffix + "$", ".tpl"));
 					// System.out.println("Comparing '" + thisfile + "' with source '" + counterpart + "' and exists=" + counterpart.exists());
 					self.setSelected(counterpart.exists());
 				]]></scriptselector>

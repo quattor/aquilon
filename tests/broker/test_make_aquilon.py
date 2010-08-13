@@ -59,7 +59,7 @@ class TestMakeAquilon(TestBrokerCommand):
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
-            "unittest02.one-nyp.ms.com.xml")))
+            "unittest02.one-nyp.ms.com%s" % self.profile_suffix)))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
@@ -135,7 +135,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchclean(err, "removing binding", command)
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
-            "unittest00.one-nyp.ms.com.xml")))
+            "unittest00.one-nyp.ms.com%s" % self.profile_suffix)))
 
     def testverifybuildstatus(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"

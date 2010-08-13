@@ -121,7 +121,12 @@ class CommandDelHost(BrokerCommand):
                 ph.cleanup(domain, locked=True)
                 # And we also want to remove the profile itself
                 profiles = self.config.get("broker", "profilesdir")
-                remove_file(os.path.join(profiles, fqdn+".xml"), logger=logger)
+                # Only one of these should exist, but it doesn't hurt
+                # to try to clean up both.
+                xmlfile = os.path.join(profiles, fqdn + ".xml")
+                remove_file(xmlfile, logger=logger)
+                xmlgzfile = xmlfile + ".gz"
+                remove_file(xmlgzfile, logger=logger)
                 # And the cached template created by ant
                 remove_file(os.path.join(self.config.get("broker",
                                                          "quattordir"),

@@ -232,9 +232,13 @@ class Plenary(object):
             # Can't call remove() here because it relies on the new domain.
             if self.template_type == "object" and hasattr(self, 'name'):
                 qdir = self.config.get("broker", "quattordir")
+                # Only one or the other of .xml/.xml.gz should be there...
+                # it doesn't hurt to clean up both.
                 xmlfile = os.path.join(qdir, "build", "xml", domain,
                                        self.plenary_template + ".xml")
                 remove_file(xmlfile, logger=self.logger)
+                xmlgzfile = xmlfile + ".gz"
+                remove_file(xmlgzfile, logger=self.logger)
                 depfile = os.path.join(qdir, "build", "xml", domain,
                                        self.plenary_template + ".xml.dep")
                 remove_file(depfile, logger=self.logger)

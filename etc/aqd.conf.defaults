@@ -166,6 +166,7 @@ pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
 batch_size = 1000
 # Option passed to panc the output format that it uses
 formatter = pan
+gzip_output = false
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

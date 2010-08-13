@@ -63,9 +63,12 @@ class CommandDelESXCluster(BrokerCommand):
         plenary.cleanup(domain)
 
         # Remove the compiled profile.
-        remove_file(os.path.join(self.config.get("broker", "profilesdir"),
-                                 "clusters", cluster + ".xml"),
-                    logger=logger)
+        # The file is either gzip'd or not, but it doesn't hurt to try both.
+        xmlfile = os.path.join(self.config.get("broker", "profilesdir"),
+                               "clusters", cluster + ".xml")
+        remove_file(xmlfile, logger=logger)
+        xmlgzfile = xmlfile + ".gz"
+        remove_file(xmlgzfile, logger=logger)
         # Remove the cache in the global profiles directory created by
         # the ant task.
         remove_file(os.path.join(self.config.get("broker", "quattordir"),

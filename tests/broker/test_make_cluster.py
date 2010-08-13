@@ -55,7 +55,7 @@ class TestMakeCluster(TestBrokerCommand):
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            "utecl1.xml")))
+            "utecl1%s" % self.profile_suffix)))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
@@ -86,7 +86,7 @@ class TestMakeCluster(TestBrokerCommand):
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            "utecl2.xml")))
+            "utecl2%s" % self.profile_suffix)))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),

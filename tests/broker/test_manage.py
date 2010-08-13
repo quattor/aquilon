@@ -46,7 +46,7 @@ class TestManage(TestBrokerCommand):
                           want_exist=True, command="manage"):
         qdir = self.config.get("broker", "quattordir")
         domaindir = os.path.join(qdir, "build", "xml", domain)
-        xmlfile = os.path.join(domaindir, object + ".xml")
+        xmlfile = os.path.join(domaindir, object + self.profile_suffix)
         depfile = os.path.join(domaindir, object + ".xml.dep")
         builddir = self.config.get("broker", "builddir")
         profile = os.path.join(builddir, "domains", domain, "profiles",
