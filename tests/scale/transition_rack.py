@@ -33,8 +33,8 @@
 from common import AQRunner, TestRack
 
 
-def transition_rack(building, rackid, status, aqservice):
-    aq = AQRunner(aqservice=aqservice)
+def transition_rack(building, rackid, status, aqservice, aqhost, aqport):
+    aq = AQRunner(aqservice=aqservice, aqhost=aqhost, aqport=aqport)
     rack = TestRack(building, rackid)
     rc = aq.wait(["ping"])
     for half in [0, 1]:
@@ -57,6 +57,10 @@ if __name__=='__main__':
                       help="The status to use [build, ready, failed]")
     parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
                       help="The service name to use when connecting to aqd")
+    parser.add_option("-t", "--aqhost", dest="aqhost", type="string",
+                      help="The aqd host to connect to")
+    parser.add_option("-p", "--aqport", dest="aqport", type="string",
+                      help="The port to use when connecting to aqd")
     (options, args) = parser.parse_args()
     if not options.building:
         parser.error("Missing option --building")
@@ -68,4 +72,4 @@ if __name__=='__main__':
         parser.error("Missing option --status")
 
     transition_rack(options.building, options.rack, options.status,
-                    options.aqservice)
+                    options.aqservice, options.aqhost, options.aqport)
