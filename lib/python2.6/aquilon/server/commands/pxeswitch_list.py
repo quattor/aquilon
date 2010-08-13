@@ -32,8 +32,7 @@ from __future__ import with_statement
 from socket import gethostbyname
 from tempfile import NamedTemporaryFile
 
-from aquilon.exceptions_ import (NameServiceError, ArgumentError,
-                                 NotFoundException)
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.processes import run_command
@@ -102,7 +101,7 @@ class CommandPxeswitch(BrokerCommand):
             with NamedTemporaryFile() as tmpfile:
                 tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
-               
+
                 for (option, mapped) in self._option_map.items():
                     if locals()[option]:
                         groupargs.append(mapped)

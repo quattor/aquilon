@@ -104,7 +104,7 @@ dispatch_tbl['sapphire_bldgs'] = """
         AND B.state >=0) """
 
 #TODO: make this a template string and have the dump method work it out
-dispatch_tbl['host_info']  = """ SELECT
+dispatch_tbl['host_info'] = """ SELECT
     A.host_name,                                       /* network_host */
     B.cpu, B.virt_cpu, B.cputype, B.memory, B.hostid,  /* machine */
     C.name, C.version, C.kernel_id,                    /* os */
@@ -129,4 +129,8 @@ dispatch_tbl['host_info']  = """ SELECT
            --AND G.state >= 0
            AND A.host_name = 'HOST' """
 
-
+dispatch_tbl['transaction_log'] = """
+    SELECT A.log_created, B.user_name, A.transaction_info
+    FROM transaction_log A, user_info B
+    WHERE B.user_id = A.uid
+    """

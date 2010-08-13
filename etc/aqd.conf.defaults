@@ -31,7 +31,7 @@
 # etc/aqd.conf.example for an example of a prod config file) or a
 # developer will use etc/aqd.conf.dev or a copy.  This file is always
 # read first when determining configuration, and supplies all defaults.
-# This behavior has been hard-coded into the config.py methods.  
+# This behavior has been hard-coded into the config.py methods.
 #
 # If a value is missing from here *and* not supplied later, the broker
 # might fail.  The purpose of this file is to make sure that all values
@@ -178,20 +178,3 @@ aquilon = INFO
 
 [protocols]
 directory = /ms/dist/aquilon/PROJ/protocols/1.4/common/lib/python
-
-#
-# Regional Configuration
-#
-[eu]
-dsdb   = LNP_DSDB11
-
-[hk]
-dsdb   = HKP_DSDB11
-
-[na]
-dsdb   = NYP_DSDB11
-
-[tk]
-dsdb   = TKP_DSDB11
-
-

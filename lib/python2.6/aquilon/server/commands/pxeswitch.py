@@ -31,7 +31,7 @@
 
 from socket import gethostbyname
 
-from aquilon.exceptions_ import NameServiceError, ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.processes import run_command

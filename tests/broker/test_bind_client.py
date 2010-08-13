@@ -29,15 +29,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the bind client command."""
 
-import os
-import sys
+
 import re
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -170,4 +168,3 @@ class TestBindClient(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindClient)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

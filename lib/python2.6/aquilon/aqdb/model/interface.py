@@ -90,7 +90,7 @@ class Interface(Base):
 
     comments = Column('comments', String(255), nullable=True)
 
-    hardware_entity = relation(HardwareEntity, lazy=False,
+    hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
                                backref=backref('interfaces'))
 
     system = relation(System, backref='interfaces')

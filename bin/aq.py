@@ -63,7 +63,7 @@ class RESTResource(object):
     def __init__(self, httpconnection, uri):
         self.httpconnection = httpconnection
         self.uri = uri
-    
+
     def get(self):
         return self._sendRequest('GET')
     def post(self, **kwargs):
@@ -136,7 +136,7 @@ class CustomAction(object):
         else:
             print >>sys.stdout, "\nYou haven't made any changes on this branch\n"
             sys.exit(0)
-            
+
         (handle, filename) = mkstemp()
         try:
             rc = Popen(("git", "bundle", "create", filename, revlist),
@@ -145,7 +145,7 @@ class CustomAction(object):
                 print >>sys.stderr, \
                         "Error running git bundle create, returncode %d" % rc
                 sys.exit(1)
-    
+
             commandOptions["bundle"] = b64encode(file(filename).read())
         finally:
             os.unlink(filename)
@@ -191,10 +191,10 @@ def create_sandbox(pageData, noexec=False):
 
 
 class StatusThread(Thread):
-    def __init__(self, host, port, authuser, requestid=None, auditid=None,
+    def __init__(self, aqhost, aqport, authuser, requestid=None, auditid=None,
                  debug=False, outstream=sys.stderr, **kwargs):
-        self.host = host
-        self.port = port
+        self.host = aqhost
+        self.port = aqport
         self.authuser = authuser
         self.requestid = requestid
         self.auditid = auditid

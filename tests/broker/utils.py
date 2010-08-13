@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -27,64 +27,22 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-
-""" tests create and delete of a machine through the session """
-from utils import load_classpath, add, commit
-
-load_classpath()
-
-from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import EsxCluster, Archetype, Personality, Domain
-
-from sqlalchemy import and_
-from sqlalchemy.orm import join
-from sqlalchemy.exc import IntegrityError
-
-from nose.tools import raises
-
-db = DbFactory()
-sess = db.Session()
-
-CLUSTER_NAME = 'test_esx_cluster'
-
-def clean_up():
-    del_cluster()
-
-def del_cluster():
-    cl = sess.query(EsxCluster).filter_by(name=CLUSTER_NAME).first()
-    if cl:
-        sess.delete(cl)
-        commit(sess)
-        print 'deleted test cluster'
-
-def setup():
-    print 'set up'
-    clean_up()
-
-def teardown():
-    print 'tear down'
-    clean_up()
-
-def create_cluster():
-    per = sess.query(Personality).select_from(
-            join(Archetype, Personality)).filter(
-            and_(Archetype.name=='windows', Personality.name=='generic')).one()
-    domain = sess.query(Domain).filter_by(name='ny-prod').first()
-
-    ec = EsxCluster(name=CLUSTER_NAME, personality=per, domain=domain)
-    add(sess,ec)
-    commit(sess)
-
-    assert ec
+""" Miscelaneous helper libraries for testing """
 
 
-def test_get_unique_against_polymorphic():
-    create_cluster()
-    ec = EsxCluster.get_unique(sess, CLUSTER_NAME)
-    assert ec
+def import_depends():
+    """ Set up the sys.path for loading library dependencies """
+    import os
+    import sys
 
+    _DIR = os.path.dirname(os.path.realpath(__file__))
+    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
+    _TESTDIR = os.path.join(_DIR, "..")
 
+    if _LIBDIR not in sys.path:
+        sys.path.insert(0, _LIBDIR)
 
-if __name__ == "__main__":
-    import nose
-    nose.runmodule()
+    if _TESTDIR not in sys.path:
+        sys.path.insert(1, _TESTDIR)
+
+    import depends

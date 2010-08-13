@@ -30,16 +30,13 @@
 """Module for testing the add dynamic range command."""
 
 
-import os
-import sys
 import unittest
-from ipaddr import IPv4Address
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
+from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
 
@@ -132,4 +129,3 @@ class TestAddDynamicRange(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDynamicRange)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

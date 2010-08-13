@@ -187,6 +187,9 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
         return ip
     elif ipalgorithm == 'max':
         # Return the max. used address + 1
+        if not used_set:
+            #Avoids ValueError being thrown when used_set is empty
+            return IPv4Address(min(free_set))
         ip = None
         next = max(used_set)
         if not next + 1 in free_set:
