@@ -34,7 +34,7 @@ from aquilon.aqdb.model import ObservedMac
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 
 
-class CommandObservedMac(BrokerCommand):
+class CommandSearchObservedMac(BrokerCommand):
 
     required_parameters = []
     default_style = "csv"

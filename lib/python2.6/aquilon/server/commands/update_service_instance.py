@@ -35,7 +35,7 @@ from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.templates.service import PlenaryServiceInstance
 
 
-class CommandAddService(BrokerCommand):
+class CommandUpdateServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 

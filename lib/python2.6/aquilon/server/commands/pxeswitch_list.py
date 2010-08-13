@@ -40,7 +40,7 @@ from aquilon.server.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
 
 
-class CommandPxeswitch(BrokerCommand):
+class CommandPxeswitchList(BrokerCommand):
 
     required_parameters = ["list"]
     _option_map = {'status':'--statuslist', 'configure':'--configurelist',

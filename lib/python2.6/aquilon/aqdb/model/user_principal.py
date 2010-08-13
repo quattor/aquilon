@@ -67,6 +67,7 @@ user_principal = UserPrincipal.__table__
 user_principal.primary_key.name = 'user_principal_pk'
 user_principal.append_constraint(
     UniqueConstraint('name', 'realm_id', name='user_principal_realm_uk'))
+user_principal.info['unique_fields'] = ['name']
 
 table = user_principal
 

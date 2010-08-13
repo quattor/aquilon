@@ -34,9 +34,7 @@ from aquilon.server.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import Machine
 
 
-class CommandShowHostAll(BrokerCommand):
+class CommandShowMachineAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return SimpleMachineList(session.query(Machine).order_by(Machine.name).all())
-
-
