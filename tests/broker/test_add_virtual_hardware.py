@@ -319,6 +319,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_700_add_windows(self):
         command = ["add_windows_host", "--hostname=aqddesk1.msad.ms.com",
+                   "--osversion=nt61e",
                    "--machine=evm1", "--comments=Windows Virtual Desktop"]
         self.noouttest(command)
 
@@ -327,6 +328,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: aqddesk1.msad.ms.com", command)
         self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Template: windows/os/windows/nt61e/config.tpl",
+                         command)
         self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
 
     def test_810_verifycatcluster(self):
@@ -334,7 +337,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "'name', 'windows',", command)
         self.matchoutput(out, "'os', 'windows',", command)
-        self.matchoutput(out, "'osversion', 'generic',", command)
+        self.matchoutput(out, "'osversion', 'nt61e',", command)
         self.matchoutput(out, "'hostname', 'aqddesk1',", command)
         self.matchoutput(out, "'domainname', 'msad.ms.com',", command)
 
