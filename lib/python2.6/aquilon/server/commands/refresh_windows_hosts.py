@@ -50,18 +50,21 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         clusters = set()
         key = SyncKey(data="windows", logger=logger)
         lock_queue.acquire(key)
+        partial_error = None
         try:
             try:
                 self.refresh_windows_hosts(session, logger, clusters)
                 if dryrun:
                     session.rollback()
                     return
-            finally:
-                if not dryrun:
-                    # Commit whatever was successful regardless of overall
-                    # success/failure.  Need to be able to release the sync
-                    # lock before taking a compile lock.
-                    session.commit()
+                session.commit()
+            except PartialError, e:
+                if dryrun:
+                    raise
+                partial_error = e
+                # All errors were caught before hitting the session, so
+                # keep going with whatever was successful.
+                session.commit()
         finally:
             lock_queue.release(key)
         if clusters:
@@ -69,6 +72,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             for dbcluster in clusters:
                 plenaries.append(PlenaryCluster(dbcluster, logger=logger))
             plenaries.write()
+        if partial_error:
+            raise partial_error
         return
 
     def refresh_windows_hosts(self, session, logger, clusters):
@@ -193,6 +198,13 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is already tied to %s." % \
                         (host, mac, dbinterface.system.fqdn)
+                failed.append(msg)
+                logger.info(msg)
+                continue
+            if dbmachine.host:
+                msg = "Skipping host %s: The AQDB interface with MAC address " \
+                        "%s is already tied to %s." % \
+                        (host, mac, dbmachine.host.fqdn)
                 failed.append(msg)
                 logger.info(msg)
                 continue
