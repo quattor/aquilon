@@ -43,6 +43,7 @@ from aquilon.aqdb.model import Base, System, HardwareEntity, ObservedMac
 
 INTERFACE_TYPES = ('public', 'management', 'oa') #, 'transit')
 
+
 def _validate_mac(kw):
     """ Prevents null MAC addresses in certain cases.
 
@@ -53,6 +54,7 @@ def _validate_mac(kw):
         if kw.get('mac') is None:
             raise ValueError(msg)
     return True
+
 
 class Interface(Base):
     """ In this design, interface is really just a name/type pair, AND the
@@ -95,6 +97,14 @@ class Interface(Base):
 
     system = relation(System, backref='interfaces')
 
+    def __format__(self, format_spec):
+        if self.system:
+            owner = self.system.fqdn
+        else:
+            owner = self.hardware_entity.name
+        instance = "%s/%s" % (owner, self.name)
+        return self.format_helper(format_spec, instance)
+
     @validates('mac')
     def validate_mac(self, key, value):
         temp_dict = {'bootable': self.bootable, 'mac': value,
@@ -122,12 +132,6 @@ class Interface(Base):
         _validate_mac(kw)
         super(Interface, self).__init__(**kw)
 
-    def __str__(self):
-        return 'Interface {0} for {1} {2}'.format(
-            self.name, self.hardware_entity.hardware_entity_type,
-            self.hardware_entity.hardware_name)
-
-    #TODO: __repr__ when interface is simplified by dns changes
 
 interface = Interface.__table__ # pylint: disable-msg=C0103, E1101
 interface.primary_key.name = 'interface_pk'

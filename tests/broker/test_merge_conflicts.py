@@ -326,7 +326,7 @@ class TestMergeConflicts(TestBrokerCommand):
         command = "del sandbox --sandbox changetest4"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
-                         "sandbox changetest4 is tracked by "
+                         "Sandbox changetest4 is tracked by "
                          "['changetest4-tracker']",
                          command)
 

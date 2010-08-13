@@ -58,12 +58,9 @@ class CommandAddMachine(BrokerCommand):
             if slot is None:
                 raise ArgumentError("The --chassis option requires a --slot.")
             if dblocation and dblocation != dbchassis.chassis_hw.location:
-                raise ArgumentError("Location %s %s conflicts with chassis "
-                                    "location %s %s." %
-                                    (dblocation.location_type,
-                                     dblocation.name,
-                                     dbchassis.chassis_hw.location.location_type,
-                                     dbchassis.chassis_hw.location.name))
+                raise ArgumentError("{0} conflicts with chassis location "
+                                    "{1}.".format(dblocation,
+                                                  dbchassis.chassis_hw.location))
             dblocation = dbchassis.chassis_hw.location
         elif slot is not None:
             raise ArgumentError("The --slot option requires a --chassis.")
@@ -86,13 +83,10 @@ class CommandAddMachine(BrokerCommand):
                 raise ArgumentError("Can only add virtual machines to "
                                     "clusters with archetype vmhost.")
             if dblocation and dbcluster.location_constraint != dblocation:
-                raise ArgumentError(
-                    "Cannot override cluster location %s %s "
-                    "with location %s %s." %
-                    (dbcluster.location_constraint.location_type,
-                     dbcluster.location_constraint.name,
-                     dblocation.location_type,
-                     dblocation.name))
+                raise ArgumentError("Cannot override cluster location {0} "
+                                    "with location {1}.".format(
+                                        dbcluster.location_constraint,
+                                        dblocation))
             dblocation = dbcluster.location_constraint
         elif dbmodel.machine_type == 'virtual_machine':
             raise ArgumentError("Virtual machines must be assigned to a "

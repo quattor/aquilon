@@ -48,7 +48,7 @@ class TestMakeCluster(TestBrokerCommand):
         command = ["make_cluster", "--cluster", "utecl1"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
-                         "esx cluster utecl1 adding binding for "
+                         "ESX Cluster utecl1 adding binding for "
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
@@ -79,7 +79,7 @@ class TestMakeCluster(TestBrokerCommand):
         command = ["make_cluster", "--cluster", "utecl2"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
-                         "esx cluster utecl2 adding binding for "
+                         "ESX Cluster utecl2 adding binding for "
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)

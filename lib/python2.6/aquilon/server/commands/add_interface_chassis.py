@@ -50,8 +50,8 @@ class CommandAddInterfaceChassis(BrokerCommand):
         dbchassis = get_system(session, chassis, Chassis, 'Chassis')
 
         if dbchassis.ip:
-            raise ArgumentError("Chassis %s already has an interface with an "
-                                "IP address." % dbchassis.fqdn)
+            raise ArgumentError("{0} already has an interface with an IP "
+                                "address.".format(dbchassis))
 
         extra = {}
         if comments:
@@ -61,8 +61,8 @@ class CommandAddInterfaceChassis(BrokerCommand):
         q = q.filter_by(name=interface, hardware_entity=dbchassis.chassis_hw)
         prev = q.first()
         if prev:
-            raise ArgumentError("Chassis %s already has an interface named %s."
-                    % (dbchassis.fqdn, interface))
+            raise ArgumentError("{0} already has an interface named "
+                                "{1}.".format(dbchassis, interface))
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:

@@ -50,8 +50,8 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
 
         if dbtor_switch.ip:
-            raise ArgumentError("ToR switch %s already has an interface with "
-                                "an IP address." % dbtor_switch.fqdn)
+            raise ArgumentError("{0} already has an interface with an IP "
+                                "address.".format(dbtor_switch))
 
         extra = {}
         if comments:
@@ -61,8 +61,8 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
         q = q.filter_by(name=interface, hardware_entity=dbtor_switch.tor_switch_hw)
         prev = q.first()
         if prev:
-            raise ArgumentError("ToR switch %s already has an interface "
-                                "named %s." % (dbtor_switch.fqdn, interface))
+            raise ArgumentError("{0} already has an interface named "
+                                "{1}.".format(dbtor_switch, interface))
 
         prev = session.query(Interface).filter_by(mac=mac).first()
         if prev:

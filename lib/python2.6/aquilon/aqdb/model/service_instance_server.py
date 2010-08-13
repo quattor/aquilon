@@ -62,12 +62,6 @@ class ServiceInstanceServer(Base):
     service_instance = relation(ServiceInstance)
     system = relation(System, uselist=False, backref='sislist')
 
-    def __str__(self):
-        return str(self.system.fqdn)
-
-    def __repr__(self):
-        return self.__class__.__name__ + " " + str(self.system.fqdn)
-
 
 service_instance_server = ServiceInstanceServer.__table__
 service_instance_server.primary_key.name='service_instance_server_pk'

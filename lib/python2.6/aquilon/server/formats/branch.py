@@ -38,9 +38,8 @@ class DomainFormatter(ObjectFormatter):
         flags = " [autosync]" if domain.autosync else ""
         details = [indent + "Domain: %s%s" % (domain.name, flags)]
         if domain.tracked_branch:
-            details.append(indent + "  Tracking: %s %s" %
-                           (domain.tracked_branch.branch_type,
-                            domain.tracked_branch.name))
+            details.append(indent +
+                           "  Tracking: {0:l}".format(domain.tracked_branch))
             details.append(indent + "  Rollback commit: %s" %
                            domain.rollback_commit)
         details.append(indent + "  Validated: %s" % domain.is_sync_valid)

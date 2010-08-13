@@ -35,11 +35,10 @@ from aquilon.aqdb.model import Cluster, EsxCluster
 
 class ClusterFormatter(ObjectFormatter):
     def format_raw(self, cluster, indent=""):
-        details = [indent + "%s cluster: %s" %
-                   (cluster.cluster_type, cluster.name)]
+        details = [indent + "{0:c}: {0.name}".format(cluster)]
         if cluster.metacluster:
-            details.append(indent + "  Metacluster: %s" %
-                           cluster.metacluster.name)
+            details.append(indent + \
+                           "  {0:c}: {0.name}".format(cluster.metacluster))
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % cluster.max_hosts)
@@ -57,8 +56,8 @@ class ClusterFormatter(ObjectFormatter):
             details.append(indent + "  ESX VMHost count: %s" %
                            len(cluster.hosts))
             if cluster.switch:
-                details.append(indent + "  ToR Switch: %s" %
-                               cluster.switch.fqdn)
+                details.append(indent + \
+                               "  {0:c}: {0.fqdn}".format(cluster.switch))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         if cluster.branch.branch_type == 'domain':
             details.append(indent + "  Domain: %s" % cluster.branch.name)

@@ -50,7 +50,7 @@ class TestUncluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Host evh1.aqd-unittest.ms.com is bound to "
-                         "esx cluster utecl2, not esx cluster utecl1.",
+                         "ESX cluster utecl2, not ESX cluster utecl1.",
                          command)
 
     def testunbindutecl1(self):
@@ -76,7 +76,7 @@ class TestUncluster(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
                              command)
-            self.matchclean(out, "Member of esx cluster", command)
+            self.matchclean(out, "Member of ESX Cluster", command)
 
     def testfailmissingcluster(self):
         command = ["uncluster", "--hostname=evh9.aqd-unittest.ms.com",

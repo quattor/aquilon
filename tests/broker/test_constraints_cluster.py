@@ -49,7 +49,7 @@ class TestClusterConstraints(TestBrokerCommand):
     def testverifydelclusterwithmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
 
     # FIXME: Add a test for unbinding a vmhost from a cluster where
     # the vm_to_host_ratio would be exceeded.

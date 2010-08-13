@@ -94,12 +94,9 @@ class CommandUpdateMachine(BrokerCommand):
                 dbcl = dbslot.chassis.chassis_hw.location
                 if dbcl != dblocation:
                     if chassis or slot is not None:
-                        raise ArgumentError("Location %s %s conflicts with "
-                                            "chassis %s location %s %s." % (
-                                            dblocation.location_type,
-                                            dblocation.name,
-                                            dbslot.chassis.fqdn,
-                                            dbcl.location_type, dbcl.name))
+                        raise ArgumentError("{0} conflicts with chassis {1!s} "
+                                            "location {2}.".format(dblocation,
+                                                        dbslot.chassis, dbcl))
                     else:
                         session.delete(dbslot)
             if machine_plenary_will_move(old=dbmachine.location,
@@ -158,10 +155,9 @@ class CommandUpdateMachine(BrokerCommand):
             dbcluster = Cluster.get_unique(session, name=cluster, compel=True)
             if dbcluster.metacluster != dbmachine.cluster.metacluster:
                 raise ArgumentError("Cannot move machine to a new "
-                                    "metacluster: Current metacluster %s "
-                                    "does not match new metacluster %s." %
-                                    (dbmachine.cluster.metacluster.name,
-                                     dbcluster.metacluster.name))
+                                    "metacluster: Current {0:l} does not match "
+                                    "new {1:l}.".format(dbmachine.cluster.metacluster,
+                                                        dbcluster.metacluster))
             old_cluster = dbmachine.cluster
             dbmcm = MachineClusterMember.get_unique(session,
                                                     cluster=dbmachine.cluster,
@@ -229,18 +225,17 @@ class CommandUpdateMachine(BrokerCommand):
                                 "current chassis slot information.")
         if not multislot:
             for dbslot in dbmachine.chassis_slot:
-                logger.info("Clearing machine %s out of chassis %s slot %d" %
-                            (dbmachine.name, dbslot.chassis.fqdn,
-                             dbslot.slot_number))
+                logger.info("Clearing {0:l} out of {1:l} slot "
+                            "{2}".format(dbmachine, dbslot.chassis,
+                                         dbslot.slot_number))
                 dbslot.machine = None
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis, slot_number=slot)
         dbslot = q.first()
         if dbslot:
             if dbslot.machine:
-                raise ArgumentError("Chassis %s slot %d already has machine "
-                                    "%s." % (dbchassis.fqdn, slot,
-                                             dbslot.machine.name))
+                raise ArgumentError("{0} slot {1} already has machine "
+                                    "{2!s}.".format(dbchassis, slot, dbslot.machine))
             dbslot.machine = dbmachine
             session.add(dbslot)
         else:

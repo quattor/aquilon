@@ -46,8 +46,8 @@ class TorSwitchInterfacePairFormatter(ObjectFormatter):
         interface = item[1]
 
         details = [tor_switch.fqdn,
-                   tor_switch.tor_switch_hw.location.rack,
-                   tor_switch.tor_switch_hw.location.building,
+                   tor_switch.tor_switch_hw.location.rack.name,
+                   tor_switch.tor_switch_hw.location.building.name,
                    tor_switch.tor_switch_hw.model.vendor.name,
                    tor_switch.tor_switch_hw.model.name,
                    tor_switch.tor_switch_hw.serial_no]

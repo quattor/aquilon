@@ -48,14 +48,12 @@ class CommandDelMachine(BrokerCommand):
         dbcluster = dbmachine.cluster
 
         if dbmachine.host:
-            raise ArgumentError("Machine %s is still in use by host %s and "
-                                "cannot be deleted." %
-                                (dbmachine.name, dbmachine.host.fqdn))
+            raise ArgumentError("{0} is still in use by {1:l} and cannot be "
+                                "deleted.".format(dbmachine, dbmachine.host))
         if dbmachine.auxiliaries:
-            raise ArgumentError("Machine %s is still in use by auxiliaries: "
-                                "%s." %
-                                (dbmachine, ", ".join([a.fqdn for a in
-                                                       dbmachine.auxiliaries])))
+            raise ArgumentError("%s is still in use by auxiliaries: %s." %
+                                (format(dbmachine),
+                                 ", ".join([a.fqdn for a in dbmachine.auxiliaries])))
         for iface in dbmachine.interfaces:
             logger.info("Before deleting machine '%s', "
                         "removing interface '%s' [%s] boot=%s)" %

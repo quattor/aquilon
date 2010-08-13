@@ -182,7 +182,7 @@ class PlenaryToplevelHost(Plenary):
         # personality with a more suitable value, we just leave this here
         # for paranoia's sake.
         lines.append("'/system/function' = 'grid';");
-        lines.append("'/system/build' = '%s';"%self.dbhost.status)
+        lines.append("'/system/build' = '%s';" % self.dbhost.status.name)
         if self.dbhost.cluster:
             lines.append("'/system/cluster/name' = '%s';" % self.dbhost.cluster.name)
         lines.append("")

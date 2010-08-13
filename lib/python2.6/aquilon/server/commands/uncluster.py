@@ -45,13 +45,10 @@ class CommandUncluster(BrokerCommand):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if not dbhost.cluster:
-            raise ArgumentError("Host %s is not bound to a cluster." % hostname)
+            raise ArgumentError("{0} is not bound to a cluster.".format(dbhost))
         if dbhost.cluster != dbcluster:
-            raise ArgumentError("Host %s is bound to %s cluster %s, "
-                                "not %s cluster %s." %
-                                (hostname, dbhost.cluster.cluster_type,
-                                 dbhost.cluster.name,
-                                 dbcluster.cluster_type, dbcluster.name))
+            raise ArgumentError("{0} is bound to {1:l}, not {2:l}.".format(
+                                dbhost, dbhost.cluster, dbcluster))
         dbhcm = HostClusterMember.get_unique(session, cluster=dbcluster,
                                              host=dbhost)
         session.delete(dbhcm)

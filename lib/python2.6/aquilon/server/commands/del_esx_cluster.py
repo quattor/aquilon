@@ -45,15 +45,13 @@ class CommandDelESXCluster(BrokerCommand):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         cluster = str(dbcluster.name)
         if dbcluster.machines:
-            raise ArgumentError("ESX Cluster %s is still in use by virtual "
-                                "machines: %s." %
-                                (cluster, ", ".join([m.name for m in
-                                                     dbcluster.machines])))
+            machines = ", ".join([m.name for m in dbcluster.machines])
+            raise ArgumentError("%s is still in use by virtual machines: %s." %
+                                (format(dbcluster), machines))
         if dbcluster.hosts:
-            raise ArgumentError("ESX Cluster %s is still in use by vmhosts: "
-                                "%s." %
-                                (cluster, ", ".join([h.fqdn for h in
-                                                     dbcluster.hosts])))
+            hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
+            raise ArgumentError("%s is still in use by vmhosts: %s." %
+                                (format(dbcluster), hosts))
         dbmetacluster = dbcluster.metacluster
         plenary = PlenaryCluster(dbcluster, logger=logger)
         domain = dbcluster.branch.name
