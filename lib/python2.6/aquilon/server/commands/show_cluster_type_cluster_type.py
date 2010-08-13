@@ -29,11 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_cluster_type import CommandShowClusterType
+from aquilon.server.commands.show_cluster_type_all import CommandShowClusterTypeAll
 
 
-class CommandShowClusterTypeClusterType(CommandShowClusterType):
+class CommandShowClusterTypeClusterType(CommandShowClusterTypeAll):
 
     required_parameters = ['cluster_type']
-
-

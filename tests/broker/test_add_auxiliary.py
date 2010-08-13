@@ -61,6 +61,11 @@ class TestAddAuxiliary(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
+    def testverifyauxiliaryall(self):
+        command = ["show", "auxiliary", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
+
     def testrejectut3c1n4eth1(self):
         # This is an IP address outside of the Firm.  It should not appear
         # in the network table and thus should trigger a bad request here.

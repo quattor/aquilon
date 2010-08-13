@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2009,2010  Contributor
+# Copyright (C) 2008,2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,23 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+"""Contains the logic for `aq show building`."""
 
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.server.formats.cluster_type import ClusterType
 from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowClusterType(BrokerCommand):
+class CommandShowBuildingAll(CommandShowLocationType):
 
-    def render(self, session, cluster_type, **arguments):
-        if cluster_type:
-            if cluster_type.lower() != 'esx':
-                raise NotFoundException("Cluster type %s not found." %
-                                        cluster_type)
-        cluster_types = [ClusterType('esx')]
-        for ct in cluster_types:
-            ct.populate(session)
-        return cluster_types
+    required_parameters = []
 
-
+    def render(self, session, **arguments):
+        return CommandShowLocationType.render(self, session=session,
+                                              type='building', name=None,
+                                              **arguments)

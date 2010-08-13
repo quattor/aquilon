@@ -26,18 +26,17 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show chassis`."""
+"""Contains the logic for `aq show dns_domain --all`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Chassis
+from aquilon.aqdb.model import DnsDomain
+from aquilon.server.formats.dns_domain import DNSDomainList
 
 
-class CommandShowChassis(BrokerCommand):
+class CommandShowDnsDomainAll(BrokerCommand):
 
     required_parameters = []
 
     def render(self, session, **arguments):
-        return session.query(Chassis).all()
-
-
+        return DNSDomainList(session.query(DnsDomain).all())

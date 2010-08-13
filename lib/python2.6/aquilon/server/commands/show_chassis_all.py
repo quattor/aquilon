@@ -26,18 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show principal`."""
+"""Contains the logic for `aq show chassis`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import UserPrincipal
+from aquilon.aqdb.model import Chassis
 
 
-class CommandShowPrincipal(BrokerCommand):
+class CommandShowChassisAll(BrokerCommand):
 
     required_parameters = []
 
     def render(self, session, **arguments):
-        return session.query(UserPrincipal).order_by(UserPrincipal.name).all()
+        return session.query(Chassis).all()
 
 

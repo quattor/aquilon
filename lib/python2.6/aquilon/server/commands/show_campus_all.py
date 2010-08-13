@@ -26,18 +26,18 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show rack`."""
+"""Contains the logic for `aq show campus`."""
 
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowRack(CommandShowLocationType):
+class CommandShowCampusAll(CommandShowLocationType):
 
     required_parameters = []
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                                              type='rack', name=None,
+                                              type='campus', name=None,
                                               **arguments)

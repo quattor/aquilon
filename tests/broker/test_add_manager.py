@@ -179,6 +179,13 @@ class TestAddManager(TestBrokerCommand):
         self.matchoutput(out, "Interface: bmc %s boot=False" %
                          self.net.unknown[0].usable[8].mac.lower(), command)
 
+    def testverifymanagerall(self):
+        command = ["show", "manager", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
+        self.matchoutput(out, "unittest12r.aqd-unittest.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddManager)

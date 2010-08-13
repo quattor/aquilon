@@ -33,7 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.show_location_type import CommandShowLocationType
 
 
-class CommandShowCountry(CommandShowLocationType):
+class CommandShowCountryAll(CommandShowLocationType):
 
     required_parameters = []
 

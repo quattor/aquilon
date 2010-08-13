@@ -26,16 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show archetype`."""
+"""Contains the logic for `aq show principal`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Archetype
+from aquilon.aqdb.model import UserPrincipal
 
 
-class CommandShowArchetype(BrokerCommand):
+class CommandShowPrincipalAll(BrokerCommand):
+
+    required_parameters = []
 
     def render(self, session, **arguments):
-        return session.query(Archetype).order_by(Archetype.name).all()
-
-
+        return session.query(UserPrincipal).order_by(UserPrincipal.name).all()
