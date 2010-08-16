@@ -14,6 +14,11 @@
             Turn off verbose mode.  Do not make a secondary request to
             the broker for out of band status messages.
          </option>
+         <option name="partialok" type="boolean" conflicts="">
+            For any command that returns status 207 (MULTI_STATUS) indicating
+            some success and some failure, exit with status code 0 instead of
+            exit code 2.  Warning messages will still go to stderr.
+         </option>
          <option name="debug" short="d" type="boolean" conflicts="">
             Generate debug statements sent to stderr.  Some commands may
             also increase output from the server on stdout.
