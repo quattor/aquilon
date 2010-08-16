@@ -28,6 +28,8 @@
 # TERMS THAT MAY APPLY.
 
 
+from sqlalchemy.orm import joinedload_all
+
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import EsxCluster
 from aquilon.server.broker import BrokerCommand
@@ -39,6 +41,9 @@ class CommandShowESXClusterAll(BrokerCommand):
         q = session.query(EsxCluster)
         if cluster:
             q = q.filter_by(name=cluster)
+        q = q.options(joinedload_all('_hosts.host.machine'))
+        q = q.options(joinedload_all('_machines.machine'))
+        q = q.options(joinedload_all('_metacluster.metacluster'))
         q = q.order_by(EsxCluster.name)
         dbclusters = q.all()
         if cluster and not dbclusters:
