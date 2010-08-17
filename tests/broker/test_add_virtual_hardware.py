@@ -72,27 +72,28 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "cluster conflicts with rack", command)
 
     def test_050_addutmc5machines(self):
-        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2, need
-        # enough machines not to fit in one cluster
-        for i in range(50, 90):
-            if i < 70:
-                cluster = "utecl11"
-            else:
-                cluster = "npecl11"
-            self.noouttest(["add", "machine", "--machine", "evm%s" % i,
-                            "--cluster", cluster, "--model", "utmedium"])
+        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2
+        # All machines should fit inside one cluster
+        for i in range(0, 13):
+            machine = "evm%d" % (i + 50)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "utecl11", "--model", "utmedium"])
+            machine = "evm%d" % (i + 70)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "npecl11", "--model", "utmedium"])
 
     def test_051_addutmc6machines(self):
-        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2, need
-        # just enough machines to fit in one cluster
-        for i in range(90, 115):
-            if i < 105:
-                cluster = "utecl12"
-            else:
-                cluster = "npecl12"
-            self.noouttest(["add", "machine", "--machine", "evm%s" % i,
-                            "--cluster", cluster, "--model", "utmedium",
-                            "--memory", 12288])
+        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2
+        # The machines should not fit inside one cluster
+        for i in range(0, 13):
+            machine = "evm%d" % (i + 90)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "utecl12", "--model", "utmedium",
+                            "--memory", 16384])
+            machine = "evm%d" % (i + 110)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "npecl12", "--model", "utmedium",
+                            "--memory", 16384])
 
     def test_090_verifyaddmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
@@ -115,7 +116,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                         "--interface", "eth0", "--automac"])
 
     def test_125_addutmc5utmc6interfaces(self):
-        for i in range(50, 90) + range(90, 115):
+        for i in range(50, 63) + range(70, 83) + range(90, 103) + range(110, 123):
             machine = "evm%d" % i
             self.noouttest(["add_interface", "--machine", machine,
                             "--interface", "eth0", "--automac"])
