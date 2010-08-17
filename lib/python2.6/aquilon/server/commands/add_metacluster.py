@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 
-from aquilon.server.broker import BrokerCommand, validate_basic, force_int
+from aquilon.server.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import MetaCluster
 from aquilon.exceptions_ import ArgumentError
 
@@ -45,15 +45,13 @@ class CommandAddMetaCluster(BrokerCommand):
 
         MetaCluster.get_unique(session, metacluster, preclude=True)
 
-        if not max_members:
+        if max_members is None:
             max_members = self.config.get("broker",
                                           "metacluster_max_members_default")
-        max_members = force_int("max_members", max_members)
 
-        if not max_shares:
+        if max_shares is None:
             max_shares = self.config.get("broker",
                                          "metacluster_max_shares_default")
-        max_shares = force_int("max_shares", max_shares)
 
         dbmetacluster = MetaCluster(name=metacluster, max_clusters=max_members,
                                     max_shares=max_shares, comments=comments)

@@ -209,6 +209,7 @@ class TestPublishSandbox(TestBrokerCommand):
 
 "manufacturer" = "utvendor";
 "model" = "utmedium";
+"template_name" = "utmedium";
                 """)
         finally:
             f.close()

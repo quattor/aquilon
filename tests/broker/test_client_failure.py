@@ -78,6 +78,22 @@ class TestClientFailure(TestBrokerCommand):
                 % (command, out))
         self.assertEqual(p.returncode, 2)
 
+    def testextraargs(self):
+        command = "show cpu --speed 2000 foo"
+        (p, out, err) = self.runcommand(command.split(" "))
+        s = "Extra arguments on the command line"
+        self.assert_(err.find(s) >= 0,
+                "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                % (command, s, err))
+
+    def testinvalidinteger(self):
+        command = "show cpu --speed foo"
+        (p, out, err) = self.runcommand(command.split(" "))
+        s = "option --speed: invalid integer value: 'foo'"
+        self.assert_(err.find(s) >= 0,
+                "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
+                % (command, s, err))
+
     def testhelp(self):
         command = "help"
         out = self.commandtest(command)

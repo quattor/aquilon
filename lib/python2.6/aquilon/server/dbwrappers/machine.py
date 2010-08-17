@@ -33,17 +33,14 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Cpu, LocalDisk, Machine
-from aquilon.server.broker import force_int
 
 
 def create_machine(session, machine, dblocation, dbmodel,
         cpuname, cpuvendor, cpuspeed, cpucount, memory, serial):
-    if cpuspeed is not None:
-        cpuspeed = force_int("cpuspeed", cpuspeed)
 
     # Figure out a CPU...
     dbcpu = None
-    if not (cpuname or cpuspeed or cpuvendor):
+    if not (cpuname or cpuvendor or cpuspeed is not None):
         if not dbmodel.machine_specs:
             raise ArgumentError("Model %s does not have machine specification defaults, please specify --cpuvendor, --cpuname, and --cpuspeed." %
                     dbmodel.name)
@@ -53,7 +50,7 @@ def create_machine(session, machine, dblocation, dbmodel,
         q = session.query(Cpu)
         if cpuname:
             q = q.filter(Cpu.name.like(cpuname.lower() + '%'))
-        if cpuspeed:
+        if cpuspeed is not None:
             q = q.filter_by(speed=cpuspeed)
         if cpuvendor:
             q = q.join('vendor').filter_by(name=cpuvendor.lower())
@@ -68,7 +65,7 @@ def create_machine(session, machine, dblocation, dbmodel,
             # Not exact, but see if the specs match the default.
             dbcpu = dbmodel.machine_specs.cpu
             if ((cpuname and not dbcpu.name.startswith(cpuname.lower()))
-                    or (cpuspeed and dbcpu.speed != cpuspeed)
+                    or (cpuspeed is not None and dbcpu.speed != cpuspeed)
                     or (cpuvendor and
                         dbcpu.vendor.name != cpuvendor.lower())):
                 raise ArgumentError("Could not uniquely identify a CPU with "
@@ -81,19 +78,17 @@ def create_machine(session, machine, dblocation, dbmodel,
         if dbmodel.machine_specs:
             cpucount = dbmodel.machine_specs.cpu_quantity
         else:
-            raise ArgumentError("Model %s does not have machine specification defaults, please specify --cpucount." %
-                    dbmodel.name)
-    else:
-        cpucount = force_int("cpucount", cpucount)
+            raise ArgumentError("Model %s does not have machine specification "
+                                "defaults, please specify --cpucount." %
+                                dbmodel.name)
 
     if memory is None:
         if dbmodel.machine_specs:
             memory = dbmodel.machine_specs.memory
         else:
-            raise ArgumentError("Model %s does not have machine specification defaults, please specify --memory (in MB)." %
-                    dbmodel.name)
-    else:
-        memory = force_int("memory", memory)
+            raise ArgumentError("Model %s does not have machine specification "
+                                "defaults, please specify --memory (in MB)." %
+                                dbmodel.name)
 
     dbmachine = Machine(location=dblocation, model=dbmodel, name=machine,
             cpu=dbcpu, cpu_quantity=cpucount, memory=memory, serial_no=serial)

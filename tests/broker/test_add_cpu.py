@@ -44,17 +44,20 @@ from brokertest import TestBrokerCommand
 class TestAddCpu(TestBrokerCommand):
 
     def testaddutcpu(self):
-        command = "add cpu --cpu utcpu --vendor intel --speed 1000 --comments 'unit test cpu'"
-        self.noouttest(command.split(" "))
+        command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
+                   "--speed", "1000", "--comments", "unit test cpu"]
+        self.noouttest(command)
 
     def testaddutcpuagain(self):
-        command = "add cpu --cpu utcpu --vendor intel --speed 1000 --comments 'unit test cpu'"
-        self.badrequesttest(command.split(" "))
+        command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
+                   "--speed", "1000", "--comments", "unit test cpu"]
+        self.badrequesttest(command)
 
     def testverifyaddutcpu(self):
         command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cpu: intel utcpu 1000 MHz", command)
+        self.matchoutput(out, "Comments: unit test cpu", command)
 
     def testaddutcpu2(self):
         command = "add cpu --cpu utcpu_1500 --vendor intel --speed 1500"
@@ -69,4 +72,3 @@ class TestAddCpu(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCpu)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -33,7 +33,8 @@ from csv import DictReader, Error as CSVError
 from StringIO import StringIO
 from datetime import datetime
 
-from aquilon.exceptions_ import AquilonError, NotFoundException, ArgumentError
+from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
+                                 NotFoundException, ProcessException)
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.observed_mac import (
@@ -78,12 +79,20 @@ class CommandPollTorSwitch(BrokerCommand):
 
     def poll(self, session, logger, switches, clear, vlan):
         now = datetime.now()
+        failed_vlan = 0
         for switch in switches:
             if clear and clear != str(False):
                 self.clear(session, logger, switch)
             self.poll_mac(session, logger, switch, now)
             if vlan and vlan != str(False):
-                self.poll_vlan(session, logger, switch, now)
+                try:
+                    self.poll_vlan(session, logger, switch, now)
+                except ProcessException, e:
+                    failed_vlan += 1
+                    logger.client_info("Failed getting VLAN info for %s: %s" %
+                                       (switch.fqdn, e))
+        if switches and failed_vlan == len(switches):
+            raise ArgumentError("Failed getting VLAN info.")
         return
 
     def poll_mac(self, session, logger, switch, now):

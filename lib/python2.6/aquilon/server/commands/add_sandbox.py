@@ -46,7 +46,7 @@ class CommandAddSandbox(CommandGet):
     default_style = "csv"
     requires_format = True
 
-    def render(self, session, logger, dbuser, sandbox, start, noget, comments,
+    def render(self, session, logger, dbuser, sandbox, start, get, comments,
                **arguments):
         if not dbuser:
             raise AuthorizationException("Cannot create a sandbox without an "
@@ -81,7 +81,7 @@ class CommandAddSandbox(CommandGet):
         run_git(["branch", sandbox, dbstart.name],
                 logger=logger, path=self.config.get("broker", "kingdir"))
 
-        if noget:
+        if get == False:
             # The client knows to interpret an empty response as no action.
             return []
 

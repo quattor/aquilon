@@ -43,14 +43,23 @@ from brokertest import TestBrokerCommand
 
 class TestUpdateNetwork(TestBrokerCommand):
 
-    def testupdatedomain(self):
+    def test_100_update_discoverable(self):
         self.noouttest(["update", "network", "--ip", "10.184.78.224",
-                        "--discoverable", "true"])
+                        "--discoverable"])
 
-    def testverifyupdatedomain(self):
+    def test_110_verify_discoverable(self):
         command = "show network --ip 10.184.78.224"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Discoverable: True", command)
+
+    def test_200_update_nodiscoverable(self):
+        self.noouttest(["update", "network", "--ip", "10.184.78.224",
+                        "--nodiscoverable"])
+
+    def test_210_verify_nodiscoverable(self):
+        command = "show network --ip 10.184.78.224"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Discoverable: False", command)
 
 
 if __name__=='__main__':

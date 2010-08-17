@@ -57,17 +57,18 @@ class TestSearchMachine(TestBrokerCommand):
                          command)
 
     def testlocation(self):
-        # Should only show virtual machines, since all the physical machines
-        # are at the rack level and this search is exact.
         command = "search machine --building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "evm", command)
-        self.matchclean(out, "ut", command)
+        self.matchoutput(out, "ut", command)
 
-    def testfailcpucount(self):
-        command = "search machine --cpucount BAD"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Expected an integer for cpucount", command)
+    def testlocationexact(self):
+        # Should only show virtual machines, since all the physical machines
+        # are at the rack level and this search is exact.
+        command = "search machine --building ut --exact_location"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evm", command)
+        self.matchclean(out, "ut", command)
 
     def testcpucount(self):
         command = "search machine --cpucount 1"

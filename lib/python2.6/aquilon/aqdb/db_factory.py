@@ -256,10 +256,10 @@ class DbFactory(object):
 
         if no_confirm or confirm(prompt=msg, resp=False):
             for table in self.get_tables():
-                self.safe_execute('DROP TABLE %s CASCADE CONSTRAINTS' %(table))
+                self.safe_execute('DROP TABLE "%s" CASCADE CONSTRAINTS' % table)
 
             for seq in self.get_sequences():
-                self.safe_execute('DROP SEQUENCE %s'%(seq))
+                self.safe_execute('DROP SEQUENCE "%s"' % seq)
 
             self.safe_execute('PURGE RECYCLEBIN')
 

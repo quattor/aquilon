@@ -29,17 +29,11 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.bind_esx_cluster_hostname import (
-    CommandBindESXClusterHostname)
+from aquilon.server.commands.cluster import CommandCluster
 from aquilon.server.dbwrappers.host import hostname_to_host
 
 
-class CommandRebindESXClusterHostname(CommandBindESXClusterHostname):
+class CommandRebindESXClusterHostname(CommandCluster):
 
-    required_parameters = ["hostname", "cluster"]
-
-    def render(self, session, **arguments):
-        arguments["force"] = True
-        return CommandBindESXClusterHostname.render(self, session, **arguments)
-
-
+    def render(self, **arguments):
+        return CommandCluster.render(self, **arguments)

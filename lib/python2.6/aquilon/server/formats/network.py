@@ -82,7 +82,7 @@ class NetworkHostListFormatter(ListFormatter):
                 elif hasattr(system, "name"):
                     device_name = system.name
                 elif hasattr(system, "machine"):
-                    device_name = int.machine.name
+                    device_name = system.machine.name
                 else:
                     device_name = system.ip
                 details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, system.mac))
@@ -151,6 +151,23 @@ class SimpleNetworkListFormatter(ListFormatter):
     def format_html(self, nlist):
         return "<ul>\n%s\n</ul>\n" % "\n".join([
             """<li><a href="/network/%(ip)s.html">%(ip)s</a></li>"""
-            % {"ip": network.ip} for ip in shlist])
+            % {"ip": n.ip} for n in nlist])
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
+
+
+class ShortNetworkList(list):
+    """By convention, holds a list of networks to be formatted.
+
+    The format is just the IP and mask.
+
+    """
+    pass
+
+
+class ShortNetworkListFormatter(SimpleNetworkListFormatter):
+
+    def format_raw(self, nlist, indent=""):
+        return "\n".join(["%s/%s" % (n.ip, n.cidr) for n in nlist])
+
+ObjectFormatter.handlers[ShortNetworkList] = ShortNetworkListFormatter()

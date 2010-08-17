@@ -84,6 +84,7 @@ from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
 from test_add_interface import TestAddInterface
+from test_add_address import TestAddAddress
 from test_add_dynamic_range import TestAddDynamicRange
 from test_add_host import TestAddHost
 from test_add_aquilon_host import TestAddAquilonHost
@@ -97,6 +98,7 @@ from test_prebind_server import TestPrebindServer
 from test_make_aquilon import TestMakeAquilon
 from test_make import TestMake
 from test_make_cluster import TestMakeCluster
+from test_cluster import TestCluster
 from test_bind_esx_cluster import TestBindESXCluster
 from test_change_status_cluster import TestChangeClusterStatus
 from test_rebind_esx_cluster import TestRebindESXCluster
@@ -138,6 +140,7 @@ from test_search_host import TestSearchHost
 from test_search_esx_cluster import TestSearchESXCluster
 from test_search_observed_mac import TestSearchObservedMac
 from test_search_next import TestSearchNext
+from test_search_network import TestSearchNetwork
 from test_refresh_network import TestRefreshNetwork
 from test_update_interface import TestUpdateInterface
 from test_update_machine import TestUpdateMachine
@@ -155,7 +158,9 @@ from test_unmap_service import TestUnmapService
 from test_del_10gig_hardware import TestDel10GigHardware
 from test_del_virtual_hardware import TestDelVirtualHardware
 from test_unbind_esx_cluster import TestUnbindESXCluster
+from test_uncluster import TestUncluster
 from test_del_dynamic_range import TestDelDynamicRange
+from test_del_address import TestDelAddress
 from test_del_manager import TestDelManager
 from test_del_auxiliary import TestDelAuxiliary
 from test_del_host import TestDelHost
@@ -184,6 +189,7 @@ from test_del_domain import TestDelDomain
 from test_del_sandbox import TestDelSandbox
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
+from test_client_bypass import TestClientBypass
 from test_stop import TestBrokerStop
 
 
@@ -217,13 +223,14 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestClusterEarlyConstraints,
                 TestAddTorSwitch, TestPollTorSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
-                TestAddDynamicRange, TestAddHost,
+                TestAddAddress, TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                 TestAddAuxiliary, TestAddManager,
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
-                TestMakeAquilon, TestMakeCluster,
-                TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster, TestMake,
+                TestMakeAquilon, TestMakeCluster, TestCluster,
+                TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster, 
+                TestMake,
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,
                 TestUnbindClient, TestRebindClient, TestReconfigure,
@@ -243,18 +250,19 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestSearchHardware, TestSearchMachine,
                 TestSearchSystem, TestSearchHost, TestSearchESXCluster,
-                TestSearchObservedMac, TestSearchNext,
+                TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
                 TestUpdateRack,
                 TestRefreshNetwork, TestUpdateNetwork,
                 TestUpdateArchetype,
                 TestUpdateMetaCluster, TestUpdateESXCluster,
                 TestPxeswitch, TestManage,
+                TestClientBypass,
                 TestUmaskConstraints,
                 TestUnbindServer, TestUnmapService,
                 TestDel10GigHardware, TestDelVirtualHardware,
-                TestUnbindESXCluster,
-                TestDelDynamicRange,
+                TestUnbindESXCluster, TestUncluster,
+                TestDelDynamicRange, TestDelAddress,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
                 TestDelTorSwitch,

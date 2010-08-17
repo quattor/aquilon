@@ -36,7 +36,6 @@ from aquilon.aqdb.model import DynamicStub, System, DnsDomain
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.dbwrappers.interface import restrict_tor_offsets
-from aquilon.utils import force_ipv4
 from aquilon.server.processes import DSDBRunner
 
 
@@ -46,9 +45,6 @@ class CommandAddDynamicRange(BrokerCommand):
 
     def render(self, session, logger, startip, endip, dns_domain, prefix,
                **arguments):
-        startip = force_ipv4("startip", startip)
-        endip = force_ipv4("endip", endip)
-
         if not prefix:
             prefix = 'dynamic'
         startnet = get_net_id_from_ip(session, startip)

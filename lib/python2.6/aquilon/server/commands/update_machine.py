@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  UnimplementedError, IncompleteError)
-from aquilon.server.broker import BrokerCommand, force_int
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
@@ -73,10 +73,9 @@ class CommandUpdateMachine(BrokerCommand):
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot "
                                     "information.")
-            slot = force_int("slot", slot)
             self.adjust_slot(session, logger,
                              dbmachine, dbchassis, slot, multislot)
-        elif slot:
+        elif slot is not None:
             dbchassis = None
             for dbslot in dbmachine.chassis_slot:
                 if dbchassis and dbslot.chassis != dbchassis:
@@ -86,7 +85,6 @@ class CommandUpdateMachine(BrokerCommand):
             if not dbchassis:
                 raise ArgumentError("Option --slot requires --chassis "
                                     "information.")
-            slot = force_int("slot", slot)
             self.adjust_slot(session, logger,
                              dbmachine, dbchassis, slot, multislot)
 
@@ -136,17 +134,14 @@ class CommandUpdateMachine(BrokerCommand):
                                      dbmodel.machine_type))
             dbmachine.model = dbmodel
 
-        if cpuname or cpuvendor or cpuspeed:
+        if cpuname or cpuvendor or cpuspeed is not None:
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                                   speed=force_int("cpuspeed", cpuspeed),
-                                   compel=True)
+                                   speed=cpuspeed, compel=True)
             dbmachine.cpu = dbcpu
 
-        if cpucount:
-            cpucount = force_int("cpucount", cpucount)
+        if cpucount is not None:
             dbmachine.cpu_quantity = cpucount
-        if memory:
-            memory = force_int("memory", memory)
+        if memory is not None:
             dbmachine.memory=memory
         if serial:
             dbmachine.serial_no=serial

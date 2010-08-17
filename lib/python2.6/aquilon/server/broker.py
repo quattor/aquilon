@@ -85,6 +85,14 @@ class BrokerCommand(object):
 
     """
 
+    parameter_checks = {}
+    """ Parameter checks are filled in automatically based on input.xml.
+
+    This lets us do some rudimentary checks before the actual command is
+    invoked.
+
+    """
+
     requires_azcheck = True
     """ Opt out of authorization checks by setting this flag to False."""
 
@@ -149,6 +157,7 @@ class BrokerCommand(object):
         # parameters).
         self.required_parameters = self.required_parameters[:]
         self.optional_parameters = self.optional_parameters[:]
+        self.parameter_checks = self.parameter_checks.copy()
         self.action = self.__module__
         package_prefix = "aquilon.server.commands."
         if self.action.startswith(package_prefix):
@@ -203,6 +212,10 @@ class BrokerCommand(object):
         def updated_render(self, *args, **kwargs):
             principal = kwargs["user"]
             request = kwargs["request"]
+            for key in kwargs.keys():
+                if key in self.parameter_checks:
+                    kwargs[key] = self.parameter_checks[key]("--" + key,
+                                                             kwargs[key])
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
@@ -368,34 +381,6 @@ class BrokerCommand(object):
                 if not super_is_free:
                     return super_is_free
         return True
-
-
-# FIXME: This utility method may be better suited elsewhere.
-def force_int(label, value):
-    """Utility method to force incoming values to int and wrap errors."""
-    if value is None:
-        return None
-    try:
-        result = int(value)
-    except ValueError, e:
-        raise ArgumentError("Expected an integer for %s: %s" % (label, e))
-    return result
-
-ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
-
-# FIXME: This utility method may be better suited elsewhere.
-def force_ratio(label, value):
-    """Utility method to force incoming values to int ratio and wrap errors."""
-    if value is None:
-        return (None, None)
-    m = ratio_re.search(value)
-    if not m:
-        raise ArgumentError("Expected a ratio like 1:2 for %s but got '%s'" %
-                            (label, value))
-    (left, right) = m.groups()
-    if right is None:
-        right = 1
-    return (int(left), int(right))
 
 
 # This might belong somewhere else.  The functionality that uses this
