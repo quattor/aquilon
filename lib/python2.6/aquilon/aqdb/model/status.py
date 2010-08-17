@@ -44,14 +44,15 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 # to allow for sysadmins to kick a state transition that is
 # broken.
 host_status_transitions = {
-               'blind'        : ['build', 'decoed'],
-               'build'        : ['almostready','ready', 'decoed'],
-               'install'      : ['build', 'decoed'],
-               'almostready'  : ['ready', 'decoed'],
-               'ready'        : ['rebuild', 'reinstall', 'failed', 'decoed'],
-               'reinstall'    : ['rebuild', 'decoed'],
-               'rebuild'      : ['ready', 'decoed'],
-               'failed'       : ['rebuild', 'decoed'],
+               'blind'        : ['build', 'decommissioned'],
+               'build'        : ['almostready','ready', 'decommissioned'],
+               'install'      : ['build', 'decommissioned'],
+               'almostready'  : ['ready', 'decommissioned'],
+# XXX: temporary migration path: allow ready->build until aqhwss is changed
+               'ready'        : ['rebuild', 'reinstall', 'failed', 'decommissioned', 'build'],
+               'reinstall'    : ['rebuild', 'decommissioned'],
+               'rebuild'      : ['ready', 'decommissioned'],
+               'failed'       : ['rebuild', 'decommissioned'],
                }
 
 # The list of possible cluster transitions (simpler than hosts)

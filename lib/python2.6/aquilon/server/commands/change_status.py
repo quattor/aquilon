@@ -37,6 +37,7 @@ from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.aqdb.model.status import host_status_transitions as graph
+from aquilon.aqdb.model import Status
 
 
 class CommandChangeStatus(BrokerCommand):
@@ -45,15 +46,20 @@ class CommandChangeStatus(BrokerCommand):
 
     def render(self, session, logger, hostname, buildstatus, **arguments):
         dbhost = hostname_to_host(session, hostname)
+        dbstatus = Status.get_unique(session, buildstatus, compel=True)
+
+        buildstatus = dbstatus.name
 
         # almostready is a magical state that will be automatically
         # used if the input requests us to move to 'ready', but we're
         # in a cluster which isn't ready yet.
         if buildstatus == "ready" and dbhost.cluster:
             if dbhost.cluster.status.name != "ready":
-                logger.info("cluster is not ready, so forcing " +
-                            "state to almostready")
-                buildstatus = "almostready"
+                force = "almostready"
+                logger.info(("cluster is not ready, so forcing " +
+                            "state to %s") % force)
+                dbstatus = Status.get_unique(session, force, compel=True)
+                buildstatus = dbstatus.name
 
         if buildstatus == dbhost.status.name:
             return
@@ -63,12 +69,11 @@ class CommandChangeStatus(BrokerCommand):
                                 (buildstatus, ", ".join(graph.keys())))
 
         if buildstatus not in graph[dbhost.status.name]:
-            raise ArgumentError("cannot change state to '%s' from '%s'. " +
-                                "Legal states are: %s" %
+            raise ArgumentError(("cannot change state to '%s' from '%s'. " +
+                                "Legal states are: %s") %
                                 (buildstatus, dbhost.status.name,
                                  ", ".join(graph[dbhost.status.name])))
 
-        dbstatus = get_status(session, buildstatus)
         dbhost.status = dbstatus
         session.add(dbhost)
 
