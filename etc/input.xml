@@ -2610,8 +2610,8 @@
          <option name="metacluster" type="string" conflicts="all">Name of the metacluster</option>
          <option name="all" type="flag" conflicts="metacluster">Show all</option>
       </optgroup>
-      <transport method="get" path="metacluster" />
-      <transport method="get" trigger="metacluster" path="metacluster/%(metacluster)s" />
+      <transport trigger="all" method="get" path="metacluster" />
+      <transport trigger="metacluster" method="get" path="metacluster/%(metacluster)s" />
    </command>
 
    <command name="update_metacluster">
