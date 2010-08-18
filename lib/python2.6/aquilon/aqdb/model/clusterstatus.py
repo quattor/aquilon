@@ -33,7 +33,7 @@ from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
                         String, ForeignKey, UniqueConstraint)
 
 from aquilon.aqdb.model import Base
-from aquilon.utils import monkeypatch
+from aquilon.utils import monkeypatch, StateEngine
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
@@ -43,7 +43,7 @@ This stateful view describes where the cluster is within it's
 provisioning lifecycle. 
 '''
 _TN = 'clusterlifecycle'
-class ClusterLifecycle(Base):
+class ClusterLifecycle(Base, StateEngine):
     transitions = {
                'build'        : ['ready', 'decomissioned'],
                'ready'        : ['decommissioned'],
@@ -60,43 +60,6 @@ class ClusterLifecycle(Base):
     def __repr__(self):
         return str(self.name)
 
-    def transition(self, session, obj, to):
-        '''Transition to another state. 
-
-        session -- the sqlalchemy session
-        host -- the object which wants to change state
-        to -- the target state name
-
-        returns a new state object for the target state, or
-        throws an ArgumentError exception if the state cannot
-        be reached. This method may be subclassed by states 
-        if there is special logic regarding the transition.
-        If the current state has an onLeave method, then the
-        method will be called with the object as an argument.
-        If the target state has an onEnter method, then the
-        method will be called with the object as an argument.
-
-        '''
-
-        if to == self.name:
-            return self
-
-        if to not in ClusterLifecycle.transitions:
-            raise ArgumentError("status of %s is invalid" % to)
-
-        targets = ClusterLifecycle.transitions[self.name]
-        if to not in targets:
-            raise ArgumentError(("cannot change state to %s from %s. " +
-                   "Legal states are: %s") % (to, self.name,
-                   ", ".join(targets)))
-
-        ret = ClusterLifecycle.get_unique(session, to, compel=True)
-        if hasattr(self, 'onLeave'):
-            self.onLeave(obj)
-        obj.status = ret
-        if hasattr(ret, 'onEnter'):
-            ret = ret.onEnter(obj)
-        return ret
 
 clusterlifecycle = ClusterLifecycle.__table__
 clusterlifecycle.primary_key.name='%s_pk'%(_TN)
@@ -130,16 +93,6 @@ class Decommissioned(ClusterLifecycle):
 
 class Ready(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
-
-    def onEnter(self, host):
-        for dbhost in dbcluster.hosts:
-            if dbhost.status.name == 'almostready':
-                logger.info("promoting %s from almostready to ready" % 
-                            dbhost.fqdn)
-                dbhost.status = dbhost.status.transition(dbhost, 'ready')
-                session.add(dbhost)
-
-        return self
 
 
 class Build(ClusterLifecycle):

@@ -44,15 +44,24 @@ class CommandChangeStatus(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, buildstatus, **arguments):
-        dbhost = hostname_to_host(session, hostname)
         dbstatus = Status.get_unique(session, buildstatus, compel=True)
         buildstatus = dbstatus.name
-        if buildstatus == dbhost.status.name:
-            return
 
-        dbhost.status.transition(session, dbhost, buildstatus)
+        dbhost = hostname_to_host(session, hostname)
+        # almostready is a magical state that will be automatically
+        # used if the input requests us to move to 'ready', but we're
+        # in a cluster which isn't ready yet.
+        if buildstatus == "ready" and dbhost.cluster:
+            if dbhost.cluster.status.name != "ready":
+                force = "almostready"
+                logger.info(("cluster is not ready, so forcing " +
+                            "state to %s") % force)
+                dbstatus = Status.get_unique(session, force, compel=True)
+                buildstatus = dbstatus.name
 
-        if not dbhost.archetype.is_compileable:
+        changed = dbhost.status.transition(session, dbhost, buildstatus)
+
+        if not changed or not dbhost.archetype.is_compileable:
             return
 
         session.flush()
@@ -74,4 +83,3 @@ class CommandChangeStatus(BrokerCommand):
             raise
         finally:
             lock_queue.release(key)
-        return
