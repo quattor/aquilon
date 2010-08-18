@@ -147,12 +147,11 @@ def force_boolean(label, value):
 class StateEngine:
     transitions = {} # Override in derived class!
 
-    def transition(self, session, obj, to):
+    def transition(self, obj, target_state):
         '''Transition to another state.
 
-        session -- the sqlalchemy session
         host -- the object which wants to change state
-        to -- the target state name
+        target_state -- a db object referring to the desired state
 
         returns a list of objects that have changed state.
         throws an ArgumentError exception if the state cannot
@@ -165,35 +164,21 @@ class StateEngine:
 
         '''
 
-        #cls = self.__class__
-        # This is truly horrible. We are given a subclass
-        # as our query (e.g. "Ready"), but SQLalchemy needs the
-        # parent class (e.g. "Status") in order to properly be
-        # able to query all the other subclasses.
-        # I can't find a way of getting the name
-        # of the (appropriate) superclass in python, so I have
-        # to pick a random class from the MRO. Well, it's not
-        # random, but it feels like it :(
-        import inspect
-        cls = inspect.getmro(self.__class__)[1]
-        ret = cls.get_unique(session, to, compel=True)
-        to = ret.name
-        if to == self.name:
+        if target_state.name == self.name:
             return False
 
-        if to not in self.__class__.transitions:
-            raise ArgumentError("status of %s is invalid" % to)
+        if target_state.name not in self.__class__.transitions:
+            raise ArgumentError("status of %s is invalid" % target_state.name)
 
         targets = self.__class__.transitions[self.name]
-        if to not in targets:
+        if target_state.name not in targets:
             raise ArgumentError(("cannot change state to %s from %s. " +
-                   "Legal states are: %s") % (to, self.name,
+                   "Legal states are: %s") % (target_state.name, self.name,
                    ", ".join(targets)))
 
         if hasattr(self, 'onLeave'):
             self.onLeave(obj)
-        obj.status = ret
-        session.add(obj)
-        if hasattr(ret, 'onEnter'):
-            ret.onEnter(obj)
+        obj.status = target_state
+        if hasattr(target_state, 'onEnter'):
+            target_state.onEnter(obj)
         return True

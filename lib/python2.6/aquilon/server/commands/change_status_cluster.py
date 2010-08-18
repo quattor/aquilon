@@ -44,17 +44,22 @@ class CommandChangeClusterStatus(BrokerCommand):
 
     def render(self, session, logger, cluster, buildstatus, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        dbstatus = ClusterLifecycleState.get_unique(session, buildstatus,
+                                                    compel=True)
 
-        if not dbcluster.status.transition(session, dbcluster, buildstatus):
+        if not dbcluster.status.transition(dbcluster, dbstatus):
             return
+        session.add(dbcluster)
 
         # Promote the members of the cluster
         new_promotes = []
         plenaries = []
         if dbcluster.status.name == "ready":
+            dbready = Status.get_unique(session, "ready", compel=True)
             for dbhost in dbcluster.hosts:
                 if dbhost.status.name == 'almostready':
-                    if dbhost.status.transition(session, dbhost, 'ready'):
+                    if dbhost.status.transition(dbhost, dbready):
+                        session.add(dbhost)
                         logger.info("promoted %s from almostready to ready" % dbhost.fqdn)
                         new_promotes.append(dbhost.fqdn)
                         hostfile = PlenaryHost(dbhost, logger=logger)

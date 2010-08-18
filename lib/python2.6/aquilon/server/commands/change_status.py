@@ -59,11 +59,12 @@ class CommandChangeStatus(BrokerCommand):
                 dbstatus = Status.get_unique(session, force, compel=True)
                 buildstatus = dbstatus.name
 
-        changed = dbhost.status.transition(session, dbhost, buildstatus)
+        changed = dbhost.status.transition(dbhost, dbstatus)
 
         if not changed or not dbhost.archetype.is_compileable:
             return
 
+        session.add(dbhost)
         session.flush()
 
         plenary = PlenaryHost(dbhost, logger=logger)
