@@ -39,21 +39,14 @@ from aquilon.exceptions_ import ArgumentError
 
 
 ''' 
-This stateful view describes where the host is within it's
+This stateful view describes where the cluster is within it's
 provisioning lifecycle. 
 '''
-_TN = 'status'
-class Status(Base):
+_TN = 'clusterlifecycle'
+class ClusterLifecycle(Base):
     transitions = {
-               'blind'        : ['build', 'decommissioned'],
-               'build'        : ['almostready','ready', 'decomissioned'],
-               'install'      : ['build', 'decommissioned'],
-               'almostready'  : ['ready', 'decommissioned'],
-               'ready'        : ['rebuild', 'reinstall', 'failed', 
-                                 'decommissioned'],
-               'reinstall'    : ['rebuild', 'decommissioned'],
-               'rebuild'      : ['ready', 'decommissioned'],
-               'failed'       : ['rebuild', 'decommissioned'],
+               'build'        : ['ready', 'decomissioned'],
+               'ready'        : ['decommissioned'],
                'decommissioned' : [],
                }
 
@@ -71,7 +64,7 @@ class Status(Base):
         '''Transition to another state. 
 
         session -- the sqlalchemy session
-        obj -- the object which wants to change state
+        host -- the object which wants to change state
         to -- the target state name
 
         returns a new state object for the target state, or
@@ -79,105 +72,77 @@ class Status(Base):
         be reached. This method may be subclassed by states 
         if there is special logic regarding the transition.
         If the current state has an onLeave method, then the
-        method will be called with the obj as an argument.
+        method will be called with the object as an argument.
         If the target state has an onEnter method, then the
-        method will be called with the obj as an argument.
+        method will be called with the object as an argument.
 
         '''
 
         if to == self.name:
             return self
 
-        if to not in Status.transitions:
+        if to not in ClusterLifecycle.transitions:
             raise ArgumentError("status of %s is invalid" % to)
 
-        targets = Status.transitions[self.name]
+        targets = ClusterLifecycle.transitions[self.name]
         if to not in targets:
             raise ArgumentError(("cannot change state to %s from %s. " +
                    "Legal states are: %s") % (to, self.name,
                    ", ".join(targets)))
-        ret = Status.get_unique(session, to, compel=True)
-        
+
+        ret = ClusterLifecycle.get_unique(session, to, compel=True)
         if hasattr(self, 'onLeave'):
             self.onLeave(obj)
         obj.status = ret
-        session.add(obj)
         if hasattr(ret, 'onEnter'):
             ret = ret.onEnter(obj)
         return ret
 
-hostlifecycle = Status.__table__
-hostlifecycle.primary_key.name='%s_pk'%(_TN)
-hostlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
-hostlifecycle.info['unique_fields'] = ['name']
+clusterlifecycle = ClusterLifecycle.__table__
+clusterlifecycle.primary_key.name='%s_pk'%(_TN)
+clusterlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
+clusterlifecycle.info['unique_fields'] = ['name']
 
-@monkeypatch(hostlifecycle)
+@monkeypatch(clusterlifecycle)
 def populate(sess, *args, **kw):
     from sqlalchemy.exceptions import IntegrityError
 
-    statuslist = Status.transitions.keys()
+    statuslist = ClusterLifecycle.transitions.keys()
 
-    i = hostlifecycle.insert()
+    i = clusterlifecycle.insert()
     for name in statuslist:
         try:
             i.execute(name=name)
         except IntegrityError:
             pass
 
-    assert len(sess.query(Status).all()) == len(statuslist)
+    assert len(sess.query(ClusterLifecycle).all()) == len(statuslist)
 
 
 '''
-The following classes are the actual lifecycle states for a host
+The following classes are the actual lifecycle states for a cluster
 '''
 
-class Blind(Status):
-    __mapper_args__ = {'polymorphic_identity': 'blind'}
-    pass
-
-
-class Decommissioned(Status):
+class Decommissioned(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
     pass
 
 
-class Ready(Status):
+class Ready(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
 
     def onEnter(self, host):
-        if host.cluster and host.cluster.status.name != 'ready':
-            # logger.info("cluster is not ready, so forcing " +
-            #             "state to almostready")
-            return Almostready()
+        for dbhost in dbcluster.hosts:
+            if dbhost.status.name == 'almostready':
+                logger.info("promoting %s from almostready to ready" % 
+                            dbhost.fqdn)
+                dbhost.status = dbhost.status.transition(dbhost, 'ready')
+                session.add(dbhost)
+
         return self
 
 
-class Almostready(Status):
-    __mapper_args__ = {'polymorphic_identity': 'almostready'}
-    pass
-
-
-class Install(Status):
-    __mapper_args__ = {'polymorphic_identity': 'install'}
-    pass
-
-
-class Build(Status):
+class Build(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'build'}
-    pass
-
-
-class Rebuild(Status):
-    __mapper_args__ = {'polymorphic_identity': 'rebuild'}
-    pass
-
-
-class Reinstall(Status):
-    __mapper_args__ = {'polymorphic_identity': 'reinstall'}
-    pass
-
-
-class Failed(Status):
-    __mapper_args__ = {'polymorphic_identity': 'failed'}
     pass
 

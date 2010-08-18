@@ -34,7 +34,6 @@ from aquilon.server.commands.make import CommandMake
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.aqdb.model import BuildItem, Archetype, Personality
-from aquilon.aqdb.model.status import host_status_transitions as graph
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -70,20 +69,21 @@ class CommandReconfigure(CommandMake):
 
             if buildstatus and dbhost.status.name != buildstatus:
                 dbstatus = get_status(session, buildstatus)
-                if buildstatus == "ready" and dbhost.cluster:
-                    if dbhost.cluster.status.name != "ready":
-                        logger.info("cluster is not ready, so forcing ready state to almostready")
-                        buildstatus = "almostready"
+                dbhost.status = dbhost.status.transition(dbstatus.name)
+                #if buildstatus == "ready" and dbhost.cluster:
+                #    if dbhost.cluster.status.name != "ready":
+                #        logger.info("cluster is not ready, so forcing ready state to almostready")
+                #        buildstatus = "almostready"
 
-                if buildstatus not in graph:
-                    raise ArgumentError("state '%s' is not valid. Try one of: %s" %
-                                        (buildstatus, ", ".join(graph.keys())))
+                #if buildstatus not in graph:
+                #    raise ArgumentError("state '%s' is not valid. Try one of: %s" %
+                #                        (buildstatus, ", ".join(graph.keys())))
 
-                if buildstatus not in graph[dbhost.status.name]:
-                    raise ArgumentError("cannot change state to '%s' from '%s'. Legal states are: %s" %
-                                        (buildstatus, dbhost.status.name,
-                                         ", ".join(graph[dbhost.status.name])))
-                dbhost.status = dbstatus
+                #if buildstatus not in graph[dbhost.status.name]:
+                #    raise ArgumentError("cannot change state to '%s' from '%s'. Legal states are: %s" %
+                #                        (buildstatus, dbhost.status.name,
+                #                         ", ".join(graph[dbhost.status.name])))
+                #dbhost.status = dbstatus
 
 
             if personality:

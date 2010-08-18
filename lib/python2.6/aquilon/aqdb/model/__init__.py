@@ -92,6 +92,7 @@ from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.disk import Disk, LocalDisk, NasDisk
 
 #CLUSTER
+from aquilon.aqdb.model.clusterstatus import ClusterLifecycle
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         HostClusterMember,
                                         MachineClusterMember,

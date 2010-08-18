@@ -29,48 +29,65 @@
 """Contains the logic for `aq change status`."""
 
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.templates.domain import TemplateDomain
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import Status
+from aquilon.aqdb.model import Cluster
 
+class CommandChangeClusterStatus(BrokerCommand):
 
-class CommandChangeStatus(BrokerCommand):
+    required_parameters = ["cluster"]
 
-    required_parameters = ["hostname"]
+    def render(self, session, logger, cluster, buildstatus, **arguments):
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
-    def render(self, session, logger, hostname, buildstatus, **arguments):
-        dbhost = hostname_to_host(session, hostname)
-        dbstatus = Status.get_unique(session, buildstatus, compel=True)
-        buildstatus = dbstatus.name
-        if buildstatus == dbhost.status.name:
+        if buildstatus == dbcluster.status.name:
             return
 
-        dbhost.status.transition(session, dbhost, buildstatus)
+        dbstatus = get_status(session, buildstatus)
+        dbcluster.status.transition(session, dbcluster, dbstatus)
+        session.add(dbcluster)
+        
+        # Promote the members of the cluster
+        new_promotes = []
+        plenaries = []
+        if buildstatus == "ready":
+            for dbhost in dbcluster.hosts:
+                if dbhost.status.name == 'almostready':
+                    dbhost.status = dbstatus
+                    session.add(dbhost)
+                    logger.info("promoting %s from almostready to ready" % dbhost.fqdn)
+                    new_promotes.append(dbhost.fqdn)
+                    hostfile = PlenaryHost(dbhost, logger=logger)
+                    plenaries.append(hostfile)
+                    
 
-        if not dbhost.archetype.is_compileable:
+        if not dbcluster.personality.archetype.is_compileable:
             return
 
         session.flush()
 
-        plenary = PlenaryHost(dbhost, logger=logger)
+        plenary = PlenaryCluster(dbcluster, logger=logger)
+        plenaries.append(plenary)
         # Force a host lock as pan might overwrite the profile...
-        key = CompileKey(domain=dbhost.branch.name, profile=dbhost.fqdn,
+        key = CompileKey(domain=dbcluster.branch.name, profile=dbcluster.name,
                          logger=logger)
         try:
             lock_queue.acquire(key)
-            plenary.write(locked=True)
-            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+            for tpl in plenaries:
+                tpl.write(locked=True)
+            td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, only=dbhost.fqdn, locked=True)
-        except IncompleteError, e:
-            raise ArgumentError("Run aq make for host %s first." % dbhost.fqdn)
+            out = td.compile(session, only=" ".join(new_promotes), locked=True)
+            # We cannnot get an incomplete exception, because new_promotes are all
+            # hosts that are in almostready status, therefore they must be complete.
         except:
-            plenary.restore_stash()
+            for tpl in plenaries:
+                tpl.restore_stash()
             raise
         finally:
             lock_queue.release(key)
