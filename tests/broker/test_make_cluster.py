@@ -31,14 +31,13 @@
 
 
 import os
-import sys
-import unittest
 import re
+import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
+
 
 from brokertest import TestBrokerCommand
 
@@ -49,14 +48,14 @@ class TestMakeCluster(TestBrokerCommand):
         command = ["make_cluster", "--cluster", "utecl1"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
-                         "esx cluster utecl1 adding binding for "
+                         "ESX Cluster utecl1 adding binding for "
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            "utecl1.xml")))
+            "utecl1%s" % self.profile_suffix)))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
@@ -80,14 +79,14 @@ class TestMakeCluster(TestBrokerCommand):
         command = ["make_cluster", "--cluster", "utecl2"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
-                         "esx cluster utecl2 adding binding for "
+                         "ESX Cluster utecl2 adding binding for "
                          "service esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            "utecl2.xml")))
+            "utecl2%s" % self.profile_suffix)))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),

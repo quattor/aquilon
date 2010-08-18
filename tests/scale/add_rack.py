@@ -36,8 +36,8 @@ import sys
 from common import AQRunner, TestNetwork, TestRack
 
 
-def add_rack(building, rackid, netid, aqservice):
-    aq = AQRunner(aqservice=aqservice)
+def add_rack(building, rackid, netid, aqservice, aqhost, aqport):
+    aq = AQRunner(aqservice=aqservice, aqhost=aqhost, aqport=aqport)
     rack = TestRack(building, rackid)
     rc = aq.wait(["ping"])
     for half in [0, 1]:
@@ -83,6 +83,10 @@ if __name__=='__main__':
                       help="The subnet to use, 0-7")
     parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
                       help="The service name to use when connecting to aqd")
+    parser.add_option("-t", "--aqhost", dest="aqhost", type="string",
+                      help="The aqd host to connect to")
+    parser.add_option("-p", "--aqport", dest="aqport", type="string",
+                      help="The port to use when connecting to aqd")
     (options, args) = parser.parse_args()
     if not options.building:
         parser.error("Missing option --building")
@@ -95,5 +99,5 @@ if __name__=='__main__':
     if options.subnet not in range(8):
         parser.error("--subnet must be 0-7")
 
-    add_rack(options.building, options.rack, options.subnet, options.aqservice)
-
+    add_rack(options.building, options.rack, options.subnet,
+             options.aqservice, options.aqhost, options.aqport)

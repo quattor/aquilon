@@ -163,7 +163,7 @@ class Location(Base):
         for component in components:
             if component not in self.p_dict:
                 return None
-        return str('.'.join([str(self.p_dict[item]) for item in components]))
+        return str('.'.join([self.p_dict[item].name for item in components]))
 
     def get_parts(self):
         parts = list(self.parents)
@@ -181,12 +181,6 @@ class Location(Base):
                 return merged
             merged = self_part
         return merged
-
-    def __repr__(self):
-        return self.__class__.__name__ + " " + str(self.name)
-
-    def __str__(self):
-        return str(self.name)
 
 location = Location.__table__
 

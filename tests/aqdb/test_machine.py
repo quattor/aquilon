@@ -64,8 +64,7 @@ def add_machine(sess, name, model):
     if mchn:
         return mchn
 
-    model = Model.get_by('name', model, sess)[0]
-    assert model, "Can't find model %s"%(model)
+    model = Model.get_unique(sess, name=model, compel=True)
 
     proc = sess.query(Cpu).first()
     assert proc, "Can't find a cpu"

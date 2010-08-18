@@ -35,6 +35,7 @@ from aquilon.aqdb.model import System, TorSwitchHw
 
 class TorSwitch(System):
     __tablename__ = 'tor_switch'
+    _class_label = 'ToR Switch'
 
     id = Column(Integer,
                 ForeignKey('system.id', ondelete='CASCADE',

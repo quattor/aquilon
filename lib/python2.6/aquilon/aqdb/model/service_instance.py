@@ -64,6 +64,10 @@ class ServiceInstance(Base):
 
     service = relation(Service, lazy=False, uselist=False, backref='instances')
 
+    def __format__(self, format_spec):
+        instance = "%s/%s" % (self.service.name, self.name)
+        return self.format_helper(format_spec, instance)
+
     @property
     def cfg_path(self):
         return 'service/%s/%s'% (self.service.name, self.name)
@@ -228,12 +232,6 @@ class ServiceInstance(Base):
                     current_location = current_location.parent
         return cache
 
-    def __repr__(self):
-        return '(%s) %s %s'% (self.__class__.__name__,
-                              self.service.name, self.name)
-
-    def __str__(self):
-        return "Service Instance %s/%s" % (self.service.name, self.name)
 
 service_instance = ServiceInstance.__table__
 
@@ -344,8 +342,6 @@ class BuildItem(Base):
     def cfg_path(self):
         return self.service_instance.cfg_path
 
-    def __repr__(self):
-        return '%s: %s'% (self.host.name,self.service_instance.cfg_path)
 
 build_item = BuildItem.__table__
 

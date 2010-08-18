@@ -31,7 +31,7 @@
 
 from socket import gethostbyname
 
-from aquilon.exceptions_ import NameServiceError, ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.processes import run_command
@@ -43,17 +43,16 @@ class CommandPxeswitch(BrokerCommand):
     required_parameters = ["hostname"]
     _option_map = {'status':'--status', 'configure':'--configure',
                    'localboot':'--boot', 'install':'--install',
+                   'rescue':'--rescue',
                    'firmware':'--firmware', 'blindbuild':'--livecd'}
 
-    def render(self, session, logger, hostname,
-               status, configure, localboot, install, firmware, blindbuild,
-               **arguments):
+    def render(self, session, logger, hostname, **arguments):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = Service.get_unique(session, "bootserver", compel=True)
         bootbi = get_host_build_item(session, dbhost, dbservice)
         if not bootbi:
-            raise ArgumentError("Host %s has no bootserver." % hostname)
+            raise ArgumentError("{0} has no bootserver.".format(dbhost))
         # for that instance, find what servers are bound to it.
         servers = [s.system.fqdn for s in bootbi.service_instance.servers]
 
@@ -61,7 +60,7 @@ class CommandPxeswitch(BrokerCommand):
         args = [command]
 
         for (option, mapped) in self._option_map.items():
-            if locals()[option]:
+            if arguments[option]:
                 args.append(mapped)
                 args.append(dbhost.fqdn)
         if args[-1] == command:

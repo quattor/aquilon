@@ -50,16 +50,17 @@ class CommandManageCluster(BrokerCommand):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         old_branch = dbcluster.branch.name
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
+        # Need to set the new branch *before* creating the plenary objects.
         dbcluster.branch = dbbranch
         dbcluster.sandbox_author = dbauthor
         session.add(dbcluster)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenaryCluster(dbcluster, logger=logger))
         for dbhost in dbcluster.hosts:
-            plenaries.append(PlenaryHost(dbhost, logger=logger))
             dbhost.branch = dbbranch
             dbhost.sandbox_author = dbauthor
             session.add(dbhost)
+            plenaries.append(PlenaryHost(dbhost, logger=logger))
 
         session.flush()
 

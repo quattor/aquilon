@@ -188,7 +188,7 @@ class NetRefresher(object):
         """
         for i in k:
             self.session.delete(aq[i])
-            self._commit('deleting %s' % aq[i])
+            self._commit('deleting {0}'.format(aq[i]))
 
     def _do_adds(self, k, ds):
         """Adds networks in dsdb and not in aqdb.
@@ -214,7 +214,7 @@ class NetRefresher(object):
             net.comments = getattr(ds[i], 'comments', None)
 
             self.session.add(net)
-            self._commit('adding %s' % net)
+            self._commit('adding {0}'.format(net))
 
     def _do_updates(self, k, aq, ds):
         """Makes changes to networks which have differences.
@@ -236,7 +236,7 @@ class NetRefresher(object):
                 #get an updated version of the aqdb network
                 aq[i] = ds[i].update_aq_net(aq[i], self)
                 self.session.add(aq[i])
-                self._commit('saving %s' % aq[i])
+                self._commit('saving {0}'.format(aq[i]))
                 # Each update has already been added to the report.
 
     def _refresh_system_networks(self):

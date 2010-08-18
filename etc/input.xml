@@ -789,6 +789,7 @@
       <optgroup name="optional_opts">
          <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
          <option name="personality" type="string">Personality name.  See `aq show personality --archetype windows`.  Currently defaults to 'generic'.</option>
+         <option name="osversion" type="string">Operating system version.  Default 'generic'.</option>
          <option name="comments" type="string">Comments</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <optgroup name="add_host_ip_opts" mandatory="False" fields="any">
@@ -1255,7 +1256,7 @@
          <option name="all" type="flag" conflicts="share">Select all shares</option>
       </optgroup>
       <transport trigger="share" method="get" path="nas_disk_share/%(share)s"/>
-      <transport method="get" path="nas_disk_share" />
+      <transport trigger="all" method="get" path="nas_disk_share" />
    </command>
 
    <command name="update_service">
@@ -1383,7 +1384,7 @@
          <option name="all" type="flag" conflicts="archetype">Select all services</option>
       </optgroup>
       <transport trigger="archetype" method="get" path="archetype/%(archetype)s" />
-      <transport method="get" path="archetype" />
+      <transport trigger="all" method="get" path="archetype" />
    </command>
 
    <command name="del_required_service">
@@ -1507,12 +1508,13 @@
          <option name="list" type="file" conflicts="hostname">file containing hostnames</option>
       </optgroup>
       <optgroup name="pxeswitch_action" mandatory="True" fields="any">
-         <option name="status" type="flag" conflicts="configure localboot install firmware blindbuild">display the current status of how the host will boot</option>
+         <option name="status" type="flag" conflicts="configure localboot install firmware blindbuild rescue">display the current status of how the host will boot</option>
          <option name="configure" type="flag" conflicts="status">(re)initialize the pxeswitch configuration</option>
-         <option name="localboot" type="flag" conflicts="status install firmware blindbuild">set the host to boot from local disk</option>
-         <option name="install" type="flag" conflicts="status localboot firmware blindbuild">set the host to install from the network at next reboot</option>
-         <option name="firmware" type="flag" conflicts="status localboot install blindbuild">set the host to boot its firmware image</option>
-         <option name="blindbuild" type="flag" conflicts="status localboot install firmware">set the host to boot a blindbuild livecd image</option>
+         <option name="localboot" type="flag" conflicts="status install firmware blindbuild rescue">set the host to boot from local disk</option>
+         <option name="install" type="flag" conflicts="status localboot firmware blindbuild rescue">set the host to install from the network at next reboot</option>
+         <option name="firmware" type="flag" conflicts="status localboot install blindbuild rescue">set the host to boot its firmware image</option>
+         <option name="blindbuild" type="flag" conflicts="status localboot install firmware rescue">set the host to boot a blindbuild livecd image</option>
+         <option name="rescue" type="flag" conflicts="status localboot install firmware blindbuild">set the host to boot a rescue image</option>
       </optgroup>
       <transport method="post" path="host/%(hostname)s/command/pxeswitch" />
       <transport trigger="list" method="post" path="command/pxeswitch/list" />
@@ -1857,10 +1859,11 @@
 
    <command name="show_chassis">
       Show the chassis list, or details about a particular chassis.
-      <optgroup name="show_chassis_opts">
-         <option name="chassis" type="string">chassis name</option>
+      <optgroup name="show_chassis_opts" mandatory="True" fields="any">
+         <option name="chassis" type="string" conflicts="all">chassis name</option>
+         <option name="all" type="flag" conflicts="chassis">Select all</option>
       </optgroup>
-      <transport method="get" path="location/chassis" />
+      <transport trigger="all" method="get" path="chassis" />
       <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
    </command>
 
@@ -1915,7 +1918,7 @@
          <option name="rack" type="string" conflicts="all">rack name</option>
          <option name="all" type="flag" conflicts="rack">all</option>
       </optgroup>
-      <transport method="get" path="location/rack" />
+      <transport trigger="all" method="get" path="location/rack" />
       <transport trigger="rack" method="get" path="location/rack/%(rack)s" />
    </command>
 
@@ -1937,15 +1940,16 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_building/%(city)s/%(building)s" />
+      <transport method="put" path="location/building/%(building)s" />
    </command>
 
    <command name="show_building">
       Show the building list, or details about a particular building.
-      <optgroup name="show_building_opts">
-         <option name="building" type="string">building name</option>
+      <optgroup name="show_building_opts" mandatory="True" fields="any">
+         <option name="building" type="string" conflicts="all">building name</option>
+         <option name="all" type="flag" conflicts="building">Select all</option>
       </optgroup>
-      <transport method="get" path="location/building" />
+      <transport trigger="all" method="get" path="location/building" />
       <transport trigger="building" method="get" path="location/building/%(building)s" />
    </command>
 
@@ -1967,7 +1971,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_room/%(building)s/%(room)s" />
+      <transport method="put" path="location/room/%(room)s" />
    </command>
 
    <command name="show_room">
@@ -1976,7 +1980,7 @@
          <option name="room" type="string">room name</option>
          <option name="all" type="flag">show all</option>
       </optgroup>
-      <transport method="get" path="location/room" />
+      <transport trigger="all" method="get" path="location/room" />
       <transport trigger="room" method="get" path="location/room/%(room)s" />
    </command>
 
@@ -1991,10 +1995,10 @@
    <command name="show_campus">
       Show the list of campuses, or details about a particular campus.
       <optgroup name="show_campus_opts" mandatory="True" fields="any">
-         <option name="campus" type="string">campus name</option>
-         <option name="all" type="flag">show all campuses</option>
+         <option name="campus" type="string" conflicts="all">campus name</option>
+         <option name="all" type="flag" conflicts="campus">show all campuses</option>
       </optgroup>
-      <transport method="get" path="location/campus" />
+      <transport trigger="all" method="get" path="location/campus" />
       <transport trigger="campus" method="get" path="location/campus/%(campus)s" />
    </command>
 
@@ -2008,15 +2012,16 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_city/%(country)s/%(city)s" />
+      <transport method="put" path="location/city/%(city)s" />
    </command>
 
    <command name="show_city">
       Show the list of cities, or details about a particular city.
-      <optgroup name="show_city_opts">
-         <option name="city" type="string">city name</option>
+      <optgroup name="show_city_opts" mandatory="True" fields="any">
+         <option name="city" type="string" conflicts="all">city name</option>
+         <option name="all" type="flag" conflicts="city">show all cities</option>
       </optgroup>
-      <transport method="get" path="location/city" />
+      <transport trigger="all" method="get" path="location/city" />
       <transport trigger="city" method="get" path="location/city/%(city)s" />
    </command>
 
@@ -2038,15 +2043,16 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_country/%(continent)s/%(country)s" />
+      <transport method="put" path="location/country/%(country)s" />
    </command>
 
    <command name="show_country">
       Show the list of countries, or details about a particular country.
-      <optgroup name="show_country_opts">
-         <option name="country" type="string">country name</option>
+      <optgroup name="show_country_opts" mandatory="True" fields="any">
+         <option name="country" type="string" conflicts="all">country name</option>
+         <option name="all" type="flag" conflicts="country">show all countries</option>
       </optgroup>
-      <transport method="get" path="location/country" />
+      <transport trigger="all" method="get" path="location/country" />
       <transport trigger="country" method="get" path="location/country/%(country)s" />
    </command>
 
@@ -2068,15 +2074,16 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_continent/%(hub)s/%(continent)s" />
+      <transport method="put" path="location/continent/%(continent)s" />
    </command>
 
    <command name="show_continent">
       Show the list of continents, or details about a particular continent.
-      <optgroup name="show_continent_opts">
-         <option name="continent" type="string">continent name</option>
+      <optgroup name="show_continent_opts" mandatory="True" fields="any">
+         <option name="continent" type="string" conflicts="all">continent name</option>
+         <option name="all" type="flag" conflicts="continent">show all continents</option>
       </optgroup>
-      <transport method="get" path="location/continent" />
+      <transport trigger="all" method="get" path="location/continent" />
       <transport trigger="continent" method="get" path="location/continent/%(continent)s" />
    </command>
 
@@ -2097,7 +2104,7 @@
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_organization/%(organization)s" />
+      <transport method="put" path="location/organization/%(organization)s" />
    </command>
 
    <command name="del_organization">
@@ -2111,10 +2118,11 @@
 
    <command name="show_organization">
       Show an organization.
-      <optgroup name="show_org_options" mandatory="False" fields="all">
-         <option name="organization" type="string">Name of the organization</option>
+      <optgroup name="show_org_options" mandatory="True" fields="any">
+         <option name="organization" type="string" conflicts="all">Name of the organization</option>
+         <option name="all" type="flag" conflicts="organization">Show all organizations</option>
       </optgroup>
-      <transport method="get" path="location/organization" />
+      <transport trigger="all" method="get" path="location/organization" />
       <transport trigger="organization" method="get" path="location/organization/%(organization)s" />
    </command>
 
@@ -2128,15 +2136,16 @@
          <option name="organization" type="string">The owning organization of the hub</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="location/add_hub/%(hub)s" />
+      <transport method="put" path="location/hub/%(hub)s" />
    </command>
 
    <command name="show_hub">
       Show the list of hubs, or details about a particular hub.
-      <optgroup name="show_hub_opts">
-         <option name="hub" type="string">hub name</option>
+      <optgroup name="show_hub_opts" mandatory="True" fields="any">
+         <option name="hub" type="string" conflicts="all">hub name</option>
+         <option name="all" type="flag" conflicts="hub">Show all hubs</option>
       </optgroup>
-      <transport method="get" path="location/hub" />
+      <transport trigger="all" method="get" path="location/hub" />
       <transport trigger="hub" method="get" path="location/hub/%(hub)s" />
    </command>
 
@@ -2196,7 +2205,7 @@
   <command name="show_vendor">
       Show currently defined vendors.
       <optgroup name="mandatory_options" mandatory="True" fields="any">
-         <option name="vendor" type="string">The name of the vendor</option>
+         <option name="vendor" type="string" conflicts="all">The name of the vendor</option>
          <option name="all" type="flag" conflicts="vendor">Show all vendors</option>
       </optgroup>
       <transport trigger="vendor" method="get" path="vendor/%(vendor)s" />
@@ -2542,10 +2551,11 @@
 
    <command name="show_principal">
       Show the entitlements for a given username.
-      <optgroup name="show_role_opts" mandatory="False">
-         <option name="principal" type="string">User Principal to check</option>
+      <optgroup name="show_role_opts" mandatory="True" fields="any">
+         <option name="principal" type="string" conflicts="all">User Principal to check</option>
+         <option name="all" type="flag" conflicts="principal">Show all principals</option>
       </optgroup>
-      <transport method="get" path="principal" />
+      <transport trigger="all" method="get" path="principal" />
       <transport trigger="principal" method="get" path="principal/%(principal)s" />
    </command>
 
@@ -2581,7 +2591,7 @@
          <option name="all" type="flag" conflicts="dns_domain">Show all DNS domains</option>
       </optgroup>
       <transport trigger="dns_domain" method="get" path="dns_domain/%(dns_domain)s" />
-      <transport method="get" path="dns_domain" />
+      <transport trigger="all" method="get" path="dns_domain" />
    </command>
 
    <command name="del_dns_domain">
@@ -2608,8 +2618,8 @@
    <command name="show_metacluster">
       Show details for a metacluster.
       <optgroup name="show_metacluster_req" mandatory="True" fields="any">
-         <option name="metacluster" type="string">Name of the metacluster</option>
-         <option name="all" type="flag">Show all</option>
+         <option name="metacluster" type="string" conflicts="all">Name of the metacluster</option>
+         <option name="all" type="flag" conflicts="metacluster">Show all</option>
       </optgroup>
       <transport method="get" path="metacluster" />
       <transport method="get" trigger="metacluster" path="metacluster/%(metacluster)s" />
@@ -2693,11 +2703,11 @@
    <command name="show_esx_cluster">
       Show details for an ESX cluster.
       <optgroup name="show_cluster_req" mandatory="True" fields="any">
-         <option name="cluster" type="string">Name of the cluster</option>
-         <option name="all" type="flag">Show all clusters</option>
+         <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
+         <option name="all" type="flag" conflicts="cluster">Show all clusters</option>
       </optgroup>
-      <transport method="get" trigger="cluster" path="cluster/esx/%(cluster)s" />
-      <transport method="get" path="cluster/esx" />
+      <transport trigger="cluster" method="get" path="cluster/esx/%(cluster)s" />
+      <transport trigger="all" method="get" path="cluster/esx" />
    </command>
 
    <command name="update_esx_cluster">
@@ -2862,7 +2872,7 @@
          <option name="all" type="flag" conflicts="cluster_type">Select all cluster types</option>
       </optgroup>
       <transport trigger="cluster_type" method="get" path="cluster_type/%(cluster_type)s" />
-      <transport method="get" path="cluster_type" />
+      <transport trigger="all" method="get" path="cluster_type" />
    </command>
 
    <command name="del_esx_cluster_aligned_service">
@@ -2910,16 +2920,31 @@
 
    <command name="add_address">
       Add DNS addresses to the database.
+      <p/>
+      The IP address can be derived based on aqdb availabililty using:
+      --ipfromip:     choose a free IP address in the subnet of the given ip
+      --ipfromsystem: choose based on the subnet in use by the given system
+      <p/>
+      Three algorithms are available for deriving the IP address:
+      lowest:         Use the lowest available IP in the subnet.
+      highest:        Use the highest available IP in the subnet.
+      max:            Find the highest IP in use and add one.
+      The default is lowest.
       <optgroup name="add_address_mandatory" mandatory="True" fields="all">
          <option name="fqdn" type="string">A fully qualified domain name</option>
-         <option name="ip" type="ipv4">An IP Address</option>
+         <optgroup name="add_address_ip_opts" mandatory="True" fields="any">
+            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem">IP address</option>
+            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem">choose IP address in subnet</option>
+            <option name="ipfromsystem" type="string" conflicts="ip ipfromip">choose IP address in subnet of system</option>
+         </optgroup>
       </optgroup>
       <optgroup name="add_address_optional" mandatory="False">
          <option name="dns_environment" type="string">The name of the environment the address is in (only the default is currently accepted)</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="address_default/%(fqdn)s/%(ip)s" />
-      <transport method="put" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
+      <transport method="post" path="address_default/%(fqdn)s" />
+      <transport method="post" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s" />
    </command>
 
    <command name="del_address">

@@ -36,8 +36,8 @@ import sys
 from common import AQRunner
 
 
-def show_info(aqservice):
-    aq = AQRunner(aqservice=aqservice)
+def show_info(aqservice, aqhost, aqport):
+    aq = AQRunner(aqservice=aqservice, aqhost=aqhost, aqport=aqport)
     rc = aq.wait(["ping"])
     rc = aq.wait(["show", "host", "--all"])
     rc = aq.wait(["show", "domain", "--all"])
@@ -46,18 +46,18 @@ def show_info(aqservice):
     rc = aq.wait(["show", "cpu", "--all"])
     rc = aq.wait(["show", "model", "--type", "blade"])
     rc = aq.wait(["show", "service", "--all"])
-    rc = aq.wait(["show", "archetype"])
+    rc = aq.wait(["show", "archetype", "--all"])
     rc = aq.wait(["show", "map", "--building", "np"])
-    rc = aq.wait(["show", "chassis"])
+    rc = aq.wait(["show", "chassis", "--all"])
     rc = aq.wait(["show", "rack", "--all"])
-    rc = aq.wait(["show", "building"])
-    rc = aq.wait(["show", "city"])
-    rc = aq.wait(["show", "country"])
-    rc = aq.wait(["show", "continent"])
-    rc = aq.wait(["show", "hub"])
+    rc = aq.wait(["show", "building", "--all"])
+    rc = aq.wait(["show", "city", "--all"])
+    rc = aq.wait(["show", "country", "--all"])
+    rc = aq.wait(["show", "continent", "--all"])
+    rc = aq.wait(["show", "hub", "--all"])
     rc = aq.wait(["show", "machine", "--all"])
-    rc = aq.wait(["show", "tor_switch", "--model", "rs8000"])
-    rc = aq.wait(["show", "principal"])
+    rc = aq.wait(["show", "tor_switch", "--model", "rs g8000"])
+    rc = aq.wait(["show", "principal", "--all"])
 
 
 if __name__=='__main__':
@@ -66,7 +66,10 @@ if __name__=='__main__':
     parser = OptionParser()
     parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
                       help="The service name to use when connecting to aqd")
+    parser.add_option("-t", "--aqhost", dest="aqhost", type="string",
+                      help="The aqd host to connect to")
+    parser.add_option("-p", "--aqport", dest="aqport", type="string",
+                      help="The port to use when connecting to aqd")
     (options, args) = parser.parse_args()
 
-    show_info(options.aqservice)
-
+    show_info(options.aqservice, options.aqhost, options.aqport)

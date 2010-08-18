@@ -36,7 +36,7 @@ from aquilon.server.templates.service import (PlenaryServiceInstanceToplevel,
 from aquilon.aqdb.model import Service
 
 
-class CommandCatService(BrokerCommand):
+class CommandCatInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 

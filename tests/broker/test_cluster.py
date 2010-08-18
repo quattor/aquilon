@@ -67,10 +67,10 @@ class TestCluster(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
                              command)
-            self.matchoutput(out, "Member of esx cluster: utecl1", command)
+            self.matchoutput(out, "Member of ESX Cluster: utecl1", command)
         command = "show esx cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         for i in range(1, 5):
             self.matchoutput(out, "Member: evh%s.aqd-unittest.ms.com" %i,
                              command)
@@ -99,7 +99,7 @@ class TestCluster(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         self.matchoutput(out,
                          "Host aquilon61.aqd-unittest.ms.com sandbox "
-                         "%s/utsandbox does not match esx cluster utecl1 "
+                         "%s/utsandbox does not match ESX cluster utecl1 "
                          "domain unittest" % user,
                          command)
 

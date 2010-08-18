@@ -44,6 +44,8 @@ if __name__ == "__main__":
     BINDIR = os.path.dirname(os.path.realpath(__file__))
     SRCDIR = os.path.join(BINDIR, "..", "..")
     sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    sys.path.append(os.path.join(SRCDIR, "tests"))
+    import depends
 
 from test_start import TestBrokerStart
 from test_ping import TestPing

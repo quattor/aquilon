@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the map service command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -173,7 +170,7 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def testverifymapwihtoutarchetype(self):
@@ -182,7 +179,7 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def testverifymapwihtoutpersonality(self):
@@ -190,7 +187,7 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Company ms",
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def testverifypersonalitymapproto(self):

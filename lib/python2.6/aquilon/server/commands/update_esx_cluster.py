@@ -59,24 +59,22 @@ class CommandUpdateESXCluster(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if fix_location:
             dblocation = dbcluster.minimum_location
+            if not dblocation:
+                raise ArgumentError("Cannot infer the cluster location from "
+                                    "the host locations.")
         if dblocation:
             errors = []
             if not dblocation.campus:
-                errors.append("%s %s is not within a campus." %
-                              (dblocation.location_type.capitalize(),
-                               dblocation.name))
+                errors.append("{0} is not within a campus.".format(dblocation))
             for host in dbcluster.hosts:
                 if host.machine.location != dblocation and \
                    dblocation not in host.machine.location.parents:
-                    errors.append("Host %s has location %s %s." % (host.fqdn,
-                        host.machine.location.location_type.capitalize(),
-                        host.machine.location.name))
+                    errors.append("{0} has location {1}.".format(host,
+                                                                 host.machine.location))
             if errors:
-                raise ArgumentError("Cannot set ESX Cluster %s location "
-                                    "constraint to %s %s:\n%s" %
-                                    (dbcluster.name,
-                                     dblocation.location_type.capitalize(),
-                                     dblocation.name, "\n".join(errors)))
+                raise ArgumentError("Cannot set {0} location constraint to "
+                                    "{1}:\n{2}".format(dbcluster, dblocation,
+                                                       "\n".join(errors)))
             if dbcluster.location_constraint != dblocation:
                 if machine_plenary_will_move(old=dbcluster.location_constraint,
                                              new=dblocation):
@@ -112,9 +110,9 @@ class CommandUpdateESXCluster(BrokerCommand):
         if max_members is not None:
             current_members = len(dbcluster.hosts)
             if max_members < current_members:
-                raise ArgumentError("ESX Cluster %s has %d hosts bound, "
-                                    "which exceeds the requested limit %d." %
-                                    (dbcluster.name, current_members,
+                raise ArgumentError("%s has %d hosts bound, which exceeds "
+                                    "the requested limit %d." %
+                                    (format(dbcluster), current_members,
                                      max_members))
             dbcluster.max_hosts = max_members
             cluster_updated = True

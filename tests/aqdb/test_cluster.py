@@ -35,7 +35,7 @@ from utils import load_classpath, add, commit
 load_classpath()
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import (Vendor, Model, Machine, Cpu, Building, Domain,
+from aquilon.aqdb.model import (Vendor, Model, Machine, Cpu, Building, Branch,
                                 DnsDomain, Status, Personality, Archetype, Host,
                                 Cluster, EsxCluster, HostClusterMember,
                                 MachineClusterMember, OperatingSystem)
@@ -112,10 +112,10 @@ def del_cluster_member():
         print 'deleted cluster host'
 
 def test_create_vm():
-    vend = Vendor.get_unique(sess, 'virtual')
-    mod = Model.get_unique(sess, 'vm', vendor_id=vend.id)
-    proc = Cpu.get_unique(sess, 'virtual_cpu', vendor_id=vend.id, speed=0)
-    np = Building.get_unique(sess, 'np')
+    #vend = Vendor.get_unique(sess, 'virtual')
+    mod = Model.get_unique(sess, name='vm', compel=True)
+    proc = Cpu.get_unique(sess, name='virtual_cpu', speed=0, compel=True)
+    np = Building.get_unique(sess, 'np', compel=True)
 
     for i in xrange(NUM_MACHINES):
         vm = Machine(name='%s%s'%(VM_NAME, i), location=np, model=mod,
@@ -128,9 +128,9 @@ def test_create_vm():
     print 'created %s machines' % (len(machines))
 
 def test_create_machines_for_hosts():
-    np = Building.get_by('name', 'np', sess)[0]
-    am = Model.get_by('name', 'vm', sess)[0]
-    a_cpu = Cpu.get_by('name', 'aurora_cpu', sess)[0]
+    np = Building.get_unique(sess, name='np', compel=True)
+    am = Model.get_unique(sess, name='vm', compel=True)
+    a_cpu = Cpu.get_unique(sess, name='aurora_cpu', compel=True)
 
     for i in xrange(NUM_HOSTS):
         machine = Machine(name='%s%s'% (MACHINE_NAME, i), location=np, model=am,
@@ -153,9 +153,9 @@ def esx_machine_factory():
 m_factory = esx_machine_factory()
 
 def test_create_hosts():
-    dmn = Domain.get_unique(sess, 'ny-prod')
-    dns_dmn = DnsDomain.get_unique(sess, 'one-nyp.ms.com')
-    stat = Status.get_unique(sess, 'build')
+    br = Branch.get_unique(sess, 'ny-prod', compel=True)
+    dns_dmn = DnsDomain.get_unique(sess, 'one-nyp.ms.com', compel=True)
+    stat = Status.get_unique(sess, 'build', compel=True)
     os = sess.query(OperatingSystem).filter(Archetype.name == 'vmhost').first()
     assert os, 'No OS in %s' % func_name()
 
@@ -168,7 +168,7 @@ def test_create_hosts():
     for i in xrange(NUM_HOSTS):
         machine = m_factory.next()
         vm_host = Host(machine=machine, name='%s%s' % (HOST_NAME, i),
-                       dns_domain=dns_dmn, domain=dmn, personality=pers,
+                       dns_domain=dns_dmn, branch=br, personality=pers,
                        status=stat, operating_system=os)
         add(sess, vm_host)
 
@@ -191,14 +191,14 @@ h_factory = host_factory()
 
 def test_create_esx_cluster():
     """ tests the creation of an EsxCluster """
-    dmn = Domain.get_unique(sess, 'ny-prod')
-    np = sess.query(Building).filter_by(name='np').one()
+    np = Building.get_unique(sess, name='np', compel=True)
+    br = Branch.get_unique(sess, 'ny-prod', compel=True)
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
 
     ec = EsxCluster(name=CLUSTER_NAME, location_constraint=np,
-                    personality=per, domain=dmn, down_hosts_threshold=2)
+                    personality=per, down_hosts_threshold=2, branch=br)
     create(sess, ec)
 
     assert ec
@@ -210,14 +210,15 @@ def test_create_esx_cluster():
 @raises(IntegrityError)
 def test_no_host_threshold():
     """ ensure down_hosts_threshold must exist """
-    dmn = Domain.get_by('name', 'ny-prod', sess)[0]
-    np = sess.query(Building).filter_by(name='np').one()
+    br = Branch.get_unique(sess, 'ny-prod', compel=True)
+    np = Building.get_unique(sess, name='np', compel=True)
+
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name=='windows', Personality.name=='generic')).one()
 
     ec = EsxCluster(name=CLUSTER_NAME,
-                    location_constraint=np, personality=per, domain=dmn)
+                    location_constraint=np, personality=per, branch=br)
     add(sess, ec)
     commit(sess)
 

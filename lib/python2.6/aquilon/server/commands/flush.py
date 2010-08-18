@@ -112,8 +112,7 @@ class CommandFlush(BrokerCommand):
                             pass
                             #logger.client_info("Not flushing host: %s" % e)
                         except Exception, e:
-                            failed.append("Host %s in %s %s failed: %s" %
-                                          (h.fqdn, d.branch_type, b.name, e))
+                            failed.append("{0} in {1:l} failed: {2}".format(h, b, e))
 
             if clusters or all:
                 logger.client_info("Flushing clusters.")
@@ -122,9 +121,7 @@ class CommandFlush(BrokerCommand):
                         plenary = PlenaryCluster(clus)
                         written += plenary.write(locked=True)
                     except Exception, e:
-                        failed.append("%s cluster %s failed: %s" %
-                                      (clus.cluster_type.capitalize(),
-                                       clus.name, e))
+                        failed.append("{0} failed: {1}".format(clus, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this

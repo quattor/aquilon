@@ -47,23 +47,18 @@ class CommandCluster(BrokerCommand):
         if dbhost.machine.location != dbcluster.location_constraint and \
            dbcluster.location_constraint not in \
            dbhost.machine.location.parents:
-            raise ArgumentError("Host location %s %s is not within cluster "
-                                "location %s %s." %
-                                (dbhost.machine.location.location_type.capitalize(),
-                                 dbhost.machine.location.name,
-                                 dbcluster.location_constraint.location_type.capitalize(),
-                                 dbcluster.location_constraint.name))
+            raise ArgumentError("Host location {0} is not within cluster "
+                                "location {1}.".format(dbhost.machine.location,
+                                                       dbcluster.location_constraint))
         if dbhost.personality != dbcluster.personality:
-            logger.client_info("Updating host %s to match cluster "
-                               "archetype %s personality %s.",
-                               dbhost.fqdn,
-                               dbcluster.personality.archetype.name,
-                               dbcluster.personality.name)
+            logger.client_info("Updating {0:l} to match cluster "
+                               "archetype {1!s} personality {2!s}.".format(
+                               dbhost, dbcluster.personality.archetype,
+                               dbcluster.personality))
             dbhost.personality = dbcluster.personality
         if dbhost.cluster and dbhost.cluster != dbcluster:
-            logger.client_info("Removing host %s from %s cluster %s." %
-                               (hostname, dbhost.cluster.cluster_type,
-                                dbhost.cluster.name))
+            logger.client_info("Removing {0:l} from {1:l}.".format(dbhost,
+                                                                   dbhost.cluster))
             old_cluster = dbhost.cluster
             dbhcm = HostClusterMember.get_unique(session, cluster=old_cluster,
                                                  host=dbhost)
@@ -78,13 +73,13 @@ class CommandCluster(BrokerCommand):
         if not dbhost.cluster:
             if dbhost.branch != dbcluster.branch or \
                dbhost.sandbox_author != dbcluster.sandbox_author:
-                raise ArgumentError("Host %s %s %s does not match "
-                                    "%s cluster %s %s %s." %
-                                    (dbhost.fqdn, dbhost.branch.branch_type,
-                                     dbhost.authored_branch,
-                                     dbcluster.cluster_type, dbcluster.name,
-                                     dbcluster.branch.branch_type,
-                                     dbcluster.authored_branch))
+                raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
+                                    "{5}.".format(dbhost,
+                                                  dbhost.branch.branch_type,
+                                                  dbhost.authored_branch,
+                                                  dbcluster,
+                                                  dbcluster.branch.branch_type,
+                                                  dbcluster.authored_branch))
             # Check for max_members happens in aqdb layer and can throw a VE
             try:
                 dbhcm = HostClusterMember(cluster=dbcluster, host=dbhost)

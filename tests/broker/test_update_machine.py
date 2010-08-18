@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the update machine command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -54,7 +51,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USN99C5553", command)
 
@@ -104,7 +101,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 2", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
 
@@ -154,7 +151,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_3000 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_3000 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USNKPDZ407", command)
 
@@ -439,7 +436,7 @@ class TestUpdateMachine(TestBrokerCommand):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "esx cluster utecl3 cannot support VMs with "
+                         "ESX Cluster utecl3 cannot support VMs with "
                          "0 vmhosts and a down_host_threshold of 2",
                          command)
 

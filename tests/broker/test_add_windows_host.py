@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add windows host command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -60,6 +57,9 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Build Status: build", command)
+        self.matchoutput(out,
+                         "Template: windows/os/windows/generic/config.tpl",
+                         command)
 
 
 if __name__=='__main__':

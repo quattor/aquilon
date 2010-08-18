@@ -45,15 +45,13 @@ class CommandDelESXCluster(BrokerCommand):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
         cluster = str(dbcluster.name)
         if dbcluster.machines:
-            raise ArgumentError("ESX Cluster %s is still in use by virtual "
-                                "machines: %s." %
-                                (cluster, ", ".join([m.name for m in
-                                                     dbcluster.machines])))
+            machines = ", ".join([m.name for m in dbcluster.machines])
+            raise ArgumentError("%s is still in use by virtual machines: %s." %
+                                (format(dbcluster), machines))
         if dbcluster.hosts:
-            raise ArgumentError("ESX Cluster %s is still in use by vmhosts: "
-                                "%s." %
-                                (cluster, ", ".join([h.fqdn for h in
-                                                     dbcluster.hosts])))
+            hosts = ", ".join([h.fqdn for h in  dbcluster.hosts])
+            raise ArgumentError("%s is still in use by vmhosts: %s." %
+                                (format(dbcluster), hosts))
         dbmetacluster = dbcluster.metacluster
         plenary = PlenaryCluster(dbcluster, logger=logger)
         domain = dbcluster.branch.name
@@ -65,9 +63,12 @@ class CommandDelESXCluster(BrokerCommand):
         plenary.cleanup(domain)
 
         # Remove the compiled profile.
-        remove_file(os.path.join(self.config.get("broker", "profilesdir"),
-                                 "clusters", cluster + ".xml"),
-                    logger=logger)
+        # The file is either gzip'd or not, but it doesn't hurt to try both.
+        xmlfile = os.path.join(self.config.get("broker", "profilesdir"),
+                               "clusters", cluster + ".xml")
+        remove_file(xmlfile, logger=logger)
+        xmlgzfile = xmlfile + ".gz"
+        remove_file(xmlgzfile, logger=logger)
         # Remove the cache in the global profiles directory created by
         # the ant task.
         remove_file(os.path.join(self.config.get("broker", "quattordir"),

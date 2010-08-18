@@ -57,6 +57,10 @@ class Model(Base):
 
     vendor = relation(Vendor)
 
+    def __format__(self, format_spec):
+        instance = "%s/%s" % (self.vendor.name, self.name)
+        return self.format_helper(format_spec, instance)
+
 
 model = Model.__table__
 model.primary_key.name = 'model_pk'

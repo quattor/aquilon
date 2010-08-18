@@ -41,6 +41,7 @@ if __name__=='__main__':
                                                      "lib", "python2.6")))
 
 from aquilon.config import Config
+from aquilon.exceptions_ import ProcessException
 
 
 class AQBroker(object):
@@ -63,10 +64,12 @@ class AQBroker(object):
 
     def start(self, **kwargs):
         """Start a broker with the given config."""
+        # FIXME: Make coverage configurable.
         args = [self.twistd, "--pidfile", self.pidfile,
                 "--logfile", self.logfile,
                 "aqd",
-                "--config", self.configfile, "--coverage", self.coverage]
+                # "--coverage", self.coverage,
+                "--config", self.configfile]
         p = Popen(args, stdout=1, stderr=2)
         return p.wait()
 
@@ -92,9 +95,10 @@ class AQBroker(object):
             p = Popen(("/ms/dist/kerberos/PROJ/krb5_keytab/"
                        "prod/sbin/krb5_keytab"),
                        stdout=1, stderr=2)
-            rc = p.wait()
+            if p.wait():
+                raise ProcessException(code=p.returncode)
 
-        for label in ["quattordir", "kingdir", "swrepdir", ]:
+        for label in ["quattordir", "swrepdir", ]:
             dir = self.config.get("broker", label)
             if os.path.exists(dir):
                 continue
@@ -104,39 +108,40 @@ class AQBroker(object):
                 print >>sys.stderr, "Could not create %s: %s" % (dir, e)
         
         dirs = [self.config.get("database", "dbdir")]
-        for label in ["templatesdir", "rundir", "logdir", "profilesdir",
-                      "depsdir", "hostsdir", "plenarydir", "builddir"]:
+        for label in ["domainsdir", "kingdir", "rundir", "profilesdir",
+                      "depsdir", "hostsdir", "plenarydir", "logdir"]:
             dirs.append(self.config.get("broker", label))
         
         for dir in dirs:
             if os.path.exists(dir):
                 print "Removing %s" % dir
                 p = Popen(("/bin/rm", "-rf", dir), stdout=1, stderr=2)
-                rc = p.wait()
-                # FIXME: check rc
+                if p.wait():
+                    raise ProcessException(code=p.returncode)
             try:
                 os.makedirs(dir)
             except OSError, e:
                 print >>sys.stderr, "Could not create %s: %s" % (dir, e)
         
-        #template_king_host = self.config.get("unittest", "template_king_host")
-        template_king_host = "nyaqd1"
-        p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-            "%s:/var/quattor/template-king" % template_king_host,
-            # Minor hack... ignores config kingdir...
-            self.config.get("broker", "quattordir")),
-            stdout=1, stderr=2)
-        rc = p.wait()
-        # FIXME: check rc
+        template_source = "git://nyaqd1/quattor/template-king"
+        template_dest = self.config.get("broker", "kingdir")
+        env = {}
+        env["PATH"] = "%s:%s" % (self.config.get("broker", "git_path"),
+                                 os.environ.get("PATH", ""))
+        p = Popen(("git", "clone", "--bare", "--branch", "prod",
+                   template_source, template_dest),
+                  env=env, stdout=1, stderr=2)
+        if p.wait():
+            raise ProcessException(code=p.returncode)
         
-        #swrep_repository_host = self.config.get("unittest", "swrep_repository_host")
-        swrep_repository_host = "nyaqd1"
-        p = Popen(("rsync", "-avP", "-e", "ssh", "--delete",
-            "%s:/var/quattor/swrep/repository" % swrep_repository_host,
-            self.config.get("broker", "swrepdir")),
-            stdout=1, stderr=2)
-        rc = p.wait()
-        # FIXME: check rc
+        # FIXME: Maybe make a new perftest section in the conf...
+        swrep_base = self.config.get("database", "password_base")
+        p = Popen(("rsync", "-avP", "--delete",
+                   os.path.join(swrep_base, "swrep", "repository"),
+                   self.config.get("broker", "swrepdir")),
+                  stdout=1, stderr=2)
+        if p.wait():
+            raise ProcessException(code=p.returncode)
 
         env = {}
         for (key, value) in os.environ.items():
@@ -146,7 +151,12 @@ class AQBroker(object):
                                "tests", "aqdb")
         cmdlst = ['./build_db.py', '--delete', '--populate']
         p = Popen(cmdlst, stdout=1, stderr=2, env=env, cwd=aqdbdir)
-        rc = p.wait()
+        if p.wait():
+            raise ProcessException(code=p.returncode)
+        cmdlst = ['./add_admin.py']
+        p = Popen(cmdlst, stdout=1, stderr=2, env=env, cwd=aqdbdir)
+        if p.wait():
+            raise ProcessException(code=p.returncode)
 
 
 if __name__=='__main__':

@@ -67,15 +67,12 @@ def get_branch_dependencies(dbbranch):
     """
     ret = []
     if dbbranch.hosts:
-        ret.append("Hosts are still attached to %s %s." %
-                   (dbbranch.branch_type, dbbranch.name))
+        ret.append("Hosts are still attached to {0:l}.".format(dbbranch))
     if dbbranch.clusters:
-        ret.append("Clusters are still attached to %s %s." %
-                   (dbbranch.branch_type, dbbranch.name))
+        ret.append("Clusters are still attached to {0:l}.".format(dbbranch))
     if dbbranch.trackers:
-        ret.append("%s %s is tracked by %s." %
-                   (dbbranch.branch_type, dbbranch.name,
-                    [str(t.name) for t in dbbranch.trackers]))
+        ret.append("%s is tracked by %s." %
+                   (format(dbbranch), [str(t.name) for t in dbbranch.trackers]))
     return ret
 
 def remove_branch(config, logger, dbbranch):

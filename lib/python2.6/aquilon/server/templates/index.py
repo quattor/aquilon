@@ -85,6 +85,8 @@ def build_index(config, session, profilesdir, clientNotify=True,
                     if obj:
                         if obj.endswith(".xml"):
                             obj = obj[:-4]
+                        elif obj.endswith(".xml.gz"):
+                            obj = obj[:-7]
                         old_object_index[obj] = int(profile.attrib["mtime"])
         except Exception, e:
             logger.info("Error processing %s, continuing: %s" %
@@ -95,12 +97,14 @@ def build_index(config, session, profilesdir, clientNotify=True,
     # modified_index stores the subset of namespaced names that
     # have changed since the last index. The values are unused.
     modified_index = {}
+    gzip_output = config.getboolean("panc", "gzip_output")
+    profile_suffix = ".xml.gz" if gzip_output else ".xml"
 
     for root, _dirs, files in os.walk(profilesdir):
         for profile in files:
             if profile == profile_index:
                 continue
-            if not profile.endswith(".xml"):
+            if not profile.endswith(profile_suffix):
                 continue
             obj = os.path.join(root, profile[:-4])
             # Remove the common prefix: our profilesdir, so that the
@@ -123,8 +127,8 @@ def build_index(config, session, profilesdir, clientNotify=True,
     content.append("<?xml version='1.0' encoding='utf-8'?>")
     content.append("<profiles>")
     for obj, mtime in object_index.items():
-        content.append("<profile mtime='%d'>%s.xml</profile>"
-                % (mtime, obj))
+        content.append("<profile mtime='%d'>%s%s</profile>" %
+                       (mtime, obj, profile_suffix))
     content.append("</profiles>")
 
     write_file(index_path, "\n".join(content), logger=logger)

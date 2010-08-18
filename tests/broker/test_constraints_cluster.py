@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing constraints in commands involving clusters."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -52,7 +49,7 @@ class TestClusterConstraints(TestBrokerCommand):
     def testverifydelclusterwithmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
 
     # FIXME: Add a test for unbinding a vmhost from a cluster where
     # the vm_to_host_ratio would be exceeded.

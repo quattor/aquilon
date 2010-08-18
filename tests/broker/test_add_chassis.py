@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add chassis command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -81,6 +78,12 @@ class TestAddChassis(TestBrokerCommand):
             self.matchoutput(out, "Chassis: ut9c%d.aqd-unittest.ms.com" % i,
                              command)
 
+    def testverifychassisall(self):
+        command = ["show", "chassis", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)

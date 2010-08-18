@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add auxiliary command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -63,6 +60,11 @@ class TestAddAuxiliary(TestBrokerCommand):
                          self.net.unknown[0].usable[3].mac,
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
+
+    def testverifyauxiliaryall(self):
+        command = ["show", "auxiliary", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
 
     def testrejectut3c1n4eth1(self):
         # This is an IP address outside of the Firm.  It should not appear

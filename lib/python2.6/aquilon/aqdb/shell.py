@@ -86,10 +86,11 @@ def main(*args, **kw):
     ipshell()
 
 
-def graph_schema(db, file_name="/tmp/aqdb_schema.png"):
+def graph_schema(db=db, file_name="/tmp/aqdb_schema"):
     """ Produces a png image of the schema. """
-    import aquilon.aqdb.utils.schema2dot
-    aquilon.aqdb.utils.schema2dot.show_schema_graph(db, file_name)
+    import aquilon.aqdb.utils.schema2dot as s2d
+    s2d.write_schema_png(db.meta, "%s.png" % file_name)
+    s2d.write_schema_dot(db.meta, "%s.dot" % file_name)
 
 if __name__ == '__main__':
     main(sys.argv)

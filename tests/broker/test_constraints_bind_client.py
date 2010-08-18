@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing constraints involving the bind client command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -76,8 +73,8 @@ class TestBindClientConstraints(TestBrokerCommand):
                    "--service=esx_management_server", "--instance=%s" % next]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "The esx cluster utecl1 is set to use service "
-                         "esx_management_server instance %s" % instance,
+                         "ESX Cluster utecl1 is set to use service "
+                         "instance esx_management_server/%s" % instance,
                          command)
 
 

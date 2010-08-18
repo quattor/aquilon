@@ -109,8 +109,8 @@ class CommandAddHost(BrokerCommand):
 
         session.refresh(dbmachine)
         if dbmachine.host:
-            raise ArgumentError("Machine %s is already allocated to host %s." %
-                    (dbmachine.name, dbmachine.host.fqdn))
+            raise ArgumentError("{0} is already allocated to "
+                                "{1:l}.".format(dbmachine, dbmachine.host))
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
 

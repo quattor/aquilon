@@ -34,14 +34,11 @@ immediately.
 
 """
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -121,9 +118,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         err = self.partialerrortest(command.split(" "))
         err = self.striplock(err)
         self.matchoutput(err,
-                         "deleting <Network 0.1.1.0 ip=0.1.1.0/24 "
-                         "(netmask=255.255.255.0), type=unknown, "
-                         "side=a, located in Building np>",
+                         "deleting Network 0.1.1.0",
                          command)
         for i in range(4, 9):
             self.matchoutput(err,
@@ -182,9 +177,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         err = self.striplock(err)
         self.matchoutput(err,
-                         "deleting <Network 0.1.1.0 ip=0.1.1.0/24 "
-                         "(netmask=255.255.255.0), type=unknown, "
-                         "side=a, located in Building np>",
+                         "deleting Network 0.1.1.0",
                          command)
 
 

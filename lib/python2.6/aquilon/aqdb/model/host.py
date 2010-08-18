@@ -113,8 +113,6 @@ class Host(System):
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
         return str(self.branch.name)
 
-    def __repr__(self):
-        return 'Host %s'%(self.name)
 
 #TODO: synonym for location, sysloc, fqdn (in system)
 host = Host.__table__

@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the rebind esx cluster command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -53,7 +50,7 @@ class TestRebindESXCluster(TestBrokerCommand):
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: evh1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Member of esx cluster: utecl2", command)
+        self.matchoutput(out, "Member of ESX Cluster: utecl2", command)
 
     # FIXME: Also test plenary files.
 

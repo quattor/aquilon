@@ -196,29 +196,28 @@ class EsxCluster(Cluster):
             return
 
         if host_part == 0:
-            raise error("Invalid ratio of %s:%s for %s cluster %s" %
-                        (vm_part, host_part, self.cluster_type, self.name))
+            raise error("Invalid ratio of {0}:{1} for {2:l}.".format(
+                        vm_part, host_part, self))
 
         # For calculations, assume that down_hosts_threshold vmhosts
         # are not available from the number currently configured.
         adjusted_host_count = current_host_count - down_hosts_threshold
 
         if adjusted_host_count <= 0:
-            raise error("%s cluster %s cannot support VMs with %s "
+            raise error("%s cannot support VMs with %s "
                         "vmhosts and a down_host_threshold of %s" %
-                        (self.cluster_type, self.name,
-                         current_host_count, down_hosts_threshold))
+                        (format(self), current_host_count,
+                         down_hosts_threshold))
 
         # The current ratio must be less than the requirement...
         # cur_vm / cur_host <= vm_part / host_part
         # cur_vm * host_part <= vm_part * cur_host
         # Apply a logical not to test for the error condition...
         if current_vm_count * host_part > vm_part * adjusted_host_count:
-            raise error("%s VMs:%s hosts in %s cluster %s violates "
+            raise error("%s VMs:%s hosts in %s violates "
                         "ratio %s:%s with down_hosts_threshold %s" %
-                        (current_vm_count, current_host_count,
-                         self.cluster_type, self.name, vm_part, host_part,
-                         down_hosts_threshold))
+                        (current_vm_count, current_host_count, format(self),
+                         vm_part, host_part, down_hosts_threshold))
         return
 
     def __init__(self, **kw):

@@ -64,9 +64,7 @@ class CommandAddESXCluster(BrokerCommand):
             raise ArgumentError("Adding a cluster requires a location "
                                 "constraint.")
         if not dblocation.campus:
-            raise ArgumentError("%s %s is not within a campus." %
-                                (dblocation.location_type.capitalize(),
-                                 dblocation.name))
+            raise ArgumentError("{0} is not within a campus.".format(dblocation))
 
         Cluster.get_unique(session, cluster, preclude=True)
 

@@ -42,7 +42,9 @@ class AqStr(sqlalchemy.types.TypeDecorator):
         return str(value).strip().lower()
 
     def process_result_value(self, value, engine):
-        return value
+        if value is None:
+            return value
+        return str(value)
 
     def copy(self):
         return AqStr(self.impl.length)

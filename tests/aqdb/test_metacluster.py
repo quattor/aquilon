@@ -36,7 +36,7 @@ load_classpath()
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import (Building, Personality, Archetype, Cluster,
                                 EsxCluster, MetaCluster, MetaClusterMember,
-                                Domain)
+                                Branch)
 
 from sqlalchemy import and_
 from sqlalchemy.orm import join
@@ -89,7 +89,8 @@ def teardown():
 
 def test_create_clusters():
     np = sess.query(Building).filter_by(name='np').one()
-    dmn = Domain.get_unique(sess, 'ny-prod')
+    br = Branch.get_unique(sess, 'ny-prod', compel=True)
+
     per = sess.query(Personality).select_from(
             join(Archetype, Personality)).filter(
             and_(Archetype.name == 'windows',
@@ -97,9 +98,8 @@ def test_create_clusters():
 
     for i in xrange(NUM_CLUSTERS):
         ec = EsxCluster(name='%s%s' % (CLUSTER_NAME, i),
-                        location_constraint=np,
-                        personality=per,
-                        domain=dmn)
+                        location_constraint=np, branch=br,
+                        personality=per, down_hosts_threshold=2)
         add(sess, ec)
     commit(sess)
 

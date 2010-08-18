@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010  Contributor
@@ -26,18 +27,22 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq show principal`."""
+""" Miscelaneous helper libraries for testing """
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import UserPrincipal
+def import_depends():
+    """ Set up the sys.path for loading library dependencies """
+    import os
+    import sys
 
+    _DIR = os.path.dirname(os.path.realpath(__file__))
+    _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
+    _TESTDIR = os.path.join(_DIR, "..")
 
-class CommandShowPrincipal(BrokerCommand):
+    if _LIBDIR not in sys.path:
+        sys.path.insert(0, _LIBDIR)
 
-    required_parameters = []
+    if _TESTDIR not in sys.path:
+        sys.path.insert(1, _TESTDIR)
 
-    def render(self, session, **arguments):
-        return session.query(UserPrincipal).order_by(UserPrincipal.name).all()
-
-
+    import depends

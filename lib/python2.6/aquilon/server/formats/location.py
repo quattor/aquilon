@@ -38,8 +38,7 @@ from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
 
 class LocationFormatter(ObjectFormatter):
     def format_raw(self, location, indent=""):
-        details = [indent + "%s: %s" %
-                (location.location_type.capitalize(), location.name)]
+        details = [indent + "{0:c}: {0.name}".format(location)]
         if location.fullname:
             details.append(indent + "  Fullname: %s" % location.fullname)
         # Rack could have been a separate formatter, but since this is
@@ -51,8 +50,7 @@ class LocationFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
             details.append(indent + "  Location Parents: [%s]" %
-                    ", ".join("%s: %s" % (p.location_type.capitalize(), p.name)
-                    for p in location.parents))
+                    ", ".join(format(p) for p in location.parents))
         return "\n".join(details)
 
     def csv_fields(self, location):

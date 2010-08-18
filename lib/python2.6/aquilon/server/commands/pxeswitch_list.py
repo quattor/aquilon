@@ -32,8 +32,7 @@ from __future__ import with_statement
 from socket import gethostbyname
 from tempfile import NamedTemporaryFile
 
-from aquilon.exceptions_ import (NameServiceError, ArgumentError,
-                                 NotFoundException)
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
 from aquilon.server.processes import run_command
@@ -41,17 +40,15 @@ from aquilon.server.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
 
 
-class CommandPxeswitch(BrokerCommand):
+class CommandPxeswitchList(BrokerCommand):
 
     required_parameters = ["list"]
     _option_map = {'status':'--statuslist', 'configure':'--configurelist',
                    'localboot':'--bootlist', 'install':'--installlist',
+                   'rescue':'--rescuelist',
                    'firmware':'--firmwarelist', 'blindbuild':'--livecdlist'}
 
-    def render(self, session, logger, list,
-               install, localboot, status, firmware, configure, blindbuild,
-               **arguments):
-
+    def render(self, session, logger, list, **arguments):
         user = self.config.get("broker", "installfe_user")
         command = self.config.get("broker", "installfe")
         args = [command]
@@ -102,9 +99,9 @@ class CommandPxeswitch(BrokerCommand):
             with NamedTemporaryFile() as tmpfile:
                 tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
-               
+
                 for (option, mapped) in self._option_map.items():
-                    if locals()[option]:
+                    if arguments[option]:
                         groupargs.append(mapped)
                         groupargs.append(tmpfile.name)
                 if groupargs[-1] == command:

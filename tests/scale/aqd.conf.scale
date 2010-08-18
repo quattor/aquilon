@@ -13,9 +13,9 @@ dbdir = %(basedir)s/aquilondb
 dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
-dbuser = scale
-server = nyt-aqdb.one-nyp.ms.com
-dsn = oracle://%(dbuser)s:PASSWORD@%(server)s:1521/AQUILON
+dbuser = aqdqa
+server = NYTO_LEMON_01
+password_base = /ms/dist/aquilon/PROJ/aqd-perftest/incr/common
 
 [database]
 database_section = database_oracle
@@ -26,10 +26,18 @@ quattordir = %(basedir)s/quattor
 templateport = %(openport)s
 git_templates_url = http://%(servername)s:%(templateport)s/templates
 dsdb_use_testdb = True
-dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
-installfe = /bin/echo
+run_knc = True
+run_git_daemon = True
 server_notifications = 
 client_notifications = no
+dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
+installfe = /bin/echo
+#CheckNet = %(srcdir)s/tests/fakebin/fake_CheckNet
+#sharedata = %(srcdir)s/tests/testnasobjects.map
+#windows_host_info = %(dbdir)s/machines.db
+#vlan2net = %(srcdir)s/tests/fakebin/fake_vlan2net
+sys_loc = %(srcdir)s/tests/fakebin/fake_sys_loc
+mean = %(srcdir)s/tests/fakebin/fake_mean
 
 [unittest]
 scratchdir = %(basedir)s/scratch

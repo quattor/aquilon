@@ -33,8 +33,8 @@
 from common import AQRunner
 
 
-def compile(domain, aqservice):
-    aq = AQRunner(aqservice=aqservice)
+def compile(domain, aqservice, aqhost, aqport):
+    aq = AQRunner(aqservice=aqservice, aqhost=aqhost, aqport=aqport)
     print "Compiling domain %s" % domain
     rc = aq.wait(["compile", "--domain=%s" % domain])
 
@@ -47,8 +47,12 @@ if __name__=='__main__':
                       help="The domain to compile")
     parser.add_option("-a", "--aqservice", dest="aqservice", type="string",
                       help="The service name to use when connecting to aqd")
+    parser.add_option("-t", "--aqhost", dest="aqhost", type="string",
+                      help="The aqd host to connect to")
+    parser.add_option("-p", "--aqport", dest="aqport", type="string",
+                      help="The port to use when connecting to aqd")
     (options, args) = parser.parse_args()
     if not options.domain:
         parser.error("Missing option --domain")
 
-    compile(options.domain, options.aqservice)
+    compile(options.domain, options.aqservice, options.aqhost, options.aqport)

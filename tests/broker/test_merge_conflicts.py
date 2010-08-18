@@ -31,14 +31,12 @@
 
 
 import os
-import sys
 import unittest
 from subprocess import Popen
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -328,7 +326,7 @@ class TestMergeConflicts(TestBrokerCommand):
         command = "del sandbox --sandbox changetest4"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
-                         "sandbox changetest4 is tracked by "
+                         "Sandbox changetest4 is tracked by "
                          "['changetest4-tracker']",
                          command)
 

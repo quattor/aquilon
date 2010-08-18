@@ -48,7 +48,7 @@ class OperatingSystem(Base):
 
     id = Column(Integer, Sequence('%s_seq'%(_ABV)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-    version = Column(AqStr(16), nullable=False )
+    version = Column(AqStr(16), nullable=False)
     archetype_id = Column(Integer, ForeignKey(
         'archetype.id', name='%s_arch_fk'%(_ABV)), nullable=False)
     #vendor id?
@@ -57,16 +57,13 @@ class OperatingSystem(Base):
 
     archetype = relation(Archetype, backref='os', uselist=False, lazy=False)
 
+    def __format__(self, format_spec):
+        instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)
+        return self.format_helper(format_spec, instance)
+
     @property
     def cfg_path(self):
         return 'os/%s/%s'% (self.name, self.version)
-
-    def __repr__(self):
-        s = ("<"+self.__class__.__name__ +
-             " name="+ self.name +
-             " version=" + self.version +
-             " archetype=" + str(self.archetype) + '>')
-        return s
 
     @classmethod
     def by_archetype(cls, dbarchetype):
@@ -88,27 +85,29 @@ def populate(sess, *args, **kw):
     if len(sess.query(OperatingSystem).all()) > 0:
         return
 
-    aquilon = Archetype.get_by('name', 'aquilon', sess)[0]
+    aquilon = Archetype.get_unique(sess, 'aquilon', compel=True)
     for ver in ['4.0.1-ia32', '4.0.1-x86_64', '5.0-x86_64']:
         os_obj = OperatingSystem(archetype=aquilon, name='linux', version=ver)
         sess.add(os_obj)
 
-    aurora = Archetype.get_unique(sess, 'aurora')
+    aurora = Archetype.get_unique(sess, 'aurora', compel=True)
     for ver in ['3.0.3-ia32','3.0.3-amd64', '4.0.1-ia32', '4.0.1-x86_64',
                 '4.0.2-ia32', '4.0.2-x86_64', '5.0-x86_64', 'generic']:
         os_obj = OperatingSystem(archetype=aurora, name='linux', version=ver)
         sess.add(os_obj)
 
-    win = Archetype.get_unique(sess, 'windows')
-    win_obj=OperatingSystem(archetype=win, name='windows', version='generic')
-    sess.add(win_obj)
+    win = Archetype.get_unique(sess, 'windows', compel=True)
+    for ver in ['generic', 'nt51', 'nt52e', 'nt52s', 'nt61e', 'x64nt51',
+                'x64nt52e', 'x64nt52s', 'nt64nt61e', 'x64nt61se', 'x64nt61ss']:
+        win_obj=OperatingSystem(archetype=win, name='windows', version=ver)
+        sess.add(win_obj)
 
-    vmhost = Archetype.get_unique(sess, 'vmhost')
+    vmhost = Archetype.get_unique(sess, 'vmhost', compel=True)
     for ver in ['4.0.0']:
         os_obj = OperatingSystem(archetype=vmhost, name='esxi', version=ver)
         sess.add(os_obj)
 
-    pserver = Archetype.get_unique(sess, 'pserver')
+    pserver = Archetype.get_unique(sess, 'pserver', compel=True)
     assert pserver, "can't find archetype 'pserver' in os.populate"
     os_obj = OperatingSystem(archetype=pserver, name='ontap',
                              version = '7.3.1p2d20')

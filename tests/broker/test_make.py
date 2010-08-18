@@ -29,16 +29,13 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the make command."""
 
-
 import os
-import sys
-import unittest
 import re
+import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -54,7 +51,7 @@ class TestMake(TestBrokerCommand):
 
             self.assert_(os.path.exists(os.path.join(
                 self.config.get("broker", "profilesdir"),
-                "evh1.aqd-unittest.ms.com.xml")))
+                "evh1.aqd-unittest.ms.com%s" % self.profile_suffix)))
 
             self.failUnless(os.path.exists(os.path.join(
                 self.config.get("broker", "builddir"),

@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add machine command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -55,7 +52,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
 
@@ -118,7 +115,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ406", command)
 
@@ -156,7 +153,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Blade: ut3c1n4", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ407", command)
 
@@ -332,6 +329,19 @@ class TestAddMachine(TestBrokerCommand):
                             "--rack", "ut11", "--model", "vb1205xm"])
             self.noouttest(["add", "machine", "--machine", "ut12s02p%d" % port,
                             "--rack", "ut12", "--model", "vb1205xm"])
+
+    def testverifymachineall(self):
+        command = ["show", "machine", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.matchoutput(out, "ut3c1n3", command)
+        self.matchoutput(out, "ut3c1n4", command)
+        self.matchoutput(out, "ut3s01p1a", command)
+        self.matchoutput(out, "ut3s01p1b", command)
+        self.matchoutput(out, "ut8s02p1", command)
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchoutput(out, "ut10s04p1", command)
+        self.matchoutput(out, "ut11s01p1", command)
 
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.

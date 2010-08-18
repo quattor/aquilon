@@ -73,11 +73,11 @@ class Disk(Base):
     __mapper_args__ = {'polymorphic_on': disk_type}
 
     def __repr__(self):
-        return '%s <machine %s %s /dev/%s %s GB> '% (self.__class__.__name__,
-                                          self.machine.name,
-                                          self.controller_type,
-                                          self.device_name,
-                                          self.capacity)
+        # The default __repr__() is too long
+        return "<%s %s (%s) of machine %s, %d GB>" % \
+            (self._get_class_label(), self.device_name, self.controller_type,
+             self.machine.name, self.capacity)
+
 
 disk = Disk.__table__
 disk.primary_key.name='%s_pk'% (_TN)
@@ -125,13 +125,10 @@ class NasDisk(Disk):
         super(NasDisk, self).__init__(**kw)
 
     def __repr__(self):
-        return '%s <machine %s %s /dev/%s %s GB provided by %s> '% (
-            self.__class__.__name__,
-            self.machine.name,
-            self.controller_type,
-            self.device_name,
-            self.capacity,
-            self.service_instance.name)
+        return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
+                (self._get_class_label(), self.device_name,
+                 self.controller_type, self.machine.name, self.capacity,
+                 self.service_instance.name)
 
 #machine_specs-> indicates the service instance for nas disk
 #service instance name is the share name

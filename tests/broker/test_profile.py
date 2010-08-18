@@ -29,16 +29,16 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the generated profiles."""
 
+
 import os
-import sys
-import unittest
 import re
+import unittest
 from lxml import etree
+import gzip
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -46,8 +46,10 @@ class TestProfile(TestBrokerCommand):
 
     def load_profile(self, name):
         path = os.path.join(self.config.get("broker", "profilesdir"),
-                            name + ".xml")
+                            name + self.profile_suffix)
         self.failUnless(os.path.exists(path))
+        if self.gzip_profiles:
+            path = gzip.open(path)
         tree = etree.parse(path)
         return tree
 

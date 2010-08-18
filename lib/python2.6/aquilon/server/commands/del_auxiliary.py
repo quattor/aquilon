@@ -52,9 +52,7 @@ class CommandDelAuxiliary(BrokerCommand):
             # Check dependencies, translate into user-friendly message
             dbauxiliary = get_system(session, auxiliary)
             if not isinstance(dbauxiliary, Auxiliary):
-                raise ArgumentError("%s %s is not auxiliary." % (
-                                    dbauxiliary.system_type.capitalize(),
-                                    dbauxiliary.fqdn))
+                raise ArgumentError("{0} is not auxiliary.".format(dbauxiliary))
 
             # FIXME: Look for System dependencies...
 

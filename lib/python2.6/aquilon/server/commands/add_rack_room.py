@@ -33,7 +33,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 
 
-class CommandAddRack(BrokerCommand):
+class CommandAddRackRoom(BrokerCommand):
 
     required_parameters = ["rackid", "room", "row", "column"]
 
@@ -43,5 +43,3 @@ class CommandAddRack(BrokerCommand):
                            rackcolumn=column, room=room, fullname=fullname,
                            comments=comments)
         return
-
-

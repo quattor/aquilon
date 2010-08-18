@@ -87,6 +87,8 @@ class TestBrokerCommand(unittest.TestCase):
                     "aurora_without_node")
         else:
             self.aurora_without_node = "pissp1"
+        self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
+        self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
 
     def tearDown(self):
         pass

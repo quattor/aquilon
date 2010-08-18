@@ -26,26 +26,26 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-import weakref
-from inspect import isclass
 import sys
 
-from sqlalchemy import Integer
+from inspect import isclass
+
 from sqlalchemy.orm.session import Session
-from sqlalchemy.orm.properties import RelationProperty
+from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.schema import UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
 
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
+
 
 def _raise_custom(cls, defcls, msg):
     if isclass(cls) and issubclass(cls, Exception):
         raise cls(msg)
     else:
         raise defcls(msg)
+
 
 class Base(object):
     """ The abstract base class for all aqdb objects """
@@ -59,31 +59,108 @@ class Base(object):
             setattr(self, k, kw[k])
 
     def __repr__(self):
-        # This functions much more like a __str__ than a __repr__...
-        return "%s %s" % (self.__class__._get_class_label(),
-                          self._get_instance_label())
+        """
+        Return an internal representation of the object.
+
+        This representation is intended mainly for debugging, and it should
+        uniquely identify the instance. The output of repr() should never be
+        sent to the client, and should only appear in server-side logs at the
+        debug level.
+        """
+        label = self.__class__.__name__
+        attrs = []
+        mapper = self.__class__.__mapper__
+        for prop in mapper.iterate_properties:
+            if not isinstance(prop, ColumnProperty):
+                continue
+            field = prop.columns[0].name
+
+            # These fields are not really interesting
+            if field == 'id' or field == 'creation_date' or field == 'comments':
+                continue
+
+            # Convert foreign IDs to names
+            if field.endswith("_id") and mapper.has_property(field[:-3]) and \
+                    isinstance(mapper.get_property(field[:-3]),
+                               RelationProperty):
+                field = field[:-3]
+            value = getattr(self, field, None)
+
+            attrs.append("%s: %s" % (field, value))
+        return "<%s %s>" % (label, ", ".join(attrs))
+
+    def __str__(self):
+        """
+        Return the most significant attribute of the object.
+
+        If the object has a single field that makes it unique, then that field
+        should be returned.
+        """
+        return str(self._get_instance_label())
+
+    def format_helper(self, format_spec, instance):
+        """ Common helper for formatting functions """
+        lowercase = False
+        class_only = False
+        passthrough = ""
+        for letter in format_spec:
+            if letter == "l":
+                lowercase = True
+            elif letter == "c":
+                class_only = True
+            else:
+                passthrough += letter
+
+        clsname = self.__class__._get_class_label(tolower=lowercase)
+        if class_only:
+            return clsname.__format__(passthrough)
+        val = "%s %s" % (clsname, instance)
+        return val.__format__(passthrough)
+
+    def __format__(self, format_spec):
+        """
+        Return a pretty-printed representation of the object.
+
+        The output of format() should be the preferred form when referring to
+        this object in messages sent to the client. It should be readable as
+        plain text, and should uniquely identify the object.
+
+        The format_spec argument can be a standard format specifier suitable for
+        strings, with some extensions:
+
+        - specifying the 'l' flag will format the class label in lower case,
+          except abbreviations.
+
+        - specifying the 'c' flag will return the pretty printed class name
+        """
+
+        return self.format_helper(format_spec, self._get_instance_label())
 
     @classmethod
-    def get_by(cls, k, v, session):
-        return session.query(cls).filter(cls.__dict__[k] == v).all()
-
-    @classmethod
-    def _get_class_label(cls):
-        return getattr(cls, "_class_label", cls.__name__)
-
+    def _get_class_label(cls, tolower=False):
+        label = getattr(cls, "_class_label", cls.__name__)
+        if tolower:
+            parts = label.split()
+            # 'Operating System' -> 'operating system', but:
+            # 'ESX Cluster' -> 'ESX cluster'
+            # 'ToR Switch' -> 'ToR switch'
+            #
+            # Heuristic: a word is an acronym if the last letter is in upper
+            # case
+            label = ' '.join(map(lambda x: x if x[:-1].isupper() else x.lower(), parts))
+        return label
 
     def _get_instance_label(self):
-        """Subclasses can override this method or just set a property to check.
+        """ Subclasses can override this method or just set a property to check
 
-        If an instance has an attribute named _instance_label, the property
-        named by that attribute will be checked for an identifier.
+            If an instance has an attribute named _instance_label, the property
+            named by that attribute will be checked for an identifier.
 
-        Without _instance_label set, the properties 'name' and 'type' are
-        checked, followed by service.name and system.name.
+            Without _instance_label set, the properties 'name' and 'type' are
+            checked, followed by service.name and system.name.
 
-        For situations more complex than just checking a property this
-        method should be overridden with the necessary logic.
-
+            For situations more complex than just checking a property this
+            method should be overridden with the necessary logic.
         """
         if hasattr(self, "_instance_label"):
             return getattr(self, getattr(self, "_instance_label"))
@@ -100,12 +177,12 @@ class Base(object):
     def _selection_helper(cls, session, query, *args, **kwargs):
         """ Helper method for get_unique and get_matching_ids
 
-        Every class that wishes to support get_unique() must have
-        'unique_fields' defined in the table's info dictionary. 'unique_fields'
-        is a list that contains the names of fields that make the object unique.
-        Every field can be either a column or a relation. In the latter case,
-        'unique_fields' of the referenced class must contain a single field
-        only.
+            Every class that wishes to support get_unique() must have
+            'unique_fields' defined in the table's info dictionary.
+            'unique_fields' is a list that contains the names of fields that
+            make the object unique. Every field can be either a column or a
+            relation. In the latter case, 'unique_fields' of the referenced
+            class must contain a single field only
         """
 
         compel = kwargs.pop('compel', False)
@@ -116,7 +193,7 @@ class Base(object):
 
         if not isinstance(session, Session):
             raise TypeError("The first argument of %s() must be an "
-                            "SQLAlchemy session." %  caller)
+                            "SQLAlchemy session." % caller)
 
         if 'unique_fields' not in table.info:
             raise InternalError("Class %s is not annotated to be used with "
@@ -198,8 +275,8 @@ class Base(object):
             msg = "%s %s not found." % (clslabel, ", ".join(desc))
             _raise_custom(compel, NotFoundException, msg)
         except MultipleResultsFound:
-                msg = "%s %s is not unique." % (clslabel, ", ".join(desc))
-                raise ArgumentError(msg)
+            msg = "%s %s is not unique." % (clslabel, ", ".join(desc))
+            raise ArgumentError(msg)
 
     @classmethod
     def get_matching_query(cls, session, *args, **kwargs):

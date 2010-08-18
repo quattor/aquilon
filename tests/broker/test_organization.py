@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add organization command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -50,7 +47,7 @@ class TestOrganization(TestBrokerCommand):
     def testverifyaddexorg(self):
         command = "show organization --organization example"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Company: example", command)
+        self.matchoutput(out, "Organization: example", command)
 
     def testdelexorg(self):
         command = "del organization --organization example"
@@ -59,12 +56,12 @@ class TestOrganization(TestBrokerCommand):
     def testdelexorgagain(self):
         command = "del organization --organization example"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Company example not found.", command)
+        self.matchoutput(out, "Organization example not found.", command)
 
     def testverifydelexorg(self):
         command = "show organization --organization example"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Company example not found.", command)
+        self.matchoutput(out, "Organization example not found.", command)
 
 
 if __name__=='__main__':

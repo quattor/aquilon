@@ -51,7 +51,7 @@ class CommandManageHostname(BrokerCommand):
         if dbhost.cluster:
             raise ArgumentError("Cluster nodes must be managed at the "
                                 "cluster level; this host is a member of "
-                                "cluster %s." % dbhost.cluster.name)
+                                "{0}.".format(dbhost.cluster))
 
         old_branch = dbhost.branch.name
 

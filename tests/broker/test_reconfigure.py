@@ -29,15 +29,14 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the reconfigure command."""
 
+
 import os
-import sys
-import unittest
 import re
+import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -386,7 +385,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchoutput(out,
                          "Cannot change personality of host "
                          "evh1.aqd-unittest.ms.com while it is a member of "
-                         "esx cluster ",
+                         "ESX cluster ",
                          command)
 
     # This doesn't work since the manage test comes after this one.

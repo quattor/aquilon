@@ -29,14 +29,11 @@
 # TERMS THAT MAY APPLY.
 """Module for testing the add building command."""
 
-import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -50,6 +47,11 @@ class TestAddBuilding(TestBrokerCommand):
     def testverifyaddut(self):
         command = "show building --building ut"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Building: ut", command)
+
+    def testverifybuildingall(self):
+        command = ["show", "building", "--all"]
+        out = self.commandtest(command)
         self.matchoutput(out, "Building: ut", command)
 
     def testverifyshowcsv(self):

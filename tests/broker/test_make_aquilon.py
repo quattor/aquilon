@@ -30,21 +30,21 @@
 """Module for testing the make aquilon command."""
 
 import os
-import sys
-import unittest
 import re
+import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
-# This tests the "make aquilon" command, which has
-# the specific feature of auto-binding required services.
 
 class TestMakeAquilon(TestBrokerCommand):
+    """ This tests the "make aquilon" command
+
+        which has the specific feature of auto-binding required services
+    """
 
     def testmakeunittest02(self):
         command = ["make", "aquilon",
@@ -59,7 +59,7 @@ class TestMakeAquilon(TestBrokerCommand):
 
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
-            "unittest02.one-nyp.ms.com.xml")))
+            "unittest02.one-nyp.ms.com%s" % self.profile_suffix)))
 
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "builddir"),
@@ -135,7 +135,7 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchclean(err, "removing binding", command)
         self.assert_(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
-            "unittest00.one-nyp.ms.com.xml")))
+            "unittest00.one-nyp.ms.com%s" % self.profile_suffix)))
 
     def testverifybuildstatus(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"

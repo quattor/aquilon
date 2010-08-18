@@ -30,13 +30,11 @@
 """Module for testing commands that add virtual hardware."""
 
 import os
-import sys
 import unittest
 
 if __name__ == "__main__":
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    SRCDIR = os.path.join(BINDIR, "..", "..")
-    sys.path.append(os.path.join(SRCDIR, "lib", "python2.6"))
+    import utils
+    utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
@@ -76,7 +74,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_090_verifyaddmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Virtual Machine count: 9", command)
 
     def test_100_addinterfaces(self):
@@ -186,10 +184,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
             command = "show machine --machine evm%s" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Virtual_machine: evm%s" % i, command)
-            self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+            self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-            self.matchoutput(out, "Cpu: Cpu xeon_2500 x 1", command)
+            self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
             self.matchoutput(out,
                              "Interface: eth0 00:50:56:01:20:%02x boot=True" %
@@ -254,7 +252,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_500_verifyshow(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "esx cluster: utecl1", command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 8", command)
@@ -301,10 +299,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = "show machine --machine evm1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Virtual_machine: evm1", command)
-        self.matchoutput(out, "Hosted by esx cluster: utecl1", command)
+        self.matchoutput(out, "Hosted by ESX Cluster: utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
-        self.matchoutput(out, "Cpu: Cpu xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 12288 MB", command)
         self.matchoutput(out,
                          "Interface: eth0 00:50:56:01:20:00 boot=True",
@@ -321,6 +319,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_700_add_windows(self):
         command = ["add_windows_host", "--hostname=aqddesk1.msad.ms.com",
+                   "--osversion=nt61e",
                    "--machine=evm1", "--comments=Windows Virtual Desktop"]
         self.noouttest(command)
 
@@ -329,6 +328,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hostname: aqddesk1.msad.ms.com", command)
         self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Template: windows/os/windows/nt61e/config.tpl",
+                         command)
         self.matchoutput(out, "Comments: Windows Virtual Desktop", command)
 
     def test_810_verifycatcluster(self):
@@ -336,7 +337,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "'name', 'windows',", command)
         self.matchoutput(out, "'os', 'windows',", command)
-        self.matchoutput(out, "'osversion', 'generic',", command)
+        self.matchoutput(out, "'osversion', 'nt61e',", command)
         self.matchoutput(out, "'hostname', 'aqddesk1',", command)
         self.matchoutput(out, "'domainname', 'msad.ms.com',", command)
 
