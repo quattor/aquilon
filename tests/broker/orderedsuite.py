@@ -231,7 +231,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMapService, TestBindClient, TestPrebindServer,
                 TestServiceConstraints,
                 TestMakeAquilon, TestMakeCluster, TestCluster,
-                TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster, 
+                TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
                 TestMake,
                 TestRebindMetaCluster,
                 TestAddVirtualHardware, TestAdd10GigHardware,

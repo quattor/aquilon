@@ -63,7 +63,7 @@ class StateEngine:
                 return None
             msg = "%s %s not found." % (clslabel, name)
             raise NotFoundException(msg)
-            
+
         query = session.query(cls).filter(getattr(cls, "name") == name)
         # We can't get NoResultFound since we've already checked the transition
         # table, and we can't get MultipleResultsFound since name is unique.

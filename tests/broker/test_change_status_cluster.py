@@ -50,12 +50,12 @@ class TestChangeClusterStatus(TestBrokerCommand):
         self.successtest(["change_status",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--buildstatus", "ready"])
-        
+
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out, "Build Status: almostready", command)
-        
+
     def testPromoteCluster(self):
         self.successtest(["change_status", "--cluster", "utecl1",
                           "--buildstatus", "ready"])
@@ -78,21 +78,20 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Build Status: almostready", command)        
+        self.matchoutput(out, "Build Status: almostready", command)
 
         # Put the host back and confirm it can move to ready
         self.successtest(["rebind_esx_cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--cluster", "utecl1"])         
+                          "--cluster", "utecl1"])
         self.successtest(["change_status",
                           "--hostname", "evh1.aqd-unittest.ms.com",
                           "--buildstatus", "ready"])
-        
+
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out, "Build Status: ready", command)
-        
 
 
 if __name__=='__main__':

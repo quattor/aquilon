@@ -63,7 +63,7 @@ class CommandChangeClusterStatus(BrokerCommand):
                         new_promotes.append(dbhost.fqdn)
                         hostfile = PlenaryHost(dbhost, logger=logger)
                         plenaries.append(hostfile)
-                    
+
         if not dbcluster.personality.archetype.is_compileable:
             return
 

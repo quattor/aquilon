@@ -30,7 +30,7 @@
 from datetime import datetime
 
 from sqlalchemy.orm import object_session
-from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, 
+from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
                         String, ForeignKey, UniqueConstraint)
 
 from aquilon.aqdb.model import StateEngine, Base
@@ -39,23 +39,23 @@ from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
 
-''' 
+'''
 This stateful view describes where the host is within it's
-provisioning lifecycle. 
+provisioning lifecycle.
 '''
 _TN = 'hostlifecycle'
 class HostLifecycle(StateEngine, Base):
     transitions = {
                'blind'        : ['build', 'failed', 'decommissioned'],
-               'build'        : ['almostready','ready', 'failed', 
+               'build'        : ['almostready','ready', 'failed',
                                  'decomissioned'],
                'install'      : ['build', 'failed', 'decommissioned'],
                'almostready'  : ['ready', 'rebuild', 'reinstall', 'failed',
                                  'decommissioned'],
-               'ready'        : ['almostready', 'rebuild', 'reinstall', 'failed', 
+               'ready'        : ['almostready', 'rebuild', 'reinstall', 'failed',
                                  'decommissioned'],
                'reinstall'    : ['rebuild', 'failed', 'decommissioned'],
-               'rebuild'      : ['almostready', 'ready', 'failed', 
+               'rebuild'      : ['almostready', 'ready', 'failed',
                                  'decommissioned'],
                'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
                'decommissioned' : [],

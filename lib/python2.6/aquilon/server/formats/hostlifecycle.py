@@ -30,7 +30,7 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import HostLifecycle 
+from aquilon.aqdb.model import HostLifecycle
 
 
 class StatusFormatter(ObjectFormatter):

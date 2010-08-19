@@ -142,4 +142,3 @@ def force_boolean(label, value):
     if no_re.match(value):
         return False
     raise ArgumentError("Expected a boolean value for %s." % label)
-
