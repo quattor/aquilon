@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import Cluster, HostClusterMember
+from aquilon.aqdb.model import Cluster, HostClusterMember, HostLifecycle
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.services import Chooser
 
@@ -86,6 +86,20 @@ class CommandCluster(BrokerCommand):
                 session.add(dbhcm)
             except ValueError, e:
                 raise ArgumentError(e.message)
+
+            # demote a host when switching clusters
+            # promote a host when switching clusters
+            if dbhost.status.name == 'ready':
+                if dbcluster.status.name != 'ready':
+                    dbalmost = HostLifecycle.get_unique(session, 'almostready',
+                                                        compel=True)
+                    dbhost.status.transition(dbhost, dbalmost)
+            elif dbhost.status.name == 'almostready':
+                if dbcluster.status.name == 'ready':
+                    dbready = HostLifecycle.get_unique(session, 'ready',
+                                                       compel=True)
+                    dbhost.status.transition(dbhost, dbready)
+
             session.flush()
             session.refresh(dbhost)
             # Enforce that service instances are set correctly for the
