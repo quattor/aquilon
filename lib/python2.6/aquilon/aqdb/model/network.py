@@ -181,6 +181,7 @@ network.primary_key.name = 'network_pk'
 network.append_constraint(UniqueConstraint('ip', name='net_ip_uk'))
 
 network.info['unique_fields'] = ['ip']
+network.info['extra_search_fields'] = ['name']
 
 Index('net_loc_id_idx', network.c.location_id)
 
