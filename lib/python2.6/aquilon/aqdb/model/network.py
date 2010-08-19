@@ -32,6 +32,7 @@ from datetime import datetime
 from struct import pack
 from socket import inet_ntoa
 from ipaddr import IPv4Address, IPv4Network
+import math
 
 from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
                         UniqueConstraint, ForeignKey, Boolean, func)
@@ -244,7 +245,8 @@ def populate(sess, **kw):
                 continue
 
             kwargs['name'] = name
-            kwargs['network'] = IPv4Network("%s/%s" % (ip, _mask_to_cidr[mask]))
+            prefixlen = 32 - int(math.log(mask, 2))
+            kwargs['network'] = IPv4Network("%s/%s" % (ip, prefixlen))
             kwargs['network_type'] = network_type
 
             if network_type == 'tor_net' or network_type == 'grid_access':
@@ -273,40 +275,3 @@ def populate(sess, **kw):
         stend = time.clock()
         thetime = stend - start
         log.info('created %s networks in %2f' % (count, thetime))
-
-
-#for fast lookups as opposed to a computed column approach
-_mask_to_cidr = {
-    1          : 32,
-    2          : 31,
-    4          : 30,
-    8          : 29,
-    16         : 28,
-    32         : 27,
-    64         : 26,
-    128        : 25,
-    256        : 24,
-    512        : 23,
-    1024       : 22,
-    2048       : 21,
-    4096       : 20,
-    8192       : 19,
-    16384      : 18,
-    32768      : 17,
-    65536      : 16,
-    131072     : 15,
-    262144     : 14,
-    524288     : 13,
-    1048576    : 12,
-    2097152    : 11,
-    4194304    : 10,
-    8388608    : 9,
-    16777216   : 8,
-    33554432   : 7,
-    67108864   : 6,
-    134217728  : 5,
-    268435456  : 4,
-    536870912  : 3,
-    1073741824 : 2,
-    2147483648 : 1,
-    4294967296 : 0}

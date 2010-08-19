@@ -33,6 +33,7 @@ import os
 import sys
 import logging
 import optparse
+import math
 from ipaddr import IPv4Address, IPv4Network
 
 if __name__ == "__main__":
@@ -44,7 +45,6 @@ from sqlalchemy.exceptions import DatabaseError, IntegrityError
 from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Building, System, Network
-from aquilon.aqdb.model.network import _mask_to_cidr
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.dsdb import DsdbConnection
 from aquilon.aqdb.data_sync.net_record import NetRecord
@@ -106,10 +106,10 @@ class NetRefresher(object):
         for building in self.session.query(Building).all():
             buildings[building.name] = building
         for (name, ip, mask, type, bldg, side) in data:
-            cidr = _mask_to_cidr[mask]
+            prefixlen = 32 - int(math.log(mask, 2))
             ip = IPv4Address(ip)
             d[ip] = NetRecord(ip=ip, name=name, net_type=type,
-                              cidr=cidr, side=side, bldg=bldg,
+                              cidr=prefixlen, side=side, bldg=bldg,
                               location=buildings.get(bldg, None))
         return d
 

@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 
 import re
+import math
 from ipaddr import (IPv4Network, IPv4IpValidationError,
                     IPv4NetmaskValidationError)
 
@@ -35,8 +36,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.network import get_network_byname
-from aquilon.aqdb.model.network import (Network, _mask_to_cidr,
-                                        get_net_id_from_ip)
+from aquilon.aqdb.model.network import Network, get_net_id_from_ip
 
 class CommandAddNetwork(BrokerCommand):
 
@@ -58,7 +58,7 @@ class CommandAddNetwork(BrokerCommand):
             # IPv4Network can handle it just fine
             netmask = arguments["prefixlen"]
         elif arguments.get("mask"):
-            netmask = _mask_to_cidr[arguments["mask"]]
+            netmask = 32 - int(math.log(arguments["mask"], 2))
 
         try:
             address = IPv4Network("%s/%s" % (ip, netmask))
