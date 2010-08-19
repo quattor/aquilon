@@ -49,7 +49,6 @@ if config.has_option("database", "module"):
     ms.modulecmd.load(config.get("database", "module"))
 
 from aquilon.aqdb.model import *
-import aquilon.aqdb.dsdb as dsdb_
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
 from loader import load_from_file
@@ -94,12 +93,6 @@ def parse_cli(*args, **kw):
                       help    = 'run functions to prepopulate data',
                       default = False)
 
-    parser.add_argument('-f', '--full',
-                      action  = 'store_true',
-                      dest    = 'full',
-                      help    = 'perform full network table population',
-                      default = False)
-
     return parser.parse_args()
 
 
@@ -125,14 +118,9 @@ def main(*args, **kw):
             for table in reversed(Base.metadata.sorted_tables):
                 table.drop(checkfirst=True)
 
-    #TODO: pass opts arg around? stop passing dsdb around/make ?
-    kwargs = {'full': opts.full}
-
     if opts.populate:
         s = db.Session()
         assert s, "No Session in build_db.py populate"
-
-        kwargs['dsdb'] = dsdb_.DsdbConnection()
 
     #Create all tables upfront
     Base.metadata.create_all(checkfirst=True)
@@ -154,7 +142,7 @@ def main(*args, **kw):
 
         if hasattr(tbl, 'populate') and opts.populate:
             #log.debug('populating %s' % tbl.name)
-            tbl.populate(s, **kwargs)
+            tbl.populate(s)
 
     #CONSTRAINTS
     if db.dsn.startswith('oracle'):
