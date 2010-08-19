@@ -32,7 +32,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import BuildItem, OperatingSystem, Personality
+from aquilon.aqdb.model import (BuildItem, HostLifecycle,
+                                OperatingSystem, Personality)
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
@@ -78,7 +79,6 @@ class CommandMake(BrokerCommand):
             raise ArgumentError("{0} is not a compilable archetype "
                                 "({1!s}).".format(dbhost, dbhost.archetype))
 
-        # XXX: Need to do the same cluster check!!!
         if buildstatus:
             dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                 compel=True)

@@ -34,7 +34,8 @@ from aquilon.aqdb.model import HostLifecycle, StateEngine
 
 from aquilon.aqdb.model.hostlifecycle import (Ready, Almostready, Build,
                                               Rebuild, Decommissioned,
-                                              Install, Reinstall)
+                                              Failed,
+                                              Blind, Install, Reinstall)
 
 class StatusFormatter(ObjectFormatter):
     template_raw = "status.mako"
@@ -43,9 +44,11 @@ ObjectFormatter.handlers[HostLifecycle] = StatusFormatter()
 
 # This sucks... is there a better way?
 ObjectFormatter.handlers[Almostready] = StatusFormatter()
+ObjectFormatter.handlers[Blind] = StatusFormatter()
 ObjectFormatter.handlers[Build] = StatusFormatter()
 ObjectFormatter.handlers[Rebuild] = StatusFormatter()
 ObjectFormatter.handlers[Ready] = StatusFormatter()
 ObjectFormatter.handlers[Decommissioned] = StatusFormatter()
 ObjectFormatter.handlers[Install] = StatusFormatter()
 ObjectFormatter.handlers[Reinstall] = StatusFormatter()
+ObjectFormatter.handlers[Failed] = StatusFormatter()

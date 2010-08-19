@@ -83,8 +83,8 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if buildstatus:
-            dbbuildstatus = HostLifecycleget_unique(session, buildstatus,
-                                                    compel=True)
+            dbbuildstatus = HostLifecycle.get_unique(session, buildstatus,
+                                                     compel=True)
             q = q.filter_by(status=dbbuildstatus)
 
         if osname and osversion and archetype:
