@@ -1,0 +1,7 @@
+1. Run the personality_cluster_info.sql script using sqlplus while the broker
+   is down.
+
+2. Run the add_capacity_overrides.sh script after the broker has been
+   restarted.
+
+3. Run the commands printed out by the add_capacity_overrides.sh script.
