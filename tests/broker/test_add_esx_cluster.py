@@ -160,7 +160,7 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--archetype=vmhost", "--personality=esx_desktop"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Status wanting not found",
+                         "state wanting not found",
                          command)
 
     def testfailinvalidname(self):

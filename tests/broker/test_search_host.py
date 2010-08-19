@@ -139,7 +139,7 @@ class TestSearchHost(TestBrokerCommand):
     def testbuildstatusunavailable(self):
         command = "search host --buildstatus status-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Status status-does-not-exist not found",
+        self.matchoutput(out, "state status-does-not-exist not found",
                          command)
 
     def testipavailable(self):

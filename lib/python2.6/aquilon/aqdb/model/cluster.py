@@ -37,7 +37,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Base, Status, Host, Service, Location, 
+from aquilon.aqdb.model import (Base, Host, Service, Location,
                                 Personality, ClusterLifecycle,
                                 ServiceInstance, Machine, Branch, TorSwitch,
                                 UserPrincipal)

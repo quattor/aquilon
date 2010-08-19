@@ -26,20 +26,14 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a status simpler."""
+"""Status formatter."""
 
 
-from sqlalchemy.orm.exc import NoResultFound
-
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Status
+from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.aqdb.model import HostLifecycle 
 
 
-def get_status(session, status):
-    try:
-        dbstatus = session.query(Status).filter_by(name=status).one()
-    except NoResultFound:
-        msg = ", ".join([st.name for st in session.query(Status).all()])
-        raise NotFoundException("Status %s not found.  Try one of: %s." %
-                                (status, msg))
-    return dbstatus
+class StatusFormatter(ObjectFormatter):
+    template_raw = "status.mako"
+
+ObjectFormatter.handlers[HostLifecycle] = StatusFormatter()

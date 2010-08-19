@@ -30,8 +30,8 @@
 
 from aquilon.server.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
+                                ClusterLifecycle,
                                 MetaClusterMember, Personality)
-from aquilon.server.dbwrappers.status import get_status
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
@@ -49,10 +49,10 @@ class CommandAddESXCluster(BrokerCommand):
                tor_switch, down_hosts_threshold, buildstatus, comments, **arguments):
         validate_basic("cluster", cluster)
 
-        if buildstatus:
-            dbstatus = get_status(session, buildstatus)
-        else:
-            dbstatus = get_status(session, "build")
+        if not buildstatus:
+            buildstatus = "build"
+        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
+                                               compel=True)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,

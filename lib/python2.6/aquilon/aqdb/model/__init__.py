@@ -27,6 +27,7 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 from aquilon.aqdb.model.base import Base
+from aquilon.aqdb.model.stateengine import StateEngine
 
 #AUTHORIZATION
 from aquilon.aqdb.model.role import Role
@@ -61,7 +62,7 @@ from aquilon.aqdb.model.model import Model
 from aquilon.aqdb.model.hardware_entity import HardwareEntity
 from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
-from aquilon.aqdb.model.status import Status
+from aquilon.aqdb.model.hostlifecycle import HostLifecycle
 from aquilon.aqdb.model.tor_switch_hw import TorSwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw
 
@@ -92,7 +93,7 @@ from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.disk import Disk, LocalDisk, NasDisk
 
 #CLUSTER
-from aquilon.aqdb.model.clusterstatus import ClusterLifecycle
+from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         HostClusterMember,
                                         MachineClusterMember,

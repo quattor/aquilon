@@ -32,7 +32,8 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import Archetype, Personality, OperatingSystem, Status
+from aquilon.aqdb.model import (Archetype, Personality,
+                                OperatingSystem, HostLifecycle)
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser
@@ -93,7 +94,8 @@ class CommandReconfigureList(BrokerCommand):
                                               archetype=dbarchetype,
                                               compel=True)
         if buildstatus:
-            dbstatus = Status.get_unique(session, buildstatus, compel=True)
+            dbstatus = HostLifecycle.get_unique(session, buildstatus,
+                                                compel=True)
 
         branches = {}
         authors = {}
@@ -145,7 +147,7 @@ class CommandReconfigureList(BrokerCommand):
                 dbhost.operating_system = dbos
                 session.add(dbhost)
             if buildstatus:
-                dbhost.status = dbstatus
+                dbhost.status.transition(dbhost, dbstatus)
                 session.add(dbhost)
         session.flush()
 

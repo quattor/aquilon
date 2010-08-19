@@ -29,11 +29,12 @@
 
 from datetime import datetime
 
+from sqlalchemy.orm import object_session
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, 
                         String, ForeignKey, UniqueConstraint)
 
-from aquilon.aqdb.model import Base
-from aquilon.utils import monkeypatch, StateEngine
+from aquilon.aqdb.model import StateEngine, Base
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
@@ -42,18 +43,21 @@ from aquilon.exceptions_ import ArgumentError
 This stateful view describes where the host is within it's
 provisioning lifecycle. 
 '''
-_TN = 'status'
-class Status(Base, StateEngine):
+_TN = 'hostlifecycle'
+class HostLifecycle(StateEngine, Base):
     transitions = {
-               'blind'        : ['build', 'decommissioned'],
-               'build'        : ['almostready','ready', 'decomissioned'],
-               'install'      : ['build', 'decommissioned'],
-               'almostready'  : ['ready', 'decommissioned'],
-               'ready'        : ['rebuild', 'reinstall', 'failed', 
+               'blind'        : ['build', 'failed', 'decommissioned'],
+               'build'        : ['almostready','ready', 'failed', 
+                                 'decomissioned'],
+               'install'      : ['build', 'failed', 'decommissioned'],
+               'almostready'  : ['ready', 'rebuild', 'reinstall', 'failed',
                                  'decommissioned'],
-               'reinstall'    : ['rebuild', 'decommissioned'],
-               'rebuild'      : ['ready', 'decommissioned'],
-               'failed'       : ['rebuild', 'decommissioned'],
+               'ready'        : ['almostready', 'rebuild', 'reinstall', 'failed', 
+                                 'decommissioned'],
+               'reinstall'    : ['rebuild', 'failed', 'decommissioned'],
+               'rebuild'      : ['almostready', 'ready', 'failed', 
+                                 'decommissioned'],
+               'failed'       : ['rebuild', 'reinstall', 'decommissioned'],
                'decommissioned' : [],
                }
 
@@ -68,7 +72,7 @@ class Status(Base, StateEngine):
         return str(self.name)
 
 
-hostlifecycle = Status.__table__
+hostlifecycle = HostLifecycle.__table__
 hostlifecycle.primary_key.name='%s_pk'%(_TN)
 hostlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
 hostlifecycle.info['unique_fields'] = ['name']
@@ -77,7 +81,7 @@ hostlifecycle.info['unique_fields'] = ['name']
 def populate(sess, *args, **kw):
     from sqlalchemy.exceptions import IntegrityError
 
-    statuslist = Status.transitions.keys()
+    statuslist = HostLifecycle.transitions.keys()
 
     i = hostlifecycle.insert()
     for name in statuslist:
@@ -86,54 +90,52 @@ def populate(sess, *args, **kw):
         except IntegrityError:
             pass
 
-    assert len(sess.query(Status).all()) == len(statuslist)
+    assert len(sess.query(HostLifecycle).all()) == len(statuslist)
 
 
 '''
 The following classes are the actual lifecycle states for a host
 '''
 
-class Blind(Status):
+class Blind(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'blind'}
-    pass
 
 
-class Decommissioned(Status):
+class Decommissioned(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
-    pass
 
 
-class Ready(Status):
+class Ready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
-    pass
+
+    def onEnter(self, obj):
+        if obj.cluster and obj.cluster.status != 'ready':
+            dbstate = HostLifecycle.get_unique(object_session(obj),
+                                               'almostready',
+                                               compel=True)
+            obj.status.transition(obj, dbstate)
 
 
-class Almostready(Status):
+class Almostready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'almostready'}
-    pass
 
 
-class Install(Status):
+class Install(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'install'}
-    pass
 
 
-class Build(Status):
+class Build(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'build'}
-    pass
 
 
-class Rebuild(Status):
+class Rebuild(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'rebuild'}
-    pass
 
 
-class Reinstall(Status):
+class Reinstall(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'reinstall'}
-    pass
 
 
-class Failed(Status):
+class Failed(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'failed'}
-    pass
 

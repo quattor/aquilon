@@ -32,11 +32,10 @@
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import Status
+from aquilon.aqdb.model import HostLifecycle
 
 
 class CommandChangeStatus(BrokerCommand):
@@ -44,21 +43,8 @@ class CommandChangeStatus(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, buildstatus, **arguments):
-        dbstatus = Status.get_unique(session, buildstatus, compel=True)
-        buildstatus = dbstatus.name
-
         dbhost = hostname_to_host(session, hostname)
-        # almostready is a magical state that will be automatically
-        # used if the input requests us to move to 'ready', but we're
-        # in a cluster which isn't ready yet.
-        if buildstatus == "ready" and dbhost.cluster:
-            if dbhost.cluster.status.name != "ready":
-                force = "almostready"
-                logger.info(("cluster is not ready, so forcing " +
-                            "state to %s") % force)
-                dbstatus = Status.get_unique(session, force, compel=True)
-                buildstatus = dbstatus.name
-
+        dbstatus = HostLifecycle.get_unique(session, buildstatus, compel=True)
         changed = dbhost.status.transition(dbhost, dbstatus)
 
         if not changed or not dbhost.archetype.is_compileable:

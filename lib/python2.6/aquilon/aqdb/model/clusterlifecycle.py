@@ -32,8 +32,8 @@ from datetime import datetime
 from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, 
                         String, ForeignKey, UniqueConstraint)
 
-from aquilon.aqdb.model import Base
-from aquilon.utils import monkeypatch, StateEngine
+from aquilon.aqdb.model import Base, StateEngine
+from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
@@ -43,7 +43,7 @@ This stateful view describes where the cluster is within it's
 provisioning lifecycle. 
 '''
 _TN = 'clusterlifecycle'
-class ClusterLifecycle(Base, StateEngine):
+class ClusterLifecycle(StateEngine, Base):
     transitions = {
                'build'        : ['ready', 'decomissioned'],
                'ready'        : ['decommissioned'],
@@ -88,7 +88,6 @@ The following classes are the actual lifecycle states for a cluster
 
 class Decommissioned(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
-    pass
 
 
 class Ready(ClusterLifecycle):
@@ -97,5 +96,4 @@ class Ready(ClusterLifecycle):
 
 class Build(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'build'}
-    pass
 

@@ -31,12 +31,11 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, HostLifecycle, ClusterLifecycle
 
 class CommandChangeClusterStatus(BrokerCommand):
 
@@ -55,7 +54,7 @@ class CommandChangeClusterStatus(BrokerCommand):
         new_promotes = []
         plenaries = []
         if dbcluster.status.name == "ready":
-            dbready = Status.get_unique(session, "ready", compel=True)
+            dbready = HostLifecycle.get_unique(session, "ready", compel=True)
             for dbhost in dbcluster.hosts:
                 if dbhost.status.name == 'almostready':
                     if dbhost.status.transition(dbhost, dbready):
