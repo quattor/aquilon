@@ -37,6 +37,7 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
+                                HostLifecycle,
                                 Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
