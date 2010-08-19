@@ -109,7 +109,7 @@ class Ready(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
 
     def onEnter(self, obj):
-        if obj.cluster and obj.cluster.status != 'ready':
+        if obj.cluster and obj.cluster.status.name != 'ready':
             dbstate = HostLifecycle.get_unique(object_session(obj),
                                                'almostready',
                                                compel=True)

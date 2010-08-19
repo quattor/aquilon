@@ -69,13 +69,6 @@ class CommandReconfigure(CommandMake):
             if buildstatus:
                 dbstatus = HostLifecycle.get_unique(session, buildstatus,
                                                     compel=True)
-                if dbstatus.name == "ready" and dbhost.cluster:
-                    if dbhost.cluster.status.name != "ready":
-                        logger.info("cluster is not ready, so forcing ready state to almostready")
-                        buildstatus = "almostready"
-
-                    dbstatus = HostLifecycle.get_unique(session, buildstatus,
-                                                        compel=True)
                 dbhost.status.transition(dbhost, dbstatus)
 
 

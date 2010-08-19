@@ -29,10 +29,11 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence, 
+from sqlalchemy.orm.session import object_session
+from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
                         String, ForeignKey, UniqueConstraint)
 
-from aquilon.aqdb.model import Base, StateEngine
+from aquilon.aqdb.model import Base, StateEngine, HostLifecycle
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
@@ -46,7 +47,8 @@ _TN = 'clusterlifecycle'
 class ClusterLifecycle(StateEngine, Base):
     transitions = {
                'build'        : ['ready', 'decomissioned'],
-               'ready'        : ['decommissioned'],
+               'ready'        : ['rebuild', 'decommissioned'],
+               'rebuild'      : ['ready', 'decommissioned'],
                'decommissioned' : [],
                }
 
@@ -93,7 +95,17 @@ class Decommissioned(ClusterLifecycle):
 class Ready(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'ready'}
 
+    def onEnter(self, dbcluster):
+        dbready = HostLifecycle.get_unique(object_session(dbcluster),
+                                           "ready", compel=True)
+        for dbhost in dbcluster.hosts:
+            if dbhost.status.name == 'almostready':
+                dbhost.status.transition(dbhost, dbready)
+
+
+class Rebuild(ClusterLifecycle):
+    __mapper_args__ = {'polymorphic_identity': 'rebuild'}
+
 
 class Build(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'build'}
-

@@ -43,46 +43,46 @@ class CommandChangeClusterStatus(BrokerCommand):
 
     def render(self, session, logger, cluster, buildstatus, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        dbstatus = ClusterLifecycleState.get_unique(session, buildstatus,
+        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
                                                     compel=True)
 
         if not dbcluster.status.transition(dbcluster, dbstatus):
             return
-        session.add(dbcluster)
-
-        # Promote the members of the cluster
-        new_promotes = []
-        plenaries = []
-        if dbcluster.status.name == "ready":
-            dbready = HostLifecycle.get_unique(session, "ready", compel=True)
-            for dbhost in dbcluster.hosts:
-                if dbhost.status.name == 'almostready':
-                    if dbhost.status.transition(dbhost, dbready):
-                        session.add(dbhost)
-                        logger.info("promoted %s from almostready to ready" % dbhost.fqdn)
-                        new_promotes.append(dbhost.fqdn)
-                        hostfile = PlenaryHost(dbhost, logger=logger)
-                        plenaries.append(hostfile)
 
         if not dbcluster.personality.archetype.is_compileable:
             return
 
         session.flush()
 
+        plenaries = []
         plenary = PlenaryCluster(dbcluster, logger=logger)
         plenaries.append(plenary)
+
+        # recompile all of the hosts associated with the cluster
+        compilelist = []
+        compilelist.append("cluster/" + dbcluster.name)
+        for dbhost in dbcluster.hosts:
+            hostfile = PlenaryHost(dbhost, logger=logger)
+            plenaries.append(hostfile)
+            compilelist.append(dbhost.fqdn)
+
         # Force a host lock as pan might overwrite the profile...
         key = CompileKey(domain=dbcluster.branch.name, profile=dbcluster.name,
                          logger=logger)
         try:
             lock_queue.acquire(key)
+
             for tpl in plenaries:
-                tpl.write(locked=True)
+                try:
+                    tpl.write(locked=True)
+                except IncompleteError:
+                    # some hosts may not be built yet
+                    pass
+
             td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, only=" ".join(new_promotes), locked=True)
-            # We cannnot get an incomplete exception, because new_promotes are all
-            # hosts that are in almostready status, therefore they must be complete.
+            out = td.compile(session, " ".join(compilelist), locked=True)
+
         except:
             for tpl in plenaries:
                 tpl.restore_stash()

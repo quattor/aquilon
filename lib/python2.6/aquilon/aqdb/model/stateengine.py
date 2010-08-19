@@ -1,5 +1,5 @@
 from aquilon.aqdb.model import Base
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.session import Session, object_session
 from sqlalchemy.orm.exc import NoResultFound
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 
@@ -38,6 +38,7 @@ class StateEngine:
         if hasattr(self, 'onLeave'):
             self.onLeave(obj)
         obj.status = target_state
+        object_session(obj).add(obj)
         if hasattr(target_state, 'onEnter'):
             target_state.onEnter(obj)
         return True
