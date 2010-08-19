@@ -30,22 +30,18 @@
 
 
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import HostLifecycle, StateEngine
+from aquilon.aqdb.model import ClusterLifecycle
 
-from aquilon.aqdb.model.hostlifecycle import (Ready, Almostready, Build,
-                                              Rebuild, Decommissioned,
-                                              Install, Reinstall)
+from aquilon.aqdb.model.clusterlifecycle import (Ready, Build,
+                                                 Rebuild, Decommissioned)
 
 class StatusFormatter(ObjectFormatter):
     template_raw = "status.mako"
 
-ObjectFormatter.handlers[HostLifecycle] = StatusFormatter()
+ObjectFormatter.handlers[ClusterLifecycle] = StatusFormatter()
 
 # This sucks... is there a better way?
-ObjectFormatter.handlers[Almostready] = StatusFormatter()
 ObjectFormatter.handlers[Build] = StatusFormatter()
 ObjectFormatter.handlers[Rebuild] = StatusFormatter()
 ObjectFormatter.handlers[Ready] = StatusFormatter()
 ObjectFormatter.handlers[Decommissioned] = StatusFormatter()
-ObjectFormatter.handlers[Install] = StatusFormatter()
-ObjectFormatter.handlers[Reinstall] = StatusFormatter()
