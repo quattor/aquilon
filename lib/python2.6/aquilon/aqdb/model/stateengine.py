@@ -9,7 +9,7 @@ class StateEngine:
     def transition(self, obj, target_state):
         '''Transition to another state.
 
-        host -- the object which wants to change state
+        obj -- the object which wants to change state
         target_state -- a db object referring to the desired state
 
         returns a list of objects that have changed state.
