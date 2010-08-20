@@ -34,7 +34,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, select,
                         Column, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import (Base, System, Branch, Machine, Status,
+from aquilon.aqdb.model import (Base, System, Branch, Machine, HostLifecycle,
                                 Personality, OperatingSystem, UserPrincipal)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -43,8 +43,8 @@ class Host(System):
     """ Here's our most common kind of System, the Host. Putting a physical
         machine into a chassis and powering it up leaves it in a state with a
         few more attributes not filled in: what Branch configures this host?
-        What is the build/mcm 'status'? If Ownership is captured, this is the
-        place for it. """
+        If Ownership is captured, this is the place for it.
+    """
 
     __tablename__ = 'host'
     __mapper_args__ = {'polymorphic_identity':'host'}
@@ -71,8 +71,8 @@ class Host(System):
                                                 name='host_prsnlty_fk'),
                             nullable=False)
 
-    status_id = Column(Integer, ForeignKey('status.id',
-                                              name='host_status_fk'),
+    lifecycle_id = Column(Integer, ForeignKey('hostlifecycle.id',
+                                              name='host_lifecycle_fk'),
                           nullable=False)
 
     operating_system_id = Column(Integer, ForeignKey('operating_system.id',
@@ -83,7 +83,7 @@ class Host(System):
     branch = relation(Branch, backref='hosts')
     sandbox_author = relation(UserPrincipal, backref='sandboxed_hosts')
     personality = relation(Personality, backref='hosts')
-    status = relation(Status, backref='hosts')
+    status = relation(HostLifecycle, backref='hosts')
     operating_system = relation(OperatingSystem, uselist=False, backref='hosts')
 
     """ The following relation is defined in BuildItem to avoid circular

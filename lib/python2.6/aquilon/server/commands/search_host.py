@@ -33,9 +33,9 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
+                                HostLifecycle,
                                 OperatingSystem, Service, Machine, Model)
 from aquilon.server.dbwrappers.system import search_system_query
-from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
@@ -83,7 +83,8 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if buildstatus:
-            dbbuildstatus = get_status(session, buildstatus)
+            dbbuildstatus = HostLifecycle.get_unique(session, buildstatus,
+                                                     compel=True)
             q = q.filter_by(status=dbbuildstatus)
 
         if osname and osversion and archetype:

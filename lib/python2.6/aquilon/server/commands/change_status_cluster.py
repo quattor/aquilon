@@ -29,44 +29,63 @@
 """Contains the logic for `aq change status`."""
 
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.templates.domain import TemplateDomain
+from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import HostLifecycle
+from aquilon.aqdb.model import Cluster, HostLifecycle, ClusterLifecycle
 
+class CommandChangeClusterStatus(BrokerCommand):
 
-class CommandChangeStatus(BrokerCommand):
+    required_parameters = ["cluster"]
 
-    required_parameters = ["hostname"]
+    def render(self, session, logger, cluster, buildstatus, **arguments):
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
+                                                    compel=True)
 
-    def render(self, session, logger, hostname, buildstatus, **arguments):
-        dbhost = hostname_to_host(session, hostname)
-        dbstatus = HostLifecycle.get_unique(session, buildstatus, compel=True)
-        changed = dbhost.status.transition(dbhost, dbstatus)
-
-        if not changed or not dbhost.archetype.is_compileable:
+        if not dbcluster.status.transition(dbcluster, dbstatus):
             return
 
-        session.add(dbhost)
+        if not dbcluster.personality.archetype.is_compileable:
+            return
+
         session.flush()
 
-        plenary = PlenaryHost(dbhost, logger=logger)
+        plenaries = []
+        plenary = PlenaryCluster(dbcluster, logger=logger)
+        plenaries.append(plenary)
+
+        # recompile all of the hosts associated with the cluster
+        compilelist = []
+        compilelist.append("cluster/" + dbcluster.name)
+        for dbhost in dbcluster.hosts:
+            hostfile = PlenaryHost(dbhost, logger=logger)
+            plenaries.append(hostfile)
+            compilelist.append(dbhost.fqdn)
+
         # Force a host lock as pan might overwrite the profile...
-        key = CompileKey(domain=dbhost.branch.name, profile=dbhost.fqdn,
-                         logger=logger)
+        key = CompileKey(domain=dbcluster.branch.name, logger=logger)
         try:
             lock_queue.acquire(key)
-            plenary.write(locked=True)
-            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+
+            for tpl in plenaries:
+                try:
+                    tpl.write(locked=True)
+                except IncompleteError:
+                    # some hosts may not be built yet
+                    pass
+
+            td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                                 logger=logger)
-            out = td.compile(session, only=dbhost.fqdn, locked=True)
-        except IncompleteError, e:
-            raise ArgumentError("Run aq make for host %s first." % dbhost.fqdn)
+            out = td.compile(session, " ".join(compilelist), locked=True)
+
         except:
-            plenary.restore_stash()
+            for tpl in plenaries:
+                tpl.restore_stash()
             raise
         finally:
             lock_queue.release(key)
+        return

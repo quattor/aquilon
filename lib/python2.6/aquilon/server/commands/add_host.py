@@ -31,13 +31,13 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.status import get_status
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
+                                HostLifecycle,
                                 Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -57,10 +57,9 @@ class CommandAddHost(BrokerCommand):
                                                      domain=domain,
                                                      sandbox=sandbox,
                                                      compel=True)
-        if buildstatus:
-            dbstatus = get_status(session, buildstatus)
-        else:
-            dbstatus = get_status(session, "build")
+        if not buildstatus:
+            buildstatus = 'build'
+        dbstatus = HostLifecycle.get_unique(session, buildstatus, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)

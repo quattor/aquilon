@@ -26,20 +26,29 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a status simpler."""
+"""Status formatter."""
 
 
-from sqlalchemy.orm.exc import NoResultFound
+from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.aqdb.model import HostLifecycle, StateEngine
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Status
+from aquilon.aqdb.model.hostlifecycle import (Ready, Almostready, Build,
+                                              Rebuild, Decommissioned,
+                                              Failed,
+                                              Blind, Install, Reinstall)
 
+class StatusFormatter(ObjectFormatter):
+    template_raw = "status.mako"
 
-def get_status(session, status):
-    try:
-        dbstatus = session.query(Status).filter_by(name=status).one()
-    except NoResultFound:
-        msg = ", ".join([st.name for st in session.query(Status).all()])
-        raise NotFoundException("Status %s not found.  Try one of: %s." %
-                                (status, msg))
-    return dbstatus
+ObjectFormatter.handlers[HostLifecycle] = StatusFormatter()
+
+# This sucks... is there a better way?
+ObjectFormatter.handlers[Almostready] = StatusFormatter()
+ObjectFormatter.handlers[Blind] = StatusFormatter()
+ObjectFormatter.handlers[Build] = StatusFormatter()
+ObjectFormatter.handlers[Rebuild] = StatusFormatter()
+ObjectFormatter.handlers[Ready] = StatusFormatter()
+ObjectFormatter.handlers[Decommissioned] = StatusFormatter()
+ObjectFormatter.handlers[Install] = StatusFormatter()
+ObjectFormatter.handlers[Reinstall] = StatusFormatter()
+ObjectFormatter.handlers[Failed] = StatusFormatter()

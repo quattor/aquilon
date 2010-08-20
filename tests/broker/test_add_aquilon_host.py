@@ -46,7 +46,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--ip", self.net.unknown[0].usable[2],
                         "--machine", "ut3c1n3", "--domain", "unittest",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
-                        "--personality", "inventory"])
+                        "--personality", "inventory", "--buildstatus", "blind"])
 
     def testverifyaddunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -58,7 +58,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: inventory", command)
         self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Build Status: build", command)
+        self.matchoutput(out, "Build Status: blind", command)
 
     def testverifyshowmanagermissing(self):
         command = "show manager --missing"

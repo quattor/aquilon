@@ -72,6 +72,7 @@ class ClusterFormatter(ObjectFormatter):
             else:
                 usagestr = None
             details.append(indent + "  Resources used by VMs: %s" % usagestr)
+        details.append(self.redirect_raw(cluster.status, indent + "  "))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         if cluster.branch.branch_type == 'domain':
             details.append(indent + "  Domain: %s" % cluster.branch.name)

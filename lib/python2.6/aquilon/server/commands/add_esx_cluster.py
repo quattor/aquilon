@@ -29,7 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand, validate_basic
-from aquilon.aqdb.model import Cluster, EsxCluster, MetaCluster, Personality
+from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
+                                ClusterLifecycle,
+                                MetaClusterMember, Personality)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
@@ -44,8 +46,13 @@ class CommandAddESXCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, metacluster, archetype,
                personality, max_members, vm_to_host_ratio, domain, sandbox,
-               tor_switch, down_hosts_threshold, comments, **arguments):
+               tor_switch, down_hosts_threshold, buildstatus, comments, **arguments):
         validate_basic("cluster", cluster)
+
+        if not buildstatus:
+            buildstatus = "build"
+        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
+                                               compel=True)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
@@ -89,6 +96,7 @@ class CommandAddESXCluster(BrokerCommand):
                                branch=dbbranch, sandbox_author=dbauthor,
                                switch=dbtor_switch,
                                down_hosts_threshold=down_hosts_threshold,
+                               status=dbstatus,
                                comments=comments)
         session.add(dbcluster)
         dbmetacluster.members.append(dbcluster)

@@ -41,7 +41,9 @@ from brokertest import TestBrokerCommand
 
 class TestChangeStatus(TestBrokerCommand):
     def testchangeunittest02(self):
-        for status in ['failed', 'build', 'ready']:
+        # we start off as "ready", so each of these transitions (in order)
+        # should be valid
+        for status in ['failed', 'rebuild', 'ready']:
             command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
                        "--buildstatus", status]
             (out, err) = self.successtest(command)
@@ -54,6 +56,11 @@ class TestChangeStatus(TestBrokerCommand):
             command = "cat --hostname unittest02.one-nyp.ms.com"
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "'/system/build' = '%s';" % status, command)
+
+        # And a transition that should be illegal from the final state above (ready)
+        command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
+                   "--buildstatus", "install"]
+        self.badrequesttest(command)
 
 
 if __name__=='__main__':

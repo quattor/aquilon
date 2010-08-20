@@ -38,7 +38,7 @@ from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, Status, DnsDomain, System,
+                                Personality, HostLifecycle, DnsDomain, System,
                                 OperatingSystem)
 
 
@@ -139,7 +139,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         dbpersonality = Personality.get_unique(session, archetype=dbarchetype,
                                                name="generic",
                                                compel=InternalError)
-        dbstatus = Status.get_unique(session, "ready", compel=InternalError)
+        dbstatus = HostLifecycle.get_unique(session, "ready",
+                                            compel=InternalError)
         dbos = OperatingSystem.get_unique(session, name="windows",
                                           version="generic",
                                           archetype=dbarchetype,

@@ -32,8 +32,7 @@
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.make import CommandMake
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.server.dbwrappers.status import get_status
-from aquilon.aqdb.model import BuildItem, Archetype, Personality
+from aquilon.aqdb.model import BuildItem, HostLifecycle, Archetype, Personality
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -42,7 +41,7 @@ class CommandReconfigure(CommandMake):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, archetype, personality, buildstatus,
+    def render(self, session, logger, hostname, archetype, personality, buildstatus,
                osname, osversion, os, **arguments):
         """There is some duplication here with make.
 
@@ -68,8 +67,11 @@ class CommandReconfigure(CommandMake):
                 raise ArgumentError("Nothing to do.")
 
             if buildstatus:
-                dbstatus = get_status(session, buildstatus)
-                dbhost.status = dbstatus
+                dbstatus = HostLifecycle.get_unique(session, buildstatus,
+                                                    compel=True)
+                dbhost.status.transition(dbhost, dbstatus)
+
+
             if personality:
                 dbpersonality = Personality.get_unique(session,
                                                        name=personality,
@@ -91,7 +93,7 @@ class CommandReconfigure(CommandMake):
             session.add(dbhost)
             return
 
-        return CommandMake.render(self, session=session, hostname=hostname,
+        return CommandMake.render(self, session=session, logger=logger, hostname=hostname,
                                   archetype=archetype, personality=personality,
                                   osname=osname, osversion=osversion, os=os,
                                   buildstatus=buildstatus, **arguments)

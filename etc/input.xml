@@ -1554,13 +1554,24 @@
    </command>
 
    <command name="change_status">
-      Update the buildstatus for a host and recompile its profile.
-      This command does not verify the service bindings of the host.
+      Update the buildstatus for a host/cluster and recompile its profile.
+      This command does not verify the service bindings of the host or cluster.
+
+      Changing the buildstatus may cause the configuration to be different
+      (for example, while hosts are in "build" status, they are not available
+      for general login access) and so any affected profiles will be recompiled.
+
+      Changing a cluster buildstatus may cause the member hosts to also change their
+      buildstatus.
       <optgroup name="change_status_options" mandatory="True" fields="all">
-         <option name="hostname" type="string">Host name</option>
-         <option name="buildstatus" type="string">Update host buildstatus to 'build', 'ready', or 'failed'</option>
+         <optgroup name='what_to_change' mandatory="True" fields="any">
+                <option name="hostname" type="string">Host name</option>
+                <option name="cluster" type="string">Cluster name</option>
+         </optgroup>
+         <option name="buildstatus" type="string">The new value of the buildstatus</option>
       </optgroup>
       <transport method="put" path="host/%(hostname)s/buildstatus/%(buildstatus)s" />
+      <transport method="put" trigger="cluster" path="cluster/%(cluster)s/buildstatus/%(buildstatus)s" />
    </command>
 
    <command name="add_domain">
@@ -2698,6 +2709,7 @@
          <option name="max_members" type="int">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="tor_switch" type="string">ToR switch in use by the cluster</option>
+         <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="cluster/esx/%(cluster)s" />
