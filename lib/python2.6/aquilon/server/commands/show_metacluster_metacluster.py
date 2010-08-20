@@ -29,11 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.show_metacluster import CommandShowMetaCluster
+from aquilon.server.commands.show_metacluster_all import CommandShowMetaClusterAll
 
 
-class CommandShowMetaClusterMetaCluster(CommandShowMetaCluster):
+class CommandShowMetaClusterMetaCluster(CommandShowMetaClusterAll):
 
     required_parameters = ['metacluster']
-
-

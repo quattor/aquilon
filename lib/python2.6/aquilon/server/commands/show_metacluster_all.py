@@ -33,7 +33,7 @@ from aquilon.aqdb.model import MetaCluster
 from aquilon.server.broker import BrokerCommand
 
 
-class CommandShowMetaCluster(BrokerCommand):
+class CommandShowMetaClusterAll(BrokerCommand):
 
     def render(self, session, metacluster, **arguments):
         q = session.query(MetaCluster)
@@ -43,5 +43,3 @@ class CommandShowMetaCluster(BrokerCommand):
         if metacluster and not dbmetaclusters:
             raise NotFoundException("Metacluster %s not found." % metacluster)
         return dbmetaclusters
-
-
