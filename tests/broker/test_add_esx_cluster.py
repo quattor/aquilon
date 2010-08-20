@@ -43,10 +43,11 @@ from brokertest import TestBrokerCommand
 class TestAddESXCluster(TestBrokerCommand):
 
     def testaddutecl1(self):
+        # For this cluster, we'll use the default for buildstatus
+        # to confirm it does the right thing
         command = ["add_esx_cluster", "--cluster=utecl1",
                    "--metacluster=utmc1", "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=2",
-                   "--buildstatus=build",
                    "--archetype=vmhost", "--personality=esx_desktop"]
         self.noouttest(command)
 
@@ -64,7 +65,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
-        self.matchoutput(out, "Buildstatus: build", command)
+        self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -107,7 +108,7 @@ class TestAddESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: 1:1", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Down Hosts Threshold: 1", command)
-        self.matchoutput(out, "Buildstatus: build", command)
+        self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
