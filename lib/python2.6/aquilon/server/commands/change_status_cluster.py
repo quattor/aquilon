@@ -67,8 +67,7 @@ class CommandChangeClusterStatus(BrokerCommand):
             compilelist.append(dbhost.fqdn)
 
         # Force a host lock as pan might overwrite the profile...
-        key = CompileKey(domain=dbcluster.branch.name, profile=dbcluster.name,
-                         logger=logger)
+        key = CompileKey(domain=dbcluster.branch.name, logger=logger)
         try:
             lock_queue.acquire(key)
 
