@@ -48,7 +48,7 @@ class HostLifecycle(StateEngine, Base):
     transitions = {
                'blind'        : ['build', 'failed', 'decommissioned'],
                'build'        : ['almostready', 'ready', 'failed',
-                                 'rebuild', 'reinstall', 'decomissioned'],
+                                 'rebuild', 'reinstall', 'decommissioned'],
                'install'      : ['build', 'reinstall', 'failed',
                                  'decommissioned'],
                'almostready'  : ['ready', 'rebuild', 'reinstall', 'failed',

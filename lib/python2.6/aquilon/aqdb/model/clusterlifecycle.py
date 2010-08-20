@@ -46,7 +46,7 @@ provisioning lifecycle.
 _TN = 'clusterlifecycle'
 class ClusterLifecycle(StateEngine, Base):
     transitions = {
-               'build'        : ['ready', 'decomissioned'],
+               'build'        : ['ready', 'decommissioned'],
                'ready'        : ['rebuild', 'decommissioned'],
                'rebuild'      : ['ready', 'decommissioned'],
                'decommissioned' : [],
