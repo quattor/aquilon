@@ -98,6 +98,18 @@ class TestAddMetaCluster(TestBrokerCommand):
                    "--max_members=6", "--max_shares=6"]
         self.noouttest(command)
 
+    def testaddutmc5(self):
+        # High availability testing
+        command = ["add_metacluster", "--metacluster=utmc5",
+                   "--max_members=6", "--max_shares=6"]
+        self.noouttest(command)
+
+    def testaddutmc6(self):
+        # High availability testing
+        command = ["add_metacluster", "--metacluster=utmc6",
+                   "--max_members=6", "--max_shares=6"]
+        self.noouttest(command)
+
     def testverifyshowall(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))

@@ -29,7 +29,7 @@
 """Contains the logic for `aq add machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import create_machine
@@ -37,8 +37,7 @@ from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Cluster, Model,
-                                Machine, MachineClusterMember)
+from aquilon.aqdb.model import Chassis, ChassisSlot, Cluster, Model, Machine
 
 
 class CommandAddMachine(BrokerCommand):
@@ -48,7 +47,7 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
-               user, **arguments):
+               **arguments):
         dblocation = get_location(session, **arguments)
         if chassis:
             dbchassis = get_system(session, chassis)
@@ -105,12 +104,9 @@ class CommandAddMachine(BrokerCommand):
             dbslot.machine = dbmachine
             session.add(dbslot)
         if cluster:
-            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
-            session.add(dbmcm)
+            dbcluster.machines.append(dbmachine)
             session.flush()
             session.refresh(dbcluster)
-            if hasattr(dbcluster, 'verify_ratio'):
-                dbcluster.verify_ratio()
 
         session.flush()
 

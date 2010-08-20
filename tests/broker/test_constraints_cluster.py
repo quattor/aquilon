@@ -51,6 +51,30 @@ class TestClusterConstraints(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ESX Cluster: utecl1", command)
 
+    def testupdatevmhostmemory(self):
+        command = ["update", "machine", "--machine", "np13s03p13",
+                   "--memory", 8192]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         command)
+
+    def testupdatevmmeory(self):
+        command = ["update", "machine", "--machine", "evm110",
+                   "--memory", 81920]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         command)
+
+    def testunbindmachine(self):
+        command = ["uncluster", "--hostname", "evh87.one-nyp.ms.com",
+                   "--cluster", "npecl12"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         command)
+
     # FIXME: Add a test for unbinding a vmhost from a cluster where
     # the vm_to_host_ratio would be exceeded.
 

@@ -31,7 +31,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import Cluster, HostClusterMember
+from aquilon.aqdb.model import Cluster
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -49,14 +49,9 @@ class CommandUncluster(BrokerCommand):
         if dbhost.cluster != dbcluster:
             raise ArgumentError("{0} is bound to {1:l}, not {2:l}.".format(
                                 dbhost, dbhost.cluster, dbcluster))
-        dbhcm = HostClusterMember.get_unique(session, cluster=dbcluster,
-                                             host=dbhost)
-        session.delete(dbhcm)
+        dbcluster.hosts.remove(dbhost)
         session.flush()
-
         session.refresh(dbcluster)
-        if hasattr(dbcluster, 'verify_ratio'):
-            dbcluster.verify_ratio()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryHost(dbhost, logger=logger))

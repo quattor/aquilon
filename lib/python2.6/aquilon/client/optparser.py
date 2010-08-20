@@ -527,6 +527,9 @@ class option(Element):
         elif self.type == 'int':
             parser.add_option(*names, dest=self.name, action="store",
                               type="int", **extra_args)
+        elif self.type == 'float':
+            parser.add_option(*names, dest=self.name, action="store",
+                              type="float", **extra_args)
         elif self.type == 'file':
             # Need type?
             parser.add_option(*names, dest=self.name, action="callback",

@@ -55,6 +55,14 @@ class TestAddRack(TestBrokerCommand):
         command = "add rack --rackid np997 --building np --row ZZ --column 99"
         self.noouttest(command.split(" "))
 
+    def testaddut13(self):
+        command = "add rack --rackid 13 --building ut --row k --column 3"
+        self.noouttest(command.split(" "))
+
+    def testaddnp13(self):
+        command = "add rack --rackid 13 --building np --row k --column 3"
+        self.noouttest(command.split(" "))
+
     def testverifyaddnp997(self):
         command = "show rack --rack np997"
         out = self.commandtest(command.split(" "))

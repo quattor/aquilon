@@ -30,7 +30,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, Personality
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.tor_switch import get_tor_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
@@ -43,11 +43,12 @@ from aquilon.utils import force_ratio
 
 class CommandUpdateESXCluster(BrokerCommand):
 
-    required_parameters = [ "cluster" ]
+    required_parameters = ["cluster"]
 
     def render(self, session, logger, cluster, archetype, personality,
                max_members, vm_to_host_ratio, tor_switch, fix_location,
-               down_hosts_threshold, comments, **arguments):
+               down_hosts_threshold, comments, memory_capacity,
+               clear_overrides, **arguments):
         cluster_type = 'esx'
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
 
@@ -125,8 +126,8 @@ class CommandUpdateESXCluster(BrokerCommand):
                 host_count = dbcluster.host_count
             if down_hosts_threshold is None:
                 down_hosts_threshold = dbcluster.down_hosts_threshold
-            dbcluster.verify_ratio(vm_part=vm_count, host_part=host_count,
-                                   down_hosts_threshold=down_hosts_threshold)
+            dbcluster.validate(vm_part=vm_count, host_part=host_count,
+                               down_hosts_threshold=down_hosts_threshold)
             dbcluster.vm_count = vm_count
             dbcluster.host_count = host_count
             dbcluster.down_hosts_threshold = down_hosts_threshold
@@ -143,6 +144,16 @@ class CommandUpdateESXCluster(BrokerCommand):
 
         if comments is not None:
             dbcluster.comments = comments
+            cluster_updated = True
+
+        if memory_capacity is not None:
+            dbcluster.memory_capacity = memory_capacity
+            dbcluster.validate()
+            cluster_updated = True
+
+        if clear_overrides is not None:
+            dbcluster.memory_capacity = None
+            dbcluster.validate()
             cluster_updated = True
 
         if not cluster_updated:

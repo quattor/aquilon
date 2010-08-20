@@ -160,7 +160,8 @@ class TestAddESXCluster(TestBrokerCommand):
                    "--metacluster=utmc3", "--building=ut",
                    "--archetype=vmhost", "--personality=esx_desktop"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "utmc3 already at maximum capacity (0)", command)
+        self.matchoutput(out, "Metacluster utmc3 already has the maximum "
+                         "number of clusters (0).", command)
 
     def testverifyshowall(self):
         command = "show esx_cluster --all"
@@ -269,6 +270,34 @@ class TestAddESXCluster(TestBrokerCommand):
                        "--domain=unittest", "--down_hosts_threshold=2",
                        "--archetype=vmhost", "--personality=esx_desktop"]
             self.noouttest(command)
+
+    def testaddutmc5(self):
+        command = ["add_esx_cluster", "--cluster=utecl11",
+                   "--metacluster=utmc5", "--rack=ut13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+        command = ["add_esx_cluster", "--cluster=npecl11",
+                   "--metacluster=utmc5", "--rack=np13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+
+    def testaddutmc6(self):
+        command = ["add_esx_cluster", "--cluster=utecl12",
+                   "--metacluster=utmc6", "--rack=ut13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
+        command = ["add_esx_cluster", "--cluster=npecl12",
+                   "--metacluster=utmc6", "--rack=np13",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--max_members=15",
+                   "--archetype=vmhost", "--personality=esx_desktop"]
+        self.noouttest(command)
 
     def testfailcatmissingcluster(self):
         command = "cat --cluster=cluster-does-not-exist"

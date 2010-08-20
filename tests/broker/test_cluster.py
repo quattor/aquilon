@@ -139,7 +139,7 @@ class TestCluster(TestBrokerCommand):
                    "--cluster", "utecl3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "utecl3 already at maximum capacity (0)",
+                         "ESX Cluster utecl3 is over capacity of 0 hosts.",
                          command)
 
     def testfailunmadecluster(self):
@@ -154,6 +154,17 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 25):
             host = "evh%s.aqd-unittest.ms.com" % (i + 50)
             cluster = "utecl%d" % (5 + ((i - 1) / 4))
+            self.successtest(["cluster",
+                              "--hostname", host, "--cluster", cluster])
+
+    def testbindhaclusters(self):
+        for i in range(25, 49):
+            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
+            cluster = "utecl%d" % (11 + ((i - 25) / 12))
+            self.successtest(["cluster",
+                              "--hostname", host, "--cluster", cluster])
+            host = "evh%s.one-nyp.ms.com" % (i + 50)
+            cluster = "npecl%d" % (11 + ((i - 25) / 12))
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
 

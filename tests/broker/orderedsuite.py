@@ -149,6 +149,7 @@ from test_update_model import TestUpdateModel
 from test_update_rack import TestUpdateRack
 from test_update_network import TestUpdateNetwork
 from test_update_archetype import TestUpdateArchetype
+from test_update_personality import TestUpdatePersonality
 from test_update_metacluster import TestUpdateMetaCluster
 from test_update_esx_cluster import TestUpdateESXCluster
 from test_pxeswitch import TestPxeswitch
@@ -245,6 +246,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDomainConstraints, TestVendorConstraints,
                 TestMachineConstraints, TestTorSwitchConstraints,
                 TestMakeConstraints,
+                TestUpdatePersonality,
                 TestClusterConstraints, TestMetaClusterConstraints,
                 TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,

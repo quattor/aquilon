@@ -29,8 +29,7 @@
 """Contains the logic for `aq update machine`."""
 
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException,
-                                 UnimplementedError, IncompleteError)
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import get_system
@@ -40,8 +39,8 @@ from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.locks import lock_queue, CompileKey
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model,
-                                Cluster, MachineClusterMember, Machine)
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
+                                Machine)
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -51,7 +50,7 @@ class CommandUpdateMachine(BrokerCommand):
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot, cluster,
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
-               user, **arguments):
+               **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         plenaries = PlenaryCollection(logger=logger)
 
@@ -139,9 +138,9 @@ class CommandUpdateMachine(BrokerCommand):
         if cpucount is not None:
             dbmachine.cpu_quantity = cpucount
         if memory is not None:
-            dbmachine.memory=memory
+            dbmachine.memory = memory
         if serial:
-            dbmachine.serial_no=serial
+            dbmachine.serial_no = serial
 
         # FIXME: For now, if a machine has its interface(s) in a portgroup
         # this command will need to be followed by an update_interface to
@@ -159,28 +158,25 @@ class CommandUpdateMachine(BrokerCommand):
                                     "new {1:l}.".format(dbmachine.cluster.metacluster,
                                                         dbcluster.metacluster))
             old_cluster = dbmachine.cluster
-            dbmcm = MachineClusterMember.get_unique(session,
-                                                    cluster=dbmachine.cluster,
-                                                    machine=dbmachine)
-            session.delete(dbmcm)
-            session.flush()
-            # Without these refreshes the MCM creation below fails...
-            # presumably because the old linkage is still cached somewhere?
-            session.refresh(dbmachine)
-            session.refresh(old_cluster)
-            dbmcm = MachineClusterMember(cluster=dbcluster, machine=dbmachine)
-            session.add(dbmcm)
+            old_cluster.machines.remove(dbmachine)
+            dbmachine.location = dbcluster.location_constraint
+            dbcluster.machines.append(dbmachine)
             session.flush()
             session.refresh(dbmachine)
             session.refresh(dbcluster)
-            if hasattr(dbcluster, 'verify_ratio'):
-                dbcluster.verify_ratio()
-            dbmachine.location = dbcluster.location_constraint
+            session.refresh(old_cluster)
             plenaries.append(PlenaryCluster(old_cluster, logger=logger))
             plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 
         session.add(dbmachine)
         session.flush()
+
+        # Check if the changed parameters still meet cluster capacity
+        # requiremets
+        if dbmachine.cluster:
+            dbmachine.cluster.validate()
+        if dbmachine.host and dbmachine.host.cluster:
+            dbmachine.host.cluster.validate()
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

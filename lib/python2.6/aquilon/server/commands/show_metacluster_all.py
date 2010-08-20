@@ -28,8 +28,10 @@
 # TERMS THAT MAY APPLY.
 
 
+from sqlalchemy.orm import joinedload_all
+
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import MetaCluster
+from aquilon.aqdb.model import MetaCluster, MetaClusterMember, Cluster, EsxCluster
 from aquilon.server.broker import BrokerCommand
 
 
@@ -39,6 +41,9 @@ class CommandShowMetaClusterAll(BrokerCommand):
         q = session.query(MetaCluster)
         if metacluster:
             q = q.filter_by(name=metacluster)
+        q = q.options(joinedload_all('_clusters.cluster._hosts.host.machine'))
+        q = q.options(joinedload_all('_clusters.cluster._machines.machine'))
+        # TODO: eager load EsxCluster.host_count
         dbmetaclusters = q.order_by(MetaCluster.name).all()
         if metacluster and not dbmetaclusters:
             raise NotFoundException("Metacluster %s not found." % metacluster)

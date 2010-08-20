@@ -325,6 +325,7 @@
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+         <option name="capacity_override" type="flag">Select clusters with capacity overrides</option>
          <optgroup name="search_cluster_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
@@ -2245,6 +2246,19 @@
       <transport method="delete" path="personality/%(archetype)s/%(personality)s" />
   </command>
 
+  <command name="update_personality">
+      Updates personality information.
+      <optgroup name="update_personality_mandatory" mandatory="True" fields="all">
+         <option name="personality" type="string">The name to delete</option>
+         <option name="archetype" type="string">Which archetype to use</option>
+      </optgroup>
+      <optgroup name="update_personality_opt" mandatory="False">
+	 <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
+	 <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
+      </optgroup>
+      <transport method="post" path="personality/%(archetype)s/%(personality)s" />
+  </command>
+
   <command name="show_personality">
       Show personality details.  Specifying both name and archetype will
       uniquely identify a personality.
@@ -2620,9 +2634,10 @@
          <option name="metacluster" type="string">Name of the metacluster</option>
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
-         <option name="max_members" type="int">Comments</option>
-         <option name="max_shares" type="int">Comments</option>
+         <option name="max_members" type="int">Maximum number of clusters that can be members of this metacluster</option>
+         <option name="max_shares" type="int">Maximum number of shares that virtual machines may use</option>
          <option name="comments" type="string">Comments</option>
+         <option name="high_availability" type="boolean">Turn on high availaibility mode</option>
       </optgroup>
       <transport method="post" path="metacluster/%(metacluster)s" />
    </command>
@@ -2716,6 +2731,8 @@
          <option name="tor_switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
+         <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
+         <option name="clear_overrides" type="flag" conflicts="override_memory_capacity">Clear capacity overrides</option>
          <optgroup name="update_cluster_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>

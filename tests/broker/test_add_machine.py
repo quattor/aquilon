@@ -318,10 +318,12 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddverarirack(self):
         # number 100 is in use by the tor_switch.
+        # The virtual machine tests require quite a bit of memory...
         for i in range(101, 150):
             port = i - 100
             self.noouttest(["add", "machine", "--machine", "ut10s04p%d" % port,
-                            "--rack", "ut10", "--model", "vb1205xm"])
+                            "--rack", "ut10", "--model", "vb1205xm",
+                            "--memory", 81920])
 
     def testadd10gigracks(self):
         for port in range(1, 13):
@@ -329,6 +331,14 @@ class TestAddMachine(TestBrokerCommand):
                             "--rack", "ut11", "--model", "vb1205xm"])
             self.noouttest(["add", "machine", "--machine", "ut12s02p%d" % port,
                             "--rack", "ut12", "--model", "vb1205xm"])
+
+    def testaddharacks(self):
+        # Machines for metacluster high availability testing
+        for port in range(1, 25):
+            for rack in ["ut13", "np13"]:
+                self.noouttest(["add", "machine",
+                                "--machine", "%ss03p%d" % (rack, port),
+                                "--rack", rack, "--model", "vb1205xm"])
 
     def testverifymachineall(self):
         command = ["show", "machine", "--all"]

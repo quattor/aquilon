@@ -69,6 +69,14 @@ class TestDelMetaCluster(TestBrokerCommand):
         command = ["del_metacluster", "--metacluster=utmc4"]
         self.noouttest(command)
 
+    def testdelutmc5(self):
+        command = ["del_metacluster", "--metacluster=utmc5"]
+        self.noouttest(command)
+
+    def testdelutmc6(self):
+        command = ["del_metacluster", "--metacluster=utmc6"]
+        self.noouttest(command)
+
     def testverifyall(self):
         command = ["show_metacluster", "--all"]
         out = self.commandtest(command)

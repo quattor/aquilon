@@ -71,6 +71,30 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "cluster conflicts with rack", command)
 
+    def test_050_addutmc5machines(self):
+        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2
+        # All machines should fit inside one cluster
+        for i in range(0, 13):
+            machine = "evm%d" % (i + 50)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "utecl11", "--model", "utmedium"])
+            machine = "evm%d" % (i + 70)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "npecl11", "--model", "utmedium"])
+
+    def test_051_addutmc6machines(self):
+        # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2
+        # The machines should not fit inside one cluster
+        for i in range(0, 13):
+            machine = "evm%d" % (i + 90)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "utecl12", "--model", "utmedium",
+                            "--memory", 16384])
+            machine = "evm%d" % (i + 110)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", "npecl12", "--model", "utmedium",
+                            "--memory", 16384])
+
     def test_090_verifyaddmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
@@ -90,6 +114,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # This should now fill in the 'hole' between 7 and 9
         self.noouttest(["add", "interface", "--machine", "evm8",
                         "--interface", "eth0", "--automac"])
+
+    def test_125_addutmc5utmc6interfaces(self):
+        for i in range(50, 63) + range(70, 83) + range(90, 103) + range(110, 123):
+            machine = "evm%d" % i
+            self.noouttest(["add_interface", "--machine", machine,
+                            "--interface", "eth0", "--automac"])
 
     def test_130_adddisks(self):
         # The first 8 shares should work...
@@ -112,8 +142,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--type", "sata", "--capacity", "15",
                    "--share", "test_share_9", "--address", "0:0"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "would exceed the metacluster's max_shares",
-                         command)
+        self.matchoutput(out, "Metacluster utmc1 already has the maximum "
+                         "number of shares (8).", command)
 
     def test_170_failmaxclients(self):
         command = ["update_service", "--service=nas_disk_share",

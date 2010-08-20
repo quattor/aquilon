@@ -39,6 +39,7 @@ from aquilon.aqdb.model import Disk, LocalDisk, NasDisk, Service, Machine
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
+
 class CommandAddDisk(BrokerCommand):
 
     # FIXME: add "controller" and "size" once the deprecated alternatives are
@@ -46,7 +47,7 @@ class CommandAddDisk(BrokerCommand):
     required_parameters = ["machine", "disk"]
 
     def render(self, session, logger, machine, disk, controller, size, share,
-               address, comments, user, **arguments):
+               address, comments, **arguments):
 
         # Handle deprecated arguments
         if arguments.get("type", None):
@@ -60,13 +61,14 @@ class CommandAddDisk(BrokerCommand):
         d = session.query(Disk).filter_by(machine=dbmachine, device_name=disk).all()
         if (len(d) != 0):
             raise ArgumentError("Machine %s already has a disk named %s." %
-                                (machine,disk))
+                                (machine, disk))
 
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
                                 "of: %s." % (controller,
                                              ", ".join(controller_types)))
 
+        dbmetacluster = None
         if share:
             dbservice = Service.get_unique(session, "nas_disk_share",
                                            compel=True)
@@ -74,16 +76,8 @@ class CommandAddDisk(BrokerCommand):
             if not re.compile("\d+:\d+$").match(address):
                 raise ArgumentError("Disk address '%s' is not valid, it must "
                                     "match \d+:\d+ (e.g. 0:0)." % address)
-            if dbmachine.cluster and dbmachine.cluster.metacluster:
+            if dbmachine.cluster:
                 dbmetacluster = dbmachine.cluster.metacluster
-                shares = dbmetacluster.shares
-                if dbshare not in shares and \
-                   len(shares) >= dbmetacluster.max_shares:
-                    raise ArgumentError("Adding a disk on a new share for %s "
-                                        "would exceed the metacluster's "
-                                        "max_shares (%s)." %
-                                        (dbmetacluster.name,
-                                         dbmetacluster.max_shares))
             max_clients = dbshare.enforced_max_clients
             current_clients = len(dbshare.nas_disks)
             if max_clients is not None and current_clients >= max_clients:
@@ -103,6 +97,9 @@ class CommandAddDisk(BrokerCommand):
                                comments=comments)
         try:
             session.add(dbdisk)
+            session.flush()
+            if dbmetacluster:
+                dbmetacluster.validate()
         except InvalidRequestError, e:
             raise ArgumentError("Could not add disk: %s" % e)
 

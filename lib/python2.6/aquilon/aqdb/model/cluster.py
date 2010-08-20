@@ -33,6 +33,8 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
 
 from sqlalchemy.orm import relation, backref, object_session
+from sqlalchemy.orm.attributes import instance_state
+from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
@@ -41,16 +43,45 @@ from aquilon.aqdb.model import (Base, Host, Service, Location, Personality,
                                 ServiceInstance, Machine, Branch, TorSwitch,
                                 UserPrincipal)
 
-def _cluster_machine_append(machine):
-    """ creator function for MachineClusterMember """
-    return MachineClusterMember(machine=machine)
+# List of functions allowed to be used in vmhost_capacity_function
+restricted_builtins = {'None': None,
+                       'dict': dict,
+                       'divmod': divmod,
+                       'float': float,
+                       'int': int,
+                       'len': len,
+                       'long': long,
+                       'max': max,
+                       'min': min,
+                       'pow': pow,
+                       'round': round}
 
-def _cluster_host_append(host):
-    """ creator function for HostClusterMember """
-    return HostClusterMember(host=host)
 
-#cluster is a reserved word in oracle and may not
+def convert_resources(resources):
+    """ Convert a list of dicts to a dict of lists """
+    # Turn this: [{'a': 1, 'b': 1},
+    #             {'a': 2, 'b': 2}]
+    #
+    # Into this: {'a': [1, 2],
+    #             'b': [1, 2]}
+    resmap = {}
+    for res in resources:
+        for name, value in res.items():
+            if name not in resmap:
+                resmap[name] = []
+            resmap[name].append(value)
+    return resmap
+
+# Cluster is a reserved word in Oracle
 _TN = 'clstr'
+_HCM = 'host_cluster_member'
+_MCM = 'machine_cluster_member'
+_CAS = 'cluster_aligned_service'
+_CASABV = 'clstr_alnd_svc'
+_CSB = 'cluster_service_binding'
+_CSBABV = 'clstr_svc_bndg'
+
+
 class Cluster(Base):
     """
         A group of two or more hosts for high availablility or grid capabilities
@@ -58,7 +89,7 @@ class Cluster(Base):
     """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq'%(_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     cluster_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
 
@@ -82,7 +113,7 @@ class Cluster(Base):
     #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, default=2, nullable=True)
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments      = Column(String(255))
+    comments = Column(String(255))
 
     location_constraint = relation(Location,
                                    uselist=False,
@@ -92,10 +123,10 @@ class Cluster(Base):
     branch = relation(Branch, uselist=False, lazy=False, backref='clusters')
     sandbox_author = relation(UserPrincipal, uselist=False)
 
-    #FIXME: Is it possible to have an append that checks the max_members?
-    hosts = association_proxy('_hosts', 'host', creator=_cluster_host_append)
+    hosts = association_proxy('_hosts', 'host',
+                              creator=lambda host: HostClusterMember(host=host))
     machines = association_proxy('_machines', 'machine',
-                                 creator=_cluster_machine_append)
+                         creator=lambda mach: MachineClusterMember(machine=mach))
 
     service_bindings = association_proxy('_cluster_svc_binding',
                                          'service_instance')
@@ -103,10 +134,13 @@ class Cluster(Base):
     _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
 
+    __mapper_args__ = {'polymorphic_on': cluster_type}
+
     @property
     def required_services(self):
-        return object_session(self).query(ClusterAlignedService).filter_by(
-            cluster_type = self.cluster_type).all()
+        q = object_session(self).query(ClusterAlignedService)
+        q = q.filter_by(cluster_type=self.cluster_type)
+        return q.all()
 
     @property
     def authored_branch(self):
@@ -114,9 +148,23 @@ class Cluster(Base):
             return "%s/%s" % (self.sandbox_author.name, self.branch.name)
         return str(self.branch.name)
 
-    __mapper_args__ = {'polymorphic_on': cluster_type}
+    @property
+    def personality_info(self):
+        if self.cluster_type in self.personality.cluster_infos:
+            return self.personality.cluster_infos[self.cluster_type]
+        else:
+            return None
 
-cluster = Cluster.__table__
+    def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
+        if max_hosts is None:
+            max_hosts = self.max_hosts
+        if len(self.hosts) > self.max_hosts:
+            raise error("{0} is over capacity of {1} hosts.".format(self,
+                                                                    max_hosts))
+        if self.metacluster:
+            self.metacluster.validate()
+
+cluster = Cluster.__table__  # pylint: disable-msg=C0103, E1101
 cluster.primary_key.name = 'cluster_pk'
 cluster.append_constraint(UniqueConstraint('name', name='cluster_uk'))
 cluster.info['unique_fields'] = ['name']
@@ -130,7 +178,7 @@ class EsxCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'esx'}
     _class_label = 'ESX Cluster'
 
-    esx_cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
+    esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='esx_cluster_fk',
                                             ondelete='CASCADE'),
                             #if the cluster record is deleted so is esx_cluster
@@ -139,6 +187,9 @@ class EsxCluster(Cluster):
     vm_count = Column(Integer, default=16, nullable=True)
     host_count = Column(Integer, default=1, nullable=False)
     down_hosts_threshold = Column(Integer, nullable=False)
+
+    # Memory capacity override
+    memory_capacity = Column(Integer, nullable=True)
 
     switch_id = Column(Integer,
                        ForeignKey('tor_switch.id',
@@ -150,7 +201,7 @@ class EsxCluster(Cluster):
 
     @property
     def vm_to_host_ratio(self):
-        return '%s:%s'% (self.vm_count, self.host_count)
+        return '%s:%s' % (self.vm_count, self.host_count)
 
     @property
     def max_vm_count(self):
@@ -171,9 +222,100 @@ class EsxCluster(Cluster):
                 location = host.location
         return location
 
-    def verify_ratio(self, vm_part=None, host_part=None,
-                     current_vm_count=None, current_host_count=None,
-                     down_hosts_threshold=None, error=ArgumentError):
+    @property
+    def vmhost_capacity_function(self):
+        """ Return the compiled VM host capacity function """
+        info = self.personality_info
+        if info:
+            return info.compiled_vmhost_capacity_function
+        else:
+            return None
+
+    @property
+    def virtmachine_capacity_function(self):
+        """ Return the compiled virtual machine capacity function """
+        # Only identity mapping for now
+        return None
+
+    def get_total_capacity(self, down_hosts_threshold=None):
+        """ Return the total capacity available for use by virtual machines """
+        if down_hosts_threshold is None:
+            down_hosts_threshold = self.down_hosts_threshold
+
+        if len(self.hosts) <= down_hosts_threshold:
+            return {'memory': 0}
+
+        func = self.vmhost_capacity_function
+        if self.personality_info:
+            overcommit = self.personality_info.vmhost_overcommit_memory
+        else:
+            overcommit = 1
+
+        # No access for anything except built-in functions
+        global_vars = {'__builtins__': restricted_builtins}
+
+        resources = []
+        for host in self.hosts:
+            # This is the list of variables we want to pass to the capacity
+            # function
+            local_vars = {'memory': host.machine.memory}
+            if func:
+                rec = eval(func, global_vars, local_vars)
+            else:
+                rec = local_vars
+
+            # Apply the memory overcommit factor. Force the result to be
+            # an integer since it looks better on display
+            if 'memory' in rec:
+                rec['memory'] = int(rec['memory'] * overcommit)
+
+            resources.append(rec)
+
+        # Convert the list of dicts to a dict of lists
+        resmap = convert_resources(resources)
+
+        # Drop the <down_hosts_threshold> largest elements from every list, and
+        # sum the rest
+        for name in resmap:
+            reslist = sorted(resmap[name])
+            if down_hosts_threshold > 0:
+                reslist = reslist[:-down_hosts_threshold]
+            resmap[name] = sum(reslist)
+
+        # Process overrides
+        if self.memory_capacity is not None:
+            resmap['memory'] = self.memory_capacity
+
+        return resmap
+
+    def get_total_usage(self):
+        """ Return the amount of resources used by the virtual machines """
+        func = self.virtmachine_capacity_function
+
+        # No access for anything except built-in functions
+        global_vars = {'__builtins__': restricted_builtins}
+
+        resmap = {}
+        for machine in self.machines:
+            # This is the list of variables we want to pass to the capacity
+            # function
+            local_vars = {'memory': machine.memory}
+            if func:
+                res = eval(func, global_vars, local_vars)
+            else:
+                res = local_vars
+            for name, value in res.items():
+                if name not in resmap:
+                    resmap[name] = value
+                else:
+                    resmap[name] += value
+        return resmap
+
+    def validate(self, vm_part=None, host_part=None, current_vm_count=None,
+                 current_host_count=None, down_hosts_threshold=None,
+                 error=ArgumentError, **kwargs):
+        super(EsxCluster, self).validate(error=error, **kwargs)
+
         if vm_part is None:
             vm_part = self.vm_count
         if host_part is None:
@@ -200,7 +342,7 @@ class EsxCluster(Cluster):
 
         if adjusted_host_count <= 0:
             raise error("%s cannot support VMs with %s "
-                        "vmhosts and a down_host_threshold of %s" %
+                        "vmhosts and a down_hosts_threshold of %s" %
                         (format(self), current_host_count,
                          down_hosts_threshold))
 
@@ -213,6 +355,17 @@ class EsxCluster(Cluster):
                         "ratio %s:%s with down_hosts_threshold %s" %
                         (current_vm_count, current_host_count, format(self),
                          vm_part, host_part, down_hosts_threshold))
+
+        capacity = self.get_total_capacity()
+        usage = self.get_total_usage()
+        for name, value in usage.items():
+            # Skip resources that are not restricted
+            if name not in capacity:
+                continue
+            if value > capacity[name]:
+                raise error("{0} is over capacity regarding {1}: wanted {2}, "
+                            "but the limit is {3}.".format(self, name, value,
+                                                           capacity[name]))
         return
 
     def __init__(self, **kw):
@@ -220,17 +373,34 @@ class EsxCluster(Cluster):
             kw['max_hosts'] = 8
         super(EsxCluster, self).__init__(**kw)
 
-esx_cluster = EsxCluster.__table__
+esx_cluster = EsxCluster.__table__  # pylint: disable-msg=C0103, E1101
 esx_cluster.primary_key.name = 'esx_cluster_pk'
 esx_cluster.info['unique_fields'] = ['name']
 
 
-_HCM = 'host_cluster_member'
+class ValidateCluster(MapperExtension):
+    """ Helper class to perform validation on cluster membership changes """
+
+    def after_insert(self, mapper, connection, instance):
+        instance.cluster.validate()
+
+    def after_delete(self, mapper, connection, instance):
+        # This is a little tricky. If the instance got deleted through an
+        # association proxy, then instance.cluster will be None (although
+        # instance.cluster_id still has the right value).
+        if instance.cluster:
+            cluster = instance.cluster
+        else:
+            state = instance_state(instance)
+            cluster = state.committed_state['cluster']
+        cluster.validate()
+
+
 class HostClusterMember(Base):
     """ Specific Class for EsxCluster vmhosts """
     __tablename__ = _HCM
 
-    cluster_id = Column(Integer, ForeignKey('%s.id'% (_TN),
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='hst_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                         #if the cluster is deleted, so is membership
@@ -253,40 +423,28 @@ class HostClusterMember(Base):
         and their links also causes deleteion of hosts (BAD)
     """
     cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('_hosts', cascade='all'))
+                       backref=backref('_hosts', cascade='all, delete-orphan'))
 
     host = relation(Host, lazy=False,
-                    backref=backref('_cluster', uselist=False, cascade='all'))
+                    backref=backref('_cluster', uselist=False,
+                                    cascade='all, delete-orphan'))
 
-    def __init__(self, **kw):
-        if kw.has_key('cluster'):
-            """
-                when we append to the association proxy, there's no metacluster
-                argument which prevents this from being checked.
-            """
-            cl = kw['cluster']
-            if len(cl.hosts) >= cl.max_hosts:
-                msg = '%s already at maximum capacity (%s)'% (cl.name,
-                                                          cl.max_hosts)
-                raise ValueError(msg)
+    __mapper_args__ = {'extension': ValidateCluster()}
 
-        #TODO: enforce cluster members are inside the location constraint?
-        super(HostClusterMember, self).__init__(**kw)
-
-hcm = HostClusterMember.__table__
-hcm.primary_key.name = '%s_pk'% (_HCM)
+hcm = HostClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+hcm.primary_key.name = '%s_pk' % _HCM
 hcm.append_constraint(
     UniqueConstraint('host_id', name='host_cluster_member_host_uk'))
 hcm.info['unique_fields'] = ['cluster', 'host']
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
-_MCM = 'machine_cluster_member'
+
 class MachineClusterMember(Base):
     """ Binds machines into clusters """
     __tablename__ = _MCM
 
-    cluster_id = Column(Integer, ForeignKey('%s.id'% (_TN),
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='mchn_clstr_mmbr_clstr_fk',
                                                 ondelete='CASCADE'),
                             primary_key=True)
@@ -300,23 +458,23 @@ class MachineClusterMember(Base):
 
     """ See comments for HostClusterMembers relations """
     cluster = relation(Cluster, uselist=False, lazy=False,
-                       backref=backref('_machines', cascade='all'))
+                       backref=backref('_machines', cascade='all, delete-orphan'))
 
     machine = relation(Machine, lazy=False,
-                  backref=backref('_cluster', uselist=False, cascade='all'))
+                  backref=backref('_cluster', uselist=False,
+                                  cascade='all, delete-orphan'))
 
-    #TODO: __init__ that checks the sanity of adding new machines to clusters?
+    __mapper_args__ = {'extension': ValidateCluster()}
 
-mcm = MachineClusterMember.__table__
-mcm.primary_key.name = '%s_pk'% (_MCM)
+mcm = MachineClusterMember.__table__  # pylint: disable-msg=C0103, E1101
+mcm.primary_key.name = '%s_pk' % _MCM
 mcm.append_constraint(UniqueConstraint('machine_id',
                                        name='machine_cluster_member_uk'))
 mcm.info['unique_fields'] = ['cluster', 'machine']
 
 Machine.cluster = association_proxy('_cluster', 'cluster')
 
-_CRS = 'cluster_aligned_service'
-_ABV = 'clstr_alnd_svc'
+
 class ClusterAlignedService(Base):
     """
         Express services that must be the same for cluster types. As SQL Alchemy
@@ -325,11 +483,11 @@ class ClusterAlignedService(Base):
         string. As ESX is the only type for now, it's seems a reasonable corner
         to cut.
     """
-    __tablename__ = _CRS
+    __tablename__ = _CAS
     _class_label = 'Cluster Aligned Service'
 
     service_id = Column(Integer, ForeignKey('service.id',
-                                            name='%s_svc_fk'%(_ABV),
+                                            name='%s_svc_fk' % _CASABV,
                                             ondelete='CASCADE'),
                         #if the service is deleted, delete the link?
                         primary_key=True)
@@ -343,12 +501,11 @@ class ClusterAlignedService(Base):
                        backref=backref('_clusters', cascade='all'))
     #cascade deleted services to delete their being required to cluster_types
 
-cas = ClusterAlignedService.__table__
-cas.primary_key.name = '%s_pk'% (_ABV)
+cas = ClusterAlignedService.__table__  # pylint: disable-msg=C0103, E1101
+cas.primary_key.name = '%s_pk' % _CASABV
 cas.info['unique_fields'] = ['cluster_type', 'service']
 
-_CSB = 'cluster_service_binding'
-_CAB = 'clstr_svc_bndg'
+
 class ClusterServiceBinding(Base):
     """
         Makes bindings of service instances to clusters
@@ -356,14 +513,14 @@ class ClusterServiceBinding(Base):
     __tablename__ = _CSB
     _class_label = 'Cluster Service Binding'
 
-    cluster_id = Column(Integer, ForeignKey('%s.id'%(_TN),
-                                            name='%s_cluster_fk'%(_CAB),
+    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                            name='%s_cluster_fk' % _CSBABV,
                                             ondelete='CASCADE'),
                         primary_key=True)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
-                                            name='%s_srv_inst_fk'%(_CAB)),
+                                            name='%s_srv_inst_fk' % _CSBABV),
                                  primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
@@ -392,6 +549,6 @@ class ClusterServiceBinding(Base):
     def cfg_path(self):
         return self.service_instance.cfg_path
 
-csb = ClusterServiceBinding.__table__
-csb.primary_key.name = '%s_pk'% (_CSB)
+csb = ClusterServiceBinding.__table__  # pylint: disable-msg=C0103, E1101
+csb.primary_key.name = '%s_pk' % _CSB
 csb.info['unique_fields'] = ['cluster', 'service_instance']

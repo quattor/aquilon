@@ -39,7 +39,7 @@ from aquilon.server.processes import remove_file
 
 class CommandDelESXCluster(BrokerCommand):
 
-    required_parameters = [ "cluster" ]
+    required_parameters = ["cluster"]
 
     def render(self, session, logger, cluster, **arguments):
         dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
