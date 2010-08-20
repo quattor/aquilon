@@ -59,7 +59,7 @@ class ClusterFormatter(ObjectFormatter):
                 details.append(indent + \
                                "  {0:c}: {0.fqdn}".format(cluster.switch))
 
-        details.append(indent + "  Buildstatus: %s" % cluster.status)
+        details.append(self.redirect_raw(cluster.status, indent + "  "))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         if cluster.branch.branch_type == 'domain':
             details.append(indent + "  Domain: %s" % cluster.branch.name)
