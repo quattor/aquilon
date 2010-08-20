@@ -470,6 +470,9 @@ if __name__ == "__main__":
     if res.status != httplib.OK:
         print >>sys.stderr, "%s: %s" % (
             httplib.responses.get(res.status, res.status), pageData)
+        if res.status == httplib.MULTI_STATUS and \
+           globalOptions.get('partialok'):
+            sys.exit(0)
         sys.exit(res.status / 100)
 
     exit_status = 0
