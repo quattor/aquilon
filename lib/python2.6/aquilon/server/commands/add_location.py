@@ -68,7 +68,7 @@ def add_location(session, name, fullname, type, parent_name, parent_type, commen
         raise ArgumentError("%s is not a known location type." % (
             type.capitalize()))
 
-    if not fullname:  # FIXME: should we keep doing this or demand a 5char code?
+    if not fullname:
         fullname = name
 
     return location_type(name=name, fullname=fullname,
