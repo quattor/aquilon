@@ -39,9 +39,13 @@ class CommandDelCity(CommandDelLocation):
     required_parameters = ["city"]
 
     def render(self, session, logger, city, **arguments):
+        # This should probably be refactored into a method that would
+        # return the database label that was removed.  (For now, added
+        # calls to strip() and lower() below.)
+        result = CommandDelLocation.render(self, session=session, name=city,
+                                           type='city', **arguments)
+        session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.del_city(city)
-
-        return CommandDelLocation.render(self, session=session, name=city,
-                                         type='city', **arguments)
+        dsdb_runner.del_city(city.strip().lower())
+        return result

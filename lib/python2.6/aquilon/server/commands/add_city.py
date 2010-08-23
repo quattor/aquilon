@@ -44,10 +44,10 @@ class CommandAddCity(CommandAddLocation):
 
         new_loc = add_location(session, city, fullname, 'city', country,
                                'country', comments)
+        session.add(new_loc)
+        session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.add_city(city, country, fullname)
 
-        session.add(new_loc)
         return
-
