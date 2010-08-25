@@ -34,11 +34,32 @@ import re
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint)
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'dns_domain'
+
+
+def parse_fqdn(session, fqdn):
+    """ Break an fqdn (string) and get some useful information from it.
+
+        Returns a tuple of the shortname (string), and DnsDomain object
+    """
+    if not fqdn:
+        raise ArgumentError("No fully qualified name specified.")
+
+    (short, dot, dns_domain) = fqdn.partition(".")
+
+    if not dns_domain:
+        raise ArgumentError("FQDN '%s' is not valid, it does not contain a "
+                            "domain." % fqdn)
+    if not short:
+        raise ArgumentError("FQDN '%s' is not valid, missing host "
+                            "name." % fqdn)
+    dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+    return (short, dbdns_domain)
 
 
 class DnsDomain(Base):

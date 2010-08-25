@@ -29,11 +29,11 @@
 
 from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import System, FutureARecord
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_switch_offsets)
-from aquilon.server.dbwrappers.system import parse_system
 from aquilon.server.processes import DSDBRunner
 
 
@@ -48,7 +48,7 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
             raise UnimplementedError("Only the '%s' DNS environment is "
                                      "currently supported." % default)
 
-        (short, dbdns_domain) = parse_system(session, fqdn)
+        (short, dbdns_domain) = parse_fqdn(session, fqdn)
         System.get_unique(session, name=short, dns_domain=dbdns_domain,
                           preclude=True)
 

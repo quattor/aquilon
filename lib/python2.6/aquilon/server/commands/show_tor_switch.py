@@ -32,9 +32,9 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.system import parse_system
 from aquilon.server.formats.switch import TorSwitch
 from aquilon.aqdb.model import Switch, HardwareEntity, Model
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 
 class CommandShowTorSwitch(BrokerCommand):
@@ -46,7 +46,7 @@ class CommandShowTorSwitch(BrokerCommand):
                            "show_switch or search_switch instead.")
         q = session.query(Switch)
         if tor_switch:
-            (short, dbdns_domain) = parse_system(session, tor_switch)
+            (short, dbdns_domain) = parse_fqdn(session, tor_switch)
             q = q.filter_by(name=short, dns_domain=dbdns_domain)
         if rack:
             dblocation = get_location(session, rack=rack)
