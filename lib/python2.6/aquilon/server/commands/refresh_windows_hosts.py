@@ -106,8 +106,9 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         q = session.query(Host)
         q = q.filter_by(comments='Created by refresh_windows_host')
         for dbhost in q.all():
+            mac_addresses = [iface.mac for iface in dbhost.machine.interfaces]
             if dbhost.fqdn in windows_hosts and \
-               dbhost.mac == windows_hosts[dbhost.fqdn]:
+               windows_hosts[dbhost.fqdn] in mac_addresses:
                 # All is well
                 continue
             deps = get_host_dependencies(session, dbhost)
@@ -210,7 +211,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 logger.info(msg)
                 continue
             dbhost = Host(machine=dbmachine, branch=dbdomain,
-                          status=dbstatus, mac=mac, ip=None, network=None,
+                          status=dbstatus, ip=None, network=None,
                           name=short, dns_domain=dbdns_domain,
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")

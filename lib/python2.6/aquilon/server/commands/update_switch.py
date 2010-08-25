@@ -83,7 +83,6 @@ class CommandUpdateSwitch(BrokerCommand):
         if dbswitch.switch_hw.interfaces and not dbswitch.interfaces:
             dbinterface = dbswitch.switch_hw.interfaces[0]
             dbinterface.system = dbswitch
-            dbswitch.mac = dbinterface.mac
             session.add(dbinterface)
             session.add(dbswitch)
 

@@ -38,8 +38,6 @@ class AuxiliaryFormatter(ObjectFormatter):
         details = [indent + "Auxiliary: %s" % auxiliary.fqdn]
         if auxiliary.ip:
             details.append(indent + "  IP: %s" % auxiliary.ip)
-        if auxiliary.mac:
-            details.append(indent + "  MAC: %s" % auxiliary.mac)
         for i in auxiliary.interfaces:
             if i.system == auxiliary:
                 details.append(self.redirect_raw(i, indent + "  "))

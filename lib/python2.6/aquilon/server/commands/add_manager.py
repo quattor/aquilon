@@ -72,7 +72,7 @@ class CommandAddManager(BrokerCommand):
 
         dbmanager = Manager(name=short, dns_domain=dbdns_domain,
                             machine=dbmachine, ip=ip, network=dbnetwork,
-                            mac=dbinterface.mac, comments=comments)
+                            comments=comments)
         session.add(dbmanager)
         dbinterface.system = dbmanager
 

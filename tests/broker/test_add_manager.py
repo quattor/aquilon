@@ -55,8 +55,6 @@ class TestAddManager(TestBrokerCommand):
         self.matchoutput(out, "Manager: unittest00r.one-nyp.ms.com", command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[4],
                          command)
-        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[4].mac,
-                         command)
         self.matchoutput(out,
                          "Interface: bmc %s boot=False" %
                          self.net.unknown[0].usable[4].mac,
@@ -96,8 +94,6 @@ class TestAddManager(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Manager: unittest02rsa.one-nyp.ms.com", command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[9],
-                         command)
-        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[9].mac,
                          command)
         self.matchoutput(out,
                          "Interface: ilo %s boot=False" %

@@ -85,7 +85,11 @@ class NetworkHostListFormatter(ListFormatter):
                     device_name = system.machine.name
                 else:
                     device_name = system.ip
-                details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, system.mac))
+                if system.interfaces:
+                    mac = system.interfaces[0].mac
+                else:
+                    mac = None
+                details.append(indent + "Host: %s Host IP: %s Host MAC: %s" % (device_name, system.ip, mac))
         return "\n".join(details)
 
     def format_proto(self, netlist, skeleton=None):

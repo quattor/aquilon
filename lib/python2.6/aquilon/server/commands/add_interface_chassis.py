@@ -63,7 +63,6 @@ class CommandAddInterfaceChassis(BrokerCommand):
         restrict_switch_offsets(dbnetwork, ip)
         dbchassis.ip = ip
         dbchassis.network = dbnetwork
-        dbchassis.mac = mac
         dbinterface.system = dbchassis
         session.add(dbinterface)
         session.add(dbchassis)

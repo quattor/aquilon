@@ -40,8 +40,6 @@ class SystemFormatter(ObjectFormatter):
         details = [indent + "{0:c}: {0.fqdn}".format(system)]
         if system.ip:
             details.append(indent + "  IP: %s" % system.ip)
-        if system.mac:
-            details.append(indent + "  MAC: %s" % system.mac)
         if system.comments:
             details.append(indent + "  Comments: %s" % system.comments)
         return "\n".join(details)

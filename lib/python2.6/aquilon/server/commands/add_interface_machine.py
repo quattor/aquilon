@@ -135,7 +135,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
             dbinterface.system = dbmanager
-            dbmanager.mac = dbinterface.mac
             session.add(dbmanager)
 
         session.add(dbinterface)

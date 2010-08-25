@@ -76,8 +76,7 @@ class CommandAddAuxiliary(BrokerCommand):
 
         dbauxiliary = Auxiliary(name=short, dns_domain=dbdns_domain,
                                 machine=dbmachine,
-                                ip=ip, network=dbnetwork, mac=dbinterface.mac,
-                                comments=comments)
+                                ip=ip, network=dbnetwork, comments=comments)
         session.add(dbauxiliary)
         dbinterface.system = dbauxiliary
 

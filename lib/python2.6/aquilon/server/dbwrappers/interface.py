@@ -225,14 +225,10 @@ def describe_interface(session, interface):
         description.append("is attached to %s %s" % (hw_type, hw.name))
     if interface.system:
         description.append("points to system %s" % interface.system.fqdn)
-    systems = session.query(System).filter_by(mac=interface.mac).all()
-    if len(systems) == 1 and systems[0] != interface.system:
+    ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
+    if len(ifaces) == 1 and ifaces[0] != interface:
         description.append("but MAC address %s is in use by %s" %
-                           (interface.mac, systems[0].fqdn))
-    if len(systems) > 1:
-        description.append("and MAC address %s is in use by %s" %
-                           (interface.mac,
-                            ", ".join([s.fqdn for s in systems])))
+                           (interface.mac, format(ifaces[0].hardware_entity)))
     return ", ".join(description)
 
 def verify_port_group(dbmachine, port_group):

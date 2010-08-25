@@ -71,7 +71,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbhost = hostname_to_host(session, arguments['hostname'])
             if dbhost.archetype.name == 'aurora' and not dbhost.interfaces:
                 dbinterface.system = dbhost
-                dbhost.mac = dbinterface.mac
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the
@@ -93,7 +92,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbinterface.comments = comments
         if boot:
             # FIXME: If type == 'public', this should swing the
-            # system link!  And update system.mac.
+            # system link!
             for i in dbinterface.hardware_entity.interfaces:
                 if i == dbinterface:
                     i.bootable = True
@@ -108,8 +107,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         #about the order of update to bootable=True and mac address
         if mac:
             dbinterface.mac = mac
-            if dbinterface.system:
-                dbinterface.system.mac = mac
 
         if dbinterface.system:
             session.add(dbinterface.system)

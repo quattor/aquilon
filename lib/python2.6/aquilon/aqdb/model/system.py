@@ -36,7 +36,7 @@ from sqlalchemy.orm import relation, deferred, backref
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.model import Base, DnsDomain, Network
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.aqdb.column_types import AqStr, IPV4, AqMac
+from aquilon.aqdb.column_types import AqStr, IPV4
 
 #TODO: enum type for system_type column
 #_sys_types = ['host', 'switch', 'console_switch', 'chassis', 'manager',
@@ -72,7 +72,6 @@ class System(Base):
                                                name='SYSTEM_DNS_FK'),
                            nullable=False ) #TODO: default
 
-    mac = Column(AqMac(17), nullable=True)
     ip = Column(IPV4, nullable=True)
     network_id = Column(Integer, ForeignKey('network.id',
                                                  name='SYSTEM_NET_ID_FK'),
@@ -129,7 +128,7 @@ system.append_constraint(
     UniqueConstraint('name','dns_domain_id', name='SYSTEM_DNS_NAME_UK'))
 
 system.append_constraint(                    #systm_pt_uk means 'primary tuple'
-    UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='SYSTEM_PT_UK'))
+    UniqueConstraint('name', 'dns_domain_id', 'ip', name='SYSTEM_PT_UK'))
 
 system.info['unique_fields'] = ['name', 'dns_domain']
 system.info['extra_search_fields'] = ['ip']

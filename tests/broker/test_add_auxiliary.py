@@ -55,8 +55,6 @@ class TestAddAuxiliary(TestBrokerCommand):
                          command)
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[3],
                          command)
-        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[3].mac,
-                         command)
         self.matchoutput(out,
                          "Interface: eth1 %s boot=False" %
                          self.net.unknown[0].usable[3].mac,

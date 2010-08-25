@@ -139,7 +139,7 @@ class CommandAddHost(BrokerCommand):
         restrict_switch_offsets(dbnetwork, ip)
 
         dbhost = Host(name=short, dns_domain=dbdns_domain,
-                      mac=mac, ip=ip, network=dbnetwork, comments=comments,
+                      ip=ip, network=dbnetwork, comments=comments,
                       machine=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos)

@@ -82,7 +82,6 @@ class CommandAddInterfaceSwitch(BrokerCommand):
             return
 
         dbinterface.system = dbswitch
-        dbswitch.mac = dbinterface.mac
         session.add(dbinterface)
         session.add(dbswitch)
 

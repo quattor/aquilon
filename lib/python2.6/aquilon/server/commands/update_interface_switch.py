@@ -59,7 +59,4 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
             dbinterface.comments = comments
         if mac:
             dbinterface.mac = mac
-            if dbinterface.system == dbswitch:
-                dbinterface.system.mac = mac
-                session.add(dbinterface.system)
         session.add(dbinterface)

@@ -260,8 +260,10 @@ class ObjectFormatter(object):
             host_msg.sysloc = str(host.sysloc)
         if getattr(host, "ip", None):
             host_msg.ip = str(host.ip)
-        if getattr(host, "mac", None):
-            host_msg.mac = str(host.mac)
+        for iface in host.machine.hardware_entity.interfaces:
+            if iface.interface_type != 'public' or not iface.bootable:
+                continue
+            host_msg.mac = str(iface.mac)
         if hasattr(host, "system_type"):
             host_msg.type = str(host.system_type)
         if hasattr(host, "personality"):

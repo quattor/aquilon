@@ -38,8 +38,6 @@ class ManagerFormatter(ObjectFormatter):
         details = [indent + "Manager: %s" % manager.fqdn]
         if manager.ip:
             details.append(indent + "  IP: %s" % manager.ip)
-        if manager.mac:
-            details.append(indent + "  MAC: %s" % manager.mac)
         for i in manager.interfaces:
             if i.system == manager:
                 details.append(self.redirect_raw(i, indent + "  "))
