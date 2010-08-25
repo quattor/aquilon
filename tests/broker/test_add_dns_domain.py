@@ -65,6 +65,21 @@ class TestAddDnsDomain(TestBrokerCommand):
         domain = self.parse_dns_domainlist_msg(out, expect=1).dns_domains[0]
         self.failUnlessEqual(domain.name, 'aqd-unittest.ms.com')
 
+    def testaddtoolongdomain(self):
+        command = ['add', 'dns_domain', '--dns_domain',
+            #          1         2         3         4         5         6
+            's234567890123456789012345678901234567890123456789012345678901234' +
+            '.ms.com']
+        self.badrequesttest(command)
+
+    def testaddtopleveldomain(self):
+        command = ['add', 'dns_domain', '--dns_domain', 'toplevel']
+        self.badrequesttest(command)
+
+    def testaddinvaliddomain(self):
+        command = ['add', 'dns_domain', '--dns_domain', 'foo-.ms.com']
+        self.badrequesttest(command)
+
     def testverifyshowall(self):
         command = "show dns_domain --all"
         out = self.commandtest(command.split(" "))

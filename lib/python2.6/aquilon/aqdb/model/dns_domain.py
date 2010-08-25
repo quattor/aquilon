@@ -29,6 +29,7 @@
 """ DNS Domains, as simple names """
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint)
@@ -46,14 +47,48 @@ class DnsDomain(Base):
     __tablename__ = _TN
     _class_label = 'DNS Domain'
 
+    # RFC 1035
+    _name_check = re.compile('^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$')
+
     id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
     name = Column(AqStr(32), nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
+    @classmethod
+    def check_label(cls, label):  # TODO: database check constraint for length
+        if len(label) < 1 or len(label) > 63:
+            msg = 'DNS name components must have a length between 1 and 63.'
+            raise ValueError(msg)
+        if not cls._name_check.match(label):
+            raise ValueError("Illegal DNS domain name format '%s'." % label)
 
-dnsdomain = DnsDomain.__table__
+    def __init__(self, *args, **kwargs):
+
+        if 'name' not in kwargs:
+            raise KeyError('DNS domain name missing.')
+
+        domain = kwargs['name']
+
+        # The limit for DNS name length is 255, assuming wire format. This
+        # translates to 253 for simple ASCII text; see:
+        # http://www.ops.ietf.org/lists/namedroppers/namedroppers.2003/msg00964.html
+        if len(domain) > 253:
+            raise ValueError('The DNS domain name is too long.')
+
+        parts = domain.split('.')
+        if len(parts) < 2:
+            raise ValueError('Top-level DNS domains cannot be added.')
+        # The limit of max. 127 parts mentioned at various documents about DNS
+        # follows from the other checks above and below
+        for part in parts:
+            self.check_label(part)
+
+        super(DnsDomain, self).__init__(*args, **kwargs)
+
+
+dnsdomain = DnsDomain.__table__  # pylint: disable-msg=C0103, E1101
 
 dnsdomain.primary_key.name = '%s_pk' % (_TN)
 dnsdomain.append_constraint(UniqueConstraint('name', name='%s_uk' % (_TN)))
