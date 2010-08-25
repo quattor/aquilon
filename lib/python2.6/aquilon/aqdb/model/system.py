@@ -37,7 +37,7 @@ from aquilon.aqdb.model import Base, DnsDomain, Network
 from aquilon.aqdb.column_types import AqStr, IPV4, AqMac
 
 #TODO: enum type for system_type column
-#_sys_types = ['host', 'tor_switch', 'console_switch', 'chassis', 'manager',
+#_sys_types = ['host', 'switch', 'console_switch', 'chassis', 'manager',
 #              'auxiliary' ]
 
 class System(Base):

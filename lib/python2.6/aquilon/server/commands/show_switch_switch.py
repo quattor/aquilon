@@ -26,39 +26,16 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Top of Rack Swtiches """
-from datetime import datetime
+"""Contains the logic for `aq show switch --switch`."""
 
-from sqlalchemy      import Table, Column, Integer, ForeignKey, DateTime
-from sqlalchemy.orm  import relation, deferred, backref
 
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.switch import get_switch
 
-#TODO: use selection of the tor_switch_hw specs to dynamically populate
-#      default values for all of the attrs where its possible
 
-class TorSwitchHw(HardwareEntity):
-    __tablename__ = 'tor_switch_hw'
-    __mapper_args__ = {'polymorphic_identity' : 'tor_switch_hw'}
+class CommandShowSwitchSwitch(BrokerCommand):
 
-    #TODO: rename to id?
-    hardware_entity_id = Column(Integer,
-                                ForeignKey('hardware_entity.id',
-                                           name='tor_switch_hw_ent_fk',
-                                           ondelete='CASCADE'),
-                                           primary_key=True)
+    required_parameters = ["switch"]
 
-    last_poll = Column(DateTime, nullable=False, default=datetime.now)
-
-    @property
-    def hardware_name(self):
-        if self.tor_switch:
-            return ",".join(tor_switch.fqdn for tor_switch in self.tor_switch)
-        return self._hardware_name
-
-tor_switch_hw = TorSwitchHw.__table__
-tor_switch_hw.primary_key.name='tor_switch_hw_pk'
-
-table = tor_switch_hw
-
-#TODO: make tor_switch_hw --like [other tor_switch_hw] + overrides
+    def render(self, session, logger, switch, **arguments):
+        return get_switch(session, switch)

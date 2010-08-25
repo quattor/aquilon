@@ -26,17 +26,14 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq poll tor_switch`."""
+"""Contains the logic for `aq show switch --all`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_switch import CommandPollSwitch
+from aquilon.aqdb.model import Switch
 
 
-class CommandPollTorSwitch(CommandPollSwitch):
-    """Deprecated wrapper for poll_switch."""
+class CommandShowSwitchAll(BrokerCommand):
 
-    def render(self, logger, **arguments):
-        logger.client_info("Command poll_tor_switch is deprecated, please use "
-                           "poll_switch instead.")
-        return CommandPollSwitch.render(self, logger=logger, **arguments)
+    def render(self, session, logger, **arguments):
+        return session.query(Switch).all()

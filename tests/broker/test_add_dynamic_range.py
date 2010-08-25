@@ -120,7 +120,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The IP address %s is reserved for dynamic "
-                         "DHCP for a ToR switch on subnet %s" %
+                         "DHCP for a switch on subnet %s" %
                          (self.net.tor_net2[1].reserved[0],
                           self.net.tor_net2[1].ip),
                          command)

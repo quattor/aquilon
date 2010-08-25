@@ -26,22 +26,22 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""TorSwitchHw formatter."""
+"""SwitchHw formatter."""
 
 
 from aquilon import const
 from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import TorSwitchHw, HardwareEntity
+from aquilon.aqdb.model import SwitchHw, HardwareEntity
 
 
-class TorSwitchHwFormatter(ObjectFormatter):
-    def format_raw(self, tor_switch_hw, indent=""):
+class SwitchHwFormatter(ObjectFormatter):
+    def format_raw(self, switch_hw, indent=""):
         details = []
-        for tor_switch in tor_switch_hw.tor_switch:
-            details.append(self.redirect_raw(tor_switch, indent))
+        for switch in switch_hw.switch:
+            details.append(self.redirect_raw(switch, indent))
         if not details:
             handler = ObjectFormatter.handlers[HardwareEntity]
-            details.append(handler.format_raw(tor_switch_hw, indent))
+            details.append(handler.format_raw(switch_hw, indent))
         return "\n".join(details)
 
-ObjectFormatter.handlers[TorSwitchHw] = TorSwitchHwFormatter()
+ObjectFormatter.handlers[SwitchHw] = SwitchHwFormatter()

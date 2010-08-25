@@ -33,24 +33,29 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.system import parse_system
-from aquilon.aqdb.model import TorSwitch, HardwareEntity, Model
+from aquilon.server.formats.switch import TorSwitch
+from aquilon.aqdb.model import Switch, HardwareEntity, Model
 
 
 class CommandShowTorSwitch(BrokerCommand):
 
-    def render(self, session, tor_switch, rack, model, vendor, **arguments):
-        q = session.query(TorSwitch)
+    def render(self, session, logger, tor_switch, rack, model, vendor,
+               **arguments):
+        # Almost pointless - the aq client doesn't ask for this channel...
+        logger.client_info("Command show_tor_switch is deprecated, please use "
+                           "show_switch or search_switch instead.")
+        q = session.query(Switch)
         if tor_switch:
             (short, dbdns_domain) = parse_system(session, tor_switch)
             q = q.filter_by(name=short, dns_domain=dbdns_domain)
         if rack:
             dblocation = get_location(session, rack=rack)
-            q = q.filter(TorSwitch.tor_switch_id==HardwareEntity.id)
+            q = q.filter(Switch.switch_id==HardwareEntity.id)
             q = q.filter(HardwareEntity.location_id==dblocation.id)
         if model or vendor:
             subq = Model.get_matching_query(session, name=model, vendor=vendor,
-                                            machine_type='tor_switch',
-                                            compel=True)
-            q = q.filter(TorSwitch.tor_switch_id==HardwareEntity.id)
+                                            machine_type='switch', compel=True)
+            q = q.filter(Switch.switch_id==HardwareEntity.id)
             q = q.filter(HardwareEntity.model_id.in_(subq))
-        return q.all()
+        # This output gets the old CSV formatter.
+        return [TorSwitch(dbswitch) for dbswitch in q.all()]

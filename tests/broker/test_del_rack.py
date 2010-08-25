@@ -48,6 +48,10 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack ut3"
         self.notfoundtest(command.split(" "))
 
+    def testdelut4(self):
+        command = "del rack --rack ut4"
+        self.noouttest(command.split(" "))
+
     def testdelnp997(self):
         command = "del rack --rack np997"
         self.noouttest(command.split(" "))

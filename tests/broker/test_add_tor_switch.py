@@ -39,16 +39,11 @@ from brokertest import TestBrokerCommand
 
 class TestAddTorSwitch(TestBrokerCommand):
 
-    def testaddut3gd1r01(self):
-        self.noouttest(["add", "tor_switch",
-            "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com",
-            "--rack", "ut3", "--model", "uttorswitch", "--serial", "SNgd1r01"])
-
     def verifyswitch(self, tor_switch, vendor, model,
                      rack, rackrow, rackcol, serial=None):
         command = "show tor_switch --tor_switch %s" % tor_switch
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: %s" % tor_switch, command)
+        self.matchoutput(out, "Switch: %s" % tor_switch, command)
         self.matchoutput(out, "Rack: %s" % rack, command)
         self.matchoutput(out, "Row: %s" % rackrow, command)
         self.matchoutput(out, "Column: %s" % rackcol, command)
@@ -62,21 +57,18 @@ class TestAddTorSwitch(TestBrokerCommand):
 #            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)
 
-    def testverifyaddut3gd1r01(self):
-        self.verifyswitch("ut3gd1r01.aqd-unittest.ms.com", "hp", "uttorswitch",
-                          "ut3", "a", "3", "SNgd1r01")
+# FIXME: If needed, move these out into separate show_switch/show_fqdn tests...
+#   def testverifyaddut3gd1r01csv(self):
+#       command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com --format=csv"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com,ut3,ut,hp,uttorswitch,SNgd1r01,,,",
+#               command)
 
-    def testverifyaddut3gd1r01csv(self):
-        command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com --format=csv"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com,ut3,ut,hp,uttorswitch,SNgd1r01,,,",
-                command)
-
-    def testverifyshowfqdntorswitch(self):
-        command = "show fqdn --fqdn ut3gd1r01.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
-                         command)
+#   def testverifyshowfqdntorswitch(self):
+#       command = "show fqdn --fqdn ut3gd1r01.aqd-unittest.ms.com"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com",
+#                        command)
 
     # Testing that add machine does not allow a tor_switch....
     def testrejectut3gd1r02(self):
@@ -84,7 +76,7 @@ class TestAddTorSwitch(TestBrokerCommand):
             "--machine", "ut3gd1r02.aqd-unittest.ms.com",
             "--rack", "ut3", "--model", "uttorswitch"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "cannot add machines of type tor_switch",
+        self.matchoutput(out, "cannot add machines of type switch",
                          command)
 
     def testverifyrejectut3gd1r02(self):
@@ -97,8 +89,9 @@ class TestAddTorSwitch(TestBrokerCommand):
             "--tor_switch", "ut3gd1r03.aqd-unittest.ms.com",
             "--rack", "ut3", "--model", "hs21-8853l5u"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Model hs21-8853l5u, machine_type "
-                         "tor_switch not found.", command)
+        self.matchoutput(out,
+                         "Model hs21-8853l5u, machine_type switch not found.",
+                         command)
 
     def testverifyrejectut3gd1r03(self):
         command = "show tor_switch --tor_switch ut3gd1r03.aqd-unittest.ms.com"
@@ -106,11 +99,13 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     # Test adding a switch with an existing rack using --rackid
     def testaddnp997gd1r04(self):
-        self.noouttest(["add", "tor_switch",
-            "--tor_switch", "np997gd1r04.aqd-unittest.ms.com",
-            "--building", "np", "--rackid", "997",
-            "--rackrow", "zz", "--rackcol", "99",
-            "--model", "rs g8000"])
+        # Deprecated
+        command = ["add", "tor_switch",
+                   "--tor_switch", "np997gd1r04.aqd-unittest.ms.com",
+                   "--building", "np", "--rackid", "997",
+                   "--rackrow", "zz", "--rackcol", "99",
+                   "--model", "rs g8000"]
+        (out, err) = self.successtest(command)
 
     def testverifynp997gd1r04(self):
         self.verifyswitch("np997gd1r04.aqd-unittest.ms.com", "bnt", "rs g8000",
@@ -123,11 +118,13 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     # Test adding a switch and creating a new rack
     def testaddnp998gd1r01(self):
-        self.noouttest(["add", "tor_switch",
-            "--tor_switch", "np998gd1r01.aqd-unittest.ms.com",
-            "--building", "np", "--rackid", "998",
-            "--rackrow", "yy", "--rackcol", "88",
-            "--model", "ws-c2960-48tt-l"])
+        # Deprecated
+        command = ["add", "tor_switch",
+                   "--tor_switch", "np998gd1r01.aqd-unittest.ms.com",
+                   "--building", "np", "--rackid", "998",
+                   "--rackrow", "yy", "--rackcol", "88",
+                   "--model", "ws-c2960-48tt-l"]
+        (out, err) = self.successtest(command)
 
     def testverifynp998gd1r01(self):
         self.verifyswitch("np998gd1r01.aqd-unittest.ms.com",
@@ -140,21 +137,25 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     # Test adding a switch but specifying the rack row in upper case
     def testaddnp998gd1r02(self):
-        self.noouttest(["add", "tor_switch",
-            "--tor_switch", "np998gd1r02.aqd-unittest.ms.com",
-            "--building", "np", "--rackid", "998",
-            "--rackrow", "YY", "--rackcol", "88",
-            "--model", "ws-c2960-48tt-l"])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "np998gd1r02.aqd-unittest.ms.com",
+                   "--building", "np", "--rackid", "998",
+                   "--rackrow", "YY", "--rackcol", "88",
+                   "--model", "ws-c2960-48tt-l"]
+        (out, err) = self.successtest(command)
 
     # Test adding a switch, creating a new rack, and adding an IP.
     def testaddnp999gd1r01(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "np999gd1r01.aqd-unittest.ms.com",
-                        "--building", "np", "--rackid", "999",
-                        "--rackrow", "zz", "--rackcol", "11",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net[5].usable[0].mac,
-                        "--ip", self.net.tor_net[5].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "np999gd1r01.aqd-unittest.ms.com",
+                   "--building", "np", "--rackid", "999",
+                   "--rackrow", "zz", "--rackcol", "11",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net[5].usable[0].mac,
+                   "--ip", self.net.tor_net[5].usable[0]]
+        (out, err) = self.successtest(command)
 
     def testverifynp999gd1r01(self):
         (out, command) = self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
@@ -182,87 +183,93 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifyshowtorswitchrack(self):
         command = "show tor_switch --rack np999"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: np999gd1r01.aqd-unittest.ms.com",
+        self.matchoutput(out, "Switch: np999gd1r01.aqd-unittest.ms.com",
                          command)
 
-    def testverifyshowtorswitchmodel(self):
-        command = "show tor_switch --model uttorswitch"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
-                         command)
+#   def testverifyshowtorswitchmodel(self):
+#       command = "show tor_switch --model uttorswitch"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com",
+#                        command)
 
     def testverifyshowtorswitchall(self):
         command = "show tor_switch --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
+#       self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com",
+#                        command)
+        self.matchoutput(out, "Switch: np997gd1r04.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "Tor_switch: np997gd1r04.aqd-unittest.ms.com",
+        self.matchoutput(out, "Switch: np998gd1r01.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "Tor_switch: np998gd1r01.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "Tor_switch: np999gd1r01.aqd-unittest.ms.com",
+        self.matchoutput(out, "Switch: np999gd1r01.aqd-unittest.ms.com",
                          command)
 
     def testaddnp06bals03(self):
-        self.noouttest(["add", "tor_switch",
-            "--tor_switch", "np06bals03.ms.com",
-            "--building", "np", "--rackid", "7",
-            "--rackrow", "g", "--rackcol", "1",
-            "--model", "rs g8000",
-            "--interface", "gigabitethernet0/1",
-            "--mac", "0018b1898600", "--ip", "172.31.64.69"])
+        # Deprecated.
+        command = ["add", "tor_switch", "--tor_switch", "np06bals03.ms.com",
+                   "--building", "np", "--rackid", "7",
+                   "--rackrow", "g", "--rackcol", "1", "--model", "rs g8000",
+                   "--interface", "gigabitethernet0/1",
+                   "--mac", "0018b1898600", "--ip", "172.31.64.69"]
+        (out, err) = self.successtest(command)
 
     def testverifynp06bals03(self):
         self.verifyswitch("np06bals03.ms.com",
                           "bnt", "rs g8000", "np7", "g", "1")
 
     def testaddnp06fals01(self):
-        self.noouttest(["add", "tor_switch",
-            "--tor_switch", "np06fals01.ms.com",
-            "--building", "np", "--rackid", "7",
-            "--rackrow", "g", "--rackcol", "1",
-            "--model", "ws-c2960-48tt-l",
-            "--interface", "xge49",
-            "--mac", "001cf699e5c1", "--ip", "172.31.88.5"])
+        # Deprecated.
+        command = ["add", "tor_switch", "--tor_switch", "np06fals01.ms.com",
+                   "--building", "np", "--rackid", "7",
+                   "--rackrow", "g", "--rackcol", "1",
+                   "--model", "ws-c2960-48tt-l", "--interface", "xge49",
+                   "--mac", "001cf699e5c1", "--ip", "172.31.88.5"]
+        (out, err) = self.successtest(command)
 
     def testverifynp06fals01(self):
         self.verifyswitch("np06fals01.ms.com",
                           "cisco", "ws-c2960-48tt-l", "np7", "g", "1")
 
     def testaddut01ga1s02(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "ut01ga1s02.aqd-unittest.ms.com",
-                        "--building", "ut", "--rackid", "8",
-                        "--rackrow", "g", "--rackcol", "2",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net[0].usable[0].mac,
-                        "--ip", self.net.tor_net[0].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga1s02.aqd-unittest.ms.com",
+                   "--building", "ut", "--rackid", "8",
+                   "--rackrow", "g", "--rackcol", "2",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net[0].usable[0].mac,
+                   "--ip", self.net.tor_net[0].usable[0]]
+        (out, err) = self.successtest(command)
 
     def testverifyut01ga1s02(self):
         self.verifyswitch("ut01ga1s02.aqd-unittest.ms.com",
                           "bnt", "rs g8000", "ut8", "g", "2")
 
     def testaddut01ga1s03(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "ut01ga1s03.aqd-unittest.ms.com",
-                        "--room", "utroom2", "--rackid", "9",
-                        "--rackrow", "g", "--rackcol", "3",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net[1].usable[0].mac,
-                        "--ip", self.net.tor_net[1].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga1s03.aqd-unittest.ms.com",
+                   "--room", "utroom2", "--rackid", "9",
+                   "--rackrow", "g", "--rackcol", "3",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net[1].usable[0].mac,
+                   "--ip", self.net.tor_net[1].usable[0]]
+        (out, err) = self.successtest(command)
 
     def testverifyut01ga1s03(self):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
                           "bnt", "rs g8000", "ut9", "g", "3")
 
     def testaddut01ga1s04(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
-                        "--building", "ut", "--rackid", "10",
-                        "--rackrow", "g", "--rackcol", "4",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net[2].usable[0].mac,
-                        "--ip", self.net.tor_net[2].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
+                   "--building", "ut", "--rackid", "10",
+                   "--rackrow", "g", "--rackcol", "4",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net[2].usable[0].mac,
+                   "--ip", self.net.tor_net[2].usable[0]]
+        (out, err) = self.successtest(command)
 
     def testverifyut01ga1s04(self):
         self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
@@ -288,38 +295,46 @@ class TestAddTorSwitch(TestBrokerCommand):
         out = self.notfoundtest(command.split(" "))
 
     def testaddut01ga2s01(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com",
-                        "--building", "ut", "--rackid", "11",
-                        "--rackrow", "k", "--rackcol", "1",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net2[2].usable[0].mac,
-                        "--ip", self.net.tor_net2[2].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com",
+                   "--building", "ut", "--rackid", "11",
+                   "--rackrow", "k", "--rackcol", "1",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net2[2].usable[0].mac,
+                   "--ip", self.net.tor_net2[2].usable[0]]
+        (out, err) = self.successtest(command)
 
     def testaddut01ga2s02(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com",
-                        "--building", "ut", "--rackid", "12",
-                        "--rackrow", "k", "--rackcol", "2",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net2[2].usable[1].mac,
-                        "--ip", self.net.tor_net2[2].usable[1]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com",
+                   "--building", "ut", "--rackid", "12",
+                   "--rackrow", "k", "--rackcol", "2",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net2[2].usable[1].mac,
+                   "--ip", self.net.tor_net2[2].usable[1]]
+        (out, err) = self.successtest(command)
 
     def testaddut01ga2s03(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com",
-                        "--rack", "ut13",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net2[3].usable[0].mac,
-                        "--ip", self.net.tor_net2[3].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com",
+                   "--rack", "ut13",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net2[3].usable[0].mac,
+                   "--ip", self.net.tor_net2[3].usable[0]]
+        (out, err) = self.successtest(command)
 
     def testaddnp01ga2s03(self):
-        self.noouttest(["add", "tor_switch",
-                        "--tor_switch", "np01ga2s03.one-nyp.ms.com",
-                        "--rack", "np13",
-                        "--model", "rs g8000", "--interface", "xge49",
-                        "--mac", self.net.tor_net2[4].usable[0].mac,
-                        "--ip", self.net.tor_net2[4].usable[0]])
+        # Deprecated.
+        command = ["add", "tor_switch",
+                   "--tor_switch", "np01ga2s03.one-nyp.ms.com",
+                   "--rack", "np13",
+                   "--model", "rs g8000", "--interface", "xge49",
+                   "--mac", self.net.tor_net2[4].usable[0].mac,
+                   "--ip", self.net.tor_net2[4].usable[0]]
+        (out, err) = self.successtest(command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)

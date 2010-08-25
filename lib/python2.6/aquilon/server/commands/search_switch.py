@@ -26,17 +26,47 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq poll tor_switch`."""
+"""Contains the logic for `aq search switch`."""
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_switch import CommandPollSwitch
+from aquilon.server.formats.switch import SimpleSwitchList
+from aquilon.aqdb.model import Switch, SwitchHw, Model
+from aquilon.server.dbwrappers.system import search_system_query
+from aquilon.server.dbwrappers.location import get_location
 
 
-class CommandPollTorSwitch(CommandPollSwitch):
-    """Deprecated wrapper for poll_switch."""
+class CommandSearchSwitch(BrokerCommand):
 
-    def render(self, logger, **arguments):
-        logger.client_info("Command poll_tor_switch is deprecated, please use "
-                           "poll_switch instead.")
-        return CommandPollSwitch.render(self, logger=logger, **arguments)
+    required_parameters = []
+
+    def render(self, session, logger, switch, type, model, vendor, serial,
+               fullinfo, **arguments):
+        if switch:
+            arguments['fqdn'] = switch
+        q = search_system_query(session, Switch, **arguments)
+
+        dblocation = get_location(session, **arguments)
+        if dblocation:
+            q = q.join(['switch_hw'])
+            if arguments.get('exact_location'):
+                q = q.filter_by(location=dblocation)
+            else:
+                childids = dblocation.offspring_ids()
+                q = q.filter(SwitchHw.location_id.in_(childids))
+            q = q.reset_joinpoint()
+        if model or vendor:
+            subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                            machine_type='switch', compel=True)
+            q = q.join(['switch_hw'])
+            q = q.filter(SwitchHw.model_id.in_(subq))
+            q = q.reset_joinpoint()
+        if type:
+            q = q.filter_by(switch_type=type)
+        if serial:
+            q = q.join(['switch_hw'])
+            q = q.filter_by(serial_no=serial)
+            q = q.reset_joinpoint()
+        if fullinfo:
+            return q.all()
+        return SimpleSwitchList(q.all())

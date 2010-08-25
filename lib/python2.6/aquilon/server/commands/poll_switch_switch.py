@@ -26,32 +26,19 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Top of Rack Switches """
+"""Contains the logic for `aq poll switch --switch`."""
 
-from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import System, TorSwitchHw
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.poll_switch import CommandPollSwitch
+from aquilon.server.dbwrappers.system import get_system
+from aquilon.aqdb.model import Switch
 
-class TorSwitch(System):
-    __tablename__ = 'tor_switch'
-    _class_label = 'ToR Switch'
 
-    id = Column(Integer,
-                ForeignKey('system.id', ondelete='CASCADE',
-                           name='TOR_SW_SYS_FK'), primary_key=True)
+class CommandPollSwitchSwitch(CommandPollSwitch):
 
-    tor_switch_id = Column(Integer, ForeignKey('tor_switch_hw.hardware_entity_id',
-                                               name='TOR_SW_SY_HW_FK',
-                                               ondelete='CASCADE'),
-                                              nullable=False)
+    required_parameters = ["switch"]
 
-    tor_switch_hw = relation(TorSwitchHw, uselist=False,
-                             backref=backref('tor_switch',cascade='delete'))
-
-    __mapper_args__ = {'polymorphic_identity' : 'tor_switch'}
-
-tor_switch = TorSwitch.__table__
-tor_switch.primary_key.name='TOR_SWITCH_PK'
-
-table = tor_switch
+    def render(self, session, logger, switch, clear, vlan, **arguments):
+        dbswitch = get_system(session, switch, Switch, 'Switch')
+        return self.poll(session, logger, [dbswitch], clear, vlan)

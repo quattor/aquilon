@@ -26,56 +26,65 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Contains the logic for `aq add interface --tor_switch`.
-    Duplicates logic used in `aq add interface --chassis`."""
+""" Contains the logic for `aq add interface --switch`."""
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Interface, TorSwitch
+from aquilon.aqdb.model import Interface, Switch
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_tor_offsets,
+                                                 restrict_switch_offsets,
                                                  get_or_create_interface)
 from aquilon.server.processes import DSDBRunner
 
 
-class CommandAddInterfaceTorSwitch(BrokerCommand):
+class CommandAddInterfaceSwitch(BrokerCommand):
 
-    required_parameters = ["interface", "tor_switch", "mac"]
+    required_parameters = ["interface", "switch", "mac"]
+    invalid_parameters = ['automac', 'ip', 'ipfromip', 'ipfromsystem',
+                          'autoip', 'ipalgorithm', 'pg', 'autopg']
 
-    def render(self, session, logger, interface, tor_switch, mac, comments,
+    def render(self, session, logger, interface, switch, mac, comments,
                **arguments):
-        dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
+        """This command can handle three cases:
 
-        if dbtor_switch.ip:
-            raise ArgumentError("{0} already has an interface with an IP "
-                                "address.".format(dbtor_switch))
+        1) Switch is old-style, and has no IP address.  In that case,
+        update_switch has to handle adding an IP, and this command can
+        add the interface either now or later.
+
+        2) Switch has an IP address with no interfaces.  Tie this interface
+        in as providing the IP.  Not going to worry about propogating the
+        extra information into DSDB.
+
+        3) Switch has an IP address and an interface tied to that address.
+        In this case, just record the new interface.
+
+        """
+        dbswitch = get_system(session, switch, Switch, 'Switch')
+
+        for arg in self.invalid_parameters:
+            if arguments.get(arg) is not None:
+                raise ArgumentError("Cannot use argument --%s when adding an "
+                                    "interface to a switch" % arg)
 
         dbinterface = get_or_create_interface(session,
-                                              dbtor_switch.tor_switch_hw,
+                                              dbswitch.switch_hw,
                                               name=interface, mac=mac,
                                               interface_type='oa',
                                               comments=comments, preclude=True)
 
-        ip = generate_ip(session, dbinterface, compel=True, **arguments)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(dbnetwork, ip)
-        dbtor_switch.ip = ip
-        dbtor_switch.network = dbnetwork
-        dbtor_switch.mac = mac
-        dbinterface.system = dbtor_switch
+        if not dbswitch.ip:
+            return
+
+        if dbswitch.interfaces:
+            return
+
+        dbinterface.system = dbswitch
+        dbswitch.mac = dbinterface.mac
         session.add(dbinterface)
-        session.add(dbtor_switch)
+        session.add(dbswitch)
 
-        session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbtor_switch)
-
-        dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.add_host(dbinterface)
-        except ProcessException, e:
-            raise ArgumentError("Could not add ToR switch to DSDB: %s" % e)
-        return
+        # We could theoretically add the mac information to DSDB...
+        # doesn't seem worth the trouble.

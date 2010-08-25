@@ -34,11 +34,11 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
-from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
+from aquilon.server.dbwrappers.interface import (restrict_switch_offsets,
                                                  get_or_create_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface, Model
+from aquilon.aqdb.model import Switch, SwitchHw, Interface, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -52,10 +52,12 @@ class CommandAddTorSwitch(BrokerCommand):
                cpuname, cpuvendor, cpuspeed, cpucount, memory,
                serial,
                user, **arguments):
+        logger.client_info("add_tor_switch is deprecated, please use "
+                           "add_switch instead.")
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   machine_type='tor_switch', compel=True)
+                                   machine_type='switch', compel=True)
 
-        if dbmodel.machine_type not in ['tor_switch']:
+        if dbmodel.machine_type not in ['switch']:
             raise ArgumentError("The add_tor_switch command cannot add "
                                 "machines of type %s.  Try 'add machine'." %
                                 dbmodel.machine_type)
@@ -78,11 +80,11 @@ class CommandAddTorSwitch(BrokerCommand):
         (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                              tor_switch)
 
-        dbtor_switch_hw = TorSwitchHw(location=dblocation, model=dbmodel,
-                                      serial_no=serial)
+        dbtor_switch_hw = SwitchHw(location=dblocation, model=dbmodel,
+                                   serial_no=serial)
         session.add(dbtor_switch_hw)
-        dbtor_switch = TorSwitch(name=short, dns_domain=dbdns_domain,
-                                 tor_switch_hw=dbtor_switch_hw)
+        dbtor_switch = Switch(name=short, dns_domain=dbdns_domain,
+                              switch_hw=dbtor_switch_hw, switch_type='tor')
         session.add(dbtor_switch)
 
         if interface or mac or ip:
@@ -93,7 +95,7 @@ class CommandAddTorSwitch(BrokerCommand):
 
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
-            restrict_tor_offsets(dbnetwork, ip)
+            restrict_switch_offsets(dbnetwork, ip)
             dbtor_switch.mac = mac
             dbtor_switch.ip = ip
             dbtor_switch.network = dbnetwork

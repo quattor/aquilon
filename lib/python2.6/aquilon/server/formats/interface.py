@@ -57,12 +57,12 @@ class InterfaceFormatter(ObjectFormatter):
         hw_type = hw.hardware_entity_type
         if hw_type == 'machine':
             details.append(indent + "  Attached to: machine %s" % hw.name)
-        elif hw_type == 'tor_switch_hw':
-            if hw.tor_switch:
-                details.append(indent + "  Attached to: tor_switch %s" %
-                                   ",".join([ts.fqdn for ts in hw.tor_switch]))
+        elif hw_type == 'switch_hw':
+            if hw.switch:
+                details.append(indent + "  Attached to: switch %s" %
+                                   ",".join([ts.fqdn for ts in hw.switch]))
             else:
-                details.append("  Attached to: unnamed tor_switch")
+                details.append("  Attached to: unnamed switch")
         elif hw_type == 'chassis_hw':
             if hw.chassis_hw:
                 details.append("  Attached to: chassis %s" %

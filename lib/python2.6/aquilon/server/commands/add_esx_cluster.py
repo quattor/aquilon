@@ -36,7 +36,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.dbwrappers.tor_switch import get_tor_switch
+from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.utils import force_ratio
 
 
@@ -46,7 +46,8 @@ class CommandAddESXCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, metacluster, archetype,
                personality, max_members, vm_to_host_ratio, domain, sandbox,
-               tor_switch, down_hosts_threshold, buildstatus, comments, **arguments):
+               tor_switch, switch, down_hosts_threshold, buildstatus, comments,
+               **arguments):
         validate_basic("cluster", cluster)
 
         if not buildstatus:
@@ -84,9 +85,13 @@ class CommandAddESXCluster(BrokerCommand):
                                              vm_to_host_ratio)
 
         if tor_switch:
-            dbtor_switch = get_tor_switch(session, tor_switch)
+            logger.client_info("Option --tor_switch is deprecated, please use "
+                               "--switch instead.")
+            switch = tor_switch
+        if switch:
+            dbswitch = get_switch(session, switch)
         else:
-            dbtor_switch = None
+            dbswitch = None
 
         dbcluster = EsxCluster(name=cluster,
                                location_constraint=dblocation,
@@ -94,7 +99,7 @@ class CommandAddESXCluster(BrokerCommand):
                                max_hosts=max_members,
                                vm_count=vm_count, host_count=host_count,
                                branch=dbbranch, sandbox_author=dbauthor,
-                               switch=dbtor_switch,
+                               switch=dbswitch,
                                down_hosts_threshold=down_hosts_threshold,
                                status=dbstatus,
                                comments=comments)

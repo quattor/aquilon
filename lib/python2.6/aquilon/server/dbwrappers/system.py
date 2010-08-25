@@ -101,7 +101,11 @@ def search_system_query(session, system_type=System, **kwargs):
     if kwargs.get('mac', None):
         q = q.filter_by(mac=kwargs['mac'])
     if kwargs.get('type', None):
-        q = q.filter_by(system_type=kwargs['type'])
+        # Deprecated... remove if it becomes a problem.
+        type_arg = kwargs['type'].strip().lower()
+        if type_arg == 'tor_switch':
+            type_arg = 'switch'
+        q = q.filter_by(system_type=type_arg)
     return q
 
 def get_system_dependencies(session, dbsystem):

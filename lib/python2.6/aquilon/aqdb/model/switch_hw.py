@@ -26,17 +26,35 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq poll tor_switch`."""
+""" Switches """
+from datetime import datetime
+
+from sqlalchemy      import Table, Column, Integer, ForeignKey, DateTime
+from sqlalchemy.orm  import relation, deferred, backref
+
+from aquilon.aqdb.model import HardwareEntity
 
 
-from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_switch import CommandPollSwitch
+class SwitchHw(HardwareEntity):
+    __tablename__ = 'switch_hw'
+    __mapper_args__ = {'polymorphic_identity' : 'switch_hw'}
 
+    hardware_entity_id = Column(Integer,
+                                ForeignKey('hardware_entity.id',
+                                           name='switch_hw_ent_fk',
+                                           ondelete='CASCADE'),
+                                           primary_key=True)
 
-class CommandPollTorSwitch(CommandPollSwitch):
-    """Deprecated wrapper for poll_switch."""
+    last_poll = Column(DateTime, nullable=False, default=datetime.now)
 
-    def render(self, logger, **arguments):
-        logger.client_info("Command poll_tor_switch is deprecated, please use "
-                           "poll_switch instead.")
-        return CommandPollSwitch.render(self, logger=logger, **arguments)
+    @property
+    def hardware_name(self):
+        if self.switch:
+            # FIXME: Does this ever get executed?
+            return ",".join([switch.fqdn for switch in self.switch])
+        return self._hardware_name
+
+switch_hw = SwitchHw.__table__
+switch_hw.primary_key.name='switch_hw_pk'
+
+table = switch_hw

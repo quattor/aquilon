@@ -36,7 +36,6 @@ import re
 
 _long_nms = {}
 _long_nms['CHASSIS_MANAGER'] = 'CHAS_MGR'
-_long_nms['TOR_SWITCH'] = 'TOR_SW'
 _long_nms['HARDWARE_ENTITY_TYPE'] = 'HW_ENT_TYP'
 _long_nms['HARDWARE_ENTITY_TYPE_ID'] = 'HW_ENT_TYP_ID'
 _long_nms['HARDWARE_ENTITY'] = 'HW_ENT'

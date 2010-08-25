@@ -38,9 +38,10 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestTorSwitchConstraints(TestBrokerCommand):
+class TestSwitchConstraints(TestBrokerCommand):
 
     def testdelmachineastor_switch(self):
+        # Deprecated usage.
         command = "del tor_switch --tor_switch ut3c5n10"
         self.badrequesttest(command.split(" "))
 
@@ -55,13 +56,14 @@ class TestTorSwitchConstraints(TestBrokerCommand):
     #    self.badrequesttest(command.split(" "))
 
     def testverifydeltor_switchasmachinefailed(self):
+        # Deprecated usage.
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
-                         command)
+        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
 
     # Testing that del tor_switch does not delete a blade....
     def testrejectut3c1n3(self):
+        # Deprecated usage.
         self.badrequesttest(["del", "tor_switch", "--tor_switch", "ut3c1n3"])
 
     def testverifyrejectut3c1n3(self):
@@ -71,6 +73,6 @@ class TestTorSwitchConstraints(TestBrokerCommand):
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestTorSwitchConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestSwitchConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
 

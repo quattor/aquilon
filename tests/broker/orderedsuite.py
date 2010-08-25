@@ -81,7 +81,9 @@ from test_add_esx_cluster_aligned_service import (
     TestAddESXClusterAlignedService)
 from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_add_tor_switch import TestAddTorSwitch
-from test_poll_tor_switch import TestPollTorSwitch
+from test_add_switch import TestAddSwitch
+from test_update_switch import TestUpdateSwitch
+from test_poll_switch import TestPollSwitch
 from test_add_chassis import TestAddChassis
 from test_add_machine import TestAddMachine
 from test_add_disk import TestAddDisk
@@ -125,7 +127,7 @@ from test_constraints_service import TestServiceConstraints
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
-from test_constraints_tor_switch import TestTorSwitchConstraints
+from test_constraints_switch import TestSwitchConstraints
 from test_constraints_make import TestMakeConstraints
 from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
@@ -135,6 +137,8 @@ from test_show_machinemaclist import TestShowMachineMacList
 from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
+from test_show_switch import TestShowSwitch
+from test_search_switch import TestSearchSwitch
 from test_search_hardware import TestSearchHardware
 from test_search_machine import TestSearchMachine
 from test_search_system import TestSearchSystem
@@ -171,7 +175,7 @@ from test_del_interface import TestDelInterface
 from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
-from test_del_tor_switch import TestDelTorSwitch
+from test_del_switch import TestDelSwitch
 from test_del_esx_cluster_aligned_service import (
     TestDelESXClusterAlignedService)
 from test_del_esx_cluster import TestDelESXCluster
@@ -224,7 +228,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddESXClusterAlignedService,
                 TestClusterEarlyConstraints,
-                TestAddTorSwitch, TestPollTorSwitch,
+                TestAddTorSwitch, TestAddSwitch, TestUpdateSwitch,
+                TestPollSwitch,
                 TestAddChassis, TestAddMachine, TestAddDisk, TestAddInterface,
                 TestAddAddress, TestAddDynamicRange, TestAddHost,
                 TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
@@ -246,12 +251,13 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestBindClientConstraints, TestBindServerConstraints,
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,
-                TestMachineConstraints, TestTorSwitchConstraints,
+                TestMachineConstraints, TestSwitchConstraints,
                 TestMakeConstraints,
                 TestUpdatePersonality,
                 TestClusterConstraints, TestMetaClusterConstraints,
                 TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
+                TestShowSwitch, TestSearchSwitch,
                 TestSearchHardware, TestSearchMachine,
                 TestSearchSystem, TestSearchHost, TestSearchESXCluster,
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
@@ -269,7 +275,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelDynamicRange, TestDelAddress,
                 TestDelManager, TestDelAuxiliary, TestDelHost,
                 TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                TestDelTorSwitch,
+                TestDelSwitch,
                 TestDelESXClusterAlignedService,
                 TestDelESXCluster, TestDelMetaCluster,
                 TestDelNetwork,

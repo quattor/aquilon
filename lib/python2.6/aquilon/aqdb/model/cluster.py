@@ -41,7 +41,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Service, Location,
                                 Personality, ClusterLifecycle,
-                                ServiceInstance, Machine, Branch, TorSwitch,
+                                ServiceInstance, Machine, Branch, Switch,
                                 UserPrincipal)
 
 # List of functions allowed to be used in vmhost_capacity_function
@@ -197,11 +197,11 @@ class EsxCluster(Cluster):
     memory_capacity = Column(Integer, nullable=True)
 
     switch_id = Column(Integer,
-                       ForeignKey('tor_switch.id',
+                       ForeignKey('switch.id',
                                   name='esx_cluster_switch_fk'),
                        nullable=True)
 
-    switch = relation(TorSwitch, uselist=False, lazy=False,
+    switch = relation(Switch, uselist=False, lazy=False,
                       backref=backref('esx_clusters'))
 
     @property

@@ -318,14 +318,14 @@ class DSDBRunner(object):
         return None
 
     def add_host(self, dbinterface):
-        if not dbinterface.system.ip:
-            raise ArgumentError("No ip address found for '%s' to add to dsdb." %
-                                dbinterface.system.fqdn)
         return self.add_host_details(dbinterface.system.fqdn,
                                      dbinterface.system.ip,
                                      dbinterface.name, dbinterface.mac)
 
     def add_host_details(self, fqdn, ip, name, mac):
+        if not ip:
+            raise ArgumentError("No ip address found for '%s' to add to dsdb."
+                                % fqdn)
         # DSDB does not accept '/' as valid in an interface name.
         command = [self.config.get("broker", "dsdb"),
                     "add", "host", "-host_name", fqdn,
@@ -408,6 +408,16 @@ class DSDBRunner(object):
         return
 
     def update_host_force(self, dbinterface, oldinfo):
+        return self.update_host_force_details(dbinterface.system.fqdn,
+                                              dbinterface.system.ip,
+                                              dbinterface.name,
+                                              dbinterface.mac,
+                                              oldinfo['ip'],
+                                              oldinfo['name'],
+                                              oldinfo['mac'])
+
+    def update_host_force_details(self, fqdn, newip, newint, newmac,
+                                  oldip, oldint, oldmac):
         """This gets tricky.  On a basic level, we want to remove the
         old information from dsdb and then re-add it.
 
@@ -422,15 +432,14 @@ class DSDBRunner(object):
         info, and then pass the failure back to the user.  (Hopefully
         just the original failure, but possibly both.)
         """
-        self.delete_host_details(oldinfo["ip"])
+        self.delete_host_details(oldip)
         try:
-            self.add_host(dbinterface)
+            self.add_host_details(fqdn, newip, newint, newmac)
         except ProcessException, pe1:
             self.logger.info("Failed adding new information to dsdb, "
                              "attempting to restore old info.")
             try:
-                self.add_host_details(dbinterface.system.fqdn, oldinfo["ip"],
-                        oldinfo["name"], oldinfo["mac"])
+                self.add_host_details(fqdn, oldip, oldint, oldmac)
             except ProcessException, pe2:
                 # FIXME: Add details.
                 raise AquilonError("DSDB is now in an inconsistent state.  Removing old information succeeded, but cannot add new information.")

@@ -228,17 +228,17 @@ class TestAddInterface(TestBrokerCommand):
     def testaddinterfacenp997gd1r04(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[3].usable[0].mac,
-                   "--ip", self.net.tor_net[3].usable[0],
-                   "--tor_switch", "np997gd1r04.aqd-unittest.ms.com"]
+#                  "--ip", self.net.tor_net[3].usable[0],
+                   "--switch", "np997gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testverifyaddinterfacenp997gd1r04(self):
         command = "show tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: np997gd1r04.aqd-unittest.ms.com",
+        self.matchoutput(out, "Switch: np997gd1r04.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[3].usable[0],
-                         command)
+#       self.matchoutput(out, "IP: %s" % self.net.tor_net[3].usable[0],
+#                        command)
         self.matchoutput(out,
                          "Interface: xge49 %s boot=False" %
                          self.net.tor_net[3].usable[0].mac,
@@ -248,8 +248,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net.tor_net[0].usable[0].mac,
-                   "--ip", self.net.tor_net[0].usable[0],
-                   "--tor_switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use: " %
@@ -259,7 +258,7 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchclean(out, "Interface: xge49", command)
 
     # These two will eventually be created when testing the addition

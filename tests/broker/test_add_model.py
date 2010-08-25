@@ -42,7 +42,7 @@ class TestAddModel(TestBrokerCommand):
 
     def testadduttorswitch(self):
         command = ["add_model", "--model=uttorswitch", "--vendor=hp",
-                   "--type=tor_switch", "--cpuname=xeon_2500", "--cpunum=1",
+                   "--type=switch", "--cpuname=xeon_2500", "--cpunum=1",
                    "--memory=8192", "--disktype=local", "--diskcontroller=scsi",
                    "--disksize=36", "--nics=4"]
         self.noouttest(command)
@@ -51,7 +51,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --model uttorswitch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
-        self.matchoutput(out, "Type: tor_switch", command)
+        self.matchoutput(out, "Type: switch", command)
         self.matchoutput(out, "MachineSpecs for hp uttorswitch", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -59,7 +59,7 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: sda 36 GB DiskType scsi", command)
 
     def testverifyshowtypetorswitch(self):
-        command = "show model --type tor_switch"
+        command = "show model --type switch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 

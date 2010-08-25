@@ -26,16 +26,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a machine simpler."""
+""" Switches """
+
+from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy.orm import relation, backref
+
+from aquilon.aqdb.column_types import Enum
+from aquilon.aqdb.model import System, SwitchHw
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import TorSwitch
-from aquilon.server.dbwrappers.system import get_system
+SWITCH_TYPES = ('tor', 'bor', 'agg')
 
+class Switch(System):
+    __tablename__ = 'switch'
+    _class_label = 'Switch'
 
-def get_tor_switch(session, tor_switch):
-    dbsystem = get_system(session, tor_switch)
-    if not isinstance(dbsystem, TorSwitch):
-        raise ArgumentError("%s is not a ToR switch." % tor_switch)
-    return dbsystem
+    id = Column(Integer,
+                ForeignKey('system.id', ondelete='CASCADE',
+                           name='SWITCH_SYS_FK'), primary_key=True)
+
+    switch_id = Column(Integer, ForeignKey('switch_hw.hardware_entity_id',
+                                           name='SWITCH_SYS_HW_FK',
+                                           ondelete='CASCADE'),
+                       nullable=False)
+
+    switch_hw = relation(SwitchHw, uselist=False,
+                         backref=backref('switch',cascade='delete'))
+
+    switch_type = Column(Enum(16, SWITCH_TYPES), nullable=False)
+
+    __mapper_args__ = {'polymorphic_identity' : 'switch'}
+
+switch = Switch.__table__
+switch.primary_key.name='SWITCH_PK'
+
+table = switch

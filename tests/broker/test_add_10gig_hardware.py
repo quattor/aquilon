@@ -86,16 +86,17 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_090_addswitch(self):
         for i in range(5, 8):
-            self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                            "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"])
+            # Deprecated.
+            self.successtest(["update_esx_cluster", "--cluster=utecl%d" % i,
+                              "--tor_switch=ut01ga2s01.aqd-unittest.ms.com"])
         for i in range(8, 11):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                            "--tor_switch=ut01ga2s02.aqd-unittest.ms.com"])
+                            "--switch=ut01ga2s02.aqd-unittest.ms.com"])
         for i in range(11, 13):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                            "--tor_switch=ut01ga2s03.aqd-unittest.ms.com"])
+                            "--switch=ut01ga2s03.aqd-unittest.ms.com"])
             self.noouttest(["update_esx_cluster", "--cluster=npecl%d" % i,
-                            "--tor_switch=np01ga2s03.one-nyp.ms.com"])
+                            "--switch=np01ga2s03.one-nyp.ms.com"])
 
     def test_100_addinterfaces(self):
         # Skip index 8 and 17 - these will fail.

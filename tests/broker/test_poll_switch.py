@@ -40,25 +40,28 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestPollTorSwitch(TestBrokerCommand):
+class TestPollSwitch(TestBrokerCommand):
 
     def testpollnp06bals03(self):
-        self.noouttest(["poll", "tor_switch",
-                        "--tor_switch", "np06bals03.ms.com"])
+        # Issues deprecated warning.
+        self.successtest(["poll", "tor_switch",
+                          "--tor_switch", "np06bals03.ms.com"])
 
     # Tests re-polling np06bals03 and polls np06fals01
     def testpollnp7(self):
         # Need to make sure that last_seen != creation_date for np06bals03
         # so sleep for 2 seconds here...
         sleep(2)
-        self.noouttest(["poll", "tor_switch", "--rack", "np7"])
+        # Issues deprecated warning.
+        self.successtest(["poll", "tor_switch", "--rack", "np7"])
 
     def testrepollwithclear(self):
         # Forcing there to "normally" be a difference in last_seen and
         # creation_date to test that clear is working...
         sleep(2)
-        self.noouttest(["poll", "tor_switch", "--tor_switch=np06fals01.ms.com",
-                        "--clear"])
+        # Issues deprecated warning.
+        self.successtest(["poll_tor_switch", "--tor_switch=np06fals01.ms.com",
+                          "--clear"])
 
     # FIXME: Verify the poll and that last_seen != creation_date
     def testverifypollnp06bals03(self):
@@ -125,8 +128,9 @@ class TestPollTorSwitch(TestBrokerCommand):
                     (m.group(1), m.group(2), out))
 
     def testpollut01ga2s01(self):
-        self.noouttest(["poll", "tor_switch", "--vlan",
-                        "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com"])
+        # Issues deprecated warning.
+        self.successtest(["poll", "tor_switch", "--vlan",
+                          "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com"])
 
     def testverifypollut01ga2s01(self):
         command = "show tor_switch --tor_switch ut01ga2s01.aqd-unittest.ms.com"
@@ -148,8 +152,9 @@ class TestPollTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[5].ip, command)
 
     def testpollut01ga2s02(self):
-        self.noouttest(["poll", "tor_switch", "--vlan",
-                        "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com"])
+        # Issues deprecated warning.
+        self.successtest(["poll", "tor_switch", "--vlan",
+                          "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com"])
 
     def testverifypollut01ga2s02(self):
         command = "show tor_switch --tor_switch ut01ga2s02.aqd-unittest.ms.com"
@@ -171,14 +176,16 @@ class TestPollTorSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net.unknown[9].ip, command)
 
     def testpollut01ga2s03(self):
-        self.noouttest(["poll", "tor_switch",
-                        "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com"])
+        # Issues deprecated warning.
+        self.successtest(["poll", "tor_switch",
+                          "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com"])
 
     def testpollnp01ga2s03(self):
-        self.noouttest(["poll", "tor_switch",
-                        "--tor_switch", "np01ga2s03.one-nyp.ms.com"])
+        # Issues deprecated warning.
+        self.successtest(["poll", "tor_switch",
+                          "--tor_switch", "np01ga2s03.one-nyp.ms.com"])
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestPollTorSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPollSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)

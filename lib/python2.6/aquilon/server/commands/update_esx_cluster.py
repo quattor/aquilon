@@ -32,7 +32,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import EsxCluster, Personality
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.tor_switch import get_tor_switch
+from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -46,7 +46,7 @@ class CommandUpdateESXCluster(BrokerCommand):
     required_parameters = ["cluster"]
 
     def render(self, session, logger, cluster, archetype, personality,
-               max_members, vm_to_host_ratio, tor_switch, fix_location,
+               max_members, vm_to_host_ratio, tor_switch, switch, fix_location,
                down_hosts_threshold, comments, memory_capacity,
                clear_overrides, **arguments):
         cluster_type = 'esx'
@@ -134,12 +134,16 @@ class CommandUpdateESXCluster(BrokerCommand):
             cluster_updated = True
 
         if tor_switch is not None:
-            if tor_switch:
+            logger.client_info("Option --tor_switch is deprecated, please use "
+                               "--switch instead.")
+            switch = tor_switch
+        if switch is not None:
+            if switch:
                 # FIXME: Verify that any hosts are on the same network
-                dbtor_switch = get_tor_switch(session, tor_switch)
+                dbswitch = get_switch(session, switch)
             else:
-                dbtor_switch = None
-            dbcluster.switch = dbtor_switch
+                dbswitch = None
+            dbcluster.switch = dbswitch
             cluster_updated = True
 
         if comments is not None:

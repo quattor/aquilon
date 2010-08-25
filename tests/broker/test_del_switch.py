@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing the del tor_switch command."""
+"""Module for testing the del switch command."""
 
 import unittest
 
@@ -38,102 +38,120 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestDelTorSwitch(TestBrokerCommand):
+class TestDelSwitch(TestBrokerCommand):
 
     def testdelut3gd1r01(self):
+        # Deprecated usage.
         command = "del tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
-        self.noouttest(command.split(" "))
+        self.successtest(command.split(" "))
 
     def testverifydelut3gd1r01(self):
+        # Deprecated usage.
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
-        self.notfoundtest(command.split(" "))
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+
+    def testdelut3gd1r04(self):
+        command = "del switch --switch ut3gd1r04.aqd-unittest.ms.com"
+        self.successtest(command.split(" "))
+
+    def testdelut3gd1r05(self):
+        command = "del switch --switch ut3gd1r05.aqd-unittest.ms.com"
+        self.successtest(command.split(" "))
+
+    def testdelut3gd1r06(self):
+        command = "del switch --switch ut3gd1r06.aqd-unittest.ms.com"
+        self.successtest(command.split(" "))
+
+    def testdelut3gd1r07(self):
+        command = "del switch --switch ut3gd1r07.aqd-unittest.ms.com"
+        self.successtest(command.split(" "))
 
     def testdelnp997gd1r04(self):
-        command = "del tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
+        command = "del switch --switch np997gd1r04.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp997gd1r04(self):
-        command = "show tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
+        command = "show switch --switch np997gd1r04.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp998gd1r01(self):
-        command = "del tor_switch --tor_switch np998gd1r01.aqd-unittest.ms.com"
+        command = "del switch --switch np998gd1r01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp998gd1r01(self):
-        command = "show tor_switch --tor_switch np998gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch np998gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp998gd1r02(self):
-        command = "del tor_switch --tor_switch np998gd1r02.aqd-unittest.ms.com"
+        command = "del switch --switch np998gd1r02.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testdelnp999gd1r01(self):
-        command = "del tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com"
+        command = "del switch --switch np999gd1r01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp999gd1r01(self):
-        command = "show tor_switch --tor_switch np999gd1r01.aqd-unittest.ms.com"
+        command = "show switch --switch np999gd1r01.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp06bals03(self):
-        command = "del tor_switch --tor_switch np06bals03.ms.com"
+        command = "del switch --switch np06bals03.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp06bals03(self):
-        command = "show tor_switch --tor_switch np06bals03.ms.com"
+        command = "show switch --switch np06bals03.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelnp06fals01(self):
-        command = "del tor_switch --tor_switch np06fals01.ms.com"
+        command = "del switch --switch np06fals01.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelnp06bals03(self):
-        command = "show tor_switch --tor_switch np06fals01.ms.com"
+        command = "show switch --switch np06fals01.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut01ga1s02(self):
-        command = "del tor_switch --tor_switch ut01ga1s02.aqd-unittest.ms.com"
+        command = "del switch --switch ut01ga1s02.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut01ga1s02(self):
-        command = "show tor_switch --tor_switch ut01ga1s02.aqd-unittest.ms.com"
+        command = "show switch --switch ut01ga1s02.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut01ga1s03(self):
-        command = "del tor_switch --tor_switch ut01ga1s03.aqd-unittest.ms.com"
+        command = "del switch --switch ut01ga1s03.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut01ga1s03(self):
-        command = "show tor_switch --tor_switch ut01ga1s03.aqd-unittest.ms.com"
+        command = "show switch --switch ut01ga1s03.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut01ga1s04(self):
-        command = "del tor_switch --tor_switch ut01ga1s04.aqd-unittest.ms.com"
+        command = "del switch --switch ut01ga1s04.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testverifydelut01ga1s04(self):
-        command = "show tor_switch --tor_switch ut01ga1s04.aqd-unittest.ms.com"
+        command = "show switch --switch ut01ga1s04.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelut01ga2s01(self):
-        command = "del tor_switch --tor_switch ut01ga2s01.aqd-unittest.ms.com"
+        command = "del switch --switch ut01ga2s01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testdelut01ga2s02(self):
-        command = "del tor_switch --tor_switch ut01ga2s02.aqd-unittest.ms.com"
+        command = "del switch --switch ut01ga2s02.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testdelut01ga2s03(self):
-        command = "del tor_switch --tor_switch ut01ga2s03.aqd-unittest.ms.com"
+        command = "del switch --switch ut01ga2s03.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
     def testdelnp01ga2s03(self):
-        command = "del tor_switch --tor_switch np01ga2s03.one-nyp.ms.com"
+        command = "del switch --switch np01ga2s03.one-nyp.ms.com"
         self.noouttest(command.split(" "))
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelTorSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelSwitch)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

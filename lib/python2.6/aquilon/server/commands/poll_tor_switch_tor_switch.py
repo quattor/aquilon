@@ -30,15 +30,16 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_tor_switch import CommandPollTorSwitch
-from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.model import TorSwitch
+from aquilon.server.commands.poll_switch_switch import CommandPollSwitchSwitch
 
 
-class CommandPollTorSwitchTorSwitch(CommandPollTorSwitch):
+class CommandPollTorSwitchTorSwitch(CommandPollSwitchSwitch):
+    """Deprecated wrapper for poll_switch."""
 
     required_parameters = ["tor_switch"]
 
-    def render(self, session, logger, tor_switch, clear, vlan, **arguments):
-        dbtor_switch = get_system(session, tor_switch, TorSwitch, 'TorSwitch')
-        return self.poll(session, logger, [dbtor_switch], clear, vlan)
+    def render(self, logger, tor_switch, **arguments):
+        logger.client_info("Command poll_tor_switch is deprecated, please use "
+                           "poll_switch instead.")
+        return CommandPollSwitchSwitch.render(self, logger=logger,
+                                              switch=tor_switch, **arguments)

@@ -241,7 +241,7 @@
          <option name="fqdn" type="string">fully qualified domain name</option>
          <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
-         <option name="type" type="string">System type (host, chassis, tor_switch, manager, auxiliary)</option>
+         <option name="type" type="string">System type (host, chassis, switch, manager, auxiliary)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
          <option name="mac" type="string">primary mac address</option>
@@ -371,14 +371,15 @@
    </command>
 
    <command name="search_observed_mac">
-      Search poll_tor_switch results.
+      Search poll_switch results.
 
       Supported options for --format: csv.
 
       The 'csv' format contains the following fields, in this order:
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
-         <option name="tor_switch" type="string">FQDN of the switch</option>
+         <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) FQDN of the switch</option>
+         <option name="switch" type="string" conflicts="tor_switch">FQDN of the switch</option>
          <option name="port_number" type="int">Port number on the switch</option>
          <option name="mac" type="string">MAC address to search for</option>
       </optgroup>
@@ -1057,8 +1058,7 @@
       <p/>
       To give an IP address to a host, provide it when using add_host.
       <p/>
-      For chassis and tor_switches, the IP address is provided with this
-      command.
+      For chassis the IP address is provided with this command.
       <p/>
       The IP address can be derived based on aqdb availabililty using:
       --ipfromip:     choose a free IP address in the subnet of the given ip
@@ -1078,10 +1078,10 @@
          <option name="automac" type="flag" conflicts="mac">Automatically generate MAC for virtual hardware</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname chassis tor_switch ip ipfromip ipfromsystem autoip">Machine (node) name</option>
-         <option name="hostname" type="string" conflicts="machine chassis tor_switch ip ipfromip ipfromsystem autoip">Hostname</option>
-         <option name="chassis" type="string" conflicts="machine hostname tor_switch">Chassis name</option>
-         <option name="tor_switch" type="string" conflicts="machine hostname chassis">TOR Switch name</option>
+         <option name="machine" type="string" conflicts="hostname chassis switch ip ipfromip ipfromsystem autoip">Machine (node) name</option>
+         <option name="hostname" type="string" conflicts="machine chassis switch ip ipfromip ipfromsystem autoip">Hostname</option>
+         <option name="chassis" type="string" conflicts="machine hostname switch">Chassis name</option>
+         <option name="switch" type="string" conflicts="machine hostname chassis">Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="comments" type="string">Comments</option>
@@ -1096,7 +1096,7 @@
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
       <transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s" />
-      <transport trigger="tor_switch" method="put" path="tor_switch/%(tor_switch)s/interface/%(interface)s" />
+      <transport trigger="switch" method="put" path="switch/%(switch)s/interface/%(interface)s" />
    </command>
 
    <command name="add_network">
@@ -2480,16 +2480,7 @@
    <command name="add_tor_switch">
       Create a new Top-Of-Rack (TOR) network switch.
       <p/>
-      If the model was created with machine specifications (values for
-      cpuname, cpuvendor, cpuspeed, cpucount, memory) they do not need
-      to be given to this command - the model info will be used as a default.
-      <p/>
-      However, if the model does not have defaults, they all need to be given.
-      <p/>
-      See the help for add_rack for more information about the rack options.
-      The --rack option can only be used with a preexisting rack.  If given
-      --building, --rackid, --rackrow, and --rackcolumn, the rack will be
-      created if needed.
+      This command is deprecated.  Please use the new add_switch.
       <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
          <option name="tor_switch" type="string">tor_switch name</option>
          <option name="model" type="string">tor_switch model</option>
@@ -2525,8 +2516,45 @@
       <transport method="put" path="tor_switch/%(tor_switch)s" />
    </command>
 
+   <command name="add_switch">
+      Create a new network switch.
+      <optgroup name="add_switch_mandatory" mandatory="True" fields="all">
+         <option name="switch" type="string">Switch fully qualified name</option>
+         <option name="model" type="string">Switch model</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="type" type="string">Switch type (tor, bor, agg)</option>
+         <option name="ip" type="ipv4">IP address</option>
+      </optgroup>
+      <optgroup name="add_switch_optional" mandatory="False">
+	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
+	 <option name="serial" type="string">Serial Number</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="switch/%(switch)s" />
+   </command>
+
+   <command name="update_switch">
+      Update network switch information.  Requires the switch name.  All
+      other fields can be updated.
+      <optgroup name="add_switch_mandatory" mandatory="True" fields="all">
+         <option name="switch" type="string">Switch fully qualified name</option>
+      </optgroup>
+      <optgroup name="add_switch_optional" mandatory="False">
+         <option name="model" type="string">Switch model</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="type" type="string">Switch type (tor, bor, agg)</option>
+         <option name="ip" type="ipv4">IP address</option>
+	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
+	 <option name="serial" type="string">Serial Number</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="switch/%(switch)s" />
+   </command>
+
    <command name="show_tor_switch">
       Show the configuration information for the specified switch.
+      <p/>
+      This is deprecated.  Please use either show_switch or search_switch.
       <p/>
       Supported options for --format: raw, csv.
       <p/>
@@ -2547,15 +2575,86 @@
       <transport method="get" path="find/tor_switch" />
    </command>
 
+   <command name="show_switch">
+      Show the configuration information for the specified switch.
+      <p/>
+      Supported options for --format: raw, csv.
+      <p/>
+      The 'csv' format contains the following fields, in this order:
+      FQDN, Type, Rack, Building, Vendor name, Model name, Serial number,
+      Interface name, Interface MAC address, Interface IP address.
+      <p/>
+      If the switch has multiple interfaces assigned, then there will be a
+      separate line for each.
+      <optgroup name="show_switch_opts" mandatory="True" fields="any">
+         <option name="switch" type="string">switch fully qualified name</option>
+         <option name="all" type="flag">show all</option>
+      </optgroup>
+      <transport trigger="switch" method="get" path="switch/%(switch)s" />
+      <transport trigger="all" method="get" path="switch" />
+   </command>
+
+   <command name="search_switch">
+      Find switches matching the given information.
+      <p/>
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
+      <p/>
+      Supported options for --format: raw, csv.
+      <p/>
+      The 'csv' format contains the following fields, in this order:
+      FQDN, Type, Rack, Building, Vendor name, Model name, Serial number,
+      Interface name, Interface MAC address, Interface IP address.
+      <p/>
+      If the switch has multiple interfaces assigned, then there will be a
+      separate line for each.
+      <optgroup name="search_switch_opts" mandatory="True" fields="any">
+         <option name="switch" type="string">switch fully qualified name</option>
+         <option name="type" type="string">Type (tor, bor, agg)</option>
+         <option name="model" type="string">switch model</option>
+         <option name="vendor" type="string">switch vendor </option>
+         <optgroup name="search_switch_location_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+	 <option name="serial" type="string">serial number</option>
+         <option name="exact_location" type="flag">match the location exactly</option>
+         <option name="fullinfo" type="flag">show full information for the matching switches</option>
+         <option name="all" type="flag">show all</option>
+      </optgroup>
+      <transport method="get" path="find/switch" />
+   </command>
+
    <command name="del_tor_switch">
       Delete the specified TOR switch.
+      <p/>
+      This is deprecated.  Please use del_switch.
       <optgroup name="del_tor_switch_opts" mandatory="True" fields="all">
          <option name="tor_switch" type="string">tor_switch name</option>
       </optgroup>
       <transport method="delete" path="tor_switch/%(tor_switch)s" />
    </command>
 
+   <command name="del_switch">
+      Delete the specified switch.
+      <optgroup name="del_switch_opts" mandatory="True" fields="all">
+         <option name="switch" type="string">switch name</option>
+      </optgroup>
+      <transport method="delete" path="switch/%(switch)s" />
+   </command>
+
    <command name="poll_tor_switch">
+      Poll ToR switch for MAC information.
+      <p/>
+      This is deprecated.  Please use poll_switch.
       <optgroup name="poll_tor_switch_opts" mandatory="True" fields="any">
          <option name="tor_switch" type="string" conflicts="rack">tor_switch name</option>
          <option name="rack" type="string" conflicts="tor_switch">Rack name</option>
@@ -2565,6 +2664,21 @@
          <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
       </optgroup>
       <transport trigger="tor_switch" method="post" path="tor_switch/%(tor_switch)s/command/poll" />
+      <transport method="post" path="old_poll/rack/%(rack)s" />
+   </command>
+
+   <command name="poll_switch">
+      Poll switch for MAC information.
+      <optgroup name="poll_switch_opts" mandatory="True" fields="any">
+         <option name="switch" type="string" conflicts="rack">switch name</option>
+         <option name="rack" type="string" conflicts="switch">Rack name</option>
+      </optgroup>
+      <optgroup name="poll_tor_switch optional" mandatory="False" fields="any">
+         <option name="type" type="string">If polling a rack, poll only this type of switch</option>
+         <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
+         <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
+      </optgroup>
+      <transport trigger="switch" method="post" path="switch/%(switch)s/command/poll" />
       <transport method="post" path="poll/rack/%(rack)s" />
    </command>
 
@@ -2713,7 +2827,8 @@
       <optgroup name="add_esx_cluster_options" mandatory="False">
          <option name="max_members" type="int">Comments</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="tor_switch" type="string">ToR switch in use by the cluster</option>
+         <option name="tor_switch" type="string" conflicts="switch">(Deprecated) ToR switch in use by the cluster</option>
+         <option name="switch" type="string" conflicts="tor_switch">switch in use by the cluster</option>
          <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -2745,7 +2860,8 @@
          <option name="down_hosts_threshold" type="int">Down hosts threshold</option>
          <option name="max_members" type="int">Max allowed vmhost members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-         <option name="tor_switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) Set the switch in use by the cluster.  An empty string removes the setting.</option>
+         <option name="switch" type="string" conflicts="tor_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
          <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
