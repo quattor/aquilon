@@ -263,8 +263,10 @@ class DbFactory(object):
             msg = 'drop_all_tables not permitted on the production database'
             raise ValueError(msg)
 
+        # Don't show the password
+        dbname = re.sub(':.*@', '@', self.dsn)
         msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
-               % self.dsn)
+               % dbname)
 
         if no_confirm or confirm(prompt=msg, resp=False):
             for table in self.get_tables():
