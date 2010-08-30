@@ -33,7 +33,9 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.model import Base, DnsDomain, Network
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr, IPV4, AqMac
 
 #TODO: enum type for system_type column
@@ -84,14 +86,44 @@ class System(Base):
     dns_domain = relation(DnsDomain)
     network = relation(Network, backref='interfaces')
 
-    __mapper_args__ = {'polymorphic_on' : system_type}
+    __mapper_args__ = {'polymorphic_on': system_type}
 
-    def _fqdn(self):
-        return '.'.join([str(self.name),str(self.dns_domain.name)])
-    fqdn = property(_fqdn)
+    @property
+    def fqdn(self):
+        return '.'.join([str(self.name), str(self.dns_domain.name)])
 
-system = System.__table__
-system.primary_key.name='SYSTEM_PK'
+    @classmethod
+    def get_unique(cls, session, *args, **kwargs):
+        if "fqdn" in kwargs:
+            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
+            kwargs["name"] = name
+            kwargs["dns_domain"] = dbdns_domain
+        return super(System, cls).get_unique(session, *args, **kwargs)
+
+    def __init__(self, session=None, *args, **kwargs):
+        if "fqdn" in kwargs:
+            if not session:
+                raise InternalError("Passing fqdn to Session.__init__() needs "
+                                    "a session.")
+            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
+            kwargs["name"] = name
+            kwargs["dns_domain"] = dbdns_domain
+        return super(System, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def get_or_create(cls, session, **kwargs):
+        system = cls.get_unique(session, **kwargs)
+        if system:
+            return system
+        system = cls(session=session, **kwargs)
+        session.add(system)
+        session.flush()
+        session.refresh(system)
+        return system
+
+
+system = System.__table__  # pylint: disable-msg=C0103, E1101
+system.primary_key.name = 'SYSTEM_PK'
 
 system.append_constraint(
     UniqueConstraint('name','dns_domain_id', name='SYSTEM_DNS_NAME_UK'))
@@ -100,6 +132,8 @@ system.append_constraint(                    #systm_pt_uk means 'primary tuple'
     UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='SYSTEM_PT_UK'))
 
 system.info['unique_fields'] = ['name', 'dns_domain']
+system.info['extra_search_fields'] = ['ip']
+
 
 class DynamicStub(System):
     """
@@ -120,6 +154,7 @@ class DynamicStub(System):
 
 DynamicStub.__table__.primary_key.name='dynamic_stub_pk'
 
+
 class FutureARecord(System):
     """FutureARecord is a placeholder to let us add name/IP addresses now.
 
@@ -127,7 +162,7 @@ class FutureARecord(System):
 
     """
     __tablename__ = 'future_a_record'
-    __mapper_args__ = {'polymorphic_identity':'future_a_record'}
+    __mapper_args__ = {'polymorphic_identity': 'future_a_record'}
     _class_label = 'DNS Record'
 
     system_id = Column(Integer, ForeignKey('system.id',
@@ -135,4 +170,8 @@ class FutureARecord(System):
                                            ondelete='CASCADE'),
                        primary_key=True)
 
-FutureARecord.__table__.primary_key.name='future_a_record_pk'
+
+farecord = FutureARecord.__table__  # pylint: disable-msg=C0103, E1101
+farecord.primary_key.name = 'future_a_record_pk'
+farecord.info['unique_fields'] = ['name', 'dns_domain']
+farecord.info['extra_search_fields'] = ['ip']
