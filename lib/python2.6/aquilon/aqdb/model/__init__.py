@@ -56,6 +56,9 @@ from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.personality import Personality
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
+#SYSTEM
+from aquilon.aqdb.model.system import System, DynamicStub, FutureARecord
+
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor
 from aquilon.aqdb.model.model import Model
@@ -67,7 +70,6 @@ from aquilon.aqdb.model.switch_hw import SwitchHw
 from aquilon.aqdb.model.chassis_hw import ChassisHw
 
 #SYSTEM
-from aquilon.aqdb.model.system import System, DynamicStub, FutureARecord
 from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.manager import Manager
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
