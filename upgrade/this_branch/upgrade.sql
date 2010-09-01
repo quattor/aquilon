@@ -51,4 +51,13 @@ ALTER TABLE hardware_entity
 -- Drop machine.name
 ALTER TABLE machine DROP COLUMN name;
 
+--
+-- Make DynamicStub a child of FutureARecord
+--
+INSERT INTO future_a_record (system_id)
+	SELECT system_id FROM dynamic_stub;
+ALTER TABLE dynamic_stub DROP CONSTRAINT "DYNAMIC_STUB_SYSTEM_FK";
+ALTER TABLE dynamic_stub
+	ADD CONSTRAINT "DYNAMIC_STUB_FARECORD_FK" FOREIGN KEY (system_id) REFERENCES future_a_record (system_id) ON DELETE CASCADE;
+
 QUIT;

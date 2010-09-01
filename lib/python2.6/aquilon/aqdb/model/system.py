@@ -134,26 +134,6 @@ system.info['unique_fields'] = ['name', 'dns_domain']
 system.info['extra_search_fields'] = ['ip']
 
 
-class DynamicStub(System):
-    """
-        DynamicStub is a hack to handle stand alone dns records for dynamic
-        hosts prior to having a properly reworked set of tables for Dns
-        information. It should not be used by anything other than to create host
-        records for virtual machines using names similar to
-        'dynamic-1-2-3-4.subdomain.ms.com'
-    """
-    __tablename__ = 'dynamic_stub'
-    __mapper_args__ = {'polymorphic_identity':'dynamic_stub'}
-    _class_label = 'Dynamic Stub'
-
-    system_id = Column(Integer, ForeignKey('system.id',
-                                           name='dynamic_stub_system_fk',
-                                           ondelete='CASCADE'),
-                       primary_key=True)
-
-DynamicStub.__table__.primary_key.name='dynamic_stub_pk'
-
-
 class FutureARecord(System):
     """FutureARecord is a placeholder to let us add name/IP addresses now.
 
@@ -174,3 +154,24 @@ farecord = FutureARecord.__table__  # pylint: disable-msg=C0103, E1101
 farecord.primary_key.name = 'future_a_record_pk'
 farecord.info['unique_fields'] = ['name', 'dns_domain']
 farecord.info['extra_search_fields'] = ['ip']
+
+
+class DynamicStub(FutureARecord):
+    """
+        DynamicStub is a hack to handle stand alone dns records for dynamic
+        hosts prior to having a properly reworked set of tables for Dns
+        information. It should not be used by anything other than to create host
+        records for virtual machines using names similar to
+        'dynamic-1-2-3-4.subdomain.ms.com'
+    """
+    __tablename__ = 'dynamic_stub'
+    __mapper_args__ = {'polymorphic_identity': 'dynamic_stub'}
+    _class_label = 'Dynamic Stub'
+
+    system_id = Column(Integer, ForeignKey('future_a_record.system_id',
+                                           name='dynamic_stub_farecord_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
+
+
+DynamicStub.__table__.primary_key.name = 'dynamic_stub_pk'
