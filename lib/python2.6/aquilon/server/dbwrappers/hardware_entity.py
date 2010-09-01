@@ -63,4 +63,5 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.reset_joinpoint()
     if kwargs.get('serial', None):
         q = q.filter_by(serial_no=kwargs['serial'])
+    q = q.order_by(HardwareEntity.label)
     return q
