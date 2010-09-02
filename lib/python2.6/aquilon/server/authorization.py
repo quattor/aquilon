@@ -84,7 +84,7 @@ class AuthorizationBroker(object):
                     "Must have the aqd_admin role to %s." % action)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',
-                              'compile', 'compile_hostname',
+                              'compile', 'compile_hostname', 'change_status',
                               'update_interface_hostname',
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
