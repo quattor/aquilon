@@ -120,10 +120,14 @@ class PlenaryClusterObject(Plenary):
         lines.append('')
         lines.append("'/system/cluster/machines' = nlist(")
         for machine in self.dbcluster.machines:
+            if not machine.interfaces or not machine.disks:
+                # Do not bother creating entries for VMs that are incomplete.
+                continue
             pmac = PlenaryMachineInfo(machine)
             lines.append("    '%s', nlist(" % machine.name)
             lines.append("            'hardware', create('%s')," %
                                                     pmac.plenary_template)
+            # One day we may get to the point where this will be required.
             if (machine.host):
                 # we fill this in manually instead of just assigning
                 # 'system' = value("//hostname/system")
