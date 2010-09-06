@@ -40,6 +40,7 @@ from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
+from aquilon.server.templates.panutils import pan
 
 LOGGER = logging.getLogger('aquilon.server.templates.host')
 
@@ -115,7 +116,7 @@ class PlenaryToplevelHost(Plenary):
     def body(self, lines):
         session = object_session(self.dbhost)
 
-        interfaces = []
+        interfaces = dict()
         default_gateway = None
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
@@ -124,12 +125,11 @@ class PlenaryToplevelHost(Plenary):
                 continue
 
             ifdesc = {}
-            ifdesc["aliases"] = []
             # XXX Move this to templates
             ifdesc["bootproto"] = "static"
-            ifdesc["name"] = dbinterface.name
             if isinstance(dbinterface, VlanInterface):
                 ifdesc["vlan"] = "true"
+                ifdesc["physdev"] = dbinterface.parent.name
 
             for addr in dbinterface.assignments:
                 net = addr.network
@@ -145,13 +145,15 @@ class PlenaryToplevelHost(Plenary):
                     ifdesc["broadcast"] = net.broadcast
                     ifdesc["gateway"] = gateway
                 else:
-                    aliasdesc = {"label": addr.label,
-                                 "ip": addr.ip,
+                    aliasdesc = {"ip": addr.ip,
                                  "netmask": net.netmask,
                                  "broadcast": net.broadcast}
-                    ifdesc["aliases"].append(aliasdesc)
+                    if "aliases" in ifdesc:
+                        ifdesc["aliases"][addr.label] = aliasdesc
+                    else:
+                        ifdesc["aliases"] = {addr.label: aliasdesc}
 
-            interfaces.append(ifdesc)
+            interfaces[dbinterface.name] = ifdesc
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
@@ -190,44 +192,27 @@ class PlenaryToplevelHost(Plenary):
         # Okay, here's the real content
         arcdir = self.dbhost.archetype.name
         lines.append("# this is an %s host, so all templates should be sourced from there" % self.dbhost.archetype.name)
-        lines.append("variable LOADPATH = list('%s');" % arcdir)
+        lines.append("variable LOADPATH = %s;" % pan([arcdir]))
         lines.append("")
         lines.append("include { 'pan/units' };")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)
         lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
-
-        for ifdesc in interfaces:
-            lines.append("'/system/network/interfaces/%(name)s' = nlist("
-                         "\n\t\t'bootproto', '%(bootproto)s'," % ifdesc)
-            if "ip" in ifdesc:
-                lines.append("\t\t'ip', '%(ip)s', "
-                             "\n\t\t'netmask', '%(netmask)s', "
-                             "\n\t\t'broadcast', '%(broadcast)s', "
-                             "\n\t\t'gateway', '%(gateway)s'," % ifdesc)
-            if len(ifdesc["aliases"]) > 0:
-                lines.append("\t\t'aliases', nlist(")
-                for aliasdesc in ifdesc["aliases"]:
-                    lines.append("\t\t\t'%(label)s', nlist('ip', '%(ip)s', "
-                                 "'netmask', '%(netmask)s', "
-                                 "'broadcast', '%(broadcast)s')," % aliasdesc)
-                lines.append("\t\t),")
-            lines.append(");")
-
+        lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
         if default_gateway:
-            lines.append("'/system/network/default_gateway' = '%s';" %
-                         default_gateway)
+            lines.append("'/system/network/default_gateway' = %s;" %
+                         pan(default_gateway))
         lines.append("")
+        # XXX: remove!
         # We put in a default function: this will be overridden by the
         # personality with a more suitable value, we just leave this here
         # for paranoia's sake.
         lines.append("'/system/function' = 'grid';");
-        lines.append("'/system/build' = '%s';" % self.dbhost.status.name)
+        lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if self.dbhost.cluster:
-            lines.append("'/system/cluster/name' = '%s';" % self.dbhost.cluster.name)
+            lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))
         lines.append("")
         for template in templates:
-
-            lines.append("include { '%s' };" % template)
+            lines.append("include { %s };" % pan(template))
         lines.append("")
 
         return
