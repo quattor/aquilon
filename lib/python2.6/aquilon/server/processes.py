@@ -327,6 +327,15 @@ class DSDBRunner(object):
         cmd = [self.dsdb, "delete_city_aq", "-city", city]
         out = run_command(cmd, env=self.getenv(), logger=self.logger)
 
+    def add_building(self, building, city, building_addr):
+        cmd = [self.dsdb, "add_building", "-building_name", building,
+               "-city", city, "-building_addr", building_addr]
+        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+
+    def del_building(self, building):
+        cmd = [self.dsdb, "delete_building_aq", "-building", building]
+        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+
     def add_host(self, dbinterface):
         if not dbinterface.system.ip:
             raise ArgumentError("No ip address found for '%s' to add to dsdb." %

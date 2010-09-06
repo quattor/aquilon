@@ -38,5 +38,10 @@ class CommandDelBuilding(CommandDelLocation):
     required_parameters = ["building"]
 
     def render(self, session, building, **arguments):
-        return CommandDelLocation.render(self, session=session, name=building,
-                                         type='building', **arguments)
+        result = CommandDelLocation.render(self, session=session, name=building,
+                                           type='building', **arguments)
+        session.flush()
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.del_city(city.strip().lower())
+        return result

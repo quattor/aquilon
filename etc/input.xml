@@ -1940,6 +1940,7 @@
       Add a new building to the database. See also add_location.
       <optgroup name="add_building_input" mandatory="True" fields="all">
          <option name="building" type="string">Name of the new building</option>
+         <option name="address" type="string">The building's address</option>
          <option name="city" type="string">Name of the city that contains the building</option>
       </optgroup>
       <optgroup name="optional_opts">
