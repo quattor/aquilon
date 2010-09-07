@@ -101,7 +101,7 @@ class CommandAddAuroraHost(CommandAddHost):
                                                        name="aurora_chassis_model",
                                                        vendor="aurora_vendor",
                                                        compel=True)
-                    dbchassis_hw = ChassisHw(location=dbrack,
+                    dbchassis_hw = ChassisHw(label=chassis, location=dbrack,
                                              model=dbchassis_model)
                     session.add(dbchassis_hw)
                     dbchassis = Chassis(name=chassis, dns_domain=dbdns_domain,

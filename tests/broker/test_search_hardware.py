@@ -117,13 +117,13 @@ class TestSearchHardware(TestBrokerCommand):
         command = "search hardware --building np"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ny00l4as01", command)
-        self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "np997gd1r04", command)
 
     def testlocationexact(self):
         command = "search hardware --building np --exact_location"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ny00l4as01", command)
-        self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
+        self.matchclean(out, "np997gd1r04", command)
 
     def testlocationunavailable(self):
         command = "search hardware --building building-does-not-exist"
@@ -134,8 +134,8 @@ class TestSearchHardware(TestBrokerCommand):
         command = "search hardware --all"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
-        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3gd1r01", command)
+        self.matchoutput(out, "ut3c1", command)
         self.matchoutput(out, "ut3s01p1", command)
         self.matchoutput(out, "ny00l4as01", command)
 

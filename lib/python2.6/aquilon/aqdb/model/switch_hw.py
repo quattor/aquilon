@@ -37,7 +37,7 @@ from aquilon.aqdb.model import HardwareEntity
 
 class SwitchHw(HardwareEntity):
     __tablename__ = 'switch_hw'
-    __mapper_args__ = {'polymorphic_identity' : 'switch_hw'}
+    __mapper_args__ = {'polymorphic_identity' : 'switch'}
 
     hardware_entity_id = Column(Integer,
                                 ForeignKey('hardware_entity.id',

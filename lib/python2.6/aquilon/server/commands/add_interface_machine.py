@@ -89,7 +89,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # - the old interface is associated with a host
             # - that host was blindly created, and thus can be removed safely
             if prev and itype == 'management' and \
-               prev.hardware_entity.hardware_entity_type == 'machine' and \
+               prev.hardware_entity.hardware_type == 'machine' and \
                prev.system and prev.system.system_type == 'host' and \
                prev.system.status.name == 'blind':
                 # FIXME: Is this just always allowed?  Maybe restrict

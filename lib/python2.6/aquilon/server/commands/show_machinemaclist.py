@@ -56,7 +56,7 @@ class CommandShowMachineMacList(BrokerCommand):
                 #command would be more efficient in hand written sql
                 if intf.mac is None:
                     continue
-                entry = [ intf.mac, intf.hardware_entity.hardware_name ]
+                entry = [intf.mac, intf.hardware_entity.label]
                 if intf.system:
                     entry.append(intf.system.fqdn)
                 else:

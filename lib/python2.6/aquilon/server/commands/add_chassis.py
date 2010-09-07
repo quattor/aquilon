@@ -46,8 +46,8 @@ class CommandAddChassis(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    machine_type='chassis', compel=True)
         # FIXME: Precreate chassis slots?
-        dbchassis_hw = ChassisHw(location=dblocation, model=dbmodel,
-                                 serial_no=serial)
+        dbchassis_hw = ChassisHw(label=short, location=dblocation,
+                                 model=dbmodel, serial_no=serial)
         session.add(dbchassis_hw)
         dbchassis = Chassis(name=short, dns_domain=dbdns_domain,
                             chassis_hw=dbchassis_hw, comments=comments)

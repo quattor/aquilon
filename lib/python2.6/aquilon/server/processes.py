@@ -385,7 +385,7 @@ class DSDBRunner(object):
             raise InternalError("Cannot update interface %s on %s that is not "
                                 "associated with a DNS Record." %
                                 (dbinterface.name,
-                                 dbinterface.hardware_entity.hardware_name))
+                                 dbinterface.hardware_entity.label))
         if not dbinterface.system.ip:
             # This may not be relevant for an update...
             raise ArgumentError("No ip address found for '%s' to update dsdb."

@@ -55,7 +55,7 @@ class CommandAddSwitch(BrokerCommand):
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, switch)
 
-        dbswitch_hw = SwitchHw(location=dblocation, model=dbmodel,
+        dbswitch_hw = SwitchHw(label=short, location=dblocation, model=dbmodel,
                                serial_no=serial)
         session.add(dbswitch_hw)
 

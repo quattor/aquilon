@@ -54,23 +54,21 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  Port Group: %s" % interface.port_group)
 
         hw = interface.hardware_entity
-        hw_type = hw.hardware_entity_type
+        hw_type = hw.hardware_type
         if hw_type == 'machine':
             details.append(indent + "  Attached to: machine %s" % hw.name)
-        elif hw_type == 'switch_hw':
+        elif hw_type == 'switch':
             if hw.switch:
                 details.append(indent + "  Attached to: switch %s" %
                                    ",".join([ts.fqdn for ts in hw.switch]))
             else:
                 details.append("  Attached to: unnamed switch")
-        elif hw_type == 'chassis_hw':
+        elif hw_type == 'chassis':
             if hw.chassis_hw:
                 details.append("  Attached to: chassis %s" %
                                    ",".join([c.fqdn for c in hw.chassis_hw]))
             else:
                 details.append("  Attached to: unnamed chassis")
-        elif getattr(hw, "name", None):
-            details.append("  Attached to: %s" % hw.name)
         if interface.system:
             details.append(indent + "  Provides: %s [%s]" %
                            (interface.system.fqdn, interface.system.ip))
@@ -96,7 +94,7 @@ class MissingManagersFormatter(ListFormatter):
                                 host.fqdn)
             else:
                 commands.append("# No host found for machine %s with management interface" %
-                                interface.hardware_entity.name)
+                                interface.hardware_entity.label)
         return "\n".join(commands)
 
     def csv_fields(self, interface):

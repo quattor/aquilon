@@ -206,23 +206,21 @@ def describe_interface(session, interface):
                    (interface.interface_type, interface.name, interface.mac,
                     interface.bootable)]
     hw = interface.hardware_entity
-    hw_type = hw.hardware_entity_type
+    hw_type = hw.hardware_type
     if hw_type == 'machine':
         description.append("is attached to machine %s" % hw.name)
-    elif hw_type == 'switch_hw':
+    elif hw_type == 'switch':
         if hw.switch:
             description.append("is attached to switch %s" %
                                ",".join([ts.fqdn for ts in hw.switch]))
         else:
             description.append("is attached to unnamed switch hardware")
-    elif hw_type == 'chassis_hw':
+    elif hw_type == 'chassis':
         if hw.chassis_hw:
             description.append("is attached to chassis %s" %
                                ",".join([c.fqdn for c in hw.chassis_hw]))
         else:
             description.append("is attached to unnamed chassis hardware")
-    elif getattr(hw, "name", None):
-        description.append("is attached to %s %s" % (hw_type, hw.name))
     if interface.system:
         description.append("points to system %s" % interface.system.fqdn)
     ifaces = session.query(Interface).filter_by(mac=interface.mac).all()

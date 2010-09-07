@@ -192,7 +192,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is tied to hardware %s instead of a virtual " \
                         "machine." % \
-                        (host, mac, dbinterface.hardware_entity.hardware_name)
+                        (host, mac, dbinterface.hardware_entity.label)
                 failed.append(msg)
                 logger.info(msg)
                 continue

@@ -29,24 +29,30 @@
 """ Base class of polymorphic hardware structures """
 from datetime import datetime
 
-from sqlalchemy     import (Column, Table, Integer, Sequence, ForeignKey,
-                            Index, String, DateTime)
-from sqlalchemy.orm import relation, deferred
+from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
+                        Index, String, DateTime)
+from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Base, Location, Model
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr, Enum
 
-#valid types are machine, switch_hw, chassis_hw, console_server_hw
-class HardwareEntity(Base):
-    __tablename__ = 'hardware_entity'
+HARDWARE_TYPES = ['machine', 'switch', 'chassis']  # , 'netapp_filer']
+_TN = "hardware_entity"
 
-    id = Column(Integer, Sequence('hardware_entity_seq'), primary_key=True)
 
-    hardware_entity_type = Column(AqStr(64), nullable=False)
+class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
+    __tablename__ = _TN
+    _instance_label = 'label'
+
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+
+    label = Column(AqStr(63), nullable=False)
+
+    hardware_type = Column(Enum(64, HARDWARE_TYPES), nullable=False)
 
     location_id = Column(Integer, ForeignKey('location.id',
                                             name='hw_ent_loc_fk'),
-                                            nullable=False)
+                         nullable=False)
 
     model_id = Column(Integer, ForeignKey('model.id',
                                           name='hw_ent_model_fk'),
@@ -54,21 +60,16 @@ class HardwareEntity(Base):
 
     serial_no = Column(String(64), nullable=True)
 
-    creation_date = deferred(Column(DateTime, default=datetime.now, nullable=False ))
-    comments = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
     location = relation(Location, uselist=False)
     model = relation(Model, uselist=False)
 
-    __mapper_args__ = {'polymorphic_on':hardware_entity_type}
-
-    _hardware_name = 'Unnamed hardware'
-    @property
-    def hardware_name(self):
-        return self._hardware_name
+    __mapper_args__ = {'polymorphic_on': hardware_type}
 
 hardware_entity = HardwareEntity.__table__
-hardware_entity.primary_key.name='hardware_entity_pk'
+hardware_entity.primary_key.name = '%s_pk' % _TN
+hardware_entity.append_constraint(UniqueConstraint('label', name='%s_label_uk' % _TN))
+hardware_entity.info['unique_fields'] = ['label']
 Index('hw_ent_loc_idx',  hardware_entity.c.location_id)
-
-table = hardware_entity

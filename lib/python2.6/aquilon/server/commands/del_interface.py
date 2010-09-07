@@ -50,7 +50,7 @@ class CommandDelInterface(BrokerCommand):
         session.delete(dbinterface)
         session.flush()
 
-        if hw_ent and hw_ent.hardware_entity_type == 'machine':
+        if hw_ent and hw_ent.hardware_type == 'machine':
             plenary_info = PlenaryMachineInfo(hw_ent, logger=logger)
             plenary_info.write()
         return

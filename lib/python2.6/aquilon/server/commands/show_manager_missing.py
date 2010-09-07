@@ -41,5 +41,5 @@ class CommandShowManagerMissing(BrokerCommand):
         q = q.filter_by(interface_type='management')
         q = q.filter(Interface.system==None)
         q = q.join('hardware_entity')
-        q = q.filter_by(hardware_entity_type='machine')
+        q = q.filter_by(hardware_type='machine')
         return MissingManagersList(q.all())

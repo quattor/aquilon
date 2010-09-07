@@ -39,7 +39,7 @@ from aquilon.aqdb.model import HardwareEntity
 
 class TorSwitchHw(HardwareEntity):
     __tablename__ = 'tor_switch_hw'
-    __mapper_args__ = {'polymorphic_identity' : 'tor_switch_hw'}
+    __mapper_args__ = {'polymorphic_identity': 'tor_switch'}
 
     #TODO: rename to id?
     hardware_entity_id = Column(Integer,

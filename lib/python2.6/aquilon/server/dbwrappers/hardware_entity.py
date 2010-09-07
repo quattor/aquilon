@@ -34,10 +34,10 @@ from aquilon.aqdb.model import HardwareEntity, Model
 from aquilon.server.dbwrappers.location import get_location
 
 
-def search_hardware_entity_query(session, hardware_entity_type=HardwareEntity,
+def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  **kwargs):
-    q = session.query(hardware_entity_type)
-    if hardware_entity_type is HardwareEntity:
+    q = session.query(hardware_type)
+    if hardware_type is HardwareEntity:
         q = q.with_polymorphic(
             HardwareEntity.__mapper__.polymorphic_map.values())
     dblocation = get_location(session, **kwargs)

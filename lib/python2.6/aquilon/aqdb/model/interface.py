@@ -101,7 +101,7 @@ class Interface(Base):
         if self.system:
             owner = self.system.fqdn
         else:
-            owner = self.hardware_entity.name
+            owner = self.hardware_entity.label
         instance = "%s/%s" % (owner, self.name)
         return self.format_helper(format_spec, instance)
 

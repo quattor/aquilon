@@ -80,8 +80,8 @@ class CommandAddTorSwitch(BrokerCommand):
         (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                              tor_switch)
 
-        dbtor_switch_hw = SwitchHw(location=dblocation, model=dbmodel,
-                                   serial_no=serial)
+        dbtor_switch_hw = SwitchHw(label=short, location=dblocation,
+                                   model=dbmodel, serial_no=serial)
         session.add(dbtor_switch_hw)
         dbtor_switch = Switch(name=short, dns_domain=dbdns_domain,
                               switch_hw=dbtor_switch_hw, switch_type='tor')

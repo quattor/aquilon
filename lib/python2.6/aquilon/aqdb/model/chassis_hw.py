@@ -40,7 +40,7 @@ from aquilon.aqdb.model import HardwareEntity
 
 class ChassisHw(HardwareEntity):
     __tablename__ = 'chassis_hw'
-    __mapper_args__ = {'polymorphic_identity':'chassis_hw'}
+    __mapper_args__ = {'polymorphic_identity': 'chassis'}
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                            name='chassis_hw_fk',
