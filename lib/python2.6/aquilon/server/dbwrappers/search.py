@@ -45,7 +45,8 @@ def search_next(session, cls, attr, value, start, pack, **filters):
         start = 1
     entries = []
     for item in q.all():
-        m = int_re.match(item.name[len(value):])
+        attrvalue = getattr(item, attr.property.key)
+        m = int_re.match(attrvalue[len(value):])
         if m:
             n = int(m.group(1))
             # Only remember entries that we care about...
