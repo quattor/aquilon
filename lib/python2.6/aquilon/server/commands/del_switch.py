@@ -54,18 +54,6 @@ class CommandDelSwitch(BrokerCommand):
         dbswitch = get_switch(session, switch)
         ip = dbswitch.ip
 
-        for iface in dbswitch.interfaces:
-            logger.info("Before deleting switch '%s', "
-                        "removing interface '%s' [%s] boot=%s)" %
-                        (dbswitch.fqdn, iface.name, iface.mac, iface.bootable))
-            session.delete(iface)
-
-        for iface in dbswitch.switch_hw.interfaces:
-            logger.info("Before deleting switch '%s', "
-                        "removing hardware interface '%s' [%s] boot=%s)" %
-                        (dbswitch.fqdn, iface.name, iface.mac, iface.bootable))
-            session.delete(iface)
-
         session.delete(dbswitch.switch_hw)
         session.delete(dbswitch)
 

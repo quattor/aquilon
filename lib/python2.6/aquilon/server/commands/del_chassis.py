@@ -51,20 +51,6 @@ class CommandDelChassis(BrokerCommand):
                                 "cannot be deleted.".format(dbchassis,
                                                             machine_count))
 
-        for iface in dbchassis.interfaces:
-            logger.info("Before deleting chassis '%s', "
-                        "removing interface '%s' [%s] boot=%s)" %
-                        (dbchassis.fqdn,
-                         iface.name, iface.mac, iface.bootable))
-            session.delete(iface)
-
-        for iface in dbchassis.chassis_hw.interfaces:
-            logger.info("Before deleting chassis '%s', "
-                        "removing hardware interface '%s' [%s] boot=%s)" %
-                        (dbchassis.fqdn,
-                         iface.name, iface.mac, iface.bootable))
-            session.delete(iface)
-
         session.delete(dbchassis.chassis_hw)
         session.delete(dbchassis)
         return

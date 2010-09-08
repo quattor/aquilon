@@ -93,9 +93,9 @@ class Interface(Base):
     comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
-                               backref=backref('interfaces'))
+                               backref=backref('interfaces', cascade='all'))
 
-    system = relation(System, backref='interfaces')
+    system = relation(System, backref=backref('interfaces'))
 
     def __format__(self, format_spec):
         if self.system:
