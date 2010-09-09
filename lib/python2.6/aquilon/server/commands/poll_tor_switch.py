@@ -81,10 +81,10 @@ class CommandPollTorSwitch(BrokerCommand):
         now = datetime.now()
         failed_vlan = 0
         for switch in switches:
-            if clear and clear != str(False):
+            if clear:
                 self.clear(session, logger, switch)
             self.poll_mac(session, logger, switch, now)
-            if vlan and vlan != str(False):
+            if vlan:
                 try:
                     self.poll_vlan(session, logger, switch, now)
                 except ProcessException, e:
