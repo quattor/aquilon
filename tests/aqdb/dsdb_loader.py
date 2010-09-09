@@ -67,7 +67,11 @@ def populate_building(session, dsdb, logger):
         if building:
             missed += 1
             continue
-        building = model.Building(name=building_code, fullname=address, parent=city)
+        #FIXME: find a better input for fullname or remove: should be the short
+        # bit before .ms.com in the DNS zone, or the LDAP code (usually close
+        # to an intelligible 5 character code, from FBI/Reference Data)
+        building = model.Building(name=building_code, fullname=address,
+                                  address=address, parent=city)
         session.add(building)
         imported += 1
     try:
