@@ -43,7 +43,8 @@ from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
 const.location_types = ("company", "hub", "continent", "country", "campus",
                         "city", "building", "room", "rack", "desk")
 
-def add_location(session, name, fullname, type, parent_name, parent_type, comments=None):
+def add_location(session, name, fullname, type, parent_name, parent_type,
+                 comments=None, address=None):
     """ Perform all the initialization and error checking to add a location
 
         Returns a new location which has not been added to any session, allows
@@ -71,8 +72,13 @@ def add_location(session, name, fullname, type, parent_name, parent_type, commen
     if not fullname:
         fullname = name
 
-    return location_type(name=name, fullname=fullname,
-                         parent=parent, comments=comments)
+    kw={'name': name, 'fullname': fullname, 'parent': parent,
+        'comments': comments}
+
+    if type == 'building':
+        kw['address'] = address
+
+    return location_type(**kw)
 
 class CommandAddLocation(BrokerCommand):
 

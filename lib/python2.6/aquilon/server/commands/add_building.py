@@ -29,6 +29,7 @@
 """Contains the logic for `aq add building`."""
 
 
+from aquilon.server.processes import DSDBRunner
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_location import (CommandAddLocation,
                                                   add_location)
@@ -41,8 +42,8 @@ class CommandAddBuilding(CommandAddLocation):
     def render(self, session, logger, building, city, fullname, comments,
                address, **arguments):
 
-        new_loc = add_location(session, building, 'building', city,
-                               'city', comments)
+        new_loc = add_location(session, building, fullname, 'building', city,
+                               'city', comments, address)
 
         session.add(new_loc)
         session.flush()

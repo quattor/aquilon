@@ -312,6 +312,8 @@ class DSDBRunner(object):
         self.config = Config()
         self.logger = logger
         self.dsdb = self.config.get("broker", "dsdb")
+        self.location_sync = self.config.getboolean(
+            "broker", "dsdb_location_sync")
 
     def getenv(self):
         if self.config.getboolean("broker", "dsdb_use_testdb"):
@@ -321,20 +323,36 @@ class DSDBRunner(object):
     def add_city(self, city, country, fullname):
         cmd = [self.dsdb, "add_city_aq", "-city_symbol", city,
                "-country_symbol", country, "-city_name", fullname]
-        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
 
     def del_city(self, city):
         cmd = [self.dsdb, "delete_city_aq", "-city", city]
-        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
 
     def add_building(self, building, city, building_addr):
-        cmd = [self.dsdb, "add_building", "-building_name", building,
+        cmd = [self.dsdb, "add_building_aq", "-building_name", building,
                "-city", city, "-building_addr", building_addr]
-        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
 
     def del_building(self, building):
         cmd = [self.dsdb, "delete_building_aq", "-building", building]
-        out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
 
     def add_host(self, dbinterface):
         if not dbinterface.system.ip:
