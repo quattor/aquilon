@@ -31,7 +31,7 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import System, DynamicStub, FutureARecord
+from aquilon.aqdb.model import System, DynamicStub, FutureARecord, ReservedName
 
 
 class SystemFormatter(ObjectFormatter):
@@ -49,6 +49,7 @@ ObjectFormatter.handlers[System] = SystemFormatter()
 
 ObjectFormatter.handlers[DynamicStub] = SystemFormatter()
 ObjectFormatter.handlers[FutureARecord] = SystemFormatter()
+ObjectFormatter.handlers[ReservedName] = SystemFormatter()
 
 
 class SimpleSystemList(list):

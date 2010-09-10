@@ -57,7 +57,8 @@ from aquilon.aqdb.model.personality import Personality
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
 #SYSTEM
-from aquilon.aqdb.model.system import System, DynamicStub, FutureARecord
+from aquilon.aqdb.model.system import (System, DynamicStub, FutureARecord,
+                                       ReservedName)
 
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor

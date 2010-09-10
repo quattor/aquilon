@@ -60,4 +60,32 @@ ALTER TABLE dynamic_stub DROP CONSTRAINT "DYNAMIC_STUB_SYSTEM_FK";
 ALTER TABLE dynamic_stub
 	ADD CONSTRAINT "DYNAMIC_STUB_FARECORD_FK" FOREIGN KEY (system_id) REFERENCES future_a_record (system_id) ON DELETE CASCADE;
 
+--
+-- Create reserved_name
+--
+CREATE TABLE reserved_name (
+	system_id INTEGER CONSTRAINT "RESERVED_NAME_SYSTEM_ID_NN" NOT NULL,
+	CONSTRAINT "RESERVED_NAME_SYSTEM_FK" FOREIGN KEY (system_id) REFERENCES system (id) ON DELETE CASCADE,
+	CONSTRAINT "RESERVED_NAME_PK" PRIMARY KEY (system_id)
+);
+
+-- Convert old system subclasses to future_a_record/reserved_name
+INSERT INTO future_a_record (system_id)
+	SELECT id FROM system
+		WHERE ip IS NOT NULL AND
+			system_type != 'future_a_record' AND
+			system_type != 'dynamic_stub';
+UPDATE SYSTEM
+	SET system_type = 'future_a_record'
+	WHERE ip IS NOT NULL AND
+		system_type != 'future_a_record' AND
+		system_type != 'dynamic_stub';
+
+INSERT INTO reserved_name (system_id)
+	SELECT id FROM system
+		WHERE ip IS NULL AND system_type != 'reserved_name';
+UPDATE system
+	SET system_type = 'reserved_name'
+	WHERE ip IS NULL AND system_type != 'reserved_name';
+
 QUIT;

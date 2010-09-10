@@ -180,3 +180,29 @@ class DynamicStub(FutureARecord):
 
 
 DynamicStub.__table__.primary_key.name = 'dynamic_stub_pk'
+
+
+class ReservedName(System):
+    """
+        ReservedName is a placeholder for a name that does not have an IP
+        address.
+    """
+
+    __tablename__ = 'reserved_name'
+    __mapper_args__ = {'polymorphic_identity': 'reserved_name'}
+    _class_label = 'Reserved Name'
+
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='reserved_name_system_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
+
+    def __init__(self, **kwargs):
+        if "ip" in kwargs and kwargs["ip"]:
+            raise ArgumentError("Reserved names must not have an IP address.")
+        return super(ReservedName, self).__init__(**kwargs)
+
+
+resname = ReservedName.__table__  # pylint: disable-msg=C0103, E1101
+resname.primary_key.name = 'reserved_name_pk'
+resname.info['unique_fields'] = ['name', 'dns_domain']
