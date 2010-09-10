@@ -120,6 +120,14 @@ class System(Base):
         session.refresh(system)
         return system
 
+    def __format__(self, format_spec):
+        if format_spec != "a":
+            return super(System, self).__format__(format_spec)
+        if self.ip:
+            return "%s [%s]" % (self.fqdn, self.ip)
+        else:
+            return self.fqdn
+
 
 system = System.__table__  # pylint: disable-msg=C0103, E1101
 system.primary_key.name = 'SYSTEM_PK'

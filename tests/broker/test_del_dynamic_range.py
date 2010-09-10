@@ -86,11 +86,11 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.matchoutput(out, "The range contains non-dynamic systems",
                          command)
         self.matchoutput(out,
-                         "unittest12.aqd-unittest.ms.com (%s)" %
+                         "unittest12.aqd-unittest.ms.com [%s]" %
                          self.net.unknown[0].usable[7],
                          command)
         self.matchoutput(out,
-                         "unittest12r.aqd-unittest.ms.com (%s)" %
+                         "unittest12r.aqd-unittest.ms.com [%s]" %
                          self.net.unknown[0].usable[8],
                          command)
 
