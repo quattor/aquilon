@@ -33,7 +33,7 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.exceptions_ import InternalError
+from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.model import Base, DnsDomain, Network
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr, IPV4
@@ -148,6 +148,11 @@ class FutureARecord(System):
                                            name='future_a_record_system_fk',
                                            ondelete='CASCADE'),
                        primary_key=True)
+
+    def __init__(self, ip=None, **kwargs):
+        if not ip:
+            raise ArgumentError("DNS A records need an IP address.")
+        return super(FutureARecord, self).__init__(ip=ip, **kwargs)
 
 
 farecord = FutureARecord.__table__  # pylint: disable-msg=C0103, E1101
