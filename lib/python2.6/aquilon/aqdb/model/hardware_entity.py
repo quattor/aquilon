@@ -36,7 +36,7 @@ from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
 from sqlalchemy.orm import relation
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Base, Location, Model, FutureARecord
+from aquilon.aqdb.model import Base, Location, Model, System
 from aquilon.aqdb.column_types import AqStr, Enum
 
 HARDWARE_TYPES = ['machine', 'switch', 'chassis']  # , 'netapp_filer']
@@ -118,7 +118,7 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
         hwe = None
 
         if "." in name:
-            dns_rec = FutureARecord.get_unique(sess, fqdn=name)
+            dns_rec = System.get_unique(sess, fqdn=name)
             my_pna = pna.PrimaryNameAssociation.get_unique(sess, dns_rec)
             if my_pna:
                 hwe = my_pna.hardware_entity

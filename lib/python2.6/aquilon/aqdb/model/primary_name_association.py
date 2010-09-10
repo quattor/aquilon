@@ -35,7 +35,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         UniqueConstraint)
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Base, FutureARecord, HardwareEntity
+from aquilon.aqdb.model import Base, System, HardwareEntity
 
 _TN = 'primary_name_association'
 _ABV = 'primary_name_asc'
@@ -73,41 +73,46 @@ class PrimaryNameAssociation(Base):
                                                     name='%s_hw_fk' % _ABV),
                                 primary_key=True)
 
-    a_record_id = Column(Integer, ForeignKey('future_a_record.system_id',
-                                             ondelete='CASCADE',
-                                             name='%s_a_rec_fk' % _ABV),
-                         primary_key=True)
+    dns_record_id = Column(Integer, ForeignKey('system.id', ondelete='CASCADE',
+                                               name='%s_dns_rec_fk' % _ABV),
+                           primary_key=True)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
+    # Cascading:
+    # - do not delete the HW if the association is removed
+    # - remove the association if the HW is removed
     hardware_entity = relation(HardwareEntity,
                                lazy=False,
                                uselist=False,
-                               cascade='all',
                                innerjoin=True,
+                               cascade=False,
                                backref=backref('_primary_name_asc',
                                                uselist=False,
                                                innerjoin=True,
-                                               cascade='all'))  #, delete-orphan'))
+                                               cascade='all, delete-orphan'))
 
-    a_record = relation(FutureARecord,
-                        lazy=False,
-                        uselist=False,
-                        innerjoin=True,
-                        cascade='all',
-                        backref=backref('_primary_name_asc',
-                                        uselist=False,
-                                        innerjoin=True,
-                                        cascade='all'))  #, delete-orphan'))
+    # Cascading:
+    # - delete the DNS record if the association is removed
+    # - delete the association if the DNS record is removed
+    dns_record = relation(System,
+                          lazy=False,
+                          uselist=False,
+                          innerjoin=True,
+                          cascade='all',
+                          backref=backref('_primary_name_asc',
+                                          uselist=False,
+                                          innerjoin=True,
+                                          cascade='all, delete-orphan'))
 
     def __repr__(self):
         return "<{0} for {1}: {2}>".format(self.__class__.__name__,
-                                           self.hardware_entity, self.a_record)
+                                           self.hardware_entity, self.dns_record)
 
     #TODO: take fqdn/dns_environment and cut out extra work?
     @classmethod
-    def get_unique(cls, sess, a_record, compel=False, preclude=False):
+    def get_unique(cls, sess, dns_record, compel=False, preclude=False):
         """ Take an ARecord, return a PrimaryNameAssociation
 
             This overridden method is heavily tweaked from the standard
@@ -117,14 +122,14 @@ class PrimaryNameAssociation(Base):
             the main use of this method is in HardwareEntity.get_unique, which
             doesn't need the use of these options.
         """
-        pna = sess.query(cls).filter_by(a_record=a_record).first()
+        pna = sess.query(cls).filter_by(dns_record=dns_record).first()
         if not pna and compel:
             raise NotFoundException('No such primary_name assignment %s' % (
-                                    a_record.fqdn))
+                                    dns_record.fqdn))
 
         if pna and preclude:
             raise ArgumentError('Primary Name %s already exists' % (
-                                a_record.fqdn))
+                                dns_record.fqdn))
 
         return pna
 
@@ -136,11 +141,11 @@ pna.append_constraint(
     UniqueConstraint('hardware_entity_id', name='%s_hw_ent_uk' % _ABV))
 
 pna.append_constraint(
-    UniqueConstraint('a_record_id', name='%s_dns_uk' % _ABV))
+    UniqueConstraint('dns_record_id', name='%s_dns_uk' % _ABV))
 
 
-HardwareEntity.primary_name = association_proxy('_primary_name_asc', 'a_record',
-                creator=lambda dns_rec: PrimaryNameAssociation(a_record=dns_rec))
+HardwareEntity.primary_name = association_proxy('_primary_name_asc', 'dns_record',
+                creator=lambda dns_rec: PrimaryNameAssociation(dns_record=dns_rec))
 
-FutureARecord.hardware_entity = association_proxy('_primary_name_asc',
+System.hardware_entity = association_proxy('_primary_name_asc',
                                                   'hardware_entity')
