@@ -1189,8 +1189,9 @@
          <option name="interface" type="string">Interface name</option>
       </optgroup>
       <optgroup name="update_interface_hw_opts" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname">Machine name</option>
-         <option name="hostname" type="string" conflicts="machine">Host name</option>
+         <option name="machine" type="string" conflicts="hostname switch">Machine name</option>
+         <option name="hostname" type="string" conflicts="machine switch">Host name</option>
+         <option name="switch" type="string" conflicts="machine hostname">Switch name</option>
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="string">MAC address</option>
@@ -1202,6 +1203,7 @@
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
+      <transport trigger="switch" method="post" path="switch/%(switch)s/interface/%(interface)s" />
    </command>
 
    <command name="del_interface">

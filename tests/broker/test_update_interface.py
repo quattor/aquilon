@@ -97,6 +97,49 @@ class TestUpdateInterface(TestBrokerCommand):
                           % self.net.unknown[0].usable[12].mac,
                           command)
 
+    def testfailswitchboot(self):
+        command = ["update_interface", "--boot", "--interface=xge49",
+                   "--switch=ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out,
+                         "cannot use the --autopg, --pg, or --boot options",
+                         command)
+
+    def testfailswitchip(self):
+        command = ["update_interface", "--interface=xge49",
+                   "--ip", self.net.tor_net[0].usable[1],
+                   "--switch=ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "use update_switch to update the IP", command)
+
+    def testfailnointerface(self):
+        command = ["update_interface", "--interface=xge49",
+                   "--comments=This should fail",
+                   "--switch=ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Interface xge49 of ut3gd1r01.aqd-unittest.ms.com "
+                         "not found",
+                         command)
+
+    def testupdateswitch(self):
+        command = ["update_interface", "--interface=xge49",
+                   "--comments=Some interface comments",
+                   "--mac", self.net.tor_net[8].usable[0].mac,
+                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def testverifyupdateswitch(self):
+        command = ["show_switch",
+                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Switch: ut3gd1r06.aqd-unittest.ms.com", command)
+        self.matchoutput(out,
+                         "Interface: xge49 %s" %
+                         self.net.tor_net[8].usable[0].mac,
+                         command)
+        self.matchoutput(out, "Comments: Some interface comments", command)
+
 
 if __name__=='__main__':
     import aquilon.aqdb.depends
