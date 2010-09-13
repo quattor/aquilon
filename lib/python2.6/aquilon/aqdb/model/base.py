@@ -30,10 +30,11 @@ import sys
 
 from inspect import isclass
 
+from sqlalchemy.schema import CreateTable
 from sqlalchemy.orm.session import Session
-from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
 
 from aquilon.utils import monkeypatch
@@ -291,6 +292,9 @@ class Base(object):
                 _raise_custom(compel, NotFoundException, msg)
         return query.subquery()
 
+    @classmethod
+    def ddl(self):
+        return str(CreateTable(self.__table__))
 
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)
 Base = declarative_base(cls=Base)
