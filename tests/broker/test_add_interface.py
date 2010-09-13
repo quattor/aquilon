@@ -114,6 +114,11 @@ class TestAddInterface(TestBrokerCommand):
                          self.net.unknown[0].usable[4].mac.lower(),
                          command)
 
+    def testaddut3c1n8eth0(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c1n8",
+                        "--mac", self.net.unknown[0].usable[18].mac])
+
     def testverifyshowmanagermissing(self):
         command = "show manager --missing"
         out = self.commandtest(command.split(" "))

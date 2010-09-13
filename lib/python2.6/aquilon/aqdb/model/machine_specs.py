@@ -78,6 +78,12 @@ class MachineSpecs(Base):
     model = relation(Model, backref=backref('machine_specs', uselist=False))
     cpu = relation(Cpu)
 
+    @property
+    def disk_name(self):
+        if self.controller_type == 'cciss':
+            return 'c0d0'
+        return 'sda'
+
 
 machine_specs = MachineSpecs.__table__
 machine_specs.primary_key.name = 'machine_specs_pk'

@@ -215,6 +215,27 @@ class TestPublishSandbox(TestBrokerCommand):
         self.gitcommand(["commit", "-a", "-m", "added model utmedium"],
                         cwd=sandboxdir)
 
+    def testaddutccissmodel(self):
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        modeldir = os.path.join(sandboxdir, "hardware", "machine", "hp")
+        if not os.path.exists(modeldir):
+            os.makedirs(modeldir)
+        template = os.path.join(modeldir, "utccissmodel.tpl")
+        f = open(template, 'w')
+        try:
+            f.writelines(
+                """structure template hardware/machine/hp/utccissmodel;
+
+"manufacturer" = "hp";
+"model" = "utccissmodel";
+"template_name" = "utccissmodel";
+                """)
+        finally:
+            f.close()
+        self.gitcommand(["add", "utccissmodel.tpl"], cwd=modeldir)
+        self.gitcommand(["commit", "-a", "-m", "added model utccissmodel"],
+                        cwd=sandboxdir)
+
     def testaddutcpu(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         cpudir = os.path.join(sandboxdir, "hardware", "cpu", "intel")

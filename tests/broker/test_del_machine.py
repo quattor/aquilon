@@ -64,6 +64,10 @@ class TestDelMachine(TestBrokerCommand):
         command = "show machine --machine ut3c1n4"
         self.notfoundtest(command.split(" "))
 
+    def testdelut3c1n8(self):
+        command = "del machine --machine ut3c1n8"
+        self.noouttest(command.split(" "))
+
     def testdelut3s01p1(self):
         command = "del machine --machine ut3s01p1"
         self.noouttest(command.split(" "))

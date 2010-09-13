@@ -139,6 +139,26 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Model utblade, vendor aurora_vendor already "
                          "exists.", command)
 
+    def testaddutccissmodel(self):
+        command = ["add_model", "--model=utccissmodel", "--vendor=hp",
+                   "--type=rackmount", "--cpuname=xeon_2500", "--cpunum=2",
+                   "--memory=49152", "--disktype=local",
+                   "--diskcontroller=cciss",
+                   "--disksize=466", "--nics=2"]
+        self.noouttest(command)
+
+    def testverifyaddutccissmodel(self):
+        command = "show model --model utccissmodel"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
+        self.matchoutput(out, "Type: rackmount", command)
+        self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
+        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Memory: 49152 MB", command)
+        self.matchoutput(out, "NIC count: 2", command)
+        self.matchoutput(out, "Disk: c0d0 466 GB DiskType cciss [local]",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)

@@ -96,11 +96,10 @@ def create_machine(session, machine, dblocation, dbmodel,
 
     if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node' \
        and dbmodel.machine_specs.disk_type == 'local':
-        # FIXME: Look up an appropriate default device name based on
-        # controller_type.
-        dbdisk = LocalDisk(machine=dbmachine, device_name='sda',
-                controller_type=dbmodel.machine_specs.controller_type,
-                capacity=dbmodel.machine_specs.disk_capacity)
+        specs = dbmodel.machine_specs
+        dbdisk = LocalDisk(machine=dbmachine, device_name=specs.disk_name,
+                           controller_type=specs.controller_type,
+                           capacity=specs.disk_capacity)
         session.add(dbdisk)
 
     session.flush()
