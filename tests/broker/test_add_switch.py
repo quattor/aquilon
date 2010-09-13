@@ -88,7 +88,15 @@ class TestAddSwitch(TestBrokerCommand):
                      serial=None, switch_type=None, ip=None, comments=None):
         command = "show switch --switch %s" % tor_switch
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: %s" % tor_switch, command)
+        (short, dot, dns_domain) = tor_switch.partition(".")
+        self.matchoutput(out, "Switch: %s" % short, command)
+        if dns_domain:
+            if ip:
+                self.matchoutput(out, "Primary Name: %s [%s]" %
+                                 (tor_switch, ip), command)
+            else:
+                self.matchoutput(out, "Primary Name: %s" % tor_switch,
+                                 command)
         if switch_type is None:
             switch_type = 'tor'
         self.matchoutput(out, "Switch Type: %s" % switch_type, command)
@@ -97,8 +105,6 @@ class TestAddSwitch(TestBrokerCommand):
         self.matchoutput(out, "Column: %s" % rackcol, command)
         self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
                          command)
-        if ip:
-            self.matchoutput(out, "IP: %s" % ip, command)
         if serial:
             self.matchoutput(out, "Serial: %s" % serial, command)
         else:

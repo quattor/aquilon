@@ -140,7 +140,7 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["show_switch",
                    "--switch=ut3gd1r06.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Switch: ut3gd1r06.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r06", command)
         self.matchoutput(out,
                          "Interface: xge49 %s" %
                          self.net.tor_net[8].usable[0].mac,

@@ -56,8 +56,7 @@ class ClusterFormatter(ObjectFormatter):
             details.append(indent + "  ESX VMHost count: %s" %
                            len(cluster.hosts))
             if cluster.switch:
-                details.append(indent + \
-                               "  {0:c}: {0.fqdn}".format(cluster.switch))
+                details.append(indent + "  {0:c}: {0!s}".format(cluster.switch))
             caps = cluster.get_total_capacity()
             if caps:
                 capstr = ", ".join(["%s: %s" % (name, value) for name, value in

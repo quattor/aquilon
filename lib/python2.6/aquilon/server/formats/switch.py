@@ -46,13 +46,13 @@ class SwitchInterfacePairFormatter(ObjectFormatter):
         interface = item[1]
 
         details = [switch.fqdn,
-                   switch.ip,
+                   switch.primary_ip,
                    switch.switch_type,
-                   switch.switch_hw.location.rack.name,
-                   switch.switch_hw.location.building.name,
-                   switch.switch_hw.model.vendor.name,
-                   switch.switch_hw.model.name,
-                   switch.switch_hw.serial_no]
+                   switch.location.rack.name,
+                   switch.location.building.name,
+                   switch.model.vendor.name,
+                   switch.model.name,
+                   switch.serial_no]
         if interface:
             details.extend([interface.name, interface.mac])
         else:
@@ -72,11 +72,11 @@ class TorSwitchInterfacePairFormatter(ObjectFormatter):
         interface = item[1]
 
         details = [switch.fqdn,
-                   switch.switch_hw.location.rack.name,
-                   switch.switch_hw.location.building.name,
-                   switch.switch_hw.model.vendor.name,
-                   switch.switch_hw.model.name,
-                   switch.switch_hw.serial_no]
+                   switch.location.rack.name,
+                   switch.location.building.name,
+                   switch.model.vendor.name,
+                   switch.model.name,
+                   switch.serial_no]
         if interface:
             details.extend([interface.name, interface.mac, interface.system.ip])
         else:
@@ -88,19 +88,16 @@ ObjectFormatter.handlers[TorSwitchInterfacePair] = TorSwitchInterfacePairFormatt
 
 class SwitchFormatter(ObjectFormatter):
     def format_raw(self, switch, indent=""):
-        details = [indent + "%s: %s" %
-                (switch.switch_hw.model.machine_type.capitalize(),
-                 switch.fqdn)]
+        details = [indent + "%s: %s" % (switch.model.machine_type.capitalize(),
+                                        switch.label)]
+        if switch.primary_name:
+            details.append(indent + "  Primary Name: "
+                           "{0:a}".format(switch.primary_name))
         details.append(indent + "  Switch Type: %s" % switch.switch_type)
-        if switch.ip:
-            details.append(indent + "  IP: %s" % switch.ip)
-        details.append(self.redirect_raw(switch.switch_hw.location,
-                                         indent + "  "))
-        details.append(self.redirect_raw(switch.switch_hw.model,
-                                         indent + "  "))
-        if switch.switch_hw.serial_no:
-            details.append(indent + "  Serial: %s" %
-                           switch.switch_hw.serial_no)
+        details.append(self.redirect_raw(switch.location, indent + "  "))
+        details.append(self.redirect_raw(switch.model, indent + "  "))
+        if switch.serial_no:
+            details.append(indent + "  Serial: %s" % switch.serial_no)
         for om in switch.observed_macs:
             details.append(indent + "  Port %d: %s" %
                            (om.port_number, om.mac_address))
@@ -110,7 +107,7 @@ class SwitchFormatter(ObjectFormatter):
             details.append(indent + "  VLAN %d: %s" %
                            (ov.vlan_id, ov.network.ip))
             details.append(indent + "    Created: %s" % ov.creation_date)
-        for i in switch.switch_hw.interfaces:
+        for i in switch.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
         if switch.comments:
             details.append(indent + "  Comments: %s" % switch.comments)
@@ -122,7 +119,7 @@ class SwitchFormatter(ObjectFormatter):
 
     def csv_tolist(self, switch):
         interfaces = []
-        for i in switch.switch_hw.interfaces:
+        for i in switch.interfaces:
             if not i.system:
                 continue
             interfaces.append(i)
@@ -149,7 +146,7 @@ class TorSwitchFormatter(SwitchFormatter):
 
     def csv_tolist(self, switch):
         interfaces = []
-        for i in switch.switch_hw.interfaces:
+        for i in switch.interfaces:
             if not i.system:
                 continue
             interfaces.append(i)

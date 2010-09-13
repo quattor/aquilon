@@ -32,49 +32,38 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.server.dbwrappers.rack import get_or_create_rack
-from aquilon.server.dbwrappers.interface import (restrict_switch_offsets,
-                                                 describe_interface)
-from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import Switch, SwitchHw, Interface, Model
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Switch, Model
 
 
 class CommandAddSwitch(BrokerCommand):
 
     required_parameters = ["switch", "model", "rack", "type", "ip"]
 
-    def render(self, session, logger, switch, model, rack, type, ip,
+    def render(self, session, logger, switch, label, model, rack, type, ip,
                vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    machine_type='switch', compel=True)
 
         dblocation = get_location(session, rack=rack)
 
-        (short, dbdns_domain) = parse_system_and_verify_free(session, switch)
-
-        dbswitch_hw = SwitchHw(label=short, location=dblocation, model=dbmodel,
-                               serial_no=serial)
-        session.add(dbswitch_hw)
-
-        dbnetwork = get_net_id_from_ip(session, ip)
-        # Hmm... should this check apply to the switch's own network?
-        restrict_switch_offsets(dbnetwork, ip)
+        dbdns_rec = parse_primary_name(session, switch, ip)
+        if not label:
+            label = dbdns_rec.name
 
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?
-        dbswitch = Switch(name=short, dns_domain=dbdns_domain,
-                          switch_hw=dbswitch_hw, switch_type=type,
-                          ip=ip, network=dbnetwork, comments=comments)
+        dbswitch = Switch(label=label, switch_type=type, location=dblocation,
+                          model=dbmodel, serial_no=serial, comments=comments)
         session.add(dbswitch)
+        dbswitch.primary_name = dbdns_rec
 
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
         try:
-            dsdb_runner.add_host_details(dbswitch.fqdn, dbswitch.ip,
+            dsdb_runner.add_host_details(dbswitch.fqdn, dbswitch.primary_ip,
                                          name=None, mac=None)
         except ProcessException, e:
             raise ArgumentError("Could not add switch to DSDB: %s" % e)

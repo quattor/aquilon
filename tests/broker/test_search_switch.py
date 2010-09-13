@@ -107,8 +107,8 @@ class TestSearchSwitch(TestBrokerCommand):
     def testserialandfullinfo(self):
         command = ["search_switch", "--serial=SNgd1r05_new", "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Switch: ut3gd1r05.aqd-unittest.ms.com", command)
-        self.matchclean(out, "ut3gd1r04.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r05", command)
+        self.matchclean(out, "ut3gd1r04", command)
 
     def testfullinfocsv(self):
         command = ["search_switch", "--serial=SNgd1r05_new", "--fullinfo",
@@ -123,15 +123,19 @@ class TestSearchSwitch(TestBrokerCommand):
     def testsearchswitchall(self):
         command = ["search_switch", "--all", "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[0],
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
+        self.matchoutput(out,
+                         "Primary Name: ut3gd1r01.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[0].usable[0],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
         self.matchoutput(out, "Serial: SNgd1r01", command)
-        self.matchoutput(out, "Switch: ut3gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[6].usable[1],
+        self.matchoutput(out, "Switch: ut3gd1r04", command)
+        self.matchoutput(out,
+                         "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[6].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: tor", command)
 
@@ -139,8 +143,10 @@ class TestSearchSwitch(TestBrokerCommand):
         command = ["search_switch", "--switch=ut3gd1r04.aqd-unittest.ms.com",
                    "--fullinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Switch: ut3gd1r04.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[6].usable[1],
+        self.matchoutput(out, "Switch: ut3gd1r04", command)
+        self.matchoutput(out,
+                         "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[6].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)

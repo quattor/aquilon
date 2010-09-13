@@ -38,4 +38,4 @@ class CommandShowChassisAll(BrokerCommand):
     required_parameters = []
 
     def render(self, session, **arguments):
-        return session.query(Chassis).all()
+        return session.query(Chassis).order_by('label').all()

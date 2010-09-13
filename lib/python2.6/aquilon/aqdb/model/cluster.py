@@ -197,7 +197,7 @@ class EsxCluster(Cluster):
     memory_capacity = Column(Integer, nullable=True)
 
     switch_id = Column(Integer,
-                       ForeignKey('switch.id',
+                       ForeignKey('switch.hardware_entity_id',
                                   name='esx_cluster_switch_fk'),
                        nullable=True)
 

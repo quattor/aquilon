@@ -90,7 +90,7 @@ class MachineFormatter(ObjectFormatter):
                     details.append(indent + "    Column: %s" %
                                    machine.location.rack.rack_column)
         for slot in machine.chassis_slot:
-            details.append(indent + "  {0:c}: {0.fqdn}".format(slot.chassis))
+            details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))
             details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}".format(
             machine.model.vendor, machine.model))

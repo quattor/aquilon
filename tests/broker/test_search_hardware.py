@@ -143,8 +143,8 @@ class TestSearchHardware(TestBrokerCommand):
         command = "search hardware --all --fullinfo"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Rackmount: ut3s01p1", command)
         self.matchoutput(out, "Aurora_node: ny00l4as01", command)

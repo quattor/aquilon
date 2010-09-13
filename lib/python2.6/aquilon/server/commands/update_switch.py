@@ -47,44 +47,34 @@ class CommandUpdateSwitch(BrokerCommand):
         dbswitch = Switch.get_unique(session, switch, compel=True)
 
         if vendor and not model:
-            model = dbswitch.switch_hw.model.name
+            model = dbswitch.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        machine_type='switch', compel=True)
-            dbswitch.switch_hw.model = dbmodel
-            session.add(dbswitch.switch_hw)
+            dbswitch.model = dbmodel
 
         dblocation = get_location(session, rack=rack)
         if dblocation:
-            dbswitch.switch_hw.location = dblocation
-            session.add(dbswitch.switch_hw)
+            dbswitch.location = dblocation
 
         if serial is not None:
-            dbswitch.switch_hw.serial_no = serial
-            session.add(dbswitch.switch_hw)
+            dbswitch.serial_no = serial
 
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?
         if type:
             dbswitch.switch_type = type
-            session.add(dbswitch)
 
         if ip:
-            old_ip = dbswitch.ip
+            old_ip = dbswitch.primary_ip
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
             restrict_switch_offsets(dbnetwork, ip)
-            dbswitch.ip = ip
-            dbswitch.network = dbnetwork
-            session.add(dbswitch)
+            dbswitch.primary_name.ip = ip
+            dbswitch.primary_name.network = dbnetwork
+            session.add(dbswitch.primary_name)
 
-        # Is this useful?  Counter-productive?
-        if dbswitch.switch_hw.interfaces and not dbswitch.interfaces:
-            dbinterface = dbswitch.switch_hw.interfaces[0]
-            dbinterface.system = dbswitch
-            session.add(dbinterface)
-            session.add(dbswitch)
-
+        session.add(dbswitch)
         session.flush()
 
         if ip and ip != old_ip:

@@ -89,7 +89,15 @@ class TestUpdateSwitch(TestBrokerCommand):
                      serial=None, switch_type=None, ip=None, comments=None):
         command = "show switch --switch %s" % switch
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: %s" % switch, command)
+        (short, dot, dns_domain) = switch.partition(".")
+        self.matchoutput(out, "Switch: %s" % short, command)
+        if dns_domain:
+            if ip:
+                self.matchoutput(out, "Primary Name: %s [%s]" %
+                                 (switch, ip), command)
+            else:
+                self.matchoutput(out, "Primary Name: %s" % switch,
+                                 command)
         if switch_type is None:
             switch_type = 'tor'
         self.matchoutput(out, "Switch Type: %s" % switch_type, command)
@@ -98,8 +106,6 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.matchoutput(out, "Column: %s" % rackcol, command)
         self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
                          command)
-        if ip:
-            self.matchoutput(out, "IP: %s" % ip, command)
         if serial:
             self.matchoutput(out, "Serial: %s" % serial, command)
         else:

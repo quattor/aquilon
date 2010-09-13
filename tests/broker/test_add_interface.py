@@ -201,8 +201,10 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyaddinterfaceut3c5(self):
         command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[6],
+        self.matchoutput(out, "Chassis: ut3c5", command)
+        self.matchoutput(out,
+                         "Primary Name: ut3c5.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[6],
                          command)
         self.matchoutput(out,
                          "Interface: oa %s boot=False" %
@@ -224,7 +226,9 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyfailaddinterfaceut3c1(self):
         command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
+        self.matchoutput(out, "Primary Name: ut3c1.aqd-unittest.ms.com",
+                         command)
         self.matchclean(out, "Interface: oa", command)
 
     def testaddinterfacenp997gd1r04(self):
@@ -237,10 +241,9 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyaddinterfacenp997gd1r04(self):
         command = "show tor_switch --tor_switch np997gd1r04.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: np997gd1r04.aqd-unittest.ms.com",
+        self.matchoutput(out, "Switch: np997gd1r04", command)
+        self.matchoutput(out, "Primary Name: np997gd1r04.aqd-unittest.ms.com",
                          command)
-#       self.matchoutput(out, "IP: %s" % self.net.tor_net[3].usable[0],
-#                        command)
         self.matchoutput(out,
                          "Interface: xge49 %s boot=False" %
                          self.net.tor_net[3].usable[0].mac,
@@ -260,7 +263,9 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
+        self.matchoutput(out, "Primary Name: ut3gd1r01.aqd-unittest.ms.com",
+                         command)
         self.matchclean(out, "Interface: xge49", command)
 
     # These two will eventually be created when testing the addition

@@ -31,10 +31,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Interface, Chassis
+from aquilon.aqdb.model import Chassis, FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_switch_offsets,
                                                  get_or_create_interface)
@@ -47,13 +46,13 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
     def render(self, session, logger, interface, chassis, mac, comments, user,
                **arguments):
-        dbchassis = get_system(session, chassis, Chassis, 'Chassis')
+        dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
-        if dbchassis.ip:
+        if dbchassis.primary_name.ip:
             raise ArgumentError("{0} already has an interface with an IP "
                                 "address.".format(dbchassis))
 
-        dbinterface = get_or_create_interface(session, dbchassis.chassis_hw,
+        dbinterface = get_or_create_interface(session, dbchassis,
                                               name=interface, mac=mac,
                                               interface_type='oa',
                                               comments=comments, preclude=True)
@@ -61,15 +60,22 @@ class CommandAddInterfaceChassis(BrokerCommand):
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_switch_offsets(dbnetwork, ip)
-        dbchassis.ip = ip
-        dbchassis.network = dbnetwork
-        dbinterface.system = dbchassis
-        session.add(dbinterface)
-        session.add(dbchassis)
+
+        if ip:
+            dbdns_domain = dbchassis.primary_name.dns_domain
+            short = dbchassis.primary_name.name
+            session.delete(dbchassis.primary_name)
+            session.expire(dbchassis)
+            session.flush()
+
+            dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                      ip=ip)
+            dbdns_rec.network = dbnetwork
+            session.add(dbdns_rec)
+            dbinterface.system = dbdns_rec
+            dbchassis.primary_name = dbdns_rec
 
         session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbchassis)
 
         dsdb_runner = DSDBRunner(logger=logger)
         try:

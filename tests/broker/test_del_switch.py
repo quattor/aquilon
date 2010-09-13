@@ -50,8 +50,7 @@ class TestDelSwitch(TestBrokerCommand):
     def testverifydelut3gd1r01(self):
         # Deprecated usage.
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.notfoundtest(command.split(" "))
 
     def testdelut3gd1r04(self):
         self.dsdb_expect_delete(self.net.tor_net[6].usable[1])

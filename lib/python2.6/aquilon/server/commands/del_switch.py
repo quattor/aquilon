@@ -41,21 +41,26 @@ class CommandDelSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, **arguments):
+        dbswitch = Switch.get_unique(session, switch, compel=True)
         key = DeleteKey("system", logger=logger)
         try:
             lock_queue.acquire(key)
-            self.del_switch(session, logger, switch)
+            self.del_switch(session, logger, dbswitch)
             session.commit()
         finally:
             lock_queue.release(key)
         return
 
-    def del_switch(self, session, logger, switch):
-        dbswitch = Switch.get_unique(session, switch, compel=True)
-        ip = dbswitch.ip
-
-        session.delete(dbswitch.switch_hw)
+    def del_switch(self, session, logger, dbswitch):
+        dbdns_rec = dbswitch.primary_name
         session.delete(dbswitch)
+        if dbdns_rec:
+            ip = dbdns_rec.ip
+            session.delete(dbdns_rec)
+        else:
+            ip = None
+
+        session.flush()
 
         # Any switch ports hanging off this switch should be deleted with
         # the cascade delete of the switch.

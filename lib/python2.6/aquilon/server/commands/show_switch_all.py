@@ -36,4 +36,4 @@ from aquilon.aqdb.model import Switch
 class CommandShowSwitchAll(BrokerCommand):
 
     def render(self, session, logger, **arguments):
-        return session.query(Switch).all()
+        return session.query(Switch).order_by(Switch.label).all()

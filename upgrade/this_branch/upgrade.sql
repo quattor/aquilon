@@ -103,4 +103,104 @@ CREATE TABLE primary_name_association (
 	CONSTRAINT "PRIMARY_NAME_ASC_DNS_REC_FK" FOREIGN KEY (dns_record_id) REFERENCES system (id) ON DELETE CASCADE
 );
 
+--
+-- Convert chassis & switch from being based on system to hardware_entity
+--
+
+-- Convert chassis_slot to reference chassis_hw instead of chassis
+ALTER TABLE chassis_slot DROP CONSTRAINT "CHASSIS_SLOT_CHASSIS_FK";
+ALTER TABLE chassis_slot DROP CONSTRAINT "CHASSIS_SLOT_PK";
+ALTER TABLE chassis_slot DROP CONSTRAINT "CHASSIS_SLOT_CHASSIS_ID_NN";
+ALTER TABLE chassis_slot RENAME COLUMN chassis_id TO chassis_system_id;
+ALTER TABLE chassis_slot ADD chassis_id INTEGER;
+UPDATE chassis_slot SET chassis_id = (SELECT chassis.chassis_hw_id
+						FROM chassis
+						WHERE chassis.system_id = chassis_slot.chassis_system_id);
+ALTER TABLE chassis_slot
+	MODIFY (chassis_id CONSTRAINT "CHASSIS_SLOT_CHASSIS_ID_NN" NOT NULL);
+ALTER TABLE chassis_slot
+	ADD CONSTRAINT "CHASSIS_SLOT_CHASSIS_FK" FOREIGN KEY (chassis_id) REFERENCES chassis_hw (hardware_entity_id) ON DELETE CASCADE;
+ALTER TABLE chassis_slot DROP COLUMN chassis_system_id;
+ALTER TABLE chassis_slot
+	ADD CONSTRAINT "CHASSIS_SLOT_PK" PRIMARY KEY (chassis_id, slot_number);
+
+-- Convert esx_cluster to reference switch_hw instead of switch
+ALTER TABLE esx_cluster DROP CONSTRAINT "ESX_CLUSTER_SWITCH_FK";
+ALTER TABLE esx_cluster RENAME COLUMN switch_id TO switch_system_id;
+ALTER TABLE esx_cluster ADD switch_id INTEGER;
+UPDATE esx_cluster SET switch_id = (SELECT switch.switch_id
+						FROM switch
+						WHERE switch.id = esx_cluster.switch_system_id);
+ALTER TABLE esx_cluster
+	ADD CONSTRAINT "ESX_CLUSTER_SWITCH_FK" FOREIGN KEY (switch_id) REFERENCES switch_hw (hardware_entity_id);
+ALTER TABLE esx_cluster DROP COLUMN switch_system_id;
+
+-- Convert observed_mac to reference switch_hw instead of switch
+ALTER TABLE observed_mac DROP CONSTRAINT "OBS_MAC_HW_FK";
+ALTER TABLE observed_mac DROP CONSTRAINT "OBSERVED_MAC_SWITCH_ID_NN";
+ALTER TABLE observed_mac DROP CONSTRAINT "OBSERVED_MAC_PK";
+ALTER TABLE observed_mac RENAME COLUMN switch_id TO switch_system_id;
+ALTER TABLE observed_mac ADD switch_id INTEGER;
+UPDATE observed_mac SET switch_id = (SELECT switch.switch_id
+						FROM switch
+						WHERE switch.id = observed_mac.switch_system_id);
+ALTER TABLE observed_mac
+	ADD CONSTRAINT "OBS_MAC_HW_FK" FOREIGN KEY (switch_id) REFERENCES switch_hw (hardware_entity_id) ON DELETE CASCADE;
+ALTER TABLE observed_mac
+	MODIFY (switch_id CONSTRAINT "OBSERVED_MAC_SWITCH_ID_NN" NOT NULL);
+ALTER TABLE observed_mac DROP COLUMN switch_system_id;
+ALTER TABLE observed_mac
+	ADD CONSTRAINT "OBSERVED_MAC_PK" PRIMARY KEY (switch_id, port_number, mac_address, slot);
+
+-- Convert observed_vlan to reference switch_hw instead of switch
+ALTER TABLE observed_vlan DROP CONSTRAINT "OBS_VLAN_HW_FK";
+ALTER TABLE observed_vlan DROP CONSTRAINT "OBSERVED_VLAN_SWITCH_ID_NN";
+ALTER TABLE observed_vlan DROP CONSTRAINT "OBSERVED_VLAN_PK";
+ALTER TABLE observed_vlan RENAME COLUMN switch_id TO switch_system_id;
+ALTER TABLE observed_vlan ADD switch_id INTEGER;
+UPDATE observed_vlan set switch_id = (SELECT switch.switch_id FROM switch
+					WHERE switch.id = observed_vlan.switch_system_id);
+ALTER TABLE observed_vlan
+	ADD CONSTRAINT "OBS_VLAN_HW_FK" FOREIGN KEY (switch_id) REFERENCES switch_hw (hardware_entity_id) ON DELETE CASCADE;
+ALTER TABLE observed_vlan
+	MODIFY (switch_id CONSTRAINT "OBSERVED_VLAN_SWITCH_ID_NN" NOT NULL);
+ALTER TABLE observed_vlan DROP COLUMN switch_system_id;
+ALTER TABLE observed_vlan
+	ADD CONSTRAINT "OBSERVED_VLAN_PK" PRIMARY KEY (switch_id, network_id, vlan_id);
+
+-- Convert old chassis/chassis_hw to new chassis/primary_name_association
+INSERT INTO primary_name_association (hardware_entity_id, dns_record_id, creation_date)
+	SELECT chassis.chassis_hw_id, chassis.system_id, system.creation_date
+		FROM chassis, system
+		WHERE chassis.system_id = system.id;
+UPDATE chassis_hw SET comments = (SELECT comments FROM chassis
+					WHERE chassis.chassis_hw_id = chassis_hw.hardware_entity_id)
+	WHERE comments IS NULL;
+DROP TABLE chassis;
+ALTER TABLE chassis_hw RENAME TO chassis;
+ALTER TABLE chassis RENAME CONSTRAINT "CHASSIS_HW_PK" TO "CHASSIS_PK";
+ALTER TABLE chassis RENAME CONSTRAINT "CHASSIS_HW_FK" TO "CHASSIS_HW_ENT_FK";
+ALTER TABLE chassis RENAME CONSTRAINT "CHASSIS_HW_HW_ENT_ID_NN" TO "CHASSIS_HW_ENT_ID_NN";
+ALTER INDEX "CHASSIS_HW_PK" RENAME TO "CHASSIS_PK";
+
+-- Convert old switch/switch_hw to new switch/primary_name_association
+INSERT INTO primary_name_association (hardware_entity_id, dns_record_id, creation_date)
+	SELECT switch.switch_id, switch.id, system.creation_date
+		FROM switch, system
+		WHERE switch.id = system.id;
+ALTER TABLE switch_hw ADD switch_type VARCHAR2(16);
+UPDATE switch_hw SET switch_type = (SELECT switch_type FROM switch
+					WHERE switch.switch_id = switch_hw.hardware_entity_id);
+UPDATE switch_hw SET comments = (SELECT comments FROM switch
+					WHERE switch.switch_id = switch_hw.hardware_entity_id)
+	WHERE comments IS NULL;
+DROP TABLE switch;
+ALTER TABLE switch_hw RENAME TO switch;
+ALTER TABLE switch RENAME CONSTRAINT "SWITCH_HW_PK" TO "SWITCH_PK";
+ALTER TABLE switch RENAME CONSTRAINT "SWITCH_HW_HW_ENT_ID_NN" TO "SWITCH_HW_ENT_ID_NN";
+ALTER TABLE switch RENAME CONSTRAINT "SWITCH_HW_LAST_POLL_NN" TO "SWITCH_LAST_POLL_NN";
+ALTER TABLE switch
+	MODIFY (switch_type CONSTRAINT "SWITCH_SWITCH_TYPE_NN" NOT NULL);
+ALTER INDEX "TOR_SWITCH_HW_PK" RENAME TO "SWITCH_PK";
+
 QUIT;

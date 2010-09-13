@@ -43,7 +43,10 @@ class TestAddTorSwitch(TestBrokerCommand):
                      rack, rackrow, rackcol, serial=None):
         command = "show tor_switch --tor_switch %s" % tor_switch
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: %s" % tor_switch, command)
+        (short, dot, dns_domain) = tor_switch.partition(".")
+        self.matchoutput(out, "Switch: %s" % short, command)
+        if dns_domain:
+            self.matchoutput(out, "Primary Name: %s" % tor_switch, command)
         self.matchoutput(out, "Rack: %s" % rack, command)
         self.matchoutput(out, "Row: %s" % rackrow, command)
         self.matchoutput(out, "Column: %s" % rackcol, command)
@@ -67,7 +70,7 @@ class TestAddTorSwitch(TestBrokerCommand):
 #   def testverifyshowfqdntorswitch(self):
 #       command = "show fqdn --fqdn ut3gd1r01.aqd-unittest.ms.com"
 #       out = self.commandtest(command.split(" "))
-#       self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com",
+#       self.matchoutput(out, "Switch: ut3gd1r01",
 #                        command)
 
     # Testing that add machine does not allow a tor_switch....
@@ -165,7 +168,8 @@ class TestAddTorSwitch(TestBrokerCommand):
                                            "bnt", "rs g8000",
                                            "np999", "zz", "11")
         self.matchoutput(out,
-                         "IP: %s" % self.net.tor_net[5].usable[0],
+                         "Primary Name: np999gd1r01.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[5].usable[0],
                          command)
         self.matchoutput(out,
                          "Interface: xge49 %s boot=False" %
@@ -186,26 +190,21 @@ class TestAddTorSwitch(TestBrokerCommand):
     def testverifyshowtorswitchrack(self):
         command = "show tor_switch --rack np999"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: np999gd1r01.aqd-unittest.ms.com",
-                         command)
+        self.matchoutput(out, "Switch: np999gd1r01", command)
 
 #   def testverifyshowtorswitchmodel(self):
 #       command = "show tor_switch --model uttorswitch"
 #       out = self.commandtest(command.split(" "))
-#       self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com",
+#       self.matchoutput(out, "Switch: ut3gd1r01",
 #                        command)
 
     def testverifyshowtorswitchall(self):
         command = "show tor_switch --all"
         out = self.commandtest(command.split(" "))
-#       self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com",
-#                        command)
-        self.matchoutput(out, "Switch: np997gd1r04.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "Switch: np998gd1r01.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "Switch: np999gd1r01.aqd-unittest.ms.com",
-                         command)
+#       self.matchoutput(out, "Switch: ut3gd1r01", command)
+        self.matchoutput(out, "Switch: np997gd1r04", command)
+        self.matchoutput(out, "Switch: np998gd1r01", command)
+        self.matchoutput(out, "Switch: np999gd1r01", command)
 
     def testaddnp06bals03(self):
         # Deprecated.

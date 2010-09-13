@@ -40,7 +40,7 @@ from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Machine, FutureARecord, ReservedName
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -86,7 +86,17 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbnetwork = get_net_id_from_ip(session, ip)
             restrict_switch_offsets(dbnetwork, ip)
             if dbinterface.system:
-                dbinterface.system.ip = ip
+                if isinstance(dbinterface.system, ReservedName):
+                    short = dbinterface.system.name
+                    dbdns_domain = dbinterface.system.dns_domain
+                    session.delete(dbinterface.system)
+                    session.flush()
+                    dbinterface.system = FutureARecord(name=short,
+                                                       dns_domain=dbdns_domain,
+                                                       ip=ip)
+                    session.add(dbinterface.system)
+                else:
+                    dbinterface.system.ip = ip
                 dbinterface.system.network = dbnetwork
         if comments:
             dbinterface.comments = comments

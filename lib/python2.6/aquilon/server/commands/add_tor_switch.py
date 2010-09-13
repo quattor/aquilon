@@ -32,23 +32,20 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
-from aquilon.server.dbwrappers.interface import (restrict_switch_offsets,
-                                                 get_or_create_interface)
-from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.server.dbwrappers.interface import get_or_create_interface
+from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import Switch, SwitchHw, Interface, Model
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Switch, Model
 
 
 class CommandAddTorSwitch(BrokerCommand):
 
     required_parameters = ["tor_switch", "model"]
 
-    def render(self, session, logger, tor_switch, model, vendor,
+    def render(self, session, logger, tor_switch, label, model, vendor,
                rack, building, room, rackid, rackrow, rackcolumn,
-               interface, mac, ip, serial, **arguments):
+               interface, mac, ip, serial, comments, **arguments):
         logger.client_info("add_tor_switch is deprecated, please use "
                            "add_switch instead.")
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
@@ -74,28 +71,22 @@ class CommandAddTorSwitch(BrokerCommand):
                                 "provide --rackid, --rackrow and --rackcolumn "
                                 "along with --building or --room.")
 
-        (short, dbdns_domain) = parse_system_and_verify_free(session,
-                                                             tor_switch)
+        dbdns_rec = parse_primary_name(session, tor_switch, ip)
+        if not label:
+            label = dbdns_rec.name
 
-        dbtor_switch_hw = SwitchHw(label=short, location=dblocation,
-                                   model=dbmodel, serial_no=serial)
-        session.add(dbtor_switch_hw)
-        dbtor_switch = Switch(name=short, dns_domain=dbdns_domain,
-                              switch_hw=dbtor_switch_hw, switch_type='tor')
+        dbtor_switch = Switch(label=label, switch_type='tor',
+                              location=dblocation, model=dbmodel,
+                              serial_no=serial, comments=comments)
         session.add(dbtor_switch)
+        dbtor_switch.primary_name = dbdns_rec
 
-        if interface or mac or ip:
-            dbinterface = get_or_create_interface(session, dbtor_switch_hw,
+        if interface or mac:
+            dbinterface = get_or_create_interface(session, dbtor_switch,
                                                   name=interface, mac=mac,
-                                                  system=dbtor_switch,
                                                   interface_type='oa')
 
-            dbnetwork = get_net_id_from_ip(session, ip)
-            # Hmm... should this check apply to the switch's own network?
-            restrict_switch_offsets(dbnetwork, ip)
-            dbtor_switch.ip = ip
-            dbtor_switch.network = dbnetwork
-            session.add(dbtor_switch)
+            dbinterface.system = dbdns_rec
             session.flush()
 
             dsdb_runner = DSDBRunner(logger=logger)

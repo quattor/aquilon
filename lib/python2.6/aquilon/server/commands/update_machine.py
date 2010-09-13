@@ -32,7 +32,6 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -63,12 +62,12 @@ class CommandUpdateMachine(BrokerCommand):
 
         remove_plenaries = PlenaryCollection(logger=logger)
         if chassis:
-            dbchassis = get_system(session, chassis, Chassis, 'Chassis')
+            dbchassis = Chassis.get_unique(session, chassis, compel=True)
             if machine_plenary_will_move(old=dbmachine.location,
-                                         new=dbchassis.chassis_hw.location):
+                                         new=dbchassis.location):
                 remove_plenaries.append(PlenaryMachineInfo(dbmachine,
                                                            logger=logger))
-            dbmachine.location = dbchassis.chassis_hw.location
+            dbmachine.location = dbchassis.location
             if slot is None:
                 raise ArgumentError("Option --chassis requires --slot "
                                     "information.")
@@ -90,7 +89,7 @@ class CommandUpdateMachine(BrokerCommand):
         dblocation = get_location(session, **arguments)
         if dblocation:
             for dbslot in dbmachine.chassis_slot:
-                dbcl = dbslot.chassis.chassis_hw.location
+                dbcl = dbslot.chassis.location
                 if dbcl != dblocation:
                     if chassis or slot is not None:
                         raise ArgumentError("{0} conflicts with chassis {1!s} "

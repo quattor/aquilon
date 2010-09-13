@@ -29,27 +29,30 @@
 """Contains the logic for `aq add chassis`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Chassis, ChassisHw, Model
+from aquilon.aqdb.model import Chassis, Model
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.system import parse_system_and_verify_free
+from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
 
 
 class CommandAddChassis(BrokerCommand):
 
     required_parameters = ["chassis", "rack", "model"]
 
-    def render(self, session, chassis, rack, serial, model, vendor, comments, **arguments):
-        (short, dbdns_domain) = parse_system_and_verify_free(session, chassis)
+    def render(self, session, chassis, label, rack, serial, model, vendor,
+               comments, **arguments):
+        dbdns_rec = parse_primary_name(session, chassis, None)
+        if not label:
+            label = dbdns_rec.name
+
         dblocation = get_location(session, rack=rack)
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    machine_type='chassis', compel=True)
         # FIXME: Precreate chassis slots?
-        dbchassis_hw = ChassisHw(label=short, location=dblocation,
-                                 model=dbmodel, serial_no=serial)
-        session.add(dbchassis_hw)
-        dbchassis = Chassis(name=short, dns_domain=dbdns_domain,
-                            chassis_hw=dbchassis_hw, comments=comments)
+        dbchassis = Chassis(label=label, location=dblocation, model=dbmodel,
+                            serial_no=serial, comments=comments)
         session.add(dbchassis)
+        dbchassis.primary_name = dbdns_rec
+
+        session.flush()
         return

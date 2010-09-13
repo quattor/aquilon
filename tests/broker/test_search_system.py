@@ -161,8 +161,8 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
                          command)
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
 if __name__=='__main__':

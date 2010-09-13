@@ -150,28 +150,33 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             if not dbom:
                 raise ArgumentError("No switch found in the discovery table "
                                     "for MAC address %s." % dbinterface.mac)
-            dbsystem = dbom.switch
+            if not dbom.switch.primary_ip:
+                raise ArgumentError("{0} does not have a primary IP address "
+                                    "to use for network "
+                                    "selection.".format(dbom.switch))
+            dbnetwork = get_net_id_from_ip(session, dbom.switch.primary_ip)
 
     if ipfromsystem:
         # Assumes one system entry, not necessarily correct.
         dbsystem = get_system(session, ipfromsystem)
+        if dbsystem.ip:
+            dbnetwork = get_net_id_from_ip(session, dbsystem.ip)
 
     if ipfromip:
         # determine network
         dbnetwork = get_net_id_from_ip(session, ipfromip)
-    elif not dbnetwork:
-        # Any of the other options set dbsystem...
-        dbnetwork = dbsystem.network
-        # Could be slightly more intelligent here, and check to see if
-        # there is an IP, and then fix the network setting.
-        if not dbnetwork:
-            raise ArgumentError("Could not determine network to use for %s." %
-                                dbsystem.fqdn)
+
+    if not dbnetwork:
+        raise ArgumentError("Could not determine network to use for %s." %
+                            dbsystem.fqdn)
 
     startip = dbnetwork.first_usable_host
 
+    used_ips = session.query(System.ip)
+    used_ips = used_ips.filter(System.ip >= startip)
+    used_ips = used_ips.filter(System.ip < dbnetwork.broadcast)
+
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
-    used_ips = session.query(System.ip).filter_by(network=dbnetwork).all()
     used_set = set([int(item.ip) for item in used_ips])
     free_set = full_set - used_set
 
@@ -207,21 +212,7 @@ def describe_interface(session, interface):
                    (interface.interface_type, interface.name, interface.mac,
                     interface.bootable)]
     hw = interface.hardware_entity
-    hw_type = hw.hardware_type
-    if hw_type == 'machine':
-        description.append("is attached to machine %s" % hw.label)
-    elif hw_type == 'switch':
-        if hw.switch:
-            description.append("is attached to switch %s" %
-                               ",".join([ts.fqdn for ts in hw.switch]))
-        else:
-            description.append("is attached to unnamed switch hardware")
-    elif hw_type == 'chassis':
-        if hw.chassis_hw:
-            description.append("is attached to chassis %s" %
-                               ",".join([c.fqdn for c in hw.chassis_hw]))
-        else:
-            description.append("is attached to unnamed chassis hardware")
+    description.append("is attached to {0:l}".format(hw))
     if interface.system:
         description.append("points to system %s" % interface.system.fqdn)
     ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
@@ -261,24 +252,23 @@ def verify_port_group(dbmachine, port_group):
             dbobserved_vlan = q.one()
         except NoResultFound:
             raise ArgumentError("Cannot verify port group availability: "
-                                "no record for VLAN %s on switch %s." %
-                                (vlan_id, dbswitch.fqdn))
+                                "no record for VLAN {0} on "
+                                "{1:l}.".format(vlan_id, dbswitch))
         except MultipleResultsFound:
-            raise InternalError("Too many subnets found for VLAN %s "
-                                "on switch %s." %
-                                (vlan_id, dbswitch.fqdn))
+            raise InternalError("Too many subnets found for VLAN {0} "
+                                "on {1:l}.".format(vlan_id, dbswitch))
         if dbobserved_vlan.is_at_guest_capacity:
-            raise ArgumentError("Port group %s is full for switch %s." %
-                                (dbvi.port_group,
-                                 dbobserved_vlan.switch.fqdn))
+            raise ArgumentError("Port group {0} is full for "
+                                "{1:l}.".format(dbvi.port_group,
+                                                dbobserved_vlan.switch))
     elif dbmachine.host and dbmachine.host.cluster and \
          dbmachine.host.cluster.switch:
         dbswitch = dbmachine.host.cluster.switch
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id, switch=dbswitch)
         if not q.count():
-            raise ArgumentError("VLAN %s not found for switch %s." %
-                                (dbvi.vlan_id, dbswitch.fqdn))
+            raise ArgumentError("VLAN {0} not found for "
+                                "{1:l}.".format(dbvi.vlan_id, dbswitch))
     return dbvi.port_group
 
 def choose_port_group(dbmachine):
@@ -294,8 +284,8 @@ def choose_port_group(dbmachine):
         if dbobserved_vlan.is_at_guest_capacity:
             continue
         return dbobserved_vlan.port_group
-    raise ArgumentError("No available user port groups on switch %s." %
-                        dbmachine.cluster.switch.fqdn)
+    raise ArgumentError("No available user port groups on "
+                        "{0:l}.".format(dbmachine.cluster.switch))
 
 def _type_msg(interface_type, bootable):
     if bootable is not None:

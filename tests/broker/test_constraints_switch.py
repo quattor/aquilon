@@ -59,7 +59,7 @@ class TestSwitchConstraints(TestBrokerCommand):
         # Deprecated usage.
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
 
     # Testing that del tor_switch does not delete a blade....
     def testrejectut3c1n3(self):

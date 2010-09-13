@@ -97,7 +97,7 @@ class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
 
-    switch_id = Column(Integer, ForeignKey('switch.id',
+    switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
                                            name='%s_hw_fk' % _ABV),
                        primary_key=True)

@@ -45,7 +45,7 @@ class ObservedMac(Base):
     """ reports the observance of a mac address on a switch port. """
     __tablename__ = _TN
 
-    switch_id = Column(Integer, ForeignKey('switch.id',
+    switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
                                            name='obs_mac_hw_fk'),
                        primary_key=True)

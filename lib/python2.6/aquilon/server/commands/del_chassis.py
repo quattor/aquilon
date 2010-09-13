@@ -31,7 +31,6 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Chassis, ChassisSlot
 
 
@@ -40,10 +39,10 @@ class CommandDelChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, logger, chassis, **arguments):
-        dbchassis = get_system(session, chassis, Chassis, 'Chassis')
-        q = session.query(ChassisSlot).filter_by(
-            chassis=dbchassis).filter(
-                ChassisSlot.machine_id != None)
+        dbchassis = Chassis.get_unique(session, chassis, compel=True)
+        q = session.query(ChassisSlot)
+        q = q.filter_by(chassis=dbchassis)
+        q = q.filter(ChassisSlot.machine_id != None)
 
         machine_count = q.count()
         if machine_count > 0:
@@ -51,6 +50,11 @@ class CommandDelChassis(BrokerCommand):
                                 "cannot be deleted.".format(dbchassis,
                                                             machine_count))
 
-        session.delete(dbchassis.chassis_hw)
+        # Order matters here
+        dbdns_rec = dbchassis.primary_name
         session.delete(dbchassis)
+        if dbdns_rec:
+            session.delete(dbdns_rec)
+
+        session.flush()
         return

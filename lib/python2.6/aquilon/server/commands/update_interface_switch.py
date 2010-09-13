@@ -48,7 +48,7 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
 
         dbswitch = Switch.get_unique(session, switch, compel=True)
         q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbswitch.switch_hw)
+        q = q.filter_by(name=interface, hardware_entity=dbswitch)
         dbinterface = q.first()
         if not dbinterface:
             raise NotFoundException("Interface %s of %s not found." %

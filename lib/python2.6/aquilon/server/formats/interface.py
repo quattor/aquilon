@@ -43,8 +43,7 @@ class InterfaceFormatter(ObjectFormatter):
             obs = interface.last_observation
             if obs:
                 details.append(indent + "  Last switch poll: %s port %s [%s]" %
-                               (obs.switch.fqdn, obs.port_number,
-                                obs.last_seen))
+                               (obs.switch, obs.port_number, obs.last_seen))
         else:
             details = [indent + "Interface: %s boot=%s (no mac addr)" % (
                 interface.name, interface.bootable)]
@@ -54,21 +53,7 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  Port Group: %s" % interface.port_group)
 
         hw = interface.hardware_entity
-        hw_type = hw.hardware_type
-        if hw_type == 'machine':
-            details.append(indent + "  Attached to: machine %s" % hw.label)
-        elif hw_type == 'switch':
-            if hw.switch:
-                details.append(indent + "  Attached to: switch %s" %
-                                   ",".join([ts.fqdn for ts in hw.switch]))
-            else:
-                details.append("  Attached to: unnamed switch")
-        elif hw_type == 'chassis':
-            if hw.chassis_hw:
-                details.append("  Attached to: chassis %s" %
-                                   ",".join([c.fqdn for c in hw.chassis_hw]))
-            else:
-                details.append("  Attached to: unnamed chassis")
+        details.append(indent + "  Attached to: {0}".format(hw))
         if interface.system:
             details.append(indent + "  Provides: %s [%s]" %
                            (interface.system.fqdn, interface.system.ip))

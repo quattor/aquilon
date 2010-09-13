@@ -1858,6 +1858,7 @@
 	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
       <optgroup name="optional_opts">
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">serial number</option>
          <option name="comments" type="string">Comments</option>
@@ -2484,8 +2485,8 @@
       <p/>
       This command is deprecated.  Please use the new add_switch.
       <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
-         <option name="tor_switch" type="string">tor_switch name</option>
-         <option name="model" type="string">tor_switch model</option>
+         <option name="tor_switch" type="string">Switch name</option>
+         <option name="model" type="string">Switch model</option>
       </optgroup>
       <optgroup name="add_tor_switch_location" mandatory="True" fields="any">
          <option name="rack" type="string" conflicts="building">Rack name</option>
@@ -2505,8 +2506,10 @@
          <option name="ip" type="ipv4">IP address of the interface</option>
       </optgroup>
       <optgroup name="add_tor_switch_optional">
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
-	 <option name="serial" type="string">serial number</option>
+	 <option name="serial" type="string">Serial number</option>
+	 <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="tor_switch/%(tor_switch)s" />
    </command>
@@ -2521,6 +2524,7 @@
          <option name="ip" type="ipv4">IP address</option>
       </optgroup>
       <optgroup name="add_switch_optional" mandatory="False">
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>

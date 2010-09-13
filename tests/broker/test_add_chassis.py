@@ -47,7 +47,10 @@ class TestAddChassis(TestBrokerCommand):
     def testverifyaddut3c5(self):
         command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Chassis: ut3c5", command)
+        self.matchoutput(out,
+                         "Primary Name: ut3c5.aqd-unittest.ms.com",
+                         command)
 
     def testaddut3c1(self):
         command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"
@@ -56,12 +59,12 @@ class TestAddChassis(TestBrokerCommand):
     def testverifyaddut3c1(self):
         command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
 
     def testverifyshowfqdnchassis(self):
         command = "show fqdn --fqdn ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
 
     def testaddut9chassis(self):
         for i in range(1,6):
@@ -75,15 +78,17 @@ class TestAddChassis(TestBrokerCommand):
             command = ["show", "chassis",
                        "--chassis", "ut9c%d.aqd-unittest.ms.com" % i]
             out = self.commandtest(command)
-            self.matchoutput(out, "Chassis: ut9c%d.aqd-unittest.ms.com" % i,
+            self.matchoutput(out, "Chassis: ut9c%d" % i, command)
+            self.matchoutput(out,
+                             "Primary Name: ut9c%d.aqd-unittest.ms.com" % i,
                              command)
 
     def testverifychassisall(self):
         command = ["show", "chassis", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Chassis: ut3c5", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
+        self.matchoutput(out, "Chassis: ut9c1", command)
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)

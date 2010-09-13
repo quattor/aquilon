@@ -67,15 +67,13 @@ from aquilon.aqdb.model.hardware_entity import HardwareEntity
 from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.hostlifecycle import HostLifecycle
-from aquilon.aqdb.model.switch_hw import SwitchHw
-from aquilon.aqdb.model.chassis_hw import ChassisHw
+from aquilon.aqdb.model.switch import Switch
+from aquilon.aqdb.model.chassis import Chassis
 
 #SYSTEM
-from aquilon.aqdb.model.chassis import Chassis
 from aquilon.aqdb.model.manager import Manager
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
 from aquilon.aqdb.model.host import Host
-from aquilon.aqdb.model.switch import Switch
 
 from aquilon.aqdb.model.primary_name_association import PrimaryNameAssociation
 
