@@ -74,6 +74,8 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.system:
             details.append(indent + "  Provides: %s [%s]" %
                            (interface.system.fqdn, interface.system.ip))
+        if interface.comments:
+            details.append(indent + "  Comments: %s" % interface.comments)
         return "\n".join(details)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
