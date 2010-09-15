@@ -35,7 +35,7 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from aquilon.aqdb.model import Base, System, ServiceInstance
+from aquilon.aqdb.model import Base, Host, ServiceInstance
 
 
 class ServiceInstanceServer(Base):
@@ -48,10 +48,10 @@ class ServiceInstanceServer(Base):
                                                      ondelete='CASCADE'),
                                  primary_key=True)
 
-    system_id = Column(Integer, ForeignKey('system.id',
-                                           name='sis_system_fk',
-                                           ondelete='CASCADE'),
-                       primary_key=True)
+    host_id = Column(Integer, ForeignKey('host.machine_id',
+                                         name='sis_host_fk',
+                                         ondelete='CASCADE'),
+                     primary_key=True)
 
     position = Column(Integer, nullable=False)
 
@@ -60,7 +60,7 @@ class ServiceInstanceServer(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     service_instance = relation(ServiceInstance)
-    system = relation(System, uselist=False, backref='sislist')
+    host = relation(Host, uselist=False, backref='sislist')
 
 
 service_instance_server = ServiceInstanceServer.__table__

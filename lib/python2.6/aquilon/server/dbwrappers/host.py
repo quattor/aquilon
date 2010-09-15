@@ -31,7 +31,6 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Machine
-from aquilon.server.dbwrappers.system import get_system_dependencies
 
 
 def hostname_to_host(session, hostname):
@@ -53,7 +52,10 @@ def get_host_dependencies(session, dbhost):
     If the host has no dependencies, then an empty list is returned
     """
     ret = []
-    ret.extend(get_system_dependencies(session, dbhost.machine.primary_name))
+    for sis in dbhost.sislist:
+        ret.append("%s is bound as a server for service %s instance %s" %
+                   (sis.host.fqdn, sis.service_instance.service.name,
+                    sis.service_instance.name))
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
        dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
        dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):

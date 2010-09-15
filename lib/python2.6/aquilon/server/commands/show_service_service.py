@@ -30,7 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
+from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import get_service_instance, get_client_service_instances
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.formats.service_instance import ServiceInstanceList
@@ -42,13 +42,16 @@ class CommandShowServiceService(BrokerCommand):
 
     def render(self, session, service, server, client, **arguments):
         instance = arguments.get("instance", None)
-        dbserver = server and get_system(session, server) or None
-        dbclient = client and get_system(session, client) or None
+        dbserver = server and hostname_to_host(session, server) or None
+        dbclient = client and hostname_to_host(session, client) or None
         dbservice = Service.get_unique(session, service, compel=True)
         if dbserver:
-            return ServiceInstanceList(
-                session.query(ServiceInstance).filter_by(service=dbservice).join(
-                'servers').filter_by(system=dbserver).all())
+            q = session.query(ServiceInstance)
+            q = q.filter_by(service=dbservice)
+            q = q.join('servers')
+            q = q.filter_by(host=dbserver)
+            q = q.order_by(ServiceInstance.name)
+            return ServiceInstanceList(q.all())
         elif dbclient:
             service_instances = get_client_service_instances(session, dbclient)
             service_instances = [si for si in service_instances if si.service == dbservice]

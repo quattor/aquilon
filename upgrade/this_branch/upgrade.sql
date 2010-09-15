@@ -252,6 +252,22 @@ INSERT INTO primary_name_association (hardware_entity_id, dns_record_id, creatio
 		FROM host, system
 		WHERE host.id = system.id;
 
+-- Convert service_instance_server to reference host.id instead of system.id
+ALTER TABLE service_instance_server ADD host_id INTEGER;
+UPDATE service_instance_server
+	SET host_id = (SELECT machine_id FROM host WHERE host.id = service_instance_server.system_id)
+	WHERE system_id IN (SELECT id FROM host);
+UPDATE service_instance_server
+	SET host_id = (SELECT machine_id FROM auxiliary WHERE auxiliary.id = service_instance_server.system_id)
+	WHERE system_id IN (SELECT id FROM auxiliary);
+ALTER TABLE service_instance_server
+	MODIFY (host_id CONSTRAINT "SIS_HOST_ID_NN" NOT NULL);
+ALTER TABLE service_instance_server DROP CONSTRAINT "SERVICE_INSTANCE_SERVER_PK";
+ALTER TABLE service_instance_server DROP COLUMN system_id;
+-- Foreign key on host(machine_id) have to wait because that is not a primary key yet
+ALTER TABLE service_instance_server
+	ADD CONSTRAINT "SERVICE_INSTANCE_SERVER_PK" PRIMARY KEY (service_instance_id, host_id);
+
 -- Drop id, update the primary key
 ALTER TABLE host DROP CONSTRAINT "HOST_PK";
 ALTER TABLE host DROP COLUMN id;
@@ -263,5 +279,7 @@ ALTER TABLE host_cluster_member
 	ADD CONSTRAINT "HST_CLSTR_MMBR_HST_FK" FOREIGN KEY (host_id) REFERENCES host (machine_id) ON DELETE CASCADE;
 ALTER TABLE build_item
 	ADD CONSTRAINT "BUILD_ITEM_HOST_FK" FOREIGN KEY (host_id) REFERENCES host (machine_id) ON DELETE CASCADE;
+ALTER TABLE service_instance_server
+	ADD CONSTRAINT "SIS_HOST_FK" FOREIGN KEY (host_id) REFERENCES host (machine_id) ON DELETE CASCADE;
 
 QUIT;

@@ -334,7 +334,7 @@ class ObjectFormatter(object):
         si_msg.name = str(service_instance.name)
         si_msg.template = str(service_instance.cfg_path)
         for server in service_instance.servers:
-            self.add_host_msg(si_msg.servers.add(), server.system)
+            self.add_host_msg(si_msg.servers.add(), server.host)
 
     def add_service_map_msg(self, sm_msg, service_map):
         sm_msg.location.name = str(service_map.location.name)

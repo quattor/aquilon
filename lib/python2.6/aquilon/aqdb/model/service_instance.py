@@ -46,7 +46,7 @@ _ABV = 'svc_inst'
 
 
 class ServiceInstance(Base):
-    """ Service instance captures the data around assignment of a system for a
+    """ Service instance captures the data around assignment of a host for a
         particular purpose (aka usage). If machines have a 'personality'
         dictated by the application they run """
 
@@ -118,9 +118,10 @@ class ServiceInstance(Base):
 
     @property
     def server_fqdns(self):
+        from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(System)
-        q = q.join(['sislist'])
+        q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         q = q.outerjoin(System.dns_domain)
@@ -130,9 +131,10 @@ class ServiceInstance(Base):
 
     @property
     def server_ips(self):
+        from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(System)
-        q = q.join(['sislist'])
+        q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         q = q.outerjoin(System.dns_domain)

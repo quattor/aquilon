@@ -43,7 +43,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 % (si.service.name, si.name)]
         details.append(indent + "  Template: %s" % si.cfg_path)
         for sis in si.servers:
-            details.append(indent + "  Server: %s" % sis.system.fqdn)
+            details.append(indent + "  Server: %s" % sis.host.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: {0}".format(map.location))
         for pmap in si.personality_service_map:

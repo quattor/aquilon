@@ -54,7 +54,7 @@ class CommandPxeswitch(BrokerCommand):
         if not bootbi:
             raise ArgumentError("{0} has no bootserver.".format(dbhost))
         # for that instance, find what servers are bound to it.
-        servers = [s.system.fqdn for s in bootbi.service_instance.servers]
+        servers = [s.host.fqdn for s in bootbi.service_instance.servers]
 
         command = self.config.get("broker", "installfe")
         args = [command]
