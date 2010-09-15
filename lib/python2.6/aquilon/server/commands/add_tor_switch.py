@@ -35,7 +35,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import create_machine
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import (restrict_tor_offsets,
-                                                 describe_interface)
+                                                 get_or_create_interface)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import TorSwitch, TorSwitchHw, Interface, Model
@@ -86,15 +86,10 @@ class CommandAddTorSwitch(BrokerCommand):
         session.add(dbtor_switch)
 
         if interface or mac or ip:
-            if not (interface and mac and ip):
-                raise ArgumentError("If using --interface, --mac, or --ip, "
-                                    "all of them must be given.")
-
-            prev = session.query(Interface).filter_by(mac=mac).first()
-            if prev:
-                msg = describe_interface(session, prev)
-                raise ArgumentError("MAC address %s is already in use: %s." %
-                                    (mac, msg))
+            dbinterface = get_or_create_interface(session, dbtor_switch_hw,
+                                                  name=interface, mac=mac,
+                                                  system=dbtor_switch,
+                                                  interface_type='oa')
 
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
@@ -103,12 +98,7 @@ class CommandAddTorSwitch(BrokerCommand):
             dbtor_switch.ip = ip
             dbtor_switch.network = dbnetwork
             session.add(dbtor_switch)
-            dbinterface = Interface(name=interface, interface_type='public',
-                                    mac=mac, system=dbtor_switch,
-                                    hardware_entity=dbtor_switch_hw)
-            session.add(dbinterface)
             session.flush()
-            session.refresh(dbinterface)
 
             dsdb_runner = DSDBRunner(logger=logger)
             try:

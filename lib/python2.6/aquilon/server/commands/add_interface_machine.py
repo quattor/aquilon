@@ -37,7 +37,8 @@ from aquilon.exceptions_ import (ArgumentError, ProcessException,
 from aquilon.aqdb.model import Interface, Machine, Manager
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.interface import (describe_interface,
+from aquilon.server.dbwrappers.interface import (get_or_create_interface,
+                                                 describe_interface,
                                                  verify_port_group,
                                                  choose_port_group)
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
@@ -55,11 +56,10 @@ class CommandAddInterfaceMachine(BrokerCommand):
     def render(self, session, logger, interface, machine, mac, automac,
                pg, autopg, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        extra = {}
         if interface == 'eth0':
-            extra['bootable'] = True
-        if comments:
-            extra['comments'] = comments
+            bootable = True
+        else:
+            bootable = False
 
         prev = session.query(Interface).filter_by(
                 name=interface,hardware_entity=dbmachine).first()
@@ -118,15 +118,18 @@ class CommandAddInterfaceMachine(BrokerCommand):
             pass
 
         if pg is not None:
-            extra['port_group'] = verify_port_group(dbmachine, pg)
+            port_group = verify_port_group(dbmachine, pg)
         elif autopg:
-            extra['port_group'] = choose_port_group(dbmachine)
+            port_group = choose_port_group(dbmachine)
+        else:
+            port_group = None
 
-        try:
-            dbinterface = Interface(name=interface, hardware_entity=dbmachine,
-                                    mac=mac, interface_type=itype, **extra)
-        except ValueError, e:
-            raise ArgumentError(e.message)
+        dbinterface = get_or_create_interface(session, dbmachine,
+                                              name=interface,
+                                              interface_type=itype, mac=mac,
+                                              bootable=bootable,
+                                              port_group=port_group,
+                                              comments=comments, preclude=True)
 
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.

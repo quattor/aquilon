@@ -37,7 +37,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets,
-                                                 describe_interface)
+                                                 get_or_create_interface)
 from aquilon.server.processes import DSDBRunner
 
 
@@ -53,27 +53,11 @@ class CommandAddInterfaceTorSwitch(BrokerCommand):
             raise ArgumentError("{0} already has an interface with an IP "
                                 "address.".format(dbtor_switch))
 
-        extra = {}
-        if comments:
-            extra['comments'] = comments
-
-        q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbtor_switch.tor_switch_hw)
-        prev = q.first()
-        if prev:
-            raise ArgumentError("{0} already has an interface named "
-                                "{1}.".format(dbtor_switch, interface))
-
-        prev = session.query(Interface).filter_by(mac=mac).first()
-        if prev:
-            msg = describe_interface(session, prev)
-            raise ArgumentError("MAC address %s is already in use: %s." %
-                                (mac, msg))
-
-        dbinterface = Interface(name=interface,
-                                hardware_entity=dbtor_switch.tor_switch_hw,
-                                mac=mac, interface_type='oa', **extra)
-        session.add(dbinterface)
+        dbinterface = get_or_create_interface(session,
+                                              dbtor_switch.tor_switch_hw,
+                                              name=interface, mac=mac,
+                                              interface_type='oa',
+                                              comments=comments, preclude=True)
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)

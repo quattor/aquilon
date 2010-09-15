@@ -35,7 +35,7 @@ from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_tor_offsets,
-                                                 describe_interface)
+                                                 get_or_create_interface)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import Host, Interface, Auxiliary, Machine
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -60,42 +60,10 @@ class CommandAddAuxiliary(BrokerCommand):
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, auxiliary)
 
-        q = session.query(Interface)
-        q = q.filter_by(hardware_entity=dbmachine, interface_type='public',
-                        bootable=False)
-        if interface:
-            q = q.filter_by(name=interface)
-        if mac:
-            q = q.filter_by(mac=mac)
-        dbinterfaces = q.all()
-
-        if len(dbinterfaces) > 1:
-            raise ArgumentError("Could not uniquely determine an interface.  "
-                                "Please use --interface or --mac to specify "
-                                "the correct interface to use.")
-        if len(dbinterfaces) == 1:
-            dbinterface = dbinterfaces[0]
-        elif interface and mac:
-            dbinterface = session.query(Interface).filter_by(mac=mac).first()
-            if dbinterface:
-                msg = describe_interface(session, dbinterface)
-                raise ArgumentError("MAC address %s is already in use: %s." %
-                                    (mac, msg))
-            q = session.query(Interface)
-            q = q.filter_by(hardware_entity=dbmachine, name=interface)
-            dbinterface = q.first()
-            if dbinterface:
-                raise ArgumentError("Machine %s already has an interface named %s, bootable=%s and type=%s" %
-                                    (dbmachine.name, dbinterface.name,
-                                     dbinterface.bootable,
-                                     dbinterface.interface_type))
-            dbinterface = Interface(name=interface, interface_type='public',
-                                    mac=mac,
-                                    bootable=False, hardware_entity=dbmachine)
-            session.add(dbinterface)
-        else:
-            raise ArgumentError("Interface not found. Use both --interface and "
-                                "--mac to create one.")
+        dbinterface = get_or_create_interface(session, dbmachine,
+                                              name=interface, mac=mac,
+                                              interface_type='public',
+                                              bootable=False)
 
         if dbinterface.system:
             raise ArgumentError("{0} of {1} already provides "
