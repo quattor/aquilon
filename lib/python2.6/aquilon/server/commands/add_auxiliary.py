@@ -93,6 +93,9 @@ class CommandAddAuxiliary(BrokerCommand):
                                     mac=mac,
                                     bootable=False, hardware_entity=dbmachine)
             session.add(dbinterface)
+        else:
+            raise ArgumentError("Interface not found. Use both --interface and "
+                                "--mac to create one.")
 
         if dbinterface.system:
             raise ArgumentError("{0} of {1} already provides "
