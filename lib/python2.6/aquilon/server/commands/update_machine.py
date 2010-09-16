@@ -231,7 +231,8 @@ class CommandUpdateMachine(BrokerCommand):
         if dbslot:
             if dbslot.machine:
                 raise ArgumentError("{0} slot {1} already has machine "
-                                    "{2!s}.".format(dbchassis, slot, dbslot.machine))
+                                    "{2}.".format(dbchassis, slot,
+                                                  dbslot.machine.label))
             dbslot.machine = dbmachine
             session.add(dbslot)
         else:

@@ -83,7 +83,7 @@ class CommandSearchNetwork(BrokerCommand):
                 networks = [i.system.network.id for i in dbmachine.interfaces
                             if i.system and i.system.network]
                 if not networks:
-                    msg = "{0} has no interfaces ".format(dbmachine)
+                    msg = "Machine %s has no interfaces " % dbmachine.label
                     if dbmachine.cluster:
                         msg += "with a portgroup or "
                     msg += "assigned to a network."

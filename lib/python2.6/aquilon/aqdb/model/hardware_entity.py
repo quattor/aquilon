@@ -45,7 +45,7 @@ _TN = "hardware_entity"
 
 class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     __tablename__ = _TN
-    _instance_label = 'label'
+    _instance_label = 'printable_name'
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
 
@@ -86,6 +86,14 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
             return self.primary_name.ip
         else:
             return None
+
+    @property
+    def printable_name(self):
+        """ Returns the most meaningful name """
+        if self.primary_name:
+            return self.primary_name.fqdn
+        else:
+            return self.label
 
     @classmethod
     def get_unique(cls, sess, name, **kw):
