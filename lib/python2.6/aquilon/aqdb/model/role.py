@@ -37,7 +37,7 @@ from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 roles = ['nobody', 'operations', 'engineering', 'aqd_admin', 'telco_eng',
-         'maintech', 'unixops_l2']
+         'maintech', 'unixops_l2', 'winops']
 
 #Upfront Design Decisions:
 #  -Needs it's own creation_date + comments columns. Audit log depends on
