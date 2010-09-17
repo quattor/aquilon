@@ -101,6 +101,19 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Virtual Machine count: 9", command)
 
+    def test_095_makecluster(self):
+        # This should succeed, silently skipping all VMs (no interfaces or
+        # disks).
+        command = ["make_cluster", "--cluster=utecl1"]
+        (out, err) = self.successtest(command)
+
+    def test_096_clusterplenary(self):
+        # The cluster plenary should not have VMs.
+        command = ["cat", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
+
     def test_100_addinterfaces(self):
         for i in range(1, 8):
             self.noouttest(["add", "interface", "--machine", "evm%s" % i,
@@ -120,6 +133,18 @@ class TestAddVirtualHardware(TestBrokerCommand):
             machine = "evm%d" % i
             self.noouttest(["add_interface", "--machine", machine,
                             "--interface", "eth0", "--automac"])
+
+    def test_126_makecluster(self):
+        # This should succeed, silently skipping all VMs (no disks).
+        command = ["make_cluster", "--cluster=utecl1"]
+        (out, err) = self.successtest(command)
+
+    def test_127_clusterplenary(self):
+        # The cluster plenary should not have VMs.
+        command = ["cat", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"'/system/cluster/machines' = nlist\(\s*\);",
+                          command)
 
     def test_130_adddisks(self):
         # The first 8 shares should work...

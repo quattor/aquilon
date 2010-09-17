@@ -75,6 +75,11 @@ class TestMake(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "is not a compilable archetype", command)
 
+    def testmakeccisshost(self):
+        command = ["make", "--hostname=unittest18.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)

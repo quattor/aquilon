@@ -80,9 +80,9 @@ def force_yes(msg):
         sys.exit(1)
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hdc:vq",
+    opts, args = getopt.getopt(sys.argv[1:], "hdc:vqm",
                                ["help", "debug", "config=", "coverage",
-                                "profile", "verbose", "quiet"])
+                                "profile", "verbose", "quiet", "mirror"])
 except getopt.GetoptError, e:
     print >>sys.stderr, str(e)
     usage()
@@ -92,6 +92,7 @@ configfile = default_configfile
 coverage = False
 profile = False
 verbosity = 1
+mirror = False
 for o, a in opts:
     if o in ("-h", "--help"):
         usage()
@@ -109,6 +110,8 @@ for o, a in opts:
         verbosity += 1
     elif o in ("-q", "--quiet"):
         verbosity -= 1
+    elif o in ("-m", "--mirror"):
+        mirror = True
     else:
         assert False, "unhandled option '%s'" % o
 
@@ -133,6 +136,27 @@ if coverage:
     config.set("unittest", "coverage", "True")
 if profile:
     config.set("unittest", "profile", "True")
+
+if mirror:
+    # Copy the source directory and exec from it.
+    env = os.environ.copy()
+    env['AQDCONF'] = config.baseconfig
+    srcdir = config.get('unittest', 'srcdir')
+    mirrordir = config.get('unittest', 'mirrordir')
+    p = Popen(['rsync', '-avP', '--delete', srcdir + '/', mirrordir],
+              stdout=1, stderr=2)
+    p.communicate()
+    if p.returncode != 0:
+        print >>sys.stderr, "Rsync failed!"
+        sys.exit(1)
+    args = [sys.executable, os.path.join(mirrordir, 'tests', 'runtests.py')]
+    for o, a in opts:
+        if o in ('-m', '--mirror'):
+            continue
+        args.append(o)
+        if a is not None:
+            args.append(a)
+    os.execve(sys.executable, args, env)
 
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None

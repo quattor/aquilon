@@ -181,6 +181,35 @@ class TestAddMachine(TestBrokerCommand):
             """create("hardware/cpu/intel/xeon_2660"));""",
             command)
 
+    def testaddccissmachine(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c1n8",
+                        "--rack", "ut3", "--model", "utccissmodel"])
+
+    def testverifyccissmachine(self):
+        command = "show machine --machine ut3c1n8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rackmount: ut3c1n8", command)
+        self.matchoutput(out, "Rack: ut3", command)
+        self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
+        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Memory: 49152 MB", command)
+        self.matchoutput(out, "Disk: c0d0 466 GB cciss", command)
+
+    def testverifycatut3c1n8(self):
+        command = "cat --machine ut3c1n8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+        self.matchoutput(out,
+                         "include { 'hardware/machine/hp/utccissmodel' };",
+                         command)
+        self.matchoutput(out,
+                         "escape('cciss/c0d0'), "
+                         "create('hardware/harddisk/generic/cciss',",
+                         command)
+        self.matchoutput(out,
+                         "'capacity', 466*GB),",
+                         command)
+
     # Testing that add machine does not allow a tor_switch....
     def testrejectut3gd2r01(self):
         self.badrequesttest(["add", "machine", "--machine", "ut3gd2r01",

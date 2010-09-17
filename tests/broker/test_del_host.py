@@ -130,6 +130,11 @@ class TestDelHost(TestBrokerCommand):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def testdelunittest18(self):
+        command = "del host --hostname unittest18.aqd-unittest.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+
     def testdeltest_aurora_default_os(self):
         command = "del host --hostname test_aurora_default_os.ms.com --quiet"
         self.noouttest(command.split(" "))

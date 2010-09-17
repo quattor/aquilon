@@ -271,6 +271,13 @@ class TestAddHost(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Can not determine a sensible default OS", command)
 
+    def testaddccisshost(self):
+        command = ["add", "host", "--archetype", "aquilon",
+                   "--hostname", "unittest18.aqd-unittest.ms.com",
+                   "--ip", self.net.unknown[0].usable[18],
+                   "--domain", "unittest", "--machine", "ut3c1n8"]
+        self.noouttest(command)
+
     #test aurora and windows defaults now
     def testaddauroradefaultos(self):
         self.noouttest(["add", "host", "--archetype", "aurora",

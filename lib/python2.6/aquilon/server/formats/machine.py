@@ -92,7 +92,8 @@ class MachineFormatter(ObjectFormatter):
         for slot in machine.chassis_slot:
             details.append(indent + "  {0:c}: {0.fqdn}".format(slot.chassis))
             details.append(indent + "  Slot: %d" % slot.slot_number)
-        details.append(self.redirect_raw(machine.model, indent + "  "))
+        details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}".format(
+            machine.model.vendor, machine.model))
         details.append(indent + "  Cpu: %s x %d" %
                 (machine.cpu, machine.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine.memory)

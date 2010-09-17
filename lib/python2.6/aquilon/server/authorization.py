@@ -82,9 +82,12 @@ class AuthorizationBroker(object):
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
+        if dbuser.role.name == 'winops':
+            if action not in ['add_host', 'add_windows_host', 'del_host']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',
-                              'compile', 'compile_hostname',
+                              'compile', 'compile_hostname', 'change_status',
                               'update_interface_hostname',
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
