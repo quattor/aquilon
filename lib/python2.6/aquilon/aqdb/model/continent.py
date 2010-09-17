@@ -45,29 +45,3 @@ class Continent(Location):
 continent = Continent.__table__
 continent.primary_key.name='continent_pk'
 continent.info['unique_fields'] = ['name']
-
-
-@monkeypatch(continent)
-def populate(sess, **kw):
-
-    _continents = ('af', 'as', 'au', 'eu', 'na', 'sa')
-
-    if len(sess.query(Continent).all()) < len(_continents):
-        from aquilon.aqdb.model import Hub
-
-        if sess.query(Hub).count() < 3:
-            Hub.populate(sess, **kw)
-
-        hubs ={}
-        for hub in sess.query(Hub).all():
-            hubs[hub.name] = hub
-        a = Continent(name='af', fullname='Africa', parent = hubs['ln'])
-        b = Continent(name='as', fullname='Asia', parent = hubs['hk'])
-        c = Continent(name='au', fullname='Australia', parent = hubs['hk'])
-        d = Continent(name='eu', fullname='Europe', parent = hubs['ln'])
-        e = Continent(name='na', fullname='North America', parent = hubs['ny'])
-        f = Continent(name='sa', fullname='South America', parent = hubs['ny'])
-
-        for i in (a,b,c,d,e,f):
-            sess.add(i)
-        sess.commit()

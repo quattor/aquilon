@@ -44,38 +44,3 @@ class Country(Location):
 country = Country.__table__
 country.primary_key.name='country_pk'
 country.info['unique_fields'] = ['name']
-
-
-@monkeypatch(country)
-def populate(sess, *args, **kw):
-    if sess.query(Country).count() < 1:
-
-        if sess.query(Continent).count() < 1:
-            Continent.populate(sess, **kw)
-
-        import logging
-        log = logging.getLogger('aqdb.populate')
-
-        dsdb = kw['dsdb']
-        assert dsdb, "No dsdb in kwargs for Country.populate()"
-
-        cnts = {}
-
-        for c in sess.query(Continent).all():
-            cnts[c.name] = c
-
-        for row in dsdb.dump('country'):
-
-            a = Country(name = str(row[0]),
-                        fullname = str(row[1]),
-                        parent = cnts[str(row[2])])
-            sess.add(a)
-
-        sess.commit()
-
-        try:
-            sess.commit()
-        except Exception, e:
-            log.error(str(e))
-
-        log.debug('created %s countries'%(len(sess.query(Country).all())))

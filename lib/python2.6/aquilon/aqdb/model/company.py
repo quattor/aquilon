@@ -46,19 +46,3 @@ class Company(Location):
 company = Company.__table__
 company.primary_key.name='company_pk'
 company.info['unique_fields'] = ['name']
-
-
-@monkeypatch(company)
-def populate(sess, *args, **kw):
-    """ create the only one """
-
-    if sess.query(Company).count() < 1:
-        a = Company(name='ms', fullname='morgan stanley')
-        #NO PARENT FOR THE ROOT NODE: breaks connect_by
-        #TODO: audit for null parents in location table
-        #      where its not the root node
-        sess.add(a)
-        try:
-            sess.commit()
-        except Exception, e:
-            print e

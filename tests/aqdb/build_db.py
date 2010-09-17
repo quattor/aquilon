@@ -31,6 +31,7 @@
 import sys
 import logging
 import optparse
+import getpass
 
 logging.basicConfig(levl=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -48,13 +49,9 @@ if config.has_option("database", "module"):
     ms.modulecmd.load(config.get("database", "module"))
 
 from aquilon.aqdb.model import *
-import aquilon.aqdb.dsdb as dsdb_
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
-import test_campus_populate as tcp
-
-ordered_locations = ['location', 'company', 'hub', 'continent', 'country',
-                     'city', 'building', 'room', 'rack', 'desk']
+from loader import load_from_file
 
 
 def importName(modulename, name):
@@ -96,12 +93,6 @@ def parse_cli(*args, **kw):
                       help    = 'run functions to prepopulate data',
                       default = False)
 
-    parser.add_argument('-f', '--full',
-                      action  = 'store_true',
-                      dest    = 'full',
-                      help    = 'perform full network table population',
-                      default = False)
-
     return parser.parse_args()
 
 
@@ -127,57 +118,31 @@ def main(*args, **kw):
             for table in reversed(Base.metadata.sorted_tables):
                 table.drop(checkfirst=True)
 
-    #TODO: pass opts arg around? stop passing dsdb around/make ?
-    kwargs = {'full': opts.full}
-
     if opts.populate:
         s = db.Session()
         assert s, "No Session in build_db.py populate"
 
-        kwargs['dsdb'] = dsdb_.DsdbConnection()
-
     #Create all tables upfront
     Base.metadata.create_all(checkfirst=True)
 
-    # Location doesn't work with sorted tables (only FK to parent, not to
-    # its dependent parent location type. Hacking it for now with a list.
-    # These don't change a lot, and we'll go to a single table inheritance
-    # perhaps sometime soon, which eliminates the extra loop
-    for module_name in ordered_locations:
-        pkg_name = 'aquilon.aqdb.model'
-        try:
-            mod = importName(pkg_name, module_name)
-        except ImportError, e:
-            log.error('Failed to import %s\n' % (module_name, str(e)))
-            sys.exit(9)
+    if opts.populate:
+        load_from_file(s, "data/unittest.dump")
 
-        if hasattr(mod, 'populate') and opts.populate:
-            #log.debug('populating %s' % tbl.name)
-            mod.populate(s, **kwargs)
+        # Add the current user as admin
+        admin = Role.get_unique(s, "aqd_admin", compel=True)
+        realm = Realm.get_unique(s, "is1.morgan", compel=True)
+        user = UserPrincipal(name=getpass.getuser(), role=admin, realm=realm)
+        s.add(user)
+        s.commit()
+        s.expire(user)
 
     #New loop: over sorted tables in Base.metadata.
     for tbl in Base.metadata.sorted_tables:
         #this might be a place to set schema if needed (for DB2)
-        #skip locations: they're handled separately above
-        if tbl.name in ordered_locations:
-            continue
 
         if hasattr(tbl, 'populate') and opts.populate:
             #log.debug('populating %s' % tbl.name)
-            tbl.populate(s, **kwargs)
-
-    #CAMPUS
-    if opts.populate:
-        try:
-            cps = tcp.TestCampusPopulate(s, **kwargs)
-            cps.setUp()
-            cps.testPopulate()
-        except Exception, e:
-            log.error('problem populating campuses')
-            log.error(str(e))
-            sys.exit(9)
-            #TODO: death on fail an option
-
+            tbl.populate(s)
 
     #CONSTRAINTS
     if db.dsn.startswith('oracle'):

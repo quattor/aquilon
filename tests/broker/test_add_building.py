@@ -40,14 +40,14 @@ from brokertest import TestBrokerCommand
 
 class TestAddBuilding(TestBrokerCommand):
 
-    def testaddut(self):
-        command = "add building --building ut --city ny"
+    def testaddbu(self):
+        command = "add building --building bu --city ny"
         self.noouttest(command.split(" "))
 
-    def testverifyaddut(self):
-        command = "show building --building ut"
+    def testverifyaddbu(self):
+        command = "show building --building bu"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Building: bu", command)
 
     def testverifybuildingall(self):
         command = ["show", "building", "--all"]
@@ -55,9 +55,9 @@ class TestAddBuilding(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
 
     def testverifyshowcsv(self):
-        command = "show building --building ut --format=csv"
+        command = "show building --building bu --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "building,ut,city,ny", command)
+        self.matchoutput(out, "building,bu,city,ny", command)
 
 
 if __name__=='__main__':

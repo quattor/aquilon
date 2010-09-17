@@ -35,7 +35,6 @@ from sqlalchemy.orm import relation
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, Archetype
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -76,43 +75,3 @@ personality.primary_key.name = '%s_pk' % (_ABV)
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
                                                name='%s_uk' % (_TN)))
 personality.info['unique_fields'] = ['name', 'archetype']
-
-generics = ['aquilon', 'windows', 'aurora', 'aegis', 'vmhost', 'pserver']
-
-aquilon_personalities = ['c1_regbas_qa', 'c1_rs_grid', 'compileserver',
-                         'cva-ice20-qa', 'cva-ice20', 'desktopserver',
-                         'fxoption-nyriskprod-qa', 'fxoption-nyriskprod',
-                         'ied-rvtesting', 'ied-scenprod', 'ied-testgrid',
-                         'infra', 'inventory', 'lemon-collector-oracle',
-                         'db2-test', 'ied-prodgrid', 'spg-shared-qa',
-                         'spg-shared-va', 'unixeng-test', 'zcs', 'ifmx-test',
-                         'aqd-testing', 'spg-rmi', 'sybase-test', 'train-prod',
-                         'train-tu']
-
-
-@monkeypatch(personality)
-def populate(sess, **kw):
-    if len(sess.query(Personality).all()) > 0:
-        return
-
-    for arch in generics:
-        archetype = sess.query(Archetype).filter_by(name=arch).first()
-        assert archetype, "No archetype found for '%s' in populate" % arch
-        pers = Personality(name='generic', archetype=archetype)
-        sess.add(pers)
-
-    aquln = sess.query(Archetype).filter_by(name='aquilon').first()
-    assert aquln, "No aquilon archetype found in personality populate"
-
-    for nm in aquilon_personalities:
-        pers = Personality(archetype=aquln, name=nm)
-        sess.add(pers)
-
-    try:
-        sess.commit()
-    except Exception, e:
-        sess.rollback()
-        raise e
-
-    a = sess.query(Personality).first()
-    assert(a)

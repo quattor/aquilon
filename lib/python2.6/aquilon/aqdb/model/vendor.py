@@ -33,13 +33,9 @@ from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         UniqueConstraint)
 
 from aquilon.aqdb.model import Base
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'vendor'
-vendors = ['amd', 'intel', 'sun', 'generic', 'dell', 'hp', 'ibm', 'verari',
-           'virtual', 'vmware', '3com', 'broadcom', 'bnt', 'cisco', 'netapp',
-           'aurora_vendor']
 
 
 class Vendor(Base):
@@ -58,19 +54,3 @@ vendor.primary_key.name = '%s_pk' % (_TN)
 vendor.append_constraint(
     UniqueConstraint('name', name='%s_uk' % _TN))
 vendor.info['unique_fields'] = ['name']
-
-
-@monkeypatch(vendor)
-def populate(sess, **kw):
-    """ populate some vendors we use for testing"""
-    if len(sess.query(Vendor).all()) < 1:
-
-        for v in vendors:
-            dbv = Vendor(name=v)
-            sess.add(dbv)
-
-        try:
-            sess.commit()
-        except Exception, e:
-            sess.rollback()
-            raise e

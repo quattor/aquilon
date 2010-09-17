@@ -32,7 +32,6 @@ from datetime import datetime
 from struct import pack
 from socket import inet_ntoa
 from ipaddr import IPv4Address, IPv4Network
-import math
 
 from sqlalchemy import (Column, Integer, Sequence, String, Index, DateTime,
                         UniqueConstraint, ForeignKey, Boolean, func)
@@ -201,77 +200,3 @@ def get_net_id_from_ip(s, ip):
         raise NotFoundException("Could not determine network containing IP "
                                 "address %s." % ip)
     return net
-
-
-@monkeypatch(network)
-def populate(sess, **kw):
-    """ populates networks from dsdb """
-
-    #TODO populate comments, have a full populate do the other
-    #    networks in an asynchronous manner while others run
-
-    if len(sess.query(Network).limit(30).all()) < 1:
-        from aquilon.aqdb.model import Building
-        import time
-        import logging
-
-        log = logging.getLogger('aqdb.populate')
-
-        dsdb = kw['dsdb']
-        b_cache = {}
-        count = 0
-
-        if kw.pop('full', None):
-            dump_action = 'network_full'
-        else:
-            dump_action = 'np_network'
-
-        log.debug('starting to import networks...')
-        start = time.clock()
-
-        for bldg in sess.query(Building.name, Building.id).all():
-            b_cache[bldg.name] = bldg.id
-
-        #type_cache = get_type_cache(dsdb)
-
-        for (name, ip, mask, network_type, bldg_name,
-             side) in dsdb.dump(dump_action):
-
-            kwargs = {}
-            try:
-                kwargs['location_id'] = b_cache[bldg_name]
-            except KeyError:
-                log.error("Can't find building '%s'" % bldg_name)
-                continue
-
-            kwargs['name'] = name
-            prefixlen = 32 - int(math.log(mask, 2))
-            kwargs['network'] = IPv4Network("%s/%s" % (ip, prefixlen))
-            kwargs['network_type'] = network_type
-
-            if network_type == 'tor_net' or network_type == 'grid_access':
-                kwargs['is_discoverable'] = True
-
-            if side:
-                kwargs['side'] = side
-
-            net = Network(**kwargs)
-            sess.add(net)
-            count += 1
-            if count % 3000 == 0:
-                try:
-                    sess.commit()
-                except Exception, e:
-                    sess.rollback()
-                    print e
-
-
-        try:
-            sess.commit()
-        except Exception, e:
-            print e
-            sess.rollback()
-
-        stend = time.clock()
-        thetime = stend - start
-        log.info('created %s networks in %2f' % (count, thetime))

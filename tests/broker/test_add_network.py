@@ -48,6 +48,17 @@ class TestAddNetwork(TestBrokerCommand):
                        "--building=ut", "--type=%s" % network.nettype]
             self.noouttest(command)
 
+    def testaddextranetwork(self):
+        # These were previously pulled from DSDB
+        self.noouttest(["add_network", "--ip", "172.31.64.64",
+                        "--network", "np06bals03_v103",
+                        "--netmask", "255.255.255.192",
+                        "--building", "np", "--side", "a", "--type", "unknown"])
+        self.noouttest(["add_network", "--ip", "172.31.88.0",
+                        "--network", "nyp_hpl_2960_verari_mnmt",
+                        "--netmask", "255.255.255.192",
+                        "--building", "np", "--side", "a", "--type", "unknown"])
+
     def testaddnetworkdup(self):
         # Old name, new address
         net = self.net.all[0]

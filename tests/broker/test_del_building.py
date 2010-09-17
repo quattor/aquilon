@@ -40,12 +40,12 @@ from brokertest import TestBrokerCommand
 
 class TestDelBuilding(TestBrokerCommand):
 
-    def testdelut(self):
-        command = "del building --building ut"
+    def testdelbu(self):
+        command = "del building --building bu"
         self.noouttest(command.split(" "))
 
-    def testverifydelut3c5(self):
-        command = "show building --building ut"
+    def testverifydelbu(self):
+        command = "show building --building bu"
         self.notfoundtest(command.split(" "))
 
 
