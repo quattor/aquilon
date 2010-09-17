@@ -29,6 +29,9 @@
 """Branch formatter."""
 
 
+import os
+
+from aquilon.config import Config
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import Domain, Sandbox
 
@@ -52,6 +55,17 @@ class DomainFormatter(ObjectFormatter):
 ObjectFormatter.handlers[Domain] = DomainFormatter()
 
 
+class AuthoredSandbox(object):
+    def __init__(self, dbsandbox, dbauthor):
+        self.dbsandbox = dbsandbox
+        self.dbauthor = dbauthor
+        config = Config()
+        templatesdir = config.get('broker', 'templatesdir')
+        self.path = os.path.join(templatesdir, dbauthor.name, dbsandbox.name)
+    def __getattr__(self, attr):
+        return getattr(self.dbsandbox, attr)
+
+
 class SandboxFormatter(ObjectFormatter):
     def format_raw(self, sandbox, indent=""):
         flags = " [autosync]" if sandbox.autosync else ""
@@ -59,11 +73,14 @@ class SandboxFormatter(ObjectFormatter):
         details.append(indent + "  Validated: %s" % sandbox.is_sync_valid)
         details.append(indent + "  Owner: %s" % sandbox.owner.name)
         details.append(indent + "  Compiler: %s" % sandbox.compiler)
+        if hasattr(sandbox, 'path'):
+            details.append(indent + "  Path: %s" % sandbox.path)
         if sandbox.comments:
             details.append(indent + "  Comments: %s" % sandbox.comments)
         return "\n".join(details)
 
 ObjectFormatter.handlers[Sandbox] = SandboxFormatter()
+ObjectFormatter.handlers[AuthoredSandbox] = SandboxFormatter()
 
 
 class RemoteSandbox(object):

@@ -55,6 +55,7 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "Sandbox: utsandbox", command)
         self.matchoutput(out, "Comments: Sandbox used for aqd unit tests",
                          command)
+        self.matchclean(out, "Path", command)
 
     def testverifyshowpath(self):
         user = self.config.get("broker", "user")
@@ -82,9 +83,12 @@ class TestAddSandbox(TestBrokerCommand):
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def testverifyaddchangetest1sandbox(self):
-        command = "show sandbox --sandbox changetest1"
+        user = self.config.get("unittest", "user")
+        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
+        command = "show sandbox --sandbox %s/changetest1" % user
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: changetest1", command)
+        self.matchoutput(out, "Path: %s" % sandboxdir, command)
         self.matchclean(out, "Comments", command)
 
     def testaddchangetest2sandbox(self):

@@ -35,6 +35,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.sandbox import get_sandbox
+from aquilon.server.formats.branch import AuthoredSandbox
 
 
 class CommandShowSandboxSandbox(BrokerCommand):
@@ -42,13 +43,12 @@ class CommandShowSandboxSandbox(BrokerCommand):
     required_parameters = ["sandbox"]
 
     def render(self, session, logger, sandbox, pathonly, **arguments):
-        (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox)
+        (mysandbox, dbauthor) = get_sandbox(session, logger, sandbox)
+        if dbauthor:
+            mysandbox = AuthoredSandbox(mysandbox, dbauthor)
         if not pathonly:
-            return dbsandbox
+            return mysandbox
         if not dbauthor:
             raise ArgumentError("Must specify sandbox as author/branch "
                                 "when using --pathonly")
-        templatesdir = self.config.get("broker", "templatesdir")
-        sandboxdir = os.path.join(templatesdir, dbauthor.name,
-                                  dbsandbox.name)
-        return sandboxdir
+        return mysandbox.path
