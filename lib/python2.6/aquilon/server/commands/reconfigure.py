@@ -97,5 +97,3 @@ class CommandReconfigure(CommandMake):
                                   archetype=archetype, personality=personality,
                                   osname=osname, osversion=osversion, os=os,
                                   buildstatus=buildstatus, **arguments)
-
-

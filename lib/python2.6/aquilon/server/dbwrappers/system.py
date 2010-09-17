@@ -116,5 +116,3 @@ def get_system_dependencies(session, dbsystem):
                    (sis.system.fqdn, sis.service_instance.service.name,
                     sis.service_instance.name))
     return ret
-
-

@@ -37,5 +37,3 @@ class CommandDelDiskDisk(CommandDelDisk):
     """The base class already has the necessary logic to handle this."""
 
     required_parameters = ["machine", "disk"]
-
-

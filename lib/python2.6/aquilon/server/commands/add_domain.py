@@ -46,8 +46,8 @@ class CommandAddDomain(BrokerCommand):
     def render(self, session, logger, dbuser,
                domain, track, start, comments, **arguments):
         if not dbuser:
-            raise AuthorizationException("Cannot create a domain without"
-                    + " an authenticated connection.")
+            raise AuthorizationException("Cannot create a domain without "
+                                         "an authenticated connection.")
 
         Branch.get_unique(session, domain, preclude=True)
 

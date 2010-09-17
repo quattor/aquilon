@@ -46,5 +46,3 @@ class CommandSearchNextMetaCluster(BrokerCommand):
         if number:
             return str(result)
         return "%s%d" % (metacluster, result)
-
-

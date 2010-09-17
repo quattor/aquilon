@@ -42,5 +42,3 @@ class CommandUpdateMachineHostname(CommandUpdateMachine):
         dbhost = hostname_to_host(session, hostname)
         arguments['machine'] = dbhost.machine.name
         return CommandUpdateMachine.render(self, session=session, **arguments)
-
-

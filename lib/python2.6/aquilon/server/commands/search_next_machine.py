@@ -45,5 +45,3 @@ class CommandSearchNextMachine(BrokerCommand):
         if number:
             return str(result)
         return "%s%d" % (machine, result)
-
-

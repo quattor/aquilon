@@ -44,5 +44,3 @@ class CommandSearchSystem(BrokerCommand):
         if fullinfo:
             return q.all()
         return SimpleSystemList(q.all())
-
-

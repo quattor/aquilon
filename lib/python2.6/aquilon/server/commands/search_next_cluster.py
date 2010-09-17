@@ -47,5 +47,3 @@ class CommandSearchNextCluster(BrokerCommand):
         if number:
             return str(result)
         return "%s%d" % (cluster, result)
-
-

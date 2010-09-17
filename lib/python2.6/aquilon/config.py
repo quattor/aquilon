@@ -78,7 +78,9 @@ class Config(SafeConfigParser):
         src_defaults = os.path.join(defaults["srcdir"],
                 "etc", "aqd.conf.defaults")
         read_files = self.read([src_defaults, self.baseconfig])
-        # FIXME: Check that read_files includes the files we asked for...
+        for file in [src_defaults, self.baseconfig]:
+            if file not in read_files:
+                raise AquilonError("Could not read configuration file %s." % file)
 
         # Allow a section to "pull in" another section, as though all the
         # values defined in the alternate were actually defined there.
@@ -100,5 +102,3 @@ if __name__=='__main__':
         print "[%s]" % section
         for (name, value) in config.items(section):
             print "%s=%s" % (name, value)
-
-

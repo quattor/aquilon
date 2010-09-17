@@ -52,5 +52,3 @@ class CommandCatMachine(BrokerCommand):
             return "\n".join(lines)
         else:
             return plenary_info.read()
-
-

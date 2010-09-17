@@ -41,5 +41,3 @@ class CommandPing(BrokerCommand):
 
     def render(self, **arguments):
         return "pong"
-
-

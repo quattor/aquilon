@@ -47,5 +47,3 @@ class CommandDelVendor(BrokerCommand):
                                 dbvendor.name)
         session.delete(dbvendor)
         return
-
-

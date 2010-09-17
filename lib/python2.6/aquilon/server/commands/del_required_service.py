@@ -52,5 +52,3 @@ class CommandDelRequiredService(BrokerCommand):
         session.delete(dbsli)
         session.refresh(dbarchetype)
         return
-
-

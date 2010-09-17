@@ -50,5 +50,3 @@ class CommandAddRequiredService(BrokerCommand):
                                 comments=comments)
         session.add(dbsli)
         return
-
-

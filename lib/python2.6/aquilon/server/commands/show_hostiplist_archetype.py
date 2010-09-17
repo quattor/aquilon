@@ -40,5 +40,3 @@ class CommandShowHostIPListArchetype(CommandShowHostIPList):
     """
 
     required_parameters = ["archetype"]
-
-

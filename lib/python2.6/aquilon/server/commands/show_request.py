@@ -74,5 +74,3 @@ class CommandShowRequest(BrokerCommand):
         deferred = Deferred()
         status.add_subscriber(StatusWriter(deferred, request, loglevel))
         return deferred
-
-

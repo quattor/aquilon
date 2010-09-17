@@ -96,5 +96,3 @@ class CommandShowMap(BrokerCommand):
             if not results:
                 raise NotFoundException("No matching map found.")
         return results
-
-

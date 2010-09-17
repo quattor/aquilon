@@ -59,5 +59,3 @@ class CommandShowServiceService(BrokerCommand):
         if not instance:
             return dbservice
         return get_service_instance(session, dbservice, instance)
-
-

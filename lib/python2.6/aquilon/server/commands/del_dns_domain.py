@@ -45,7 +45,8 @@ class CommandDelDnsDomain(BrokerCommand):
         dbsystem = session.query(System).filter_by(
                 dns_domain=dbdns_domain).first()
         if dbsystem:
-            raise ArgumentError("DNS domain %s cannot be deleted while still in use." % dns_domain)
+            raise ArgumentError("DNS domain %s cannot be deleted while still "
+                                "in use." % dns_domain)
 
         session.delete(dbdns_domain)
         session.flush()
@@ -54,5 +55,3 @@ class CommandDelDnsDomain(BrokerCommand):
         dsdb_runner.delete_dns_domain(dns_domain)
 
         return
-
-

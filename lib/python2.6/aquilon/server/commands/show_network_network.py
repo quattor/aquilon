@@ -40,5 +40,3 @@ class CommandShowNetworkNetwork(CommandShowNetwork):
     """
 
     required_parameters = ["network"]
-
-

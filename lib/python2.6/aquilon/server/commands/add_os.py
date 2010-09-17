@@ -55,5 +55,3 @@ class CommandAddOS(BrokerCommand):
         session.add(dbos)
 
         return
-
-

@@ -58,5 +58,3 @@ class CommandAddMetaCluster(BrokerCommand):
         session.add(dbmetacluster)
 
         return
-
-

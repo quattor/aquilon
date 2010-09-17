@@ -57,4 +57,3 @@ class IPV4(sqlalchemy.types.TypeDecorator):
 
     def copy(self):
         return IPV4(self.impl.length)
-

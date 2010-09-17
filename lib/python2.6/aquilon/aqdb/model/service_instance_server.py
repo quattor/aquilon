@@ -72,6 +72,3 @@ table = service_instance_server
 ServiceInstance.servers = relation(ServiceInstanceServer,
                           collection_class=ordering_list('position'),
                           order_by=[ServiceInstanceServer.__table__.c.position])
-
-
-

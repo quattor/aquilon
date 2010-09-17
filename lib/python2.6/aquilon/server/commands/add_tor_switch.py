@@ -87,7 +87,8 @@ class CommandAddTorSwitch(BrokerCommand):
 
         if interface or mac or ip:
             if not (interface and mac and ip):
-                raise ArgumentError("If using --interface, --mac, or --ip, all of them must be given.")
+                raise ArgumentError("If using --interface, --mac, or --ip, "
+                                    "all of them must be given.")
 
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev:

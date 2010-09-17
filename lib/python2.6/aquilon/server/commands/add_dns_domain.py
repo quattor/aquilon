@@ -59,5 +59,3 @@ class CommandAddDnsDomain(BrokerCommand):
         dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
 
         return
-
-

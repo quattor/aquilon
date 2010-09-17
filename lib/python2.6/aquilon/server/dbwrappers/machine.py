@@ -42,8 +42,9 @@ def create_machine(session, machine, dblocation, dbmodel,
     dbcpu = None
     if not (cpuname or cpuvendor or cpuspeed is not None):
         if not dbmodel.machine_specs:
-            raise ArgumentError("Model %s does not have machine specification defaults, please specify --cpuvendor, --cpuname, and --cpuspeed." %
-                    dbmodel.name)
+            raise ArgumentError("Model %s does not have machine specification "
+                                "defaults, please specify --cpuvendor, "
+                                "--cpuname, and --cpuspeed." % dbmodel.name)
         dbcpu = dbmodel.machine_specs.cpu
     else:
         # Was there enough on the command line to specify one?

@@ -6,6 +6,12 @@ if [ -z "$AQDCONF" ] ; then
 fi
 
 BASEDIR=`../lib/python2.6/aquilon/config.py | grep -A 1000 "\[broker\]" | grep "basedir=" | head -1 | cut -c9-`
+
+if [ -z "$BASEDIR" ]; then
+	echo "Failed to determine the base directory" >&2
+	exit 1
+fi
+
 RUNDIR=`../lib/python2.6/aquilon/config.py | grep -A 1000 "\[broker\]" | grep "rundir=" | head -1 | cut -c8-`
 DSN=`../lib/python2.6/aquilon/config.py | grep -A 1000 "\[database\]" | grep "dsn=" | head -1 | cut -c5-`
 

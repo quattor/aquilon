@@ -157,5 +157,3 @@ class InternalError(AquilonError):
     These should only be raised from "can't happen" code and are
     preferred over assertion errors.
     """
-
-

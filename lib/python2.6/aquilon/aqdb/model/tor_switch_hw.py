@@ -62,5 +62,3 @@ tor_switch_hw.primary_key.name='tor_switch_hw_pk'
 table = tor_switch_hw
 
 #TODO: make tor_switch_hw --like [other tor_switch_hw] + overrides
-
-

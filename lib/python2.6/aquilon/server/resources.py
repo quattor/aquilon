@@ -428,5 +428,3 @@ class RestServer(ResponsePage):
                 os.makedirs(dir)
             except OSError, e:
                 log.msg("Could not create directory '%s': %s" % (dir, e))
-
-

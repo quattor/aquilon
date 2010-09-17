@@ -116,5 +116,3 @@ class RequestLogger(Logger):
             return
         if CLIENT_INFO >=self.getEffectiveLevel():
             apply(self._log, (CLIENT_INFO, msg, args), kwargs)
-
-

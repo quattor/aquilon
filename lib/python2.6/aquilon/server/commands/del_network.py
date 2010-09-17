@@ -40,5 +40,3 @@ class CommandDelNetwork(BrokerCommand):
         dbnetwork = Network.get_unique(session, ip, compel=True)
         session.delete(dbnetwork)
         return
-
-

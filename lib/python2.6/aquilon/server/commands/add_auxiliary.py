@@ -54,7 +54,8 @@ class CommandAddAuxiliary(BrokerCommand):
         if hostname:
             dbhost = hostname_to_host(session, hostname)
             if machine and dbhost.machine != dbmachine:
-                raise ArgumentError("Use either --hostname or --machine to uniquely identify a system.")
+                raise ArgumentError("Use either --hostname or --machine to "
+                                    "uniquely identify a system.")
             dbmachine = dbhost.machine
 
         (short, dbdns_domain) = parse_system_and_verify_free(session, auxiliary)
@@ -69,7 +70,9 @@ class CommandAddAuxiliary(BrokerCommand):
         dbinterfaces = q.all()
 
         if len(dbinterfaces) > 1:
-            raise ArgumentError("Could not uniquely determine an interface.  Please use --interface or --mac to specify the correct interface to use.")
+            raise ArgumentError("Could not uniquely determine an interface.  "
+                                "Please use --interface or --mac to specify "
+                                "the correct interface to use.")
         if len(dbinterfaces) == 1:
             dbinterface = dbinterfaces[0]
         elif interface and mac:
@@ -90,6 +93,9 @@ class CommandAddAuxiliary(BrokerCommand):
                                     mac=mac,
                                     bootable=False, hardware_entity=dbmachine)
             session.add(dbinterface)
+        else:
+            raise ArgumentError("Interface not found. Use both --interface and "
+                                "--mac to create one.")
 
         if dbinterface.system:
             raise ArgumentError("{0} of {1} already provides "

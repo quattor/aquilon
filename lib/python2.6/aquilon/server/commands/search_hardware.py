@@ -45,5 +45,3 @@ class CommandSearchHardware(BrokerCommand):
         if fullinfo:
             return q.all()
         return SimpleHardwareEntityList(q.all())
-
-

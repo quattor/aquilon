@@ -38,5 +38,3 @@ class CommandShowHostAll(BrokerCommand):
 
     def render(self, session, **arguments):
         return SimpleHostList(session.query(Host).all())
-
-

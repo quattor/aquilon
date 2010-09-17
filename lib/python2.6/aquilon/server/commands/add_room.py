@@ -43,5 +43,3 @@ class CommandAddRoom(CommandAddLocation):
                                          parentname=building,
                                          parenttype='building',
                                          comments=comments, **arguments)
-
-

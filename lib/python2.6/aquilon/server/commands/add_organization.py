@@ -49,5 +49,3 @@ class CommandAddOrganization(BrokerCommand):
         dborg = Company(name=organization, fullname=fullname, comments=comments)
         session.add(dborg)
         session.flush()
-
-

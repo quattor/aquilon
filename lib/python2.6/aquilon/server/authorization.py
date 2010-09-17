@@ -125,5 +125,3 @@ class AuthorizationBroker(object):
         if resource.startswith("/host/%s/" % m.group(1)):
             return True
         return False
-
-

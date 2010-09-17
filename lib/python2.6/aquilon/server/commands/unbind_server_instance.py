@@ -40,5 +40,3 @@ class CommandUnbindServerInstance(CommandUnbindServer):
     def render(self, *args, **arguments):
         # The superclass already contains the logic to handle this case.
         return CommandUnbindServer.render(self, *args, **arguments)
-
-

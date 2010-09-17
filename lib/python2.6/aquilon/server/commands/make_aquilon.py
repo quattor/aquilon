@@ -38,5 +38,3 @@ class CommandMakeAquilon(CommandMake):
     def render(self, **arguments):
         arguments['archetype'] = 'aquilon'
         return CommandMake.render(self, **arguments)
-
-
