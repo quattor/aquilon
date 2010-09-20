@@ -31,8 +31,7 @@
 
 from aquilon.exceptions_ import UnimplementedError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Interface
-from aquilon.server.dbwrappers.switch import get_switch
+from aquilon.aqdb.model import Interface, Switch
 
 
 class CommandUpdateInterfaceSwitch(BrokerCommand):
@@ -47,7 +46,7 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
         if ip:
             raise UnimplementedError("use update_switch to update the IP")
 
-        dbswitch = get_switch(session, switch)
+        dbswitch = Switch.get_unique(session, switch, compel=True)
         q = session.query(Interface)
         q = q.filter_by(name=interface, hardware_entity=dbswitch.switch_hw)
         dbinterface = q.first()

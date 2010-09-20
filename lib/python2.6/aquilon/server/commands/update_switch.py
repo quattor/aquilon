@@ -33,9 +33,8 @@ from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.interface import restrict_switch_offsets
-from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import Interface, Model
+from aquilon.aqdb.model import Interface, Model, Switch
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -45,7 +44,7 @@ class CommandUpdateSwitch(BrokerCommand):
 
     def render(self, session, logger, switch, model, rack, type, ip,
                vendor, serial, comments, **arguments):
-        dbswitch = get_switch(session, switch)
+        dbswitch = Switch.get_unique(session, switch, compel=True)
 
         if vendor and not model:
             model = dbswitch.switch_hw.model.name

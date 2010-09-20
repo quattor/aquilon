@@ -29,10 +29,9 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import EsxCluster, Personality
+from aquilon.aqdb.model import EsxCluster, Personality, Switch
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.server.templates.machine import (PlenaryMachineInfo,
                                               machine_plenary_will_move)
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -140,7 +139,7 @@ class CommandUpdateESXCluster(BrokerCommand):
         if switch is not None:
             if switch:
                 # FIXME: Verify that any hosts are on the same network
-                dbswitch = get_switch(session, switch)
+                dbswitch = Switch.get_unique(session, switch, compel=True)
             else:
                 dbswitch = None
             dbcluster.switch = dbswitch

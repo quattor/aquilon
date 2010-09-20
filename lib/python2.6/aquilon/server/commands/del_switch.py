@@ -30,8 +30,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Switch
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
 
@@ -51,7 +51,7 @@ class CommandDelSwitch(BrokerCommand):
         return
 
     def del_switch(self, session, logger, switch):
-        dbswitch = get_switch(session, switch)
+        dbswitch = Switch.get_unique(session, switch, compel=True)
         ip = dbswitch.ip
 
         session.delete(dbswitch.switch_hw)

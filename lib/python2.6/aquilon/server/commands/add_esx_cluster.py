@@ -30,13 +30,12 @@
 
 from aquilon.server.broker import BrokerCommand, validate_basic
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster,
-                                ClusterLifecycle,
+                                ClusterLifecycle, Switch,
                                 MetaClusterMember, Personality)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.templates.cluster import PlenaryCluster
-from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.utils import force_ratio
 
 
@@ -89,7 +88,7 @@ class CommandAddESXCluster(BrokerCommand):
                                "--switch instead.")
             switch = tor_switch
         if switch:
-            dbswitch = get_switch(session, switch)
+            dbswitch = Switch.get_unique(session, switch, compel=True)
         else:
             dbswitch = None
 
