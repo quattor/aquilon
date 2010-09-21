@@ -2504,15 +2504,8 @@
          <option name="mac" type="string">MAC address of the interface</option>
          <option name="ip" type="ipv4">IP address of the interface</option>
       </optgroup>
-      <optgroup name="add_tor_switch_specs_opts" mandatory="False">
-	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
-	 <option name="cpuname" type="string">cpu name</option>
-	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="int">cpu speed</option>
-	 <option name="cpucount" type="int">cpu count</option>
-	 <option name="memory" type="int">memory in MB</option>
-      </optgroup>
       <optgroup name="add_tor_switch_optional">
+	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">serial number</option>
       </optgroup>
       <transport method="put" path="tor_switch/%(tor_switch)s" />

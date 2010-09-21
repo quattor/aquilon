@@ -48,10 +48,7 @@ class CommandAddTorSwitch(BrokerCommand):
 
     def render(self, session, logger, tor_switch, model, vendor,
                rack, building, room, rackid, rackrow, rackcolumn,
-               interface, mac, ip,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory,
-               serial,
-               user, **arguments):
+               interface, mac, ip, serial, **arguments):
         logger.client_info("add_tor_switch is deprecated, please use "
                            "add_switch instead.")
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
