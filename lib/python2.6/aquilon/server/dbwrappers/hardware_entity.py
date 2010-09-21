@@ -30,8 +30,12 @@
 
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.model import HardwareEntity, Model
+from aquilon.aqdb.model import (HardwareEntity, Model, System, FutureARecord,
+                                ReservedName)
+from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.dbwrappers.interface import restrict_switch_offsets
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
@@ -65,3 +69,56 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.filter_by(serial_no=kwargs['serial'])
     q = q.order_by(HardwareEntity.label)
     return q
+
+def parse_primary_name(session, fqdn, ip):
+    """
+    Parse & verify a primary name.
+
+    The name may already be registered in the DNS, in which case it must not be
+    a primary name of some other hardware. Otherwise, a new DNS record is
+    created. If the name already exists as a reserved name and an IP address is
+    given, then it is converted to an A record.
+    """
+
+    (short, dbdns_domain) = parse_fqdn(session, fqdn)
+    dbdns_rec = System.get_unique(session, name=short, dns_domain=dbdns_domain)
+
+    if dbdns_rec and dbdns_rec.hardware_entity:
+        raise ArgumentError("{0} already exists as the primary name of "
+                            "{1:l}.".format(hwname, dbdns_rec.hardware_entity))
+
+    if dbdns_rec and isinstance(dbdns_rec, ReservedName) and ip:
+        session.delete(dbdns_rec)
+        dbdns_rec = None
+
+    if dbdns_rec:
+        # Exclude any other subclasses of System except FutureARecord.
+        # Do not use isinstance() here, as DynDnsStub is a child of
+        # FutureARecord
+        if dbdns_rec.system_type != 'future_a_record':
+            raise ArgumentError("%s already exists as a(n) %s." %
+                                (hwname, dbdns_rec._get_class_label()))
+
+        # Make sure the primary name does not resolve to multiple addresses
+        if ip and dbdns_rec.ip != ip:
+            raise ArgumentError("%s already exists, but points to %s "
+                                "instead of %s. A pimary name is not "
+                                "allowed to point to multiple addresses." %
+                                (hwname, dbdns_rec.ip, ip))
+
+    if not dbdns_rec:
+        if ip:
+            dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain, ip=ip)
+        else:
+            dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
+        session.add(dbdns_rec)
+        session.flush()
+
+    if dbdns_rec.ip:
+        dbnetwork = get_net_id_from_ip(session, dbdns_rec.ip)
+        restrict_switch_offsets(dbnetwork, dbdns_rec.ip)
+
+        # TODO: get rid of this
+        dbdns_rec.network = dbnetwork
+
+    return dbdns_rec
