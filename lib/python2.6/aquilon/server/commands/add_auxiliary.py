@@ -37,7 +37,7 @@ from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_switch_offsets,
                                                  get_or_create_interface)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Host, Interface, Auxiliary, Machine
+from aquilon.aqdb.model import Machine, FutureARecord
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.locks import lock_queue
 from aquilon.server.processes import DSDBRunner
@@ -48,7 +48,7 @@ class CommandAddAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, hostname, machine, auxiliary, interface,
-               mac, comments, user, **arguments):
+               mac, comments, **arguments):
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
         if hostname:
@@ -65,24 +65,25 @@ class CommandAddAuxiliary(BrokerCommand):
                                               interface_type='public',
                                               bootable=False)
 
-        if dbinterface.system:
-            raise ArgumentError("{0} already provides {2!s}.".format(
-                dbinterface, dbinterface.system))
+        # Multiple addresses will only be allowed with the "add interface
+        # address" command
+        addrs = ", ".join(["%s [%s]" % (addr.logical_name, addr.ip) for addr
+                           in dbinterface.all_addresses()])
+        if addrs:
+            raise ArgumentError("{0} already has the following addresses: "
+                                "{1}.".format(dbinterface, addrs))
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_switch_offsets(dbnetwork, ip)
 
-        dbauxiliary = Auxiliary(name=short, dns_domain=dbdns_domain,
-                                machine=dbmachine,
-                                ip=ip, network=dbnetwork, comments=comments)
-        session.add(dbauxiliary)
-        dbinterface.system = dbauxiliary
+        dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                  ip=ip, network=dbnetwork,
+                                  comments=comments)
+        session.add(dbdns_rec)
+        dbinterface.vlans[0].addresses.append(ip)
 
         session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbmachine)
-        session.refresh(dbauxiliary)
 
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         key = plenary_info.get_write_key()

@@ -71,13 +71,15 @@ class TestShowHostIPList(TestBrokerCommand):
                          "unittest00.one-nyp.ms.com,%s,\n" %
                          self.net.unknown[0].usable[2],
                          command)
-        # FIXME: Arguably, this shouldn't be included.  Right now,
-        # archetype is a noop.
         self.matchoutput(out,
                          "unittest00-e1.one-nyp.ms.com,%s,"
                          "unittest00.one-nyp.ms.com" %
                          self.net.unknown[0].usable[3],
                          command)
+        self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest01.one-nyp.ms.com", command)
+        self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "evh2.aqd-unittest.ms.com", command)
         self.matchclean(out, self.aurora_with_node, command)
         self.matchclean(out, self.aurora_without_node, command)
         self.matchclean(out, "nyaqd1", command)

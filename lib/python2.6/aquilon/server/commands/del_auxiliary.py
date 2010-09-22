@@ -29,42 +29,47 @@
 """Contains the logic for `aq del auxiliary`."""
 
 
-import os
-
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.model import Auxiliary
+from aquilon.aqdb.model import FutureARecord
 
 
 class CommandDelAuxiliary(BrokerCommand):
 
     required_parameters = ["auxiliary"]
 
-    def render(self, session, logger, auxiliary, user, **arguments):
+    def render(self, session, logger, auxiliary, **arguments):
         key = DeleteKey("system", logger=logger)
         dbmachine = None
         try:
             lock_queue.acquire(key)
             # Check dependencies, translate into user-friendly message
-            dbauxiliary = get_system(session, auxiliary)
-            if not isinstance(dbauxiliary, Auxiliary):
-                raise ArgumentError("{0} is not auxiliary.".format(dbauxiliary))
+            dbauxiliary = FutureARecord.get_unique(session, fqdn=auxiliary,
+                                                   compel=True)
+            is_aux = True
+            if not dbauxiliary.assignments or len(dbauxiliary.assignments) > 1:
+                is_aux = False
+            else:
+                assignment = dbauxiliary.assignments[0]
+                dbmachine = assignment.vlan.interface.hardware_entity
 
-            # FIXME: Look for System dependencies...
+                if assignment.ip == dbmachine.primary_ip:
+                    is_aux = False
+                if assignment.vlan.interface.interface_type == 'management':
+                    is_aux = False
+
+            if not is_aux:
+                raise ArgumentError("{0:a} is not an auxiliary.".format(dbauxiliary))
+
+            # FIXME: Look for dependencies...
 
             ip = dbauxiliary.ip
-            dbmachine = dbauxiliary.machine
-            # FIXME: Check to see if this is handled auto-magically by
-            # sqlalchemy.
-            for dbinterface in dbauxiliary.interfaces:
-                dbinterface.system = None
-                session.add(dbinterface)
-
+            session.delete(assignment)
             session.delete(dbauxiliary)
+            session.expire(dbmachine)
             session.flush()
 
             try:

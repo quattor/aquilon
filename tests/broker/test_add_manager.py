@@ -52,8 +52,9 @@ class TestAddManager(TestBrokerCommand):
     def testverifyaddunittest00r(self):
         command = "show manager --manager unittest00r.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Manager: unittest00r.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[4],
+        self.matchoutput(out,
+                         "Manager: unittest00r.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[4],
                          command)
         self.matchoutput(out,
                          "Interface: bmc %s boot=False" %
@@ -92,8 +93,9 @@ class TestAddManager(TestBrokerCommand):
     def testverifyaddunittest02rsa(self):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Manager: unittest02rsa.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[9],
+        self.matchoutput(out,
+                         "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[9],
                          command)
         self.matchoutput(out,
                          "Interface: ilo %s boot=False" %

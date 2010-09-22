@@ -31,8 +31,9 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.machine import MachineMacList
-from aquilon.aqdb.model import HardwareEntity
-from sqlalchemy.orm import joinedload_all
+from aquilon.aqdb.model import (HardwareEntity, Interface,
+                                PrimaryNameAssociation, System, DnsDomain)
+from sqlalchemy.orm import contains_eager
 
 
 class CommandShowMachineMacList(BrokerCommand):
@@ -40,26 +41,19 @@ class CommandShowMachineMacList(BrokerCommand):
     default_style = "csv"
 
     def render(self, session, **arguments):
-        # We want to scan all the MAC addresses, to do so efficiently,
-        # we run an inside-out query starting from the hardware entity
-        # since that gives us far more efficient linkage to the fqdn
-        q = session.query(HardwareEntity)
-        q = q.with_polymorphic('*')
-        q = q.options(eagerload('interfaces'))
-        q = q.options(joinedload_all('_primary_name_asc.dns_record.dns_domain'))
+        q = session.query(Interface)
+        q = q.filter(Interface.mac != None)
+        q = q.join(HardwareEntity)
+        q = q.options(contains_eager('hardware_entity'))
+        q = q.outerjoin(PrimaryNameAssociation, System, DnsDomain)
+        q = q.options(contains_eager('hardware_entity._primary_name_asc'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.dns_record'))
+        q = q.options(contains_eager('hardware_entity._primary_name_asc.dns_record.dns_domain'))
+        q = q.order_by(HardwareEntity.label)
 
         maclist = MachineMacList()
-        for hwentity in q.all():
-            for intf in hwentity.interfaces:
-                #skip nulls. this is less than efficient, then again this
-                #command would be more efficient in hand written sql
-                if intf.mac is None:
-                    continue
-                entry = [intf.mac, hwentity.label]
-                if hwentity.primary_name:
-                    entry.append(hwentity.primary_name.fqdn)
-                else:
-                    entry.append("")
-                maclist.append(entry)
+        for iface in q:
+            hwent = iface.hardware_entity
+            maclist.append([iface.mac, hwent.label, hwent.fqdn])
 
         return maclist

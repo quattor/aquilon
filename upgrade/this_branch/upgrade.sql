@@ -334,4 +334,10 @@ INSERT INTO address_assignment (id, vlan_interface_id, ip, label, creation_date)
 -- Drop interface.system_id
 ALTER TABLE interface DROP COLUMN system_id;
 
+--
+-- Get rid of Auxiliary and Manager
+--
+DROP TABLE auxiliary;
+DROP TABLE manager;
+
 QUIT;

@@ -76,12 +76,26 @@ class MachineFormatter(ObjectFormatter):
         if machine.cluster:
             details.append(indent + \
                            "  Hosted by {0:c}: {0.name}".format(machine.cluster))
-        for manager in machine.manager:
-            details.append(indent + "  Manager: %s [%s]" % (manager.fqdn,
-                                                            manager.ip))
-        for dbauxiliary in machine.auxiliaries:
-            details.append(indent + "  Auxiliary: %s [%s]" % (
-                           dbauxiliary.fqdn, dbauxiliary.ip))
+
+        # FIXME: This is now somewhat redundant
+        managers = []
+        auxiliaries = []
+        for iface in machine.interfaces:
+            for addr in iface.all_addresses():
+                if addr.ip == machine.primary_ip:
+                    continue
+                if iface.interface_type == 'management':
+                    managers.append((addr.fqdns, addr.ip))
+                else:
+                    auxiliaries.append((addr.fqdns, addr.ip))
+
+        for mgr in managers:
+            details.append(indent + "  Manager: %s [%s]" %
+                           (", ".join(mgr[0]), mgr[1]))
+        for aux in auxiliaries:
+            details.append(indent + "  Auxiliary: %s [%s]" %
+                           (", ".join(aux[0]), aux[1]))
+
         # This is a bit of a hack.  Delegating out to the standard location
         # formatter now spews too much information about chassis.  Maybe
         # that will change when chassis has a corresponding hardware type.

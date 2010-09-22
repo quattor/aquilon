@@ -28,13 +28,23 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show manager --all`."""
 
+from sqlalchemy.orm import contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import Manager
+from aquilon.aqdb.model import (AddressAssignment, VlanInterface, Interface,
+                                FutureARecord, DnsDomain)
 
 
 class CommandShowManagerAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return SimpleSystemList(session.query(Manager).all())
+        q = session.query(FutureARecord)
+        q = q.join((AddressAssignment, FutureARecord.ip ==
+                    AddressAssignment.ip))
+        q = q.join(VlanInterface, Interface)
+        q = q.filter_by(interface_type='management')
+        q = q.reset_joinpoint()
+        q = q.join(DnsDomain)
+        q = q.options(contains_eager(FutureARecord.dns_domain))
+        q = q.order_by(FutureARecord.name, DnsDomain.name)
+        return [rec.fqdn for rec in q.all()]

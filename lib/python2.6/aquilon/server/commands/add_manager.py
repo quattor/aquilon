@@ -36,8 +36,8 @@ from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_switch_offsets,
                                                  get_or_create_interface)
+from aquilon.aqdb.model import FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import Interface, Manager
 from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
@@ -48,7 +48,7 @@ class CommandAddManager(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, manager, interface, mac,
-               comments, user, **arguments):
+               comments, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.machine
 
@@ -62,24 +62,25 @@ class CommandAddManager(BrokerCommand):
                                               interface_type='management',
                                               bootable=False)
 
-        if dbinterface.system:
-            raise ArgumentError("{0} already provides {2!s}.".format(
-                dbinterface, dbinterface.system))
+        # Multiple addresses will only be allowed with the "add interface
+        # address" command
+        addrs = ", ".join(["%s [%s]" % (addr.logical_name, addr.ip) for addr
+                           in dbinterface.all_addresses()])
+        if addrs:
+            raise ArgumentError("{0} already has the following addresses: "
+                                "addresses: {1}.".format(dbinterface, addrs))
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_switch_offsets(dbnetwork, ip)
 
-        dbmanager = Manager(name=short, dns_domain=dbdns_domain,
-                            machine=dbmachine, ip=ip, network=dbnetwork,
-                            comments=comments)
-        session.add(dbmanager)
-        dbinterface.system = dbmanager
+        dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                  ip=ip, network=dbnetwork,
+                                  comments=comments)
+        session.add(dbdns_rec)
+        dbinterface.vlans[0].addresses.append(ip)
 
         session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbmachine)
-        session.refresh(dbmanager)
 
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         key = plenary_info.get_write_key()

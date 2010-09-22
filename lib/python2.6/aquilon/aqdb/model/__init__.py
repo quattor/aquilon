@@ -70,8 +70,7 @@ from aquilon.aqdb.model.hostlifecycle import HostLifecycle
 from aquilon.aqdb.model.switch import Switch
 from aquilon.aqdb.model.chassis import Chassis
 
-#SYSTEM
-from aquilon.aqdb.model.manager import Manager
+#HOST
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
 from aquilon.aqdb.model.host import Host
 
@@ -81,7 +80,6 @@ from aquilon.aqdb.model.primary_name_association import PrimaryNameAssociation
 from aquilon.aqdb.model.observed_mac import ObservedMac
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
 from aquilon.aqdb.model.interface import Interface
-from aquilon.aqdb.model.auxiliary import Auxiliary
 from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo, VlanInterface
 from aquilon.aqdb.model.address_assignment import AddressAssignment
 

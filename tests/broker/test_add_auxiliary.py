@@ -51,9 +51,9 @@ class TestAddAuxiliary(TestBrokerCommand):
     def testverifyaddunittest00e1(self):
         command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Auxiliary: unittest00-e1.one-nyp.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[3],
+        self.matchoutput(out,
+                         "Auxiliary: unittest00-e1.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[3],
                          command)
         self.matchoutput(out,
                          "Interface: eth1 %s boot=False" %

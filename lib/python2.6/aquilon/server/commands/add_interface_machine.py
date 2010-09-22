@@ -34,7 +34,7 @@ from sqlalchemy.sql.expression import asc, desc, bindparam
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  IncompleteError, UnimplementedError)
-from aquilon.aqdb.model import Interface, Machine, Manager
+from aquilon.aqdb.model import Interface, Machine, FutureARecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
@@ -256,9 +256,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.label, e))
             return
-        dbmanager = Manager(name=short, dns_domain=dbdns_domain,
-                            machine=dbmachine,
-                            ip=old_ip, network=old_network)
+        dbmanager = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                  ip=old_ip, network=old_network)
         session.add(dbmanager)
         return dbmanager
 
