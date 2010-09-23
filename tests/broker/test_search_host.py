@@ -411,6 +411,18 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
+    def testguestoncluster(self):
+        command = "search host --guest_on_cluster utecl5"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ivirt1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ivirt4.aqd-unittest.ms.com", command)
+
+    def testguestonshare(self):
+        command = "search host --guest_on_share utecl5_share"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ivirt1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ivirt4.aqd-unittest.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)

@@ -279,6 +279,8 @@
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster name</option>
+         <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
+         <option name="guest_on_share" type="string">host is a virtual machine using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
