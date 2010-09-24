@@ -70,6 +70,9 @@ def populate_building(session, dsdb, logger):
         #FIXME: find a better input for fullname or remove: should be the short
         # bit before .ms.com in the DNS zone, or the LDAP code (usually close
         # to an intelligible 5 character code, from FBI/Reference Data)
+        print 'Building(name=%s, fullname=%s, address=%s, parent=%s)' % (
+            building_code, address, address, city)
+
         building = model.Building(name=building_code, fullname=address,
                                   address=address, parent=city)
         session.add(building)
