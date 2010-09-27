@@ -32,6 +32,8 @@
 import os
 import re
 
+from sqlalchemy.orm import joinedload, contains_eager
+
 from aquilon.aqdb.model import Archetype, Personality
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.personality import (ThresholdedPersonality,
@@ -63,7 +65,10 @@ class CommandShowPersonality(BrokerCommand):
         if personality:
             q = q.filter_by(name=personality)
         q = q.join(Archetype)
+        q = q.options(contains_eager('archetype'))
         q = q.order_by([Archetype.name, Personality.name])
+        q = q.options(joinedload('_services'))
+        q = q.options(joinedload('cluster_infos'))
         results = PersonalityList()
         if not dbbranch:
             results.extend(q.all())

@@ -29,11 +29,14 @@
 """Contains the logic for `aq show tor_switch`."""
 
 
+from sqlalchemy.orm import subqueryload_all, contains_eager
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.formats.switch import TorSwitch
-from aquilon.aqdb.model import Switch, HardwareEntity, Model
+from aquilon.aqdb.model import (Switch, HardwareEntity, Model,
+                                PrimaryNameAssociation, System, DnsDomain)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 
@@ -57,6 +60,24 @@ class CommandShowTorSwitch(BrokerCommand):
             subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                             machine_type='switch', compel=True)
             q = q.filter(Switch.model_id.in_(subq))
-        q = q.order_by(Switch.label)
+
+        q = q.options(subqueryload_all('location'))
+        q = q.options(subqueryload_all('interfaces._vlan_ids'))
+        q = q.options(subqueryload_all('interfaces.vlans.assignments.dns_records'))
+        q = q.options(subqueryload_all('observed_vlans'))
+        q = q.options(subqueryload_all('observed_macs'))
+        q = q.options(subqueryload_all('model.vendor'))
+        # Switches don't have machine specs, but the formatter checks for their
+        # existence anyway
+        q = q.options(subqueryload_all('model.machine_specs'))
+
+        # Prefer the primary name when ordering
+        q = q.outerjoin(PrimaryNameAssociation, System, DnsDomain)
+        q = q.options(contains_eager('_primary_name_asc'))
+        q = q.options(contains_eager('_primary_name_asc.dns_record'))
+        q = q.options(contains_eager('_primary_name_asc.dns_record.dns_domain'))
+        q = q.reset_joinpoint()
+        q = q.order_by(System.name, DnsDomain.name, Switch.label)
+
         # This output gets the old CSV formatter.
         return [TorSwitch(dbswitch) for dbswitch in q.all()]

@@ -29,6 +29,8 @@
 """Contains the logic for `aq show model`."""
 
 
+from sqlalchemy.orm import joinedload, contains_eager
+
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Model, Vendor
 
@@ -40,6 +42,9 @@ class CommandShowModel(BrokerCommand):
     def render(self, session, model, vendor, type, **arguments):
         q = session.query(Model)
         q = q.join(Vendor)
+        q = q.options(contains_eager('vendor'))
+        q = q.options(joinedload('machine_specs'))
+        q = q.options(joinedload('machine_specs.cpu'))
         if model is not None:
             q = q.filter(Model.name.like(model + '%'))
         if vendor is not None:

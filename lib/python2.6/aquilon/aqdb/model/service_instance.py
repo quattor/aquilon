@@ -33,9 +33,10 @@ import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, contains_eager
+from sqlalchemy.orm import relation, contains_eager, column_property
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
+from sqlalchemy.sql import select, func
 
 from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
                                 PrimaryNameAssociation)
@@ -65,6 +66,9 @@ class ServiceInstance(Base):
 
     service = relation(Service, lazy=False, uselist=False, backref='instances')
 
+    # _client_count is defined later in this file
+    # nas_disk_count and nas_machine_count are defined in disk.py
+
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
         return self.format_helper(format_spec, instance)
@@ -89,16 +93,15 @@ class ServiceInstance(Base):
         cluster_types = self.service.aligned_cluster_types
         if not cluster_types:
             # By far, the common case.
-            q = session.query(BuildItem)
-            q = q.filter_by(service_instance=self)
-            return q.count()
-        q = session.query(ClusterServiceBinding)
-        q = q.filter_by(service_instance=self)
-        q = q.join('cluster')
+            return self._client_count
+
+        q = session.query(func.sum(Cluster.max_hosts))
         q = q.filter(Cluster.cluster_type.in_(cluster_types))
-        adjusted_count = 0
-        for csb in q.all():
-            adjusted_count += csb.cluster.max_hosts
+        q = q.join(ClusterServiceBinding)
+        q = q.filter_by(service_instance=self)
+        # Make sure it's a number
+        adjusted_count = q.scalar() or 0
+
         q = session.query(BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.outerjoin('host', '_cluster', 'cluster')
@@ -355,3 +358,9 @@ build_item.append_constraint(
     UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
 
 Host.templates = relation(BuildItem)
+
+# Make this a column property so it can be undeferred on bulk loads
+ServiceInstance._client_count = column_property(
+    select([func.count()],
+            BuildItem.service_instance_id == ServiceInstance.id)
+    .label("_client_count"), deferred=True)

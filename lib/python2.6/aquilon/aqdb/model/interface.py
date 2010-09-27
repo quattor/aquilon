@@ -36,7 +36,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint, Boolean)
 from sqlalchemy.orm import relation, backref, validates, object_session
-from sqlalchemy.sql.expression import desc, func
+from sqlalchemy.sql.expression import desc, case
 
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
 from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
@@ -123,11 +123,10 @@ class Interface(Base):
         session = object_session(self)
         q = session.query(ObservedMac)
         q = q.filter_by(mac_address=self.mac)
-        if session.connection().dialect.name == 'oracle':
-            # Group the results into 'any port number but zero' and 'port 0'.
-            # This prioritizes any port over the uplink port.
-            # Saying that port 0 is an uplink port isn't very elegant...
-            q = q.order_by(desc(func.DECODE(ObservedMac.port_number, 0, 0, 1)))
+        # Group the results into 'any port number but zero' and 'port 0'.
+        # This prioritizes any port over the uplink port.
+        # Saying that port 0 is an uplink port isn't very elegant...
+        q = q.order_by(desc(case([(ObservedMac.port_number == 0, 0)], else_=1)))
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 

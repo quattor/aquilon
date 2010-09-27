@@ -29,6 +29,8 @@
 """Contains the logic for `aq show service`."""
 
 
+from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
+
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -59,4 +61,24 @@ class CommandShowService(BrokerCommand):
                 service_instances = [si for si in service_instances if si.name == instance]
             return ServiceInstanceList(service_instances)
         else:
-            return ServiceList(session.query(Service).order_by(Service.name).all())
+            # Try to load as much as we can as bulk queries since loading the
+            # objects one by one is much more expensive
+            q = session.query(Service)
+            q = q.join(ServiceInstance)
+            q = q.options(contains_eager('instances'))
+            q = q.options(joinedload('_archetypes'))
+            q = q.options(joinedload('_personalities'))
+            q = q.options(undefer('instances._client_count'))
+            q = q.options(undefer('instances.nas_disk_count'))
+            q = q.options(subqueryload('instances.personality_service_map'))
+            q = q.options(subqueryload('instances.servers'))
+            q = q.options(subqueryload('instances.servers.host'))
+            q = q.options(subqueryload('instances.servers.host.machine'))
+            q = q.options(subqueryload('instances.servers.host.machine._primary_name_asc'))
+            q = q.options(subqueryload('instances.service_map'))
+            q = q.options(subqueryload('instances.service_map.location'))
+            q = q.options(subqueryload('instances.personality_service_map'))
+            q = q.options(subqueryload('instances.personality_service_map.location'))
+            q = q.options(subqueryload('_clusters'))
+            q = q.order_by(Service.name, ServiceInstance.name)
+            return ServiceList(q.all())
