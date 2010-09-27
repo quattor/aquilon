@@ -82,13 +82,16 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        cluster_types = self.service.aligned_cluster_types
-        if not cluster_types:
-            # By far, the common case.
-            return len(self.build_items)
         from aquilon.aqdb.model import (ClusterServiceBinding, BuildItem,
                                         Cluster)
         session = object_session(self)
+
+        cluster_types = self.service.aligned_cluster_types
+        if not cluster_types:
+            # By far, the common case.
+            q = session.query(BuildItem)
+            q = q.filter_by(service_instance=self)
+            return q.count()
         q = session.query(ClusterServiceBinding)
         q = q.filter_by(service_instance=self)
         q = q.join('cluster')
