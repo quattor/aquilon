@@ -39,6 +39,31 @@ from aquilon.aqdb.model import (Network, AddressAssignment, System,
                                 PrimaryNameAssociation, DnsDomain,
                                 VlanInterface, Interface, HardwareEntity)
 
+def summarize_ranges(addrlist):
+    """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """
+    ranges = []
+    start = None
+    for addr in addrlist:
+        if start is None:
+            start = addr.ip
+            end = addr.ip
+            continue
+        if int(addr.ip) == int(end) + 1:
+            end = addr.ip
+            continue
+        if start == end:
+            ranges.append(str(start))
+        else:
+            ranges.append("%s-%s" % (start, end))
+        start = end = addr.ip
+    if start is not None:
+        if start == end:
+            ranges.append(str(start))
+        else:
+            ranges.append("%s-%s" % (start, end))
+
+    return ranges
+
 
 class NetworkFormatter(ObjectFormatter):
     protocol = "aqdnetworks_pb2"
@@ -47,16 +72,27 @@ class NetworkFormatter(ObjectFormatter):
         netmask = network.netmask
         sysloc = network.location.sysloc()
         details = [indent + "Network: %s" % network.name]
-        details.append(indent + "IP: %s" % network.ip)
-        details.append(indent + "Netmask: %s" % netmask)
-        details.append(indent + "Sysloc: %s" % sysloc)
-        details.append(indent + "Country: %s" % str(network.location.country.name))
-        details.append(indent + "Side: %s" % network.side)
-        details.append(indent + "Network Type: %s" % network.network_type)
-        details.append(indent + "Discoverable: %s" % str(network.is_discoverable))
-        details.append(indent + "Discovered: %s" % str(network.is_discovered))
+        details.append(indent + "  IP: %s" % network.ip)
+        details.append(indent + "  Netmask: %s" % netmask)
+        details.append(indent + "  Sysloc: %s" % sysloc)
+        details.append(indent + "  Country: %s" % str(network.location.country.name))
+        details.append(indent + "  Side: %s" % network.side)
+        details.append(indent + "  Network Type: %s" % network.network_type)
+        details.append(indent + "  Discoverable: %s" % str(network.is_discoverable))
+        details.append(indent + "  Discovered: %s" % str(network.is_discovered))
         if network.comments:
             details.append(indent + "  Comments: %s" % network.comments)
+
+        # Look for dynamic DHCP ranges
+        session = object_session(network)
+        q = session.query(DynamicStub.ip)
+        q = q.filter(DynamicStub.ip > network.network.ip)
+        q = q.filter(DynamicStub.ip < network.broadcast)
+        q = q.order_by(DynamicStub.ip)
+        ranges = summarize_ranges(q)
+        if ranges:
+            details.append(indent + "  Dynamic Ranges: %s" % ", ".join(ranges))
+
         return "\n".join(details)
 
     def format_proto(self, network, skeleton=None):

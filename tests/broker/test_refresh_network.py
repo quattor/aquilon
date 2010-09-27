@@ -122,6 +122,11 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_310_verifynetwork(self):
+        command = "show network --ip 0.1.1.0"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Dynamic Ranges: 0.1.1.4-0.1.1.8", command)
+
     def failsync(self, command):
         """Common code for the two tests below."""
         err = self.partialerrortest(command.split(" "))
