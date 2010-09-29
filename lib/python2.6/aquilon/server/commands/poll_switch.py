@@ -99,9 +99,7 @@ class CommandPollSwitch(BrokerCommand):
             update_or_create_observed_mac(session, switch, port, mac, now)
 
     def clear(self, session, logger, switch):
-        macs = session.query(ObservedMac).filter_by(switch=switch).all()
-        for om in macs:
-            session.delete(om)
+        session.query(ObservedMac).filter_by(switch=switch).delete()
         session.flush()
 
     def run_checknet(self, logger, switch):
@@ -170,9 +168,7 @@ class CommandPollSwitch(BrokerCommand):
         if not switch.primary_ip:
             raise ArgumentError("Cannot poll VLAN info for {0:l} without "
                                 "a registered IP address.".format(switch))
-        vlans = session.query(ObservedVlan).filter_by(switch=switch).all()
-        for vlan in vlans:
-            session.delete(vlan)
+        session.query(ObservedVlan).filter_by(switch=switch).delete()
         session.flush()
         out = run_command([self.config.get("broker", "vlan2net"),
                            "-ip", switch.primary_ip])

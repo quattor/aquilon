@@ -54,12 +54,8 @@ class CommandDelServiceInstance(BrokerCommand):
                                 (dbservice.name, dbsi.name, msg))
 
         # Check the service map and remove any mappings
-        for dbmap in session.query(ServiceMap).filter_by(
-                service_instance=dbsi).all():
-            session.delete(dbmap)
-        for dbmap in session.query(PersonalityServiceMap).filter_by(
-                service_instance=dbsi).all():
-            session.delete(dbmap)
+        session.query(ServiceMap).filter_by(service_instance=dbsi).delete()
+        session.query(PersonalityServiceMap).filter_by(service_instance=dbsi).delete()
 
         session.delete(dbsi)
         session.flush()
