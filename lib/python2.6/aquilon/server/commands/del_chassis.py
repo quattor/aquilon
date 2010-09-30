@@ -39,7 +39,7 @@ class CommandDelChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
-    def render(self, session, logger, chassis, **arguments):
+    def render(self, session, logger, chassis, force, **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         # Check and complain if the chassis has any other addresses than its
@@ -60,10 +60,10 @@ class CommandDelChassis(BrokerCommand):
         q = q.filter(ChassisSlot.machine_id != None)
 
         machine_count = q.count()
-        if machine_count > 0:
-            raise ArgumentError("{0} is still in use by {1} machines and "
-                                "cannot be deleted.".format(dbchassis,
-                                                            machine_count))
+        if machine_count > 0 and not force:
+            raise ArgumentError("{0} is still in use by {1} machines. Use "
+                                "--force if you really want to delete "
+                                "it.".format(dbchassis, machine_count))
 
         # Order matters here
         dbdns_rec = dbchassis.primary_name

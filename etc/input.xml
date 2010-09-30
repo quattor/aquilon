@@ -1882,9 +1882,15 @@
    </command>
 
    <command name="del_chassis">
-      Delete a chassis. See also del_location.
+      Delete a chassis.
+      <p/>
+      If the chassis has populated slots, then the --force flag can be used to
+      remove all machines from the chassis before deleting the chassis.
       <optgroup name="del_chassis_opts" mandatory="True" fields="all">
-         <option name="chassis" type="string">chassis name</option>
+         <option name="chassis" type="string">Chassis name</option>
+      </optgroup>
+      <optgroup name="del_chassis_optional" mandatory="False" fields="any">
+         <option name="force" type="flag">Remove all machines first</option>
       </optgroup>
       <transport method="delete" path="chassis/%(chassis)s" />
    </command>
