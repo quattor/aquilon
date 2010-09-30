@@ -29,8 +29,15 @@
 """Chassis formatter."""
 
 
+import re
+
+from sqlalchemy.orm.session import object_session
+
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Chassis
+
+chassis_re = re.compile("^(.*)c(\d+)n(\d+)$")
 
 
 class ChassisFormatter(ObjectFormatter):
@@ -58,3 +65,38 @@ class ChassisFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Chassis] = ChassisFormatter()
+
+
+class MissingChassisList(list):
+    pass
+
+
+class MissingChassisListFormatter(ListFormatter):
+    def format_raw(self, machines, indent=""):
+        if machines:
+            session = object_session(machines[0])
+
+        commands = []
+        for machine in machines:
+            # Try to guess the name of the chassis
+            result = chassis_re.match(machine.label)
+            if result:
+                chassis = "%sc%s" % (result.group(1), result.group(2))
+                slot = result.group(3)
+
+                dbchassis = Chassis.get_unique(session, chassis)
+                if not dbchassis and machine.primary_name:
+                    fqdn = "%s.%s" % (chassis,
+                                      machine.primary_name.dns_domain.name)
+                    commands.append("aq add chassis --chassis '%s' "
+                                    "--rack 'RACK' --model 'MODEL'" % fqdn)
+            else:
+                chassis = 'CHASSIS'
+                slot = 'SLOT'
+
+            commands.append("aq update machine --machine '%s' "
+                            "--chassis '%s' --slot '%s'" % (machine.label,
+                                                            chassis, slot))
+        return "\n".join(commands)
+
+ObjectFormatter.handlers[MissingChassisList] = MissingChassisListFormatter()
