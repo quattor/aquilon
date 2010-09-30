@@ -670,6 +670,7 @@ class DummyNetworks(object):
         self.unknown.append(NetworkInfo("4.2.6.168/29", "unknown"))
         self.unknown.append(NetworkInfo("4.2.6.176/29", "unknown"))
         self.unknown.append(NetworkInfo("4.2.6.184/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.10.0/24", "unknown"))
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))

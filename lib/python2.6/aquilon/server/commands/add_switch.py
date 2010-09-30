@@ -30,11 +30,12 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.model import Switch, Model
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
+from aquilon.server.dbwrappers.interface import get_or_create_interface
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import Switch, Model
 
 
 class CommandAddSwitch(BrokerCommand):
@@ -42,7 +43,7 @@ class CommandAddSwitch(BrokerCommand):
     required_parameters = ["switch", "model", "rack", "type", "ip"]
 
     def render(self, session, logger, switch, label, model, rack, type, ip,
-               vendor, serial, comments, **arguments):
+               interface, mac, vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    machine_type='switch', compel=True)
 
@@ -58,6 +59,18 @@ class CommandAddSwitch(BrokerCommand):
                           model=dbmodel, serial_no=serial, comments=comments)
         session.add(dbswitch)
         dbswitch.primary_name = dbdns_rec
+
+        # FIXME: get default name from the model
+        if not interface:
+            interface = "xge"
+            ifcomments = "Created automatically by add_switch"
+        else:
+            ifcomments = None
+        dbinterface = get_or_create_interface(session, dbswitch,
+                                              name=interface, mac=mac,
+                                              interface_type="oa",
+                                              comments=ifcomments)
+        dbinterface.vlans[0].addresses.append(ip)
 
         session.flush()
 

@@ -71,6 +71,12 @@ class TestSwitchConstraints(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
+    def testdelprimaryinterface(self):
+        command = ["del", "interface", "--interface", "xge49",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "holds the primary address", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSwitchConstraints)

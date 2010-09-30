@@ -48,10 +48,6 @@ class CommandAddInterfaceChassis(BrokerCommand):
                **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
-        if dbchassis.primary_name.ip:
-            raise ArgumentError("{0} already has an interface with an IP "
-                                "address.".format(dbchassis))
-
         dbinterface = get_or_create_interface(session, dbchassis,
                                               name=interface, mac=mac,
                                               interface_type='oa',

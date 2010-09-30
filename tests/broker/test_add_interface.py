@@ -213,7 +213,7 @@ class TestAddInterface(TestBrokerCommand):
         self.matchclean(out, "Interface: oa2", command)
 
     def testfailaddinterfaceut3c1(self):
-        command = ["add", "interface", "--interface", "oa",
+        command = ["add", "interface", "--interface", "oa2",
                    "--mac", self.net.unknown[0].usable[6].mac,
                    "--ip", self.net.unknown[0].usable[6],
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
@@ -229,7 +229,7 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c1", command)
         self.matchoutput(out, "Primary Name: ut3c1.aqd-unittest.ms.com",
                          command)
-        self.matchclean(out, "Interface: oa", command)
+        self.matchclean(out, "Interface: oa2", command)
 
     def testaddinterfacenp997gd1r04(self):
         command = ["add", "interface", "--interface", "xge49",
@@ -379,7 +379,7 @@ class TestAddInterface(TestBrokerCommand):
         command = "show_machine --machine ut8s02p3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Interface: eth1 boot=False (no mac addr)",
+                         "Interface: eth1 boot=False (no MAC addr)",
                          command)
 
     def testaddhprackinterfaces(self):

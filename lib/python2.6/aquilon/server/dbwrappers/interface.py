@@ -303,7 +303,7 @@ def _type_msg(interface_type, bootable):
 
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             interface_type='public', bootable=None,
-                            preclude=False, **extra_args):
+                            preclude=False, port_group=None, comments=None):
     """ Look up an existing interface or create a new one. """
 
     q = session.query(Interface)
@@ -317,7 +317,21 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     dbinterfaces = q.all()
 
     if preclude and dbinterfaces:
-            raise ArgumentError("{0} already exists.".format(dbinterface))
+        # Special logic to allow "add_interface" to succeed if there is an
+        # auto-created interface already
+        if len(dbinterfaces) == 1 and dbinterfaces[0].mac is None and \
+           dbinterfaces[0].interface_type == interface_type and \
+           dbinterfaces[0].comments.startswith("Created automatically"):
+            dbinterface = dbinterfaces[0]
+            dbinterface.mac = mac
+            if bootable is not None:
+                dbinterface.bootable = bootable
+            dbinterface.comments = comments
+            dbinterface.port_group = port_group
+            session.flush()
+            return dbinterface
+
+        raise ArgumentError("{0} already exists.".format(dbinterfaces[0]))
 
     if not dbinterfaces:
         if mac:
@@ -333,16 +347,22 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
             raise ArgumentError("{0} has no {1} interfaces.".format(dbhw_ent,
                                                                     interface_type))
         try:
-            dbinterface = Interface(name=name, hardware_entity=dbhw_ent,
-                                    interface_type=interface_type, mac=mac,
-                                    bootable=bootable, **extra_args)
+            dbinterface = Interface(name=name, interface_type=interface_type,
+                                    mac=mac, bootable=bootable,
+                                    port_group=port_group, comments=comments)
         except ValueError, err:
             raise ArgumentError(err)
-        session.add(dbinterface)
+
+        dbhw_ent.interfaces.append(dbinterface)
         session.flush()
-        session.refresh(dbinterface)
     elif len(dbinterfaces) == 1:
         dbinterface = dbinterfaces[0]
+
+        # If the name matches but the interface did not have a MAC before, then
+        # just update the MAC
+        if name and mac and dbinterface.mac is None:
+            dbinterface.mac = normalize_mac_address(mac)
+
         # The user input must be normalized before comparing it with a value
         # from the DB
         if mac and dbinterface.mac != normalize_mac_address(mac):

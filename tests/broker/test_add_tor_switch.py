@@ -40,13 +40,23 @@ from brokertest import TestBrokerCommand
 class TestAddTorSwitch(TestBrokerCommand):
 
     def verifyswitch(self, tor_switch, vendor, model,
-                     rack, rackrow, rackcol, serial=None):
+                     rack, rackrow, rackcol, serial=None,
+                     ip=None, mac=None, interface=None):
         command = "show tor_switch --tor_switch %s" % tor_switch
         out = self.commandtest(command.split(" "))
         (short, dot, dns_domain) = tor_switch.partition(".")
         self.matchoutput(out, "Switch: %s" % short, command)
         if dns_domain:
-            self.matchoutput(out, "Primary Name: %s" % tor_switch, command)
+            if ip:
+                # Check both the primary name...
+                self.matchoutput(out, "Primary Name: %s [%s]" %
+                                 (tor_switch, ip), command)
+                # ... and the AddressAssignment record
+                self.matchoutput(out, "Provides: %s [%s]" %
+                                 (tor_switch, ip), command)
+            else:
+                self.matchoutput(out, "Primary Name: %s" % tor_switch,
+                                 command)
         self.matchoutput(out, "Rack: %s" % rack, command)
         self.matchoutput(out, "Row: %s" % rackrow, command)
         self.matchoutput(out, "Column: %s" % rackcol, command)
@@ -56,6 +66,22 @@ class TestAddTorSwitch(TestBrokerCommand):
             self.matchoutput(out, "Serial: %s" % serial, command)
         else:
             self.matchclean(out, "Serial:", command)
+
+        if interface:
+            # Include indentation not to match the switch comments
+            self.matchclean(out, "\n    Comments: Created automatically",
+                            command)
+        else:
+            # FIXME: eventually this should be part of the model
+            interface = "xge"
+            self.matchoutput(out, "\n    Comments: Created automatically "
+                             "by add_tor_switch", command)
+        if mac:
+            self.matchoutput(out, "Interface: %s %s boot=False" %
+                             (interface, mac), command)
+        else:
+            self.matchoutput(out, "Interface: %s boot=False (no MAC addr)" %
+                             interface, command)
 #        for port in range(1,49):
 #            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)
@@ -164,17 +190,11 @@ class TestAddTorSwitch(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifynp999gd1r01(self):
-        (out, command) = self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
-                                           "bnt", "rs g8000",
-                                           "np999", "zz", "11")
-        self.matchoutput(out,
-                         "Primary Name: np999gd1r01.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[5].usable[0],
-                         command)
-        self.matchoutput(out,
-                         "Interface: xge49 %s boot=False" %
-                         self.net.tor_net[5].usable[0].mac,
-                         command)
+        self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
+                          "bnt", "rs g8000", "np999", "zz", "11",
+                          ip=str(self.net.tor_net[5].usable[0]),
+                          mac=self.net.tor_net[5].usable[0].mac,
+                          interface="xge49")
 
     def testverifyaddnp999gd1r01csv(self):
         command = ["show_tor_switch", "--format=csv",
@@ -220,7 +240,9 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testverifynp06bals03(self):
         self.verifyswitch("np06bals03.ms.com",
-                          "bnt", "rs g8000", "np7", "g", "1")
+                          "bnt", "rs g8000", "np7", "g", "1",
+                          ip="172.31.64.69", mac="00:18:b1:89:86:00",
+                          interface="gigabitethernet0/1")
 
     def testaddnp06fals01(self):
         # Deprecated.
@@ -236,7 +258,9 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testverifynp06fals01(self):
         self.verifyswitch("np06fals01.ms.com",
-                          "cisco", "ws-c2960-48tt-l", "np7", "g", "1")
+                          "cisco", "ws-c2960-48tt-l", "np7", "g", "1",
+                          ip="172.31.88.5", mac="00:1c:f6:99:e5:c1",
+                          interface="xge49")
 
     def testaddut01ga1s02(self):
         # Deprecated.
@@ -254,7 +278,10 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testverifyut01ga1s02(self):
         self.verifyswitch("ut01ga1s02.aqd-unittest.ms.com",
-                          "bnt", "rs g8000", "ut8", "g", "2")
+                          "bnt", "rs g8000", "ut8", "g", "2",
+                          ip=str(self.net.tor_net[0].usable[0]),
+                          mac=self.net.tor_net[0].usable[0].mac,
+                          interface="xge49")
 
     def testaddut01ga1s03(self):
         # Deprecated.
@@ -272,7 +299,10 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testverifyut01ga1s03(self):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
-                          "bnt", "rs g8000", "ut9", "g", "3")
+                          "bnt", "rs g8000", "ut9", "g", "3",
+                          ip=str(self.net.tor_net[1].usable[0]),
+                          mac=self.net.tor_net[1].usable[0].mac,
+                          interface="xge49")
 
     def testaddut01ga1s04(self):
         # Deprecated.
@@ -290,9 +320,12 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testverifyut01ga1s04(self):
         self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
-                          "bnt", "rs g8000", "ut10", "g", "4")
+                          "bnt", "rs g8000", "ut10", "g", "4",
+                          ip=str(self.net.tor_net[2].usable[0]),
+                          mac=self.net.tor_net[2].usable[0].mac,
+                          interface="xge49")
 
-    def testrejectut01ga1s99(self):
+    def testrejectut01ga1s99mac(self):
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga1s99.aqd-unittest.ms.com",
                    "--building", "ut", "--rackid", "8",
@@ -300,11 +333,26 @@ class TestAddTorSwitch(TestBrokerCommand):
                    "--model", "rs g8000",
                    "--interface", "xge49",
                    "--mac", self.net.tor_net[0].usable[0].mac,
-                   "--ip", self.net.tor_net[0].usable[0]]
+                   "--ip", self.net.tor_net[0].usable[-2]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use" %
                          self.net.tor_net[0].usable[0].mac,
+                         command)
+
+    def testrejectut01ga1s99ip(self):
+        command = ["add", "tor_switch",
+                   "--tor_switch", "ut01ga1s99.aqd-unittest.ms.com",
+                   "--building", "ut", "--rackid", "8",
+                   "--rackrow", "g", "--rackcol", "2",
+                   "--model", "rs g8000",
+                   "--interface", "xge49",
+                   "--mac", self.net.tor_net[0].usable[-2].mac,
+                   "--ip", self.net.tor_net[0].usable[0]]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is already in use" %
+                         self.net.tor_net[0].usable[0],
                          command)
 
     def testverifyrejectut01ga1s99(self):

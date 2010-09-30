@@ -29,19 +29,22 @@
 """Contains the logic for `aq add chassis`."""
 
 
-from aquilon.server.broker import BrokerCommand
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Chassis, Model
+from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
+from aquilon.server.dbwrappers.interface import get_or_create_interface
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandAddChassis(BrokerCommand):
 
     required_parameters = ["chassis", "rack", "model"]
 
-    def render(self, session, chassis, label, rack, serial, model, vendor,
-               comments, **arguments):
-        dbdns_rec = parse_primary_name(session, chassis, None)
+    def render(self, session, logger, chassis, label, rack, model, vendor,
+               ip, interface, mac, serial, comments, **arguments):
+        dbdns_rec = parse_primary_name(session, chassis, ip)
         if not label:
             label = dbdns_rec.name
 
@@ -54,5 +57,25 @@ class CommandAddChassis(BrokerCommand):
         session.add(dbchassis)
         dbchassis.primary_name = dbdns_rec
 
+        # FIXME: get default name from the model
+        if not interface:
+            interface = "oa"
+            ifcomments = "Created automatically by add_chassis"
+        else:
+            ifcomments = None
+        dbinterface = get_or_create_interface(session, dbchassis,
+                                              name=interface, mac=mac,
+                                              interface_type="oa",
+                                              comments=ifcomments)
+        if ip:
+            dbinterface.vlans[0].addresses.append(ip)
+
         session.flush()
+
+        if ip:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_host(dbinterface)
+            except ProcessException, e:
+                raise ArgumentError("Could not add chassis to DSDB: %s" % e)
         return

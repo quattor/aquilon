@@ -39,6 +39,59 @@ from brokertest import TestBrokerCommand
 
 class TestUpdateSwitch(TestBrokerCommand):
 
+    def verifyswitch(self, switch, vendor, model,
+                     rack, rackrow, rackcol,
+                     serial=None, switch_type=None, ip=None, mac=None,
+                     interface=None, comments=None):
+        command = "show switch --switch %s" % switch
+        out = self.commandtest(command.split(" "))
+        (short, dot, dns_domain) = switch.partition(".")
+        self.matchoutput(out, "Switch: %s" % short, command)
+        if dns_domain:
+            if ip:
+                # Check both the primary name...
+                self.matchoutput(out, "Primary Name: %s [%s]" % (switch, ip),
+                                 command)
+                # ... and the AddressAssignment record
+                self.matchoutput(out, "Provides: %s [%s]" % (switch, ip),
+                                 command)
+            else:
+                self.matchoutput(out, "Primary Name: %s" % switch, command)
+        if switch_type is None:
+            switch_type = 'tor'
+        self.matchoutput(out, "Switch Type: %s" % switch_type, command)
+        self.matchoutput(out, "Rack: %s" % rack, command)
+        self.matchoutput(out, "Row: %s" % rackrow, command)
+        self.matchoutput(out, "Column: %s" % rackcol, command)
+        self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
+                         command)
+        if serial:
+            self.matchoutput(out, "Serial: %s" % serial, command)
+        else:
+            self.matchclean(out, "Serial:", command)
+
+        # Careful about indentation, do not mistake switch comments with
+        # interface comments
+        if comments:
+            self.matchoutput(out, "\n  Comments: %s" % comments, command)
+        else:
+            self.matchclean(out, "\n  Comments:", command)
+
+        if not interface:
+            # FIXME: eventually this should be part of the model
+            interface = "xge"
+            self.matchoutput(out, "\n    Comments: Created automatically "
+                             "by add_switch", command)
+        if mac:
+            self.matchoutput(out, "Interface: %s %s boot=False" %
+                             (interface, mac), command)
+        else:
+            self.matchoutput(out, "Interface: %s boot=False (no MAC addr)" %
+                             interface, command)
+#        for port in range(1,49):
+#            self.matchoutput(out, "Switch Port %d" % port, command)
+        return (out, command)
+
     def testfailnomodel(self):
         command = ["update", "switch", "--vendor", "generic",
                    "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
@@ -72,6 +125,28 @@ class TestUpdateSwitch(TestBrokerCommand):
                    "--interface=xge49",
                    "--mac", self.net.tor_net[8].usable[1].mac]
         self.noouttest(command)
+        self.verifyswitch("ut3gd1r06.aqd-unittest.ms.com", "generic",
+                          "temp_switch", "ut3", "a", "3", switch_type='tor',
+                          ip=self.net.tor_net[8].usable[0],
+                          mac=self.net.tor_net[8].usable[1].mac,
+                          interface="xge49")
+
+    # Check if removing the auto-generated interface after adding the real one
+    # transfers the primary IP assignment
+    def testdelautointerface(self):
+        command = ["del", "interface", "--interface", "xge",
+                   "--switch", "ut3gd1r06.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        command = ["show", "switch", "--switch", "ut3gd1r06.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Interface: xge boot=False (no MAC addr)", command)
+        # The primary name should still be there
+        self.matchoutput(out,
+                         "Primary Name: ut3gd1r06.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[8].usable[0], command)
+        # The AddressAssignment should have moved
+        self.matchoutput(out, "Provides: ut3gd1r06.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[8].usable[0], command)
 
     def testupdatewithinterface(self):
         oldip = self.net.tor_net[8].usable[0]
@@ -84,55 +159,25 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def verifyswitch(self, switch, vendor, model,
-                     rack, rackrow, rackcol,
-                     serial=None, switch_type=None, ip=None, comments=None):
-        command = "show switch --switch %s" % switch
-        out = self.commandtest(command.split(" "))
-        (short, dot, dns_domain) = switch.partition(".")
-        self.matchoutput(out, "Switch: %s" % short, command)
-        if dns_domain:
-            if ip:
-                self.matchoutput(out, "Primary Name: %s [%s]" %
-                                 (switch, ip), command)
-            else:
-                self.matchoutput(out, "Primary Name: %s" % switch,
-                                 command)
-        if switch_type is None:
-            switch_type = 'tor'
-        self.matchoutput(out, "Switch Type: %s" % switch_type, command)
-        self.matchoutput(out, "Rack: %s" % rack, command)
-        self.matchoutput(out, "Row: %s" % rackrow, command)
-        self.matchoutput(out, "Column: %s" % rackcol, command)
-        self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
-                         command)
-        if serial:
-            self.matchoutput(out, "Serial: %s" % serial, command)
-        else:
-            self.matchclean(out, "Serial:", command)
-        if comments:
-            self.matchoutput(out, "Comments: %s" % comments, command)
-        else:
-            self.matchclean(out, "Comments:", command)
-#        for port in range(1,49):
-#            self.matchoutput(out, "Switch Port %d" % port, command)
-        return (out, command)
-
     def testverifyupdatewithoutinterface(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
                           ip=self.net.tor_net[6].usable[1],
+                          mac=self.net.tor_net[6].usable[0].mac,
+                          interface="xge49",
                           comments="Some new switch comments")
 
     def testverifyupdatemisc(self):
         self.verifyswitch("ut3gd1r05.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut4", "a", "4", "SNgd1r05_new", switch_type='tor',
-                          ip=self.net.tor_net[7].usable[0])
+                          ip=self.net.tor_net[7].usable[0], interface="xge49")
 
     def testverifyupdatewithinterface(self):
         self.verifyswitch("ut3gd1r06.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
-                          ip=self.net.tor_net[8].usable[1])
+                          ip=self.net.tor_net[8].usable[1],
+                          mac=self.net.tor_net[8].usable[1].mac,
+                          interface="xge49")
 
 
 if __name__=='__main__':

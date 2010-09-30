@@ -1858,6 +1858,9 @@
 	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
       <optgroup name="optional_opts">
+	 <option name="ip" type="ipv4">IP address of the chassis</option>
+	 <option name="interface" type="string">Interface name (like oa)</option>
+	 <option name="mac" type="string">MAC address of the interface</option>
 	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">serial number</option>
@@ -2524,6 +2527,8 @@
          <option name="ip" type="ipv4">IP address</option>
       </optgroup>
       <optgroup name="add_switch_optional" mandatory="False">
+	 <option name="interface" type="string">Interface name (like xge49)</option>
+	 <option name="mac" type="string">MAC address of the interface</option>
 	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>

@@ -35,6 +35,10 @@ from aquilon.server.dbwrappers.interface import get_interface
 from aquilon.server.templates.machine import PlenaryMachineInfo
 
 
+class _Goto(Exception):
+    pass
+
+
 class CommandDelInterface(BrokerCommand):
 
     required_parameters = []
@@ -44,20 +48,39 @@ class CommandDelInterface(BrokerCommand):
         dbinterface = get_interface(session, interface, machine, mac)
         hw_ent = dbinterface.hardware_entity
 
-        for addr in dbinterface.all_addresses():
-            if addr.ip != hw_ent.primary_ip:
-                continue
+        try:
+            for addr in dbinterface.all_addresses():
+                if addr.ip != hw_ent.primary_ip:
+                    continue
 
-            # If this is a machine, it is possible to delete the host to get rid
-            # of the primary name
-            if hw_ent.hardware_type == "machine":
-                msg = "  You should delete the host first."
-            else:
-                msg = ""
+                # Special handling: if this interface was created automatically,
+                # and there is exactly one other interface with no IP address,
+                # then re-assign the primary address to that interface
+                if not dbinterface.mac and \
+                   dbinterface.comments.startswith("Created automatically") and \
+                   len(hw_ent.interfaces) == 2:
+                    if dbinterface == hw_ent.interfaces[0]:
+                        other = hw_ent.interfaces[1]
+                    else:
+                        other = hw_ent.interfaces[0]
 
-            raise ArgumentError("{0} holds the primary address of the {1:cl}, "
-                                "therefore it cannot be deleted."
-                                "{2}".format(dbinterface, hw_ent, msg))
+                    if len(list(other.all_addresses())) == 0:
+                        other.vlans[0].addresses.append(hw_ent.primary_ip)
+                        dbinterface.vlans[0].addresses.remove(hw_ent.primary_ip)
+                        raise _Goto
+
+                # If this is a machine, it is possible to delete the host to get rid
+                # of the primary name
+                if hw_ent.hardware_type == "machine":
+                    msg = "  You should delete the host first."
+                else:
+                    msg = ""
+
+                raise ArgumentError("{0} holds the primary address of the {1:cl}, "
+                                    "therefore it cannot be deleted."
+                                    "{2}".format(dbinterface, hw_ent, msg))
+        except _Goto:
+            pass
 
         addrs = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for addr in
                            dbinterface.all_addresses()])

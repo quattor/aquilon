@@ -40,26 +40,72 @@ from brokertest import TestBrokerCommand
 
 class TestAddChassis(TestBrokerCommand):
 
+    def verifychassis(self, chassis, vendor, model, rack, rackrow, rackcol,
+                      serial=None, ip=None, mac=None, interface=None,
+                      comments=None):
+        command = "show chassis --chassis %s" % chassis
+        out = self.commandtest(command.split(" "))
+        (short, dot, dns_domain) = chassis.partition(".")
+        self.matchoutput(out, "Chassis: %s" % short, command)
+        if dns_domain:
+            if ip:
+                # Check both the primary name...
+                self.matchoutput(out, "Primary Name: %s [%s]" %
+                                 (chassis, ip), command)
+                # ... and the AddressAssignment record
+                self.matchoutput(out, "Provides: %s [%s]" %
+                                 (chassis, ip), command)
+            else:
+                self.matchoutput(out, "Primary Name: %s" % chassis, command)
+        self.matchoutput(out, "Rack: %s" % rack, command)
+        self.matchoutput(out, "Row: %s" % rackrow, command)
+        self.matchoutput(out, "Column: %s" % rackcol, command)
+        self.matchoutput(out, "Vendor: %s Model: %s" % (vendor, model),
+                         command)
+        if serial:
+            self.matchoutput(out, "Serial: %s" % serial, command)
+        else:
+            self.matchclean(out, "Serial:", command)
+
+        # Careful about indentation, do not mix chassis comments with interface
+        # comments
+        if comments:
+            self.matchoutput(out, "\n  Comments: %s" % comments, command)
+        else:
+            self.matchclean(out, "\n  Comments:", command)
+
+        if interface:
+            self.matchclean(out, "\n    Comments: Created automatically",
+                            command)
+        else:
+            # FIXME: eventually this should be part of the model
+            interface = "oa"
+            self.matchoutput(out, "\n    Comments: Created automatically "
+                             "by add_chassis", command)
+        if mac:
+            self.matchoutput(out, "Interface: %s %s boot=False" %
+                             (interface, mac), command)
+        else:
+            self.matchoutput(out, "Interface: %s boot=False (no MAC addr)" %
+                             interface, command)
+
+        return (out, command)
+
     def testaddut3c5(self):
         command = "add chassis --chassis ut3c5.aqd-unittest.ms.com --rack ut3 --model utchassis"
         self.noouttest(command.split(" "))
 
     def testverifyaddut3c5(self):
-        command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c5", command)
-        self.matchoutput(out,
-                         "Primary Name: ut3c5.aqd-unittest.ms.com",
-                         command)
+        self.verifychassis("ut3c5.aqd-unittest.ms.com",
+                           "aurora_vendor", "utchassis", "ut3", "a", "3")
 
     def testaddut3c1(self):
         command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"
         self.noouttest(command.split(" "))
 
     def testverifyaddut3c1(self):
-        command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Chassis: ut3c1", command)
+        self.verifychassis("ut3c1.aqd-unittest.ms.com",
+                           "aurora_vendor", "utchassis", "ut3", "a", "3")
 
     def testverifyshowfqdnchassis(self):
         command = "show fqdn --fqdn ut3c1.aqd-unittest.ms.com"
@@ -68,20 +114,23 @@ class TestAddChassis(TestBrokerCommand):
 
     def testaddut9chassis(self):
         for i in range(1,6):
+            ip = self.net.unknown[10].usable[i]
+            self.dsdb_expect_add("ut9c%d.aqd-unittest.ms.com" % i,
+                                 ip, "oa", ip.mac)
             command = ["add", "chassis",
                        "--chassis", "ut9c%d.aqd-unittest.ms.com" % i,
-                       "--rack", "ut9", "--model", "c-class"]
+                       "--rack", "ut9", "--model", "c-class",
+                       "--ip", ip, "--mac", ip.mac, "--interface", "oa"]
             self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifyaddut9chassis(self):
         for i in range(1,6):
-            command = ["show", "chassis",
-                       "--chassis", "ut9c%d.aqd-unittest.ms.com" % i]
-            out = self.commandtest(command)
-            self.matchoutput(out, "Chassis: ut9c%d" % i, command)
-            self.matchoutput(out,
-                             "Primary Name: ut9c%d.aqd-unittest.ms.com" % i,
-                             command)
+            self.verifychassis("ut9c%d.aqd-unittest.ms.com" % i,
+                               "hp", "c-class", "ut9", "", "",
+                               ip=str(self.net.unknown[10].usable[i]),
+                               mac=self.net.unknown[10].usable[i].mac,
+                               interface="oa")
 
     def testverifychassisall(self):
         command = ["show", "chassis", "--all"]

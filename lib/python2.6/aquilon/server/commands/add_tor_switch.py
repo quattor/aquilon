@@ -30,13 +30,13 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.model import Switch, Model
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.rack import get_or_create_rack
 from aquilon.server.dbwrappers.interface import get_or_create_interface
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import Switch, Model
 
 
 class CommandAddTorSwitch(BrokerCommand):
@@ -81,15 +81,22 @@ class CommandAddTorSwitch(BrokerCommand):
         session.add(dbtor_switch)
         dbtor_switch.primary_name = dbdns_rec
 
-        if interface or mac:
-            dbinterface = get_or_create_interface(session, dbtor_switch,
-                                                  name=interface, mac=mac,
-                                                  interface_type='oa')
+        if not interface:
+            # FIXME: get default name from the model
+            interface = "xge"
+            ifcomments = "Created automatically by add_tor_switch"
+        else:
+            ifcomments = None
+        dbinterface = get_or_create_interface(session, dbtor_switch,
+                                              name=interface, mac=mac,
+                                              interface_type="oa",
+                                              comments=ifcomments)
+        if ip:
+            dbinterface.vlans[0].addresses.append(ip)
 
-            if ip:
-                dbinterface.vlans[0].addresses.append(ip)
-            session.flush()
+        session.flush()
 
+        if ip:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
                 dsdb_runner.add_host(dbinterface)

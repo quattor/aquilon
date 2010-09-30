@@ -41,7 +41,7 @@ class TestAddSwitch(TestBrokerCommand):
 
     def testaddut3gd1r01(self):
         ip = self.net.tor_net[0].usable[0]
-        self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip)
+        self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip, "xge")
         self.successtest(["add", "switch", "--type", "bor",
                           "--switch", "ut3gd1r01.aqd-unittest.ms.com",
                           "--ip", ip, "--rack", "ut3",
@@ -50,25 +50,27 @@ class TestAddSwitch(TestBrokerCommand):
 
     def testaddut3gd1r04(self):
         ip = self.net.tor_net[6].usable[0]
-        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ip)
+        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                          "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
+                          "--ip", ip, "--mac", ip.mac, "--interface", "xge49",
+                          "--rack", "ut3", "--model", "temp_switch",
                           "--comments", "Some switch comments"])
         self.dsdb_verify()
 
     def testaddut3gd1r05(self):
         ip = self.net.tor_net[7].usable[0]
-        self.dsdb_expect_add("ut3gd1r05.aqd-unittest.ms.com", ip)
+        self.dsdb_expect_add("ut3gd1r05.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r05.aqd-unittest.ms.com",
-                          "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
+                          "--ip", ip, "--interface", "xge49",
+                          "--rack", "ut3", "--model", "temp_switch",
                           "--vendor", "generic"])
         self.dsdb_verify()
 
     def testaddut3gd1r06(self):
         ip = self.net.tor_net[8].usable[0]
-        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", ip)
+        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", ip, "xge")
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r06.aqd-unittest.ms.com",
                           "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
@@ -77,22 +79,37 @@ class TestAddSwitch(TestBrokerCommand):
 
     def testaddut3gd1r07(self):
         ip = self.net.tor_net[9].usable[0]
-        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", ip)
+        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", ip, "xge")
         self.successtest(["add", "switch", "--type", "bor",
                           "--switch", "ut3gd1r07.aqd-unittest.ms.com",
                           "--ip", ip, "--rack", "ut3", "--model", "temp_switch"])
         self.dsdb_verify()
 
+    def testrejectut3gd1r99(self):
+        command = ["add", "switch", "--switch", "ut3gd1r99.aqd-unittest.ms.com",
+                   "--type", "bor", "--ip", self.net.tor_net[9].usable[0],
+                   "--rack", "ut3", "--model", "temp_switch"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is already in use" %
+                         self.net.tor_net[9].usable[0],
+                         command)
+
     def verifyswitch(self, tor_switch, vendor, model,
                      rack, rackrow, rackcol,
-                     serial=None, switch_type=None, ip=None, comments=None):
+                     serial=None, switch_type=None, ip=None, mac=None,
+                     interface=None, comments=None):
         command = "show switch --switch %s" % tor_switch
         out = self.commandtest(command.split(" "))
         (short, dot, dns_domain) = tor_switch.partition(".")
         self.matchoutput(out, "Switch: %s" % short, command)
         if dns_domain:
             if ip:
+                # Check both the primary name...
                 self.matchoutput(out, "Primary Name: %s [%s]" %
+                                 (tor_switch, ip), command)
+                # ... and the AddressAssignment record
+                self.matchoutput(out, "Provides: %s [%s]" %
                                  (tor_switch, ip), command)
             else:
                 self.matchoutput(out, "Primary Name: %s" % tor_switch,
@@ -109,10 +126,29 @@ class TestAddSwitch(TestBrokerCommand):
             self.matchoutput(out, "Serial: %s" % serial, command)
         else:
             self.matchclean(out, "Serial:", command)
+
+        # Careful about indentation, do not mistake switch comments with
+        # interface comments
         if comments:
-            self.matchoutput(out, "Comments: %s" % comments, command)
+            self.matchoutput(out, "\n  Comments: %s" % comments, command)
         else:
-            self.matchclean(out, "Comments:", command)
+            self.matchclean(out, "\n  Comments:", command)
+
+        if interface:
+            self.matchclean(out, "\n    Comments: Created automatically",
+                            command)
+        else:
+            # FIXME: eventually this should be part of the model
+            interface = "xge"
+            self.matchoutput(out, "\n    Comments: Created automatically "
+                             "by add_switch", command)
+        if mac:
+            self.matchoutput(out, "Interface: %s %s boot=False" %
+                             (interface, mac), command)
+        else:
+            self.matchoutput(out, "Interface: %s boot=False (no MAC addr)" %
+                             interface, command)
+
 #        for port in range(1,49):
 #            self.matchoutput(out, "Switch Port %d" % port, command)
         return (out, command)
@@ -126,12 +162,15 @@ class TestAddSwitch(TestBrokerCommand):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
                           ip=self.net.tor_net[6].usable[0],
+                          mac=self.net.tor_net[6].usable[0].mac,
+                          interface="xge49",
                           comments="Some switch comments")
 
     def testverifyaddut3gd1r05(self):
         self.verifyswitch("ut3gd1r05.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
-                          ip=self.net.tor_net[7].usable[0])
+                          ip=self.net.tor_net[7].usable[0],
+                          interface="xge49")
 
     def testverifyaddut3gd1r06(self):
         self.verifyswitch("ut3gd1r06.aqd-unittest.ms.com", "generic",
