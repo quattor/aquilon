@@ -54,7 +54,7 @@ class TestAddSwitch(TestBrokerCommand):
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r04.aqd-unittest.ms.com",
                           "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
-                          "--comments", "Some new switch comments"])
+                          "--comments", "Some switch comments"])
         self.dsdb_verify()
 
     def testaddut3gd1r05(self):
@@ -126,7 +126,7 @@ class TestAddSwitch(TestBrokerCommand):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
                           ip=self.net.tor_net[6].usable[0],
-                          comments="Some new switch comments")
+                          comments="Some switch comments")
 
     def testverifyaddut3gd1r05(self):
         self.verifyswitch("ut3gd1r05.aqd-unittest.ms.com", "generic",

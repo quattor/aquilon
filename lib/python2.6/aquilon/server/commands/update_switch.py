@@ -74,6 +74,9 @@ class CommandUpdateSwitch(BrokerCommand):
             dbswitch.primary_name.network = dbnetwork
             session.add(dbswitch.primary_name)
 
+        if comments is not None:
+            dbswitch.comments = comments
+
         session.add(dbswitch)
         session.flush()
 
