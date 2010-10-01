@@ -39,7 +39,7 @@ from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import FutureARecord, ReservedName
+from aquilon.aqdb.model import FutureARecord, ReservedName, Machine
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -61,8 +61,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         """
 
-        dbinterface = get_interface(session, interface, machine, None)
-        dbhw_ent = dbinterface.hardware_entity
+        dbhw_ent = Machine.get_unique(session, machine, compel=True)
+        dbinterface = get_interface(session, interface, dbhw_ent, None)
 
         # By default, oldinfo comes from the interface being updated.
         # If swapping the boot flag, oldinfo will be updated below.

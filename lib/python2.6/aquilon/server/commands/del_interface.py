@@ -30,6 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Chassis, Machine, Switch
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import get_interface
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -43,14 +44,29 @@ class CommandDelInterface(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, interface, machine, mac, user,
-               **arguments):
-        dbinterface = get_interface(session, interface, machine, mac)
-        hw_ent = dbinterface.hardware_entity
+    def render(self, session, logger, interface, machine, switch, chassis, mac,
+               user, **arguments):
+
+        if not (machine or switch or chassis or mac):
+            raise ArgumentError("Please specify at least one of --chassis, "
+                                "--machine, --switch or --mac.")
+
+        if machine:
+            dbhw_ent = Machine.get_unique(session, machine, compel=True)
+        elif switch:
+            dbhw_ent = Switch.get_unique(session, switch, compel=True)
+        elif chassis:
+            dbhw_ent = Chassis.get_unique(session, chassis, compel=True)
+        else:
+            dbhw_ent = None
+
+        dbinterface = get_interface(session, interface, dbhw_ent, mac)
+        if not dbhw_ent:
+            dbhw_ent = dbinterface.hardware_entity
 
         try:
             for addr in dbinterface.all_addresses():
-                if addr.ip != hw_ent.primary_ip:
+                if addr.ip != dbhw_ent.primary_ip:
                     continue
 
                 # Special handling: if this interface was created automatically,
@@ -58,27 +74,27 @@ class CommandDelInterface(BrokerCommand):
                 # then re-assign the primary address to that interface
                 if not dbinterface.mac and \
                    dbinterface.comments.startswith("Created automatically") and \
-                   len(hw_ent.interfaces) == 2:
-                    if dbinterface == hw_ent.interfaces[0]:
-                        other = hw_ent.interfaces[1]
+                   len(dbhw_ent.interfaces) == 2:
+                    if dbinterface == dbhw_ent.interfaces[0]:
+                        other = dbhw_ent.interfaces[1]
                     else:
-                        other = hw_ent.interfaces[0]
+                        other = dbhw_ent.interfaces[0]
 
                     if len(list(other.all_addresses())) == 0:
-                        other.vlans[0].addresses.append(hw_ent.primary_ip)
-                        dbinterface.vlans[0].addresses.remove(hw_ent.primary_ip)
+                        other.vlans[0].addresses.append(dbhw_ent.primary_ip)
+                        dbinterface.vlans[0].addresses.remove(dbhw_ent.primary_ip)
                         raise _Goto
 
                 # If this is a machine, it is possible to delete the host to get rid
                 # of the primary name
-                if hw_ent.hardware_type == "machine":
+                if dbhw_ent.hardware_type == "machine":
                     msg = "  You should delete the host first."
                 else:
                     msg = ""
 
                 raise ArgumentError("{0} holds the primary address of the {1:cl}, "
                                     "therefore it cannot be deleted."
-                                    "{2}".format(dbinterface, hw_ent, msg))
+                                    "{2}".format(dbinterface, dbhw_ent, msg))
         except _Goto:
             pass
 
@@ -92,7 +108,7 @@ class CommandDelInterface(BrokerCommand):
         session.delete(dbinterface)
         session.flush()
 
-        if hw_ent.hardware_type == 'machine':
-            plenary_info = PlenaryMachineInfo(hw_ent, logger=logger)
+        if dbhw_ent.hardware_type == 'machine':
+            plenary_info = PlenaryMachineInfo(dbhw_ent, logger=logger)
             plenary_info.write()
         return

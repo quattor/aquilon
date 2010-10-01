@@ -51,6 +51,24 @@ class TestDelInterface(TestBrokerCommand):
         self.noouttest(["del", "interface",
                         "--mac", self.net.unknown[0].usable[3].mac.upper()])
 
+    def testnotamachine(self):
+        command = ["del", "interface", "--interface", "xge49",
+                   "--machine", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a machine", command)
+
+    def testnotaswitch(self):
+        command = ["del", "interface", "--interface", "oa",
+                   "--switch", "ut3c5"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a switch", command)
+
+    def testnotachassis(self):
+        command = ["del", "interface", "--interface", "eth0",
+                   "--chassis", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a chassis", command)
+
     def testverifydelut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))

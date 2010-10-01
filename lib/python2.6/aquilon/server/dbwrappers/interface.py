@@ -47,18 +47,18 @@ from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, System,
 from aquilon.server.dbwrappers.system import get_system
 
 
-# FIXME: interface type?  interfaces for hardware entities in general?
+# FIXME: interface type?
 # FIXME: replace me with a usable get_unique
-def get_interface(session, interface, machine, mac):
+def get_interface(session, interface, dbhw_ent, mac):
     q = session.query(Interface)
     errmsg = []
     if interface:
         errmsg.append("named " + interface)
         q = q.filter_by(name=interface)
-    if machine:
-        errmsg.append("of machine " + machine)
+    if dbhw_ent:
+        errmsg.append("of {0:l} ".format(dbhw_ent))
         q = q.join(HardwareEntity)
-        q = q.filter_by(label=machine)
+        q = q.filter(HardwareEntity.id == dbhw_ent.id)
         q = q.reset_joinpoint()
     if mac:
         errmsg.append("having MAC address " + mac)

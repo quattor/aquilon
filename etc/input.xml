@@ -1219,6 +1219,8 @@
       <optgroup name="del_interface_opts" mandatory="True" fields="any">
          <option name="interface" type="string">Interface name</option>
          <option name="machine" type="string">Machine name</option>
+         <option name="switch" type="string">Switch name</option>
+         <option name="chassis" type="string">Chassis name</option>
          <option name="mac" type="string">MAC address</option>
       </optgroup>
       <transport method="post" path="interface/command/del" />

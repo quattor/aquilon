@@ -149,6 +149,18 @@ class TestUpdateInterface(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Comments: Some interface comments", command)
 
+    def testnotamachine(self):
+        command = ["update", "interface", "--interface", "xge49",
+                   "--machine", "ut3gd1r06.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a machine", command)
+
+    def testnotaswitch(self):
+        command = ["update", "interface", "--interface", "eth0",
+                   "--switch", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a switch", command)
+
 
 if __name__=='__main__':
     import aquilon.aqdb.depends
