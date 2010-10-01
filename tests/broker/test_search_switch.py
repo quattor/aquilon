@@ -54,7 +54,7 @@ class TestSearchSwitch(TestBrokerCommand):
         command = ["search_switch", "--switch=ut3gd1r01.aqd-unittest.ms.com",
                    "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net.tor_net[0].usable[0]
+        ip = self.net.tor_net[12].usable[0]
         self.matchoutput(out,
                          "ut3gd1r01.aqd-unittest.ms.com,%s,bor,ut3,ut,"
                          "hp,uttorswitch,SNgd1r01,," % ip,
@@ -126,7 +126,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r01.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[0].usable[0],
+                         self.net.tor_net[12].usable[0],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)
@@ -160,7 +160,7 @@ class TestSearchSwitch(TestBrokerCommand):
                          "ut3gd1r06.aqd-unittest.ms.com,%s,tor,ut3,ut,"
                          "generic,temp_switch,,xge49,%s" % (ip, ip.mac),
                          command)
-        ip = self.net.tor_net[0].usable[0]
+        ip = self.net.tor_net[12].usable[0]
         self.matchoutput(out,
                          "ut3gd1r01.aqd-unittest.ms.com,%s,bor,ut3,ut,"
                          "hp,uttorswitch,SNgd1r01,," % ip,

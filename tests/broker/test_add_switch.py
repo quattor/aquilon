@@ -40,7 +40,7 @@ from brokertest import TestBrokerCommand
 class TestAddSwitch(TestBrokerCommand):
 
     def testaddut3gd1r01(self):
-        ip = self.net.tor_net[0].usable[0]
+        ip = self.net.tor_net[12].usable[0]
         self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip, "xge")
         self.successtest(["add", "switch", "--type", "bor",
                           "--switch", "ut3gd1r01.aqd-unittest.ms.com",
@@ -156,7 +156,7 @@ class TestAddSwitch(TestBrokerCommand):
     def testverifyaddut3gd1r01(self):
         self.verifyswitch("ut3gd1r01.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", "SNgd1r01", switch_type='bor',
-                          ip=self.net.tor_net[0].usable[0])
+                          ip=self.net.tor_net[12].usable[0])
 
     def testverifyaddut3gd1r04(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "generic",

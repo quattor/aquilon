@@ -46,7 +46,7 @@ class TestShowSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r01.aqd-unittest.ms.com [%s]" %
-                         self.net.tor_net[0].usable[0],
+                         self.net.tor_net[12].usable[0],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)
