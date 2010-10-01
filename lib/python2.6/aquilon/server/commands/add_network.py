@@ -29,8 +29,7 @@
 
 import re
 import math
-from ipaddr import (IPv4Network, IPv4IpValidationError,
-                    IPv4NetmaskValidationError)
+from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.server.broker import BrokerCommand
@@ -63,9 +62,9 @@ class CommandAddNetwork(BrokerCommand):
 
         try:
             address = IPv4Network("%s/%s" % (ip, netmask))
-        except IPv4IpValidationError, e:
+        except AddressValueError, e:
             raise ArgumentError("Failed to parse the network address: %s" % e)
-        except IPv4NetmaskValidationError, e:
+        except NetmaskValueError, e:
             raise ArgumentError("Failed to parse the netmask: %s" % e)
 
         location = get_location(session, **arguments)
