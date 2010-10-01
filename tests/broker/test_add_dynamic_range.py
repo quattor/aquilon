@@ -163,6 +163,31 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.dsdb_verify()
         self.matchoutput(out, "Could not add addresses to DSDB", command)
 
+    def testfillnetwork(self):
+        for ip in range(int(self.net.tor_net2[5].usable[0]),
+                        int(self.net.tor_net2[5].usable[-1]) + 1):
+            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
+        command = ["add_dynamic_range",
+                   "--fillnetwork", self.net.tor_net2[5].ip,
+                   "--dns_domain=aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.dsdb_verify()
+
+    def testverifyfillnetwork(self):
+        # Check that the network has only dynamic entries
+        checkip = self.net.tor_net2[5].ip
+        while checkip < self.net.tor_net2[5].usable[0]:
+            command = ['search_system', '--ip', checkip]
+            self.noouttest(command)
+            checkip += 1
+        for ip in self.net.tor_net2[5].usable:
+            command = ['search_system', '--ip', checkip, '--type=dynamic_stub']
+            out = self.commandtest(command)
+            self.matchoutput(out, 'aqd-unittest.ms.com', command)
+        broadcast = self.net.tor_net2[5].broadcast
+        command = ['search_system', '--ip', broadcast]
+        self.noouttest(command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDynamicRange)

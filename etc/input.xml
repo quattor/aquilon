@@ -3065,14 +3065,20 @@
       the form: prefix-X-X-X-X.subdomain where the X's are the components
       of the IP address.  The prefix defaults to the string 'dynamic'.
       <optgroup name="add_dynamic_range_opts" mandatory="True" fields="all">
-         <option name="startip" type="ipv4" mandatory="True">First IP address in the range to add</option>
-         <option name="endip" type="ipv4" mandatory="True">Last IP address in the range to add</option>
          <option name="dns_domain" type="string" mandatory="True">DNS domain to use for the generated names</option>
+         <optgroup name="add_dynamic_range_specs" mandatory="True" fields="any">
+            <option name="fillnetwork" type="string" conflicts="startip endip">Allocate dynamic IPs for all available addresses in the network</option>
+            <optgroup name="add_dynamic_range_startend" fields="all">
+               <option name="startip" type="ipv4" conflicts="fillnetwork">First IP address in the range to add</option>
+               <option name="endip" type="ipv4" conflicts="fillnetwork">Last IP address in the range to add</option>
+            </optgroup>
+         </optgroup>
       </optgroup>
       <optgroup name="add_dynamic_range_opts" mandatory="False" fields="any">
          <option name="prefix" type="string">Prefix to use for generated names, defaults to 'dynamic'</option>
       </optgroup>
       <transport method="put" path="dynamic_range/%(startip)s/%(endip)s" />
+      <transport trigger="fillnetwork" method="post" path="dynamic_range/fill/%(fillnetwork)s" />
    </command>
 
    <command name="del_dynamic_range">
@@ -3080,11 +3086,15 @@
       IP addresses are inclusive.  The IPs must be on the same network.
       If there are any allocated systems in the range that are not
       dynamic the command will fail.
-      <optgroup name="del_dynamic_range_opts" mandatory="True" fields="all">
-         <option name="startip" type="ipv4" mandatory="True">First IP address in the range to delete</option>
-         <option name="endip" type="ipv4" mandatory="True">Last IP address in the range to delete</option>
+      <optgroup name="del_dynamic_range_opts" mandatory="True" fields="any">
+         <option name="clearnetwork" type="string" conflicts="startip endip">Remove dynamic entries from the network</option>
+         <optgroup name="del_dynamic_range_startend" fields="all">
+            <option name="startip" type="ipv4" conflicts="clearnetwork">First IP address in the range to delete</option>
+            <option name="endip" type="ipv4" conflicts="clearnetwork">Last IP address in the range to delete</option>
+         </optgroup>
       </optgroup>
       <transport method="delete" path="dynamic_range/%(startip)s/%(endip)s" />
+      <transport trigger="clearnetwork" method="post" path="dynamic_range/clear/%(clearnetwork)s" />
    </command>
 
    <command name="add_address">
