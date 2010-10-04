@@ -116,13 +116,13 @@ class TestSearchHardware(TestBrokerCommand):
     def testlocation(self):
         command = "search hardware --building np"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "nyaqd1", command)
+        self.matchoutput(out, "ny00l4as01", command)
         self.matchoutput(out, "np997gd1r04.aqd-unittest.ms.com", command)
 
     def testlocationexact(self):
         command = "search hardware --building np --exact_location"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "nyaqd1", command)
+        self.matchoutput(out, "ny00l4as01", command)
         self.matchclean(out, "np997gd1r04.aqd-unittest.ms.com", command)
 
     def testlocationunavailable(self):
@@ -137,7 +137,7 @@ class TestSearchHardware(TestBrokerCommand):
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3s01p1", command)
-        self.matchoutput(out, "nyaqd1", command)
+        self.matchoutput(out, "ny00l4as01", command)
 
     def testallfull(self):
         command = "search hardware --all --fullinfo"
@@ -147,7 +147,7 @@ class TestSearchHardware(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Blade: ut3c5n10", command)
         self.matchoutput(out, "Rackmount: ut3s01p1", command)
-        self.matchoutput(out, "Aurora_node: nyaqd1", command)
+        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
 
 
 if __name__=='__main__':

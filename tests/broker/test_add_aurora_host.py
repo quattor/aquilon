@@ -81,11 +81,13 @@ class TestAddAuroraHost(TestBrokerCommand):
     def testverifyaddnyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
+        self.matchoutput(out, "Allocated to host: nyaqd1.ms.com [None]", command)
 
     def testshowmachine(self):
         command = "show machine --model aurora_model"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Aurora_node: nyaqd1", command)
+        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
 
     def testcatmachine(self):
         command = "cat --machine %s" % self.aurora_without_node
