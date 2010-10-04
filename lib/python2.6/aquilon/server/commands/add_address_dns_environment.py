@@ -27,7 +27,8 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 
-from aquilon.exceptions_ import UnimplementedError
+from aquilon.exceptions_ import (UnimplementedError, ArgumentError,
+                                 ProcessException)
 from aquilon.aqdb.model import System, FutureARecord
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -65,6 +66,9 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
-                                     name=None, mac=None)
+        try:
+            dsdb_runner.add_host_details(fqdn=dbaddress.fqdn, ip=dbaddress.ip,
+                                         name=None, mac=None)
+        except ProcessException, e:
+            raise ArgumentError("Could not add address to DSDB: %s" % e)
         return
