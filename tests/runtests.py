@@ -220,6 +220,12 @@ for dir in dirs:
     except OSError, e:
         print >>sys.stderr, "Could not create %s: %s" % (dir, e)
 
+# Create DSDB coverage directory
+dsdb_coverage_dir = os.path.join(config.get("unittest", "scratchdir"),
+                                 "dsdb_coverage")
+os.makedirs(dsdb_coverage_dir)
+os.environ["AQTEST_DSDB_COVERAGE_DIR"] = dsdb_coverage_dir
+
 suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 suite.addTest(DatabaseTestSuite())

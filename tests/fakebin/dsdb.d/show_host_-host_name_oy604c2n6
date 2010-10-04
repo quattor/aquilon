@@ -1,0 +1,11 @@
+Primary Name: oy604c2n6
+        Node: oy604c2n6
+  DNS Domain: ms.com
+  Interfaces: 
+              oy604c2n6-e0 e0 10.172.169.170 (manual,lx)
+              oy604c2n6-e1 e1 10.172.170.170 (static)
+              oy604c2n6 le0 10.173.37.178 (static)
+     Aliases: oyias1616 oyidb1622 
+    Comments: UNIXOPS-LN blade server prod2
+       State: 0
+

@@ -92,9 +92,9 @@ def run_command(args, env=None, path=".",
 
     # Make sure that environment is properly kerberized.
     for envname, envvalue in os.environ.items():
-        if not envname.startswith("KRB"):
-            continue
-        shell_env[envname] = envvalue
+        # AQTEST<something> is used by the testsuite
+        if envname.startswith("KRB") or envname.startswith("AQTEST"):
+            shell_env[envname] = envvalue
 
     # Add a default value for the PATH.
     for envname in ["PATH"]:

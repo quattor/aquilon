@@ -90,6 +90,16 @@ class TestBrokerCommand(unittest.TestCase):
         self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
         self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
 
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        for name in ["expected_dsdb_cmds", "fail_expected_dsdb_cmds",
+                     "issued_dsdb_cmds"]:
+            path = os.path.join(dsdb_coverage_dir, name)
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
     def tearDown(self):
         pass
 
@@ -503,6 +513,101 @@ class TestBrokerCommand(unittest.TestCase):
         with open(scratchfile, 'w') as f:
             f.write(contents)
         return scratchfile
+
+    def dsdb_expect(self, command):
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        expected_name = os.path.join(dsdb_coverage_dir, "expected_dsdb_cmds")
+        with open(expected_name, "a") as fp:
+            if isinstance(command, list):
+                fp.write(" ".join([str(cmd) for cmd in command]))
+            else:
+                fp.write(str(command))
+            fp.write("\n")
+
+    def dsdb_expect_fail(self, command):
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        fail_expected_name = os.path.join(dsdb_coverage_dir, "fail_expected_dsdb_cmds")
+        with open(fail_expected_name, "a") as fp:
+            if isinstance(command, list):
+                fp.write(" ".join([str(cmd) for cmd in command]))
+            else:
+                fp.write(str(command))
+            fp.write("\n")
+
+    def dsdb_expect_add(self, hostname, ip, interface=None, mac=None):
+        command = ["add", "host", "-host_name", hostname,
+                   "-ip_address", str(ip), "-status", "aq"]
+        if interface:
+            command.extend(["-interface_name",
+                            str(interface).replace('/', '_')])
+        if mac:
+            command.extend(["-ethernet_address", str(mac)])
+
+        self.dsdb_expect(" ".join(command))
+
+    def dsdb_expect_delete(self, ip):
+        self.dsdb_expect("delete host -ip_address %s" % ip)
+
+    def dsdb_expect_update(self, fqdn, mac):
+        self.dsdb_expect("update host -host_name %s -status aq "
+                         "-ethernet_address %s" % (fqdn, mac))
+
+    def dsdb_verify(self):
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        expected_name = os.path.join(dsdb_coverage_dir, "expected_dsdb_cmds")
+        fail_expected_name = os.path.join(dsdb_coverage_dir, "fail_expected_dsdb_cmds")
+        issued_name = os.path.join(dsdb_coverage_dir, "issued_dsdb_cmds")
+
+        expected = {}
+        try:
+            with open(expected_name, "r") as fp:
+                for line in fp:
+                    expected[line.rstrip("\n")] = True
+            with open(fail_expected_name, "r") as fp:
+                for line in fp:
+                    expected[line.rstrip("\n")] = True
+        except IOError:
+            pass
+
+        # This is likely a logic error in the test
+        if not expected:
+            self.fail("dsdb_verify() called when no DSDB commands were "
+                      "expected?!?")
+
+        issued = {}
+        try:
+            with open(issued_name, "r") as fp:
+                for line in fp:
+                    issued[line.rstrip("\n")] = True
+        except IOError:
+            pass
+
+        errors = []
+        for cmd, dummy in expected.items():
+            if cmd not in issued:
+                errors.append("'%s'" % cmd)
+        # Unexpected DSDB commands are caught by the fake_dsdb script
+
+        # Clean up for the next command
+        #try:
+        #    os.remove(expected_name)
+        #except OSError:
+        #    pass
+        #try:
+        #    os.remove(fail_expected_name)
+        #except OSError:
+        #    pass
+        #try:
+        #    os.remove(issued_name)
+        #except OSError:
+        #    pass
+
+        if errors:
+            self.fail("The following expected DSDB commands were not called:"
+                      "\n@@@\n%s\n@@@\n" % "\n".join(errors))
 
 
 class DummyIP(IPv4Address):

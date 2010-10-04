@@ -1,0 +1,42 @@
+#! /bin/sh
+
+DATADIR=$(dirname "$0")/dsdb.d
+
+if [ -z "$AQTEST_DSDB_COVERAGE_DIR" ]; then
+	exit 0
+fi
+
+echo "$*" >> "${AQTEST_DSDB_COVERAGE_DIR}/issued_dsdb_cmds"
+
+if grep -q "^$*\$" "${AQTEST_DSDB_COVERAGE_DIR}/expected_dsdb_cmds" 2>/dev/null; then
+	# Is it a command that should generate some output?
+	ARGSTR=`echo $* | sed -e 's![ /]!_!g'`
+	if [ -e "${DATADIR}/${ARGSTR}" ]; then
+		cat "${DATADIR}/${ARGSTR}"
+	fi
+	exit 0
+fi
+
+if grep -q "^$*\$" "${AQTEST_DSDB_COVERAGE_DIR}/fail_expected_dsdb_cmds" 2>/dev/null; then
+	# Yes, it's stdout, not stderr
+	echo "Your query returned no data!"
+	exit 255
+fi
+
+echo "Error: fake_dsdb was called with unexpected parameters" 1>&2
+
+# Some extra info to make debugging easier...
+if [ -s "${AQTEST_DSDB_COVERAGE_DIR}/expected_dsdb_cmds" ]; then
+	echo "Commands that were expected to be called successfully: " 1>&2
+	echo "---< CUT >---" 1>&2
+	cat "${AQTEST_DSDB_COVERAGE_DIR}/expected_dsdb_cmds" 1>&2
+	echo "---< CUT >---" 1>&2
+fi
+if [ -s "${AQTEST_DSDB_COVERAGE_DIR}/fail_expected_dsdb_cmds" ]; then
+	echo "Commands that were expected to be called and fail:" 1>&2
+	echo "---< CUT >---" 1>&2
+	cat "${AQTEST_DSDB_COVERAGE_DIR}/fail_expected_dsdb_cmds" 1>&2
+	echo "---< CUT >---" 1>&2
+fi
+
+exit 1
