@@ -29,7 +29,7 @@
 """Contains the logic for `aq del tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.del_switch import CommandDelSwitch
 from aquilon.server.dbwrappers.switch import get_switch

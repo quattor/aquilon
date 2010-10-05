@@ -29,7 +29,7 @@
 """Contains the logic for `aq add dns_domain`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain
 from aquilon.server.processes import DSDBRunner
@@ -56,6 +56,9 @@ class CommandAddDnsDomain(BrokerCommand):
         session.refresh(dbdns_domain)
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
+        try:
+            dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
+        except ProcessException, err:
+            raise ArgumentError(err)
 
         return

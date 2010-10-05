@@ -29,6 +29,7 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_switch_offsets,
@@ -134,6 +135,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 # (directly) to false.
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbinterface, oldinfo)
+        except ProcessException, err:
+            plenary_info.restore_stash()
+            raise ArgumentError(err)
         except:
             plenary_info.restore_stash()
             raise

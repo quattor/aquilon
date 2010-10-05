@@ -30,7 +30,7 @@
     Duplicates logic used in `aq add interface --tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Interface, Chassis
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
