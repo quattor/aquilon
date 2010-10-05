@@ -36,6 +36,8 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+from ipaddr import IPv4Address
+
 from brokertest import TestBrokerCommand
 
 
@@ -93,20 +95,26 @@ class TestDelDynamicRange(TestBrokerCommand):
                          command)
 
     def testdelrange(self):
+        for ip in range(int(self.net.tor_net2[0].usable[2]),
+                        int(self.net.tor_net2[0].usable[-3]) + 1):
+            self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range",
                    "--startip", self.net.tor_net2[0].usable[2],
                    "--endip", self.net.tor_net2[0].usable[-3]]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifydelrange(self):
         command = "search_system --type=dynamic_stub"
         self.noouttest(command.split(" "))
 
     def testdelendingrange(self):
+        self.dsdb_expect_delete(self.net.tor_net2[1].usable[-1])
         command = ["del_dynamic_range",
                    "--startip", self.net.tor_net2[1].usable[-1],
                    "--endip", self.net.tor_net2[1].usable[-1]]
         self.noouttest(command)
+        self.dsdb_verify()
 
 
 if __name__=='__main__':

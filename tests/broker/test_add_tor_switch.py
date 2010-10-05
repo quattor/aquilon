@@ -148,14 +148,17 @@ class TestAddTorSwitch(TestBrokerCommand):
     # Test adding a switch, creating a new rack, and adding an IP.
     def testaddnp999gd1r01(self):
         # Deprecated.
+        ip =  self.net.tor_net[5].usable[0]
+        self.dsdb_expect_add("np999gd1r01.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "np999gd1r01.aqd-unittest.ms.com",
                    "--building", "np", "--rackid", "999",
                    "--rackrow", "zz", "--rackcol", "11",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net[5].usable[0].mac,
-                   "--ip", self.net.tor_net[5].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testverifynp999gd1r01(self):
         (out, command) = self.verifyswitch("np999gd1r01.aqd-unittest.ms.com",
@@ -206,12 +209,15 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddnp06bals03(self):
         # Deprecated.
+        self.dsdb_expect_add("np06bals03.ms.com", "172.31.64.69",
+                             "gigabitethernet0_1", "00:18:b1:89:86:00")
         command = ["add", "tor_switch", "--tor_switch", "np06bals03.ms.com",
                    "--building", "np", "--rackid", "7",
                    "--rackrow", "g", "--rackcol", "1", "--model", "rs g8000",
                    "--interface", "gigabitethernet0/1",
                    "--mac", "0018b1898600", "--ip", "172.31.64.69"]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testverifynp06bals03(self):
         self.verifyswitch("np06bals03.ms.com",
@@ -219,12 +225,15 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddnp06fals01(self):
         # Deprecated.
+        self.dsdb_expect_add("np06fals01.ms.com", "172.31.88.5", "xge49",
+                             "00:1c:f6:99:e5:c1")
         command = ["add", "tor_switch", "--tor_switch", "np06fals01.ms.com",
                    "--building", "np", "--rackid", "7",
                    "--rackrow", "g", "--rackcol", "1",
                    "--model", "ws-c2960-48tt-l", "--interface", "xge49",
                    "--mac", "001cf699e5c1", "--ip", "172.31.88.5"]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testverifynp06fals01(self):
         self.verifyswitch("np06fals01.ms.com",
@@ -232,14 +241,17 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga1s02(self):
         # Deprecated.
+        ip = self.net.tor_net[0].usable[0]
+        self.dsdb_expect_add("ut01ga1s02.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga1s02.aqd-unittest.ms.com",
                    "--building", "ut", "--rackid", "8",
                    "--rackrow", "g", "--rackcol", "2",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net[0].usable[0].mac,
-                   "--ip", self.net.tor_net[0].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testverifyut01ga1s02(self):
         self.verifyswitch("ut01ga1s02.aqd-unittest.ms.com",
@@ -247,14 +259,17 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga1s03(self):
         # Deprecated.
+        ip = self.net.tor_net[1].usable[0]
+        self.dsdb_expect_add("ut01ga1s03.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga1s03.aqd-unittest.ms.com",
                    "--room", "utroom2", "--rackid", "9",
                    "--rackrow", "g", "--rackcol", "3",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net[1].usable[0].mac,
-                   "--ip", self.net.tor_net[1].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testverifyut01ga1s03(self):
         self.verifyswitch("ut01ga1s03.aqd-unittest.ms.com",
@@ -262,14 +277,17 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga1s04(self):
         # Deprecated.
+        ip = self.net.tor_net[2].usable[0]
+        self.dsdb_expect_add("ut01ga1s04.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga1s04.aqd-unittest.ms.com",
                    "--building", "ut", "--rackid", "10",
                    "--rackrow", "g", "--rackcol", "4",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net[2].usable[0].mac,
-                   "--ip", self.net.tor_net[2].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testverifyut01ga1s04(self):
         self.verifyswitch("ut01ga1s04.aqd-unittest.ms.com",
@@ -296,45 +314,56 @@ class TestAddTorSwitch(TestBrokerCommand):
 
     def testaddut01ga2s01(self):
         # Deprecated.
+        ip = self.net.tor_net2[2].usable[0]
+        self.dsdb_expect_add("ut01ga2s01.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga2s01.aqd-unittest.ms.com",
                    "--building", "ut", "--rackid", "11",
                    "--rackrow", "k", "--rackcol", "1",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net2[2].usable[0].mac,
-                   "--ip", self.net.tor_net2[2].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testaddut01ga2s02(self):
         # Deprecated.
+        ip = self.net.tor_net2[2].usable[1]
+        self.dsdb_expect_add("ut01ga2s02.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga2s02.aqd-unittest.ms.com",
                    "--building", "ut", "--rackid", "12",
                    "--rackrow", "k", "--rackcol", "2",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net2[2].usable[1].mac,
-                   "--ip", self.net.tor_net2[2].usable[1]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testaddut01ga2s03(self):
         # Deprecated.
+        ip = self.net.tor_net2[3].usable[0]
+        self.dsdb_expect_add("ut01ga2s03.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "ut01ga2s03.aqd-unittest.ms.com",
                    "--rack", "ut13",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net2[3].usable[0].mac,
-                   "--ip", self.net.tor_net2[3].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def testaddnp01ga2s03(self):
         # Deprecated.
+        ip = self.net.tor_net2[4].usable[0]
+        self.dsdb_expect_add("np01ga2s03.one-nyp.ms.com", ip, "xge49", ip.mac)
         command = ["add", "tor_switch",
                    "--tor_switch", "np01ga2s03.one-nyp.ms.com",
                    "--rack", "np13",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", self.net.tor_net2[4].usable[0].mac,
-                   "--ip", self.net.tor_net2[4].usable[0]]
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddTorSwitch)

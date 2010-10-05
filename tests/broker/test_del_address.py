@@ -46,29 +46,35 @@ from brokertest import TestBrokerCommand
 class TestDelAddress(TestBrokerCommand):
 
     def testbasic(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[13])
         command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[13],
                    "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifybasic(self):
         command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def testenv(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[14])
         default = self.config.get("broker", "default_dns_environment")
         command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--dns_environment=%s" % default]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifyenv(self):
         command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def testcleanup(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[15])
         command = ["del_address", "--ip=%s" % self.net.unknown[0].usable[15],
                    "--fqdn=arecord15.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testfailbadenv(self):
         default = self.config.get("broker", "default_dns_environment")

@@ -46,9 +46,12 @@ from brokertest import TestBrokerCommand
 class TestAddAddress(TestBrokerCommand):
 
     def test_100_basic(self):
+        self.dsdb_expect_add("arecord13.aqd-unittest.ms.com",
+                             self.net.unknown[0].usable[13])
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[13],
                    "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def test_150_verifybasic(self):
         command = ["show_fqdn", "--fqdn=arecord13.aqd-unittest.ms.com"]
@@ -59,11 +62,14 @@ class TestAddAddress(TestBrokerCommand):
                          command)
 
     def test_200_env(self):
+        self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
+                             self.net.unknown[0].usable[14])
         default = self.config.get("broker", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--dns_environment=%s" % default]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def test_250_verifyenv(self):
         command = ["show_fqdn", "--fqdn=arecord14.aqd-unittest.ms.com"]
@@ -74,10 +80,13 @@ class TestAddAddress(TestBrokerCommand):
                          command)
 
     def test_300_ipfromip(self):
+        self.dsdb_expect_add("arecord15.aqd-unittest.ms.com",
+                             self.net.unknown[0].usable[15])
         command = ["add_address", "--ipalgorithm=max",
                    "--ipfromip=%s" % self.net.unknown[0].ip,
                    "--fqdn=arecord15.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def test_350_verifyipfromip(self):
         command = ["show_fqdn", "--fqdn=arecord15.aqd-unittest.ms.com"]

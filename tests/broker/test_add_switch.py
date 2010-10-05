@@ -40,38 +40,48 @@ from brokertest import TestBrokerCommand
 class TestAddSwitch(TestBrokerCommand):
 
     def testaddut3gd1r01(self):
+        ip = self.net.tor_net[0].usable[0]
+        self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip)
         self.successtest(["add", "switch", "--type", "bor",
                           "--switch", "ut3gd1r01.aqd-unittest.ms.com",
-                          "--ip", self.net.tor_net[0].usable[0],
-                          "--rack", "ut3", "--model", "uttorswitch",
-                          "--serial", "SNgd1r01"])
+                          "--ip", ip, "--rack", "ut3",
+                          "--model", "uttorswitch", "--serial", "SNgd1r01"])
+        self.dsdb_verify()
 
     def testaddut3gd1r04(self):
+        ip = self.net.tor_net[6].usable[0]
+        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ip)
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                          "--ip", self.net.tor_net[6].usable[0],
-                          "--rack", "ut3", "--model", "temp_switch",
+                          "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
                           "--comments", "Some new switch comments"])
+        self.dsdb_verify()
 
     def testaddut3gd1r05(self):
+        ip = self.net.tor_net[7].usable[0]
+        self.dsdb_expect_add("ut3gd1r05.aqd-unittest.ms.com", ip)
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r05.aqd-unittest.ms.com",
-                          "--ip", self.net.tor_net[7].usable[0],
-                          "--rack", "ut3", "--model", "temp_switch",
+                          "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
                           "--vendor", "generic"])
+        self.dsdb_verify()
 
     def testaddut3gd1r06(self):
+        ip = self.net.tor_net[8].usable[0]
+        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", ip)
         self.successtest(["add", "switch", "--type", "tor",
                           "--switch", "ut3gd1r06.aqd-unittest.ms.com",
-                          "--ip", self.net.tor_net[8].usable[0],
-                          "--rack", "ut3", "--model", "temp_switch",
+                          "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
                           "--vendor", "generic"])
+        self.dsdb_verify()
 
     def testaddut3gd1r07(self):
+        ip = self.net.tor_net[9].usable[0]
+        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", ip)
         self.successtest(["add", "switch", "--type", "bor",
                           "--switch", "ut3gd1r07.aqd-unittest.ms.com",
-                          "--ip", self.net.tor_net[9].usable[0],
-                          "--rack", "ut3", "--model", "temp_switch"])
+                          "--ip", ip, "--rack", "ut3", "--model", "temp_switch"])
+        self.dsdb_verify()
 
     def verifyswitch(self, tor_switch, vendor, model,
                      rack, rackrow, rackcol,

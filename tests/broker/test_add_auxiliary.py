@@ -41,10 +41,12 @@ from brokertest import TestBrokerCommand
 class TestAddAuxiliary(TestBrokerCommand):
 
     def testaddunittest00e1(self):
-        self.noouttest(["add", "auxiliary",
-                        "--ip", self.net.unknown[0].usable[3],
+        ip = self.net.unknown[0].usable[3]
+        self.dsdb_expect_add("unittest00-e1.one-nyp.ms.com", ip, "eth1", ip.mac)
+        self.noouttest(["add", "auxiliary", "--ip", ip,
                         "--auxiliary", "unittest00-e1.one-nyp.ms.com",
                         "--machine", "ut3c1n3", "--interface", "eth1"])
+        self.dsdb_verify()
 
     def testverifyaddunittest00e1(self):
         command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"

@@ -49,12 +49,16 @@ class TestUpdateSwitch(TestBrokerCommand):
                          command)
 
     def testupdatewithoutinterface(self):
+        oldip = self.net.tor_net[6].usable[0]
+        newip = self.net.tor_net[6].usable[1]
+        self.dsdb_expect_delete(oldip)
+        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", newip)
         command = ["update", "switch", "--type", "bor",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
-                   "--ip", self.net.tor_net[6].usable[1],
-                   "--model", "uttorswitch",
+                   "--ip", newip, "--model", "uttorswitch",
                    "--comments", "Some new switch comments"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testupdatemisc(self):
         command = ["update", "switch",
@@ -70,10 +74,15 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.noouttest(command)
 
     def testupdatewithinterface(self):
+        oldip = self.net.tor_net[8].usable[0]
+        newip = self.net.tor_net[8].usable[1]
+        self.dsdb_expect_delete(oldip)
+        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", newip)
         command = ["update", "switch",
                    "--switch", "ut3gd1r06.aqd-unittest.ms.com",
-                   "--ip", self.net.tor_net[8].usable[1]]
+                   "--ip", newip]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def verifyswitch(self, switch, vendor, model,
                      rack, rackrow, rackcol,

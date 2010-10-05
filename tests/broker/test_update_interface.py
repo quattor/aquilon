@@ -41,14 +41,21 @@ from brokertest import TestBrokerCommand
 class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateut3c5n10eth0mac(self):
+        mac = self.net.unknown[0].usable[11].mac
+        self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10",
-                        "--mac", self.net.unknown[0].usable[11].mac])
+                        "--machine", "ut3c5n10", "--mac", mac])
+        self.dsdb_verify()
 
     def testupdateut3c5n10eth0ip(self):
+        oldip = self.net.unknown[0].usable[0]
+        newip = self.net.unknown[0].usable[11]
+        self.dsdb_expect_delete(oldip)
+        self.dsdb_expect_add("unittest02.one-nyp.ms.com", newip, "eth0",
+                             oldip.mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10",
-                        "--ip", self.net.unknown[0].usable[11]])
+                        "--machine", "ut3c5n10", "--ip", newip])
+        self.dsdb_verify()
 
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",

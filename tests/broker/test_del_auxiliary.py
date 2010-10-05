@@ -41,9 +41,11 @@ from brokertest import TestBrokerCommand
 class TestDelAuxiliary(TestBrokerCommand):
 
     def testdelunittest00e1(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[3])
         command = "del auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
+        self.dsdb_verify()
 
     def testverifydelunittest00e1(self):
         command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"

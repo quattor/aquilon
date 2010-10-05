@@ -41,27 +41,33 @@ from brokertest import TestBrokerCommand
 class TestDelManager(TestBrokerCommand):
 
     def testdelunittest00r(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[4])
         command = "del manager --manager unittest00r.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
+        self.dsdb_verify()
 
     def testverifydelunittest00r(self):
         command = "show manager --manager unittest00r.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelunittest02rsa(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[9])
         command = "del manager --manager unittest02rsa.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
+        self.dsdb_verify()
 
     def testverifydelunittest02rsa(self):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
     def testdelunittest12r(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[8])
         command = "del manager --manager unittest12r.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
+        self.dsdb_verify()
 
     def testverifydelunittest12r(self):
         command = "show manager --manager unittest12r.aqd-unittest.ms.com"
