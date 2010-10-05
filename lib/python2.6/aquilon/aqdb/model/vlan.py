@@ -147,11 +147,11 @@ class ObservedVlan(Base):
         port_group = VlanInfo.get_port_group(session, vlan_id=self.vlan_id)
         ESXAlias = aliased(EsxCluster)
         q = session.query(Machine)
-        q = q.join(['_cluster', 'cluster',
-                    (ESXAlias, ESXAlias.esx_cluster_id == Cluster.id)])
+        q = q.join('_cluster', 'cluster',
+                   (ESXAlias, ESXAlias.esx_cluster_id == Cluster.id))
         q = q.filter_by(switch=self.switch)
         q = q.reset_joinpoint()
-        q = q.join(['interfaces'])
+        q = q.join('interfaces')
         q = q.filter_by(port_group=port_group)
         q = q.reset_joinpoint()
         return q.count()
