@@ -153,7 +153,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                    (dbmanager.ip, dbmanager.fqdn, e))
                 dbinterface.system = None
                 session.add(dbinterface)
-                session.remove(dbmanager)
+                session.delete(dbmanager)
                 session.flush()
                 session.refresh(dbinterface)
                 session.refresh(dbmachine)
