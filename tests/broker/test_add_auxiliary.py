@@ -42,7 +42,8 @@ class TestAddAuxiliary(TestBrokerCommand):
 
     def testaddunittest00e1(self):
         ip = self.net.unknown[0].usable[3]
-        self.dsdb_expect_add("unittest00-e1.one-nyp.ms.com", ip, "eth1", ip.mac)
+        self.dsdb_expect_add("unittest00-e1.one-nyp.ms.com", ip, "eth1", ip.mac,
+                             "unittest00.one-nyp.ms.com")
         self.noouttest(["add", "auxiliary", "--ip", ip,
                         "--auxiliary", "unittest00-e1.one-nyp.ms.com",
                         "--machine", "ut3c1n3", "--interface", "eth1"])

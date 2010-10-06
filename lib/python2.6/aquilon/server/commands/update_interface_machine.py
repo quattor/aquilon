@@ -29,7 +29,7 @@
 """Contains the logic for `aq update interface --machine`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
                                                  restrict_switch_offsets,
@@ -64,9 +64,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
         dbinterface = get_interface(session, interface, dbhw_ent, None)
 
-        # By default, oldinfo comes from the interface being updated.
-        # If swapping the boot flag, oldinfo will be updated below.
-        oldinfo = DSDBRunner.snapshot_iface(dbinterface)
+        oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
+
         if arguments.get('hostname', None):
             # Hack to set an intial interface for an aurora host...
             dbhost = dbhw_ent.host
@@ -126,8 +125,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 if i == dbinterface:
                     i.bootable = True
                 elif i.bootable:
-                    # XXX Is this correct here?
-                    oldinfo = DSDBRunner.snapshot_iface(i)
                     i.bootable = False
                     session.add(i)
 
@@ -150,11 +147,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             plenary_info.write(locked=True)
 
             if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
-                # This relies on *not* being able to set the boot flag
-                # (directly) to false.
                 dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbinterface, oldinfo)
-        except ProcessException, err:
+                dsdb_runner.update_host(dbhw_ent, oldinfo)
+        except AquilonError, err:
             plenary_info.restore_stash()
             raise ArgumentError(err)
         except:

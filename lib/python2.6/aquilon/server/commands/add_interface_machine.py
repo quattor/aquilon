@@ -33,7 +33,7 @@ from sqlalchemy import String
 from sqlalchemy.sql.expression import asc, desc, bindparam
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 IncompleteError, UnimplementedError)
+                                 AquilonError, UnimplementedError)
 from aquilon.aqdb.model import Interface, Machine, FutureARecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
@@ -55,6 +55,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
     def render(self, session, logger, interface, machine, mac, automac,
                pg, autopg, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
         if interface == 'eth0':
             bootable = True
         else:
@@ -136,8 +138,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         session.add(dbinterface)
         session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbmachine)
 
         if dbmanager:
             dsdb_runner = DSDBRunner(logger=logger)
@@ -169,6 +169,13 @@ class CommandAddInterfaceMachine(BrokerCommand):
             pending_removals.stash()
             plenaries.write(locked=True)
             pending_removals.remove(locked=True)
+
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.update_host(dbmachine, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not update host in DSDB: %s" % err)
+
         except Exception, e:
             plenaries.restore_stash()
             pending_removals.restore_stash()

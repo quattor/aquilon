@@ -536,7 +536,8 @@ class TestBrokerCommand(unittest.TestCase):
                 fp.write(str(command))
             fp.write("\n")
 
-    def dsdb_expect_add(self, hostname, ip, interface=None, mac=None):
+    def dsdb_expect_add(self, hostname, ip, interface=None, mac=None,
+                        primary=None):
         command = ["add", "host", "-host_name", hostname,
                    "-ip_address", str(ip), "-status", "aq"]
         if interface:
@@ -544,6 +545,8 @@ class TestBrokerCommand(unittest.TestCase):
                             str(interface).replace('/', '_')])
         if mac:
             command.extend(["-ethernet_address", str(mac)])
+        if primary:
+            command.extend(["-primary_host_name", primary])
 
         self.dsdb_expect(" ".join(command))
 

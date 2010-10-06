@@ -132,11 +132,13 @@ class TestUpdateInterface(TestBrokerCommand):
                          command)
 
     def testupdateswitch(self):
+        mac = self.net.tor_net[8].usable[0].mac
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", mac)
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some interface comments",
-                   "--mac", self.net.tor_net[8].usable[0].mac,
-                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+                   "--mac", mac, "--switch=ut3gd1r06.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifyupdateswitch(self):
         command = ["show_switch",

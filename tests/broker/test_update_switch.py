@@ -101,11 +101,13 @@ class TestUpdateSwitch(TestBrokerCommand):
                          "machine_type switch not found.",
                          command)
 
+    # FIXME: "without interface" is no longer true
     def testupdatewithoutinterface(self):
         oldip = self.net.tor_net[6].usable[0]
         newip = self.net.tor_net[6].usable[1]
         self.dsdb_expect_delete(oldip)
-        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", newip)
+        self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", newip, "xge49",
+                             oldip.mac)
         command = ["update", "switch", "--type", "bor",
                    "--switch", "ut3gd1r04.aqd-unittest.ms.com",
                    "--ip", newip, "--model", "uttorswitch",
@@ -121,6 +123,10 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.noouttest(command)
 
     def testaddinterface(self):
+        #self.dsdb_expect_delete(self.net.tor_net[8].usable[0])
+        #self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", "xge49",
+        #                     self.net.tor_net[8].usable[0],
+        #                     self.net.tor_net[8].usable[1].mac)
         command = ["add_interface", "--switch=ut3gd1r06.aqd-unittest.ms.com",
                    "--interface=xge49",
                    "--mac", self.net.tor_net[8].usable[1].mac]
@@ -130,6 +136,7 @@ class TestUpdateSwitch(TestBrokerCommand):
                           ip=self.net.tor_net[8].usable[0],
                           mac=self.net.tor_net[8].usable[1].mac,
                           interface="xge49")
+        #self.dsdb_verify()
 
     # Check if removing the auto-generated interface after adding the real one
     # transfers the primary IP assignment
@@ -152,7 +159,8 @@ class TestUpdateSwitch(TestBrokerCommand):
         oldip = self.net.tor_net[8].usable[0]
         newip = self.net.tor_net[8].usable[1]
         self.dsdb_expect_delete(oldip)
-        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", newip)
+        self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", newip, "xge49",
+                             newip.mac)
         command = ["update", "switch",
                    "--switch", "ut3gd1r06.aqd-unittest.ms.com",
                    "--ip", newip]

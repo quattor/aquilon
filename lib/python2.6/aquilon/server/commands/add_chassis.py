@@ -29,7 +29,7 @@
 """Contains the logic for `aq add chassis`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Chassis, Model
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
@@ -75,7 +75,7 @@ class CommandAddChassis(BrokerCommand):
         if ip:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                dsdb_runner.add_host(dbinterface)
-            except ProcessException, e:
-                raise ArgumentError("Could not add chassis to DSDB: %s" % e)
+                dsdb_runner.update_host(dbchassis, None)
+            except AquilonError, err:
+                raise ArgumentError("Could not add chassis to DSDB: %s" % err)
         return

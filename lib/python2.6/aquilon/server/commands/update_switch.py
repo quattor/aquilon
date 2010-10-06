@@ -29,7 +29,7 @@
 """Contains the logic for `aq update switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.interface import restrict_switch_offsets
@@ -46,6 +46,8 @@ class CommandUpdateSwitch(BrokerCommand):
     def render(self, session, logger, switch, model, rack, type, ip,
                vendor, serial, comments, **arguments):
         dbswitch = Switch.get_unique(session, switch, compel=True)
+
+        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 
         if vendor and not model:
             model = dbswitch.model.name
@@ -109,18 +111,7 @@ class CommandUpdateSwitch(BrokerCommand):
         if ip and ip != old_ip:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                # If we ever want to sync mac information into DSDB,
-                # something like the below would be appropriate.
-#               q = session.query(Interface).filter_by(system=dbswitch,
-#                                                      mac=dbswitch.mac)
-#               dbinterface = q.first()
-#               if dbinterface:
-#                   args = [dbswitch.fqdn,
-#                           ip, dbinterface.name, dbinterface.mac,
-#                           old_ip, dbinterface.name, dbinterface.mac]
-#               else:
-                args = [dbswitch.fqdn, ip, None, None, old_ip, None, None]
-                dsdb_runner.update_host_force_details(*args)
-            except ProcessException, e:
-                raise ArgumentError("Could not update switch in DSDB: %s" % e)
+                dsdb_runner.update_host(dbswitch, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not update switch in DSDB: %s" % err)
         return

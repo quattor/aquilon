@@ -195,7 +195,8 @@ class TestAdd10GigHardware(TestBrokerCommand):
                 port = i - 12
                 machine = "ut12s02p%d" % port
             self.dsdb_expect_add(hostname, net.usable[i - 1],
-                                 "eth1", net.usable[i - 1].mac)
+                                 "eth1", net.usable[i - 1].mac,
+                                 "evh%d.aqd-unittest.ms.com" % (i + 50))
             command = ["add", "auxiliary", "--auxiliary", hostname,
                        "--machine", machine, "--interface", "eth1", "--autoip"]
             self.noouttest(command)

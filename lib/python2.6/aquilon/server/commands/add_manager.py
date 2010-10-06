@@ -29,7 +29,7 @@
 """Contains the logic for `aq add manager`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
@@ -51,6 +51,7 @@ class CommandAddManager(BrokerCommand):
                comments, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.machine
+        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         if not manager:
             manager = "%sr.%s" % (dbmachine.primary_name.name,
@@ -90,9 +91,9 @@ class CommandAddManager(BrokerCommand):
 
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                dsdb_runner.add_host(dbinterface)
-            except ProcessException, e:
-                raise ArgumentError("Could not add host to DSDB: %s" % e)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not add host to DSDB: %s" % err)
         except:
             plenary_info.restore_stash()
             raise

@@ -29,7 +29,7 @@
 """Contains the logic for `aq add switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch, Model
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
@@ -76,8 +76,7 @@ class CommandAddSwitch(BrokerCommand):
 
         dsdb_runner = DSDBRunner(logger=logger)
         try:
-            dsdb_runner.add_host_details(dbswitch.fqdn, dbswitch.primary_ip,
-                                         name=None, mac=None)
-        except ProcessException, e:
-            raise ArgumentError("Could not add switch to DSDB: %s" % e)
+            dsdb_runner.update_host(dbswitch, None)
+        except AquilonError, err:
+            raise ArgumentError("Could not add switch to DSDB: %s" % err)
         return

@@ -75,9 +75,10 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.add_host(dbinterface)
-        except ProcessException, e:
-            raise ArgumentError("Could not add hostname to DSDB: %s" % e)
+        if ip:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_host(dbinterface)
+            except ProcessException, e:
+                raise ArgumentError("Could not add hostname to DSDB: %s" % e)
         return
