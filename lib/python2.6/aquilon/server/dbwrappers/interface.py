@@ -40,11 +40,11 @@ from sqlalchemy.orm import object_session
 from sqlalchemy import sql
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.column_types.aqmac import normalize_mac_address
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, System,
                                 VlanInfo, ObservedVlan)
 from aquilon.server.dbwrappers.system import get_system
+from aquilon.utils import force_mac
 
 
 # FIXME: interface type?
@@ -361,11 +361,9 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         # If the name matches but the interface did not have a MAC before, then
         # just update the MAC
         if name and mac and dbinterface.mac is None:
-            dbinterface.mac = normalize_mac_address(mac)
+            dbinterface.mac = mac
 
-        # The user input must be normalized before comparing it with a value
-        # from the DB
-        if mac and dbinterface.mac != normalize_mac_address(mac):
+        if mac and dbinterface.mac != mac:
             raise ArgumentError("{0} exists, but has MAC address {1} instead "
                                 "of {2}.".format(dbinterface, dbinterface.mac,
                                                  mac))

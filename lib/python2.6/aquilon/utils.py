@@ -42,6 +42,11 @@ from aquilon.exceptions_ import ArgumentError
 ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
 yes_re = re.compile("^(true|yes|y|1|on|enabled)$", re.I)
 no_re = re.compile("^(false|no|n|0|off|disabled)$", re.I)
+_unpadded_re = re.compile(r'\b([0-9a-f])\b')
+_nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
+_two_re = re.compile(r'[0-9a-f]{2}')
+_padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
+
 
 def kill_from_pid_file(pid_file):
     if os.path.isfile(pid_file):
@@ -152,3 +157,19 @@ def force_boolean(label, value):
     if no_re.match(value):
         return False
     raise ArgumentError("Expected a boolean value for %s." % label)
+
+def force_mac(label, value):
+    # Allow nullable Mac Addresses, consistent with behavior of IPV4
+    if value is None:
+        return None
+
+    # Strip, lower, and then use a regex for zero-padding if needed...
+    value = _unpadded_re.sub(r'0\1', str(value).strip().lower())
+    # If we have exactly twelve hex characters, add the colons.
+    if _nocolons_re.search(value):
+        value = ":".join(_two_re.findall(value))
+    # Check to make sure we're good.
+    if _padded_re.search(value):
+        return value
+    raise ArgumentError("Expected a MAC address like 00:1a:2b:3c:0d:55, "
+                        "001a2b3c0d55 or 0:1a:2b:3c:d:55 for %s." % label)

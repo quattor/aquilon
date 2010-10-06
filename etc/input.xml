@@ -165,7 +165,7 @@
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
-         <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
@@ -208,7 +208,7 @@
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
-         <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
@@ -244,7 +244,7 @@
          <option name="type" type="string">System type (host, chassis, switch, manager, auxiliary)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
-         <option name="mac" type="string">primary mac address</option>
+         <option name="mac" type="mac">primary MAC address</option>
          <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
@@ -268,7 +268,7 @@
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
-         <option name="mac" type="string">primary mac address</option>
+         <option name="mac" type="mac">primary MAC address</option>
          <option name="personality" type="string">personality</option>
          <option name="osname" type="string">osname</option>
          <option name="osversion" type="string">osversion</option>
@@ -381,7 +381,7 @@
          <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) FQDN of the switch</option>
          <option name="switch" type="string" conflicts="tor_switch">FQDN of the switch</option>
          <option name="port_number" type="int">Port number on the switch</option>
-         <option name="mac" type="string">MAC address to search for</option>
+         <option name="mac" type="mac">MAC address to search for</option>
       </optgroup>
       <transport method="get" path="find/observed_mac" />
    </command>
@@ -864,7 +864,7 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="interface" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
-         <option name="mac" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
+         <option name="mac" type="mac">Specify the non-bootable public interface to use, if there is more than one.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -933,7 +933,7 @@
       <optgroup name="optional_opts">
          <option name="manager" type="string">Fully qualified name for the manager interface</option>
          <option name="interface" type="string">Specify the management interface to use, if there is more than one.</option>
-         <option name="mac" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="mac" type="mac">Specify the management interface to use, if there is more than one.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -1074,7 +1074,7 @@
          <option name="interface" type="string">Interface name</option>
       </optgroup>
       <optgroup name="add_interface_mac" mandatory="False">
-         <option name="mac" type="string" conflicts="automac">MAC address</option>
+         <option name="mac" type="mac" conflicts="automac">MAC address</option>
          <option name="automac" type="flag" conflicts="mac">Automatically generate MAC for virtual hardware</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
@@ -1194,7 +1194,7 @@
          <option name="switch" type="string" conflicts="machine hostname">Switch name</option>
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
-         <option name="mac" type="string">MAC address</option>
+         <option name="mac" type="mac">MAC address</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
@@ -1221,7 +1221,7 @@
          <option name="machine" type="string">Machine name</option>
          <option name="switch" type="string">Switch name</option>
          <option name="chassis" type="string">Chassis name</option>
-         <option name="mac" type="string">MAC address</option>
+         <option name="mac" type="mac">MAC address</option>
       </optgroup>
       <transport method="post" path="interface/command/del" />
    </command>
@@ -1862,7 +1862,7 @@
       <optgroup name="optional_opts">
 	 <option name="ip" type="ipv4">IP address of the chassis</option>
 	 <option name="interface" type="string">Interface name (like oa)</option>
-	 <option name="mac" type="string">MAC address of the interface</option>
+	 <option name="mac" type="mac">MAC address of the interface</option>
 	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">serial number</option>
@@ -2518,7 +2518,7 @@
       </optgroup>
       <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">
          <option name="interface" type="string">Interface name (like xge49)</option>
-         <option name="mac" type="string">MAC address of the interface</option>
+         <option name="mac" type="mac">MAC address of the interface</option>
          <option name="ip" type="ipv4">IP address of the interface</option>
       </optgroup>
       <optgroup name="add_tor_switch_optional">
@@ -2541,7 +2541,7 @@
       </optgroup>
       <optgroup name="add_switch_optional" mandatory="False">
 	 <option name="interface" type="string">Interface name (like xge49)</option>
-	 <option name="mac" type="string">MAC address of the interface</option>
+	 <option name="mac" type="mac">MAC address of the interface</option>
 	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
