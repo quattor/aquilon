@@ -35,7 +35,7 @@ from aquilon.aqdb.column_types import Enum
 from aquilon.aqdb.model import System, SwitchHw
 
 
-SWITCH_TYPES = ('tor', 'bor', 'agg')
+SWITCH_TYPES = ('tor', 'bor', 'agg', 'misc')
 
 class Switch(System):
     __tablename__ = 'switch'
