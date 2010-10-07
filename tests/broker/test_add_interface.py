@@ -455,10 +455,9 @@ class TestAddInterface(TestBrokerCommand):
         for port in range(1, 25):
             for (template, netoff) in [('ut13s03p%d', 3), ('np13s03p%d', 4)]:
                 machine = template % port
-                i = port + 1
                 self.noouttest(["add", "interface", "--interface", "eth0",
                                 "--machine", machine,
-                                "--mac", self.net.tor_net2[netoff].usable[i].mac])
+                                "--mac", self.net.tor_net2[netoff].usable[port].mac])
 
     # FIXME: Missing a test for an interface with comments.
     # FIXME: Missing a test for adding an interface that already exists.
