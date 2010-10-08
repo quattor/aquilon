@@ -301,7 +301,7 @@ class StatusThread(Thread):
         while res.fp:
             pageData = res.read_chunk()
             if pageData:
-                print >>self.outstream, pageData
+                self.outstream.write(pageData)
         sconn.close()
         return
 
