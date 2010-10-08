@@ -61,7 +61,7 @@ class Options(usage.Options):
                 ["authonly", None, "Only use knc, do not start an open port."],
                 ["usesock", None, "use a unix socket to connect"]]
     optParameters = [["config", None, None, "Configuration file to use."],
-                     ["coverage", None, None, "Code Coverage file to create."]]
+                     ["coveragedir", None, None, "Code Coverage directory."]]
 
 
 class BridgeLogHandler(Handler):
@@ -128,11 +128,11 @@ class AQDMaker(object):
 
     def makeService(self, options):
         # Start up coverage ASAP.
-        if options["coverage"]:
-            write_test = open(options['coverage'], 'w')
-            write_test.close()
-            coverage.erase()
-            coverage.start()
+        if options["coveragedir"]:
+            os.makedirs(options["coveragedir"], 0755)
+            self.coverage = coverage.coverage()
+            self.coverage.erase()
+            self.coverage.start()
 
         # Get the config object.
         config = Config(configfile=options["config"])
@@ -140,8 +140,7 @@ class AQDMaker(object):
         # Helper for finishing off the coverage report.
         def stop_coverage():
             log.msg("Finishing coverage")
-            coverage.stop()
-            sourcefiles = []
+            self.coverage.stop()
             aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
                                           "lib", "python2.6", "aquilon")
             sourcefiles = []
@@ -150,12 +149,14 @@ class AQDMaker(object):
                     if not filename.endswith('.py'):
                         continue
                     sourcefiles.append(os.path.join(dirpath, filename))
-            output = open(options["coverage"], 'w')
-            coverage.report(sourcefiles, file=output)
+            self.coverage.html_report(sourcefiles, directory=options["coveragedir"])
+            aggregate = os.path.join(options["coveragedir"], "aqd.coverage")
+            output = open(aggregate, 'w')
+            self.coverage.report(sourcefiles, file=output)
             output.close()
 
         # Make sure the coverage report gets generated.
-        if options["coverage"]:
+        if options["coveragedir"]:
             reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
 
         # Set up the environment...

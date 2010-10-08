@@ -60,7 +60,7 @@ def usage():
     --debug     enable debug (not implemented)
     --config    supply an alternate config file
     --coverage  generate code coverage metrics for the broker
-                in logs/aqd.coverage.
+                in logs/coverage.
     --profile   generate profile information in logs/aqd.profile
 
     Note that:
