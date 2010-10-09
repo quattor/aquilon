@@ -82,7 +82,7 @@ class AQBroker(object):
             os.kill(int(pid), signal.SIGTERM)
 
     def get_aqservice(self):
-        return self.config.get("broker", "user")
+        return self.config.get("broker", "service")
 
     def initialize(self, **kwargs):
         """Clear out and set up the base directory and database.
@@ -90,10 +90,8 @@ class AQBroker(object):
         Most of this was ripped straight from runtests.py.
         
         """
-        if not os.path.exists("/var/spool/keytabs/%s" % \
-           self.config.get("broker", "user")):
-            p = Popen(("/ms/dist/kerberos/PROJ/krb5_keytab/"
-                       "prod/sbin/krb5_keytab"),
+        if not os.path.exists(self.config.get("broker", "keytab")):
+            p = Popen(self.config.get("broker", "krb5_keytab"),
                        stdout=1, stderr=2)
             if p.wait():
                 raise ProcessException(code=p.returncode)

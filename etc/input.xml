@@ -50,9 +50,9 @@
          <option name="aqhost" type="string" conflicts="">
             Name of the server to connect to.
          </option>
-         <option name="aquser" type="string" conflicts="">
-            Name of the userid running the server.  Should default correctly,
-            only useful for development.
+         <option name="aqservice" type="string" conflicts="">
+            Name of the kerberos service principal to authenticate to the server.
+            Should default correctly, only useful for development.
          </option>
       </optgroup>
    </command>
