@@ -46,7 +46,7 @@ class TestRebuild(unittest.TestCase):
             env[key] = value
         env["AQDCONF"] = Config().baseconfig
 
-        cmd = ['./build_db.py', '--delete', '--populate']
+        cmd = ['./build_db.py', '--delete', '--populate', 'data/unittest.dump']
 
         _DIR = os.path.dirname(os.path.realpath(__file__))
         p = Popen(cmd, stdout=1, stderr=2, env=env, cwd=_DIR)

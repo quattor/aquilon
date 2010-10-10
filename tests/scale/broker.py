@@ -147,7 +147,7 @@ class AQBroker(object):
         env["AQDCONF"] = self.configfile
         aqdbdir = os.path.join(self.config.get("broker", "srcdir"),
                                "tests", "aqdb")
-        cmdlst = ['./build_db.py', '--delete', '--populate']
+        cmdlst = ['./build_db.py', '--delete', '--populate', 'data/unittest.dump']
         p = Popen(cmdlst, stdout=1, stderr=2, env=env, cwd=aqdbdir)
         if p.wait():
             raise ProcessException(code=p.returncode)
