@@ -1827,7 +1827,7 @@
          <option name="parenttype" type="string">Location type of parent</option>
          <option name="comments" type="string">Comments about the location</option>
       </optgroup>
-      <transport method="put" path="location/%(type)s/%(name)s" />
+      <transport method="put" path="location/generic/%(type)s/%(name)s" />
    </command>
 
    <command name="show_location">
