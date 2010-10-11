@@ -50,6 +50,29 @@ class TestAddInterface(TestBrokerCommand):
                         "--machine", "ut3c5n10",
                         "--mac", self.net.unknown[0].usable[1].mac.lower()])
 
+    def testaddut3c5n10eth1again(self):
+        command = ["add", "interface", "--interface", "eth1",
+                   "--machine", "ut3c5n10",
+                   "--mac", self.net.unknown[0].usable[-1].mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine ut3c5n10 already has an interface named "
+                         "eth1.", command)
+
+    def testaddut3c5n10eth2badmac(self):
+        command = ["add", "interface", "--interface", "eth2",
+                   "--machine", "ut3c5n10",
+                   "--mac", self.net.tor_net[6].usable[0].mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "MAC address %s is already in use" %
+                         self.net.tor_net[6].usable[0].mac, command)
+
+    def testaddut3c5n10eth2automac(self):
+        command = ["add", "interface", "--interface", "eth2",
+                   "--machine", "ut3c5n10", "--automac"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, " Can only automatically generate MAC addresses "
+                         "for virtual hardware.", command)
+
     def testverifyaddut3c5n10interfaces(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
@@ -160,6 +183,12 @@ class TestAddInterface(TestBrokerCommand):
                          "MAC address %s is already in use: " %
                          self.net.unknown[0].usable[0].mac,
                          command)
+
+    def testfailaddut3c1n4eth1(self):
+        command = ["add", "interface", "--interface", "eth1",
+                   "--machine", "ut3c1n4", "--mac", "not-a-mac"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Expected a MAC address", command)
 
     def testfailautomacwithreal(self):
         command = ["add", "interface", "--interface", "eth1",

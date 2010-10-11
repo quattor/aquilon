@@ -70,6 +70,7 @@ from test_add_required_service import TestAddRequiredService
 from test_organization import TestOrganization
 from test_add_building import TestAddBuilding
 from test_add_room import TestAddRoom
+from test_add_location import TestAddLocation
 from test_add_rack import TestAddRack
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
@@ -222,7 +223,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestMergeConflicts,
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
-                TestAddBuilding, TestAddRoom,
+                TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddNetwork,
                 TestAddMetaCluster, TestAddESXCluster,

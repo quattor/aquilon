@@ -51,6 +51,17 @@ class TestAddHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testmachinereuse(self):
+        ip = self.net.unknown[0].usable[-1]
+        command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",
+                   "--ip", ip, "--machine", "ut3c5n10", "--domain", "unittest",
+                   "--buildstatus", "build", "--archetype", "aquilon",
+                   "--osname", "linux", "--osversion", "4.0.1-x86_64",
+                   "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine ut3c5n10 is already allocated to "
+                         "host unittest02.one-nyp.ms.com", command)
+
     def testverifyaddunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

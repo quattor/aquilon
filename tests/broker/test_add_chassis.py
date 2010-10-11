@@ -92,12 +92,15 @@ class TestAddChassis(TestBrokerCommand):
         return (out, command)
 
     def testaddut3c5(self):
-        command = "add chassis --chassis ut3c5.aqd-unittest.ms.com --rack ut3 --model utchassis"
-        self.noouttest(command.split(" "))
+        command = ["add", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "utchassis",
+                   "--serial", "ABC1234", "--comments", "Some chassis comments"]
+        self.noouttest(command)
 
     def testverifyaddut3c5(self):
-        self.verifychassis("ut3c5.aqd-unittest.ms.com",
-                           "aurora_vendor", "utchassis", "ut3", "a", "3")
+        self.verifychassis("ut3c5.aqd-unittest.ms.com", "aurora_vendor",
+                           "utchassis", "ut3", "a", "3", "ABC1234",
+                           comments="Some chassis comments")
 
     def testaddut3c1(self):
         command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"

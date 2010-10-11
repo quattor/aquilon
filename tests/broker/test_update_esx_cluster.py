@@ -215,6 +215,12 @@ class TestUpdateESXCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "violates ratio", command)
 
+    def test_400_failupdateillegalratio(self):
+        command = ["update_esx_cluster", "--cluster=utecl1",
+                   "--vm_to_host_ratio=not-a:number"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Expected a ratio like", command)
+
     def test_410_failupdaterealratio(self):
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--vm_to_host_ratio=2:1000"]

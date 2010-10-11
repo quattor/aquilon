@@ -44,7 +44,8 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=uttorswitch", "--vendor=hp",
                    "--type=switch", "--cpuname=xeon_2500", "--cpunum=1",
                    "--memory=8192", "--disktype=local", "--diskcontroller=scsi",
-                   "--disksize=36", "--nics=4"]
+                   "--disksize=36", "--nics=4",
+                   "--comments", "Some model comments"]
         self.noouttest(command)
 
     def testverifyadduttorswitch(self):
@@ -57,6 +58,7 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "NIC count: 4", command)
         self.matchoutput(out, "Disk: sda 36 GB DiskType scsi", command)
+        self.matchoutput(out, "Comments: Some model comments", command)
 
     def testverifyshowtypetorswitch(self):
         command = "show model --type switch"

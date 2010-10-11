@@ -47,16 +47,20 @@ from brokertest import TestBrokerCommand
 # that the broker really does the checks requires us bypassing the client.
 class TestClientBypass(TestBrokerCommand):
 
-    def urltest(self, path, expect_status, **kwargs):
+    def urltest(self, path, expect_status, post=False, **kwargs):
         openport = self.config.get("broker", "openport")
         server = self.config.get("broker", "servername")
-        arglist = []
-        for key, value in kwargs.items():
-            arglist.append("%s=%s" % (urllib.quote(key), urllib.quote(value)))
         url = "http://" + server + ":" + openport + path
-        if arglist:
-            url += "?" + "&".join(arglist)
-        stream = urllib.urlopen(url)
+        if post:
+            data = urllib.urlencode(kwargs)
+            stream = urllib.urlopen(url, data)
+        else:
+            arglist = []
+            for key, value in kwargs.items():
+                arglist.append("%s=%s" % (urllib.quote(key), urllib.quote(value)))
+            if arglist:
+                url += "?" + "&".join(arglist)
+            stream = urllib.urlopen(url)
         status = stream.getcode()
         output = "\n".join(stream.readlines())
         self.assertEqual(status, expect_status,
@@ -85,6 +89,14 @@ class TestClientBypass(TestBrokerCommand):
         path = "/host"
         out = self.badrequesttest(path, all="not-a-bool")
         self.matchoutput(out, "Expected a boolean value for --all.", path)
+
+    def testfloatarg(self):
+        # update personality
+        path = "/personality/vmhost/esx_desktop"
+        out = self.badrequesttest(path, post=True, archetype="vmhost",
+                                  personality="esx_desktop",
+                                  vmhost_overcommit_memory="not-a-float")
+        self.matchoutput(out, "Expected an floating point", path)
 
 
 if __name__=='__main__':
