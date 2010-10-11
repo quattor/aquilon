@@ -82,6 +82,11 @@ class TestBrokerStart(unittest.TestCase):
                 dir = os.path.join(config.get("broker", "logdir"), "coverage")
                 args.append(dir)
 
+                coveragerc = os.path.join(config.get("broker", "srcdir"),
+                                          "tests", "coverage.rc")
+                args.append("--coveragerc")
+                args.append(coveragerc)
+
         p = Popen(args)
         self.assertEqual(p.wait(), 0)
 

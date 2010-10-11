@@ -61,7 +61,8 @@ class Options(usage.Options):
                 ["authonly", None, "Only use knc, do not start an open port."],
                 ["usesock", None, "use a unix socket to connect"]]
     optParameters = [["config", None, None, "Configuration file to use."],
-                     ["coveragedir", None, None, "Code Coverage directory."]]
+                     ["coveragedir", None, None, "Code Coverage directory."],
+                     ["coveragerc", None, None, "Coverage test config file."]]
 
 
 class BridgeLogHandler(Handler):
@@ -130,7 +131,11 @@ class AQDMaker(object):
         # Start up coverage ASAP.
         if options["coveragedir"]:
             os.makedirs(options["coveragedir"], 0755)
-            self.coverage = coverage.coverage()
+            if options["coveragerc"]:
+                coveragerc = options["coveragerc"]
+            else:
+                coveragerc = None
+            self.coverage = coverage.coverage(config_file=coveragerc)
             self.coverage.erase()
             self.coverage.start()
 

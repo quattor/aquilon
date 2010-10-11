@@ -1,0 +1,24 @@
+# Config file for coverage.py
+#
+# See the documentation at http://nedbatchelder.com/code/coverage/config.html
+
+[report]
+
+exclude_lines =
+	# Enable explicit pragmas in the code
+	pragma: no cover
+
+	# The unittest shoult not cause internal errors...
+	raise InternalError
+
+	# No good way to test these
+	except IOError
+	except OSError
+
+	# repr() is for debugging
+	def __repr__
+
+	if __name__ == .__main__.:
+
+# Ignore missing source?
+ignore_errors = False
