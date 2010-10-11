@@ -42,9 +42,11 @@ class TestAddMachine(TestBrokerCommand):
 
     def testaddut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
-            "--rack", "ut3", "--model", "hs21-8853l5u", "--cpucount", "2",
-            "--cpuvendor", "intel", "--cpuname", "xeon", "--cpuspeed", "2660",
-            "--memory", "8192", "--serial", "99C5553"])
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--cpucount", "2", "--cpuvendor", "intel",
+                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--memory", "8192", "--serial", "99C5553",
+                        "--comments", "Some machine comments"])
 
     def testverifyaddut3c5n10(self):
         command = "show machine --machine ut3c5n10"
@@ -55,6 +57,7 @@ class TestAddMachine(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
+        self.matchoutput(out, "Comments: Some machine comments", command)
         self.matchclean(out, "Primary Name:", command)
 
     def testverifydelmodel(self):

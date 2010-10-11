@@ -42,7 +42,8 @@ class CommandAddNetwork(BrokerCommand):
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, network, ip, discovered, discoverable, type, side, **arguments):
+    def render(self, session, network, ip, discovered, discoverable, type, side,
+               comments, **arguments):
 
         # Handle the different ways of specifying the netmask
         mask_options = ["netmask", "prefixlen", "mask"]
@@ -93,11 +94,8 @@ class CommandAddNetwork(BrokerCommand):
             pass
 
         # Okay, all looks good, let's create the network
-        net = Network(name         = network,
-                      network      = address,
-                      network_type = type,
-                      side         = side,
-                      location     = location)
+        net = Network(name=network, network=address, network_type=type,
+                      side=side, location=location, comments=comments)
 
         if discoverable is not None:
             net.is_discoverable = discoverable

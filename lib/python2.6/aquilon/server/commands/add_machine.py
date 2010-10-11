@@ -46,7 +46,7 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
-               **arguments):
+               comments, **arguments):
         dblocation = get_location(session, **arguments)
         if chassis:
             dbchassis = Chassis.get_unique(session, chassis, compel=True)
@@ -90,7 +90,7 @@ class CommandAddMachine(BrokerCommand):
         Machine.get_unique(session, machine, preclude=True)
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount,
-                                   memory, serial)
+                                   memory, serial, comments)
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,

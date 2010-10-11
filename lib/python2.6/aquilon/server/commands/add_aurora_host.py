@@ -146,8 +146,7 @@ class CommandAddAuroraHost(CommandAddHost):
                                         (dsdb_lookup, out))
                 dblocation = dbbuilding
 
-            dbmachine = create_machine(session, machine, dblocation, dbmodel,
-                    None, None, None, None, None, None)
+            dbmachine = create_machine(session, machine, dblocation, dbmodel)
             # create_machine already does a save and a flush
             if dbslot:
                 dbslot.machine = dbmachine

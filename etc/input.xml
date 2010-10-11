@@ -1133,6 +1133,7 @@
          <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
          <option name="side" type="string">Network side, defaults to 'a'</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="network/%(ip)s" />
    </command>
@@ -2208,6 +2209,9 @@
          <option name="personality" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
+      <optgroup name="add_personality_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
       <transport method="put" path="personality/%(archetype)s/%(personality)s" />
   </command>
 
@@ -2215,6 +2219,9 @@
       Create a vendor definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="vendor" type="string">The name of the vendor</option>
+      </optgroup>
+      <optgroup name="add_vendor_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="vendor/%(vendor)s" />
   </command>
@@ -2422,7 +2429,8 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_machine_optional">
-	 <option name="serial" type="string">serial number</option>
+	 <option name="serial" type="string">Serial number</option>
+	 <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s" />
    </command>
@@ -2718,6 +2726,7 @@
       <optgroup name="permission_optional_opts">
          <option name="createuser" type="boolean">Create an entry for the user if one does not exist</option>
          <option name="createrealm" type="boolean">Create an entry for the realm if one does not exist (implies --createuser)</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="principal/%(principal)s/role" />
    </command>

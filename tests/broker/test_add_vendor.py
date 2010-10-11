@@ -52,13 +52,15 @@ class TestAddVendor(TestBrokerCommand):
         self.matchoutput(out, "Vendor name 'oops@!' is not valid", command)
 
     def testaddutvendor(self):
-        command = "add vendor --vendor utvendor"
-        self.noouttest(command.split(" "))
+        command = ["add", "vendor", "--vendor", "utvendor",
+                   "--comments", "Some vendor comments"]
+        self.noouttest(command)
 
     def testverifyutvendor(self):
         command = "show vendor --vendor utvendor"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor", command)
+        self.matchoutput(out, "Comments: Some vendor comments", command)
 
     def testverifyutvendorall(self):
         command = "show vendor --all"

@@ -36,13 +36,13 @@ class CommandAddVendor(BrokerCommand):
 
     required_parameters = [ "vendor" ]
 
-    def render(self, session, vendor, **arguments):
+    def render(self, session, vendor, comments, **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
         if (not valid.match(vendor)):
             raise ArgumentError("Vendor name '%s' is not valid." % vendor)
 
         Vendor.get_unique(session, vendor, preclude=True)
 
-        dbv = Vendor(name=vendor)
+        dbv = Vendor(name=vendor, comments=comments)
         session.add(dbv)
         return
