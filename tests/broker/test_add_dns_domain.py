@@ -44,19 +44,22 @@ class TestAddDnsDomain(TestBrokerCommand):
     def testaddaqdunittestdomain(self):
         self.dsdb_expect_fail("show dns_domains -domain_name aqd-unittest.ms.com")
         self.dsdb_expect("add dns_domain -domain_name aqd-unittest.ms.com "
-                         "-comments ")
-        self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest.ms.com"])
+                         "-comments Some DNS domain comments")
+        self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest.ms.com",
+                        "--comments", "Some DNS domain comments"])
         self.dsdb_verify()
 
     def testverifyaddaqdunittestdomain(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "DNS Domain: aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Comments: Some DNS domain comments", command)
 
     def testverifyaddaqdunittestdomaincsv(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "aqd-unittest.ms.com,", command)
+        self.matchoutput(out, "aqd-unittest.ms.com,Some DNS domain comments",
+                         command)
 
     def testverifyaddaqdunittestdomainproto(self):
         command = ["show", "dns_domain", "--dns_domain=aqd-unittest.ms.com",
