@@ -324,14 +324,21 @@ class TestBrokerCommand(unittest.TestCase):
                      (command, s, out))
 
     def searchoutput(self, out, r, command):
-        m = re.search(r, out)
+        if isinstance(r, str):
+            m = re.search(r, out, re.MULTILINE)
+        else:
+            m = re.search(r, out)
         self.failUnless(m,
                         "output for %s did not match '%s':\n@@@\n'%s'\n@@@\n"
                         % (command, r, out))
         return m
 
     def searchclean(self, out, r, command):
-        self.failIf(re.search(r, out),
+        if isinstance(r, str):
+            m = re.search(r, out, re.MULTILINE)
+        else:
+            m = re.search(r, out)
+        self.failIf(m,
                     "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
                     (command, r, out))
 
