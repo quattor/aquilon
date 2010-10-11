@@ -47,7 +47,15 @@ class CommandAddService(BrokerCommand):
         if dbservice and instance is None:
             raise ArgumentError("Service %s already exists." % dbservice.name)
         if not dbservice:
-            dbservice = Service(name=service)
+            # "add_service --service foo --comments blah" should add the comments
+            # to Service,
+            # "add_service --service foo --instance bar --comments blah" should
+            # add the comments to ServiceInstance
+            if instance:
+                srvcomments = None
+            else:
+                srvcomments = comments
+            dbservice = Service(name=service, comments=srvcomments)
             session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)
@@ -56,7 +64,8 @@ class CommandAddService(BrokerCommand):
         if instance:
             ServiceInstance.get_unique(session, service=dbservice,
                                        name=instance, preclude=True)
-            dbsi = ServiceInstance(service=dbservice, name=instance)
+            dbsi = ServiceInstance(service=dbservice, name=instance,
+                                   comments=comments)
             session.add(dbsi)
             plenaries.append(PlenaryServiceInstance(dbservice, dbsi,
                                                     logger=logger))
