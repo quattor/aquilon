@@ -131,10 +131,6 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % machine.comments)
         return "\n".join(details)
 
-    def get_header(self):
-        """This is just an idea... not used anywhere (yet?)."""
-        return "machine,rack,building,vendor,model,serial,interface,mac,ip"
-
     def csv_tolist(self, machine):
         if machine.interfaces:
             return [MachineInterfacePair((machine, i))

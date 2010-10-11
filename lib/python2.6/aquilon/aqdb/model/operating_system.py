@@ -64,12 +64,6 @@ class OperatingSystem(Base):
     def cfg_path(self):
         return 'os/%s/%s'% (self.name, self.version)
 
-    @classmethod
-    def by_archetype(cls, dbarchetype):
-        session = object_session(dbarchetype)
-        return session.query(cls).filter(
-            cls.__dict__['archetype'] == dbarchetype).all()
-
 
 operating_system = OperatingSystem.__table__
 

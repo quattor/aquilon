@@ -114,10 +114,6 @@ class SwitchFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % switch.comments)
         return "\n".join(details)
 
-    def get_header(self):
-        """This is just an idea... not used anywhere (yet?)."""
-        return "switch,type,rack,building,vendor,model,serial,interface,mac,ip"
-
     def csv_tolist(self, switch):
         interfaces = []
         for i in switch.interfaces:
@@ -142,10 +138,6 @@ class TorSwitch(object):
 
 class TorSwitchFormatter(SwitchFormatter):
     """Wrapper to use the old CSV output."""
-    def get_header(self):
-        """This is just an idea... not used anywhere (yet?)."""
-        return "switch,rack,building,vendor,model,serial,interface,mac,ip"
-
     def csv_tolist(self, switch):
         tuples = []
         for iface in switch.interfaces:
