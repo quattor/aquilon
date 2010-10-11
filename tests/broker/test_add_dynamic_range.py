@@ -98,6 +98,19 @@ class TestAddDynamicRange(TestBrokerCommand):
                          (self.net.tor_net2[0].usable[2],
                           self.net.tor_net2[0].usable[-3]), command)
 
+    def testverifynetworkproto(self):
+        command = "show network --ip %s --format proto" % self.net.tor_net2[0].ip
+        out = self.commandtest(command.split(" "))
+        msg = self.parse_netlist_msg(out, expect=1)
+        network = msg.networks[0]
+        hosts = set([host.fqdn for host in network.hosts])
+        start = self.net.tor_net2[0].usable[2]
+        end = self.net.tor_net2[0].usable[-3]
+        for i in range(int(start), int(end) + 1):
+            ip = IPv4Address(i)
+            self.failUnless(dynname(ip) in hosts, "%s is missing from network"
+                            "protobuf output" % dynname(ip))
+
     def testfailalreadytaken(self):
         command = ["add_dynamic_range",
                    "--startip", self.net.tor_net2[0].usable[2],
