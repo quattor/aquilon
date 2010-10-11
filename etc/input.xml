@@ -1825,6 +1825,8 @@
          <option name="type" type="string">Location type</option>
          <option name="parentname" type="string">Short name of parent</option>
          <option name="parenttype" type="string">Location type of parent</option>
+      </optgroup>
+      <optgroup name="add_location_optional" mandatory="False">
          <option name="comments" type="string">Comments about the location</option>
       </optgroup>
       <transport method="put" path="location/generic/%(type)s/%(name)s" />

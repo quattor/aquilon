@@ -46,8 +46,8 @@ const.location_types = ("company", "hub", "continent", "country", "campus",
 
 class CommandAddLocation(BrokerCommand):
 
-    required_parameters = ["name", "fullname", "type",
-            "parentname", "parenttype", "comments"]
+    required_parameters = ["name", "fullname", "type", "parentname",
+                           "parenttype"]
 
     def render(self, session, name, fullname, type,
             parentname, parenttype, comments, **arguments):
@@ -95,14 +95,11 @@ class CommandAddLocation(BrokerCommand):
         if not found_new:
             raise ArgumentError("Unknown type %s." % type.capitalize())
 
-        optional_args = {}
         # XXX: The fullname used to be nullable... adding hack...
         if not fullname:
             fullname = name
-        if comments:
-            optional_args["comments"] = comments
 
         new_location = location_type(name=name, fullname=fullname,
-                parent=dbparent, **optional_args)
+                parent=dbparent, comments=comments)
         session.add(new_location)
         return
