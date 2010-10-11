@@ -139,6 +139,7 @@ from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
 from test_show_switch import TestShowSwitch
+from test_show_machine import TestShowMachine
 from test_search_switch import TestSearchSwitch
 from test_search_hardware import TestSearchHardware
 from test_search_machine import TestSearchMachine
@@ -259,7 +260,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestShowHostIPList, TestShowHostMachineList, TestShowMachineMacList,
                 TestShowServiceAll, TestShowCampus, TestShowFqdn,
                 TestShowSwitch, TestSearchSwitch,
-                TestSearchHardware, TestSearchMachine,
+                TestSearchHardware, TestSearchMachine, TestShowMachine,
                 TestSearchSystem, TestSearchHost, TestSearchESXCluster,
                 TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                 TestUpdateInterface, TestUpdateMachine, TestUpdateModel,

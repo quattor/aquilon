@@ -42,17 +42,13 @@ class MachineInterfacePair(tuple):
 class MachineInterfacePairFormatter(ObjectFormatter):
     def csv_fields(self, item):
         machine = item[0]
-        interface = item[1]
+        addr = item[1]
 
         details = [machine.label, machine.location.rack.name,
                    machine.location.building.name, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
-        if interface:
-            details.extend([interface.name, interface.mac])
-            if machine.primary_name:
-                details.append(machine.primary_name.ip)
-            else:
-                details.append(None)
+        if addr:
+            details.extend([addr.logical_name, addr.vlan.interface.mac, addr.ip])
         else:
             details.extend([None, None, None])
         return details
@@ -133,8 +129,11 @@ class MachineFormatter(ObjectFormatter):
 
     def csv_tolist(self, machine):
         if machine.interfaces:
-            return [MachineInterfacePair((machine, i))
-                    for i in machine.interfaces]
+            entries = []
+            for iface in machine.interfaces:
+                for addr in iface.all_addresses():
+                    entries.append(MachineInterfacePair((machine, addr)))
+            return entries
         else:
             return [MachineInterfacePair((machine, None))]
 
