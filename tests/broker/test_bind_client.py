@@ -87,6 +87,27 @@ class TestBindClient(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Template: service/utsvc/utsi1", command)
 
+    def testverifybindutsi1proto(self):
+        command = "show service --service utsvc --instance utsi1 --format proto"
+        out = self.commandtest(command.split(" "))
+        msg = self.parse_service_instance_msg(out, 1)
+        svc = msg.servicelists[0].services[0]
+        self.failUnlessEqual(svc.name, "utsvc",
+                             "Service name mismatch: %s instead of utsvc\n" %
+                             svc.name)
+        si = svc.serviceinstances[0]
+        self.failUnlessEqual(si.name, "utsi1",
+                             "Service name mismatch: %s instead of utsi1\n" %
+                             si.name)
+        # Using set() to avoid ordering issues
+        servers = set([cli.fqdn for cli in si.clients])
+        expected = set(["unittest00.one-nyp.ms.com",
+                        "unittest02.one-nyp.ms.com"])
+        self.failUnlessEqual(servers, expected,
+                             "Wrong list of clients for service utsvc "
+                             "instance utsi1: %s\n" %
+                             " ".join(list(servers)))
+
     def testbindutsi2(self):
         command = ["bind", "client", "--debug",
                    "--hostname", "unittest02.one-nyp.ms.com",
