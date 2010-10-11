@@ -121,7 +121,7 @@ class DsdbConnection(object):
     def close(self):
         self.syb.close()
 
-def test():
+def test():  # pragma: no cover
     db = DsdbConnection()
     assert db, "No dsdb connection"
 

@@ -153,7 +153,7 @@ class ServiceInstance(Base):
                 continue
             try:
                 ips.append(socket.gethostbyname(system.fqdn))
-            except socket.gaierror:
+            except socket.gaierror:  # pragma: no cover
                 # For now this fails silently.  It may be correct to raise
                 # an error here but the timing could be unpredictable.
                 pass

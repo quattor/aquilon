@@ -216,7 +216,7 @@ class ResponsePage(resource.Resource):
                     arguments[arg] = None
                     continue
             values = request.args[arg]
-            if not isinstance(values, list):
+            if not isinstance(values, list):  # pragma: no cover
                 # FIXME: This should be something that raises a 500
                 # (Internal Server Error)... this is handled internally.
                 return defer.fail(ArgumentError(
@@ -383,9 +383,9 @@ class RestServer(ResponsePage):
                             myinstance.parameter_checks[option_name] = force_mac
                         elif paramtype == "string" or paramtype == "file":
                             pass
-                        else:
+                        else:  # pragma: no cover
                             log.msg("Warning: unknown option type %s" % paramtype)
-                    else:
+                    else:  # pragma: no cover
                         log.msg("Warning: argument type not known for %s.%s" %
                                 (myinstance.command, option_name))
 

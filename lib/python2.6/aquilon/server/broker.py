@@ -188,7 +188,7 @@ class BrokerCommand(object):
         #free = "True " if self.is_lock_free else "False"
         #log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
-    def render(self, **arguments):
+    def render(self, **arguments):  # pragma: no cover
         """ Implement this method to create a functional broker command.
 
         The base __init__ method wraps all implementations using

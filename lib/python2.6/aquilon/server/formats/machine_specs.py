@@ -46,7 +46,8 @@ class MachineSpecsFormatter(ObjectFormatter):
                         machine_specs.disk_capacity,
                         machine_specs.controller_type,
                         machine_specs.disk_type))
-        if machine_specs.comments:
+        # TODO: there is no way to set the comments on MachineSpecs right now
+        if machine_specs.comments:  # pragma: no cover
             details.append(indent + "  Comments: %s" % machine_specs.comments)
         return "\n".join(details)
 

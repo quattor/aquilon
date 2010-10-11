@@ -248,7 +248,7 @@ class DbFactory(object):
         sql = 'select sequence_name from user_sequences'
         return [name for (name, ) in self.safe_execute(sql)]
 
-    def drop_all_tables_and_sequences(self, no_confirm=False):
+    def drop_all_tables_and_sequences(self, no_confirm=False):  # pragma: no cover
         """ MetaData.drop_all() doesn't play nice with db's that have sequences.
             you're alternative is to call this """
         if self.vendor is 'sqlite':
@@ -277,20 +277,20 @@ class DbFactory(object):
 
             self.safe_execute('PURGE RECYCLEBIN')
 
-def is_prod_ora_instance(dsn):
+def is_prod_ora_instance(dsn):  # pragma: no cover
     prod_re = re.compile('@NYPO_AQUILON', re.IGNORECASE)
     if prod_re.search(dsn):
         return True
     else:
         return False
 
-def is_prod_user():
+def is_prod_user():  # pragma: no cover
     if os.environ['USER'] == 'cdb':
         return True
     else:
         return False
 
-def is_prod(dsn):
+def is_prod(dsn):  # pragma: no cover
     if is_prod_ora_instance(dsn) and is_prod_user():
         return True
     else:

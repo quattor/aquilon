@@ -48,7 +48,7 @@ campus.primary_key.name = 'campus_pk'
 campus.info['unique_fields'] = ['name']
 
 
-class CampusDiffStruct(object):
+class CampusDiffStruct(object):  # pragma: no cover
     """ Handy for populating campuses and finding common parent for
         sublocation structural elements within """
 

@@ -152,11 +152,11 @@ class ObjectFormatter(object):
             if not self.protocol in self.loaded_protocols:
                 try:
                     self.loaded_protocols[self.protocol] = __import__(self.protocol)
-                except ImportError, e:
+                except ImportError, e:  # pragma: no cover
                     self.loaded_protocols[self.protocol] = False
                     error = "path %s protocol: %s error: %s" % (self.protodir, self.protocol, e)
                     raise ProtocolError(error)
-            else:
+            else:  # pragma: no cover
                 if self.loaded_protocols[self.protocol] == False:
                     error = "path %s protocol: %s error: previous import attempt was unsuccessful" % (self.protodir, self.protocol)
                     raise ProtocolError(error)

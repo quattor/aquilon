@@ -158,7 +158,7 @@ class FutureARecord(System):
                        primary_key=True)
 
     def __init__(self, ip=None, **kwargs):
-        if not ip:
+        if not ip:  # pragma: no cover
             raise ArgumentError("DNS A records need an IP address.")
         return super(FutureARecord, self).__init__(ip=ip, **kwargs)
 
@@ -206,7 +206,7 @@ class ReservedName(System):
                        primary_key=True)
 
     def __init__(self, **kwargs):
-        if "ip" in kwargs and kwargs["ip"]:
+        if "ip" in kwargs and kwargs["ip"]:  # pragma: no cover
             raise ArgumentError("Reserved names must not have an IP address.")
         return super(ReservedName, self).__init__(**kwargs)
 

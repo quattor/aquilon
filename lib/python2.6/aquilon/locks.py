@@ -63,7 +63,7 @@ class LockQueue(object):
                 raise InternalError("Duplicate attempt to aquire %s with the "
                                     "same key." % key)
             self.queue.append(key)
-            while self.blocked(key):
+            while self.blocked(key):  # pragma: no cover
                 key.log("requesting %s with %s others waiting",
                         key, key.blocker_count)
                 self.queue_condition.wait()

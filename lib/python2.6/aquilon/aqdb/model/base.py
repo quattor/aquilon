@@ -52,7 +52,7 @@ class Base(object):
 
     def __init__(self, **kw):
         for k in kw:
-            if not hasattr(type(self), k):
+            if not hasattr(type(self), k):  # pragma: no cover
                 msg = "%r is an invalid argument for %s" % (
                     k, type(self).__name__)
                 raise TypeError(msg)
@@ -191,7 +191,7 @@ class Base(object):
         caller = sys._getframe(1).f_code.co_name
         clslabel = cls._get_class_label()
 
-        if not isinstance(session, Session):
+        if not isinstance(session, Session):  # pragma: no cover
             raise TypeError("The first argument of %s() must be an "
                             "SQLAlchemy session." % caller)
 

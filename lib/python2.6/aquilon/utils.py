@@ -66,7 +66,7 @@ def monkeypatch(cls):
         return func
     return decorator
 
-def confirm(prompt=None, resp=False):
+def confirm(prompt=None, resp=False):  # pragma: no cover
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
 

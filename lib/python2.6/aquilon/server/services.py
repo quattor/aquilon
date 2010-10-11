@@ -395,12 +395,12 @@ class Chooser(object):
     def finalize_service_instances(self):
         """Fill out the list of chosen services."""
         for (service, instances) in self.staging_services.items():
-            if len(instances) < 1:
+            if len(instances) < 1:  # pragma: no cover
                 self.error("Internal Error: Attempt to finalize on "
                            "service %s without any candidates." %
                            service.name)
                 continue
-            if len(instances) > 1:
+            if len(instances) > 1:  # pragma: no cover
                 self.error("Internal Error: Attempt to finalize on "
                            "service %s with too many candidates %s." %
                            (service.name,

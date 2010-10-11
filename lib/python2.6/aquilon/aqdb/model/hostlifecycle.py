@@ -79,7 +79,7 @@ hostlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
 hostlifecycle.info['unique_fields'] = ['name']
 
 @monkeypatch(hostlifecycle)
-def populate(sess, *args, **kw):
+def populate(sess, *args, **kw):  # pragma: no cover
     from sqlalchemy.exceptions import IntegrityError
 
     statuslist = HostLifecycle.transitions.keys()

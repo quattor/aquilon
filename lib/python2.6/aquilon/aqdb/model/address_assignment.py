@@ -48,7 +48,7 @@ def _address_creator(addr):
         return AddressAssignment(ip=addr, label=None)
     elif isinstance(addr, dict):
         return AddressAssignment(**addr)
-    else:
+    else:  # pragma: no cover
         raise TypeError("Adding an address requires either a bare IP or a "
                         "map containing the IP and the label.")
 

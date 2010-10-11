@@ -120,7 +120,7 @@ def run_command(args, env=None, path=".",
     if p.returncode >= 0:
         logger.info("command `%s` exited with return code %d" %
                     (simple_command, p.returncode))
-    else:
+    else:  # pragma: no cover
         logger.info("command `%s` exited with signal %d" %
                     (simple_command, -p.returncode))
     out = "".join(out_thread.buffer)

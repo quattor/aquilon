@@ -79,7 +79,7 @@ class StateEngine:
         The API is simpler: only a single positional argument is supported.
         '''
 
-        if not isinstance(session, Session):
+        if not isinstance(session, Session):  # pragma: no cover
             raise TypeError("The first argument of %s() must be an "
                             "SQLAlchemy session." % caller)
 
