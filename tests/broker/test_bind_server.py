@@ -78,8 +78,8 @@ class TestBindServer(TestBrokerCommand):
     def testverifybindutsi1proto(self):
         command = "show service --service utsvc --instance utsi1 --format proto"
         out = self.commandtest(command.split(" "))
-        msg = self.parse_service_instance_msg(out, 1)
-        svc = msg.servicelists[0].services[0]
+        msg = self.parse_service_msg(out, 1)
+        svc = msg.services[0]
         self.failUnlessEqual(svc.name, "utsvc",
                              "Service name mismatch: %s instead of utsvc\n" %
                              svc.name)

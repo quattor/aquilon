@@ -397,19 +397,18 @@ class TestBrokerCommand(unittest.TestCase):
                                  (expect, received))
         return dns_domainlist
 
-    def parse_service_instance_msg(self, msg, expect=None):
-        serviceinstance = aqdservices_pb2.ServiceInstanceList()
-        serviceinstance.ParseFromString(msg)
-        received = len(serviceinstance.servicelists)
+    def parse_service_msg(self, msg, expect=None):
+        service = aqdservices_pb2.ServiceList()
+        service.ParseFromString(msg)
+        received = len(service.services)
         if expect is None:
             self.failUnless(received > 0,
-                            "No service instances listed in ServiceInstance "
-                            "protobuf message\n")
+                            "No services listed in protobuf message\n")
         else:
             self.failUnlessEqual(received, expect,
-                                 "%d instance(s) expected, got %d\n" %
+                                 "%d service(s) expected, got %d\n" %
                                  (expect, received))
-        return serviceinstance
+        return service
 
 
     def parse_servicemap_msg(self, msg, expect=None):
