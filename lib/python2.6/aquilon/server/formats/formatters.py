@@ -244,6 +244,54 @@ class ObjectFormatter(object):
                 ObjectFormatter.default_handler)
         return handler.format_proto(result, skeleton)
 
+    def add_hardware_data(self, host_msg, hwent):
+        host_msg.machine.name = str(hwent.label)
+        if hwent.location:
+            host_msg.sysloc = str(hwent.location.sysloc())
+            host_msg.machine.location.name = str(hwent.location.name)
+            host_msg.machine.location.location_type = str(hwent.location.location_type)
+        host_msg.machine.model.name = str(hwent.model.name)
+        host_msg.machine.model.vendor = str(hwent.model.vendor.name)
+
+        if hwent.hardware_type == 'machine':
+            host_msg.machine.cpu = str(hwent.cpu.name)
+            host_msg.machine.memory = hwent.memory
+
+            for disk in hwent.disks:
+                disk_msg = host_msg.machine.disks.add()
+                disk_msg.device_name = str(disk.device_name)
+                disk_msg.capacity = disk.capacity
+                disk_msg.disk_type = str(disk.controller_type)
+
+        for iface in hwent.interfaces:
+            has_addrs = False
+            for addr in iface.all_addresses():
+                has_addrs = True
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = str(addr.logical_name)
+                if iface.mac:
+                    int_msg.mac = str(iface.mac)
+                int_msg.ip = str(addr.ip)
+                if addr.vlan == 0:
+                    int_msg.bootable = iface.bootable
+                else:
+                    int_msg.bootable = False
+            # Add entries for interfaces that do not have any addresses
+            if not has_addrs:
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = str(iface.name)
+                if iface.mac:
+                    int_msg.mac = str(iface.mac)
+
+    def add_host_data(self, host_msg, host):
+        # FIXME: Add branch type and sandbox author to protobufs.
+        host_msg.domain.name = str(host.branch.name)
+        host_msg.domain.owner = str(host.branch.owner.name)
+        host_msg.status = str(host.status.name)
+        host_msg.personality.name = str(host.personality.name)
+        host_msg.personality.archetype.name = str(host.personality.archetype.name)
+        host_msg.archetype.name = str(host.archetype.name)
+
     def add_host_msg(self, host_msg, host):
         """ Return a host message.
 
@@ -256,54 +304,15 @@ class ObjectFormatter(object):
         host_msg.hostname = str(host.machine.primary_name.name)
         host_msg.fqdn = host.fqdn
         host_msg.dns_domain = str(host.machine.primary_name.dns_domain.name)
-        # FIXME: Add branch type and sandbox author to protobufs.
-        host_msg.domain.name = str(host.branch.name)
-        host_msg.domain.owner = str(host.branch.owner.name)
-        host_msg.status = str(host.status.name)
         if host.machine.primary_ip:
             host_msg.ip = str(host.machine.primary_ip)
         for iface in host.machine.interfaces:
             if iface.interface_type != 'public' or not iface.bootable:
                 continue
             host_msg.mac = str(iface.mac)
-        host_msg.personality.name = str(host.personality.name)
-        host_msg.personality.archetype.name = str(host.personality.archetype.name)
-        host_msg.archetype.name = str(host.archetype.name)
-        host_msg.machine.name = str(host.machine.label)
-        if host.machine.location:
-            host_msg.sysloc = str(host.machine.location.sysloc())
-            host_msg.machine.location.name = str(host.machine.location.name)
-            host_msg.machine.location.location_type = str(host.machine.location.location_type)
-        host_msg.machine.model.name = str(host.machine.model.name)
-        host_msg.machine.model.vendor = str(host.machine.model.vendor.name)
-        host_msg.machine.cpu = str(host.machine.cpu.name)
-        host_msg.machine.memory = host.machine.memory
 
-        for disk in host.machine.disks:
-            disk_msg = host_msg.machine.disks.add()
-            disk_msg.device_name = str(disk.device_name)
-            disk_msg.capacity = disk.capacity
-            disk_msg.disk_type = str(disk.controller_type)
-
-        for i in host.machine.interfaces:
-            has_addrs = False
-            for addr in i.all_addresses():
-                has_addrs = True
-                int_msg = host_msg.machine.interfaces.add()
-                int_msg.device = str(addr.logical_name)
-                if i.mac:
-                    int_msg.mac = str(i.mac)
-                int_msg.ip = str(addr.ip)
-                if addr.vlan == 0:
-                    int_msg.bootable = i.bootable
-                else:
-                    int_msg.bootable = False
-            # Add entries for interfaces that do not have any addresses
-            if not has_addrs:
-                int_msg = host_msg.machine.interfaces.add()
-                int_msg.device = str(i.name)
-                if i.mac:
-                    int_msg.mac = str(i.mac)
+        self.add_host_data(host_msg, host)
+        self.add_hardware_data(host_msg, host.machine)
 
     def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)

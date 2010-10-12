@@ -29,7 +29,8 @@
 """Host formatter."""
 
 from sqlalchemy.sql import bindparam
-from sqlalchemy.orm import contains_eager, aliased, joinedload_all
+from sqlalchemy.orm import (contains_eager, aliased, joinedload_all,
+                            subqueryload_all)
 from sqlalchemy.orm.session import object_session
 
 from aquilon.server.formats.formatters import ObjectFormatter
@@ -222,6 +223,9 @@ class SimpleNetworkListFormatter(ListFormatter):
             addrq = addrq.join(VlanInterface, Interface)
             addrq = addrq.options(contains_eager('vlan'))
             addrq = addrq.options(contains_eager('vlan.interface'))
+            addrq = addrq.options(subqueryload_all('vlan.interface.hardware_entity.'
+                                                   'interfaces.vlans.assignments.'
+                                                   'dns_records'))
 
             dynq = session.query(DynamicStub)
             dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
@@ -252,12 +256,24 @@ class SimpleNetworkListFormatter(ListFormatter):
         addrs = addrq.params(ip=net.network.ip, broadcast=net.broadcast).all()
         for addr in addrs:
             iface = addr.vlan.interface
+            hwent = iface.hardware_entity
 
             host_msg = net_msg.hosts.add()
+
             if iface.interface_type == 'management':
                 host_msg.type = 'manager'
+            elif addr.ip == hwent.primary_ip:
+                if hwent.hardware_type == 'machine':
+                    host_msg.type = 'host'
+                    if hwent.host:
+                        self.add_host_data(host_msg, hwent.host)
+                elif hwent.hardware_type == 'switch':
+                    # aqdhcpd uses the type
+                    host_msg.type = 'tor_switch'
+                else:
+                    host_msg.type = hwent.hardware_type
             else:
-                host_msg.type = 'host'
+                host_msg.type = 'auxiliary'
 
             if addr.dns_records:
                 host_msg.hostname = str(addr.dns_records[0].name)
@@ -271,11 +287,14 @@ class SimpleNetworkListFormatter(ListFormatter):
                                                     addr.label):
                 host_msg.mac = iface.mac
 
+            self.add_hardware_data(host_msg, hwent)
+
         # Add dynamic DHCP records
         dynhosts = dynq.params(ip=net.network.ip, broadcast=net.broadcast).all()
         for dynhost in dynhosts:
             host_msg = net_msg.hosts.add()
-            host_msg.type = 'dyndns_stub'
+            # aqdhcpd uses the type
+            host_msg.type = 'dynamic_stub'
             host_msg.hostname = str(dynhost.name)
             host_msg.fqdn = str(dynhost.fqdn)
             host_msg.dns_domain = str(dynhost.dns_domain)
