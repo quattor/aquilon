@@ -70,7 +70,7 @@ def search_system_query(session, system_type=System, **kwargs):
     # Outer-join in all the subclasses so that each access of
     # system doesn't (necessarily) issue another query.
     if system_type is System:
-        q = q.with_polymorphic(System.__mapper__.polymorphic_map.values())
+        q = q.with_polymorphic('*')
     if kwargs.get('fqdn', None):
         (short, dbdns_domain) = parse_fqdn(session, kwargs['fqdn'])
         q = q.filter_by(name=short, dns_domain=dbdns_domain)

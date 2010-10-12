@@ -42,8 +42,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  subquery=False, **kwargs):
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
-        q = q.with_polymorphic(
-            HardwareEntity.__mapper__.polymorphic_map.values())
+        q = q.with_polymorphic('*')
     dblocation = get_location(session, **kwargs)
     if dblocation:
         if kwargs.get('exact_location'):
