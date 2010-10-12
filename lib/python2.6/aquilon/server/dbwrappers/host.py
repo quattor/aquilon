@@ -31,10 +31,20 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 
 def hostname_to_host(session, hostname):
-    dbmachine = Machine.get_unique(session, hostname, compel=True)
+    # When the user asked for a host, returning "machine not found" does not
+    # feel to be the right error message, even if it is technically correct.
+    # It's a little tricky though: we don't want to suppress "dns domain not
+    # found"
+    parse_fqdn(session, hostname)
+    try:
+        dbmachine = Machine.get_unique(session, hostname, compel=True)
+    except NotFoundException:
+        raise NotFoundException("Host %s not found." % hostname)
+
     if not dbmachine.host:
         raise NotFoundException("{0} does not have a host "
                                 "assigned.".format(dbmachine))
