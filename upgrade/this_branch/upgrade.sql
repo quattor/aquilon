@@ -173,9 +173,9 @@ INSERT INTO primary_name_association (hardware_entity_id, dns_record_id, creatio
 	SELECT chassis.chassis_hw_id, chassis.system_id, system.creation_date
 		FROM chassis, system
 		WHERE chassis.system_id = system.id;
-UPDATE chassis_hw SET comments = (SELECT comments FROM chassis
-					WHERE chassis.chassis_hw_id = chassis_hw.hardware_entity_id)
-	WHERE comments IS NULL;
+UPDATE hardware_entity SET comments = (SELECT comments FROM chassis
+					WHERE chassis.chassis_hw_id = hardware_entity.id)
+	WHERE hardware_type = 'chassis' AND comments IS NULL;
 DROP TABLE chassis;
 ALTER TABLE chassis_hw RENAME TO chassis;
 ALTER TABLE chassis RENAME CONSTRAINT "CHASSIS_HW_PK" TO "CHASSIS_PK";
@@ -191,9 +191,9 @@ INSERT INTO primary_name_association (hardware_entity_id, dns_record_id, creatio
 ALTER TABLE switch_hw ADD switch_type VARCHAR2(16);
 UPDATE switch_hw SET switch_type = (SELECT switch_type FROM switch
 					WHERE switch.switch_id = switch_hw.hardware_entity_id);
-UPDATE switch_hw SET comments = (SELECT comments FROM switch
-					WHERE switch.switch_id = switch_hw.hardware_entity_id)
-	WHERE comments IS NULL;
+UPDATE hardware_entity SET comments = (SELECT comments FROM switch
+					WHERE switch.switch_id = hardware_entity.id)
+	WHERE hardware_type = 'switch' AND comments IS NULL;
 DROP TABLE switch;
 ALTER TABLE switch_hw RENAME TO switch;
 ALTER TABLE switch RENAME CONSTRAINT "SWITCH_HW_PK" TO "SWITCH_PK";
