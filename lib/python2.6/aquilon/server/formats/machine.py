@@ -58,17 +58,12 @@ ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
+        # TODO: convert this formatter to mako
         details = [indent + "%s: %s" % (machine.model.machine_type.capitalize(),
                                         machine.label)]
         if machine.primary_name:
             details.append(indent + "  Primary Name: "
                            "{0:a}".format(machine.primary_name))
-        # TODO: convert this formatter to mako
-        if machine.host:
-            template = self.lookup_raw.get_template("host.mako")
-            details.append(shift(template.render(record=machine.host,
-                                                 formatter=self),
-                                 indent=indent + "  ").rstrip())
         if machine.cluster:
             details.append(indent + \
                            "  Hosted by {0:c}: {0.name}".format(machine.cluster))
@@ -125,6 +120,11 @@ class MachineFormatter(ObjectFormatter):
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
+        if machine.host:
+            template = self.lookup_raw.get_template("host.mako")
+            details.append(shift(template.render(record=machine.host,
+                                                 formatter=self),
+                                 indent=indent + "  ").rstrip())
         return "\n".join(details)
 
     def csv_tolist(self, machine):
