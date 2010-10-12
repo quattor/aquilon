@@ -41,7 +41,7 @@ from brokertest import TestBrokerCommand
 class TestAddBuilding(TestBrokerCommand):
 
     def testaddbu(self):
-        command = "add building --building bu --city ny"
+        command = 'add building --building bu --city ny --address "12_cherry_lane"'
         self.noouttest(command.split(" "))
 
     def testverifyaddbu(self):
@@ -63,4 +63,3 @@ class TestAddBuilding(TestBrokerCommand):
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
