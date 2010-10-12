@@ -189,7 +189,7 @@ class PlenaryToplevelHost(Plenary):
                                   (self.name, required_services))
 
         provides = []
-        for sis in self.dbhost.sislist:
+        for sis in self.dbhost.services_provided:
             provides.append('%s/server/config' % sis.service_instance.cfg_path)
 
         templates = []

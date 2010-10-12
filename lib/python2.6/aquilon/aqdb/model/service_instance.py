@@ -111,7 +111,7 @@ class ServiceInstance(Base):
         return adjusted_count
 
     @property
-    def clients(self):
+    def client_fqdns(self):
         session = object_session(self)
         q = session.query(System)
         q = q.join(PrimaryNameAssociation, Machine, Host, BuildItem)
@@ -342,8 +342,9 @@ class BuildItem(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    host = relation(Host, backref='build_items', uselist=False)
-    service_instance = relation(ServiceInstance, backref='build_items')
+    service_instance = relation(ServiceInstance, backref='clients')
+
+    host = relation(Host, uselist=False, backref='services_used')
 
     @property
     def cfg_path(self):

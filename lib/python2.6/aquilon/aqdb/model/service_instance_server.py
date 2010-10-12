@@ -59,16 +59,13 @@ class ServiceInstanceServer(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    service_instance = relation(ServiceInstance)
-    host = relation(Host, uselist=False, backref='sislist')
+    service_instance = relation(ServiceInstance, uselist=False,
+                                backref=backref("servers",
+                                                collection_class=ordering_list('position'),
+                                                order_by=[position]))
+
+    host = relation(Host, uselist=False, backref='services_provided')
 
 
 service_instance_server = ServiceInstanceServer.__table__
 service_instance_server.primary_key.name='service_instance_server_pk'
-
-table = service_instance_server
-
-#TODO: would we like this mapped in service_instance.py instead?
-ServiceInstance.servers = relation(ServiceInstanceServer,
-                          collection_class=ordering_list('position'),
-                          order_by=[ServiceInstanceServer.__table__.c.position])

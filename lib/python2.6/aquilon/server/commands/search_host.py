@@ -170,15 +170,15 @@ class CommandSearchHost(BrokerCommand):
             dbservice = Service.get_unique(session, service, compel=True)
             if instance:
                 dbsi = get_service_instance(session, dbservice, instance)
-                q = q.join('build_items')
+                q = q.join('services_used')
                 q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
             else:
-                q = q.join('build_items', 'service_instance')
+                q = q.join('services_used', 'service_instance')
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join(['build_items', 'service_instance'])
+            q = q.join(['services_used', 'service_instance'])
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
