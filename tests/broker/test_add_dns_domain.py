@@ -73,15 +73,19 @@ class TestAddDnsDomain(TestBrokerCommand):
             #          1         2         3         4         5         6
             's234567890123456789012345678901234567890123456789012345678901234' +
             '.ms.com']
-        self.badrequesttest(command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "DNS name components must have a length between "
+                         "1 and 63.", command)
 
     def testaddtopleveldomain(self):
         command = ['add', 'dns_domain', '--dns_domain', 'toplevel']
-        self.badrequesttest(command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Top-level DNS domains cannot be added.", command)
 
     def testaddinvaliddomain(self):
         command = ['add', 'dns_domain', '--dns_domain', 'foo-.ms.com']
-        self.badrequesttest(command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal DNS domain name format 'foo-'.", command)
 
     def testverifyshowall(self):
         command = "show dns_domain --all"
