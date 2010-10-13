@@ -30,6 +30,7 @@
 
 from datetime import datetime
 from inspect import isclass
+import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
                         Index, String, DateTime)
@@ -70,6 +71,20 @@ class HardwareEntity(Base):  # pylint: disable-msg=W0232, R0903
     model = relation(Model, uselist=False)
 
     __mapper_args__ = {'polymorphic_on': hardware_type}
+
+    _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
+
+    @classmethod
+    def valid_label(cls, label):
+        return cls._label_check.match(label)
+
+    def __init__(self, label=None, **kwargs):
+        if not label:
+            raise ArgumentError("HardwareEntity needs a label.")
+        elif not self.valid_label(label):
+            raise ArgumentError("Illegal hardware label format '%s'. Only "
+                                "alphanumeric characters are allowed." % label)
+        super(HardwareEntity, self).__init__(label=label, **kwargs)
 
     @property
     def fqdn(self):

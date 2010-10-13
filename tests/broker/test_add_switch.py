@@ -183,6 +183,23 @@ class TestAddSwitch(TestBrokerCommand):
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
                           ip=self.net.tor_net[9].usable[0])
 
+    def testrejectbadlabelimplicit(self):
+        command = ["add", "switch", "--switch", "not-alnum.aqd-unittest.ms.com",
+                   "--type", "bor", "--ip", self.net.tor_net[9].usable[-1],
+                   "--rack", "ut3", "--model", "temp_switch"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Could not deduce a valid hardware label",
+                         command)
+
+    def testrejectbadlabelexplicit(self):
+        command = ["add", "switch", "--switch", "ut3gd1r99.aqd-unittest.ms.com",
+                   "--label", "not-alnum",
+                   "--type", "bor", "--ip", self.net.tor_net[9].usable[-1],
+                   "--rack", "ut3", "--model", "temp_switch"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSwitch)

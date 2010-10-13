@@ -214,10 +214,21 @@ class TestAddMachine(TestBrokerCommand):
                          "'capacity', 466*GB),",
                          command)
 
+    def testrejectqualifiedname(self):
+        command = ["add", "machine", "--machine", "qualified.ms.com",
+                   "--rack", "ut3", "--model", "hs21-8853l5u"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Illegal hardware label format 'qualified.ms.com'.",
+                         command)
+
     # Testing that add machine does not allow a tor_switch....
     def testrejectut3gd2r01(self):
-        self.badrequesttest(["add", "machine", "--machine", "ut3gd2r01",
-            "--rack", "ut3", "--model", "uttorswitch"])
+        command = ["add", "machine", "--machine", "ut3gd1r02",
+                   "--rack", "ut3", "--model", "uttorswitch"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "cannot add machines of type switch",
+                         command)
 
     def testverifyrejectut3gd2r01(self):
         command = "show machine --machine ut3gd2r01"

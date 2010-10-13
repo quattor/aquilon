@@ -47,6 +47,10 @@ class CommandAddChassis(BrokerCommand):
         dbdns_rec = parse_primary_name(session, chassis, ip)
         if not label:
             label = dbdns_rec.name
+            if not Chassis.valid_label(label):
+                raise ArgumentError("Could not deduce a valid hardware label "
+                                    "from the chassis name.  Please specify "
+                                    "--label.")
 
         dblocation = get_location(session, rack=rack)
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,

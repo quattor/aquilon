@@ -27,6 +27,15 @@ UPDATE hardware_entity
 				switch.id = system.id)
 	WHERE hardware_entity_type = 'switch_hw';
 
+-- Strip domain from the label
+-- FIXME
+-- SELECT ha1.label FROM hardware_entity ha1 WHERE EXISTS
+--	(SELECT ha2.id FROM hardware_entity ha2 WHERE ha2.label LIKE CONCAT(ha1.label, '.%'));
+-- dd442s149p1 dd442s150p1 dd444s151p1 dd444s152p1 oy561c1n2
+UPDATE hardware_entity
+	SET label = SUBSTR(label, 1, INSTR(label, '.') - 1)
+	WHERE label LIKE '%.%';
+
 ALTER TABLE hardware_entity
 	MODIFY (label CONSTRAINT "HW_ENT_LABEL_NN" NOT NULL);
 -- FIXME

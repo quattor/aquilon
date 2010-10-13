@@ -52,6 +52,10 @@ class CommandAddSwitch(BrokerCommand):
         dbdns_rec = parse_primary_name(session, switch, ip)
         if not label:
             label = dbdns_rec.name
+            if not Switch.valid_label(label):
+                raise ArgumentError("Could not deduce a valid hardware label "
+                                    "from the switch name.  Please specify "
+                                    "--label.")
 
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?

@@ -142,6 +142,21 @@ class TestAddChassis(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c1", command)
         self.matchoutput(out, "Chassis: ut9c1", command)
 
+    def testrejectbadlabelimplicit(self):
+        command = ["add", "chassis", "--chassis", "not-alnum.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "utchassis"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Could not deduce a valid hardware label",
+                         command)
+
+    def testrejectbadlabelexplicit(self):
+        command = ["add", "chassis", "--chassis", "ut3c6.aqd-unittest.ms.com",
+                   "--label", "not-alnum", "--rack", "ut3", "--model", "utchassis"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
+                         command)
+
+
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)
