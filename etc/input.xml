@@ -1898,7 +1898,7 @@
          <option name="chassis" type="string">Chassis name</option>
       </optgroup>
       <optgroup name="del_chassis_optional" mandatory="False" fields="any">
-         <option name="force" type="flag">Remove all machines first</option>
+         <option name="clear_slots" type="flag">Remove all machines first</option>
       </optgroup>
       <transport method="delete" path="chassis/%(chassis)s" />
    </command>
