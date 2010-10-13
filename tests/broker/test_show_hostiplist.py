@@ -43,6 +43,7 @@ class TestShowHostIPList(TestBrokerCommand):
     def testshowhostiplist(self):
         command = "show hostiplist"
         out = self.commandtest(command.split(" "))
+        dynip = self.net.tor_net2[0].usable[2]
         self.matchoutput(out,
                          "unittest02.one-nyp.ms.com,%s,\n" %
                          self.net.unknown[0].usable[0],
@@ -55,6 +56,18 @@ class TestShowHostIPList(TestBrokerCommand):
                          "unittest00-e1.one-nyp.ms.com,%s,"
                          "unittest00.one-nyp.ms.com" %
                          self.net.unknown[0].usable[3],
+                         command)
+        self.matchoutput(out,
+                         "unittest00r.one-nyp.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[4],
+                         command)
+        self.matchoutput(out,
+                         "dynamic-%s.aqd-unittest.ms.com,%s,\n" %
+                         (str(dynip).replace(".", "-"), dynip),
+                         command)
+        self.matchoutput(out,
+                         "arecord13.aqd-unittest.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[13],
                          command)
         self.matchclean(out, self.aurora_with_node, command)
         self.matchclean(out, self.aurora_without_node, command)
@@ -76,7 +89,13 @@ class TestShowHostIPList(TestBrokerCommand):
                          "unittest00.one-nyp.ms.com" %
                          self.net.unknown[0].usable[3],
                          command)
+        self.matchoutput(out,
+                         "unittest00r.one-nyp.ms.com,%s,\n" %
+                         self.net.unknown[0].usable[4],
+                         command)
         self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
+        self.matchclean(out, "dynamic-", command)
+        self.matchclean(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest01.one-nyp.ms.com", command)
         self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
         self.matchclean(out, "evh2.aqd-unittest.ms.com", command)

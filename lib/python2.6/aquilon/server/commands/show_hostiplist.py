@@ -102,19 +102,33 @@ class CommandShowHostIPList(BrokerCommand):
 
         q = q.order_by(addr_dnsrec.name, addr_domain.name)
 
-        # FIXME: this list does not contain the addresses reserved for dynamic
-        # DHCP. Is this a bug or a feature?
         iplist = HostIPList()
-        for addr in q.all():
-            entry = [addr.fqdns[0], addr.ip]
+        for addr in q:
             hwent = addr.vlan.interface.hardware_entity
-            # FIXME: the exclusion of management interfaces is questionable, but
-            # matches the previous behavior
+            # Only add the primary info for auxiliary addresses, not management
+            # ones
             if hwent.primary_name and addr.ip != hwent.primary_ip and \
                addr.vlan.interface.interface_type != 'management':
-                entry.append(hwent.fqdn)
+                primary = hwent.fqdn
             else:
-                entry.append("")
-            iplist.append(entry)
+                primary = None
+            for fqdn in addr.fqdns:
+                iplist.append((fqdn, addr.ip, primary))
+
+        # Append addresses that are not bound to interfaces
+        if not archetype:
+            q = session.query(FutureARecord)
+            q = q.join(DnsDomain)
+            q = q.options(contains_eager("dns_domain"))
+            q = q.reset_joinpoint()
+
+            q = q.outerjoin((AddressAssignment,
+                             AddressAssignment.ip == FutureARecord.ip))
+            q = q.filter(AddressAssignment.id == None)
+
+            q = q.order_by(FutureARecord.name, DnsDomain.name)
+
+            for entry in q:
+                iplist.append((entry.fqdn, entry.ip, None))
 
         return iplist
