@@ -41,8 +41,10 @@ from brokertest import TestBrokerCommand
 class TestDelBuilding(TestBrokerCommand):
 
     def testdelbu(self):
+        self.dsdb_expect("delete_building_aq -building bu")
         command = "del building --building bu"
         self.noouttest(command.split(" "))
+        self.dsdb_verify()
 
     def testverifydelbu(self):
         command = "show building --building bu"

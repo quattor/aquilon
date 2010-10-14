@@ -41,8 +41,12 @@ from brokertest import TestBrokerCommand
 class TestAddBuilding(TestBrokerCommand):
 
     def testaddbu(self):
-        command = 'add building --building bu --city ny --address "12_cherry_lane"'
-        self.noouttest(command.split(" "))
+        self.dsdb_expect("add_building_aq -building_name bu -city ny "
+                         "-building_addr 12 Cherry Lane")
+        command = ["add", "building", "--building", "bu", "--city", "ny",
+                   "--address", "12 Cherry Lane"]
+        self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifyaddbu(self):
         command = "show building --building bu"
