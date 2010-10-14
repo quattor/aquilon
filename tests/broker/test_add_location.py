@@ -51,8 +51,8 @@ class TestAddLocation(TestBrokerCommand):
         command = ["add", "location", "--type", "building", "--name", "bt",
                    "--parenttype", "city", "--parentname", "no-such-city",
                    "--fullname", "bt"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Parent City no-such-city not found.", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "City no-such-city not found.", command)
 
     def testaddbadtype(self):
         command = ["add", "location", "--type", "bad-type", "--name", "bt",
