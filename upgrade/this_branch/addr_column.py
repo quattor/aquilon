@@ -1,8 +1,6 @@
 #!/ms/dist/python/PROJ/core/2.6.4-64/bin/python
 import sys
 
-from ipy import ipy
-
 sys.path.insert(0, '../../lib/python2.6')
 from aquilon.aqdb.dsdb import DsdbConnection
 from aquilon.aqdb.db_factory import DbFactory
@@ -41,8 +39,8 @@ FROM  LOCATION L, BUILDING B
 WHERE L.ID = B.ID
 AND B.ADDRESS IS NULL""".lstrip()
 
-no_addrs = dbf.engine.execute(null_addrs)
-if no_addrs is None:
+no_addrs = dbf.engine.execute(null_addrs).fetchall()
+if not no_addrs:
     nonnull="ALTER TABLE building MODIFY(address VARCHAR(255) NOT NULL)"
     dbf.engine.execute(nonnull)
     rename_non_null_check_constraints(dbf)
