@@ -42,7 +42,8 @@ from brokertest import TestBrokerCommand
 class TestAddDnsDomain(TestBrokerCommand):
 
     def testaddaqdunittestdomain(self):
-        self.dsdb_expect_fail("show dns_domains -domain_name aqd-unittest.ms.com")
+        self.dsdb_expect("show dns_domains -domain_name aqd-unittest.ms.com",
+                         fail=True)
         self.dsdb_expect("add dns_domain -domain_name aqd-unittest.ms.com "
                          "-comments Some DNS domain comments")
         self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest.ms.com",

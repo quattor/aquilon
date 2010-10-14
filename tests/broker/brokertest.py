@@ -42,6 +42,10 @@ from ipaddr import IPv4Network, IPv4Address
 LOCK_RE = re.compile(r'^(acquired|releasing) '
                      r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
 
+DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
+DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
+DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
+
 
 class TestBrokerCommand(unittest.TestCase):
 
@@ -92,8 +96,8 @@ class TestBrokerCommand(unittest.TestCase):
 
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
-        for name in ["expected_dsdb_cmds", "fail_expected_dsdb_cmds",
-                     "issued_dsdb_cmds"]:
+        for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
+                     DSDB_ISSUED_CMDS_FILE]:
             path = os.path.join(dsdb_coverage_dir, name)
             try:
                 os.remove(path)
@@ -535,10 +539,15 @@ class TestBrokerCommand(unittest.TestCase):
             f.write(contents)
         return scratchfile
 
-    def dsdb_expect(self, command):
+    def dsdb_expect(self, command, fail=False):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
-        expected_name = os.path.join(dsdb_coverage_dir, "expected_dsdb_cmds")
+        if fail:
+            filename = DSDB_EXPECT_FAILURE_FILE
+        else:
+            filename = DSDB_EXPECT_SUCCESS_FILE
+
+        expected_name = os.path.join(dsdb_coverage_dir, filename)
         with open(expected_name, "a") as fp:
             if isinstance(command, list):
                 fp.write(" ".join([str(cmd) for cmd in command]))
@@ -546,19 +555,8 @@ class TestBrokerCommand(unittest.TestCase):
                 fp.write(str(command))
             fp.write("\n")
 
-    def dsdb_expect_fail(self, command):
-        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
-                                         "dsdb_coverage")
-        fail_expected_name = os.path.join(dsdb_coverage_dir, "fail_expected_dsdb_cmds")
-        with open(fail_expected_name, "a") as fp:
-            if isinstance(command, list):
-                fp.write(" ".join([str(cmd) for cmd in command]))
-            else:
-                fp.write(str(command))
-            fp.write("\n")
-
     def dsdb_expect_add(self, hostname, ip, interface=None, mac=None,
-                        primary=None):
+                        primary=None, fail=False):
         command = ["add", "host", "-host_name", hostname,
                    "-ip_address", str(ip), "-status", "aq"]
         if interface:
@@ -569,32 +567,31 @@ class TestBrokerCommand(unittest.TestCase):
         if primary:
             command.extend(["-primary_host_name", primary])
 
-        self.dsdb_expect(" ".join(command))
+        self.dsdb_expect(" ".join(command), fail=fail)
 
-    def dsdb_expect_delete(self, ip):
-        self.dsdb_expect("delete host -ip_address %s" % ip)
+    def dsdb_expect_delete(self, ip, fail=False):
+        self.dsdb_expect("delete host -ip_address %s" % ip, fail=fail)
 
-    def dsdb_expect_update(self, fqdn, mac):
+    def dsdb_expect_update(self, fqdn, mac, fail=False):
         self.dsdb_expect("update host -host_name %s -status aq "
-                         "-ethernet_address %s" % (fqdn, mac))
+                         "-ethernet_address %s" % (fqdn, mac), fail=fail)
 
     def dsdb_verify(self):
         dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
                                          "dsdb_coverage")
-        expected_name = os.path.join(dsdb_coverage_dir, "expected_dsdb_cmds")
-        fail_expected_name = os.path.join(dsdb_coverage_dir, "fail_expected_dsdb_cmds")
-        issued_name = os.path.join(dsdb_coverage_dir, "issued_dsdb_cmds")
+        fail_expected_name = os.path.join(dsdb_coverage_dir,
+                                          DSDB_EXPECT_FAILURE_FILE)
+        issued_name = os.path.join(dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
 
         expected = {}
-        try:
-            with open(expected_name, "r") as fp:
-                for line in fp:
-                    expected[line.rstrip("\n")] = True
-            with open(fail_expected_name, "r") as fp:
-                for line in fp:
-                    expected[line.rstrip("\n")] = True
-        except IOError:
-            pass
+        for filename in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE]:
+            expected_name = os.path.join(dsdb_coverage_dir, filename)
+            try:
+                with open(expected_name, "r") as fp:
+                    for line in fp:
+                        expected[line.rstrip("\n")] = True
+            except IOError:
+                pass
 
         # This is likely a logic error in the test
         if not expected:
@@ -614,20 +611,6 @@ class TestBrokerCommand(unittest.TestCase):
             if cmd not in issued:
                 errors.append("'%s'" % cmd)
         # Unexpected DSDB commands are caught by the fake_dsdb script
-
-        # Clean up for the next command
-        #try:
-        #    os.remove(expected_name)
-        #except OSError:
-        #    pass
-        #try:
-        #    os.remove(fail_expected_name)
-        #except OSError:
-        #    pass
-        #try:
-        #    os.remove(issued_name)
-        #except OSError:
-        #    pass
 
         if errors:
             self.fail("The following expected DSDB commands were not called:"
