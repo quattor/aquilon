@@ -48,7 +48,7 @@ _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
 
-def kill_from_pid_file(pid_file):
+def kill_from_pid_file(pid_file):  # pragma: no cover
     if os.path.isfile(pid_file):
         f = open(pid_file)
         p = f.read()

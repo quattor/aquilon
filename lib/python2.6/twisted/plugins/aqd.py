@@ -149,7 +149,13 @@ class AQDMaker(object):
             aquilon_srcdir = os.path.join(config.get("broker", "srcdir"),
                                           "lib", "python2.6", "aquilon")
             sourcefiles = []
-            for dirpath, dirname, filenames in os.walk(aquilon_srcdir):
+            for dirpath, dirnames, filenames in os.walk(aquilon_srcdir):
+                # FIXME: try to do this from the coverage config file
+                if dirpath.endswith("aquilon"):
+                    dirnames.remove("client")
+                elif dirpath.endswith("aqdb"):
+                    dirnames.remove("utils")
+
                 for filename in filenames:
                     if not filename.endswith('.py'):
                         continue
