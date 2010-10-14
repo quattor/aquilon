@@ -87,7 +87,7 @@ def parse_primary_name(session, fqdn, ip):
 
     if dbdns_rec and dbdns_rec.hardware_entity:
         raise ArgumentError("{0} already exists as the primary name of "
-                            "{1:l}.".format(hwname, dbdns_rec.hardware_entity))
+                            "{1:l}.".format(fqdn, dbdns_rec.hardware_entity))
     if ip:
         addr = session.query(AddressAssignment).filter_by(ip=ip).first()
         if addr:
@@ -104,14 +104,14 @@ def parse_primary_name(session, fqdn, ip):
         # FutureARecord
         if dbdns_rec.system_type != 'future_a_record':
             raise ArgumentError("%s already exists as a(n) %s." %
-                                (hwname, dbdns_rec._get_class_label()))
+                                (fqdn, dbdns_rec._get_class_label()))
 
         # Make sure the primary name does not resolve to multiple addresses
         if ip and dbdns_rec.ip != ip:
             raise ArgumentError("%s already exists, but points to %s "
                                 "instead of %s. A pimary name is not "
                                 "allowed to point to multiple addresses." %
-                                (hwname, dbdns_rec.ip, ip))
+                                (fqdn, dbdns_rec.ip, ip))
 
     if not dbdns_rec:
         if ip:
