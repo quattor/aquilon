@@ -96,6 +96,19 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[15],
                          command)
 
+    def test_400_dsdbfailure(self):
+        self.dsdb_expect_add("arecord16.aqd-unittest.ms.com",
+                             self.net.unknown[0].usable[16], fail=True)
+        command = ["add_address", "--ip", self.net.unknown[0].usable[16],
+                   "--fqdn", "arecord16.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Could not add address to DSDB", command)
+        self.dsdb_verify()
+
+    def test_410_verifydsdbfailure(self):
+        command = ["show", "fqdn", "--fqdn", "arecord16.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
     def test_900_failbadenv(self):
         default = self.config.get("broker", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[16],

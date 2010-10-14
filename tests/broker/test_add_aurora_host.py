@@ -78,6 +78,14 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Status: ready", command)
 
+    def testdsdbmissing(self):
+        self.dsdb_expect("show host -host_name not-in-dsdb", fail=True)
+        command = ["add", "aurora", "host", "--hostname", "not-in-dsdb",
+                   "--osname", "linux", "--osversion", "4.0.1-x86_64"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
+        self.dsdb_verify()
+
     def testaddnyaqd1(self):
         self.dsdb_expect("show host -host_name nyaqd1")
         self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1",

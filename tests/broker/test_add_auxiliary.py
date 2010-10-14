@@ -67,6 +67,29 @@ class TestAddAuxiliary(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
 
+    def testrejectmultipleaddress(self):
+        command = ["add", "auxiliary", "--ip", self.net.unknown[0].usable[-1],
+                   "--auxiliary", "unittest00-e2.one-nyp.ms.com",
+                   "--hostname", "unittest00.one-nyp.ms.com",
+                   "--interface", "eth1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Interface eth1 of machine unittest00.one-nyp.ms.com "
+                         "already has the following addresses: "
+                         "eth1 [%s]" % self.net.unknown[0].usable[3],
+                         command)
+
+    # TODO: can't check this with the aq client since it detects the conflict
+    # itself. Move this check to test_client_bypass once that can use knc
+    #def testhostmachinemismatch(self):
+    #    command = ["add", "auxiliary", "--ip", self.net.unknown[0].usable[-1],
+    #               "--auxiliary", "unittest00-e2.one-nyp.ms.com",
+    #               "--hostname", "unittest00.one-nyp.ms.com",
+    #               "--machine", "ut3c1n5", "--interface", "eth1"]
+    #    out = self.badrequesttest(command)
+    #    self.matchoutput(out, "Use either --hostname or --machine to uniquely",
+    #                     command)
+
     def testrejectut3c1n4eth1(self):
         # This is an IP address outside of the Firm.  It should not appear
         # in the network table and thus should trigger a bad request here.

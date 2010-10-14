@@ -148,6 +148,21 @@ class TestAddDynamicRange(TestBrokerCommand):
                           self.net.tor_net2[1].ip),
                          command)
 
+    def testdsdbrollback(self):
+        for ip in range(int(self.net.tor_net2[2].usable[2]),
+                        int(self.net.tor_net2[2].usable[4]) + 1):
+            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
+            self.dsdb_expect_delete(IPv4Address(ip))
+        bad_ip = self.net.tor_net2[2].usable[5]
+        self.dsdb_expect_add(dynname(bad_ip), bad_ip, fail=True)
+        command = ["add_dynamic_range",
+                   "--startip", self.net.tor_net2[2].usable[2],
+                   "--endip", self.net.tor_net2[2].usable[5],
+                   "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.dsdb_verify()
+        self.matchoutput(out, "Could not add addresses to DSDB", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDynamicRange)

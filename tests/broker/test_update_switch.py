@@ -167,6 +167,19 @@ class TestUpdateSwitch(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testdsdbrollback(self):
+        oldip = self.net.tor_net[9].usable[0]
+        newip = self.net.tor_net[9].usable[1]
+        self.dsdb_expect_delete(oldip)
+        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", newip, "xge",
+                             fail=True)
+        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", oldip, "xge")
+        command = ["update", "switch", "--switch", "ut3gd1r07.aqd-unittest.ms.com",
+                   "--ip", newip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Could not update switch in DSDB", command)
+        self.dsdb_verify()
+
     def testverifyupdatewithoutinterface(self):
         self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
@@ -186,6 +199,11 @@ class TestUpdateSwitch(TestBrokerCommand):
                           ip=self.net.tor_net[8].usable[1],
                           mac=self.net.tor_net[8].usable[1].mac,
                           interface="xge49")
+
+    def testverifydsdbrollback(self):
+        self.verifyswitch("ut3gd1r07.aqd-unittest.ms.com", "generic",
+                          "temp_switch", "ut3", "a", "3", switch_type='bor',
+                          ip=self.net.tor_net[9].usable[0])
 
 
 if __name__=='__main__':
