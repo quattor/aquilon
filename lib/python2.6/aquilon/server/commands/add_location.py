@@ -34,8 +34,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from aquilon import const
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
-                                Campus, City, Building, Room, Rack, Desk)
+from aquilon.aqdb.model import Location
 
 # FIXME: This probably belongs in location.py
 # It's also broken, as campus is not strictly between country and city.
@@ -51,6 +50,12 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
         code reuse while also being able to run DSDB commands before commiting
         the transactions
     """
+
+    for value in [type, parent_type]:
+        if value not in Location.__mapper__.polymorphic_map:
+            raise ArgumentError("%s is not a known location type." %
+                                value.capitalize())
+
     loc = Location.get_unique(session, name=name,
                               location_type=type, preclude=True)
 
@@ -64,10 +69,7 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
         raise ArgumentError("Type %s cannot be a parent of %s." %
                     (parent_type.capitalize(), type.capitalize()))
 
-    location_type = globals()[type.capitalize()]
-    if not issubclass(location_type, Location):
-        raise ArgumentError("%s is not a known location type." % (
-            type.capitalize()))
+    location_type = Location.__mapper__.polymorphic_map[type].class_
 
     if not fullname:
         fullname = name
