@@ -29,12 +29,15 @@
 """Contains the logic for `aq search host`."""
 
 
+from sqlalchemy.orm import aliased
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
-                                HostLifecycle,
-                                OperatingSystem, Service, Machine, Model)
+                                HostLifecycle, OperatingSystem,
+                                Service, ServiceInstance, NasDisk, Disk,
+                                Machine, Model)
 from aquilon.server.dbwrappers.system import search_system_query
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -48,6 +51,7 @@ class CommandSearchHost(BrokerCommand):
     def render(self, session, logger, hostname, machine, archetype,
                buildstatus, personality, osname, osversion, service, instance,
                model, machine_type, vendor, serial, cluster,
+               guest_on_cluster, guest_on_share,
                domain, sandbox, branch,
                fullinfo, **arguments):
         if hostname:
@@ -142,6 +146,22 @@ class CommandSearchHost(BrokerCommand):
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             q = q.join('_cluster')
             q = q.filter_by(cluster=dbcluster)
+            q = q.reset_joinpoint()
+        if guest_on_cluster:
+            dbcluster = Cluster.get_unique(session, guest_on_cluster,
+                                           compel=True)
+            q = q.join(['machine', '_cluster'])
+            q = q.filter_by(cluster=dbcluster)
+            q = q.reset_joinpoint()
+        if guest_on_share:
+            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
+                                                compel=True)
+            dbshare = ServiceInstance.get_unique(session, name=guest_on_share,
+                                                 service=nas_disk_share,
+                                                 compel=True)
+            NasAlias = aliased(NasDisk)
+            q = q.join(['machine', 'disks', (NasAlias, NasAlias.id==Disk.id)])
+            q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
