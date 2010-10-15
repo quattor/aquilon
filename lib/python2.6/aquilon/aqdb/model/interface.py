@@ -1,4 +1,4 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-  # pylint: disable-msg=C0301
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010  Contributor
 #
