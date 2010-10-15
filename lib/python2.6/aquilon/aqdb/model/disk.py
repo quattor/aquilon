@@ -30,9 +30,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Column, Integer, DateTime, Sequence, String,
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, column_property
+from sqlalchemy.sql import select, func
 from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
@@ -79,8 +80,8 @@ class Disk(Base):
              self.machine.name, self.capacity)
 
 
-disk = Disk.__table__
-disk.primary_key.name='%s_pk'% (_TN)
+disk = Disk.__table__  # pylint: disable-msg=C0103, E1101
+disk.primary_key.name = '%s_pk'% (_TN)
 disk.append_constraint(UniqueConstraint('machine_id', 'device_name',
                                         name='disk_mach_dev_name_uk'))
 disk.info['unique_fields'] = ['machine', 'device_name']
@@ -129,6 +130,18 @@ class NasDisk(Disk):
                 (self._get_class_label(), self.device_name,
                  self.controller_type, self.machine.name, self.capacity,
                  self.service_instance.name)
+
+# The formatter code is interested in the count of disks/machines, and it is
+# cheaper to query the DB than to load all entities into memory
+ServiceInstance.nas_disk_count = column_property(
+    select([func.count()],
+           NasDisk.service_instance_id == ServiceInstance.id)
+    .label("nas_disk_count"), deferred=True)
+
+ServiceInstance.nas_machine_count = column_property(
+    select([func.count(func.distinct(NasDisk.machine_id))],
+           NasDisk.service_instance_id == ServiceInstance.id)
+    .label("nas_machine_count"), deferred=True)
 
 #machine_specs-> indicates the service instance for nas disk
 #service instance name is the share name

@@ -26,33 +26,30 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Chassis are the containers for blades. These are also systems in that they
-    also have management modules which have dhcp services, etc. and have
-    dns A records, etc. """
+""" Chassis we use today are:
+    HP: C class and P class, though p class servers have no central management
+    IBM: BCE and BCH (blade center e and blade center h). There may be some
+    blade center e's in VA but they are like rackmounts as well"""
 
-from sqlalchemy     import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy import Column, Integer, ForeignKey
 
-from aquilon.aqdb.model import System, ChassisHw
+from aquilon.aqdb.model import HardwareEntity
 
-class Chassis(System):
-    __tablename__ = 'chassis'
+_TN = 'chassis'
 
-    system_id = Column(Integer, ForeignKey('system.id', name='chassis_sys_fk',
+
+class Chassis(HardwareEntity):
+    """ Things you put blades into, silly pants ;) """
+
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
+
+    hardware_entity_id = Column(Integer,
+                                ForeignKey('hardware_entity.id',
+                                           name='%s_hw_ent_fk' % _TN,
                                            ondelete='CASCADE'),
-                       primary_key=True)
+                                primary_key=True)
 
-    chassis_hw_id = Column(Integer, ForeignKey('chassis_hw.hardware_entity_id',
-                                               name='chassis_sys_hw_fk',
-                                               ondelete='CASCADE'),
-                           nullable=False)
 
-    chassis_hw      = relation(ChassisHw, uselist=False,
-                               backref=backref('chassis_hw', cascade='delete'))
-
-    __mapper_args__ = {'polymorphic_identity':'chassis'}
-
-chassis = Chassis.__table__
-chassis.primary_key.name='chassis_pk'
-
-table = chassis
+chassis = Chassis.__table__  # pylint: disable-msg=C0103, E1101
+chassis.primary_key.name = '%s_pk' % _TN

@@ -216,10 +216,10 @@ class StatusSubscriber(object):
     def __init__(self):
         pass
 
-    def process(self, record):
+    def process(self, record):  # pragma: no cover
         """Each record will be passed to process() as it comes in."""
         pass
 
-    def finish(self):
+    def finish(self):  # pragma: no cover
         """Called after all records have been processed."""
         pass

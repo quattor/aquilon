@@ -30,13 +30,25 @@
 
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Host, DnsDomain
-from aquilon.server.dbwrappers.system import (get_system,
-                                              get_system_dependencies)
+from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 
 
 def hostname_to_host(session, hostname):
-    return get_system(session, hostname, Host, 'Host')
+    # When the user asked for a host, returning "machine not found" does not
+    # feel to be the right error message, even if it is technically correct.
+    # It's a little tricky though: we don't want to suppress "dns domain not
+    # found"
+    parse_fqdn(session, hostname)
+    try:
+        dbmachine = Machine.get_unique(session, hostname, compel=True)
+    except NotFoundException:
+        raise NotFoundException("Host %s not found." % hostname)
+
+    if not dbmachine.host:
+        raise NotFoundException("{0} does not have a host "
+                                "assigned.".format(dbmachine))
+    return dbmachine.host
 
 def get_host_build_item(self, dbhost, dbservice):
     for template in dbhost.templates:
@@ -50,7 +62,10 @@ def get_host_dependencies(session, dbhost):
     If the host has no dependencies, then an empty list is returned
     """
     ret = []
-    ret.extend(get_system_dependencies(session, dbhost))
+    for sis in dbhost.services_provided:
+        ret.append("%s is bound as a server for service %s instance %s" %
+                   (sis.host.fqdn, sis.service_instance.service.name,
+                    sis.service_instance.name))
     if dbhost.cluster and hasattr(dbhost.cluster, 'vm_to_host_ratio') and \
        dbhost.cluster.host_count * len(dbhost.cluster.machines) > \
        dbhost.cluster.vm_count * (len(dbhost.cluster.hosts) - 1):

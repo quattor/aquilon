@@ -35,8 +35,9 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Cpu, LocalDisk, Machine
 
 
-def create_machine(session, machine, dblocation, dbmodel,
-        cpuname, cpuvendor, cpuspeed, cpucount, memory, serial):
+def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
+                   cpuvendor=None, cpuspeed=None, cpucount=None, memory=None,
+                   serial=None, comments=None):
 
     # Figure out a CPU...
     dbcpu = None
@@ -91,8 +92,9 @@ def create_machine(session, machine, dblocation, dbmodel,
                                 "defaults, please specify --memory (in MB)." %
                                 dbmodel.name)
 
-    dbmachine = Machine(location=dblocation, model=dbmodel, name=machine,
-            cpu=dbcpu, cpu_quantity=cpucount, memory=memory, serial_no=serial)
+    dbmachine = Machine(location=dblocation, model=dbmodel, label=machine,
+                        cpu=dbcpu, cpu_quantity=cpucount, memory=memory,
+                        serial_no=serial, comments=comments)
     session.add(dbmachine)
 
     if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node' \

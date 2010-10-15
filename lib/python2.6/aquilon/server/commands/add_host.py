@@ -29,16 +29,13 @@
 """Contains the logic for `aq add host`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.branch import get_branch_and_author
-from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_switch_offsets)
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
+from aquilon.server.dbwrappers.interface import generate_ip
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
-                                HostLifecycle,
-                                Machine, Personality)
+                                HostLifecycle, Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -108,13 +105,10 @@ class CommandAddHost(BrokerCommand):
 
         session.refresh(dbmachine)
         if dbmachine.host:
-            raise ArgumentError("{0} is already allocated to "
+            raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        (short, dbdns_domain) = parse_system_and_verify_free(session, hostname)
-
         dbinterface = None
-        mac = None
         if dbpersonality.archetype.name != 'aurora':
             for interface in dbmachine.interfaces:
                 if interface.interface_type != 'public':
@@ -126,8 +120,6 @@ class CommandAddHost(BrokerCommand):
                                             "machine %s are marked bootable." %
                                             machine)
                     dbinterface = interface
-            if dbinterface:
-                mac = dbinterface.mac
 
         # This method is allowed to return None, which will pass through
         # the next two.
@@ -135,18 +127,15 @@ class CommandAddHost(BrokerCommand):
         # add_windows_host, or possibly by bypassing the aq client and
         # posting a request directly.
         ip = generate_ip(session, dbinterface, **arguments)
-        dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_switch_offsets(dbnetwork, ip)
+        dbdns_rec = parse_primary_name(session, hostname, ip)
 
-        dbhost = Host(name=short, dns_domain=dbdns_domain,
-                      mac=mac, ip=ip, network=dbnetwork, comments=comments,
-                      machine=dbmachine, branch=dbbranch,
+        dbhost = Host(machine=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
-                      status=dbstatus, operating_system=dbos)
+                      status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
-        if dbinterface:
-            dbinterface.system = dbhost
-            session.add(dbinterface)
+        dbmachine.primary_name = dbdns_rec
+        if ip and dbinterface and ip not in dbinterface.vlans[0].addresses:
+            dbinterface.vlans[0].addresses.append(ip)
         session.flush()
         session.refresh(dbhost)
 
@@ -171,19 +160,13 @@ class CommandAddHost(BrokerCommand):
                         fields = dsdb_runner.show_host(hostname)
                     except ProcessException, e:
                         raise ArgumentError("Could not find host in DSDB: %s" % e)
-            elif not dbhost.ip:
-                logger.info("No IP for %s, not adding to DSDB." % dbhost.fqdn)
+            elif not dbmachine.primary_ip:
+                logger.info("No IP for %s, not adding to DSDB." % dbmachine.fqdn)
             else:
-                # For anything else, reserve the name and IP in DSDB.
                 try:
-                    args = [dbhost.fqdn, dbhost.ip]
-                    if dbinterface:
-                        args.extend([dbinterface.name, dbinterface.mac])
-                    else:
-                        args.extend([None, None])
-                    dsdb_runner.add_host_details(*args)
-                except ProcessException, e:
-                    raise ArgumentError("Could not add host to DSDB: %s" % e)
+                    dsdb_runner.update_host(dbmachine, None)
+                except AquilonError, err:
+                    raise ArgumentError("Could not add host to DSDB: %s" % err)
         except:
             plenaries.restore_stash()
             raise

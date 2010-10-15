@@ -40,7 +40,12 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+from ipaddr import IPv4Address
+
 from brokertest import TestBrokerCommand
+
+def dynname(ip, domain="aqd-unittest.ms.com"):
+    return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
 
 
 class TestRefreshNetwork(TestBrokerCommand):
@@ -109,9 +114,18 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     # 300 add a small dynamic range to 0.1.1.0
     def test_300_adddynamicrange(self):
+        for ip in range(int(IPv4Address("0.1.1.4")),
+                          int(IPv4Address("0.1.1.8")) + 1):
+            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
                    "--dns_domain=aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_310_verifynetwork(self):
+        command = "show network --ip 0.1.1.0"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Dynamic Ranges: 0.1.1.4-0.1.1.8", command)
 
     def failsync(self, command):
         """Common code for the two tests below."""
@@ -166,8 +180,12 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     # 650 delete the dynamic range
     def test_650_deldynamicrange(self):
+        for ip in range(int(IPv4Address("0.1.1.4")),
+                          int(IPv4Address("0.1.1.8")) + 1):
+            self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     # 700 sync up building np
     # One last time to clean up the dummy network

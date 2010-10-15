@@ -26,30 +26,23 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Represent secondary interfaces """
+"""Contains the logic for `aq show chassis --missing`."""
 
-from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation
+from sqlalchemy.sql import exists
 
-from aquilon.aqdb.model import System, Machine
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.formats.chassis import MissingChassisList
+from aquilon.aqdb.model import Machine, Model, ChassisSlot
 
-class Auxiliary(System):
-    __tablename__ = 'auxiliary'
 
-    id = Column(Integer, ForeignKey('system.id',
-                                    name='aux_system_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
+class CommandShowChassisMissing(BrokerCommand):
 
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                             name='aux_machine_fk'),
-                         nullable=False)
-
-    machine = relation(Machine, backref='auxiliaries')
-
-    __mapper_args__ = {'polymorphic_identity':'auxiliary'}
-
-auxiliary = Auxiliary.__table__
-auxiliary.primary_key.name='aux_pk'
-
-table = auxiliary
+    def render(self, session, **arguments):
+        q = session.query(Machine)
+        q = q.filter(~exists().where(ChassisSlot.machine_id ==
+                                     Machine.machine_id))
+        q = q.join(Model)
+        q = q.filter_by(machine_type='blade')
+        q = q.reset_joinpoint()
+        q = q.order_by(Machine.label)
+        return MissingChassisList(q.all())

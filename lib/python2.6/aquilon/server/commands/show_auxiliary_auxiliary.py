@@ -29,9 +29,9 @@
 """Contains the logic for `aq show auxiliary --auxiliary`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.model import Auxiliary
+from aquilon.aqdb.model import FutureARecord
 
 
 class CommandShowAuxiliaryAuxiliary(BrokerCommand):
@@ -39,4 +39,16 @@ class CommandShowAuxiliaryAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, auxiliary, **kwargs):
-        return get_system(session, auxiliary, Auxiliary, 'Auxiliary')
+        dbdns_rec = FutureARecord.get_unique(session, fqdn=auxiliary,
+                                             compel=True)
+        if not dbdns_rec.assignments:
+            raise ArgumentError("Address {0:a} is not assigned to any "
+                                "interfaces.".format(dbdns_rec))
+        hws = []
+        for addr in dbdns_rec.assignments:
+            iface = addr.vlan.interface
+            if iface.interface_type != 'public':
+                raise ArgumentError("{0:a} is not an auxiliary.".format(dbdns_rec))
+            hws.append(iface.hardware_entity)
+
+        return hws

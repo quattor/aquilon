@@ -92,9 +92,9 @@ class CommandFlush(BrokerCommand):
                         plenary_info = PlenaryMachineInfo(machine)
                         written += plenary_info.write(locked=True)
                     except Exception, e:
-                        label = machine.name
+                        label = machine.label
                         if machine.host:
-                            label = "%s (host: %s)" % (machine.name,
+                            label = "%s (host: %s)" % (machine.label,
                                                        machine.host.fqdn)
                         failed.append("Machine %s failed: %s" % (label, e))
                         continue

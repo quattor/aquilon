@@ -50,22 +50,23 @@ class CommandDelMachine(BrokerCommand):
         if dbmachine.host:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
                                 "deleted.".format(dbmachine, dbmachine.host))
-        if dbmachine.auxiliaries:
-            raise ArgumentError("%s is still in use by auxiliaries: %s." %
-                                (format(dbmachine),
-                                 ", ".join([a.fqdn for a in dbmachine.auxiliaries])))
+
+        addrs = []
         for iface in dbmachine.interfaces:
-            logger.info("Before deleting machine '%s', "
-                        "removing interface '%s' [%s] boot=%s)" %
-                        (dbmachine.name, iface.name, iface.mac,
-                         iface.bootable))
-            session.delete(iface)
+            addrs.extend(list(iface.all_addresses()))
+        if addrs:
+            addrmsg = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for
+                                 addr in addrs])
+            raise ArgumentError("{0} still provides the following addresses, "
+                                "delete them first: {1}.".format(dbmachine,
+                                                                 addrmsg))
+
         for disk in dbmachine.disks:
             # Rely on cascade delete to remove the disks.  The Oracle driver
             # can handle the additional/explicit delete request but the
             # sqlite driver can't.
             logger.info("While deleting machine '%s' will remove disk '%s'" %
-                        (dbmachine.name, disk.device_name))
+                        (dbmachine.label, disk.device_name))
             #session.delete(disk)
         session.delete(dbmachine)
         session.flush()

@@ -41,14 +41,21 @@ from brokertest import TestBrokerCommand
 class TestUpdateInterface(TestBrokerCommand):
 
     def testupdateut3c5n10eth0mac(self):
+        mac = self.net.unknown[0].usable[11].mac
+        self.dsdb_expect_update("unittest02.one-nyp.ms.com", mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10",
-                        "--mac", self.net.unknown[0].usable[11].mac])
+                        "--machine", "ut3c5n10", "--mac", mac])
+        self.dsdb_verify()
 
     def testupdateut3c5n10eth0ip(self):
+        oldip = self.net.unknown[0].usable[0]
+        newip = self.net.unknown[0].usable[11]
+        self.dsdb_expect_delete(oldip)
+        self.dsdb_expect_add("unittest02.one-nyp.ms.com", newip, "eth0",
+                             oldip.mac)
         self.noouttest(["update", "interface", "--interface", "eth0",
-                        "--machine", "ut3c5n10",
-                        "--ip", self.net.unknown[0].usable[11]])
+                        "--machine", "ut3c5n10", "--ip", newip])
+        self.dsdb_verify()
 
     def testupdateut3c5n10eth1(self):
         self.noouttest(["update", "interface", "--interface", "eth1",
@@ -69,16 +76,18 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c5n10", command)
-        # FIXME: This is currently not working, command nees rethinking.
-        #self.matchoutput(out, "IP: %s" % self.hostip7, command)
-        self.matchoutput(out,
-                         "Interface: eth0 %s boot=False" %
-                         self.net.unknown[0].usable[11].mac.lower(),
-                         command)
-        self.matchoutput(out,
-                         "Interface: eth1 %s boot=True" %
-                         self.net.unknown[0].usable[12].mac.lower(),
-                         command)
+        self.matchoutput(out, "Interface: eth0 %s boot=False" %
+                         self.net.unknown[0].usable[11].mac.lower(), command)
+        self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[11], command)
+        self.matchoutput(out, "Interface: eth1 %s boot=True" %
+                         self.net.unknown[0].usable[12].mac.lower(), command)
+        self.matchoutput(out, "Provides: unknown [%s]" %
+                         self.net.unknown[0].usable[12], command)
+        # Verify that the primary name got updated
+        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[11], command)
+        self.matchclean(out, str(self.net.unknown[0].usable[0]), command)
 
     def testverifycatut3c5n10interfaces(self):
         #FIX ME: this doesn't really test anything at the moment: needs to be
@@ -123,22 +132,36 @@ class TestUpdateInterface(TestBrokerCommand):
                          command)
 
     def testupdateswitch(self):
+        mac = self.net.tor_net[8].usable[0].mac
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", mac)
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some interface comments",
-                   "--mac", self.net.tor_net[8].usable[0].mac,
-                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+                   "--mac", mac, "--switch=ut3gd1r06.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.dsdb_verify()
 
     def testverifyupdateswitch(self):
         command = ["show_switch",
                    "--switch=ut3gd1r06.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Switch: ut3gd1r06.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r06", command)
         self.matchoutput(out,
                          "Interface: xge49 %s" %
                          self.net.tor_net[8].usable[0].mac,
                          command)
         self.matchoutput(out, "Comments: Some interface comments", command)
+
+    def testnotamachine(self):
+        command = ["update", "interface", "--interface", "xge49",
+                   "--machine", "ut3gd1r06.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a machine", command)
+
+    def testnotaswitch(self):
+        command = ["update", "interface", "--interface", "eth0",
+                   "--switch", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "but is not a switch", command)
 
 
 if __name__=='__main__':

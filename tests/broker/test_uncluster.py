@@ -74,7 +74,7 @@ class TestUncluster(TestBrokerCommand):
         for i in range(1, 6):
             command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Hostname: evh%s.aqd-unittest.ms.com" % i,
+            self.matchoutput(out, "Primary Name: evh%s.aqd-unittest.ms.com" % i,
                              command)
             self.matchclean(out, "Member of ESX Cluster", command)
 

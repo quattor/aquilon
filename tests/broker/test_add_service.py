@@ -41,8 +41,10 @@ from brokertest import TestBrokerCommand
 class TestAddService(TestBrokerCommand):
 
     def testaddafsinstance(self):
-        command = "add service --service afs --instance q.ny.ms.com"
-        self.noouttest(command.split(" "))
+        command = ["add", "service", "--service", "afs",
+                   "--instance", "q.ny.ms.com",
+                   "--comments", "Some instance comments"]
+        self.noouttest(command)
 
     def testaddduplicateservice(self):
         command = "add service --service afs"
@@ -65,6 +67,15 @@ class TestAddService(TestBrokerCommand):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
+        # Make sure the right object got the comments
+        self.matchoutput(out, "    Comments: Some instance comments", command)
+        self.searchclean(out, r"^  Comments:", command)
+
+    def testaddbootserver(self):
+        """ add service without instance first """
+        command = ["add", "service", "--service", "bootserver",
+                   "--comments", "Some service comments"]
+        self.noouttest(command)
 
     def testaddbootserverinstance(self):
         command = "add service --service bootserver --instance np.test"
@@ -74,6 +85,7 @@ class TestAddService(TestBrokerCommand):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: bootserver Instance: np.test", command)
+        self.searchoutput(out, r"^  Comments: Some service comments", command)
 
     def testadddnsinstance(self):
         command = "add service --service dns --instance utdnsinstance"

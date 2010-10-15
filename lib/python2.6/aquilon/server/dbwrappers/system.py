@@ -31,30 +31,17 @@
 
 from sqlalchemy.exceptions import InvalidRequestError
 
-from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
+from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
+                                 UnimplementedError)
 from aquilon.aqdb.model import DnsDomain, System
+from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.network import get_network_byip
 
 
 def get_system(session, system, system_type=System, system_label='FQDN'):
-    (short, dbdns_domain) = parse_system(session, system)
+    (short, dbdns_domain) = parse_fqdn(session, system)
     return get_system_from_parts(session, short, dbdns_domain, system_type,
                                  system_label)
-
-def parse_system(session, system):
-    """ Break a system (string) name into short name (string) and
-        dns domain (db object)."""
-    if not system:
-        raise ArgumentError("No fully qualified name specified.")
-    (short, dot, dns_domain) = system.partition(".")
-    if not dns_domain:
-        raise ArgumentError("System name '%s' is not valid, it must be fully "
-                            "qualified." % system)
-    if not short:
-        raise ArgumentError("System name '%s' is not valid, missing host "
-                            "name." % system)
-    dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
-    return (short, dbdns_domain)
 
 def get_system_from_parts(session, short, dbdns_domain, system_type=System,
                           system_label='FQDN'):
@@ -71,7 +58,7 @@ def get_system_from_parts(session, short, dbdns_domain, system_type=System,
     return dbsystem
 
 def parse_system_and_verify_free(session, system):
-    (short, dbdns_domain) = parse_system(session, system)
+    (short, dbdns_domain) = parse_fqdn(session, system)
     q = session.query(System)
     dbsystem = q.filter_by(name=short, dns_domain=dbdns_domain).first()
     if dbsystem:
@@ -83,9 +70,9 @@ def search_system_query(session, system_type=System, **kwargs):
     # Outer-join in all the subclasses so that each access of
     # system doesn't (necessarily) issue another query.
     if system_type is System:
-        q = q.with_polymorphic(System.__mapper__.polymorphic_map.values())
+        q = q.with_polymorphic('*')
     if kwargs.get('fqdn', None):
-        (short, dbdns_domain) = parse_system(session, kwargs['fqdn'])
+        (short, dbdns_domain) = parse_fqdn(session, kwargs['fqdn'])
         q = q.filter_by(name=short, dns_domain=dbdns_domain)
     if kwargs.get('dns_domain', None):
         dbdns_domain = DnsDomain.get_unique(session, kwargs['dns_domain'],
@@ -99,24 +86,10 @@ def search_system_query(session, system_type=System, **kwargs):
         dbnetwork = get_network_byip(session, kwargs['networkip'])
         q = q.filter_by(network=dbnetwork)
     if kwargs.get('mac', None):
-        q = q.filter_by(mac=kwargs['mac'])
+        raise UnimplementedError("search_system --mac is no longer supported, "
+                                 "try search_hardware.")
     if kwargs.get('type', None):
         # Deprecated... remove if it becomes a problem.
         type_arg = kwargs['type'].strip().lower()
-        if type_arg == 'tor_switch':
-            type_arg = 'switch'
         q = q.filter_by(system_type=type_arg)
     return q
-
-def get_system_dependencies(session, dbsystem):
-    """Return a list of strings describing how a system is being used.
-
-    An empty list will be returned if there are no dependencies.
-
-    """
-    ret = []
-    for sis in dbsystem.sislist:
-        ret.append("%s is bound as a server for service %s instance %s" %
-                   (sis.system.fqdn, sis.service_instance.service.name,
-                    sis.service_instance.name))
-    return ret

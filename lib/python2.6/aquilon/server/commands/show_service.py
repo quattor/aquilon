@@ -29,9 +29,11 @@
 """Contains the logic for `aq show service`."""
 
 
+from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
+
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.server.dbwrappers.system import get_system
+from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import get_client_service_instances
 from aquilon.server.formats.service_instance import ServiceInstanceList
 from aquilon.server.formats.service import ServiceList
@@ -41,20 +43,42 @@ class CommandShowService(BrokerCommand):
 
     def render(self, session, server, client, **arguments):
         instance = arguments.get("instance", None)
-        dbserver = server and get_system(session, server) or None
-        dbclient = client and get_system(session, client) or None
+        dbserver = server and hostname_to_host(session, server) or None
+        dbclient = client and hostname_to_host(session, client) or None
         if dbserver:
+            q = session.query(ServiceInstance)
             if instance:
-                return ServiceInstanceList(
-                    session.query(ServiceInstance).filter_by(name=instance).join(
-                    'servers').filter_by(system=dbserver).all())
-            else:
-                return ServiceInstanceList(
-                    session.query(ServiceInstance).join('servers').filter_by(system=dbserver).all())
+                q = q.filter_by(name=instance)
+            q = q.join(Service)
+            q = q.reset_joinpoint()
+            q = q.join('servers')
+            q = q.filter_by(host=dbserver)
+            q = q.order_by(Service.name, ServiceInstance.name)
+            return ServiceInstanceList(q.all())
         elif dbclient:
             service_instances = get_client_service_instances(session, dbclient)
             if instance:
                 service_instances = [si for si in service_instances if si.name == instance]
             return ServiceInstanceList(service_instances)
         else:
-            return ServiceList(session.query(Service).order_by(Service.name).all())
+            # Try to load as much as we can as bulk queries since loading the
+            # objects one by one is much more expensive
+            q = session.query(Service)
+            q = q.join(ServiceInstance)
+            q = q.options(contains_eager('instances'))
+            q = q.options(joinedload('_archetypes'))
+            q = q.options(joinedload('_personalities'))
+            q = q.options(undefer('instances._client_count'))
+            q = q.options(undefer('instances.nas_disk_count'))
+            q = q.options(subqueryload('instances.personality_service_map'))
+            q = q.options(subqueryload('instances.servers'))
+            q = q.options(subqueryload('instances.servers.host'))
+            q = q.options(subqueryload('instances.servers.host.machine'))
+            q = q.options(subqueryload('instances.servers.host.machine._primary_name_asc'))
+            q = q.options(subqueryload('instances.service_map'))
+            q = q.options(subqueryload('instances.service_map.location'))
+            q = q.options(subqueryload('instances.personality_service_map'))
+            q = q.options(subqueryload('instances.personality_service_map.location'))
+            q = q.options(subqueryload('_clusters'))
+            q = q.order_by(Service.name, ServiceInstance.name)
+            return ServiceList(q.all())

@@ -41,13 +41,33 @@ from brokertest import TestBrokerCommand
 class TestDelAuxiliary(TestBrokerCommand):
 
     def testdelunittest00e1(self):
+        self.dsdb_expect_delete(self.net.unknown[0].usable[3])
         command = "del auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
+        self.dsdb_verify()
 
     def testverifydelunittest00e1(self):
         command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
+
+    # FIXME: This is awkward but there is no better user interface yet.
+    # test_update_interface assigns an IP to unittest02/eth1, which prevents the
+    # machine from being deleted, but the IP cannot be removed if it is not
+    # present as a System
+    def testdelunittest02e1(self):
+        ip = self.net.unknown[0].usable[12]
+        self.dsdb_expect_add("unittest02-e1.one-nyp.ms.com", ip)
+        command = ["add", "address",
+                   "--fqdn", "unittest02-e1.one-nyp.ms.com", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+        self.dsdb_expect_delete(ip)
+        command = ["del", "auxiliary", "--auxiliary",
+                   "unittest02-e1.one-nyp.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
 
 
 if __name__=='__main__':

@@ -92,9 +92,9 @@ def run_command(args, env=None, path=".",
 
     # Make sure that environment is properly kerberized.
     for envname, envvalue in os.environ.items():
-        if not envname.startswith("KRB"):
-            continue
-        shell_env[envname] = envvalue
+        # AQTEST<something> is used by the testsuite
+        if envname.startswith("KRB") or envname.startswith("AQTEST"):
+            shell_env[envname] = envvalue
 
     # Add a default value for the PATH.
     for envname in ["PATH"]:
@@ -120,7 +120,7 @@ def run_command(args, env=None, path=".",
     if p.returncode >= 0:
         logger.info("command `%s` exited with return code %d" %
                     (simple_command, p.returncode))
-    else:
+    else:  # pragma: no cover
         logger.info("command `%s` exited with signal %d" %
                     (simple_command, -p.returncode))
     out = "".join(out_thread.buffer)
@@ -355,18 +355,19 @@ class DSDBRunner(object):
                 "Would have called '%s' if location sync was enabled" % cmd)
 
     def add_host(self, dbinterface):
-        if not dbinterface.system.ip:
-            raise ArgumentError("No ip address found for '%s' to add to dsdb." %
-                                dbinterface.system.fqdn)
+        session = object_session(dbinterface)
+        primary = dbinterface.hardware_entity.fqdn
+        for addr in dbinterface.all_addresses():
+            if not addr.fqdns:
+                continue
+            if addr.vlan.vlan_id == 0 and not addr.label:
+                mac = dbinterface.mac
+            else:
+                mac = None
+            self.add_host_details(addr.fqdns[0], addr.ip, addr.logical_name,
+                                  mac, primary=primary)
 
-        return self.add_host_details(dbinterface.system.fqdn,
-                                     dbinterface.system.ip,
-                                     dbinterface.name, dbinterface.mac)
-
-    def add_host_details(self, fqdn, ip, name, mac):
-        if not ip:
-            raise ArgumentError("No ip address found for '%s' to add to dsdb."
-                                % fqdn)
+    def add_host_details(self, fqdn, ip, name, mac, primary=None):
         # DSDB does not accept '/' as valid in an interface name.
         command = [self.config.get("broker", "dsdb"),
                     "add", "host", "-host_name", fqdn,
@@ -376,6 +377,8 @@ class DSDBRunner(object):
             command.extend(["-interface_name", interface])
         if mac:
             command.extend(["-ethernet_address", mac])
+        if primary and primary != fqdn:
+            command.extend(["-primary_host_name", primary])
         out = run_command(command,env=self.getenv())
         return
 
@@ -408,7 +411,46 @@ class DSDBRunner(object):
 #            return
 #        raise ArgumentError("No boot interface found for host to delete from dsdb.")
 
-    def update_host(self, dbinterface, oldinfo):
+    @classmethod
+    def snapshot_hw(cls, dbhw_ent):
+        """
+        Make a snapshot of the interface parameters.
+
+        update_host() will use this snapshot to decide what has changed and
+        what DSDB commands have to be executed.
+        """
+
+        status = {}
+
+        # If the hw does not have a primary name with an IP, then it should not
+        # be in DSDB
+        if not dbhw_ent or not dbhw_ent.primary_ip:
+            return status
+
+        primary = dbhw_ent.fqdn
+
+        for iface in dbhw_ent.interfaces:
+            for addr in iface.all_addresses():
+                if addr.fqdns:
+                    fqdn = addr.fqdns[0]
+                else:
+                    continue
+
+                # The MAC must be unique in DSDB, so only set it for the first
+                # address on the native VLAN
+                if addr.vlan.vlan_id == 0 and not addr.label:
+                    mac = iface.mac
+                else:
+                    mac = None
+                key = '%s:%s' % (primary, addr.logical_name)
+                status[key] = {'name': addr.logical_name,
+                               'mac': mac,
+                               'ip': addr.ip,
+                               'fqdn': fqdn,
+                               'primary': primary}
+        return status
+
+    def update_host(self, dbhw_ent, oldinfo):
         """Update a dsdb host entry.
 
         The calling code (the aq update_interface command) treats the
@@ -420,73 +462,63 @@ class DSDBRunner(object):
         entry and adding a new one.
 
         """
-        if not dbinterface.system:
-            # Can't actually get here - the calling code verifies that
-            # the interface is attached to a system.
-            raise InternalError("Cannot update interface %s on %s that is not "
-                                "associated with a DNS Record." %
-                                (dbinterface.name,
-                                 dbinterface.hardware_entity.hardware_name))
-        if not dbinterface.system.ip:
-            # This may not be relevant for an update...
-            raise ArgumentError("No ip address found for '%s' to update dsdb."
-                                % dbinterface.system.fqdn)
-        if dbinterface.name != oldinfo["name"] or \
-           dbinterface.system.ip != oldinfo["ip"]:
-            # Fall back to deleting the host entry and re-adding it.
-            return self.update_host_force(dbinterface, oldinfo)
-        if not dbinterface.mac:
-            # Nothing to do.  There is no aq command that will let you
-            # remove a mac address without replacing it.
-            return
+        newinfo = self.snapshot_hw(dbhw_ent)
+
+        if not oldinfo:
+            oldinfo = {}
+
+        deletes = []
+        adds = []
+        mac_update = None
+
+        # Construct the list of operations
+        for key, attrs in oldinfo.items():
+            if key not in newinfo:
+                deletes.append(attrs)
+            elif attrs['ip'] != newinfo[key]['ip'] or \
+                    attrs['primary'] != newinfo[key]['primary']:
+                deletes.append(attrs)
+                adds.append(newinfo[key])
+            elif attrs['mac'] != newinfo[key]['mac']:
+                mac_update = newinfo[key]
+        for key, attrs in newinfo.items():
+            if key not in oldinfo:
+                adds.append(attrs)
+
+        rollback_adds = []
+        rollback_deletes = []
         try:
-            return self.update_host_mac(dbinterface.system.fqdn,
-                                        dbinterface.mac)
+            for attrs in deletes:
+                self.delete_host_details(attrs['ip'])
+                rollback_deletes.append(attrs)
+            for attrs in adds:
+                self.add_host_details(attrs['fqdn'], attrs['ip'],
+                                      attrs['name'], attrs['mac'],
+                                      attrs['primary'])
+                rollback_adds.append(attrs)
+            if mac_update:
+                self.update_host_mac(mac_update['fqdn'], mac_update['mac'])
         except ProcessException, e:
-            self.logger.info("Failed updating dsdb entry for %s with MAC %s." %
-                             (dbinterface.system.fqdn, dbinterface.mac))
-            raise
-        return
-
-    def update_host_force(self, dbinterface, oldinfo):
-        return self.update_host_force_details(dbinterface.system.fqdn,
-                                              dbinterface.system.ip,
-                                              dbinterface.name,
-                                              dbinterface.mac,
-                                              oldinfo['ip'],
-                                              oldinfo['name'],
-                                              oldinfo['mac'])
-
-    def update_host_force_details(self, fqdn, newip, newint, newmac,
-                                  oldip, oldint, oldmac):
-        """This gets tricky.  On a basic level, we want to remove the
-        old information from dsdb and then re-add it.
-
-        If the removal of the old fails, check to see why.  If the
-        entry was already missing, continue.  [This check happens as
-        part of the delete_host_details() method.]  If the command
-        fails otherwise, punt back to the caller.
-
-        If both succeed, great, continue on.
-
-        If removal succeeds, but adding fails, try to re-add the old
-        info, and then pass the failure back to the user.  (Hopefully
-        just the original failure, but possibly both.)
-        """
-        self.delete_host_details(oldip)
-        try:
-            self.add_host_details(fqdn, newip, newint, newmac)
-        except ProcessException, pe1:
-            self.logger.info("Failed adding new information to dsdb, "
-                             "attempting to restore old info.")
-            try:
-                self.add_host_details(fqdn, oldip, oldint, oldmac)
-            except ProcessException, pe2:
-                # FIXME: Add details.
-                raise AquilonError("DSDB is now in an inconsistent state.  Removing old information succeeded, but cannot add new information.")
-            self.logger.info("Restored old info, re-raising the problem "
-                             "with the add.")
-            raise pe1
+            self.logger.info("Failed updating DSDB entry for {0:l}: "
+                             "{1!s}".format(dbhw_ent, e))
+            rollback_failures = []
+            for attrs in rollback_adds:
+                try:
+                    self.delete_host_details(attrs['ip'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            for attrs in rollback_deletes:
+                try:
+                    self.add_host_details(attrs['fqdn'], attrs['ip'],
+                                          attrs['name'], attrs['mac'],
+                                          attrs['primary'])
+                except Exception, err:
+                    rollback_failures.append(str(err))
+            msg = "DSDB update failed: %s" % e
+            if rollback_failures:
+                msg += "\n\nRollback also failed, DSDB state is inconsistent:" + \
+                        "\n".join(rollback_failures)
+            raise AquilonError(msg)
         return
 
     def add_dns_domain(self, dns_domain, comments):

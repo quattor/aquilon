@@ -185,6 +185,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
         self.verifypg()
 
     def test_200_addaux(self):
+        net = self.net.vm_storage_net[0]
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
             if i < 13:
@@ -193,14 +194,17 @@ class TestAdd10GigHardware(TestBrokerCommand):
             else:
                 port = i - 12
                 machine = "ut12s02p%d" % port
+            self.dsdb_expect_add(hostname, net.usable[i - 1],
+                                 "eth1", net.usable[i - 1].mac,
+                                 "evh%d.aqd-unittest.ms.com" % (i + 50))
             command = ["add", "auxiliary", "--auxiliary", hostname,
                        "--machine", machine, "--interface", "eth1", "--autoip"]
             self.noouttest(command)
+        self.dsdb_verify()
 
     def test_210_verifyaux(self):
-        command = ["search_system", "--type=auxiliary",
-                   "--dns_domain=aqd-unittest.ms.com",
-                   "--networkip", self.net.vm_storage_net[0].ip]
+        command = ["show", "network", "--hosts",
+                   "--ip", self.net.vm_storage_net[0].ip]
         out = self.commandtest(command)
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
@@ -244,14 +248,31 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_700_add_hosts(self):
         # Skip index 8 and 17 - these don't have interfaces.
+        mac_prefix = "00:50:56:01:20"
+        mac_idx = 60
         for i in range(0, 8) + range(9, 17):
             machine = "evm%d" % (10 + i)
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
+
+            if i < 9:
+                net_index = (i / 2) + 2
+                usable_index = i % 2
+            else:
+                net_index = ((i - 9) / 2) + 6
+                usable_index = (i - 9) % 2
+            ip = self.net.unknown[net_index].usable[usable_index]
+
+            # FIXME: the MAC check is fragile...
+            self.dsdb_expect_add(hostname, ip, "eth0",
+                                 "%s:%02x" % (mac_prefix, mac_idx))
+            mac_idx += 1
+
             command = ["add_host", "--hostname", hostname,
                        "--machine", machine, "--autoip", "--domain=unittest",
                        "--archetype=aquilon", "--personality=inventory",
                        "--osname=linux", "--osversion=4.0.1-x86_64"]
             (out, err) = self.successtest(command)
+        self.dsdb_verify()
 
     def test_800_verify_add_host(self):
         for i in range(1, 9) + range(10, 18):

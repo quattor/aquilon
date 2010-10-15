@@ -33,8 +33,7 @@ from aquilon.aqdb.model import FutureARecord
 from aquilon.exceptions_ import UnimplementedError, ArgumentError
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.processes import DSDBRunner
-from aquilon.server.dbwrappers.system import (get_system,
-                                              get_system_dependencies)
+from aquilon.server.dbwrappers.system import get_system
 
 
 class CommandDelAddressDNSEnvironment(BrokerCommand):
@@ -54,12 +53,11 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             if ip != dbaddress.ip:
                 raise ArgumentError("IP address %s is not set for %s (%s).",
                                     (ip, dbaddress.fqdn, dbaddress.ip))
-            deps = get_system_dependencies(session, dbaddress)
-            if deps:
-                raise ArgumentError("Cannot remove address for %s (%s) while "
-                                    "the following dependencies exist:\n%s" %
-                                    (dbaddress.fqdn, dbaddress.ip,
-                                     "\n".join(deps)))
+            if dbaddress.hardware_entity:
+                raise ArgumentError("DNS record {0:a} is the primary name of "
+                                    "{1:l}, therefore it cannot be "
+                                    "deleted.".format(dbaddress,
+                                                      dbaddress.hardware_entity))
             session.delete(dbaddress)
             session.flush()
 

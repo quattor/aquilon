@@ -62,12 +62,6 @@ class Personality(Base):
         instance = "%s/%s" % (self.archetype.name, self.name)
         return self.format_helper(format_spec, instance)
 
-    @classmethod
-    def by_archetype(cls, dbarchetype):
-        session = object_session(dbarchetype)
-        return session.query(cls).filter(
-            cls.__dict__['archetype'] == dbarchetype).all()
-
 
 personality = Personality.__table__
 

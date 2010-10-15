@@ -37,8 +37,7 @@ from aquilon.aqdb.model import HardwareEntity
 # Should never get invoked...
 class HardwareEntityFormatter(ObjectFormatter):
     def format_raw(self, hwe, indent=""):
-        details = [indent + "%s: %s" % (hwe.hardware_entity_type,
-                                         hwe.hardware_name)]
+        details = [indent + "%s: %s" % (hwe.hardware_type, hwe.label)]
         details.append(self.redirect_raw(hwe.location, indent + "  "))
         details.append(self.redirect_raw(hwe.model, indent + "  "))
         if hwe.serial_no:
@@ -60,11 +59,11 @@ class SimpleHardwareEntityList(list):
 
 class SimpleHardwareEntityListFormatter(ListFormatter):
     def format_raw(self, shelist, indent=""):
-        return str("\n".join([indent + hw.hardware_name for hw in shelist]))
+        return str("\n".join([indent + hw.label for hw in shelist]))
 
     # TODO: Should probably display some useful info...
     def csv_fields(self, hw):
-        return (hw.hardware_name,)
+        return (hw.label,)
 
     # Maybe delegate to each type...?  There is no simple/standard
     # name based hardware search.

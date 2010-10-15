@@ -1,0 +1,17 @@
+Database upgrade procedure
+--------------------------
+
+1. Run the 'switch.sql' script using sqlplus
+
+2. Run the 'upgrade.sql' script using sqlplus
+
+3. Run the 'schema_fixes.sql' script using sqlplus
+
+4. Run the 'address_fixes.py' script. If there is no mention of skipped entries
+in the output, then edit the script, comment out the exception, and replace the
+session.rollback() call with session.commit().
+
+If the script prints out entries it skips, inspect them manually, and decide if
+it is possible to fix them up manually.
+
+5. Run the modified 'address_fixes.py' script again.

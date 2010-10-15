@@ -30,11 +30,10 @@
     Duplicates logic used in `aq add interface --tor_switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Interface, Chassis
+from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.model import Chassis, FutureARecord, ReservedName
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
                                                  restrict_switch_offsets,
                                                  get_or_create_interface)
@@ -47,13 +46,9 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
     def render(self, session, logger, interface, chassis, mac, comments, user,
                **arguments):
-        dbchassis = get_system(session, chassis, Chassis, 'Chassis')
+        dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
-        if dbchassis.ip:
-            raise ArgumentError("{0} already has an interface with an IP "
-                                "address.".format(dbchassis))
-
-        dbinterface = get_or_create_interface(session, dbchassis.chassis_hw,
+        dbinterface = get_or_create_interface(session, dbchassis,
                                               name=interface, mac=mac,
                                               interface_type='oa',
                                               comments=comments, preclude=True)
@@ -61,20 +56,29 @@ class CommandAddInterfaceChassis(BrokerCommand):
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
         restrict_switch_offsets(dbnetwork, ip)
-        dbchassis.ip = ip
-        dbchassis.network = dbnetwork
-        dbchassis.mac = mac
-        dbinterface.system = dbchassis
-        session.add(dbinterface)
-        session.add(dbchassis)
+
+        if ip:
+            dbinterface.vlans[0].addresses.append(ip)
+
+            # Convert ReservedName to FutureARecord if needed
+            if isinstance(dbchassis.primary_name, ReservedName):
+                dbdns_domain = dbchassis.primary_name.dns_domain
+                short = dbchassis.primary_name.name
+                session.delete(dbchassis.primary_name)
+                session.flush()
+                session.expire(dbchassis)
+                dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                          ip=ip)
+                dbdns_rec.network = dbnetwork
+                session.add(dbdns_rec)
+                dbchassis.primary_name = dbdns_rec
 
         session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbchassis)
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        try:
-            dsdb_runner.add_host(dbinterface)
-        except ProcessException, e:
-            raise ArgumentError("Could not add hostname to DSDB: %s" % e)
+        if ip:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_host(dbinterface)
+            except ProcessException, e:
+                raise ArgumentError("Could not add hostname to DSDB: %s" % e)
         return

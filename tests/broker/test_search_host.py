@@ -57,7 +57,7 @@ class TestSearchHost(TestBrokerCommand):
     def testfqdnavailablefull(self):
         command = "search host --hostname unittest00.one-nyp.ms.com --fullinfo"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testmachineavailable(self):
@@ -201,14 +201,14 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --all --fullinfo"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
-        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
-        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
-        self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
-        self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
+        self.matchoutput(out, "Primary Name: %s" % self.aurora_with_node, command)
+        self.matchoutput(out, "Primary Name: %s" % self.aurora_without_node,
                          command)
 
     def testpersonalityavailable(self):

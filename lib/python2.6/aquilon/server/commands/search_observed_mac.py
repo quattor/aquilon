@@ -30,8 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import ObservedMac
-from aquilon.server.dbwrappers.switch import get_switch
+from aquilon.aqdb.model import ObservedMac, Switch
 
 
 class CommandSearchObservedMac(BrokerCommand):
@@ -48,7 +47,7 @@ class CommandSearchObservedMac(BrokerCommand):
             logger.client_info("Option --tor_switch is deprecated, please use "
                                "--switch instead.")
         if switch:
-            dbswitch = get_switch(session, switch)
+            dbswitch = Switch.get_unique(session, switch, compel=True)
             q = q.filter_by(switch=dbswitch)
         if port_number is not None:
             q = q.filter_by(port_number=port_number)

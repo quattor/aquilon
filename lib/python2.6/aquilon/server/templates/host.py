@@ -31,8 +31,11 @@
 
 import logging
 
+from sqlalchemy.orm.session import object_session
+
 from aquilon.config import Config
-from aquilon.exceptions_ import IncompleteError
+from aquilon.exceptions_ import IncompleteError, InternalError
+from aquilon.aqdb.model import Host, AddressAssignment
 from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -52,6 +55,9 @@ class PlenaryHost(PlenaryCollection):
       if host profiles should be put into a "flat" toplevel (non-namespaced)
     """
     def __init__(self, dbhost, logger=LOGGER):
+        if not isinstance(dbhost, Host):
+            raise InternalError("PlenaryHost called with %s instead of Host" %
+                                dbhost.__class__.name)
         PlenaryCollection.__init__(self, logger=logger)
         self.config = Config()
         if self.config.getboolean("broker", "namespaced_host_profiles"):
@@ -77,12 +83,15 @@ class PlenaryToplevelHost(Plenary):
     def __init__(self, dbhost, logger=LOGGER):
         Plenary.__init__(self, dbhost, logger=logger)
         self.dbhost = dbhost
+        # Store the branch separately so get_key() works even after the dbhost
+        # object has been deleted
+        self.branch = dbhost.branch.name
         self.name = dbhost.fqdn
         self.plenary_core = ""
         self.plenary_template = "%(name)s" % self.__dict__
         self.template_type = "object"
         self.dir = "%s/domains/%s/profiles" % (
-            self.config.get("broker", "builddir"), dbhost.branch.name)
+            self.config.get("broker", "builddir"), self.branch)
 
     def will_change(self):
         # Need to override to handle IncompleteError...
@@ -100,35 +109,69 @@ class PlenaryToplevelHost(Plenary):
         # Going with self.name instead of self.plenary_template seems like
         # the right decision here - easier to predict behavior when meshing
         # with other CompileKey generators like PlenaryMachine.
-        return CompileKey(domain=self.dbhost.branch.name, profile=self.name,
+        return CompileKey(domain=self.branch, profile=self.name,
                           logger=self.logger)
 
     def body(self, lines):
-        # FIXME: Enforce that one of the interfaces is marked boot?
+        session = object_session(self.dbhost)
+
         interfaces = []
         default_gateway = None
+        # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
-            if not dbinterface.system or not dbinterface.system.ip:
-                continue
             if dbinterface.interface_type != 'public':
                 continue
-            net = dbinterface.system.network
-            # Fudge the gateway as the first available ip
-            gateway = net.network[1]
-            # We used to do this...
-            #if dbinterface.bootable:
-            #bootproto = "dhcp"
-            # But now all interfaces are just configured as static once past
-            # the initial boot.
-            bootproto = "static"
-            if dbinterface.bootable or not default_gateway:
-                default_gateway = gateway
-            interfaces.append({"ip":dbinterface.system.ip,
-                    "netmask":net.netmask,
-                    "broadcast":net.broadcast,
-                    "gateway":gateway,
-                    "bootproto":bootproto,
-                    "name":dbinterface.name})
+            for vlan in dbinterface.vlan_ids:
+                ifdesc = {}
+                if dbinterface.vlans[vlan].dhcp_enabled:
+                    ifdesc["bootproto"] = "dhcp"
+                else:
+                    ifdesc["bootproto"] = "static"
+
+                # XXX This is way too OS specific and should be in the
+                # templates instead
+                if vlan > 0:
+                    ifdesc["name"] = "%s.%d" % (dbinterface.name, vlan)
+                else:
+                    ifdesc["name"] = dbinterface.name
+
+                if vlan > 0:
+                    ifdesc["vlan"] = "true"
+
+                for addr in dbinterface.vlans[vlan].assignments:
+                    # Skip addresses that are assigned to more than one
+                    # interfaces, anticipating that they will be handled by
+                    # something else (like Zebra).
+                    q = session.query(AddressAssignment)
+                    q = q.filter(AddressAssignment.ip == addr.ip)
+                    if q.count() > 1:
+                        self.logger.info("Skipping IP %s as it belongs to "
+                                         "multiple interfaces." % addr.ip)
+                        continue
+
+                    net = addr.network
+
+                    if addr.label == "":
+                        # Fudge the gateway as the first available ip
+                        gateway = net.network[1]
+                        if not default_gateway and dbinterface.bootable:
+                            default_gateway = gateway
+
+                        ifdesc["ip"] = addr.ip
+                        ifdesc["netmask"] = net.netmask
+                        ifdesc["broadcast"] = net.broadcast
+                        ifdesc["gateway"] = gateway
+                    else:
+                        if not ifdesc["aliases"]:
+                            ifdesc["aliases"] = []
+
+                        aliasdesc = {"label": addr.label,
+                                     "ip": addr.ip,
+                                     "netmask": net.netmask,
+                                     "broadcast": net.broadcast}
+                        ifdesc["aliases"].append(aliasdesc)
+
+                interfaces.append(ifdesc)
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
@@ -146,7 +189,7 @@ class PlenaryToplevelHost(Plenary):
                                   (self.name, required_services))
 
         provides = []
-        for sis in self.dbhost.sislist:
+        for sis in self.dbhost.services_provided:
             provides.append('%s/server/config' % sis.service_instance.cfg_path)
 
         templates = []
@@ -172,8 +215,24 @@ class PlenaryToplevelHost(Plenary):
         lines.append("include { 'pan/units' };")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)
         lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
-        for interface in interfaces:
-            lines.append("'/system/network/interfaces/%(name)s' = nlist('ip', '%(ip)s', 'netmask', '%(netmask)s', 'broadcast', '%(broadcast)s', 'gateway', '%(gateway)s', 'bootproto', '%(bootproto)s');" % interface)
+
+        for ifdesc in interfaces:
+            lines.append("'/system/network/interfaces/%(name)s' = nlist("
+                         "\n\t\t'bootproto', '%(bootproto)s'," % ifdesc)
+            if "ip" in ifdesc:
+                lines.append("\t\t'ip', '%(ip)s', "
+                             "\n\t\t'netmask', '%(netmask)s', "
+                             "\n\t\t'broadcast', '%(broadcast)s', "
+                             "\n\t\t'gateway', '%(gateway)s'," % ifdesc)
+            if "aliases" in ifdesc:
+                lines.append("\t\t'aliases', nlist(")
+                for aliasdesc in ifdesc["aliases"]:
+                    lines.append("\t\t\t'%(label)s', nlist('ip', '%(ip)s', "
+                                 "'netmask', '%(netmask)s', "
+                                 "'broadcast', '%(broadcast)s')," % aliasdesc)
+                lines.append("\t\t),")
+            lines.append(");")
+
         if default_gateway:
             lines.append("'/system/network/default_gateway' = '%s';" %
                          default_gateway)
@@ -200,5 +259,5 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     def __init__(self, dbhost, logger=LOGGER):
         PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
         self.name = dbhost.fqdn
-        self.plenary_core = dbhost.dns_domain.name
+        self.plenary_core = dbhost.machine.primary_name.dns_domain.name
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__

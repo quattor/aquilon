@@ -42,7 +42,7 @@ class PlenaryMachineInfo(Plenary):
     def __init__(self, dbmachine, logger=LOGGER):
         Plenary.__init__(self, dbmachine, logger=logger)
         self.dbmachine = dbmachine
-        self.machine = dbmachine.name
+        self.machine = dbmachine.label
 
         loc = dbmachine.location
         self.hub = loc.hub.fullname.lower()
@@ -170,18 +170,23 @@ class PlenaryMachineInfo(Plenary):
         interfaces = []
         for interface in self.dbmachine.interfaces:
             if interface.interface_type == 'public':
-                interfaces.append({"name":interface.name, "mac":interface.mac,
-                                   "port_group":interface.port_group,
-                                   "boot":interface.bootable})
-                continue
-            if interface.interface_type == 'management':
-                manager = {"type":interface.name, "mac":interface.mac,
-                           "ip":None, "fqdn":None}
-                if interface.system:
-                    manager["ip"] = interface.system.ip
-                    manager["fqdn"] = interface.system.fqdn
-                managers.append(manager)
-                continue
+                interfaces.append({"name": interface.name,
+                                   "mac": interface.mac,
+                                   "port_group": interface.port_group,
+                                   "boot": interface.bootable})
+            elif interface.interface_type == 'management':
+                has_addr = False
+                for addr in interface.all_addresses():
+                    has_addr = True
+                    manager = {"type": addr.logical_name, "mac": interface.mac,
+                               "ip": addr.ip, "fqdn": None}
+                    if addr.fqdns:
+                        manager["fqdn"] = addr.fqdns[0]
+                    managers.append(manager)
+                if not has_addr:
+                    managers.append({"type": interface.name,
+                                     "mac": interface.mac,
+                                     "ip": None, "fqdn": None})
 
         for interface in interfaces:
             lines.append('"cards/nic/%s" = nlist(' % interface['name'])

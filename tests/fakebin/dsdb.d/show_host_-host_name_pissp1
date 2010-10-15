@@ -1,0 +1,9 @@
+Primary Name: pissp1
+        Node: 
+  DNS Domain: ms.com
+  Interfaces: 
+              pissp1 ge0 144.14.174.99 (static)
+     Aliases: 
+    Comments: perfdata e4500 server prod0
+       State: 0
+

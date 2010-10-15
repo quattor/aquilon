@@ -68,10 +68,7 @@ class CommandPollSwitch(BrokerCommand):
     def render(self, session, logger, rack, clear, vlan, **arguments):
         dblocation = get_location(session, rack=rack)
         q = session.query(Switch)
-        #q = q.join('switch_hw')
-        #q = q.filter_by(location=dblocation)
-        q = q.filter(Switch.switch_id==HardwareEntity.id)
-        q = q.filter(HardwareEntity.location_id==dblocation.id)
+        q = q.filter(Switch.location_id==dblocation.id)
         switches = q.all()
         if not switches:
             raise NotFoundException("No switch found.")
@@ -89,8 +86,8 @@ class CommandPollSwitch(BrokerCommand):
                     self.poll_vlan(session, logger, switch, now)
                 except ProcessException, e:
                     failed_vlan += 1
-                    logger.client_info("Failed getting VLAN info for %s: %s" %
-                                       (switch.fqdn, e))
+                    logger.client_info("Failed getting VLAN info for {0:l}: "
+                                       "{1!s}".format(switch, e))
         if switches and failed_vlan == len(switches):
             raise ArgumentError("Failed getting VLAN info.")
         return
@@ -102,14 +99,14 @@ class CommandPollSwitch(BrokerCommand):
             update_or_create_observed_mac(session, switch, port, mac, now)
 
     def clear(self, session, logger, switch):
-        macs = session.query(ObservedMac).filter_by(switch=switch).all()
-        for om in macs:
-            session.delete(om)
+        session.query(ObservedMac).filter_by(switch=switch).delete()
         session.flush()
 
     def run_checknet(self, logger, switch):
-        if switch.dns_domain.name == 'ms.com':
-            hostname = switch.name
+        if not switch.primary_name:
+            hostname = switch.label
+        elif switch.primary_name.dns_domain.name == 'ms.com':
+            hostname = switch.primary_name.name
         else:
             hostname = switch.fqdn
         return run_command([self.config.get("broker", "CheckNet"),
@@ -168,15 +165,13 @@ class CommandPollSwitch(BrokerCommand):
         return macports
 
     def poll_vlan(self, session, logger, switch, now):
-        if not switch.ip:
-            raise ArgumentError("Cannot poll VLAN info for switch %s without "
-                                "a registered IP address." % switch.fqdn)
-        vlans = session.query(ObservedVlan).filter_by(switch=switch).all()
-        for vlan in vlans:
-            session.delete(vlan)
+        if not switch.primary_ip:
+            raise ArgumentError("Cannot poll VLAN info for {0:l} without "
+                                "a registered IP address.".format(switch))
+        session.query(ObservedVlan).filter_by(switch=switch).delete()
         session.flush()
         out = run_command([self.config.get("broker", "vlan2net"),
-                           "-ip", switch.ip])
+                           "-ip", switch.primary_ip])
         try:
             reader = DictReader(StringIO(out))
             for row in reader:

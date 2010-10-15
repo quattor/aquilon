@@ -31,7 +31,6 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.poll_switch import CommandPollSwitch
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Switch
 
 
@@ -40,5 +39,5 @@ class CommandPollSwitchSwitch(CommandPollSwitch):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, clear, vlan, **arguments):
-        dbswitch = get_system(session, switch, Switch, 'Switch')
+        dbswitch = Switch.get_unique(session, switch, compel=True)
         return self.poll(session, logger, [dbswitch], clear, vlan)

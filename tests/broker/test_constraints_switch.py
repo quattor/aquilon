@@ -59,7 +59,7 @@ class TestSwitchConstraints(TestBrokerCommand):
         # Deprecated usage.
         command = "show tor_switch --tor_switch ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
 
     # Testing that del tor_switch does not delete a blade....
     def testrejectut3c1n3(self):
@@ -70,6 +70,12 @@ class TestSwitchConstraints(TestBrokerCommand):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Blade: ut3c1n3", command)
+
+    def testdelprimaryinterface(self):
+        command = ["del", "interface", "--interface", "xge49",
+                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "holds the primary address", command)
 
 
 if __name__=='__main__':

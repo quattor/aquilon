@@ -29,43 +29,106 @@
 """Contains the logic for `aq show hostiplist`."""
 
 
+from sqlalchemy.orm import contains_eager, aliased
+
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.host import HostIPList
-from aquilon.aqdb.model import Archetype, System
+from aquilon.aqdb.model import (AddressAssignment, VlanInterface, Interface,
+                                HardwareEntity, Personality, Machine, Host,
+                                Archetype, PrimaryNameAssociation,
+                                FutureARecord, System, DnsDomain)
 
 
 class CommandShowHostIPList(BrokerCommand):
 
     default_style = "csv"
 
-    def render(self, session, **arguments):
-        # FIXME: Currently ignores archetype and outputs regardless
-        # of whether we want hosts...
-        #archetype = arguments.get("archetype", None)
-        #if archetype:
-        #    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+    def render(self, session, archetype, **arguments):
+        archq = session.query(Machine.id)
+        archq = archq.join(Host, Personality)
+        if archetype:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+            archq = archq.filter(Personality.archetype == dbarchetype)
+        else:
+            # Ignore aurora hosts by default, since we're not authorative for
+            # them (yet)
+            dbarchetype = Archetype.get_unique(session, "aurora", compel=True)
+            archq = archq.filter(Personality.archetype == dbarchetype)
+
+        # System and DnsRecord are used twice, so be certain which instance
+        # is used where
+        addr_dnsrec = aliased(FutureARecord, name="addr_dnsrec")
+        addr_domain = aliased(DnsDomain, name="addr_domain")
+        pna_dnsrec = aliased(System, name="pna_dnsrec")
+        pna_domain = aliased(DnsDomain, name="pna_dnsdomain")
+
+        q = session.query(AddressAssignment)
+        q = q.join((addr_dnsrec, addr_dnsrec.ip == AddressAssignment.ip))
+        q = q.join((addr_domain, addr_dnsrec.dns_domain_id ==
+                    addr_domain.id))
+
+        # Make sure we pick up the right System/DnsRecord instance
+        q = q.options(contains_eager("dns_records", alias=addr_dnsrec))
+        q = q.options(contains_eager("dns_records.dns_domain",
+                                     alias=addr_domain))
+
+        q = q.reset_joinpoint()
+        q = q.join(VlanInterface, Interface, HardwareEntity)
+
+        # If archetype was given, select only the matching hosts. Otherwise,
+        # exclude aurora hosts.
+        if archetype:
+            q = q.filter(HardwareEntity.id.in_(archq.subquery()))
+        else:
+            q = q.filter(~HardwareEntity.id.in_(archq.subquery()))
+
+        q = q.outerjoin(PrimaryNameAssociation)
+        q = q.outerjoin((pna_dnsrec, PrimaryNameAssociation.dns_record_id ==
+                         pna_dnsrec.id))
+        q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id == pna_domain.id))
+        q = q.options(contains_eager('vlan'))
+        q = q.options(contains_eager('vlan.interface'))
+        q = q.options(contains_eager('vlan.interface.hardware_entity'))
+        q = q.options(contains_eager("vlan.interface.hardware_entity."
+                                     "_primary_name_asc"))
+
+        # Make sure we pick up the right System/DnsRecord instance
+        q = q.options(contains_eager("vlan.interface.hardware_entity."
+                                     "_primary_name_asc.dns_record",
+                                     alias=pna_dnsrec))
+        q = q.options(contains_eager("vlan.interface.hardware_entity."
+                                     "_primary_name_asc.dns_record.dns_domain",
+                                    alias=pna_domain))
+
+        q = q.order_by(addr_dnsrec.name, addr_domain.name)
+
         iplist = HostIPList()
-        q = session.query(System)
-        # Outer-join in all the subclasses so that each access of
-        # system doesn't (necessarily) issue another query.
-        q = q.with_polymorphic(System.__mapper__.polymorphic_map.values())
-        # Right now, this is returning everything with an ip.
-        q = q.filter(System.ip!=None)
-        for system in q.all():
-            # Do not include aurora hosts.  We are not canonical for
-            # this information.  At least, not yet.
-            if (system.system_type == 'host' and
-                    system.archetype.name == 'aurora'):
-                continue
-            entry = [system.fqdn, system.ip]
-            # For names on alternate interfaces, also provide the
-            # name for the bootable (primary) interface.  This allows
-            # the reverse IP address to be set to the primary.
-            # This is inefficient, but OK for now since we only have
-            # a few auxiliary systems.
-            if system.system_type == 'auxiliary' and system.machine.host:
-                entry.append(system.machine.host.fqdn)
+        for addr in q:
+            hwent = addr.vlan.interface.hardware_entity
+            # Only add the primary info for auxiliary addresses, not management
+            # ones
+            if hwent.primary_name and addr.ip != hwent.primary_ip and \
+               addr.vlan.interface.interface_type != 'management':
+                primary = hwent.fqdn
             else:
-                entry.append("")
-            iplist.append(entry)
+                primary = None
+            for fqdn in addr.fqdns:
+                iplist.append((fqdn, addr.ip, primary))
+
+        # Append addresses that are not bound to interfaces
+        if not archetype:
+            q = session.query(FutureARecord)
+            q = q.join(DnsDomain)
+            q = q.options(contains_eager("dns_domain"))
+            q = q.reset_joinpoint()
+
+            q = q.outerjoin((AddressAssignment,
+                             AddressAssignment.ip == FutureARecord.ip))
+            q = q.filter(AddressAssignment.id == None)
+
+            q = q.order_by(FutureARecord.name, DnsDomain.name)
+
+            for entry in q:
+                iplist.append((entry.fqdn, entry.ip, None))
+
         return iplist

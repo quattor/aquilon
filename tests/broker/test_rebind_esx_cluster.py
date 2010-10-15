@@ -49,7 +49,7 @@ class TestRebindESXCluster(TestBrokerCommand):
     def testverifyrebindevh1(self):
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: evh1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Primary Name: evh1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Member of ESX Cluster: utecl2", command)
 
     # FIXME: Also test plenary files.

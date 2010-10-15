@@ -29,9 +29,9 @@
 """Contains the logic for `aq show manager --manager`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.model import Manager
+from aquilon.aqdb.model import FutureARecord
 
 
 class CommandShowManagerManager(BrokerCommand):
@@ -39,4 +39,15 @@ class CommandShowManagerManager(BrokerCommand):
     required_parameters = ["manager"]
 
     def render(self, session, manager, **kwargs):
-        return get_system(session, manager, Manager, 'Manager')
+        dbdns_rec = FutureARecord.get_unique(session, fqdn=manager, compel=True)
+        if not dbdns_rec.assignments:
+            raise ArgumentError("Address {0:a} is not assigned to any "
+                                "interfaces.".format(dbdns_rec))
+        hws = []
+        for addr in dbdns_rec.assignments:
+            iface = addr.vlan.interface
+            if iface.interface_type != 'management':
+                raise ArgumentError("{0:a} is not a manager.".format(dbdns_rec))
+            hws.append(iface.hardware_entity)
+
+        return hws

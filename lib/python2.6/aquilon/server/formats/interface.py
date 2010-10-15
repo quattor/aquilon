@@ -43,10 +43,9 @@ class InterfaceFormatter(ObjectFormatter):
             obs = interface.last_observation
             if obs:
                 details.append(indent + "  Last switch poll: %s port %s [%s]" %
-                               (obs.switch.fqdn, obs.port_number,
-                                obs.last_seen))
+                               (obs.switch, obs.port_number, obs.last_seen))
         else:
-            details = [indent + "Interface: %s boot=%s (no mac addr)" % (
+            details = [indent + "Interface: %s boot=%s (no MAC addr)" % (
                 interface.name, interface.bootable)]
 
         details.append(indent + "  Type: %s" % interface.interface_type)
@@ -54,26 +53,29 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  Port Group: %s" % interface.port_group)
 
         hw = interface.hardware_entity
-        hw_type = hw.hardware_entity_type
-        if hw_type == 'machine':
-            details.append(indent + "  Attached to: machine %s" % hw.name)
-        elif hw_type == 'switch_hw':
-            if hw.switch:
-                details.append(indent + "  Attached to: switch %s" %
-                                   ",".join([ts.fqdn for ts in hw.switch]))
+        details.append(indent + "  Attached to: {0}".format(hw))
+
+        for vlan in interface.vlan_ids:
+            if vlan > 0:
+                details.append(indent + "  VLAN: %d" % vlan)
+                vindent = indent + "  "
             else:
-                details.append("  Attached to: unnamed switch")
-        elif hw_type == 'chassis_hw':
-            if hw.chassis_hw:
-                details.append("  Attached to: chassis %s" %
-                                   ",".join([c.fqdn for c in hw.chassis_hw]))
-            else:
-                details.append("  Attached to: unnamed chassis")
-        elif getattr(hw, "name", None):
-            details.append("  Attached to: %s" % hw.name)
-        if interface.system:
-            details.append(indent + "  Provides: %s [%s]" %
-                           (interface.system.fqdn, interface.system.ip))
+                vindent = indent
+            details.append(vindent + "  DHCP enabled: %s" %
+                           (interface.vlans[vlan].dhcp_enabled))
+            for assgn in interface.vlans[vlan].assignments:
+                if assgn.fqdns:
+                    names = ", ".join(assgn.fqdns)
+                else:
+                    names = "unknown"
+
+                if assgn.label:
+                    details.append(vindent + "  Provides: %s [%s] (label: %s)" %
+                                   (names, assgn.ip, assgn.label))
+                else:
+                    details.append(vindent + "  Provides: %s [%s]" %
+                                   (names, assgn.ip))
+
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)
         return "\n".join(details)
@@ -89,20 +91,20 @@ class MissingManagersFormatter(ListFormatter):
     def format_raw(self, mmlist, indent=""):
         commands = []
         for interface in mmlist:
-            host = interface.hardware_entity.host
-            if host:
+            hwent = interface.hardware_entity
+            if hwent.fqdn:
                 # FIXME: Deal with multiple management interfaces?
                 commands.append("aq add manager --hostname '%s' --ip 'IP'" %
-                                host.fqdn)
+                                hwent.fqdn)
             else:
                 commands.append("# No host found for machine %s with management interface" %
-                                interface.hardware_entity.name)
+                                hwent.label)
         return "\n".join(commands)
 
     def csv_fields(self, interface):
-        host = interface.hardware_entity.host
-        if host:
-            return (host.fqdn,)
+        fqdn = interface.hardware_entity.fqdn
+        if fqdn:
+            return (fqdn,)
         else:
             return None
 

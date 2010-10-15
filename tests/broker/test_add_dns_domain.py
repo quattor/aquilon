@@ -42,18 +42,25 @@ from brokertest import TestBrokerCommand
 class TestAddDnsDomain(TestBrokerCommand):
 
     def testaddaqdunittestdomain(self):
-        self.noouttest(["add", "dns_domain",
-            "--dns_domain", "aqd-unittest.ms.com"])
+        self.dsdb_expect("show dns_domains -domain_name aqd-unittest.ms.com",
+                         fail=True)
+        self.dsdb_expect("add dns_domain -domain_name aqd-unittest.ms.com "
+                         "-comments Some DNS domain comments")
+        self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest.ms.com",
+                        "--comments", "Some DNS domain comments"])
+        self.dsdb_verify()
 
     def testverifyaddaqdunittestdomain(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "DNS Domain: aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Comments: Some DNS domain comments", command)
 
     def testverifyaddaqdunittestdomaincsv(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "aqd-unittest.ms.com,", command)
+        self.matchoutput(out, "aqd-unittest.ms.com,Some DNS domain comments",
+                         command)
 
     def testverifyaddaqdunittestdomainproto(self):
         command = ["show", "dns_domain", "--dns_domain=aqd-unittest.ms.com",
@@ -61,6 +68,25 @@ class TestAddDnsDomain(TestBrokerCommand):
         out = self.commandtest(command)
         domain = self.parse_dns_domainlist_msg(out, expect=1).dns_domains[0]
         self.failUnlessEqual(domain.name, 'aqd-unittest.ms.com')
+
+    def testaddtoolongdomain(self):
+        command = ['add', 'dns_domain', '--dns_domain',
+            #          1         2         3         4         5         6
+            's234567890123456789012345678901234567890123456789012345678901234' +
+            '.ms.com']
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "DNS name components must have a length between "
+                         "1 and 63.", command)
+
+    def testaddtopleveldomain(self):
+        command = ['add', 'dns_domain', '--dns_domain', 'toplevel']
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Top-level DNS domains cannot be added.", command)
+
+    def testaddinvaliddomain(self):
+        command = ['add', 'dns_domain', '--dns_domain', 'foo-.ms.com']
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Illegal DNS domain name format 'foo-'.", command)
 
     def testverifyshowall(self):
         command = "show dns_domain --all"

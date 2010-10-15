@@ -28,9 +28,10 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ tests create and delete of a machine through the session """
-import unittest
-from utils import load_classpath, add, commit
+import logging
+log = logging.getLogger('nose.aqdb.test_machine')
 
+from utils import load_classpath, add, commit
 load_classpath()
 
 from sqlalchemy import and_
@@ -47,6 +48,7 @@ MODEL='bl45p'
 
 def cleanup():
     del_machines(sess, NAME)
+    pass
 
 def setup():
     print 'setup'
@@ -57,10 +59,10 @@ def teardown():
     cleanup()
 
 
-def add_machine(sess, name, model):
+def add_machine(sess, name, model=MODEL):
     """ Shorthand to create machines created for the purposes of reuse
         among all the various tests that require them """
-    mchn = sess.query(Machine).filter_by(name=name).first()
+    mchn = sess.query(Machine).filter_by(label=name).first()
     if mchn:
         return mchn
 
@@ -72,34 +74,45 @@ def add_machine(sess, name, model):
     rack = sess.query(Rack).first()
     assert rack, "Can't find a rack"
 
-    mchn = Machine(name=name, model=model, location=rack, cpu=proc)
+    mchn = Machine(label=name, model=model, location=rack, cpu=proc)
     add(sess, mchn)
     commit(sess)
 
     return mchn
 
+
 def del_machines(sess=sess, prefix=NAME):
     """ deletes all machines with names like prefix% """
+    machines = sess.query(Machine).filter(
+        Machine.label.like(prefix + '%')).all()
 
-    machines = sess.query(Machine).filter(Machine.name.like(prefix+'%')).all()
     if machines:
+        log.debug('attempting to delete %s machines' % len(machines))
         for machine in machines:
+            log.info('deleting %s' % machine)
             sess.delete(machine)
-        commit(sess)
-        print 'deleted %s machines'%(len(machines))
+            commit(sess)
+
 
 def test_add_machine():
     """ test creating a machine """
     mchn = add_machine(sess, NAME, MODEL)
     assert mchn, 'Commit machine failed'
+    print mchn.name
+    log.info(mchn)
+
+def test_get_unique_by_label():
+    """ test machine.get_unique """
+    mchn = Machine.get_unique(sess, NAME, compel=True)
+    assert mchn, 'get_unique failure for machine'
     print mchn
 
 def test_del_machine():
-    mchn = sess.query(Machine).filter_by(name = NAME).first()
+    mchn = sess.query(Machine).filter_by(label=NAME).first()
     if mchn:
         sess.delete(mchn)
         commit(sess)
 
-        t = sess.query(Machine).filter_by(name = NAME).first()
+        t = sess.query(Machine).filter_by(label=NAME).first()
         assert t is None
-        print 'deleted machine'
+        log.info('deleted machine')

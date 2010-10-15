@@ -53,7 +53,8 @@ class TestAddNetwork(TestBrokerCommand):
         self.noouttest(["add_network", "--ip", "172.31.64.64",
                         "--network", "np06bals03_v103",
                         "--netmask", "255.255.255.192",
-                        "--building", "np", "--side", "a", "--type", "unknown"])
+                        "--building", "np", "--side", "a", "--type", "unknown",
+                        "--comments", "Some network comments"])
         self.noouttest(["add_network", "--ip", "172.31.88.0",
                         "--network", "nyp_hpl_2960_verari_mnmt",
                         "--netmask", "255.255.255.192",
@@ -96,6 +97,11 @@ class TestAddNetwork(TestBrokerCommand):
                              command)
             self.matchoutput(out, "Discoverable: False", command)
             self.matchoutput(out, "Discovered: False", command)
+
+    def testshownetworkcomments(self):
+        command = "show network --network np06bals03_v103"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Comments: Some network comments", command)
 
     def testshownetworkbuilding(self):
         command = "show_network --building ut"

@@ -27,37 +27,30 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Switches """
+from datetime import datetime
 
-from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy import Column, Integer, ForeignKey, DateTime
 
+from aquilon.aqdb.model import HardwareEntity
 from aquilon.aqdb.column_types import Enum
-from aquilon.aqdb.model import System, SwitchHw
-
 
 SWITCH_TYPES = ('tor', 'bor', 'agg', 'misc')
+_TN = 'switch'
 
-class Switch(System):
-    __tablename__ = 'switch'
-    _class_label = 'Switch'
 
-    id = Column(Integer,
-                ForeignKey('system.id', ondelete='CASCADE',
-                           name='SWITCH_SYS_FK'), primary_key=True)
+class Switch(HardwareEntity):
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
-    switch_id = Column(Integer, ForeignKey('switch_hw.hardware_entity_id',
-                                           name='SWITCH_SYS_HW_FK',
+    hardware_entity_id = Column(Integer,
+                                ForeignKey('hardware_entity.id',
+                                           name='%s_hw_ent_fk' % _TN,
                                            ondelete='CASCADE'),
-                       nullable=False)
-
-    switch_hw = relation(SwitchHw, uselist=False,
-                         backref=backref('switch',cascade='delete'))
+                                           primary_key=True)
 
     switch_type = Column(Enum(16, SWITCH_TYPES), nullable=False)
 
-    __mapper_args__ = {'polymorphic_identity' : 'switch'}
+    last_poll = Column(DateTime, nullable=False, default=datetime.now)
 
-switch = Switch.__table__
-switch.primary_key.name='SWITCH_PK'
-
-table = switch
+switch = Switch.__table__  # pylint: disable-msg=C0103, E1101
+switch.primary_key.name = 'switch_pk'

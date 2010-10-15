@@ -37,7 +37,8 @@ from string import rstrip
 from mako.lookup import TemplateLookup
 
 from aquilon.config import Config
-from aquilon.exceptions_ import ProtocolError
+from aquilon.exceptions_ import ProtocolError, InternalError
+from aquilon.aqdb.model import Host, System
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
 # the tests.
@@ -151,11 +152,11 @@ class ObjectFormatter(object):
             if not self.protocol in self.loaded_protocols:
                 try:
                     self.loaded_protocols[self.protocol] = __import__(self.protocol)
-                except ImportError, e:
+                except ImportError, e:  # pragma: no cover
                     self.loaded_protocols[self.protocol] = False
                     error = "path %s protocol: %s error: %s" % (self.protodir, self.protocol, e)
                     raise ProtocolError(error)
-            else:
+            else:  # pragma: no cover
                 if self.loaded_protocols[self.protocol] == False:
                     error = "path %s protocol: %s error: previous import attempt was unsuccessful" % (self.protodir, self.protocol)
                     raise ProtocolError(error)
@@ -243,62 +244,75 @@ class ObjectFormatter(object):
                 ObjectFormatter.default_handler)
         return handler.format_proto(result, skeleton)
 
-    def add_host_msg(self, host_msg, host):
-        """Host here is actually a system!"""
-        host_msg.hostname = str(host.name)
-        if hasattr(host, "fqdn"):
-            host_msg.fqdn = host.fqdn
-        if hasattr(host, "dns_domain"):
-            host_msg.dns_domain = str(host.dns_domain.name)
-        # FIXME: Add branch type and sandbox author to protobufs.
-        if hasattr(host, "branch"):
-            host_msg.domain.name = str(host.branch.name)
-            host_msg.domain.owner = str(host.branch.owner.name)
-        if hasattr(host, "status"):
-            host_msg.status = str(host.status.name)
-        if hasattr(host, "sysloc"):
-            host_msg.sysloc = str(host.sysloc)
-        if getattr(host, "ip", None):
-            host_msg.ip = str(host.ip)
-        if getattr(host, "mac", None):
-            host_msg.mac = str(host.mac)
-        if hasattr(host, "system_type"):
-            host_msg.type = str(host.system_type)
-        if hasattr(host, "personality"):
-            host_msg.personality.name = str(host.personality.name)
-            host_msg.personality.archetype.name = str(host.personality.archetype.name)
-            host_msg.archetype.name = str(host.archetype.name)
-        if hasattr(host, "machine"):
-            host_msg.machine.name = str(host.machine.name)
-            if hasattr(host.machine, "location"):
-                host_msg.machine.location.name = str(host.machine.location.name)
-                host_msg.machine.location.location_type = str(host.machine.location.location_type)
-            host_msg.machine.model.name = str(host.machine.model.name)
-            host_msg.machine.model.vendor = str(host.machine.model.vendor.name)
-            host_msg.machine.cpu = str(host.machine.cpu.name)
-            host_msg.machine.memory = host.machine.memory
+    def add_hardware_data(self, host_msg, hwent):
+        host_msg.machine.name = str(hwent.label)
+        if hwent.location:
+            host_msg.sysloc = str(hwent.location.sysloc())
+            host_msg.machine.location.name = str(hwent.location.name)
+            host_msg.machine.location.location_type = str(hwent.location.location_type)
+        host_msg.machine.model.name = str(hwent.model.name)
+        host_msg.machine.model.vendor = str(hwent.model.vendor.name)
 
-            if hasattr(host.machine, "disks"):
-                for disk in host.machine.disks:
-                    disk_msg = host_msg.machine.disks.add()
-                    disk_msg.device_name = str(disk.device_name)
-                    disk_msg.capacity = disk.capacity
-                    disk_msg.disk_type = str(disk.controller_type)
-            if hasattr(host.machine, "interfaces"):
-                for i in host.machine.interfaces:
-                    int_msg = host_msg.machine.interfaces.add()
-                    int_msg.device = str(i.name)
-                    if getattr(i, "mac", None):
-                        int_msg.mac = str(i.mac)
-                    if getattr(i.system, "ip", None):
-                        int_msg.ip = str(i.system.ip)
-                    if hasattr(i, "bootable"):
-                        int_msg.bootable = i.bootable
-                    # Populating network_id is pointless...
-                    #if getattr(i.system, "network_id", None):
-                    #    int_msg.network_id = i.system.network_id
-                    if hasattr(i.system, "fqdn"):
-                        int_msg.fqdn = i.system.fqdn
+        if hwent.hardware_type == 'machine':
+            host_msg.machine.cpu = str(hwent.cpu.name)
+            host_msg.machine.memory = hwent.memory
+
+            for disk in hwent.disks:
+                disk_msg = host_msg.machine.disks.add()
+                disk_msg.device_name = str(disk.device_name)
+                disk_msg.capacity = disk.capacity
+                disk_msg.disk_type = str(disk.controller_type)
+
+        for iface in hwent.interfaces:
+            has_addrs = False
+            for addr in iface.all_addresses():
+                has_addrs = True
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = str(addr.logical_name)
+                if iface.mac:
+                    int_msg.mac = str(iface.mac)
+                int_msg.ip = str(addr.ip)
+                if addr.vlan == 0:
+                    int_msg.bootable = iface.bootable
+                else:
+                    int_msg.bootable = False
+            # Add entries for interfaces that do not have any addresses
+            if not has_addrs:
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = str(iface.name)
+                if iface.mac:
+                    int_msg.mac = str(iface.mac)
+
+    def add_host_data(self, host_msg, host):
+        # FIXME: Add branch type and sandbox author to protobufs.
+        host_msg.domain.name = str(host.branch.name)
+        host_msg.domain.owner = str(host.branch.owner.name)
+        host_msg.status = str(host.status.name)
+        host_msg.personality.name = str(host.personality.name)
+        host_msg.personality.archetype.name = str(host.personality.archetype.name)
+        host_msg.archetype.name = str(host.archetype.name)
+
+    def add_host_msg(self, host_msg, host):
+        """ Return a host message.
+
+            Hosts used to be systems, which makes this method name a bit odd
+        """
+        if not isinstance(host, Host):
+            raise InternalError("add_host_msg was called with {0} instead of "
+                                "a Host.".format(host))
+        host_msg.type = "host"  # FIXME: is hardcoding this ok?
+        host_msg.hostname = str(host.machine.primary_name.name)
+        host_msg.fqdn = host.fqdn
+        host_msg.dns_domain = str(host.machine.primary_name.dns_domain.name)
+        if host.machine.primary_ip:
+            host_msg.ip = str(host.machine.primary_ip)
+        for iface in host.machine.interfaces:
+            if iface.interface_type != 'public' or not iface.bootable:
+                continue
+            host_msg.mac = str(iface.mac)
+
+        self.add_host_data(host_msg, host)
+        self.add_hardware_data(host_msg, host.machine)
 
     def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)
@@ -318,7 +332,10 @@ class ObjectFormatter(object):
         si_msg.name = str(service_instance.name)
         si_msg.template = str(service_instance.cfg_path)
         for server in service_instance.servers:
-            self.add_host_msg(si_msg.servers.add(), server.system)
+            self.add_host_msg(si_msg.servers.add(), server.host)
+        # TODO: make this conditional to avoid performance problems
+        #for client in service_instance.clients:
+        #    self.add_host_msg(si_msg.clients.add(), client.host)
 
     def add_service_map_msg(self, sm_msg, service_map):
         sm_msg.location.name = str(service_map.location.name)

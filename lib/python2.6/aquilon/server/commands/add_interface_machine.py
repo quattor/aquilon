@@ -33,9 +33,8 @@ from sqlalchemy import String
 from sqlalchemy.sql.expression import asc, desc, bindparam
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
-                                 IncompleteError, UnimplementedError)
-from aquilon.aqdb.model import Interface, Machine, Manager
-from aquilon.aqdb.model.network import get_net_id_from_ip
+                                 AquilonError, UnimplementedError)
+from aquilon.aqdb.model import Interface, Machine, FutureARecord
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
@@ -56,6 +55,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
     def render(self, session, logger, interface, machine, mac, automac,
                pg, autopg, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
         if interface == 'eth0':
             bootable = True
         else:
@@ -79,9 +80,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if mac:
             prev = session.query(Interface).filter_by(mac=mac).first()
             if prev and prev.hardware_entity == dbmachine:
-                raise ArgumentError("Machine %s already has an interface "
-                                    "with MAC address %s." %
-                                    (dbmachine.name, mac))
+                raise ArgumentError("{0} already has an interface with MAC "
+                                    "address {1}.".format(dbmachine, mac))
             # Is the conflicting interface something that can be
             # removed?  It is if:
             # - we are currently attempting to add a management interface
@@ -89,19 +89,19 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # - the old interface is associated with a host
             # - that host was blindly created, and thus can be removed safely
             if prev and itype == 'management' and \
-               prev.hardware_entity.hardware_entity_type == 'machine' and \
-               prev.system and prev.system.system_type == 'host' and \
-               prev.system.status.name == 'blind':
+               prev.hardware_entity.hardware_type == 'machine' and \
+               prev.hardware_entity.host and \
+               prev.hardware_entity.host.status.name == 'blind':
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
-                dummy_ip = prev.system.ip
-                old_network = prev.system.network
+                dummy_ip = prev.vlans[0].assignments[0].ip
+                old_network = prev.vlans[0].assignments[0].network
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
                 self.remove_dsdb(logger, dummy_ip)
                 self.consolidate_names(session, logger, dbmachine,
-                                       dummy_machine.name, pending_removals)
+                                       dummy_machine.label, pending_removals)
                 # It seems like a shame to throw away the IP address that
                 # had been allocated for the blind host.  Try to use it
                 # as it should be used...
@@ -134,14 +134,10 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
-            dbinterface.system = dbmanager
-            dbmanager.mac = dbinterface.mac
-            session.add(dbmanager)
+            dbinterface.vlans[0].addresses.append(dbmanager.ip)
 
         session.add(dbinterface)
         session.flush()
-        session.refresh(dbinterface)
-        session.refresh(dbmachine)
 
         if dbmanager:
             dsdb_runner = DSDBRunner(logger=logger)
@@ -151,9 +147,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 logger.client_info("Could not reserve IP address %s for %s "
                                    "in DSDB: %s" %
                                    (dbmanager.ip, dbmanager.fqdn, e))
-                dbinterface.system = None
+                dbinterface.vlans[0].addresses.remove(dbmanager.ip)
                 session.add(dbinterface)
-                session.remove(dbmanager)
+                session.delete(dbmanager)
                 session.flush()
                 session.refresh(dbinterface)
                 session.refresh(dbmachine)
@@ -173,6 +169,13 @@ class CommandAddInterfaceMachine(BrokerCommand):
             pending_removals.stash()
             plenaries.write(locked=True)
             pending_removals.remove(locked=True)
+
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.update_host(dbmachine, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not update host in DSDB: %s" % err)
+
         except Exception, e:
             plenaries.restore_stash()
             pending_removals.restore_stash()
@@ -191,18 +194,17 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # The below seems too simple to warrant that, though...
         logger.info("Removing blind host '%s', machine '%s', "
                     "and interface '%s'" %
-                    (prev.system.fqdn, prev.hardware_entity.name, prev.name))
-        host_plenary_info = PlenaryHost(prev.system, logger=logger)
+                    (prev.hardware_entity.fqdn, prev.hardware_entity.label,
+                     prev.name))
+        host_plenary_info = PlenaryHost(prev.hardware_entity.host, logger=logger)
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
         # plenarys and dependency files.
         pending_removals.append(host_plenary_info)
-        session.delete(prev.system)
         dbmachine = prev.hardware_entity
-        machine_plenary_info = PlenaryMachineInfo(prev.hardware_entity,
-                                                  logger=logger)
+        machine_plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         pending_removals.append(machine_plenary_info)
-        session.delete(prev)
+        # This will cascade to prev & the host
         session.delete(dbmachine)
         session.flush()
 
@@ -218,25 +220,25 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     def consolidate_names(self, session, logger, dbmachine, dummy_machine_name,
                           pending_removals):
-        short = dbmachine.name[:-1]
+        short = dbmachine.label[:-1]
         if short != dummy_machine_name[:-1]:
             logger.client_info("Not altering name of machine %s, name of "
                                "machine being removed %s is too different." %
-                               (dbmachine.name, dummy_machine_name))
+                               (dbmachine.label, dummy_machine_name))
             return
-        if not dbmachine.name[-1].isalpha():
+        if not dbmachine.label[-1].isalpha():
             logger.client_info("Not altering name of machine %s, name does "
-                               "not end with a letter." % dbmachine.name)
+                               "not end with a letter." % dbmachine.label)
             return
-        if session.query(Machine).filter_by(name=short).first():
+        if session.query(Machine).filter_by(label=short).first():
             logger.client_info("Not altering name of machine %s, target "
                                "name %s is already in use." %
-                               (dbmachine.name, short))
+                               (dbmachine.label, short))
             return
         logger.client_info("Renaming machine %s to %s." %
-                           (dbmachine.name, short))
+                           (dbmachine.label, short))
         pending_removals.append(PlenaryMachineInfo(dbmachine, logger=logger))
-        dbmachine.name = short
+        dbmachine.label = short
         session.add(dbmachine)
         session.flush()
 
@@ -244,26 +246,26 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if not old_ip:
             logger.client_info("No IP address available for system being "
                                "removed, not auto-creating manager for %s." %
-                               dbmachine.name)
+                               dbmachine.label)
             return
         if not dbmachine.host:
             logger.client_info("Machine %s is not linked to a host, not "
                                "auto-creating manager for %s with IP address "
-                               "%s." % (dbmachine.name, old_ip))
+                               "%s." % (dbmachine.label, old_ip))
             return
-        dbhost = dbmachine.host
-        manager = "%sr.%s" % (dbhost.name, dbhost.dns_domain.name)
+        manager = "%sr.%s" % (dbmachine.primary_name.name,
+                              dbmachine.primary_name.dns_domain.name)
         try:
             (short, dbdns_domain) = parse_system_and_verify_free(session,
                                                                  manager)
         except ArgumentError, e:
             logger.client_info("Could not create manager with name %s and "
                                "IP address %s for machine %s: %s" %
-                               (manager, old_ip, dbmachine.name, e))
+                               (manager, old_ip, dbmachine.label, e))
             return
-        dbmanager = Manager(name=short, dns_domain=dbdns_domain,
-                            machine=dbmachine,
-                            ip=old_ip, network=old_network)
+        dbmanager = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                  ip=old_ip, network=old_network)
+        session.add(dbmanager)
         return dbmanager
 
     def generate_mac(self, session, dbmachine):

@@ -74,7 +74,7 @@ class TestManage(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Sandbox: %s/changetest1" % user, command)
 
     def testmanageserver1(self):
@@ -84,7 +84,7 @@ class TestManage(TestBrokerCommand):
     def testverifymanageserver1(self):
         command = "show host --hostname server1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: server1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Primary Name: server1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Domain: unittest", command)
 
     def testverifycleanup(self):
@@ -111,7 +111,7 @@ class TestManage(TestBrokerCommand):
         user = self.config.get("unittest", "user")
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Sandbox: %s/changetest2" % user, command)
 
     def testfailmanagevmhost(self):

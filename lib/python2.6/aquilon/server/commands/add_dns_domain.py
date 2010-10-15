@@ -29,11 +29,11 @@
 """Contains the logic for `aq add dns_domain`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DnsDomain
 from aquilon.server.processes import DSDBRunner
-import re
+
 
 class CommandAddDnsDomain(BrokerCommand):
 
@@ -43,19 +43,18 @@ class CommandAddDnsDomain(BrokerCommand):
         if session.query(DnsDomain).filter_by(name=dns_domain).first():
             raise ArgumentError("DNS domain %s already exists." % dns_domain)
 
-        # RFC 2181
-        label = '[^.]{1,63}'
-        pattern = '(' + label + '\.' + ')*' + label + '$'
-        valid = re.compile(pattern)
-        if not valid.match(dns_domain) or len(dns_domain) > 255:
-            raise ArgumentError("DNS domain name '%s' is not valid." % dns_domain)
-
-        dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
+        try:
+            dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
+        except ValueError, err:
+            raise ArgumentError(err)
         session.add(dbdns_domain)
         session.flush()
         session.refresh(dbdns_domain)
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
+        try:
+            dsdb_runner.add_dns_domain(dbdns_domain.name, comments)
+        except ProcessException, err:
+            raise ArgumentError(err)
 
         return

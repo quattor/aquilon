@@ -28,12 +28,33 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show switch --all`."""
 
+from sqlalchemy.orm import subqueryload_all, contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import Switch, PrimaryNameAssociation, System, DnsDomain
 
 
 class CommandShowSwitchAll(BrokerCommand):
 
     def render(self, session, logger, **arguments):
-        return session.query(Switch).all()
+        q = session.query(Switch)
+
+        q = q.options(subqueryload_all('location'))
+        q = q.options(subqueryload_all('interfaces._vlan_ids'))
+        q = q.options(subqueryload_all('interfaces.vlans.assignments.dns_records'))
+        q = q.options(subqueryload_all('observed_vlans'))
+        q = q.options(subqueryload_all('observed_macs'))
+        q = q.options(subqueryload_all('model.vendor'))
+        # Switches don't have machine specs, but the formatter checks for their
+        # existence anyway
+        q = q.options(subqueryload_all('model.machine_specs'))
+
+        # Prefer the primary name for ordering
+        q = q.outerjoin(PrimaryNameAssociation, System, DnsDomain)
+        q = q.options(contains_eager('_primary_name_asc'))
+        q = q.options(contains_eager('_primary_name_asc.dns_record'))
+        q = q.options(contains_eager('_primary_name_asc.dns_record.dns_domain'))
+        q = q.reset_joinpoint()
+        q = q.order_by(System.name, DnsDomain.name, Switch.label)
+
+        return q.all()

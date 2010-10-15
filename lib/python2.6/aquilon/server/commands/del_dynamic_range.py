@@ -73,8 +73,7 @@ class CommandDelDynamicRange(BrokerCommand):
         invalid = [s for s in existing if s.system_type != 'dynamic_stub']
         if invalid:
             raise ArgumentError("The range contains non-dynamic systems:\n" +
-                                "\n".join(["%s (%s)" % (i.fqdn, i.ip)
-                                           for i in invalid]))
+                                "\n".join([format(i, "a") for i in invalid]))
 
         stubs = {}
         for stub in existing:

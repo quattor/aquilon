@@ -30,7 +30,6 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Chassis
 
 
@@ -39,4 +38,4 @@ class CommandShowChassisChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, chassis, **arguments):
-        return get_system(session, chassis, Chassis, 'Chassis')
+        return Chassis.get_unique(session, chassis, compel=True)

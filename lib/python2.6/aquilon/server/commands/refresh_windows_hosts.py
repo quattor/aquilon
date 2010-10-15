@@ -39,7 +39,7 @@ from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.locks import lock_queue, SyncKey
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, HostLifecycle, DnsDomain, System,
-                                OperatingSystem)
+                                OperatingSystem, ReservedName)
 
 
 class CommandRefreshWindowsHosts(BrokerCommand):
@@ -106,8 +106,9 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         q = session.query(Host)
         q = q.filter_by(comments='Created by refresh_windows_host')
         for dbhost in q.all():
+            mac_addresses = [iface.mac for iface in dbhost.machine.interfaces]
             if dbhost.fqdn in windows_hosts and \
-               dbhost.mac == windows_hosts[dbhost.fqdn]:
+               windows_hosts[dbhost.fqdn] in mac_addresses:
                 # All is well
                 continue
             deps = get_host_dependencies(session, dbhost)
@@ -117,15 +118,14 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            for dbinterface in dbhost.interfaces:
-                # Verify that there's only one?
-                dbinterface.system = None
-                session.add(dbinterface)
+            dbmachine = dbhost.machine
             success.append("Removed host entry for %s (%s)" %
-                           (dbhost.machine.name, dbhost.fqdn))
-            if dbhost.machine.cluster:
-                clusters.add(dbhost.machine.cluster)
+                           (dbmachine.label, dbmachine.fqdn))
+            if dbmachine.cluster:
+                clusters.add(dbmachine.cluster)
             session.delete(dbhost)
+            session.delete(dbmachine.primary_name)
+            session.expire(dbmachine, ['_primary_name_asc'])
         session.flush()
         # The Host() creations below fail when autoflush is enabled.
         session.autoflush = False
@@ -163,17 +163,22 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             existing = System.get_unique(session, name=short,
                                          dns_domain=dbdns_domain)
             if existing:
+                if not existing.hardware_entity:
+                    msg = "Skipping host %s: It is not a primary name." % host
+                    failed.append(msg)
+                    logger.info(msg)
                 # If these are invalid there should have been a deletion
                 # attempt above.
-                if not existing.interfaces:
+                if not existing.hardware_entity.interfaces:
                     msg = "Skipping host %s: Host already exists but has " \
                             "no interface attached." % host
                     failed.append(msg)
                     logger.info(msg)
-                elif existing.interfaces[0].mac != mac:
+                elif existing.hardware_entity.interfaces[0].mac != mac:
                     msg = "Skipping host %s: Host already exists but with " \
                             "MAC address %s and not %s." % \
-                            (host, existing.interfaces[0].mac, mac)
+                            (host, existing.hardware_entity.interfaces[0].mac,
+                             mac)
                     failed.append(msg)
                     logger.info(msg)
                 continue
@@ -191,34 +196,34 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is tied to hardware %s instead of a virtual " \
                         "machine." % \
-                        (host, mac, dbinterface.hardware_entity.hardware_name)
+                        (host, mac, dbinterface.hardware_entity.label)
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            if dbinterface.system:
+            if dbinterface.vlans[0].assignments:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is already tied to %s." % \
-                        (host, mac, dbinterface.system.fqdn)
+                        (host, mac, dbinterface.vlans[0].assignments[0].fqdns[0])
                 failed.append(msg)
                 logger.info(msg)
                 continue
             if dbmachine.host:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is already tied to %s." % \
-                        (host, mac, dbmachine.host.fqdn)
+                        (host, mac, dbmachine.fqdn)
                 failed.append(msg)
                 logger.info(msg)
                 continue
             dbhost = Host(machine=dbmachine, branch=dbdomain,
-                          status=dbstatus, mac=mac, ip=None, network=None,
-                          name=short, dns_domain=dbdns_domain,
+                          status=dbstatus,
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
-            dbinterface.system = dbhost
-            session.add(dbinterface)
+            dbdns_rec = ReservedName(name=short, dns_domain=dbdns_domain)
+            session.add(dbdns_rec)
+            dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %
-                           (dbhost.machine.name, dbhost.fqdn))
+                           (dbmachine.label, dbdns_rec.fqdn))
             if dbmachine.cluster:
                 clusters.add(dbmachine.cluster)
             session.flush()

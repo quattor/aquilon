@@ -56,6 +56,10 @@ from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.personality import Personality
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
+#SYSTEM
+from aquilon.aqdb.model.system import (System, DynamicStub, FutureARecord,
+                                       ReservedName)
+
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor
 from aquilon.aqdb.model.model import Model
@@ -63,23 +67,21 @@ from aquilon.aqdb.model.hardware_entity import HardwareEntity
 from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.hostlifecycle import HostLifecycle
-from aquilon.aqdb.model.switch_hw import SwitchHw
-from aquilon.aqdb.model.chassis_hw import ChassisHw
-
-#SYSTEM
-from aquilon.aqdb.model.system import System, DynamicStub, FutureARecord
+from aquilon.aqdb.model.switch import Switch
 from aquilon.aqdb.model.chassis import Chassis
-from aquilon.aqdb.model.manager import Manager
+
+#HOST
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
 from aquilon.aqdb.model.host import Host
-from aquilon.aqdb.model.switch import Switch
+
+from aquilon.aqdb.model.primary_name_association import PrimaryNameAssociation
 
 #HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
-from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
 from aquilon.aqdb.model.interface import Interface
-from aquilon.aqdb.model.auxiliary import Auxiliary
+from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo, VlanInterface
+from aquilon.aqdb.model.address_assignment import AddressAssignment
 
 #SERVICE
 from aquilon.aqdb.model.service import (Service, ServiceListItem,

@@ -68,7 +68,6 @@ class CommandDelHost(BrokerCommand):
             dbhost = hostname_to_host(session, hostname)
             ph = PlenaryHost(dbhost, logger=logger)
             domain = dbhost.branch.name
-            fqdn   = dbhost.fqdn
             deps = get_host_dependencies(session, dbhost)
             if (len(deps) != 0):
                 deptext = "\n".join(["  %s"%d for d in deps])
@@ -78,7 +77,8 @@ class CommandDelHost(BrokerCommand):
 
             archetype = dbhost.archetype.name
             dbmachine = dbhost.machine
-            ip = dbhost.ip
+            ip = dbmachine.primary_ip
+            fqdn = dbmachine.fqdn
 
             for binding in dbhost.templates:
                 ### WARNING ###
@@ -91,8 +91,15 @@ class CommandDelHost(BrokerCommand):
                             % (fqdn, binding.cfg_path))
                 session.delete(binding)
 
+            for iface in dbmachine.interfaces:
+                for vlan in iface.vlan_ids:
+                    if ip in iface.vlans[vlan].addresses:
+                        iface.vlans[vlan].addresses.remove(ip)
+
             session.delete(dbhost)
+            session.delete(dbmachine.primary_name)
             session.flush()
+            session.expire(dbmachine)
             delplenary = True
 
             if archetype != 'aurora' and ip is not None:

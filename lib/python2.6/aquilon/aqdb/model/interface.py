@@ -1,4 +1,4 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-  # pylint: disable-msg=C0301
 #
 # Copyright (C) 2008,2009,2010  Contributor
 #
@@ -36,15 +36,14 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint, Boolean)
 from sqlalchemy.orm import relation, backref, validates, object_session
-from sqlalchemy.sql.expression import desc, func
+from sqlalchemy.sql.expression import desc, case
 
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
-from aquilon.aqdb.model import Base, System, HardwareEntity, ObservedMac
+from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
 
 INTERFACE_TYPES = ('public', 'management', 'oa') #, 'transit')
 
-
-def _validate_mac(kw):
+def _validate_mac(kw):  # pylint: disable-msg=C0103
     """ Prevents null MAC addresses in certain cases.
 
         If an interface is bootable or type 'management' we require it """
@@ -57,12 +56,21 @@ def _validate_mac(kw):
 
 
 class Interface(Base):
-    """ In this design, interface is really just a name/type pair, AND the
-        primary source for MAC address. Name/Mac/IP, the primary tuple, is
-        in system, where mac is duplicated, but code to update MAC addresses
-        must come through here """
+    """ Interface: Representation of network interfaces for our network
+
+        This table stores collections of machines, names, mac addresses,
+        types, and a bootable flag to aid our DHCP and machine configuration.
+    """
 
     __tablename__ = 'interface'
+
+    # The Natural (and composite) pk is HW_ENT_ID/NAME.
+    # But is it the "correct" pk in this case???. The surrogate key is here
+    # only because it's easier to have a single target FK in the address
+    # association object. It might actually be doable to use the natural key if
+    # we try it. The upside: less clutter, meaningful keys. Downside:
+    # It's also extra work we may not enjoy, it means rewriting the table
+    # since we'd blow away its PK.
 
     id = Column(Integer, Sequence('interface_seq'), primary_key=True)
 
@@ -70,6 +78,7 @@ class Interface(Base):
 
     mac = Column(AqMac(17), nullable=True)
 
+    # PXE boot control. Does not affect how the OS configures the interface.
     bootable = Column(Boolean, nullable=False, default=False)
 
     interface_type = Column(Enum(32, INTERFACE_TYPES),
@@ -80,11 +89,6 @@ class Interface(Base):
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
-    system_id = Column(Integer, ForeignKey('system.id',
-                                           name='IFACE_SYSTEM_FK',
-                                           ondelete='CASCADE'),
-                       nullable=True)
-
     port_group = Column(AqStr(32), nullable=True)
 
     creation_date = Column('creation_date', DateTime, default=datetime.now,
@@ -93,20 +97,22 @@ class Interface(Base):
     comments = Column('comments', String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
-                               backref=backref('interfaces'))
+                               backref=backref('interfaces', cascade='all'))
 
-    system = relation(System, backref='interfaces')
+    # Interfaces also have the properties 'interfaces' and 'assignments'
+    # which are proxied in via association proxies in AddressAssignment
+
+    # There are a couple of other mappings defined in vlan.py and
+    # address_assignment.py. See the comment after VlanInterface in vlan.py for
+    # examples.
 
     def __format__(self, format_spec):
-        if self.system:
-            owner = self.system.fqdn
-        else:
-            owner = self.hardware_entity.name
-        instance = "%s/%s" % (owner, self.name)
+        instance = "{0.name} of {1:l}".format(self, self.hardware_entity)
         return self.format_helper(format_spec, instance)
 
     @validates('mac')
     def validate_mac(self, key, value):
+        """ wraps _validate_mac for sqlalchemy @validates compatibility """
         temp_dict = {'bootable': self.bootable, 'mac': value,
                      'interface_type': self.interface_type}
         _validate_mac(temp_dict)
@@ -117,13 +123,18 @@ class Interface(Base):
         session = object_session(self)
         q = session.query(ObservedMac)
         q = q.filter_by(mac_address=self.mac)
-        if session.connection().dialect.name == 'oracle':
-            # Group the results into 'any port number but zero' and 'port 0'.
-            # This prioritizes any port over the uplink port.
-            # Saying that port 0 is an uplink port isn't very elegant...
-            q = q.order_by(desc(func.DECODE(ObservedMac.port_number, 0, 0, 1)))
+        # Group the results into 'any port number but zero' and 'port 0'.
+        # This prioritizes any port over the uplink port.
+        # Saying that port 0 is an uplink port isn't very elegant...
+        q = q.order_by(desc(case([(ObservedMac.port_number == 0, 0)], else_=1)))
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
+
+    def all_addresses(self):
+        """ Iterator returning all addresses of the interface. """
+        for vlan in self.vlan_ids:
+            for addr in self.vlans[vlan].assignments:
+                yield addr
 
     def __init__(self, **kw): # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
@@ -132,9 +143,20 @@ class Interface(Base):
         _validate_mac(kw)
         super(Interface, self).__init__(**kw)
 
+        # Always create the default VLAN, it makes life much simpler when
+        # converting VLAN-unaware code.
+        self.vlan_ids.append(0)
 
-interface = Interface.__table__ # pylint: disable-msg=C0103, E1101
+    def __repr__(self):
+        msg = "<{0} {1} of {2}, MAC={3}>".format(self._get_class_label(),
+                                                 self.name,
+                                                 self.hardware_entity, self.mac)
+        return msg
+
+
+interface = Interface.__table__  # pylint: disable-msg=C0103, E1101
 interface.primary_key.name = 'interface_pk'
+interface.info['unique_fields'] = ['name', 'hardware_entity']
 
 interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
 

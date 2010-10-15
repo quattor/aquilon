@@ -28,9 +28,8 @@
 # TERMS THAT MAY APPLY.
 """Machine formatter."""
 
-
 from aquilon import const
-from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.formatters import ObjectFormatter, shift
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import Machine
 
@@ -43,17 +42,13 @@ class MachineInterfacePair(tuple):
 class MachineInterfacePairFormatter(ObjectFormatter):
     def csv_fields(self, item):
         machine = item[0]
-        interface = item[1]
+        addr = item[1]
 
-        details = [machine.name, machine.location.rack.name,
+        details = [machine.label, machine.location.rack.name,
                    machine.location.building.name, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
-        if interface:
-            details.extend([interface.name, interface.mac])
-            if interface.system:
-                details.append(interface.system.ip)
-            else:
-                details.append(None)
+        if addr:
+            details.extend([addr.logical_name, addr.vlan.interface.mac, addr.ip])
         else:
             details.extend([None, None, None])
         return details
@@ -63,20 +58,35 @@ ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
-        details = [indent + "%s: %s" %
-                (machine.model.machine_type.capitalize(), machine.name)]
-        if machine.host:
-            details.append(indent + "  Allocated to host: %s [%s]"
-                    % (machine.host.fqdn, machine.host.ip))
+        # TODO: convert this formatter to mako
+        details = [indent + "%s: %s" % (machine.model.machine_type.capitalize(),
+                                        machine.label)]
+        if machine.primary_name:
+            details.append(indent + "  Primary Name: "
+                           "{0:a}".format(machine.primary_name))
         if machine.cluster:
             details.append(indent + \
                            "  Hosted by {0:c}: {0.name}".format(machine.cluster))
-        for manager in machine.manager:
-            details.append(indent + "  Manager: %s [%s]" % (manager.fqdn,
-                                                            manager.ip))
-        for dbauxiliary in machine.auxiliaries:
-            details.append(indent + "  Auxiliary: %s [%s]" % (
-                           dbauxiliary.fqdn, dbauxiliary.ip))
+
+        # FIXME: This is now somewhat redundant
+        managers = []
+        auxiliaries = []
+        for iface in machine.interfaces:
+            for addr in iface.all_addresses():
+                if addr.ip == machine.primary_ip:
+                    continue
+                if iface.interface_type == 'management':
+                    managers.append((addr.fqdns, addr.ip))
+                else:
+                    auxiliaries.append((addr.fqdns, addr.ip))
+
+        for mgr in managers:
+            details.append(indent + "  Manager: %s [%s]" %
+                           (", ".join(mgr[0]), mgr[1]))
+        for aux in auxiliaries:
+            details.append(indent + "  Auxiliary: %s [%s]" %
+                           (", ".join(aux[0]), aux[1]))
+
         # This is a bit of a hack.  Delegating out to the standard location
         # formatter now spews too much information about chassis.  Maybe
         # that will change when chassis has a corresponding hardware type.
@@ -90,7 +100,7 @@ class MachineFormatter(ObjectFormatter):
                     details.append(indent + "    Column: %s" %
                                    machine.location.rack.rack_column)
         for slot in machine.chassis_slot:
-            details.append(indent + "  {0:c}: {0.fqdn}".format(slot.chassis))
+            details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))
             details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}".format(
             machine.model.vendor, machine.model))
@@ -110,16 +120,20 @@ class MachineFormatter(ObjectFormatter):
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:
             details.append(indent + "  Comments: %s" % machine.comments)
+        if machine.host:
+            template = self.lookup_raw.get_template("host.mako")
+            details.append(shift(template.render(record=machine.host,
+                                                 formatter=self),
+                                 indent=indent + "  ").rstrip())
         return "\n".join(details)
-
-    def get_header(self):
-        """This is just an idea... not used anywhere (yet?)."""
-        return "machine,rack,building,vendor,model,serial,interface,mac,ip"
 
     def csv_tolist(self, machine):
         if machine.interfaces:
-            return [MachineInterfacePair((machine, i))
-                    for i in machine.interfaces]
+            entries = []
+            for iface in machine.interfaces:
+                for addr in iface.all_addresses():
+                    entries.append(MachineInterfacePair((machine, addr)))
+            return entries
         else:
             return [MachineInterfacePair((machine, None))]
 
@@ -132,7 +146,7 @@ class SimpleMachineList(list):
 
 class SimpleMachineListFormatter(ListFormatter):
     def format_raw(self, smlist, indent=""):
-        return str("\n".join([indent + machine.name for machine in smlist]))
+        return str("\n".join([indent + machine.label for machine in smlist]))
 
 ObjectFormatter.handlers[SimpleMachineList] = SimpleMachineListFormatter()
 

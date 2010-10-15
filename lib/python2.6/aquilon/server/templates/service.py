@@ -183,7 +183,7 @@ class PlenaryServiceInstanceServer(Plenary):
         lines.append("'instance' = '%(name)s';" % self.__dict__)
         lines.append("'clients' = list(" +
                      ", ".join(["'%s'" % client
-                                for client in self.dbinstance.clients]) +
+                                for client in self.dbinstance.client_fqdns]) +
                      ");")
 
 

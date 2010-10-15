@@ -30,14 +30,16 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint)
+from sqlalchemy import (Column, Integer, Boolean, DateTime, ForeignKey,
+                        Sequence, CheckConstraint, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, object_session, aliased
+from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Network, Switch, Machine
+from aquilon.aqdb.model import Base, Network, Switch, Machine, Interface
 
 MAX_VLANS = 4096 #IEEE 802.1Q standard
 
@@ -88,6 +90,9 @@ vlaninfo.info['unique_fields'] = ['port_group']
 vlaninfo.append_constraint(
     CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
                     name=('%s_max_vlan_id' % _VTN).upper()))
+vlaninfo.append_constraint(
+    CheckConstraint(('"vlan_id" >= 0').upper(),
+                    name=('%s_min_vlan_id' % _VTN).upper()))
 
 _TN = 'observed_vlan'
 _ABV = 'obs_vlan'
@@ -97,7 +102,7 @@ class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
 
-    switch_id = Column(Integer, ForeignKey('switch.id',
+    switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
                                            ondelete='CASCADE',
                                            name='%s_hw_fk' % _ABV),
                        primary_key=True)
@@ -142,11 +147,11 @@ class ObservedVlan(Base):
         port_group = VlanInfo.get_port_group(session, vlan_id=self.vlan_id)
         ESXAlias = aliased(EsxCluster)
         q = session.query(Machine)
-        q = q.join(['_cluster', 'cluster',
-                    (ESXAlias, ESXAlias.esx_cluster_id == Cluster.id)])
+        q = q.join('_cluster', 'cluster',
+                   (ESXAlias, ESXAlias.esx_cluster_id == Cluster.id))
         q = q.filter_by(switch=self.switch)
         q = q.reset_joinpoint()
-        q = q.join(['interfaces'])
+        q = q.join('interfaces')
         q = q.filter_by(port_group=port_group)
         q = q.reset_joinpoint()
         return q.count()
@@ -173,3 +178,66 @@ ObservedVlan.__table__.primary_key.name = '%s_pk' % _TN
 ObservedVlan.__table__.append_constraint(
     CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
                     name=('%s_max_vlan_id' % _TN).upper()))
+ObservedVlan.__table__.append_constraint(
+    CheckConstraint(('"vlan_id" >= 0').upper(),
+                    name=('%s_min_vlan_id' % _TN).upper()))
+
+
+_TN = 'vlan_interface'
+
+
+class VlanInterface(Base):
+    """ assigns VLANs to interfaces """
+    __tablename__ = _TN
+
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+
+    interface_id = Column(Integer, ForeignKey('interface.id',
+                                              name='%s_iface_fk' % _TN,
+                                              ondelete='CASCADE'),
+                          nullable=False)
+
+    vlan_id = Column(Integer, nullable=False)
+
+    # Interface configuration method _after_ the OS have booted. Does not affect
+    # PXE setup.
+    dhcp_enabled = Column(Boolean, nullable=False, default=False)
+
+    creation_date = Column(DateTime, nullable=False, default=datetime.now)
+
+    interface = relation(Interface, lazy=False, uselist=False,
+                         backref=backref('_vlan_ids', uselist=True,
+                                         order_by=[asc('vlan_id')],
+                                         cascade='all, delete-orphan'))
+
+    def __repr__(self):
+        return "<VLAN %d on %s/%s>" % (self.vlan_id,
+                                       self.interface.hardware_entity.label,
+                                       self.interface.name)
+
+vlanif = VlanInterface.__table__
+vlanif.primary_key.name = "%s_pk" % _TN
+vlanif.append_constraint(
+    UniqueConstraint("interface_id", "vlan_id", name="%s_if_vlan_uk" % _TN))
+vlanif.append_constraint(
+    CheckConstraint(('"vlan_id" >= 0').upper(),
+                    name=('%s_min_vlan_id' % _TN).upper()))
+vlanif.append_constraint(
+    CheckConstraint(('"vlan_id" < %s' % MAX_VLANS).upper(),
+                    name=('%s_max_vlan_id' % _TN).upper()))
+
+
+# There are quite a number of mappings here, so probably a couple of examples
+# will help to understand them:
+#
+# repr(iface.vlan_ids) = [0, 100]
+# repr(iface.vlan) =  {0: <VLAN 0 on foo.ms.com/eth0>,
+#                      100: <VLAN 100 on foo.ms.com/eth0>}
+# repr(iface.vlans[0].addresses) = [IPv4Address('192.168.0.1')]
+# repr(iface.vlans[100].addresses) = [IPv4Address('192.168.1.1')]
+# repr(iface.addresses) = [IPv4Address('192.168.0.1'),
+#                          IPv4Address('192.168.1.1')]
+Interface.vlan_ids = association_proxy('_vlan_ids', 'vlan_id',
+                            creator=lambda vlan: VlanInterface(vlan_id=vlan))
+Interface.vlans = relation(VlanInterface,
+                           collection_class=attribute_mapped_collection('vlan_id'))

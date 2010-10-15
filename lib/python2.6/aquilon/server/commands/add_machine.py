@@ -33,7 +33,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.templates.base import PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -47,20 +46,16 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
-               **arguments):
+               comments, **arguments):
         dblocation = get_location(session, **arguments)
         if chassis:
-            dbchassis = get_system(session, chassis)
-            if not isinstance(dbchassis, Chassis):
-                raise ArgumentError("The system %s is not a chassis." %
-                        chassis)
+            dbchassis = Chassis.get_unique(session, chassis, compel=True)
             if slot is None:
                 raise ArgumentError("The --chassis option requires a --slot.")
-            if dblocation and dblocation != dbchassis.chassis_hw.location:
+            if dblocation and dblocation != dbchassis.location:
                 raise ArgumentError("{0} conflicts with chassis location "
-                                    "{1}.".format(dblocation,
-                                                  dbchassis.chassis_hw.location))
-            dblocation = dbchassis.chassis_hw.location
+                                    "{1}.".format(dblocation, dbchassis.location))
+            dblocation = dbchassis.location
         elif slot is not None:
             raise ArgumentError("The --slot option requires a --chassis.")
 
@@ -95,7 +90,7 @@ class CommandAddMachine(BrokerCommand):
         Machine.get_unique(session, machine, preclude=True)
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount,
-                                   memory, serial)
+                                   memory, serial, comments)
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,

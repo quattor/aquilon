@@ -42,6 +42,10 @@ from ipaddr import IPv4Network, IPv4Address
 LOCK_RE = re.compile(r'^(acquired|releasing) '
                      r'((compile|delete|sync) )?lock[^\n]*\n', re.M)
 
+DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
+DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
+DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
+
 
 class TestBrokerCommand(unittest.TestCase):
 
@@ -89,6 +93,16 @@ class TestBrokerCommand(unittest.TestCase):
             self.aurora_without_node = "pissp1"
         self.gzip_profiles = self.config.getboolean("panc", "gzip_output")
         self.profile_suffix = ".xml.gz" if self.gzip_profiles else ".xml"
+
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
+                     DSDB_ISSUED_CMDS_FILE]:
+            path = os.path.join(dsdb_coverage_dir, name)
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
     def tearDown(self):
         pass
@@ -314,14 +328,21 @@ class TestBrokerCommand(unittest.TestCase):
                      (command, s, out))
 
     def searchoutput(self, out, r, command):
-        m = re.search(r, out)
+        if isinstance(r, str):
+            m = re.search(r, out, re.MULTILINE)
+        else:
+            m = re.search(r, out)
         self.failUnless(m,
                         "output for %s did not match '%s':\n@@@\n'%s'\n@@@\n"
                         % (command, r, out))
         return m
 
     def searchclean(self, out, r, command):
-        self.failIf(re.search(r, out),
+        if isinstance(r, str):
+            m = re.search(r, out, re.MULTILINE)
+        else:
+            m = re.search(r, out)
+        self.failIf(m,
                     "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
                     (command, r, out))
 
@@ -379,6 +400,20 @@ class TestBrokerCommand(unittest.TestCase):
                                  "%d DNS domain(s) expected, got %d\n" %
                                  (expect, received))
         return dns_domainlist
+
+    def parse_service_msg(self, msg, expect=None):
+        service = aqdservices_pb2.ServiceList()
+        service.ParseFromString(msg)
+        received = len(service.services)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No services listed in protobuf message\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d service(s) expected, got %d\n" %
+                                 (expect, received))
+        return service
+
 
     def parse_servicemap_msg(self, msg, expect=None):
         servicemaplist = aqdservices_pb2.ServiceMapList()
@@ -504,6 +539,83 @@ class TestBrokerCommand(unittest.TestCase):
             f.write(contents)
         return scratchfile
 
+    def dsdb_expect(self, command, fail=False):
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        if fail:
+            filename = DSDB_EXPECT_FAILURE_FILE
+        else:
+            filename = DSDB_EXPECT_SUCCESS_FILE
+
+        expected_name = os.path.join(dsdb_coverage_dir, filename)
+        with open(expected_name, "a") as fp:
+            if isinstance(command, list):
+                fp.write(" ".join([str(cmd) for cmd in command]))
+            else:
+                fp.write(str(command))
+            fp.write("\n")
+
+    def dsdb_expect_add(self, hostname, ip, interface=None, mac=None,
+                        primary=None, fail=False):
+        command = ["add", "host", "-host_name", hostname,
+                   "-ip_address", str(ip), "-status", "aq"]
+        if interface:
+            command.extend(["-interface_name",
+                            str(interface).replace('/', '_')])
+        if mac:
+            command.extend(["-ethernet_address", str(mac)])
+        if primary:
+            command.extend(["-primary_host_name", primary])
+
+        self.dsdb_expect(" ".join(command), fail=fail)
+
+    def dsdb_expect_delete(self, ip, fail=False):
+        self.dsdb_expect("delete host -ip_address %s" % ip, fail=fail)
+
+    def dsdb_expect_update(self, fqdn, mac, fail=False):
+        self.dsdb_expect("update host -host_name %s -status aq "
+                         "-ethernet_address %s" % (fqdn, mac), fail=fail)
+
+    def dsdb_verify(self):
+        dsdb_coverage_dir = os.path.join(self.config.get("unittest", "scratchdir"),
+                                         "dsdb_coverage")
+        fail_expected_name = os.path.join(dsdb_coverage_dir,
+                                          DSDB_EXPECT_FAILURE_FILE)
+        issued_name = os.path.join(dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
+
+        expected = {}
+        for filename in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE]:
+            expected_name = os.path.join(dsdb_coverage_dir, filename)
+            try:
+                with open(expected_name, "r") as fp:
+                    for line in fp:
+                        expected[line.rstrip("\n")] = True
+            except IOError:
+                pass
+
+        # This is likely a logic error in the test
+        if not expected:
+            self.fail("dsdb_verify() called when no DSDB commands were "
+                      "expected?!?")
+
+        issued = {}
+        try:
+            with open(issued_name, "r") as fp:
+                for line in fp:
+                    issued[line.rstrip("\n")] = True
+        except IOError:
+            pass
+
+        errors = []
+        for cmd, dummy in expected.items():
+            if cmd not in issued:
+                errors.append("'%s'" % cmd)
+        # Unexpected DSDB commands are caught by the fake_dsdb script
+
+        if errors:
+            self.fail("The following expected DSDB commands were not called:"
+                      "\n@@@\n%s\n@@@\n" % "\n".join(errors))
+
 
 class DummyIP(IPv4Address):
     def __init__(self, *args, **kwargs):
@@ -565,6 +677,7 @@ class DummyNetworks(object):
         self.unknown.append(NetworkInfo("4.2.6.168/29", "unknown"))
         self.unknown.append(NetworkInfo("4.2.6.176/29", "unknown"))
         self.unknown.append(NetworkInfo("4.2.6.184/29", "unknown"))
+        self.unknown.append(NetworkInfo("4.2.10.0/24", "unknown"))
         self.tor_net.append(NetworkInfo("4.2.1.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.1.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.0/26", "tor_net"))
@@ -577,6 +690,7 @@ class DummyNetworks(object):
         self.tor_net.append(NetworkInfo("4.2.9.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.3.0/25", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.3.128/25", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.5.0/25", "tor_net"))
         self.tor_net2.append(NetworkInfo("4.2.4.0/25", "tor_net2"))
         self.tor_net2.append(NetworkInfo("4.2.4.128/25", "tor_net2"))
         self.tor_net2.append(NetworkInfo("4.2.6.192/26", "tor_net2"))

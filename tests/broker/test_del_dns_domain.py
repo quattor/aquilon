@@ -41,8 +41,10 @@ from brokertest import TestBrokerCommand
 class TestDelDnsDomain(TestBrokerCommand):
 
     def testdelaqdunittestdomain(self):
+        self.dsdb_expect("delete dns_domain -domain_name aqd-unittest.ms.com")
         command = "del dns_domain --dns_domain aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
+        self.dsdb_verify()
 
     def testverifydelaqdunittestdomain(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com"

@@ -41,14 +41,16 @@ from brokertest import TestBrokerCommand
 class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddaurorawithnode(self):
+        self.dsdb_expect("show host -host_name %s" % self.aurora_with_node)
         self.noouttest(["add", "aurora", "host",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--hostname", self.aurora_with_node])
+        self.dsdb_verify()
 
     def testverifyaddaurorawithnode(self):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
+        self.matchoutput(out, "Primary Name: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Chassis: ", command)
         self.matchoutput(out, "Slot: ", command)
@@ -58,14 +60,16 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Status: ready", command)
 
     def testaddaurorawithoutnode(self):
+        self.dsdb_expect("show host -host_name %s" % self.aurora_without_node)
         self.noouttest(["add", "aurora", "host",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--hostname", self.aurora_without_node])
+        self.dsdb_verify()
 
     def testverifyaddaurorawithoutnode(self):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
+        self.matchoutput(out, "Primary Name: %s" % self.aurora_without_node,
                 command)
         self.matchoutput(out, "Aurora_node: ", command)
         self.matchoutput(out, "Building: ", command)
@@ -74,18 +78,30 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: ny-prod", command)
         self.matchoutput(out, "Status: ready", command)
 
+    def testdsdbmissing(self):
+        self.dsdb_expect("show host -host_name not-in-dsdb", fail=True)
+        command = ["add", "aurora", "host", "--hostname", "not-in-dsdb",
+                   "--osname", "linux", "--osversion", "4.0.1-x86_64"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
+        self.dsdb_verify()
+
     def testaddnyaqd1(self):
+        self.dsdb_expect("show host -host_name nyaqd1")
         self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64"])
+        self.dsdb_verify()
 
     def testverifyaddnyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
+        self.matchoutput(out, "Primary Name: nyaqd1.ms.com", command)
 
     def testshowmachine(self):
         command = "show machine --model aurora_model"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Aurora_node: nyaqd1", command)
+        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
 
     def testcatmachine(self):
         command = "cat --machine %s" % self.aurora_without_node

@@ -31,8 +31,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.system import get_system
-from aquilon.aqdb.model import Machine, Model
+from aquilon.aqdb.model import Machine, Model, Chassis
 
 
 class CommandShowMachine(BrokerCommand):
@@ -48,12 +47,12 @@ class CommandShowMachine(BrokerCommand):
             # In the future, this should be clearly separated as 'show machine'
             # and 'search machine'.
             Machine.get_unique(session, machine, compel=True)
-            q = q.filter_by(name=machine)
+            q = q.filter_by(label=machine)
         dblocation = get_location(session, **arguments)
         if dblocation:
             q = q.filter_by(location=dblocation)
         if chassis:
-            dbchassis = get_system(session, chassis)
+            dbchassis = Chassis.get_unique(session, chassis, compel=True)
             q = q.join('chassis_slot')
             q = q.filter_by(chassis=dbchassis)
             q = q.reset_joinpoint()
@@ -66,4 +65,4 @@ class CommandShowMachine(BrokerCommand):
                                             machine_type=machine_type,
                                             compel=True)
             q = q.filter(Machine.model_id.in_(subq))
-        return q.order_by(Machine.name).all()
+        return q.order_by(Machine.label).all()

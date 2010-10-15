@@ -29,13 +29,13 @@
 """Contains the logic for `aq update switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.interface import restrict_switch_offsets
-from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.server.processes import DSDBRunner
-from aquilon.aqdb.model import Interface, Model
+from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
+                                VlanInterface, ReservedName, FutureARecord)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -45,65 +45,73 @@ class CommandUpdateSwitch(BrokerCommand):
 
     def render(self, session, logger, switch, model, rack, type, ip,
                vendor, serial, comments, **arguments):
-        dbswitch = get_switch(session, switch)
+        dbswitch = Switch.get_unique(session, switch, compel=True)
+
+        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 
         if vendor and not model:
-            model = dbswitch.switch_hw.model.name
+            model = dbswitch.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        machine_type='switch', compel=True)
-            dbswitch.switch_hw.model = dbmodel
-            session.add(dbswitch.switch_hw)
+            dbswitch.model = dbmodel
 
         dblocation = get_location(session, rack=rack)
         if dblocation:
-            dbswitch.switch_hw.location = dblocation
-            session.add(dbswitch.switch_hw)
+            dbswitch.location = dblocation
 
         if serial is not None:
-            dbswitch.switch_hw.serial_no = serial
-            session.add(dbswitch.switch_hw)
+            dbswitch.serial_no = serial
 
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?
         if type:
             dbswitch.switch_type = type
-            session.add(dbswitch)
 
         if ip:
-            old_ip = dbswitch.ip
+            old_ip = dbswitch.primary_ip
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
             restrict_switch_offsets(dbnetwork, ip)
-            dbswitch.ip = ip
-            dbswitch.network = dbnetwork
-            session.add(dbswitch)
 
-        # Is this useful?  Counter-productive?
-        if dbswitch.switch_hw.interfaces and not dbswitch.interfaces:
-            dbinterface = dbswitch.switch_hw.interfaces[0]
-            dbinterface.system = dbswitch
-            dbswitch.mac = dbinterface.mac
-            session.add(dbinterface)
-            session.add(dbswitch)
+            # Convert ReservedName to FutureARecord if needed
+            if isinstance(dbswitch.primary_name, ReservedName):
+                dbdns_domain = dbswitch.primary_name.dns_domain
+                short = dbswitch.primary_name.name
+                session.delete(dbswitch.primary_name)
+                session.flush()
+                session.expire(dbswitch)
+                dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
+                                          ip=ip)
+                dbdns_rec.network = dbnetwork
+                session.add(dbdns_rec)
+                dbswitch.primary_name = dbdns_rec
+            else:
+                dbswitch.primary_name.ip = ip
+                dbswitch.primary_name.network = dbnetwork
 
+            q = session.query(AddressAssignment)
+            q = q.filter_by(ip=old_ip)
+            q = q.join(VlanInterface, Interface)
+            q = q.filter_by(hardware_entity=dbswitch)
+            addr = q.first()
+            if addr:
+                addr.ip = ip
+            else:
+                # This should only happen if the switch did not have an IP
+                # address before
+                dbswitch.interfaces[0].vlans[0].addresses.append(ip)
+
+        if comments is not None:
+            dbswitch.comments = comments
+
+        session.add(dbswitch)
         session.flush()
 
         if ip and ip != old_ip:
             dsdb_runner = DSDBRunner(logger=logger)
             try:
-                # If we ever want to sync mac information into DSDB,
-                # something like the below would be appropriate.
-#               q = session.query(Interface).filter_by(system=dbswitch,
-#                                                      mac=dbswitch.mac)
-#               dbinterface = q.first()
-#               if dbinterface:
-#                   args = [dbswitch.fqdn,
-#                           ip, dbinterface.name, dbinterface.mac,
-#                           old_ip, dbinterface.name, dbinterface.mac]
-#               else:
-                args = [dbswitch.fqdn, ip, None, None, old_ip, None, None]
-                dsdb_runner.update_host_force_details(*args)
-            except ProcessException, e:
-                raise ArgumentError("Could not update switch in DSDB: %s" % e)
+                dsdb_runner.update_host(dbswitch, oldinfo)
+            except AquilonError, err:
+                raise ArgumentError("Could not update switch in DSDB: %s" % err)
         return

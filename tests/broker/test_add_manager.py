@@ -43,17 +43,19 @@ class TestAddManager(TestBrokerCommand):
     # Note: If changing this, also change testverifyshowmissingmanager
     # in test_add_aquilon_host.py.
     def testaddunittest00r(self):
-        self.noouttest(["add", "manager",
-                        "--ip", self.net.unknown[0].usable[4],
+        ip = self.net.unknown[0].usable[4]
+        self.dsdb_expect_add("unittest00r.one-nyp.ms.com", ip, "bmc", ip.mac,
+                             "unittest00.one-nyp.ms.com")
+        self.noouttest(["add", "manager", "--ip", ip,
                         "--hostname", "unittest00.one-nyp.ms.com"])
+        self.dsdb_verify()
 
     def testverifyaddunittest00r(self):
         command = "show manager --manager unittest00r.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Manager: unittest00r.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[4],
-                         command)
-        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[4].mac,
+        self.matchoutput(out,
+                         "Manager: unittest00r.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[4],
                          command)
         self.matchoutput(out,
                          "Interface: bmc %s boot=False" %
@@ -81,19 +83,21 @@ class TestAddManager(TestBrokerCommand):
                          command)
 
     def testaddunittest02rsa(self):
+        ip = self.net.unknown[0].usable[9]
+        self.dsdb_expect_add("unittest02rsa.one-nyp.ms.com", ip, "ilo", ip.mac,
+                             "unittest02.one-nyp.ms.com")
         self.noouttest(["add", "manager", "--interface", "ilo",
-                        "--ip", self.net.unknown[0].usable[9],
+                        "--ip", ip, "--mac", ip.mac,
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--manager", "unittest02rsa.one-nyp.ms.com",
-                        "--mac", self.net.unknown[0].usable[9].mac])
+                        "--manager", "unittest02rsa.one-nyp.ms.com"])
+        self.dsdb_verify()
 
     def testverifyaddunittest02rsa(self):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Manager: unittest02rsa.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[9],
-                         command)
-        self.matchoutput(out, "MAC: %s" % self.net.unknown[0].usable[9].mac,
+        self.matchoutput(out,
+                         "Manager: unittest02rsa.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[9],
                          command)
         self.matchoutput(out,
                          "Interface: ilo %s boot=False" %
@@ -132,21 +136,28 @@ class TestAddManager(TestBrokerCommand):
     # and add_host, and that this *should* create a manager
     # Lots of verifications steps for this single test...
     def testaddunittest12bmc(self):
+        ip = self.net.unknown[0].usable[8]
+        self.dsdb_expect_delete(ip)
+        self.dsdb_expect_add("unittest12r.aqd-unittest.ms.com", ip, "bmc",
+                             ip.mac, "unittest12.aqd-unittest.ms.com")
         command = ["add", "interface", "--interface", "bmc",
                    "--hostname", "unittest12.aqd-unittest.ms.com",
-                   "--mac", self.net.unknown[0].usable[8].mac]
+                   "--mac", ip.mac]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Renaming machine ut3s01p1a to ut3s01p1.",
                          command)
+        self.matchclean(err, "Could not reserve", command)
+        self.matchclean(err, "DSDB", command)
+        self.dsdb_verify()
 
     # Test that the interface cannot be removed as long as the manager exists
     def testdelinterface(self):
         command = ["del", "interface", "--mac",
                    self.net.unknown[0].usable[8].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "manager unittest12r.aqd-unittest.ms.com still exists",
+        self.matchoutput(out, "still has the following addresses configured",
                          command)
+        self.matchoutput(out, str(self.net.unknown[0].usable[8]), command)
 
     def testverifyunittest13removed(self):
         command = "show host --hostname unittest13.one-nyp.ms.com"
@@ -166,9 +177,9 @@ class TestAddManager(TestBrokerCommand):
     def testverifyunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[7],
-                         command)
-        self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
+        self.matchoutput(out,
+                         "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[7],
                          command)
         self.matchoutput(out,
                          "Manager: unittest12r.aqd-unittest.ms.com [%s]" %

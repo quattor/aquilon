@@ -42,7 +42,8 @@ class TestAddPersonality(TestBrokerCommand):
 
     def testaddutpersonality(self):
         command = ["add_personality", "--personality=utpersonality",
-                   "--archetype=aquilon"]
+                   "--archetype=aquilon",
+                   "--comments", "Some personality comments"]
         self.noouttest(command)
 
     def testverifyaddutpersonality(self):
@@ -55,6 +56,7 @@ class TestAddPersonality(TestBrokerCommand):
                          "Template: "
                          "aquilon/personality/utpersonality/config.tpl",
                          command)
+        self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchclean(out, "Threshold:", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)

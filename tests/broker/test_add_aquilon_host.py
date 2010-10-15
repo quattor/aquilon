@@ -41,18 +41,21 @@ from brokertest import TestBrokerCommand
 class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest00(self):
+        ip = self.net.unknown[0].usable[2]
+        self.dsdb_expect_add("unittest00.one-nyp.ms.com", ip, "eth0", ip.mac)
         self.noouttest(["add", "aquilon", "host",
-                        "--hostname", "unittest00.one-nyp.ms.com",
-                        "--ip", self.net.unknown[0].usable[2],
+                        "--hostname", "unittest00.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c1n3", "--domain", "unittest",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "inventory", "--buildstatus", "blind"])
+        self.dsdb_verify()
 
     def testverifyaddunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[2],
+        self.matchoutput(out,
+                         "Primary Name: unittest00.one-nyp.ms.com [%s]" %
+                         self.net.unknown[0].usable[2],
                          command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -73,19 +76,22 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testaddunittest12(self):
+        ip = self.net.unknown[0].usable[7]
+        self.dsdb_expect_add("unittest12.aqd-unittest.ms.com", ip, "eth0",
+                             ip.mac)
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest12.aqd-unittest.ms.com",
-                        "--ip", self.net.unknown[0].usable[7],
-                        "--buildstatus", "blind",
+                        "--ip", ip, "--buildstatus", "blind",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--machine", "ut3s01p1a", "--domain", "unittest"])
+        self.dsdb_verify()
 
     def testverifyaddunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest12.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[7],
+        self.matchoutput(out,
+                         "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[7],
                          command)
         self.matchoutput(out, "Rackmount: ut3s01p1a", command)
         self.matchoutput(out, "Archetype: aquilon", command)
@@ -94,20 +100,23 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Build Status: blind", command)
 
     def testaddunittest13(self):
+        ip = self.net.unknown[0].usable[8]
+        self.dsdb_expect_add("unittest13.aqd-unittest.ms.com", ip, "eth0",
+                             ip.mac)
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest13.aqd-unittest.ms.com",
-                        "--ip", self.net.unknown[0].usable[8],
-                        "--buildstatus", "blind",
+                        "--ip", ip, "--buildstatus", "blind",
                         "--machine", "ut3s01p1b", "--domain", "unittest",
                         "--osname", "linux", "--osversion", "4.0.1-x86_64",
                         "--personality", "compileserver"])
+        self.dsdb_verify()
 
     def testverifyaddunittest13(self):
         command = "show host --hostname unittest13.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest13.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.unknown[0].usable[8],
+        self.matchoutput(out,
+                         "Primary Name: unittest13.aqd-unittest.ms.com [%s]" %
+                         self.net.unknown[0].usable[8],
                          command)
         self.matchoutput(out, "Rackmount: ut3s01p1b", command)
         self.matchoutput(out, "Archetype: aquilon", command)

@@ -69,7 +69,7 @@ clusterlifecycle.append_constraint(UniqueConstraint('name',name='%s_uk'%(_TN)))
 clusterlifecycle.info['unique_fields'] = ['name']
 
 @monkeypatch(clusterlifecycle)
-def populate(sess, *args, **kw):
+def populate(sess, *args, **kw):  # pragma: no cover
     from sqlalchemy.exceptions import IntegrityError
 
     statuslist = ClusterLifecycle.transitions.keys()

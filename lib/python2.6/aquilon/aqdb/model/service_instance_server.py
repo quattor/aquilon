@@ -35,7 +35,7 @@ from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from aquilon.aqdb.model import Base, System, ServiceInstance
+from aquilon.aqdb.model import Base, Host, ServiceInstance
 
 
 class ServiceInstanceServer(Base):
@@ -48,10 +48,10 @@ class ServiceInstanceServer(Base):
                                                      ondelete='CASCADE'),
                                  primary_key=True)
 
-    system_id = Column(Integer, ForeignKey('system.id',
-                                           name='sis_system_fk',
-                                           ondelete='CASCADE'),
-                       primary_key=True)
+    host_id = Column(Integer, ForeignKey('host.machine_id',
+                                         name='sis_host_fk',
+                                         ondelete='CASCADE'),
+                     primary_key=True)
 
     position = Column(Integer, nullable=False)
 
@@ -59,16 +59,13 @@ class ServiceInstanceServer(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    service_instance = relation(ServiceInstance)
-    system = relation(System, uselist=False, backref='sislist')
+    service_instance = relation(ServiceInstance, uselist=False,
+                                backref=backref("servers",
+                                                collection_class=ordering_list('position'),
+                                                order_by=[position]))
+
+    host = relation(Host, uselist=False, backref='services_provided')
 
 
 service_instance_server = ServiceInstanceServer.__table__
 service_instance_server.primary_key.name='service_instance_server_pk'
-
-table = service_instance_server
-
-#TODO: would we like this mapped in service_instance.py instead?
-ServiceInstance.servers = relation(ServiceInstanceServer,
-                          collection_class=ordering_list('position'),
-                          order_by=[ServiceInstanceServer.__table__.c.position])

@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show archetype`."""
 
+from sqlalchemy.orm import joinedload, undefer
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Archetype
@@ -36,4 +37,8 @@ from aquilon.aqdb.model import Archetype
 class CommandShowArchetypeAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return session.query(Archetype).order_by(Archetype.name).all()
+        q = session.query(Archetype)
+        q = q.options(undefer(Archetype.comments))
+        q = q.options(joinedload('_services'))
+        q = q.order_by(Archetype.name)
+        return q.all()

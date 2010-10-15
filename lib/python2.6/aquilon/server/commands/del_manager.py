@@ -29,40 +29,43 @@
 """Contains the logic for `aq del manager`."""
 
 
-import os
-
 from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.model import FutureARecord
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
 from aquilon.server.templates.machine import PlenaryMachineInfo
-from aquilon.aqdb.model import Manager
 
 
 class CommandDelManager(BrokerCommand):
 
     required_parameters = ["manager"]
 
-    def render(self, session, logger, manager, user, **arguments):
+    def render(self, session, logger, manager, **arguments):
         key = DeleteKey("system", logger=logger)
         dbmachine = None
         try:
             lock_queue.acquire(key)
             # Check dependencies, translate into user-friendly message
-            dbmanager = get_system(session, manager, Manager, 'Manager')
+            dbmanager = FutureARecord.get_unique(session, fqdn=manager,
+                                                   compel=True)
 
-            # FIXME: Look for System dependencies...
+            is_mgr = True
+            if not dbmanager.assignments or len(dbmanager.assignments) > 1:
+                is_mgr = False
+            assignment = dbmanager.assignments[0]
+            if assignment.vlan.interface.interface_type != 'management':
+                is_mgr = False
+            if not is_mgr:
+                raise ArgumentError("{0:a} is not a manager.".format(dbmanager))
+
+            # FIXME: Look for dependencies...
 
             ip = dbmanager.ip
-            dbmachine = dbmanager.machine
-            # FIXME: Check to see if this is handled auto-magically by
-            # sqlalchemy.
-            for dbinterface in dbmanager.interfaces:
-                dbinterface.system = None
-                session.add(dbinterface)
-
+            dbmachine = assignment.vlan.interface.hardware_entity
+            session.delete(assignment)
             session.delete(dbmanager)
+            session.expire(dbmachine)
             session.flush()
     
             try:

@@ -65,23 +65,37 @@ class Location(Base):
     __mapper_args__ = {'polymorphic_on': location_type}
 
     def get_parents(self):
-        pl = []
-        p_node = self.parent
-        if not p_node:
-            return pl
-        while p_node.parent is not None and p_node.parent != p_node:
+        # Cache the results since e.g. self.sysloc calls this method multiple
+        # times. Since there is currently no way to change the parent, we don't
+        # have to worry about invalidation.
+        if hasattr(self, "_parents"):
+            return self._parents
+
+        session = object_session(self)
+        if session.connection().dialect.name == 'oracle':
+            s = text("""SELECT * FROM location
+                        CONNECT BY id = PRIOR parent_id
+                        START WITH id = :loc_id""")
+            pl = session.query(Location).from_statement(s)
+            pl = pl.params(loc_id=self.id).all()
+        else:
+            pl = []
+            p_node = self.parent
+            if not p_node:
+                return pl
+            while p_node.parent is not None and p_node.parent != p_node:
+                pl.append(p_node)
+                p_node = p_node.parent
             pl.append(p_node)
-            p_node = p_node.parent
-        pl.append(p_node)
+
         pl.reverse()
+        setattr(self, "_parents", pl)
         return pl
 
     def get_p_dict(self):
-        d = {}
-        p_node = self
-        while p_node.parent is not None and p_node.parent != p_node:
+        d = {str(self.location_type): self}
+        for p_node in self.get_parents():
             d[str(p_node.location_type)] = p_node
-            p_node = p_node.parent
         return d
 
     @property

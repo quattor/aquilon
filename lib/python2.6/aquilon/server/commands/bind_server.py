@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Service, ServiceInstanceServer
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
+from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.service import PlenaryServiceInstance
 
@@ -43,11 +43,11 @@ class CommandBindServer(BrokerCommand):
 
     def render(self, session, logger, hostname, service, instance, user,
                force=False, **arguments):
-        dbsystem = get_system(session, hostname)
+        dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
         for dbserver in dbinstance.servers:
-            if dbserver.system.id == dbsystem.id:
+            if dbserver.host.machine_id == dbhost.machine_id:
                 # FIXME: This should just be a warning.  There is currently
                 # no way of returning output that would "do the right thing"
                 # on the client but still show status 200 (OK).
@@ -64,7 +64,7 @@ class CommandBindServer(BrokerCommand):
         while position in positions:
             position += 1
         sis = ServiceInstanceServer(service_instance=dbinstance,
-                                    system=dbsystem, position=position)
+                                    host=dbhost, position=position)
         session.add(sis)
         session.flush()
         session.refresh(dbinstance)

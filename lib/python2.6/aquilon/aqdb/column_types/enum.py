@@ -68,7 +68,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
             raise ValueError('"%s" not in Enum.values' % value)
         return value
 
-def test_enum():
+def test_enum():  # pragma: no cover
     from sqlalchemy import (MetaData, Table, Column, Integer, insert)
 
     t = Table('foo', MetaData('sqlite:///'),

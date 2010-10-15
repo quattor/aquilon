@@ -36,8 +36,8 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.add_host import CommandAddHost
 from aquilon.server.processes import DSDBRunner, run_command
 from aquilon.server.dbwrappers.machine import create_machine
-from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisHw, Model,
-                                 ChassisSlot, Machine, DnsDomain)
+from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
+                                Machine, DnsDomain, ReservedName)
 
 
 class CommandAddAuroraHost(CommandAddHost):
@@ -72,7 +72,7 @@ class CommandAddAuroraHost(CommandAddHost):
         # Create a machine
         dbmodel = Model.get_unique(session, name="aurora_model",
                                    vendor="aurora_vendor", compel=True)
-        dbmachine = session.query(Machine).filter_by(name=machine).first()
+        dbmachine = Machine.get_unique(session, machine)
         dbslot = None
         if not dbmachine:
             m = self.nodename_re.search(machine)
@@ -94,19 +94,19 @@ class CommandAddAuroraHost(CommandAddHost):
                 chassis = rack + "c" + cid
                 dbdns_domain = session.query(DnsDomain).filter_by(
                         name="ms.com").first()
-                dbchassis = session.query(Chassis).filter_by(
-                        name=chassis, dns_domain=dbdns_domain).first()
+                dbchassis = Chassis.get_unique(session, chassis)
                 if not dbchassis:
                     dbchassis_model = Model.get_unique(session,
                                                        name="aurora_chassis_model",
                                                        vendor="aurora_vendor",
                                                        compel=True)
-                    dbchassis_hw = ChassisHw(location=dbrack,
-                                             model=dbchassis_model)
-                    session.add(dbchassis_hw)
-                    dbchassis = Chassis(name=chassis, dns_domain=dbdns_domain,
-                                        chassis_hw=dbchassis_hw)
+                    dbchassis = Chassis(label=chassis, location=dbrack,
+                                        model=dbchassis_model)
                     session.add(dbchassis)
+                    dbdns_rec = ReservedName(name=chassis,
+                                             dns_domain=dbdns_domain)
+                    session.add(dbdns_rec)
+                    dbchassis.primary_name = dbdns_rec
                 dbslot = session.query(ChassisSlot).filter_by(
                         chassis=dbchassis, slot_number=nodenum).first()
                 # Note: Could be even more persnickity here and check that
@@ -146,8 +146,7 @@ class CommandAddAuroraHost(CommandAddHost):
                                         (dsdb_lookup, out))
                 dblocation = dbbuilding
 
-            dbmachine = create_machine(session, machine, dblocation, dbmodel,
-                    None, None, None, None, None, None)
+            dbmachine = create_machine(session, machine, dblocation, dbmodel)
             # create_machine already does a save and a flush
             if dbslot:
                 dbslot.machine = dbmachine
@@ -170,7 +169,7 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['personality'] = 'generic'
         kwargs['domain'] = self.config.get("broker", "aurora_host_domain")
         kwargs['sandbox'] = None
-        kwargs['machine'] = dbmachine.name
+        kwargs['machine'] = dbmachine.label
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
         # The superclass already contains the rest of the logic to handle this.

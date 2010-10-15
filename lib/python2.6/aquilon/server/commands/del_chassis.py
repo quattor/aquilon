@@ -29,42 +29,55 @@
 """Contains the logic for `aq del chassis`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
 from aquilon.aqdb.model import Chassis, ChassisSlot
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandDelChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
-    def render(self, session, logger, chassis, **arguments):
-        dbchassis = get_system(session, chassis, Chassis, 'Chassis')
-        q = session.query(ChassisSlot).filter_by(
-            chassis=dbchassis).filter(
-                ChassisSlot.machine_id != None)
+    def render(self, session, logger, chassis, clear_slots, **arguments):
+        dbchassis = Chassis.get_unique(session, chassis, compel=True)
+
+        # Check and complain if the chassis has any other addresses than its
+        # primary address
+        addrs = []
+        for iface in dbchassis.interfaces:
+            for addr in iface.all_addresses():
+                if addr.ip == dbchassis.primary_ip:
+                    continue
+                addrs.append(str(addr.ip))
+        if addrs:
+            raise ArgumentError("{0} still provides the following addresses, "
+                                "delete them first: {1}.".format
+                                (dbchassis, ", ".join(addrs)))
+
+        q = session.query(ChassisSlot)
+        q = q.filter_by(chassis=dbchassis)
+        q = q.filter(ChassisSlot.machine_id != None)
 
         machine_count = q.count()
-        if machine_count > 0:
-            raise ArgumentError("{0} is still in use by {1} machines and "
-                                "cannot be deleted.".format(dbchassis,
-                                                            machine_count))
+        if machine_count > 0 and not clear_slots:
+            raise ArgumentError("{0} is still in use by {1} machines. Use "
+                                "--clear_slots if you really want to delete "
+                                "it.".format(dbchassis, machine_count))
 
-        for iface in dbchassis.interfaces:
-            logger.info("Before deleting chassis '%s', "
-                        "removing interface '%s' [%s] boot=%s)" %
-                        (dbchassis.fqdn,
-                         iface.name, iface.mac, iface.bootable))
-            session.delete(iface)
-
-        for iface in dbchassis.chassis_hw.interfaces:
-            logger.info("Before deleting chassis '%s', "
-                        "removing hardware interface '%s' [%s] boot=%s)" %
-                        (dbchassis.fqdn,
-                         iface.name, iface.mac, iface.bootable))
-            session.delete(iface)
-
-        session.delete(dbchassis.chassis_hw)
+        # Order matters here
+        dbdns_rec = dbchassis.primary_name
+        ip = dbdns_rec.ip
         session.delete(dbchassis)
+        if dbdns_rec:
+            session.delete(dbdns_rec)
+
+        session.flush()
+
+        if ip:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.delete_host_details(ip)
+            except ProcessException, e:
+                raise ArgumentError("Could not remove chassis from DSDB: %s" % e)
         return

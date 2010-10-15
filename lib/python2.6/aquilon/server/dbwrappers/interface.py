@@ -40,25 +40,26 @@ from sqlalchemy.orm import object_session
 from sqlalchemy import sql
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
-from aquilon.aqdb.column_types.aqmac import normalize_mac_address
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import (Interface, Machine, ObservedMac, System,
+from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, System,
                                 VlanInfo, ObservedVlan)
 from aquilon.server.dbwrappers.system import get_system
+from aquilon.utils import force_mac
 
 
-# FIXME: interface type?  interfaces for hardware entities in general?
+# FIXME: interface type?
 # FIXME: replace me with a usable get_unique
-def get_interface(session, interface, machine, mac):
+def get_interface(session, interface, dbhw_ent, mac):
     q = session.query(Interface)
     errmsg = []
     if interface:
         errmsg.append("named " + interface)
         q = q.filter_by(name=interface)
-    if machine:
-        errmsg.append("of machine " + machine)
-        q = q.filter(Interface.hardware_entity_id==Machine.machine_id)
-        q = q.filter(Machine.name==machine)
+    if dbhw_ent:
+        errmsg.append("of {0:l} ".format(dbhw_ent))
+        q = q.join(HardwareEntity)
+        q = q.filter(HardwareEntity.id == dbhw_ent.id)
+        q = q.reset_joinpoint()
     if mac:
         errmsg.append("having MAC address " + mac)
         q = q.filter_by(mac=mac)
@@ -149,28 +150,33 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
             if not dbom:
                 raise ArgumentError("No switch found in the discovery table "
                                     "for MAC address %s." % dbinterface.mac)
-            dbsystem = dbom.switch
+            if not dbom.switch.primary_ip:
+                raise ArgumentError("{0} does not have a primary IP address "
+                                    "to use for network "
+                                    "selection.".format(dbom.switch))
+            dbnetwork = get_net_id_from_ip(session, dbom.switch.primary_ip)
 
     if ipfromsystem:
         # Assumes one system entry, not necessarily correct.
         dbsystem = get_system(session, ipfromsystem)
+        if dbsystem.ip:
+            dbnetwork = get_net_id_from_ip(session, dbsystem.ip)
 
     if ipfromip:
         # determine network
         dbnetwork = get_net_id_from_ip(session, ipfromip)
-    elif not dbnetwork:
-        # Any of the other options set dbsystem...
-        dbnetwork = dbsystem.network
-        # Could be slightly more intelligent here, and check to see if
-        # there is an IP, and then fix the network setting.
-        if not dbnetwork:
-            raise ArgumentError("Could not determine network to use for %s." %
-                                dbsystem.fqdn)
+
+    if not dbnetwork:
+        raise ArgumentError("Could not determine network to use for %s." %
+                            dbsystem.fqdn)
 
     startip = dbnetwork.first_usable_host
 
+    used_ips = session.query(System.ip)
+    used_ips = used_ips.filter(System.ip >= startip)
+    used_ips = used_ips.filter(System.ip < dbnetwork.broadcast)
+
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
-    used_ips = session.query(System.ip).filter_by(network=dbnetwork).all()
     used_set = set([int(item.ip) for item in used_ips])
     free_set = full_set - used_set
 
@@ -206,33 +212,20 @@ def describe_interface(session, interface):
                    (interface.interface_type, interface.name, interface.mac,
                     interface.bootable)]
     hw = interface.hardware_entity
-    hw_type = hw.hardware_entity_type
-    if hw_type == 'machine':
-        description.append("is attached to machine %s" % hw.name)
-    elif hw_type == 'switch_hw':
-        if hw.switch:
-            description.append("is attached to switch %s" %
-                               ",".join([ts.fqdn for ts in hw.switch]))
-        else:
-            description.append("is attached to unnamed switch hardware")
-    elif hw_type == 'chassis_hw':
-        if hw.chassis_hw:
-            description.append("is attached to chassis %s" %
-                               ",".join([c.fqdn for c in hw.chassis_hw]))
-        else:
-            description.append("is attached to unnamed chassis hardware")
-    elif getattr(hw, "name", None):
-        description.append("is attached to %s %s" % (hw_type, hw.name))
-    if interface.system:
-        description.append("points to system %s" % interface.system.fqdn)
-    systems = session.query(System).filter_by(mac=interface.mac).all()
-    if len(systems) == 1 and systems[0] != interface.system:
+    description.append("is attached to {0:l}".format(hw))
+    for addr in interface.all_addresses():
+        for dns_rec in addr.dns_records:
+            if addr.label:
+                description.append("has address {0:a} label {1} on VLAN "
+                                   "{2}".format(dns_rec, addr.label,
+                                                addr.vlan.vlan_id))
+            else:
+                description.append("has address {0:a} on VLAN "
+                                   "{1}".format(dns_rec, addr.vlan.vlan_id))
+    ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
+    if len(ifaces) == 1 and ifaces[0] != interface:
         description.append("but MAC address %s is in use by %s" %
-                           (interface.mac, systems[0].fqdn))
-    if len(systems) > 1:
-        description.append("and MAC address %s is in use by %s" %
-                           (interface.mac,
-                            ", ".join([s.fqdn for s in systems])))
+                           (interface.mac, format(ifaces[0].hardware_entity)))
     return ", ".join(description)
 
 def verify_port_group(dbmachine, port_group):
@@ -266,24 +259,23 @@ def verify_port_group(dbmachine, port_group):
             dbobserved_vlan = q.one()
         except NoResultFound:
             raise ArgumentError("Cannot verify port group availability: "
-                                "no record for VLAN %s on switch %s." %
-                                (vlan_id, dbswitch.fqdn))
+                                "no record for VLAN {0} on "
+                                "{1:l}.".format(vlan_id, dbswitch))
         except MultipleResultsFound:
-            raise InternalError("Too many subnets found for VLAN %s "
-                                "on switch %s." %
-                                (vlan_id, dbswitch.fqdn))
+            raise InternalError("Too many subnets found for VLAN {0} "
+                                "on {1:l}.".format(vlan_id, dbswitch))
         if dbobserved_vlan.is_at_guest_capacity:
-            raise ArgumentError("Port group %s is full for switch %s." %
-                                (dbvi.port_group,
-                                 dbobserved_vlan.switch.fqdn))
+            raise ArgumentError("Port group {0} is full for "
+                                "{1:l}.".format(dbvi.port_group,
+                                                dbobserved_vlan.switch))
     elif dbmachine.host and dbmachine.host.cluster and \
          dbmachine.host.cluster.switch:
         dbswitch = dbmachine.host.cluster.switch
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id, switch=dbswitch)
         if not q.count():
-            raise ArgumentError("VLAN %s not found for switch %s." %
-                                (dbvi.vlan_id, dbswitch.fqdn))
+            raise ArgumentError("VLAN {0} not found for "
+                                "{1:l}.".format(dbvi.vlan_id, dbswitch))
     return dbvi.port_group
 
 def choose_port_group(dbmachine):
@@ -299,8 +291,8 @@ def choose_port_group(dbmachine):
         if dbobserved_vlan.is_at_guest_capacity:
             continue
         return dbobserved_vlan.port_group
-    raise ArgumentError("No available user port groups on switch %s." %
-                        dbmachine.cluster.switch.fqdn)
+    raise ArgumentError("No available user port groups on "
+                        "{0:l}.".format(dbmachine.cluster.switch))
 
 def _type_msg(interface_type, bootable):
     if bootable is not None:
@@ -311,7 +303,7 @@ def _type_msg(interface_type, bootable):
 
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             interface_type='public', bootable=None,
-                            preclude=False, **extra_args):
+                            preclude=False, port_group=None, comments=None):
     """ Look up an existing interface or create a new one. """
 
     q = session.query(Interface)
@@ -325,8 +317,21 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     dbinterfaces = q.all()
 
     if preclude and dbinterfaces:
-            raise ArgumentError("Interface {0!s} of {1:l} already "
-                                "exists.".format(dbinterface, dbhw_ent))
+        # Special logic to allow "add_interface" to succeed if there is an
+        # auto-created interface already
+        if len(dbinterfaces) == 1 and dbinterfaces[0].mac is None and \
+           dbinterfaces[0].interface_type == interface_type and \
+           dbinterfaces[0].comments.startswith("Created automatically"):
+            dbinterface = dbinterfaces[0]
+            dbinterface.mac = mac
+            if bootable is not None:
+                dbinterface.bootable = bootable
+            dbinterface.comments = comments
+            dbinterface.port_group = port_group
+            session.flush()
+            return dbinterface
+
+        raise ArgumentError("{0} already exists.".format(dbinterfaces[0]))
 
     if not dbinterfaces:
         if mac:
@@ -342,28 +347,29 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
             raise ArgumentError("{0} has no {1} interfaces.".format(dbhw_ent,
                                                                     interface_type))
         try:
-            dbinterface = Interface(name=name, hardware_entity=dbhw_ent,
-                                    interface_type=interface_type, mac=mac,
-                                    bootable=bootable, **extra_args)
+            dbinterface = Interface(name=name, interface_type=interface_type,
+                                    mac=mac, bootable=bootable,
+                                    port_group=port_group, comments=comments)
         except ValueError, err:
             raise ArgumentError(err)
-        session.add(dbinterface)
+
+        dbhw_ent.interfaces.append(dbinterface)
         session.flush()
-        session.refresh(dbinterface)
     elif len(dbinterfaces) == 1:
         dbinterface = dbinterfaces[0]
-        # The user input must be normalized before comparing it with a value
-        # from the DB
-        if mac and dbinterface.mac != normalize_mac_address(mac):
-            raise ArgumentError("Interface {0!s} of {1:l} exists, but has MAC "
-                                "address {2} instead of "
-                                "{3}.".format(dbinterface, dbhw_ent,
-                                              dbinterface.mac, mac))
+
+        # If the name matches but the interface did not have a MAC before, then
+        # just update the MAC
+        if name and mac and dbinterface.mac is None:
+            dbinterface.mac = mac
+
+        if mac and dbinterface.mac != mac:
+            raise ArgumentError("{0} exists, but has MAC address {1} instead "
+                                "of {2}.".format(dbinterface, dbinterface.mac,
+                                                 mac))
         if interface_type and dbinterface.interface_type != interface_type:
-            raise ArgumentError("Interface {0!s} of {1:l} is of type {2}, not "
-                                "{3}.".format(dbinterface, dbhw_ent,
-                                              dbinterface.interface_type,
-                                              interface_type))
+            raise ArgumentError("{0} is of type {1}, not {2}.".format(
+                dbinterface, dbinterface.interface_type, interface_type))
     else:
         # Since both the MAC and name are unique keys, we can arrive here only
         # if neither of them were specified. Try to match the interface based on

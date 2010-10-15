@@ -89,14 +89,14 @@ class CommandAddDynamicRange(BrokerCommand):
                 dsdb_runner.add_host_details(fqdn=dbstub.fqdn, ip=dbstub.ip,
                                              name=None, mac=None)
                 stubs_added.append(dbstub)
-        except ProcessException, e:
+        except ProcessException, err:
             # Try to roll back anything that had succeeded...
             for dbstub in stubs_added:
                 try:
                     dsdb_runner.delete_host_details(dbstub.ip)
                 except ProcessException, pe2:
                     logger.client_info("Failed rolling back DSDB entry for "
-                                       "%s with IP Address %s: %s" %
+                                       "%s with IP address %s: %s" %
                                        (dbstub.fqdn, dbstub.ip, pe2))
-            raise e
+            raise ArgumentError("Could not add addresses to DSDB: %s" % err)
         return

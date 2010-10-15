@@ -46,8 +46,10 @@ from brokertest import TestBrokerCommand
 class TestPermission(TestBrokerCommand):
 
     def testpermissionnobody(self):
-        command = "permission --principal testusernobody@is1.morgan --role nobody --createuser"
-        self.noouttest(command.split(" "))
+        command = ["permission", "--principal", "testusernobody@is1.morgan",
+                   "--role", "nobody", "--createuser",
+                   "--comments", "Some user comments"]
+        self.noouttest(command)
 
     def testverifynobody(self):
         command = "show principal --principal testusernobody@is1.morgan"
@@ -55,6 +57,7 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out,
                 "UserPrincipal: testusernobody@is1.morgan [role: nobody]",
                 command)
+        self.matchoutput(out, "Comments: Some user comments", command)
 
     def testverifynohostpart(self):
         command = ["permission", "--principal", "testusernobody",

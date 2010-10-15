@@ -1,4 +1,4 @@
-# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*- # pylint: disable-msg=C0301
 #
 # Copyright (C) 2008,2009,2010  Contributor
 #
@@ -34,14 +34,17 @@ from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Base, Machine, Chassis
 
-class ChassisSlot(Base):
+_TN = 'chassis_slot'
+
+
+class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
     """ ChassisSlot allows a Machine to be assigned to each unique position
         within a Chassis. """
 
-    __tablename__ = 'chassis_slot'
+    __tablename__ = _TN
 
-    chassis_id = Column(Integer, ForeignKey('chassis.system_id',
-                                            name='chassis_slot_chassis_fk',
+    chassis_id = Column(Integer, ForeignKey('chassis.hardware_entity_id',
+                                            name='%s_chassis_fk' % _TN,
                                             ondelete='CASCADE'),
                         primary_key=True)
 
@@ -49,10 +52,10 @@ class ChassisSlot(Base):
 
     # TODO: Code constraint that these are Blades...
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                            name='chassis_slot_machine_fk'),
+                                            name='%s_machine_fk' % _TN),
                         nullable=True)
-    #TODO: need a unique key against this, but what if it takes 2 slots?
-
+    # TODO: need a unique key against this, but what if it takes 2 slots?
+    # TODO: remove delete-orphan?
     chassis = relation(Chassis, uselist=False,
                        backref=backref('slots', cascade='delete, delete-orphan',
                                        order_by=[asc('slot_number')]),
@@ -63,6 +66,4 @@ class ChassisSlot(Base):
                                        cascade='delete, delete-orphan'))
 
 chassis_slot = ChassisSlot.__table__
-chassis_slot.primary_key.name='chassis_slot_pk'
-
-table = chassis_slot
+chassis_slot.primary_key.name = '%s_pk' % _TN  # pylint: disable-msg=E1101, C0301

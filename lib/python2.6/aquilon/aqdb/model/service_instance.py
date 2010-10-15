@@ -33,11 +33,13 @@ import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, contains_eager
+from sqlalchemy.orm import relation, contains_eager, column_property
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
+from sqlalchemy.sql import select, func
 
-from aquilon.aqdb.model import Base, Service, Host, System, DnsDomain
+from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
+                                PrimaryNameAssociation)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN  = 'service_instance'
@@ -45,7 +47,7 @@ _ABV = 'svc_inst'
 
 
 class ServiceInstance(Base):
-    """ Service instance captures the data around assignment of a system for a
+    """ Service instance captures the data around assignment of a host for a
         particular purpose (aka usage). If machines have a 'personality'
         dictated by the application they run """
 
@@ -64,6 +66,9 @@ class ServiceInstance(Base):
 
     service = relation(Service, lazy=False, uselist=False, backref='instances')
 
+    # _client_count is defined later in this file
+    # nas_disk_count and nas_machine_count are defined in disk.py
+
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
         return self.format_helper(format_spec, instance)
@@ -81,20 +86,22 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        cluster_types = self.service.aligned_cluster_types
-        if not cluster_types:
-            # By far, the common case.
-            return len(self.build_items)
         from aquilon.aqdb.model import (ClusterServiceBinding, BuildItem,
                                         Cluster)
         session = object_session(self)
-        q = session.query(ClusterServiceBinding)
-        q = q.filter_by(service_instance=self)
-        q = q.join('cluster')
+
+        cluster_types = self.service.aligned_cluster_types
+        if not cluster_types:
+            # By far, the common case.
+            return self._client_count
+
+        q = session.query(func.sum(Cluster.max_hosts))
         q = q.filter(Cluster.cluster_type.in_(cluster_types))
-        adjusted_count = 0
-        for csb in q.all():
-            adjusted_count += csb.cluster.max_hosts
+        q = q.join(ClusterServiceBinding)
+        q = q.filter_by(service_instance=self)
+        # Make sure it's a number
+        adjusted_count = q.scalar() or 0
+
         q = session.query(BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.outerjoin('host', '_cluster', 'cluster')
@@ -104,22 +111,23 @@ class ServiceInstance(Base):
         return adjusted_count
 
     @property
-    def clients(self):
+    def client_fqdns(self):
         session = object_session(self)
-        q = session.query(Host)
-        q = q.join(['build_items'])
+        q = session.query(System)
+        q = q.join(PrimaryNameAssociation, Machine, Host, BuildItem)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
-        q = q.outerjoin(System.dns_domain)
+        q = q.join(DnsDomain)
         q = q.options(contains_eager(System.dns_domain))
         q = q.order_by(DnsDomain.name, System.name)
         return [sys.fqdn for sys in q.all()]
 
     @property
     def server_fqdns(self):
+        from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(System)
-        q = q.join(['sislist'])
+        q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         q = q.outerjoin(System.dns_domain)
@@ -129,9 +137,10 @@ class ServiceInstance(Base):
 
     @property
     def server_ips(self):
+        from aquilon.aqdb.model import ServiceInstanceServer
         session = object_session(self)
         q = session.query(System)
-        q = q.join(['sislist'])
+        q = q.join(PrimaryNameAssociation, Machine, Host, ServiceInstanceServer)
         q = q.filter_by(service_instance=self)
         q = q.reset_joinpoint()
         q = q.outerjoin(System.dns_domain)
@@ -144,7 +153,7 @@ class ServiceInstance(Base):
                 continue
             try:
                 ips.append(socket.gethostbyname(system.fqdn))
-            except socket.gaierror:
+            except socket.gaierror:  # pragma: no cover
                 # For now this fails silently.  It may be correct to raise
                 # an error here but the timing could be unpredictable.
                 pass
@@ -313,37 +322,36 @@ AND l1.id in (
 )"""
 
 
-#TODO: auto-updated "last_used" column?
 class BuildItem(Base):
-    """ Identifies the build process of a given Host.
-        Parent of 'build_element' """
+    """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
+    #FIXME: remove id column. PK is machine/svc_inst
     id = Column(Integer, Sequence('build_item_id_seq'), primary_key=True)
 
-    host_id = Column('host_id', Integer, ForeignKey('host.id',
+    host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
                                                      ondelete='CASCADE',
                                                      name='build_item_host_fk'),
-                      nullable=False)
+                     nullable=False)
 
     service_instance_id = Column(Integer,
                                  ForeignKey('service_instance.id',
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
-    creation_date = deferred(Column(DateTime,
-                                    default=datetime.now, nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    comments = Column(String(255), nullable=True)
 
-    host = relation(Host, backref='build_items', uselist=False)
-    service_instance = relation(ServiceInstance, backref='build_items')
+    service_instance = relation(ServiceInstance, backref='clients')
+
+    host = relation(Host, uselist=False, backref='services_used')
 
     @property
     def cfg_path(self):
         return self.service_instance.cfg_path
 
 
-build_item = BuildItem.__table__
+build_item = BuildItem.__table__  # pylint: disable-msg=C0103, E1101
 
 build_item.primary_key.name = 'build_item_pk'
 
@@ -351,3 +359,9 @@ build_item.append_constraint(
     UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
 
 Host.templates = relation(BuildItem)
+
+# Make this a column property so it can be undeferred on bulk loads
+ServiceInstance._client_count = column_property(
+    select([func.count()],
+            BuildItem.service_instance_id == ServiceInstance.id)
+    .label("_client_count"), deferred=True)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.6
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
 # Copyright (C) 2008,2009,2010  Contributor
@@ -26,34 +27,33 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" The hardware portion of a chassis. The chassis we use today are:
-    HP: C class and P class, though p class servers have no central management
-    IBM: BCE and BCH (blade center e and blade center h). There may be some
-    blade center e's in VA but they are like rackmounts as well"""
+"""Module for testing the show machine command."""
 
-from datetime import datetime
+import unittest
 
-from sqlalchemy import Table, Column, Integer, ForeignKey
-from sqlalchemy.orm import relation, deferred, backref
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
 
-from aquilon.aqdb.model import HardwareEntity
+from brokertest import TestBrokerCommand
 
-class ChassisHw(HardwareEntity):
-    __tablename__ = 'chassis_hw'
-    __mapper_args__ = {'polymorphic_identity':'chassis_hw'}
 
-    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                           name='chassis_hw_fk',
-                                           ondelete='CASCADE'),
-                                           primary_key=True)
+class TestShowMachine(TestBrokerCommand):
+    def testverifyut3c1n3interfacescsv(self):
+        command = "show machine --machine ut3c1n3 --format csv"
+        out = self.commandtest(command.split(" "))
+        net = self.net.unknown[0]
+        self.matchoutput(out,
+                         "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,eth0,%s,%s" %
+                         (net.usable[2].mac, net.usable[2]), command)
+        self.matchoutput(out,
+                         "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,eth1,%s,%s" %
+                         (net.usable[3].mac, net.usable[3]), command)
+        self.matchoutput(out,
+                         "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,bmc,%s,%s" %
+                         (net.usable[4].mac, net.usable[4]), command)
 
-    @property
-    def hardware_name(self):
-        if self.chassis_hw:
-            return ",".join(chassis.fqdn for chassis in self.chassis_hw)
-        return self._hardware_name
 
-chassis_hw = ChassisHw.__table__
-chassis_hw.primary_key.name='chassis_hw_pk'
-
-table = chassis_hw
+if __name__=='__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachine)
+    unittest.TextTestRunner(verbosity=2).run(suite)

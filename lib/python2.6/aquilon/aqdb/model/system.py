@@ -33,8 +33,10 @@ from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
+from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.model import Base, DnsDomain, Network
-from aquilon.aqdb.column_types import AqStr, IPV4, AqMac
+from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.aqdb.column_types import AqStr, IPV4
 
 #TODO: enum type for system_type column
 #_sys_types = ['host', 'switch', 'console_switch', 'chassis', 'manager',
@@ -70,7 +72,6 @@ class System(Base):
                                                name='SYSTEM_DNS_FK'),
                            nullable=False ) #TODO: default
 
-    mac = Column(AqMac(17), nullable=True)
     ip = Column(IPV4, nullable=True)
     network_id = Column(Integer, ForeignKey('network.id',
                                                  name='SYSTEM_NET_ID_FK'),
@@ -84,41 +85,62 @@ class System(Base):
     dns_domain = relation(DnsDomain)
     network = relation(Network, backref='interfaces')
 
-    __mapper_args__ = {'polymorphic_on' : system_type}
+    __mapper_args__ = {'polymorphic_on': system_type}
 
-    def _fqdn(self):
-        return '.'.join([str(self.name),str(self.dns_domain.name)])
-    fqdn = property(_fqdn)
+    @property
+    def fqdn(self):
+        return '.'.join([str(self.name), str(self.dns_domain.name)])
 
-system = System.__table__
-system.primary_key.name='SYSTEM_PK'
+    @classmethod
+    def get_unique(cls, session, *args, **kwargs):
+        if "fqdn" in kwargs:
+            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
+            kwargs["name"] = name
+            kwargs["dns_domain"] = dbdns_domain
+        return super(System, cls).get_unique(session, *args, **kwargs)
+
+    def __init__(self, session=None, *args, **kwargs):
+        if "fqdn" in kwargs:
+            if not session:
+                raise InternalError("Passing fqdn to Session.__init__() needs "
+                                    "a session.")
+            (name, dbdns_domain) = parse_fqdn(session, kwargs.pop("fqdn"))
+            kwargs["name"] = name
+            kwargs["dns_domain"] = dbdns_domain
+        return super(System, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def get_or_create(cls, session, **kwargs):
+        system = cls.get_unique(session, **kwargs)
+        if system:
+            return system
+        system = cls(session=session, **kwargs)
+        session.add(system)
+        session.flush()
+        session.refresh(system)
+        return system
+
+    def __format__(self, format_spec):
+        if format_spec != "a":
+            return super(System, self).__format__(format_spec)
+        if self.ip:
+            return "%s [%s]" % (self.fqdn, self.ip)
+        else:
+            return self.fqdn
+
+
+system = System.__table__  # pylint: disable-msg=C0103, E1101
+system.primary_key.name = 'SYSTEM_PK'
 
 system.append_constraint(
     UniqueConstraint('name','dns_domain_id', name='SYSTEM_DNS_NAME_UK'))
 
 system.append_constraint(                    #systm_pt_uk means 'primary tuple'
-    UniqueConstraint('name', 'dns_domain_id', 'mac', 'ip', name='SYSTEM_PT_UK'))
+    UniqueConstraint('name', 'dns_domain_id', 'ip', name='SYSTEM_PT_UK'))
 
 system.info['unique_fields'] = ['name', 'dns_domain']
+system.info['extra_search_fields'] = ['ip']
 
-class DynamicStub(System):
-    """
-        DynamicStub is a hack to handle stand alone dns records for dynamic
-        hosts prior to having a properly reworked set of tables for Dns
-        information. It should not be used by anything other than to create host
-        records for virtual machines using names similar to
-        'dynamic-1-2-3-4.subdomain.ms.com'
-    """
-    __tablename__ = 'dynamic_stub'
-    __mapper_args__ = {'polymorphic_identity':'dynamic_stub'}
-    _class_label = 'Dynamic Stub'
-
-    system_id = Column(Integer, ForeignKey('system.id',
-                                           name='dynamic_stub_system_fk',
-                                           ondelete='CASCADE'),
-                       primary_key=True)
-
-DynamicStub.__table__.primary_key.name='dynamic_stub_pk'
 
 class FutureARecord(System):
     """FutureARecord is a placeholder to let us add name/IP addresses now.
@@ -127,7 +149,7 @@ class FutureARecord(System):
 
     """
     __tablename__ = 'future_a_record'
-    __mapper_args__ = {'polymorphic_identity':'future_a_record'}
+    __mapper_args__ = {'polymorphic_identity': 'future_a_record'}
     _class_label = 'DNS Record'
 
     system_id = Column(Integer, ForeignKey('system.id',
@@ -135,4 +157,60 @@ class FutureARecord(System):
                                            ondelete='CASCADE'),
                        primary_key=True)
 
-FutureARecord.__table__.primary_key.name='future_a_record_pk'
+    def __init__(self, ip=None, **kwargs):
+        if not ip:  # pragma: no cover
+            raise ArgumentError("DNS A records need an IP address.")
+        return super(FutureARecord, self).__init__(ip=ip, **kwargs)
+
+
+farecord = FutureARecord.__table__  # pylint: disable-msg=C0103, E1101
+farecord.primary_key.name = 'future_a_record_pk'
+farecord.info['unique_fields'] = ['name', 'dns_domain']
+farecord.info['extra_search_fields'] = ['ip']
+
+
+class DynamicStub(FutureARecord):
+    """
+        DynamicStub is a hack to handle stand alone dns records for dynamic
+        hosts prior to having a properly reworked set of tables for Dns
+        information. It should not be used by anything other than to create host
+        records for virtual machines using names similar to
+        'dynamic-1-2-3-4.subdomain.ms.com'
+    """
+    __tablename__ = 'dynamic_stub'
+    __mapper_args__ = {'polymorphic_identity': 'dynamic_stub'}
+    _class_label = 'Dynamic Stub'
+
+    system_id = Column(Integer, ForeignKey('future_a_record.system_id',
+                                           name='dynamic_stub_farecord_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
+
+
+DynamicStub.__table__.primary_key.name = 'dynamic_stub_pk'
+
+
+class ReservedName(System):
+    """
+        ReservedName is a placeholder for a name that does not have an IP
+        address.
+    """
+
+    __tablename__ = 'reserved_name'
+    __mapper_args__ = {'polymorphic_identity': 'reserved_name'}
+    _class_label = 'Reserved Name'
+
+    system_id = Column(Integer, ForeignKey('system.id',
+                                           name='reserved_name_system_fk',
+                                           ondelete='CASCADE'),
+                       primary_key=True)
+
+    def __init__(self, **kwargs):
+        if "ip" in kwargs and kwargs["ip"]:  # pragma: no cover
+            raise ArgumentError("Reserved names must not have an IP address.")
+        return super(ReservedName, self).__init__(**kwargs)
+
+
+resname = ReservedName.__table__  # pylint: disable-msg=C0103, E1101
+resname.primary_key.name = 'reserved_name_pk'
+resname.info['unique_fields'] = ['name', 'dns_domain']

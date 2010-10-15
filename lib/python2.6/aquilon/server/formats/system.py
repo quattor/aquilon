@@ -31,17 +31,18 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import System, DynamicStub, FutureARecord
+from aquilon.aqdb.model import System, DynamicStub, FutureARecord, ReservedName
 
 
 class SystemFormatter(ObjectFormatter):
     def format_raw(self, system, indent=""):
+        if system.hardware_entity:
+            return self.redirect_raw(system.hardware_entity, indent)
+
         # This should be replaced by format()...
         details = [indent + "{0:c}: {0.fqdn}".format(system)]
         if system.ip:
             details.append(indent + "  IP: %s" % system.ip)
-        if system.mac:
-            details.append(indent + "  MAC: %s" % system.mac)
         if system.comments:
             details.append(indent + "  Comments: %s" % system.comments)
         return "\n".join(details)
@@ -51,6 +52,7 @@ ObjectFormatter.handlers[System] = SystemFormatter()
 
 ObjectFormatter.handlers[DynamicStub] = SystemFormatter()
 ObjectFormatter.handlers[FutureARecord] = SystemFormatter()
+ObjectFormatter.handlers[ReservedName] = SystemFormatter()
 
 
 class SimpleSystemList(list):

@@ -43,8 +43,9 @@ LOGGER = logging.getLogger('aquilon.server.dbwrappers.user_principal')
 principal_re = re.compile(r'^(.*)@([^@]+)$')
 host_re = re.compile(r'^host/(.*)@([^@]+)$')
 
-def get_or_create_user_principal(session, user,
-        createuser=True, createrealm=True, commitoncreate=False):
+def get_or_create_user_principal(session, user, createuser=True,
+                                 createrealm=True, commitoncreate=False,
+                                 comments=None):
     if user is None:
         return user
     principal = user
@@ -81,7 +82,8 @@ def get_or_create_user_principal(session, user,
         dbrealm = Realm(name=realm)
         session.add(dbrealm)
         LOGGER.info("Creating user %s@%s..." % (user, realm))
-        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
+        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
+                               comments=comments)
         session.add(dbuser)
         if commitoncreate:
             session.commit()
@@ -95,7 +97,8 @@ def get_or_create_user_principal(session, user,
                                 "the principal." % principal)
         LOGGER.info("User %s did not exist in realm %s, creating..." %
                     (user, realm))
-        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody)
+        dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
+                               comments=comments)
         session.add(dbuser)
         if commitoncreate:
             session.commit()

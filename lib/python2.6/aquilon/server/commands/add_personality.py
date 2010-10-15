@@ -39,7 +39,8 @@ class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, **arguments):
+    def render(self, session, logger, personality, archetype, comments,
+               **arguments):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
         if (not valid.match(personality)):
             raise ArgumentError("Personality name '%s' is not valid." %
@@ -49,7 +50,8 @@ class CommandAddPersonality(BrokerCommand):
         Personality.get_unique(session, archetype=dbarchetype, name=personality,
                                preclude=True)
 
-        dbpersona = Personality(name=personality, archetype=dbarchetype)
+        dbpersona = Personality(name=personality, archetype=dbarchetype,
+                                comments=comments)
 
         session.add(dbpersona)
         session.flush()

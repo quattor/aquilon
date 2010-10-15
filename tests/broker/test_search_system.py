@@ -56,7 +56,7 @@ class TestSearchSystem(TestBrokerCommand):
     def testfqdnavailablefull(self):
         command = "search system --fqdn unittest00.one-nyp.ms.com --fullinfo"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Blade: ut3c1n3", command)
 
     def testdnsdomainavailable(self):
@@ -85,18 +85,18 @@ class TestSearchSystem(TestBrokerCommand):
         command = "search system --shortname does-not-exist"
         self.noouttest(command.split(" "))
 
-    def testtypechassis(self):
-        command = "search system --type chassis"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
-        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+#   def testtypechassis(self):
+#       command = "search system --type chassis"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
+#       self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
-    def testtypetorswitch(self):
-        # Deprecated.
-        command = "search system --type tor_switch"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+#   def testtypetorswitch(self):
+#       # Deprecated.
+#       command = "search system --type tor_switch"
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
+#       self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
     def testipavailable(self):
         command = "search system --ip %s" % self.net.unknown[0].usable[2]
@@ -124,14 +124,14 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "Network with address 199.98.16.0 not found",
                          command)
 
-    def testmacavailable(self):
-        command = "search system --mac %s" % self.net.unknown[0].usable[2].mac
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+#   def testmacavailable(self):
+#       command = "search system --mac %s" % self.net.unknown[0].usable[2].mac
+#       out = self.commandtest(command.split(" "))
+#       self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
-    def testmacunavailable(self):
-        command = "search system --mac 02:02:c7:62:10:04"
-        self.noouttest(command.split(" "))
+#   def testmacunavailable(self):
+#       command = "search system --mac 02:02:c7:62:10:04"
+#       self.noouttest(command.split(" "))
 
     def testall(self):
         command = "search system --all"
@@ -152,17 +152,25 @@ class TestSearchSystem(TestBrokerCommand):
         command = "search system --all --fullinfo"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
-        self.matchoutput(out, "Hostname: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
-        self.matchoutput(out, "Hostname: unittest01.one-nyp.ms.com", command)
-        self.matchoutput(out, "Hostname: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Blade: ut3c1n4", command)
+        self.matchoutput(out, "Primary Name: unittest01.one-nyp.ms.com", command)
+        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest02rsa.one-nyp.ms.com", command)
-        self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
-        self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
+        self.matchoutput(out, "Aurora_node: %s" % self.aurora_with_node,
                          command)
-        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Primary Name: %s.ms.com" % self.aurora_with_node,
+                         command)
+        self.matchoutput(out, "Aurora_node: %s" % self.aurora_without_node,
+                         command)
+        self.matchoutput(out, "Primary Name: %s.ms.com" % self.aurora_without_node,
+                         command)
+        self.matchoutput(out, "Switch: ut3gd1r01", command)
+        self.matchoutput(out, "Chassis: ut3c1", command)
 
 
 if __name__=='__main__':

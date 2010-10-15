@@ -29,10 +29,11 @@
 """Contains the logic for `aq update interface --switch`."""
 
 
-from aquilon.exceptions_ import UnimplementedError, NotFoundException
+from aquilon.exceptions_ import (UnimplementedError, NotFoundException,
+                                 AquilonError, ArgumentError)
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Interface
-from aquilon.server.dbwrappers.switch import get_switch
+from aquilon.aqdb.model import Interface, Switch
+from aquilon.server.processes import DSDBRunner
 
 
 class CommandUpdateInterfaceSwitch(BrokerCommand):
@@ -47,19 +48,26 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
         if ip:
             raise UnimplementedError("use update_switch to update the IP")
 
-        dbswitch = get_switch(session, switch)
+        dbswitch = Switch.get_unique(session, switch, compel=True)
         q = session.query(Interface)
-        q = q.filter_by(name=interface, hardware_entity=dbswitch.switch_hw)
+        q = q.filter_by(name=interface, hardware_entity=dbswitch)
         dbinterface = q.first()
         if not dbinterface:
             raise NotFoundException("Interface %s of %s not found." %
                                     (interface, dbswitch.fqdn))
 
+        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+
         if comments:
             dbinterface.comments = comments
         if mac:
             dbinterface.mac = mac
-            if dbinterface.system == dbswitch:
-                dbinterface.system.mac = mac
-                session.add(dbinterface.system)
-        session.add(dbinterface)
+
+        session.flush()
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        try:
+            dsdb_runner.update_host(dbswitch, oldinfo)
+        except AquilonError, err:
+            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+        return

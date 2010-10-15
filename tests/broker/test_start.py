@@ -78,9 +78,14 @@ class TestBrokerStart(unittest.TestCase):
 
         if config.has_option("unittest", "coverage"):
             if config.getboolean("unittest", "coverage"):
-                args.append("--coverage")
-                args.append(os.path.join(config.get("broker", "logdir"),
-                                         "aqd.coverage"))
+                args.append("--coveragedir")
+                dir = os.path.join(config.get("broker", "logdir"), "coverage")
+                args.append(dir)
+
+                coveragerc = os.path.join(config.get("broker", "srcdir"),
+                                          "tests", "coverage.rc")
+                args.append("--coveragerc")
+                args.append(coveragerc)
 
         p = Popen(args)
         self.assertEqual(p.wait(), 0)

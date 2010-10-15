@@ -165,7 +165,7 @@
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
-         <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
@@ -208,7 +208,7 @@
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
-         <option name="mac" type="string">mac address of an attached interface</option>
+         <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
@@ -244,7 +244,7 @@
          <option name="type" type="string">System type (host, chassis, switch, manager, auxiliary)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
-         <option name="mac" type="string">primary mac address</option>
+         <option name="mac" type="mac">primary MAC address</option>
          <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
@@ -268,7 +268,7 @@
          <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
-         <option name="mac" type="string">primary mac address</option>
+         <option name="mac" type="mac">primary MAC address</option>
          <option name="personality" type="string">personality</option>
          <option name="osname" type="string">osname</option>
          <option name="osversion" type="string">osversion</option>
@@ -383,7 +383,7 @@
          <option name="tor_switch" type="string" conflicts="switch">(Deprecated.) FQDN of the switch</option>
          <option name="switch" type="string" conflicts="tor_switch">FQDN of the switch</option>
          <option name="port_number" type="int">Port number on the switch</option>
-         <option name="mac" type="string">MAC address to search for</option>
+         <option name="mac" type="mac">MAC address to search for</option>
       </optgroup>
       <transport method="get" path="find/observed_mac" />
    </command>
@@ -866,7 +866,7 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="interface" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
-         <option name="mac" type="string">Specify the non-bootable public interface to use, if there is more than one.</option>
+         <option name="mac" type="mac">Specify the non-bootable public interface to use, if there is more than one.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -935,7 +935,7 @@
       <optgroup name="optional_opts">
          <option name="manager" type="string">Fully qualified name for the manager interface</option>
          <option name="interface" type="string">Specify the management interface to use, if there is more than one.</option>
-         <option name="mac" type="string">Specify the management interface to use, if there is more than one.</option>
+         <option name="mac" type="mac">Specify the management interface to use, if there is more than one.</option>
          <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -1076,7 +1076,7 @@
          <option name="interface" type="string">Interface name</option>
       </optgroup>
       <optgroup name="add_interface_mac" mandatory="False">
-         <option name="mac" type="string" conflicts="automac">MAC address</option>
+         <option name="mac" type="mac" conflicts="automac">MAC address</option>
          <option name="automac" type="flag" conflicts="mac">Automatically generate MAC for virtual hardware</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
@@ -1135,6 +1135,7 @@
          <option name="discovered" type="boolean">Set network(s) updated</option>
          <option name="type" type="string">Network type, defaults to 'unknown'</option>
          <option name="side" type="string">Network side, defaults to 'a'</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="network/%(ip)s" />
    </command>
@@ -1196,7 +1197,7 @@
          <option name="switch" type="string" conflicts="machine hostname">Switch name</option>
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
-         <option name="mac" type="string">MAC address</option>
+         <option name="mac" type="mac">MAC address</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
@@ -1221,7 +1222,9 @@
       <optgroup name="del_interface_opts" mandatory="True" fields="any">
          <option name="interface" type="string">Interface name</option>
          <option name="machine" type="string">Machine name</option>
-         <option name="mac" type="string">MAC address</option>
+         <option name="switch" type="string">Switch name</option>
+         <option name="chassis" type="string">Chassis name</option>
+         <option name="mac" type="mac">MAC address</option>
       </optgroup>
       <transport method="post" path="interface/command/del" />
    </command>
@@ -1824,9 +1827,11 @@
          <option name="type" type="string">Location type</option>
          <option name="parentname" type="string">Short name of parent</option>
          <option name="parenttype" type="string">Location type of parent</option>
+      </optgroup>
+      <optgroup name="add_location_optional" mandatory="False">
          <option name="comments" type="string">Comments about the location</option>
       </optgroup>
-      <transport method="put" path="location/%(type)s/%(name)s" />
+      <transport method="put" path="location/generic/%(type)s/%(name)s" />
    </command>
 
    <command name="show_location">
@@ -1860,6 +1865,10 @@
 	 <option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
       </optgroup>
       <optgroup name="optional_opts">
+	 <option name="ip" type="ipv4">IP address of the chassis</option>
+	 <option name="interface" type="string">Interface name (like oa)</option>
+	 <option name="mac" type="mac">MAC address of the interface</option>
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">serial number</option>
          <option name="comments" type="string">Comments</option>
@@ -1869,18 +1878,29 @@
 
    <command name="show_chassis">
       Show the chassis list, or details about a particular chassis.
+      <p/>
+      The --missing option will list aq commands to add chassis information for
+      blade machines that are not currently in a chassis.
       <optgroup name="show_chassis_opts" mandatory="True" fields="any">
-         <option name="chassis" type="string" conflicts="all">chassis name</option>
+         <option name="chassis" type="string" conflicts="all">Chassis name</option>
          <option name="all" type="flag" conflicts="chassis">Select all</option>
+         <option name="missing" type="flag" conflicts="chassis">Show blades that has no chassis</option>
       </optgroup>
       <transport trigger="all" method="get" path="chassis" />
       <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
+      <transport trigger="missing" method="get" path="find/missing_chassis" />
    </command>
 
    <command name="del_chassis">
-      Delete a chassis. See also del_location.
+      Delete a chassis.
+      <p/>
+      If the chassis has populated slots, then the --force flag can be used to
+      remove all machines from the chassis before deleting the chassis.
       <optgroup name="del_chassis_opts" mandatory="True" fields="all">
-         <option name="chassis" type="string">chassis name</option>
+         <option name="chassis" type="string">Chassis name</option>
+      </optgroup>
+      <optgroup name="del_chassis_optional" mandatory="False" fields="any">
+         <option name="clear_slots" type="flag">Remove all machines first</option>
       </optgroup>
       <transport method="delete" path="chassis/%(chassis)s" />
    </command>
@@ -2194,6 +2214,9 @@
          <option name="personality" type="string">The name to create</option>
          <option name="archetype" type="string">Which archetype to use</option>
       </optgroup>
+      <optgroup name="add_personality_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
       <transport method="put" path="personality/%(archetype)s/%(personality)s" />
   </command>
 
@@ -2201,6 +2224,9 @@
       Create a vendor definition.
       <optgroup name="mandatory_options" mandatory="True" fields="all">
          <option name="vendor" type="string">The name of the vendor</option>
+      </optgroup>
+      <optgroup name="add_vendor_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="vendor/%(vendor)s" />
   </command>
@@ -2408,7 +2434,8 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_machine_optional">
-	 <option name="serial" type="string">serial number</option>
+	 <option name="serial" type="string">Serial number</option>
+	 <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s" />
    </command>
@@ -2487,8 +2514,8 @@
       <p/>
       This command is deprecated.  Please use the new add_switch.
       <optgroup name="add_tor_switch_opts" mandatory="True" fields="all">
-         <option name="tor_switch" type="string">tor_switch name</option>
-         <option name="model" type="string">tor_switch model</option>
+         <option name="tor_switch" type="string">Switch name</option>
+         <option name="model" type="string">Switch model</option>
       </optgroup>
       <optgroup name="add_tor_switch_location" mandatory="True" fields="any">
          <option name="rack" type="string" conflicts="building">Rack name</option>
@@ -2504,19 +2531,14 @@
       </optgroup>
       <optgroup name="add_tor_switch_primary" mandatory="False" fields="all">
          <option name="interface" type="string">Interface name (like xge49)</option>
-         <option name="mac" type="string">MAC address of the interface</option>
+         <option name="mac" type="mac">MAC address of the interface</option>
          <option name="ip" type="ipv4">IP address of the interface</option>
       </optgroup>
-      <optgroup name="add_tor_switch_specs_opts" mandatory="False">
-	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
-	 <option name="cpuname" type="string">cpu name</option>
-	 <option name="cpuvendor" type="string">cpu vendor</option>
-	 <option name="cpuspeed" type="int">cpu speed</option>
-	 <option name="cpucount" type="int">cpu count</option>
-	 <option name="memory" type="int">memory in MB</option>
-      </optgroup>
       <optgroup name="add_tor_switch_optional">
-	 <option name="serial" type="string">serial number</option>
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
+	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
+	 <option name="serial" type="string">Serial number</option>
+	 <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="tor_switch/%(tor_switch)s" />
    </command>
@@ -2531,6 +2553,9 @@
          <option name="ip" type="ipv4">IP address</option>
       </optgroup>
       <optgroup name="add_switch_optional" mandatory="False">
+	 <option name="interface" type="string">Interface name (like xge49)</option>
+	 <option name="mac" type="mac">MAC address of the interface</option>
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
@@ -2706,6 +2731,7 @@
       <optgroup name="permission_optional_opts">
          <option name="createuser" type="boolean">Create an entry for the user if one does not exist</option>
          <option name="createrealm" type="boolean">Create an entry for the realm if one does not exist (implies --createuser)</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="principal/%(principal)s/role" />
    </command>

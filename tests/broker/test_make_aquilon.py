@@ -79,16 +79,16 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
             command)
-        self.matchoutput(out,
-                         "'/system/network/interfaces/eth0' = "
-                         "nlist('ip', '%s', 'netmask', '%s', "
-                         "'broadcast', '%s', 'gateway', '%s', "
-                         "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[0],
-                          self.net.unknown[0].netmask,
-                          self.net.unknown[0].broadcast,
-                          self.net.unknown[0].gateway),
-                         command)
+        self.searchoutput(out,
+                          r"'/system/network/interfaces/eth0' = "
+                          r"nlist\(\s*'bootproto', 'static',\s*"
+                          r"'ip', '%s',\s*'netmask', '%s',\s*"
+                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
+                          (self.net.unknown[0].usable[0],
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway),
+                          command)
         self.matchoutput(out,
             """include { 'archetype/base' };""",
             command)
@@ -179,26 +179,26 @@ class TestMakeAquilon(TestBrokerCommand):
         self.matchoutput(out,
             """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
             command)
-        self.matchoutput(out,
-                         "'/system/network/interfaces/eth0' = "
-                         "nlist('ip', '%s', 'netmask', '%s', "
-                         "'broadcast', '%s', 'gateway', '%s', "
-                         "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[2],
-                          self.net.unknown[0].netmask,
-                          self.net.unknown[0].broadcast,
-                          self.net.unknown[0].gateway),
-                         command)
-        self.matchoutput(out,
-                         "'/system/network/interfaces/eth1' = "
-                         "nlist('ip', '%s', 'netmask', '%s', "
-                         "'broadcast', '%s', 'gateway', '%s', "
-                         "'bootproto', 'static');" %
-                         (self.net.unknown[0].usable[3],
-                          self.net.unknown[0].netmask,
-                          self.net.unknown[0].broadcast,
-                          self.net.unknown[0].gateway),
-                         command)
+        self.searchoutput(out,
+                          r"'/system/network/interfaces/eth0' = "
+                          r"nlist\(\s*'bootproto', 'static',\s*"
+                          r"'ip', '%s',\s*'netmask', '%s',\s*"
+                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
+                          (self.net.unknown[0].usable[2],
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway),
+                          command)
+        self.searchoutput(out,
+                          r"'/system/network/interfaces/eth1' = "
+                          r"nlist\(\s*'bootproto', 'static',\s*"
+                          r"'ip', '%s',\s*'netmask', '%s',\s*"
+                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\)" %
+                          (self.net.unknown[0].usable[3],
+                           self.net.unknown[0].netmask,
+                           self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway),
+                          command)
         self.matchoutput(out,
             """include { 'archetype/base' };""",
             command)
@@ -325,9 +325,9 @@ class TestMakeAquilon(TestBrokerCommand):
     def testverifyunittest17(self):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: unittest17.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "IP: %s" % self.net.tor_net[0].usable[3],
+        self.matchoutput(out,
+                         "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
+                         self.net.tor_net[0].usable[3],
                          command)
         self.matchoutput(out,
                          "Template: aquilon/os/linux/4.0.1-x86_64/config.tpl",

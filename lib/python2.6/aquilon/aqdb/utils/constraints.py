@@ -78,6 +78,9 @@ _long_nms['PERSONALITY_CLUSTER_INFO_ID'] = 'PERS_CLSTRID'
 _long_nms['PERSONALITY_ESX_CLUSTER_INFO'] = 'PERS_ESXCLSTR'
 _long_nms['VMHOST_OVERCOMMIT_MEMORY'] = 'VM_OVRCMT_MEM'
 _long_nms['HIGH_AVAILABILITY'] = 'HA'
+_long_nms['PRIMARY_NAME_ASSOCIATION'] = 'PRI_NAME_ASC'
+_long_nms['VLAN_INTERFACE_ID'] = 'VLAN_IFACE_ID'
+_long_nms['ADDRESS_ASSIGNMENT'] = 'ADDR_ASSIGN'
 
 
 def rename_sys_pks(db, *args, **kw):

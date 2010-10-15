@@ -296,7 +296,7 @@ class NetRefresher(object):
             s_index += 1
             continue
 
-def main(*args, **kw):
+def main(*args, **kw):  # pragma: no cover
     usage = """ usage: %prog [options]
     refreshes location data from dsdb to aqdb """
 

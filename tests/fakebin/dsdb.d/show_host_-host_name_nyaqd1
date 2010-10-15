@@ -1,0 +1,9 @@
+Primary Name: ny00l4as01
+        Node: 
+  DNS Domain: ms.com
+  Interfaces: 
+              ny00l4as01 le0 10.184.155.249 (static)
+     Aliases: nyaqd1 
+    Comments: First production AQD Broker in NY, VCS Service group for hn/np732c1n14
+       State: 0
+

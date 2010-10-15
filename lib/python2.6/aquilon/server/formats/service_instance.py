@@ -43,7 +43,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 % (si.service.name, si.name)]
         details.append(indent + "  Template: %s" % si.cfg_path)
         for sis in si.servers:
-            details.append(indent + "  Server: %s" % sis.system.fqdn)
+            details.append(indent + "  Server: %s" % sis.host.fqdn)
         for map in si.service_map:
             details.append(indent + "  Service Map: {0}".format(map.location))
         for pmap in si.personality_service_map:
@@ -63,7 +63,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
                        max_clients)
         details.append(indent + "  Client Count: %d" % si.client_count)
         if si.service.name == 'nas_disk_share':
-            details.append(indent + "  Disk Count: %d" % len(si.nas_disks))
+            details.append(indent + "  Disk Count: %d" % si.nas_disk_count)
         if si.comments:
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
@@ -105,10 +105,9 @@ class ShareFormatter(ObjectFormatter):
         plenary.lookup()
         details.append(indent + "  Server: %s" % plenary.server)
         details.append(indent + "  Mountpoint: %s" % plenary.mount)
-        disks = dbshare.nas_disks
-        details.append(indent + "  Disk Count: %d" % len(disks))
-        machines = set([disk.machine for disk in disks])
-        details.append(indent + "  Machine Count: %d" % len(machines))
+        details.append(indent + "  Disk Count: %d" % dbshare.nas_disk_count)
+        details.append(indent + "  Machine Count: %d" %
+                       dbshare.nas_machine_count)
         if dbshare.comments:
             details.append(indent + "  Comments: %s" % dbshare.comments)
         return "\n".join(details)

@@ -28,6 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show network`."""
 
+from sqlalchemy.orm import joinedload
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Network
@@ -45,6 +46,7 @@ class CommandShowNetwork(BrokerCommand):
         dbnetwork = network and get_network_byname(session, network) or None
         dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
         q = session.query(Network)
+        q = q.options(joinedload('location'))
         if dbnetwork:
             if hosts:
                 return NetworkHostList([dbnetwork])

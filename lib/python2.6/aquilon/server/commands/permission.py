@@ -40,10 +40,10 @@ class CommandPermission(BrokerCommand):
     required_parameters = ["principal", "role"]
 
     def render(self, session, principal, role, createuser, createrealm,
-            **arguments):
+               comments, **arguments):
         dbrole = Role.get_unique(session, role, compel=True)
-        dbuser = get_or_create_user_principal(session, principal, 
-                createuser, createrealm)
+        dbuser = get_or_create_user_principal(session, principal, createuser,
+                                              createrealm, comments=comments)
         dbuser.role = dbrole
         session.add(dbuser)
         return

@@ -83,10 +83,10 @@ def add_location(session, name, fullname, type, parent_name, parent_type,
 class CommandAddLocation(BrokerCommand):
 
     required_parameters = ["name", "fullname", "type", "parentname",
-                           "parenttype", "comments"]
+                           "parenttype"]
 
-    def render(self, session, name, fullname, type,
-            parentname, parenttype, comments, **arguments):
+    def render(self, session, name, fullname, type, parentname, parenttype,
+               comments, **arguments):
 
         session.add(add_location(session, name, fullname, type, parentname,
                                  parenttype, comments))

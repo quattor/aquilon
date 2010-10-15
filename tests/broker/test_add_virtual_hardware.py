@@ -381,7 +381,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_800_verify_windows(self):
         command = "show host --hostname aqddesk1.msad.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Hostname: aqddesk1.msad.ms.com", command)
+        self.matchoutput(out, "Primary Name: aqddesk1.msad.ms.com", command)
         self.matchoutput(out, "Virtual_machine: evm1", command)
         self.matchoutput(out, "Template: windows/os/windows/nt61e/config.tpl",
                          command)

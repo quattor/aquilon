@@ -80,7 +80,7 @@ class CommandPxeswitchList(BrokerCommand):
                         groups[bootbi.service_instance.name].append(dbhost)
                     else:
                         # for that instance, find what servers are bound to it.
-                        servers[bootbi.service_instance.name] = [s.system.fqdn
+                        servers[bootbi.service_instance.name] = [s.host.fqdn
                           for s in bootbi.service_instance.servers]
                         groups[bootbi.service_instance.name] = [dbhost]
 

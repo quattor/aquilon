@@ -29,9 +29,11 @@
 """Contains the logic for `aq show nas disk share --all`."""
 
 
+from sqlalchemy.orm import undefer
+
 from aquilon.exceptions_ import InternalError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance
+from aquilon.aqdb.model import Service, ServiceInstance, NasDisk
 from aquilon.server.formats.service_instance import Share
 
 
@@ -42,5 +44,9 @@ class CommandShowNASDiskShareAll(BrokerCommand):
     def render(self, session, **arguments):
         nas_disk_share = Service.get_unique(session, name='nas_disk_share',
                                             compel=InternalError)
-        q = session.query(ServiceInstance).filter_by(service=nas_disk_share)
+        q = session.query(ServiceInstance)
+        q = q.filter_by(service=nas_disk_share)
+        q = q.options(undefer(ServiceInstance.nas_disk_count))
+        q = q.options(undefer(ServiceInstance.nas_machine_count))
+        q = q.order_by(ServiceInstance.name)
         return [Share(dbshare) for dbshare in q.all()]

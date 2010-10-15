@@ -30,7 +30,7 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.switch import get_switch
+from aquilon.aqdb.model import Switch
 
 
 class CommandShowSwitchSwitch(BrokerCommand):
@@ -38,4 +38,4 @@ class CommandShowSwitchSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, **arguments):
-        return get_switch(session, switch)
+        return Switch.get_unique(session, switch, compel=True)

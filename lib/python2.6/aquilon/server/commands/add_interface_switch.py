@@ -30,13 +30,9 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Interface, Switch
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import Switch
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.system import get_system
-from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_switch_offsets,
-                                                 get_or_create_interface)
+from aquilon.server.dbwrappers.interface import get_or_create_interface
 from aquilon.server.processes import DSDBRunner
 
 
@@ -62,29 +58,21 @@ class CommandAddInterfaceSwitch(BrokerCommand):
         In this case, just record the new interface.
 
         """
-        dbswitch = get_system(session, switch, Switch, 'Switch')
+        dbswitch = Switch.get_unique(session, switch, compel=True)
 
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise ArgumentError("Cannot use argument --%s when adding an "
                                     "interface to a switch" % arg)
 
-        dbinterface = get_or_create_interface(session,
-                                              dbswitch.switch_hw,
+        dbinterface = get_or_create_interface(session, dbswitch,
                                               name=interface, mac=mac,
                                               interface_type='oa',
                                               comments=comments, preclude=True)
 
-        if not dbswitch.ip:
-            return
-
-        if dbswitch.interfaces:
-            return
-
-        dbinterface.system = dbswitch
-        dbswitch.mac = dbinterface.mac
-        session.add(dbinterface)
-        session.add(dbswitch)
+        if dbswitch.primary_name.ip and not dbswitch.primary_name.assignments:
+            dbinterface.vlans[0].addresses.append(dbswitch.primary_ip)
+        session.flush()
 
         # We could theoretically add the mac information to DSDB...
         # doesn't seem worth the trouble.

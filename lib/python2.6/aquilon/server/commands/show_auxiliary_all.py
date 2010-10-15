@@ -28,13 +28,33 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show auxiliary --all`."""
 
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.sql import exists
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import Auxiliary
+from aquilon.aqdb.model import (Interface, VlanInterface, AddressAssignment,
+                                HardwareEntity, PrimaryNameAssociation,
+                                FutureARecord, DnsDomain)
 
 
 class CommandShowAuxiliaryAll(BrokerCommand):
 
     def render(self, session, **arguments):
-        return SimpleSystemList(session.query(Auxiliary).all())
+        # An auxiliary...
+        q = session.query(FutureARecord)
+        # ... is not a primary name...
+        q = q.filter(~exists().where(PrimaryNameAssociation.dns_record_id ==
+                                     FutureARecord.system_id))
+        # ... and is assigned to a public interface...
+        q = q.join((AddressAssignment, FutureARecord.ip == AddressAssignment.ip))
+        q = q.join(VlanInterface, Interface)
+        q = q.filter_by(interface_type='public')
+        # ... of a machine.
+        q = q.join(HardwareEntity)
+        q = q.filter_by(hardware_type='machine')
+        q = q.reset_joinpoint()
+        q = q.join(DnsDomain)
+        q = q.options(contains_eager(FutureARecord.dns_domain))
+        q = q.order_by(FutureARecord.name, DnsDomain.name)
+        fqdns = [rec.fqdn for rec in q.all()]
+        return fqdns
