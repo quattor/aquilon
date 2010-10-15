@@ -59,7 +59,7 @@ class AuthorizationBroker(object):
             return True
         if dbuser is None:
             raise AuthorizationException(
-                    "Unauthorized anonymous access attempt to %s on %s" % 
+                    "Unauthorized anonymous access attempt to %s on %s" %
                     (action, resource))
         # Special-casing the aquilon hosts... this is a special user
         # that provides a bucket for all host-generated activity.
@@ -85,6 +85,11 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'winops':
             if action not in ['add_host', 'add_windows_host', 'make_cluster',
                               'reconfigure']:
+                self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'location_admin':
+            if action not in ['add_location', 'del_location',
+                              'add_building', 'del_building',
+                              'add_city', 'del_city']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',

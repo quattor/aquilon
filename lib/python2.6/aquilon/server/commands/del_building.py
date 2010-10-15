@@ -29,6 +29,7 @@
 """Contains the logic for `aq del building`."""
 
 
+from aquilon.server.processes import DSDBRunner
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.commands.del_location import CommandDelLocation
 
@@ -37,6 +38,11 @@ class CommandDelBuilding(CommandDelLocation):
 
     required_parameters = ["building"]
 
-    def render(self, session, building, **arguments):
-        return CommandDelLocation.render(self, session=session, name=building,
-                                         type='building', **arguments)
+    def render(self, session, logger, building, **arguments):
+        result = CommandDelLocation.render(self, session=session, name=building,
+                                           type='building', **arguments)
+        session.flush()
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.del_building(building.strip().lower())
+        return result

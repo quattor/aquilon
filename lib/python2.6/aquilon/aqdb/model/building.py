@@ -28,7 +28,7 @@
 # TERMS THAT MAY APPLY.
 """ Building is a subclass of Location """
 import logging
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, String
 
 from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Location, City
@@ -43,6 +43,7 @@ class Building(Location):
                                     name='building_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
+    address = Column(String(255), nullable=False)
 
 building = Building.__table__
 building.primary_key.name='building_pk'

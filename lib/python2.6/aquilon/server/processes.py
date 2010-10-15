@@ -311,13 +311,54 @@ class DSDBRunner(object):
     def __init__(self, logger=LOGGER):
         self.config = Config()
         self.logger = logger
+        self.dsdb = self.config.get("broker", "dsdb")
+        self.location_sync = self.config.getboolean(
+            "broker", "dsdb_location_sync")
 
     def getenv(self):
         if self.config.getboolean("broker", "dsdb_use_testdb"):
             return {"DSDB_USE_TESTDB": "true"}
         return None
 
+    def add_city(self, city, country, fullname):
+        cmd = [self.dsdb, "add_city_aq", "-city_symbol", city,
+               "-country_symbol", country, "-city_name", fullname]
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
+
+    def del_city(self, city):
+        cmd = [self.dsdb, "delete_city_aq", "-city", city]
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
+
+    def add_building(self, building, city, building_addr):
+        cmd = [self.dsdb, "add_building_aq", "-building_name", building,
+               "-city", city, "-building_addr", building_addr]
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
+
+    def del_building(self, building):
+        cmd = [self.dsdb, "delete_building_aq", "-building", building]
+        if self.location_sync:
+            out = run_command(cmd, env=self.getenv(), logger=self.logger)
+        else:
+            self.logger.debug(
+                "Would have called '%s' if location sync was enabled" % cmd)
+
     def add_host(self, dbinterface):
+        if not dbinterface.system.ip:
+            raise ArgumentError("No ip address found for '%s' to add to dsdb." %
+                                dbinterface.system.fqdn)
+
         return self.add_host_details(dbinterface.system.fqdn,
                                      dbinterface.system.ip,
                                      dbinterface.name, dbinterface.mac)

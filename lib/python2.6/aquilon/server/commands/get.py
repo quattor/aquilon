@@ -33,8 +33,8 @@ import os
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
-from aquilon.server.processes import run_command
-from aquilon.exceptions_ import ArgumentError
+from aquilon.server.processes import run_command, remove_dir
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.server.formats.branch import RemoteSandbox
 
 

@@ -30,16 +30,24 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.add_location import CommandAddLocation
+from aquilon.server.processes import DSDBRunner
+from aquilon.server.commands.add_location import (CommandAddLocation,
+                                                  add_location)
 
 
 class CommandAddCity(CommandAddLocation):
 
     required_parameters = ["city", "country"]
 
-    def render(self, session, city, country, fullname, comments, **arguments):
-        return CommandAddLocation.render(self, session=session, name=city,
-                                         type='city', fullname=fullname,
-                                         parentname=country,
-                                         parenttype='country',
-                                         comments=comments, **arguments)
+    def render(self, session, logger, city, country, fullname, comments,
+               **arguments):
+
+        new_loc = add_location(session, city, fullname, 'city', country,
+                               'country', comments)
+        session.add(new_loc)
+        session.flush()
+
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.add_city(city, country, fullname)
+
+        return
