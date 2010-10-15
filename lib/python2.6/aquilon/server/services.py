@@ -652,8 +652,6 @@ class ClusterChooser(Chooser):
                 host_chooser.set_single(instance.service, instance, force=True)
                 host_chooser.flush_changes()
                 # Note, host plenary will be written later.
-        if self.instances_bound or self.instances_unbound:
-            self.session.add(self.dbcluster)
 
     def prestash_primary(self):
         plenary_cluster = PlenaryCluster(self.dbcluster, logger=self.logger)
