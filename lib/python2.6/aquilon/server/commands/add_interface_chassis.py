@@ -36,7 +36,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_tor_offsets,
+                                                 restrict_switch_offsets,
                                                  get_or_create_interface)
 from aquilon.server.processes import DSDBRunner
 
@@ -60,7 +60,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(dbnetwork, ip)
+        restrict_switch_offsets(dbnetwork, ip)
         dbchassis.ip = ip
         dbchassis.network = dbnetwork
         dbchassis.mac = mac

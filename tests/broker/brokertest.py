@@ -137,6 +137,15 @@ class TestBrokerCommand(unittest.TestCase):
                          % (command, out, err))
         return (out, err)
 
+    def failuretest(self, command, returncode, **kwargs):
+        (p, out, err) = self.runcommand(command, **kwargs)
+        self.assertEqual(p.returncode, returncode,
+                         "Non-%s return code %s for %s, "
+                         "STDOUT:\n@@@\n'%s'\n@@@\n"
+                         "STDERR:\n@@@\n'%s'\n@@@\n"
+                         % (returncode, p.returncode, command, out, err))
+        return (out, err)
+
     def assertEmptyStream(self, name, contents, command):
         self.assertEqual(contents, "",
                          "%s for %s was not empty:\n@@@\n'%s'\n@@@\n"
@@ -190,9 +199,10 @@ class TestBrokerCommand(unittest.TestCase):
             self.assertEqual(out, "",
                              "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                              (command, out))
-            self.assertEqual(err.find("Not Found"), 0,
-                             "STDERR for %s did not start with Not Found:"
-                             "\n@@@\n'%s'\n@@@\n" % (command, err))
+            self.failUnless(err.find("Not Found") >= 0,
+                            "STDERR for %s did not include Not Found:"
+                            "\n@@@\n'%s'\n@@@\n" %
+                            (command, err))
         return err
 
     def badrequesttest(self, command, ignoreout=False, **kwargs):
@@ -561,6 +571,10 @@ class DummyNetworks(object):
         self.tor_net.append(NetworkInfo("4.2.2.64/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.128/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.2.192/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.9.0/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.9.64/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.9.128/26", "tor_net"))
+        self.tor_net.append(NetworkInfo("4.2.9.192/26", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.3.0/25", "tor_net"))
         self.tor_net.append(NetworkInfo("4.2.3.128/25", "tor_net"))
         self.tor_net2.append(NetworkInfo("4.2.4.0/25", "tor_net2"))

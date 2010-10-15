@@ -32,7 +32,7 @@ from aquilon.aqdb.model import System, FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_tor_offsets)
+                                                 restrict_switch_offsets)
 from aquilon.server.dbwrappers.system import parse_system
 from aquilon.server.processes import DSDBRunner
 
@@ -57,7 +57,7 @@ class CommandAddAddressDNSEnvironment(BrokerCommand):
         ipargs['dbinterface'] = None
         ip = generate_ip(session, **ipargs)
         ipnet = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(ipnet, ip)
+        restrict_switch_offsets(ipnet, ip)
         dbaddress = FutureARecord(name=short, dns_domain=dbdns_domain,
                                   ip=ip, network=ipnet, comments=comments)
         session.add(dbaddress)

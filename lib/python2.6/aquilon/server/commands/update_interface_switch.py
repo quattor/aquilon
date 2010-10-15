@@ -26,17 +26,40 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq poll tor_switch`."""
+"""Contains the logic for `aq update interface --switch`."""
 
 
+from aquilon.exceptions_ import UnimplementedError, NotFoundException
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.poll_switch import CommandPollSwitch
+from aquilon.aqdb.model import Interface
+from aquilon.server.dbwrappers.switch import get_switch
 
 
-class CommandPollTorSwitch(CommandPollSwitch):
-    """Deprecated wrapper for poll_switch."""
+class CommandUpdateInterfaceSwitch(BrokerCommand):
 
-    def render(self, logger, **arguments):
-        logger.client_info("Command poll_tor_switch is deprecated, please use "
-                           "poll_switch instead.")
-        return CommandPollSwitch.render(self, logger=logger, **arguments)
+    required_parameters = ["interface", "switch"]
+
+    def render(self, session, logger, interface, switch, mac, comments,
+               ip, boot, pg, autopg, **arguments):
+        if autopg or pg or boot is not None:
+            raise UnimplementedError("update_interface --switch cannot use "
+                                     "the --autopg, --pg, or --boot options")
+        if ip:
+            raise UnimplementedError("use update_switch to update the IP")
+
+        dbswitch = get_switch(session, switch)
+        q = session.query(Interface)
+        q = q.filter_by(name=interface, hardware_entity=dbswitch.switch_hw)
+        dbinterface = q.first()
+        if not dbinterface:
+            raise NotFoundException("Interface %s of %s not found." %
+                                    (interface, dbswitch.fqdn))
+
+        if comments:
+            dbinterface.comments = comments
+        if mac:
+            dbinterface.mac = mac
+            if dbinterface.system == dbswitch:
+                dbinterface.system.mac = mac
+                session.add(dbinterface.system)
+        session.add(dbinterface)

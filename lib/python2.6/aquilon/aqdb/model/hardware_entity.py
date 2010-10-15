@@ -36,7 +36,7 @@ from sqlalchemy.orm import relation, deferred
 from aquilon.aqdb.model import Base, Location, Model
 from aquilon.aqdb.column_types.aqstr import AqStr
 
-#valid types are machine, tor_switch_hw, chassis_hw, console_server_hw
+#valid types are machine, switch_hw, chassis_hw, console_server_hw
 class HardwareEntity(Base):
     __tablename__ = 'hardware_entity'
 

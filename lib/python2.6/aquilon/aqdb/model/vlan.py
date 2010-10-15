@@ -37,7 +37,7 @@ from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import Base, Network, TorSwitch, Machine
+from aquilon.aqdb.model import Base, Network, Switch, Machine
 
 MAX_VLANS = 4096 #IEEE 802.1Q standard
 
@@ -97,7 +97,7 @@ class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
 
-    switch_id = Column(Integer, ForeignKey('tor_switch.id',
+    switch_id = Column(Integer, ForeignKey('switch.id',
                                            ondelete='CASCADE',
                                            name='%s_hw_fk' % _ABV),
                        primary_key=True)
@@ -112,8 +112,8 @@ class ObservedVlan(Base):
     creation_date = Column('creation_date', DateTime,
                            default=datetime.now, nullable=False)
 
-    switch = relation(TorSwitch, backref=backref('%ss' % _TN, cascade='delete',
-                                                 order_by=[asc('vlan_id')]))
+    switch = relation(Switch, backref=backref('%ss' % _TN, cascade='delete',
+                                              order_by=[asc('vlan_id')]))
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete',
                                                 order_by=[asc('vlan_id')]))
 

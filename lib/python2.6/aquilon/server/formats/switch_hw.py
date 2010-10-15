@@ -26,32 +26,22 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Top of Rack Switches """
+"""SwitchHw formatter."""
 
-from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import System, TorSwitchHw
+from aquilon import const
+from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.aqdb.model import SwitchHw, HardwareEntity
 
-class TorSwitch(System):
-    __tablename__ = 'tor_switch'
-    _class_label = 'ToR Switch'
 
-    id = Column(Integer,
-                ForeignKey('system.id', ondelete='CASCADE',
-                           name='TOR_SW_SYS_FK'), primary_key=True)
+class SwitchHwFormatter(ObjectFormatter):
+    def format_raw(self, switch_hw, indent=""):
+        details = []
+        for switch in switch_hw.switch:
+            details.append(self.redirect_raw(switch, indent))
+        if not details:
+            handler = ObjectFormatter.handlers[HardwareEntity]
+            details.append(handler.format_raw(switch_hw, indent))
+        return "\n".join(details)
 
-    tor_switch_id = Column(Integer, ForeignKey('tor_switch_hw.hardware_entity_id',
-                                               name='TOR_SW_SY_HW_FK',
-                                               ondelete='CASCADE'),
-                                              nullable=False)
-
-    tor_switch_hw = relation(TorSwitchHw, uselist=False,
-                             backref=backref('tor_switch',cascade='delete'))
-
-    __mapper_args__ = {'polymorphic_identity' : 'tor_switch'}
-
-tor_switch = TorSwitch.__table__
-tor_switch.primary_key.name='TOR_SWITCH_PK'
-
-table = tor_switch
+ObjectFormatter.handlers[SwitchHw] = SwitchHwFormatter()

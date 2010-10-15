@@ -26,23 +26,57 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Contains the logic for `aq del tor_switch`."""
+"""Contains the logic for `aq del switch`."""
 
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.commands.del_switch import CommandDelSwitch
 from aquilon.server.dbwrappers.switch import get_switch
 from aquilon.server.processes import DSDBRunner
 from aquilon.server.locks import lock_queue, DeleteKey
 
 
-class CommandDelTorSwitch(CommandDelSwitch):
+class CommandDelSwitch(BrokerCommand):
 
-    required_parameters = ["tor_switch"]
+    required_parameters = ["switch"]
 
-    def render(self, logger, tor_switch, **arguments):
-        logger.client_info("Command del_tor_switch is deprecated, please use "
-                           "del_switch instead.")
-        return CommandDelSwitch.render(self, logger=logger, switch=tor_switch,
-                                       **arguments)
+    def render(self, session, logger, switch, **arguments):
+        key = DeleteKey("system", logger=logger)
+        try:
+            lock_queue.acquire(key)
+            self.del_switch(session, logger, switch)
+            session.commit()
+        finally:
+            lock_queue.release(key)
+        return
+
+    def del_switch(self, session, logger, switch):
+        dbswitch = get_switch(session, switch)
+        ip = dbswitch.ip
+
+        for iface in dbswitch.interfaces:
+            logger.info("Before deleting switch '%s', "
+                        "removing interface '%s' [%s] boot=%s)" %
+                        (dbswitch.fqdn, iface.name, iface.mac, iface.bootable))
+            session.delete(iface)
+
+        for iface in dbswitch.switch_hw.interfaces:
+            logger.info("Before deleting switch '%s', "
+                        "removing hardware interface '%s' [%s] boot=%s)" %
+                        (dbswitch.fqdn, iface.name, iface.mac, iface.bootable))
+            session.delete(iface)
+
+        session.delete(dbswitch.switch_hw)
+        session.delete(dbswitch)
+
+        # Any switch ports hanging off this switch should be deleted with
+        # the cascade delete of the switch.
+
+        if ip:
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.delete_host_details(ip)
+            except ProcessException, e:
+                raise ArgumentError("Could not remove switch from DSDB: %s" %
+                                    e)
+        return

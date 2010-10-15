@@ -31,7 +31,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
-                                                 restrict_tor_offsets,
+                                                 restrict_switch_offsets,
                                                  verify_port_group,
                                                  choose_port_group)
 from aquilon.server.dbwrappers.host import hostname_to_host
@@ -84,7 +84,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
-            restrict_tor_offsets(dbnetwork, ip)
+            restrict_switch_offsets(dbnetwork, ip)
             if dbinterface.system:
                 dbinterface.system.ip = ip
                 dbinterface.system.network = dbnetwork

@@ -31,7 +31,7 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import ObservedMac
-from aquilon.server.dbwrappers.tor_switch import get_tor_switch
+from aquilon.server.dbwrappers.switch import get_switch
 
 
 class CommandSearchObservedMac(BrokerCommand):
@@ -39,11 +39,17 @@ class CommandSearchObservedMac(BrokerCommand):
     required_parameters = []
     default_style = "csv"
 
-    def render(self, session, tor_switch, port_number, mac, **arguments):
+    def render(self, session, logger, tor_switch, switch, port_number, mac,
+               **arguments):
         q = session.query(ObservedMac)
         if tor_switch:
-            dbtor_switch = get_tor_switch(session, tor_switch)
-            q = q.filter_by(switch=dbtor_switch)
+            switch = tor_switch
+            # Almost pointless - the aq client doesn't ask for this channel...
+            logger.client_info("Option --tor_switch is deprecated, please use "
+                               "--switch instead.")
+        if switch:
+            dbswitch = get_switch(session, switch)
+            q = q.filter_by(switch=dbswitch)
         if port_number is not None:
             q = q.filter_by(port_number=port_number)
         if mac:

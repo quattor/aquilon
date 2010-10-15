@@ -140,9 +140,10 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def test_330_updateutecl1switch(self):
+        # Deprecated.
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--tor_switch=ut01ga1s04.aqd-unittest.ms.com"]
-        self.noouttest(command)
+        self.successtest(command)
 
     def test_340_updateutecl1switchfail(self):
         # Try something that is not a tor_switch
@@ -240,7 +241,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
-        self.matchoutput(out, "ToR Switch: ut01ga1s04.aqd-unittest.ms.com",
+        self.matchoutput(out, "Switch: ut01ga1s04.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Capacity limits: memory: 78618", command)
         self.matchoutput(out, "Resources used by VMs: memory: 32768", command)

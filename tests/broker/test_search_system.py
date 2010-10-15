@@ -92,6 +92,7 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testtypetorswitch(self):
+        # Deprecated.
         command = "search system --type tor_switch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
@@ -160,8 +161,7 @@ class TestSearchSystem(TestBrokerCommand):
         self.matchoutput(out, "Hostname: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Hostname: %s" % self.aurora_without_node,
                          command)
-        self.matchoutput(out, "Tor_switch: ut3gd1r01.aqd-unittest.ms.com",
-                         command)
+        self.matchoutput(out, "Switch: ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
 
 

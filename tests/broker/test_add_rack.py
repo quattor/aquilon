@@ -51,6 +51,10 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Row: a", command)
         self.matchoutput(out, "Column: 3", command)
 
+    def testaddut4(self):
+        command = "add rack --rackid 4 --room utroom1 --row a --column 4"
+        self.noouttest(command.split(" "))
+
     def testaddnp997(self):
         command = "add rack --rackid np997 --building np --row ZZ --column 99"
         self.noouttest(command.split(" "))

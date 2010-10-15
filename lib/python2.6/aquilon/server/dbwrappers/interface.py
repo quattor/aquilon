@@ -72,7 +72,7 @@ def get_interface(session, interface, machine, mac):
                             " ".join(errmsg))
     return dbinterface
 
-def restrict_tor_offsets(dbnetwork, ip):
+def restrict_switch_offsets(dbnetwork, ip):
     """ given a network and ip addr, raise an exception if the ip is reserved
 
         Used during ip assignment as a check against grabbing an ip address
@@ -92,7 +92,7 @@ def restrict_tor_offsets(dbnetwork, ip):
 
     if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_addresses:
         raise ArgumentError("The IP address %s is reserved for dynamic "
-                            "DHCP for a ToR switch on subnet %s." %
+                            "DHCP for a switch on subnet %s." %
                             (ip, dbnetwork.ip))
     return
 
@@ -209,12 +209,12 @@ def describe_interface(session, interface):
     hw_type = hw.hardware_entity_type
     if hw_type == 'machine':
         description.append("is attached to machine %s" % hw.name)
-    elif hw_type == 'tor_switch_hw':
-        if hw.tor_switch:
-            description.append("is attached to ToR switch %s" %
-                               ",".join([ts.fqdn for ts in hw.tor_switch]))
+    elif hw_type == 'switch_hw':
+        if hw.switch:
+            description.append("is attached to switch %s" %
+                               ",".join([ts.fqdn for ts in hw.switch]))
         else:
-            description.append("is attached to unnamed ToR switch hardware")
+            description.append("is attached to unnamed switch hardware")
     elif hw_type == 'chassis_hw':
         if hw.chassis_hw:
             description.append("is attached to chassis %s" %
@@ -257,7 +257,7 @@ def verify_port_group(dbmachine, port_group):
     if dbmachine.model.machine_type == "virtual_machine":
         dbswitch = dbmachine.cluster.switch
         if not dbswitch:
-            raise ArgumentError("Cannot verify port group availability: no ToR "
+            raise ArgumentError("Cannot verify port group availability: no "
                                 "switch record for {0}.".format(dbmachine.cluster))
         q = session.query(ObservedVlan)
         q = q.filter_by(vlan_id=dbvi.vlan_id)
@@ -291,7 +291,7 @@ def choose_port_group(dbmachine):
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
     if not dbmachine.cluster.switch:
-        raise ArgumentError("Cannot automatically allocate port group: no ToR "
+        raise ArgumentError("Cannot automatically allocate port group: no "
                             "switch record for {0}.".format(dbmachine.cluster))
     for dbobserved_vlan in dbmachine.cluster.switch.observed_vlans:
         if dbobserved_vlan.vlan_type != 'user':

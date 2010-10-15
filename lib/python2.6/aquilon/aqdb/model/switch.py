@@ -26,22 +26,38 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""TorSwitchHw formatter."""
+""" Switches """
+
+from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy.orm import relation, backref
+
+from aquilon.aqdb.column_types import Enum
+from aquilon.aqdb.model import System, SwitchHw
 
 
-from aquilon import const
-from aquilon.server.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import TorSwitchHw, HardwareEntity
+SWITCH_TYPES = ('tor', 'bor', 'agg', 'misc')
 
+class Switch(System):
+    __tablename__ = 'switch'
+    _class_label = 'Switch'
 
-class TorSwitchHwFormatter(ObjectFormatter):
-    def format_raw(self, tor_switch_hw, indent=""):
-        details = []
-        for tor_switch in tor_switch_hw.tor_switch:
-            details.append(self.redirect_raw(tor_switch, indent))
-        if not details:
-            handler = ObjectFormatter.handlers[HardwareEntity]
-            details.append(handler.format_raw(tor_switch_hw, indent))
-        return "\n".join(details)
+    id = Column(Integer,
+                ForeignKey('system.id', ondelete='CASCADE',
+                           name='SWITCH_SYS_FK'), primary_key=True)
 
-ObjectFormatter.handlers[TorSwitchHw] = TorSwitchHwFormatter()
+    switch_id = Column(Integer, ForeignKey('switch_hw.hardware_entity_id',
+                                           name='SWITCH_SYS_HW_FK',
+                                           ondelete='CASCADE'),
+                       nullable=False)
+
+    switch_hw = relation(SwitchHw, uselist=False,
+                         backref=backref('switch',cascade='delete'))
+
+    switch_type = Column(Enum(16, SWITCH_TYPES), nullable=False)
+
+    __mapper_args__ = {'polymorphic_identity' : 'switch'}
+
+switch = Switch.__table__
+switch.primary_key.name='SWITCH_PK'
+
+table = switch

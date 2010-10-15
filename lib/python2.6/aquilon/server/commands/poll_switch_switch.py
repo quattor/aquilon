@@ -26,16 +26,19 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Wrapper to make getting a machine simpler."""
+"""Contains the logic for `aq poll switch --switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import TorSwitch
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.poll_switch import CommandPollSwitch
 from aquilon.server.dbwrappers.system import get_system
+from aquilon.aqdb.model import Switch
 
 
-def get_tor_switch(session, tor_switch):
-    dbsystem = get_system(session, tor_switch)
-    if not isinstance(dbsystem, TorSwitch):
-        raise ArgumentError("%s is not a ToR switch." % tor_switch)
-    return dbsystem
+class CommandPollSwitchSwitch(CommandPollSwitch):
+
+    required_parameters = ["switch"]
+
+    def render(self, session, logger, switch, clear, vlan, **arguments):
+        dbswitch = get_system(session, switch, Switch, 'Switch')
+        return self.poll(session, logger, [dbswitch], clear, vlan)

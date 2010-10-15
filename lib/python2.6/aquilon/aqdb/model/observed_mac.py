@@ -36,7 +36,7 @@ from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.sql.expression import asc
 
-from aquilon.aqdb.model import Base, TorSwitch
+from aquilon.aqdb.model import Base, Switch
 from aquilon.aqdb.column_types.aqmac import AqMac
 
 _TN = 'observed_mac'
@@ -45,10 +45,10 @@ class ObservedMac(Base):
     """ reports the observance of a mac address on a switch port. """
     __tablename__ = _TN
 
-    switch_id = Column(Integer, ForeignKey('tor_switch.id',
-                                              ondelete='CASCADE',
-                                              name='obs_mac_hw_fk'),
-                                             primary_key=True)
+    switch_id = Column(Integer, ForeignKey('switch.id',
+                                           ondelete='CASCADE',
+                                           name='obs_mac_hw_fk'),
+                       primary_key=True)
 
     port_number = Column(Integer, primary_key=True)
 
@@ -62,9 +62,9 @@ class ObservedMac(Base):
     last_seen = Column('last_seen', DateTime,
                        default=datetime.now, nullable=False)
 
-    switch = relation(TorSwitch, backref=backref('observed_macs',
-                                                 cascade='delete',
-                                                 order_by=[asc('slot'),
-                                                           asc('port_number')]))
+    switch = relation(Switch, backref=backref('observed_macs',
+                                              cascade='delete',
+                                              order_by=[asc('slot'),
+                                                        asc('port_number')]))
 
 ObservedMac.__table__.primary_key.name = '%s_pk' % _TN

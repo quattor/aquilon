@@ -34,7 +34,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_tor_offsets)
+                                                 restrict_switch_offsets)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
                                 HostLifecycle,
@@ -136,7 +136,7 @@ class CommandAddHost(BrokerCommand):
         # posting a request directly.
         ip = generate_ip(session, dbinterface, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_tor_offsets(dbnetwork, ip)
+        restrict_switch_offsets(dbnetwork, ip)
 
         dbhost = Host(name=short, dns_domain=dbdns_domain,
                       mac=mac, ip=ip, network=dbnetwork, comments=comments,
