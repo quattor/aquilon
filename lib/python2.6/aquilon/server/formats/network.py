@@ -285,7 +285,8 @@ class SimpleNetworkListFormatter(ListFormatter):
             # host has multiple addresses
             if iface.interface_type != 'public' or (iface.bootable and not
                                                     addr.label):
-                host_msg.mac = iface.mac
+                if iface.mac:
+                    host_msg.mac = iface.mac
 
             self.add_hardware_data(host_msg, hwent)
 
