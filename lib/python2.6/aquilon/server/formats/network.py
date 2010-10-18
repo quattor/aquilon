@@ -224,8 +224,7 @@ class SimpleNetworkListFormatter(ListFormatter):
             addrq = addrq.options(contains_eager('vlan'))
             addrq = addrq.options(contains_eager('vlan.interface'))
             addrq = addrq.options(subqueryload_all('vlan.interface.hardware_entity.'
-                                                   'interfaces.vlans.assignments.'
-                                                   'dns_records'))
+                                                   'interfaces'))
 
             dynq = session.query(DynamicStub)
             dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
@@ -266,7 +265,7 @@ class SimpleNetworkListFormatter(ListFormatter):
                 if hwent.hardware_type == 'machine':
                     host_msg.type = 'host'
                     if hwent.host:
-                        self.add_host_data(host_msg, hwent.host)
+                        host_msg.archetype.name = str(hwent.host.archetype.name)
                 elif hwent.hardware_type == 'switch':
                     # aqdhcpd uses the type
                     host_msg.type = 'tor_switch'
@@ -288,7 +287,12 @@ class SimpleNetworkListFormatter(ListFormatter):
                 if iface.mac:
                     host_msg.mac = iface.mac
 
-            self.add_hardware_data(host_msg, hwent)
+            host_msg.machine.name = str(hwent.label)
+            for iface in hwent.interfaces:
+                int_msg = host_msg.machine.interfaces.add()
+                int_msg.device = iface.name
+                if iface.mac:
+                    int_msg.mac = str(iface.mac)
 
         # Add dynamic DHCP records
         dynhosts = dynq.params(ip=net.network.ip, broadcast=net.broadcast).all()
