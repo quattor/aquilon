@@ -197,7 +197,7 @@ class PlenaryToplevelHost(Plenary):
         required_services = set(self.dbhost.archetype.services +
                                 self.dbhost.personality.services)
 
-        for t in self.dbhost.templates:
+        for t in self.dbhost.services_used:
             required_services.discard(t.service_instance.service)
             services.append(t.cfg_path + '/client/config')
         if required_services:

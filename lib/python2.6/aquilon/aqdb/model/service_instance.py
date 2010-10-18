@@ -358,8 +358,6 @@ build_item.primary_key.name = 'build_item_pk'
 build_item.append_constraint(
     UniqueConstraint('host_id', 'service_instance_id', name='build_item_uk'))
 
-Host.templates = relation(BuildItem)
-
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(
     select([func.count()],

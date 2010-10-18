@@ -10,7 +10,7 @@ Domain: ${record.branch.name}
 Sandbox: ${record.sandbox_author.name}/${record.branch.name}
 % endif
 ${formatter.redirect_raw(record.status)}
-% for build_item in record.templates:
+% for build_item in record.services_used:
 Template: ${build_item.cfg_path}
 % endfor
 % if record.comments:

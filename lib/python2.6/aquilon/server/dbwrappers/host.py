@@ -51,7 +51,7 @@ def hostname_to_host(session, hostname):
     return dbmachine.host
 
 def get_host_build_item(self, dbhost, dbservice):
-    for template in dbhost.templates:
+    for template in dbhost.services_used:
         si = template.service_instance
         if si and si.service == dbservice:
             return template

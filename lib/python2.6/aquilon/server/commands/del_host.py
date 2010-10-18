@@ -82,7 +82,7 @@ class CommandDelHost(BrokerCommand):
             ip = dbmachine.primary_ip
             fqdn = dbmachine.fqdn
 
-            for binding in dbhost.templates:
+            for binding in dbhost.services_used:
                 ### WARNING ###
                 si = binding.service_instance
                 if si:

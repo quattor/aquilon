@@ -546,7 +546,7 @@ class HostChooser(Chooser):
                                (instance.service.name, instance.name))
                 continue
             bi = BuildItem(host=self.dbhost, service_instance=instance)
-            self.dbhost.templates.append(bi)
+            self.dbhost.services_used.append(bi)
         for instance in self.instances_unbound:
             self.logger.client_info("%s removing binding for "
                                     "service %s instance %s",
@@ -569,9 +569,9 @@ class HostChooser(Chooser):
             # Can't use _reorder if missing os, as adding the os later
             # will fail.
             # It may make sense to never call reorder()...
-            #if self.dbhost.templates and \
-            #   self.dbhost.templates[0].cfg_path.tld.type == 'os':
-            #    self.dbhost.templates._reorder()
+            #if self.dbhost.services_used and \
+            #   self.dbhost.services_used[0].cfg_path.tld.type == 'os':
+            #    self.dbhost.services_used._reorder()
             self.session.add(self.dbhost)
 
     def prestash_primary(self):

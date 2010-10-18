@@ -101,14 +101,6 @@ class Host(Base):
     status = relation(HostLifecycle, backref='hosts')
     operating_system = relation(OperatingSystem, uselist=False, backref='hosts')
 
-    #The following relation is defined in BuildItem to avoid circular
-    #import dependencies. Perhaps it can be restated another way than
-    #to append the property onto Host there, left for future enhancement.
-    #These will be moved to a property of machine post transformation to
-    #"machine profile".
-    #
-    #Host.templates = relation(BuildItem)
-
     @property
     def fqdn(self):
         return self.machine.fqdn
