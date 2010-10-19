@@ -143,14 +143,13 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, "object template unittest00.one-nyp.ms.com",
                          command)
         self.matchoutput(out,
-                         "include { 'service/utsvc/utsi1/server/config' };",
+                         'include { "service/utsvc/utsi1/server/config" };',
                          command)
         self.matchoutput(out,
-                         "include { 'service/utsvc/utsi2/server/config' };",
+                         'include { "service/utsvc/utsi2/server/config" };',
                          command)
 
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

@@ -76,38 +76,40 @@ class TestReconfigure(TestBrokerCommand):
             """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
             command)
         self.searchoutput(out,
-                          r"'/system/network/interfaces/eth0' = "
-                          r"nlist\(\s*'bootproto', 'static',\s*"
-                          r"'ip', '%s',\s*'netmask', '%s',\s*"
-                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
-                          (self.net.unknown[0].usable[0],
-                           self.net.unknown[0].netmask,
-                           self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway),
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway,
+                           self.net.unknown[0].usable[0],
+                           self.net.unknown[0].netmask),
                           command)
         self.matchoutput(out,
-            """include { 'archetype/base' };""",
+            """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { 'os/linux/4.0.1-x86_64/config' };""",
+            """include { "os/linux/4.0.1-x86_64/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/afs/q.ny.ms.com/client/config' };""",
+            """include { "service/afs/q.ny.ms.com/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/bootserver/np.test/client/config' };""",
+            """include { "service/bootserver/np.test/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/utdnsinstance/client/config' };""",
+            """include { "service/dns/utdnsinstance/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/ntp/pa.ny.na/client/config' };""",
+            """include { "service/ntp/pa.ny.na/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/compileserver/config' };""",
+            """include { "personality/compileserver/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'archetype/final' };""",
+            """include { "archetype/final" };""",
             command)
 
     # These settings have not changed - the command should still succeed.
@@ -125,48 +127,52 @@ class TestReconfigure(TestBrokerCommand):
             """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
             command)
         self.searchoutput(out,
-                          r"'/system/network/interfaces/eth0' = "
-                          r"nlist\(\s*'bootproto', 'static',\s*"
-                          r"'ip', '%s',\s*'netmask', '%s',\s*"
-                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
-                          (self.net.unknown[0].usable[2],
-                           self.net.unknown[0].netmask,
-                           self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway),
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\),' %
+                          (self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway,
+                           self.net.unknown[0].usable[2],
+                           self.net.unknown[0].netmask),
                           command)
         self.searchoutput(out,
-                          r"'/system/network/interfaces/eth1' = "
-                          r"nlist\(\s*'bootproto', 'static',\s*"
-                          r"'ip', '%s',\s*'netmask', '%s',\s*"
-                          r"'broadcast', '%s',\s*'gateway', '%s',\s*\);" %
-                          (self.net.unknown[0].usable[3],
-                           self.net.unknown[0].netmask,
-                           self.net.unknown[0].broadcast,
-                           self.net.unknown[0].gateway),
+                          r'"eth1", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)\s*\);' %
+                          (self.net.unknown[0].broadcast,
+                           self.net.unknown[0].gateway,
+                           self.net.unknown[0].usable[3],
+                           self.net.unknown[0].netmask),
                           command)
         self.matchoutput(out,
-            """include { 'archetype/base' };""",
+            """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { 'os/linux/4.0.1-x86_64/config' };""",
+            """include { "os/linux/4.0.1-x86_64/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/afs/q.ny.ms.com/client/config' };""",
+            """include { "service/afs/q.ny.ms.com/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/bootserver/np.test/client/config' };""",
+            """include { "service/bootserver/np.test/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/utdnsinstance/client/config' };""",
+            """include { "service/dns/utdnsinstance/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/ntp/pa.ny.na/client/config' };""",
+            """include { "service/ntp/pa.ny.na/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/compileserver/config' };""",
+            """include { "personality/compileserver/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'archetype/final' };""",
+            """include { "archetype/final" };""",
             command)
 
     def testreconfigurewindowsstatus(self):
@@ -315,31 +321,31 @@ class TestReconfigure(TestBrokerCommand):
             """'/hardware' = create('machine/americas/ut/ut9/ut9s03p37');""",
             command)
         self.matchoutput(out,
-            """include { 'archetype/base' };""",
+            """include { "archetype/base" };""",
             command)
         self.matchoutput(out,
-            """include { 'os/linux/4.0.1-x86_64/config' };""",
+            """include { "os/linux/4.0.1-x86_64/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/aqd/ny-prod/client/config' };""",
+            """include { "service/aqd/ny-prod/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/ntp/pa.ny.na/client/config' };""",
+            """include { "service/ntp/pa.ny.na/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/bootserver/np.test/client/config' };""",
+            """include { "service/bootserver/np.test/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/afs/q.ny.ms.com/client/config' };""",
+            """include { "service/afs/q.ny.ms.com/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'service/dns/utdnsinstance/client/config' };""",
+            """include { "service/dns/utdnsinstance/client/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'personality/inventory/config' };""",
+            """include { "personality/inventory/config" };""",
             command)
         self.matchoutput(out,
-            """include { 'archetype/final' };""",
+            """include { "archetype/final" };""",
             command)
 
     def testreconfiguredebug(self):
