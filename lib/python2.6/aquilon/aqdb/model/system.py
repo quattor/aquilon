@@ -32,6 +32,7 @@ from datetime import datetime
 from sqlalchemy import (Table, Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.model import Base, DnsDomain, Network
@@ -188,6 +189,12 @@ class DynamicStub(FutureARecord):
 
 
 DynamicStub.__table__.primary_key.name = 'dynamic_stub_pk'
+
+Network.dynamic_addresses = relation(DynamicStub, lazy=True, uselist=True,
+                                     primaryjoin=and_(DynamicStub.ip >= Network.ip,
+                                                      DynamicStub.ip <= Network.broadcast),
+                                     foreign_keys=[DynamicStub.ip],
+                                     viewonly=True)
 
 
 class ReservedName(System):
