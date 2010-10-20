@@ -93,13 +93,13 @@ class CommandSearchHost(BrokerCommand):
 
         q = session.query(Host)
         if use_addrq:
-            q = q.join(Machine, HardwareEntity, Interface)
+            q = q.join(HardwareEntity, Interface)
             q = q.filter(Interface.id.in_(addrq.subquery()))
             q = q.reset_joinpoint()
 
         dblocation = get_location(session, **arguments)
         if dblocation:
-            q = q.join(Machine, HardwareEntity)
+            q = q.join(HardwareEntity)
             if exact_location:
                 q = q.filter_by(location=dblocation)
             else:
@@ -108,7 +108,7 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if model or vendor or machine_type:
-            q = q.join(Machine, HardwareEntity)
+            q = q.join(HardwareEntity)
             subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                             machine_type=machine_type,
                                             compel=True)
@@ -116,13 +116,13 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if serial:
-            q = q.join(Machine, HardwareEntity)
+            q = q.join(HardwareEntity)
             q = q.filter_by(serial_no=serial)
             q = q.reset_joinpoint()
 
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
-            q = q.filter_by(machine=dbmachine)
+            q = q.filter_by(hardware_entity=dbmachine)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
@@ -193,7 +193,7 @@ class CommandSearchHost(BrokerCommand):
         if guest_on_cluster:
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
-            q = q.join(['machine', '_cluster'])
+            q = q.join([HardwareEntity, Machine, '_cluster'])
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if guest_on_share:
@@ -203,7 +203,7 @@ class CommandSearchHost(BrokerCommand):
                                                  service=nas_disk_share,
                                                  compel=True)
             NasAlias = aliased(NasDisk)
-            q = q.join(['machine', 'disks', (NasAlias, NasAlias.id==Disk.id)])
+            q = q.join([HardwareEntity, Machine, 'disks', (NasAlias, NasAlias.id==Disk.id)])
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if fullinfo:

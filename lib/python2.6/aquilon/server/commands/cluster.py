@@ -44,11 +44,11 @@ class CommandCluster(BrokerCommand):
     def render(self, session, logger, hostname, cluster, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        if dbhost.machine.location != dbcluster.location_constraint and \
+        if dbhost.hardware_entity.location != dbcluster.location_constraint and \
            dbcluster.location_constraint not in \
-           dbhost.machine.location.parents:
+           dbhost.hardware_entity.location.parents:
             raise ArgumentError("Host location {0} is not within cluster "
-                                "location {1}.".format(dbhost.machine.location,
+                                "location {1}.".format(dbhost.hardware_entity.location,
                                                        dbcluster.location_constraint))
         if dbhost.personality != dbcluster.personality:
             logger.client_info("Updating {0:l} to match cluster "

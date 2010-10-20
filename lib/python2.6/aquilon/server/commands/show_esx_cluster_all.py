@@ -41,7 +41,7 @@ class CommandShowESXClusterAll(BrokerCommand):
         q = session.query(EsxCluster)
         if cluster:
             q = q.filter_by(name=cluster)
-        q = q.options(joinedload_all('_hosts.host.machine'))
+        q = q.options(joinedload_all('_hosts.host.hardware_entity'))
         q = q.options(joinedload_all('_machines.machine'))
         q = q.options(joinedload_all('_metacluster.metacluster'))
         q = q.order_by(EsxCluster.name)

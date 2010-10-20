@@ -45,7 +45,7 @@ class HostFormatter(ObjectFormatter):
         return(shlf.format_proto([host], skeleton))
 
     def format_raw(self, host, indent=""):
-        return self.redirect_raw(host.machine, indent)
+        return self.redirect_raw(host.hardware_entity, indent)
 
 ObjectFormatter.handlers[Host] = HostFormatter()
 
@@ -98,6 +98,6 @@ class HostMachineList(list):
 
 class HostMachineListFormatter(ListFormatter):
     def csv_fields(self, host):
-        return (host.fqdn, host.machine.label)
+        return (host.fqdn, host.hardware_entity.label)
 
 ObjectFormatter.handlers[HostMachineList] = HostMachineListFormatter()

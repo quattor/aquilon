@@ -67,10 +67,10 @@ class CommandUpdateESXCluster(BrokerCommand):
             if not dblocation.campus:
                 errors.append("{0} is not within a campus.".format(dblocation))
             for host in dbcluster.hosts:
-                if host.machine.location != dblocation and \
-                   dblocation not in host.machine.location.parents:
+                if host.hardware_entity.location != dblocation and \
+                   dblocation not in host.hardware_entity.location.parents:
                     errors.append("{0} has location {1}.".format(host,
-                                                                 host.machine.location))
+                                                                 host.hardware_entity.location))
             if errors:
                 raise ArgumentError("Cannot set {0} location constraint to "
                                     "{1}:\n{2}".format(dbcluster, dblocation,
