@@ -91,7 +91,6 @@ class PrimaryNameAssociation(Base):
                                cascade=False,
                                backref=backref('_primary_name_asc',
                                                uselist=False,
-                                               innerjoin=True,
                                                cascade='all, delete-orphan'))
 
     # Cascading:
@@ -104,7 +103,6 @@ class PrimaryNameAssociation(Base):
                           cascade='all',
                           backref=backref('_primary_name_asc',
                                           uselist=False,
-                                          innerjoin=True,
                                           cascade='all, delete-orphan'))
 
     def __repr__(self):
