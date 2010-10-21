@@ -92,6 +92,8 @@ class Network(Base):
 
     location = relation(Location, backref='networks')
 
+    broadcast = Column(IPV4, nullable=False)
+
     def __init__(self, **kw):
         args = kw.copy()
         if "network" not in kw:
@@ -101,6 +103,7 @@ class Network(Base):
             raise TypeError("Invalid type for network: %s" % repr(net))
         args["ip"] = net.network
         args["cidr"] = net.prefixlen
+        args["broadcast"] = net.broadcast
         super(Base, self).__init__(**args)
 
     @property
@@ -154,10 +157,6 @@ class Network(Base):
     @property
     def netmask(self):
         return self.network.netmask
-
-    @property
-    def broadcast(self):
-        return self.network.broadcast
 
     @property
     def available_ip_count(self):

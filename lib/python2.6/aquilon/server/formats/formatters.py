@@ -301,18 +301,18 @@ class ObjectFormatter(object):
             raise InternalError("add_host_msg was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
-        host_msg.hostname = str(host.machine.primary_name.name)
+        host_msg.hostname = str(host.hardware_entity.primary_name.name)
         host_msg.fqdn = host.fqdn
-        host_msg.dns_domain = str(host.machine.primary_name.dns_domain.name)
-        if host.machine.primary_ip:
-            host_msg.ip = str(host.machine.primary_ip)
-        for iface in host.machine.interfaces:
+        host_msg.dns_domain = str(host.hardware_entity.primary_name.dns_domain.name)
+        if host.hardware_entity.primary_ip:
+            host_msg.ip = str(host.hardware_entity.primary_ip)
+        for iface in host.hardware_entity.interfaces:
             if iface.interface_type != 'public' or not iface.bootable:
                 continue
             host_msg.mac = str(iface.mac)
 
         self.add_host_data(host_msg, host)
-        self.add_hardware_data(host_msg, host.machine)
+        self.add_hardware_data(host_msg, host.hardware_entity)
 
     def add_dns_domain_msg(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)

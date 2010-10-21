@@ -453,7 +453,7 @@ class HostChooser(Chooser):
                                 "hosts, got %r (%s)" % (dbobj, type(dbobj)))
         self.dbhost = dbobj
         Chooser.__init__(self, dbobj, *args, **kwargs)
-        self.location = self.dbhost.machine.location
+        self.location = self.dbhost.hardware_entity.location
         self.archetype = self.dbhost.archetype
         self.personality = self.dbhost.personality
         self.required_services = set()

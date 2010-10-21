@@ -106,8 +106,8 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.filter_by(switch=dbcluster.switch)
                 q = q.reset_joinpoint()
             else:
-                net_ids = [h.machine.primary_name.network.id for h in
-                           dbcluster.hosts if h.machine.primary_name.network]
+                net_ids = [h.hardware_entity.primary_name.network.id for h in
+                           dbcluster.hosts if h.hardware_entity.primary_name.network]
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
             vlan = VlanInfo.get_vlan_id(session, pg, compel=ArgumentError)

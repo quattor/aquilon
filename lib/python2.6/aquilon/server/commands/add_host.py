@@ -129,7 +129,7 @@ class CommandAddHost(BrokerCommand):
         ip = generate_ip(session, dbinterface, **arguments)
         dbdns_rec = parse_primary_name(session, hostname, ip)
 
-        dbhost = Host(machine=dbmachine, branch=dbbranch,
+        dbhost = Host(hardware_entity=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
