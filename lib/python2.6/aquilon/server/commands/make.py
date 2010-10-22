@@ -50,7 +50,7 @@ class CommandMake(BrokerCommand):
 
         # Currently, for the Host to be created it *must* be associated with
         # a Machine already.  If that ever changes, need to check here and
-        # bail if dbhost.hardware_entity does not exist.
+        # bail if dbhost.machine does not exist.
 
         # Need to get all the BuildItem/Service instance objects
         if personality:

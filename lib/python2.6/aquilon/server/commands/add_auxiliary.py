@@ -53,10 +53,10 @@ class CommandAddAuxiliary(BrokerCommand):
             dbmachine = Machine.get_unique(session, machine, compel=True)
         if hostname:
             dbhost = hostname_to_host(session, hostname)
-            if machine and dbhost.hardware_entity != dbmachine:
+            if machine and dbhost.machine != dbmachine:
                 raise ArgumentError("Use either --hostname or --machine to "
                                     "uniquely identify a system.")
-            dbmachine = dbhost.hardware_entity
+            dbmachine = dbhost.machine
 
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 

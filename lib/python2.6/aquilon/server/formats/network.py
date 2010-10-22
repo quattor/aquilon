@@ -84,7 +84,13 @@ class NetworkFormatter(ObjectFormatter):
         if network.comments:
             details.append(indent + "  Comments: %s" % network.comments)
 
-        ranges = summarize_ranges(network.dynamic_addresses)
+        # Look for dynamic DHCP ranges
+        session = object_session(network)
+        q = session.query(DynamicStub.ip)
+        q = q.filter(DynamicStub.ip > network.network.ip)
+        q = q.filter(DynamicStub.ip < network.broadcast)
+        q = q.order_by(DynamicStub.ip)
+        ranges = summarize_ranges(q)
         if ranges:
             details.append(indent + "  Dynamic Ranges: %s" % ", ".join(ranges))
 
@@ -208,12 +214,29 @@ class SimpleNetworkListFormatter(ListFormatter):
         return "\n".join(details)
 
     def format_proto(self, nlist, skeleton=None):
+        if nlist:
+            session = object_session(nlist[0])
+            addrq = session.query(AddressAssignment)
+            addrq = addrq.filter(AddressAssignment.ip > bindparam('ip'))
+            addrq = addrq.filter(AddressAssignment.ip < bindparam('broadcast'))
+            addrq = addrq.options(joinedload_all('dns_records.dns_domain'))
+            addrq = addrq.join(VlanInterface, Interface)
+            addrq = addrq.options(contains_eager('vlan'))
+            addrq = addrq.options(contains_eager('vlan.interface'))
+            addrq = addrq.options(subqueryload_all('vlan.interface.hardware_entity.'
+                                                   'interfaces'))
+
+            dynq = session.query(DynamicStub)
+            dynq = dynq.filter(DynamicStub.ip > bindparam('ip'))
+            dynq = dynq.filter(DynamicStub.ip < bindparam('broadcast'))
+            dynq = dynq.options(joinedload_all('dns_domain'))
+
         netlist_msg = self.loaded_protocols[self.protocol].NetworkList()
         for n in nlist:
-            self.add_net_msg(netlist_msg.networks.add(), n)
+            self.add_net_msg(netlist_msg.networks.add(), n, addrq, dynq)
         return netlist_msg.SerializeToString()
 
-    def add_net_msg(self, net_msg, net):
+    def add_net_msg(self, net_msg, net, addrq, dynq):
         net_msg.name = str(net.name)
         net_msg.id = net.id
         net_msg.ip = str(net.ip)
@@ -229,7 +252,8 @@ class SimpleNetworkListFormatter(ListFormatter):
         net_msg.discovered = net.is_discovered
 
         # Add interfaces that have addresses in this network
-        for addr in net.assignments:
+        addrs = addrq.params(ip=net.network.ip, broadcast=net.broadcast).all()
+        for addr in addrs:
             iface = addr.vlan.interface
             hwent = iface.hardware_entity
 
@@ -271,7 +295,8 @@ class SimpleNetworkListFormatter(ListFormatter):
                     int_msg.mac = str(iface.mac)
 
         # Add dynamic DHCP records
-        for dynhost in net.dynamic_addresses:
+        dynhosts = dynq.params(ip=net.network.ip, broadcast=net.broadcast).all()
+        for dynhost in dynhosts:
             host_msg = net_msg.hosts.add()
             # aqdhcpd uses the type
             host_msg.type = 'dynamic_stub'

@@ -87,10 +87,10 @@ class PrimaryNameAssociation(Base):
     hardware_entity = relation(HardwareEntity,
                                lazy=False,
                                uselist=False,
+                               innerjoin=True,
                                cascade=False,
                                backref=backref('_primary_name_asc',
                                                uselist=False,
-                                               lazy=False,
                                                cascade='all, delete-orphan'))
 
     # Cascading:
@@ -99,6 +99,7 @@ class PrimaryNameAssociation(Base):
     dns_record = relation(System,
                           lazy=False,
                           uselist=False,
+                          innerjoin=True,
                           cascade='all',
                           backref=backref('_primary_name_asc',
                                           uselist=False,

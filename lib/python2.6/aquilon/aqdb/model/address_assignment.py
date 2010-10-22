@@ -36,11 +36,10 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         UniqueConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session
-from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import IPV4, AqStr
-from aquilon.aqdb.model import (Base, Interface, VlanInterface, FutureARecord,
-                                Network)
+from aquilon.aqdb.model import Base, Interface, VlanInterface, FutureARecord
+from aquilon.aqdb.model.network import get_net_id_from_ip
 
 _TN = 'address_assignment'
 _ABV = 'addr_assign'
@@ -103,12 +102,6 @@ class AddressAssignment(Base):
 
     fqdns = association_proxy('dns_records', 'fqdn')
 
-    network = relation(Network, lazy=True, uselist=False,
-                       primaryjoin=and_(ip >= Network.ip,
-                                        ip <= Network.broadcast),
-                       foreign_keys=[Network.ip, Network.broadcast],
-                       viewonly=True)
-
     @property
     def logical_name(self):
         """
@@ -143,6 +136,10 @@ class AddressAssignment(Base):
         if self.label:
             name += ":%d" % self.label
         return name
+
+    @property
+    def network(self):
+        return get_net_id_from_ip(object_session(self), self.ip)
 
     @property
     def label(self):
@@ -182,9 +179,3 @@ address.append_constraint(
 # comments after VlanInterface in vlan.py.
 VlanInterface.addresses = association_proxy('assignments', 'ip',
                                             creator=_address_creator)
-
-Network.assignments = relation(AddressAssignment, lazy=True, uselist=True,
-                               primaryjoin=and_(AddressAssignment.ip >= Network.ip,
-                                                AddressAssignment.ip <= Network.broadcast),
-                               foreign_keys=[AddressAssignment.ip],
-                               viewonly=True)

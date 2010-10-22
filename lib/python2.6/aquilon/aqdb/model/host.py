@@ -34,7 +34,7 @@ from sqlalchemy import (Integer, DateTime, String, Column, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import (Base, Branch, HardwareEntity, HostLifecycle,
+from aquilon.aqdb.model import (Base, Branch, Machine, HostLifecycle,
                                 Personality, OperatingSystem, UserPrincipal)
 
 
@@ -59,9 +59,9 @@ class Host(Base):
     __tablename__ = 'host'
     _instance_label = 'fqdn'
 
-    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                                    name='host_hw_ent_fk'),
-                                primary_key=True)
+    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+                                            name='host_machine_fk'),
+                        primary_key=True)
 
     branch_id = Column(Integer, ForeignKey('branch.id',
                                            name='host_branch_fk'),
@@ -91,9 +91,9 @@ class Host(Base):
     # Deletion of a machine deletes the host. When this is 'machine profile'
     # this should no longer be the case as it will be many to one as opposed to
     # one to one as it stands now. Could do innerjoin now...
-    hardware_entity = relation(HardwareEntity, lazy=False, uselist=False,
-                               backref=backref('host', uselist=False, lazy=False,
-                                               cascade='all'))
+    machine = relation(Machine, lazy=False, uselist=False,
+                       backref=backref('host', uselist=False, lazy=False,
+                                       cascade='all'))
 
     branch = relation(Branch, backref='hosts')
     sandbox_author = relation(UserPrincipal, backref='sandboxed_hosts')
@@ -111,7 +111,7 @@ class Host(Base):
 
     @property
     def fqdn(self):
-        return self.hardware_entity.fqdn
+        return self.machine.fqdn
 
     @property
     def archetype(self):
@@ -129,4 +129,4 @@ class Host(Base):
 host = Host.__table__  # pylint: disable-msg=C0103, E1101
 host.primary_key.name = 'host_pk'
 host.append_constraint(
-    UniqueConstraint('hardware_entity_id', 'branch_id', name='host_hw_ent_branch_uk'))
+    UniqueConstraint('machine_id', 'branch_id', name='host_machine_branch_uk'))
