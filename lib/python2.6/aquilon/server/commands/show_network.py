@@ -28,8 +28,7 @@
 # TERMS THAT MAY APPLY.
 """Contains the logic for `aq show network`."""
 
-from sqlalchemy.orm import (joinedload, subqueryload_all, subqueryload,
-                            lazyload, contains_eager)
+from sqlalchemy.orm import joinedload
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Interface, Network
@@ -43,59 +42,28 @@ class CommandShowNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network, ip, all, discovered, discoverable,
-               type=None, hosts=False, **arguments):
+    def render(self, session, network, ip, all, discovered, discoverable, type=False, hosts=False, **arguments):
         dbnetwork = network and get_network_byname(session, network) or None
         dbnetwork = ip and get_network_byip(session, ip) or dbnetwork
+        q = session.query(Network)
+        q = q.options(joinedload('location'))
         if dbnetwork:
             if hosts:
                 return NetworkHostList([dbnetwork])
             else:
                 return dbnetwork
-
-        q = session.query(Network)
-        if network:
-            q = q.filter_by(name=network)
-        if ip:
-            q = q.filter_by(ip=ip)
         if type:
-            q = q.filter_by(network_type=type)
+            q = q.filter_by(network_type = type)
         if discoverable is not None:
-            q = q.filter_by(is_discoverable=discoverable)
+            q = q.filter_by(is_discoverable = discoverable)
         if discovered is not None:
-            q = q.filter_by(is_discovered=discovered)
+            q = q.filter_by(is_discovered = discovered)
         dblocation = get_location(session, **arguments)
         if dblocation:
             childids = dblocation.offspring_ids()
             q = q.filter(Network.location_id.in_(childids))
-        q = q.options(subqueryload('dynamic_addresses'))
-        q = q.options(joinedload('dynamic_addresses.dns_domain'))
-
-        # XXX These are only neccessary if either --hosts or --format=proto was
-        # specified; but how to test for --format=proto here?
-        q = q.options(subqueryload_all('assignments.dns_records'))
-        q = q.options(joinedload('assignments.dns_records.dns_domain'))
-        q = q.options(joinedload('assignments.vlan'))
-        q = q.options(joinedload('assignments.vlan.interface'))
-        q = q.options(joinedload('assignments.vlan.interface.hardware_entity'))
-        q = q.options(joinedload('assignments.vlan.interface.hardware_entity.'
-                                 '_primary_name_asc'))
-        q = q.options(joinedload('assignments.vlan.interface.hardware_entity.'
-                                 '_primary_name_asc.dns_record'))
-        q = q.options(subqueryload('assignments.vlan.interface.hardware_entity.'
-                                   'interfaces'))
-        q = q.options(lazyload('assignments.vlan.interface.hardware_entity.'
-                               'interfaces.hardware_entity'))
-        q = q.options(joinedload('assignments.vlan.interface.hardware_entity.'
-                                 'host.personality'))
-        q = q.options(joinedload('assignments.vlan.interface.hardware_entity.'
-                                 'host.personality.archetype'))
-
         q = q.order_by(Network.ip)
-
-        nets = q.all()
-
         if hosts:
-            return NetworkHostList(nets)
+            return NetworkHostList(q.all())
         else:
-            return SimpleNetworkList(nets)
+            return SimpleNetworkList(q.all())

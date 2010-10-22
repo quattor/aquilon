@@ -91,7 +91,6 @@ class PrimaryNameAssociation(Base):
                                cascade=False,
                                backref=backref('_primary_name_asc',
                                                uselist=False,
-                                               lazy=False,
                                                cascade='all, delete-orphan'))
 
     # Cascading:
