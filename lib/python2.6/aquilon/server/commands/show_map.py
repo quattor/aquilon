@@ -29,8 +29,6 @@
 """Contains the logic for `aq show map`."""
 
 
-from sqlalchemy.orm import joinedload, contains_eager
-
 from aquilon.exceptions_ import UnimplementedError, NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, Service, ServiceMap,
@@ -73,31 +71,16 @@ class CommandShowMap(BrokerCommand):
         else:
             queries.append(session.query(ServiceMap))
             queries.append(session.query(PersonalityServiceMap))
-
-        for i in range(len(queries)):
-            queries[i] = queries[i].join('service_instance')
-            queries[i] = queries[i].options(contains_eager('service_instance'))
-            if dbservice:
+        if dbservice:
+            for i in range(len(queries)):
+                queries[i] = queries[i].join('service_instance')
                 queries[i] = queries[i].filter_by(service=dbservice)
-            if instance:
+                queries[i] = queries[i].reset_joinpoint()
+        if instance:
+            for i in range(len(queries)):
+                queries[i] = queries[i].join('service_instance')
                 queries[i] = queries[i].filter_by(name=instance)
-            queries[i] = queries[i].reset_joinpoint()
-
-            # Note: we are not loading service_instance.servers eagerly in order
-            # not to slow down the raw output. The hints below only affect the
-            # protobuf output
-            queries[i] = queries[i].options(joinedload('service_instance.servers.'
-                                                       'host'))
-            queries[i] = queries[i].options(joinedload('service_instance.servers.'
-                                                       'host.personality'))
-            queries[i] = queries[i].options(joinedload('service_instance.servers.'
-                                                       'host.status'))
-            queries[i] = queries[i].options(joinedload('service_instance.servers.'
-                                                       'host.branch'))
-            queries[i] = queries[i].options(joinedload('service_instance.servers.'
-                                                       'host.hardware_entity.location'))
-            queries[i] = queries[i].options(joinedload('service_instance.servers.'
-                                                       'host.hardware_entity.model'))
+                queries[i] = queries[i].reset_joinpoint()
         # Nothing fancy for now - just show any relevant explicit bindings.
         if dblocation:
             for i in range(len(queries)):
