@@ -69,16 +69,15 @@ class CommandShowNetwork(BrokerCommand):
             childids = dblocation.offspring_ids()
             q = q.filter(Network.location_id.in_(childids))
         q = q.options(subqueryload('dynamic_addresses'))
-        q = q.options(joinedload('dynamic_addresses.dns_domain', innerjoin=True))
+        q = q.options(joinedload('dynamic_addresses.dns_domain'))
 
         # XXX These are only neccessary if either --hosts or --format=proto was
         # specified; but how to test for --format=proto here?
         q = q.options(subqueryload_all('assignments.dns_records'))
         q = q.options(joinedload('assignments.dns_records.dns_domain'))
-        q = q.options(joinedload('assignments.vlan', innerjoin=True))
-        q = q.options(joinedload('assignments.vlan.interface', innerjoin=True))
-        q = q.options(joinedload('assignments.vlan.interface.hardware_entity',
-                                 innerjoin=True))
+        q = q.options(joinedload('assignments.vlan'))
+        q = q.options(joinedload('assignments.vlan.interface'))
+        q = q.options(joinedload('assignments.vlan.interface.hardware_entity'))
         q = q.options(joinedload('assignments.vlan.interface.hardware_entity.'
                                  '_primary_name_asc'))
         q = q.options(joinedload('assignments.vlan.interface.hardware_entity.'
