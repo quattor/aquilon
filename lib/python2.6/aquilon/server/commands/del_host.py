@@ -76,7 +76,7 @@ class CommandDelHost(BrokerCommand):
                                     (hostname, deptext))
 
             archetype = dbhost.archetype.name
-            dbmachine = dbhost.hardware_entity
+            dbmachine = dbhost.machine
             ip = dbmachine.primary_ip
             fqdn = dbmachine.fqdn
 

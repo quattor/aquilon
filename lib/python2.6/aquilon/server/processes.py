@@ -404,7 +404,7 @@ class DSDBRunner(object):
     # Not generally useful, because we have already run session.delete()
     # on the dbhost object.
 #    def delete_host(self, dbhost):
-#        for interface in dbhost.hardware_entity.interfaces:
+#        for interface in dbhost.machine.interfaces:
 #            if not interface.boot:
 #                continue
 #            self.delete_host_details(interface.ip)

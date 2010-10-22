@@ -50,7 +50,7 @@ class CommandAddManager(BrokerCommand):
     def render(self, session, logger, hostname, manager, interface, mac,
                comments, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        dbmachine = dbhost.hardware_entity
+        dbmachine = dbhost.machine
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         if not manager:

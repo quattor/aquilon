@@ -329,7 +329,7 @@ class BuildItem(Base):
     #FIXME: remove id column. PK is machine/svc_inst
     id = Column(Integer, Sequence('build_item_id_seq'), primary_key=True)
 
-    host_id = Column('host_id', Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column('host_id', Integer, ForeignKey('host.machine_id',
                                                      ondelete='CASCADE',
                                                      name='build_item_host_fk'),
                      nullable=False)

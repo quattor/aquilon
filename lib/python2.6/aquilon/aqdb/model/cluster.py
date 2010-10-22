@@ -222,9 +222,9 @@ class EsxCluster(Cluster):
         location = None
         for host in self.hosts:
             if location:
-                location = location.merge(host.hardware_entity.location)
+                location = location.merge(host.machine.location)
             else:
-                location = host.hardware_entity.location
+                location = host.machine.location
         return location
 
     @property
@@ -263,7 +263,7 @@ class EsxCluster(Cluster):
         for host in self.hosts:
             # This is the list of variables we want to pass to the capacity
             # function
-            local_vars = {'memory': host.hardware_entity.memory}
+            local_vars = {'memory': host.machine.memory}
             if func:
                 rec = eval(func, global_vars, local_vars)
             else:
@@ -411,7 +411,7 @@ class HostClusterMember(Base):
                         #if the cluster is deleted, so is membership
                         primary_key=True)
 
-    host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column(Integer, ForeignKey('host.machine_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
                         #if the host is deleted, so is the membership

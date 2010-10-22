@@ -47,7 +47,7 @@ class CommandBindServer(BrokerCommand):
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
         for dbserver in dbinstance.servers:
-            if dbserver.host.hardware_entity_id == dbhost.hardware_entity_id:
+            if dbserver.host.machine_id == dbhost.machine_id:
                 # FIXME: This should just be a warning.  There is currently
                 # no way of returning output that would "do the right thing"
                 # on the client but still show status 200 (OK).

@@ -34,7 +34,7 @@ from sqlalchemy.orm import aliased
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.cluster import SimpleClusterList
 from aquilon.aqdb.model import (EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, HardwareEntity,
+                                Personality, Machine,
                                 Service, ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -155,12 +155,12 @@ class CommandSearchESXCluster(BrokerCommand):
                 q = q.filter(EsxCluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['vmhost_'])
         if dblocation:
-            q = q.join('_hosts', 'host', 'hardware_entity')
+            q = q.join('_hosts', 'host', 'machine')
             if location_args['vmhost_']['exact_location']:
                 q = q.filter_by(location=dblocation)
             else:
                 childids = dblocation.offspring_ids()
-                q = q.filter(HardwareEntity.location_id.in_(childids))
+                q = q.filter(Machine.location_id.in_(childids))
             q = q.reset_joinpoint()
 
         q = q.order_by(EsxCluster.name)

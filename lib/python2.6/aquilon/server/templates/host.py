@@ -118,7 +118,7 @@ class PlenaryToplevelHost(Plenary):
         interfaces = []
         default_gateway = None
         # FIXME: Enforce that one of the interfaces is marked boot?
-        for dbinterface in self.dbhost.hardware_entity.interfaces:
+        for dbinterface in self.dbhost.machine.interfaces:
             if dbinterface.interface_type != 'public':
                 continue
             for vlan in dbinterface.vlan_ids:
@@ -213,7 +213,7 @@ class PlenaryToplevelHost(Plenary):
         lines.append("variable LOADPATH = list('%s');" % arcdir)
         lines.append("")
         lines.append("include { 'pan/units' };")
-        pmachine = PlenaryMachineInfo(self.dbhost.hardware_entity)
+        pmachine = PlenaryMachineInfo(self.dbhost.machine)
         lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
 
         for ifdesc in interfaces:
@@ -259,5 +259,5 @@ class PlenaryNamespacedHost(PlenaryToplevelHost):
     def __init__(self, dbhost, logger=LOGGER):
         PlenaryToplevelHost.__init__(self, dbhost, logger=logger)
         self.name = dbhost.fqdn
-        self.plenary_core = dbhost.hardware_entity.primary_name.dns_domain.name
+        self.plenary_core = dbhost.machine.primary_name.dns_domain.name
         self.plenary_template = "%(plenary_core)s/%(name)s" % self.__dict__
