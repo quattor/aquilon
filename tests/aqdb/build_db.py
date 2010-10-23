@@ -40,13 +40,9 @@ import utils
 utils.load_classpath()
 
 import argparse
-import ms.modulecmd
 
 from aquilon.config import Config
 config = Config()
-
-if config.has_option("database", "module"):
-    ms.modulecmd.load(config.get("database", "module"))
 
 from aquilon.aqdb.model import *
 from aquilon.aqdb.db_factory import DbFactory
