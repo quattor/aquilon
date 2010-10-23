@@ -112,7 +112,8 @@ class DbFactory(object):
                 #we're kerberized
                 self.kerberized = True
                 self.engine = create_engine(self.dsn, **self.pool_options)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
