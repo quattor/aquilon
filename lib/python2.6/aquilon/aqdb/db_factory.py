@@ -103,8 +103,8 @@ class DbFactory(object):
             if self.schema != '':
                 passwds = self._get_password_list()
 
-                if isinstance(passwds, 'NoneType') or  len(passwds) < 1:
-                    msg = "No password found for %s." % self.dsn
+                if not passwds:
+                    msg = "No passwords found for %s." % self.dsn
                     print >> sys.stderr, msg
                     sys.exit(0)
                 self.login(passwds)
