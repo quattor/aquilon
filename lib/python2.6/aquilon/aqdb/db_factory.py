@@ -79,8 +79,6 @@ class DbFactory(object):
         self.dsn = config.get('database', 'dsn')
         assert self.dsn, 'No DSN in db_factory'
 
-        self.buf = StringIO()  #for mock engine output
-
         self.pool_options = {}
         self.pool_options["pool_size"] = config.getint(
             "database", "pool_size")
@@ -218,21 +216,6 @@ class DbFactory(object):
             if rows:
                 return rows[0][0]
         return
-
-    def buffer_output(self, s, p=""):
-        return self.buf.write(s + p)
-
-    def ddl(self, outfile=None):
-        #TODO: reflect out the non-null constraints from oracle dbs (how???)
-        mock_engine = create_engine(self.dsn, strategy='mock',
-                                    executor=self.buffer_output)
-        self.meta.reflect()
-        self.meta.create_all(mock_engine)
-        if outfile:
-            with open(outfile, 'w') as f:
-                f.write(self.buf.getvalue())
-        else:
-            print >> sys.stderr, self.buf.getvalue()
 
     def get_tables(self):
         """ return a list of table names from the current databases public

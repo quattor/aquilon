@@ -31,7 +31,7 @@
 
 import os
 import sys
-import unittest
+
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, "..", "..", "lib", "python2.6")
@@ -39,40 +39,11 @@ sys.path.insert(0, _LIBDIR)
 
 from aquilon.aqdb.db_factory import DbFactory
 
-class testDbFactory(unittest.TestCase):
+db = None
 
-    def setUp(self, *args, **kw):
-        self.db = DbFactory()
-        self.outfile='/tmp/mock.sql'
-
-        if os.path.isfile(self.outfile):
-            os.remove(self.outfile)
-
-    def get_db(self, *args, **kw):
-        return self.db
-
-    def tearDown(self, *args, **kw):
-        #os.system('/bin/cat %s'%(self.outfile))
-        os.remove(self.outfile)
-
-    def testMock(self, *args, **kw):
-        assert(not (os.path.isfile(self.outfile)))
-        self.db.ddl(self.outfile)
-        assert(os.path.isfile(self.outfile))
-
-    def runTest(self):
-        self.setUp()
-        self.testMock()
-        self.tearDown()
-
-def main(*args, **kw):
-    import depends
-    import nose
-
-    nose.runmodule()
-
-if __name__ == "__main__":
-    main(sys.argv)
+def test_init():
+    db = DbFactory()
+    assert db, 'No db factory created'
 
 #would test singleton functionality
 __sql = """
