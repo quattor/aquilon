@@ -281,6 +281,7 @@
          <option name="cluster" type="string">cluster name</option>
          <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
          <option name="guest_on_share" type="string">host is a virtual machine using this nas_disk_share</option>
+         <option name="member_cluster_share" type="string">host is a member of a cluster with machines using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>

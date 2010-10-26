@@ -54,7 +54,7 @@ class CommandSearchHost(BrokerCommand):
     def render(self, session, logger, hostname, machine, archetype,
                buildstatus, personality, osname, osversion, service, instance,
                model, machine_type, vendor, serial, cluster,
-               guest_on_cluster, guest_on_share,
+               guest_on_cluster, guest_on_share, member_cluster_share,
                domain, sandbox, branch,
                dns_domain, shortname, mac, ip, networkip,
                exact_location, fullinfo, **arguments):
@@ -204,6 +204,18 @@ class CommandSearchHost(BrokerCommand):
                                                  compel=True)
             NasAlias = aliased(NasDisk)
             q = q.join(['machine', 'disks', (NasAlias, NasAlias.id==Disk.id)])
+            q = q.filter_by(service_instance=dbshare)
+            q = q.reset_joinpoint()
+        if member_cluster_share:
+            nas_disk_share = Service.get_unique(session, name='nas_disk_share',
+                                                compel=True)
+            dbshare = ServiceInstance.get_unique(session,
+                                                 name=member_cluster_share,
+                                                 service=nas_disk_share,
+                                                 compel=True)
+            NasAlias = aliased(NasDisk)
+            q = q.join('_cluster', 'cluster', '_machines', 'machine',
+                       'disks', (NasAlias, NasAlias.id==Disk.id))
             q = q.filter_by(service_instance=dbshare)
             q = q.reset_joinpoint()
         if fullinfo:
