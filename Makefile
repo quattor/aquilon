@@ -93,6 +93,7 @@ $(COMMON)etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 install: remove_stale $(INSTALLFILES)
 	$(COMMON)bin/twistd --help >/dev/null
 	./build/gen_completion.py --outputdir="$(COMMON)etc" --templatedir="./etc/templates" --all
+	./build/graph_schema.py --outputdir="$(COMMON)docs"
 
 .PHONY: remove_stale
 remove_stale:
