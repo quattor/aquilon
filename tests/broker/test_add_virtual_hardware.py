@@ -53,6 +53,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "evm1,,ut,utvendor,utmedium,", command)
 
+    def test_006_searchmachinenorack(self):
+        # Ditto.
+        command = ["search_machine", "--machine=evm1", "--format=csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm1,,ut,utvendor,utmedium,", command)
+
     def test_010_failwithoutcluster(self):
         command = ["add_machine", "--machine=evm999", "--rack=ut3",
                    "--model=utmedium"]
