@@ -69,10 +69,12 @@ class CommandReconfigureList(BrokerCommand):
         # - starting simple.
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+            # TODO: Once OS is a first class object this block needs
+            # to check that either OS is also being reset or that the
+            # OS is valid for the new archetype.
+        else:
+            dbarchetype = None
         if personality:
-            if not archetype:
-                raise ArgumentError("Please specify --archetype for "
-                                    "personality %s." % personality)
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
@@ -86,6 +88,8 @@ class CommandReconfigureList(BrokerCommand):
             if not osname:
                 raise ArgumentError("Please specify --osname to use with "
                                     "OS version %s." % osversion)
+            # Linux model names are the same under aurora and aquilon, so
+            # allowing to omit --archetype would not be useful
             if not archetype:
                 raise ArgumentError("Please specify --archetype for OS "
                                     "%s, version %s." % (osname, osversion))

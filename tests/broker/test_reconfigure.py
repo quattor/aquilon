@@ -441,15 +441,13 @@ class TestReconfigure(TestBrokerCommand):
                          "linux, version 4.0.1-x86_64",
                          command)
 
-    def testhostlistnopersonalityarchetype(self):
+    def testhostlistpersonalitynoarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingarchetype", "".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--personality=generic"]
         out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please specify --archetype for personality generic",
-                         command)
+        self.matchoutput(out, "Personality generic is not unique.", command)
 
     def testemptyhostlist(self):
         hosts = ["#host\n", "#does\n", "\n", "   #not   \n", "#exist\n"]
