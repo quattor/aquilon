@@ -36,8 +36,12 @@ from aquilon.aqdb.model import OperatingSystem
 class OSFormatter(ObjectFormatter):
     """ Operating System formatter """
     def format_raw(self, os, indent=""):
-        return indent + "Template: %s/os/%s/%s/config.tpl" % (os.archetype.name,
-                                                              os.name,
-                                                              os.version)
+        details = []
+        details.append(indent + "{0:c}: {0.name}".format(os))
+        details.append(indent + "  Version: %s" % os.version)
+        details.append(indent + "  Archetype: %s" % os.archetype)
+        details.append(indent + "  Template: %s/os/%s/%s/config.tpl" %
+                       (os.archetype.name, os.name, os.version))
+        return "\n".join(details)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()
