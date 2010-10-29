@@ -33,7 +33,6 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, backref, object_session, aliased
-from sqlalchemy.sql.expression import asc
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -116,9 +115,9 @@ class ObservedVlan(Base):
                            default=datetime.now, nullable=False)
 
     switch = relation(Switch, backref=backref('%ss' % _TN, cascade='delete',
-                                              order_by=[asc('vlan_id')]))
+                                              order_by=[vlan_id]))
     network = relation(Network, backref=backref('%ss' % _TN, cascade='delete',
-                                                order_by=[asc('vlan_id')]))
+                                                order_by=[vlan_id]))
 
     @property
     def port_group(self):

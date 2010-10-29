@@ -30,7 +30,6 @@
 
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relation, backref
-from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Base, Machine, Chassis
 
@@ -58,7 +57,7 @@ class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
     # TODO: remove delete-orphan?
     chassis = relation(Chassis, uselist=False,
                        backref=backref('slots', cascade='delete, delete-orphan',
-                                       order_by=[asc('slot_number')]))
+                                       order_by=[slot_number]))
 
     machine = relation(Machine, uselist=False,
                        backref=backref('chassis_slot',

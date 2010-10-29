@@ -34,7 +34,6 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.sql import select, func
-from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Base, Machine, ServiceInstance
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -69,7 +68,7 @@ class Disk(Base):
     # template since the disks are stored in a hash but this helps with
     # the tests and with preventing spurious re-writes.
     machine = relation(Machine, backref=backref('disks', cascade='all',
-                                                order_by=asc('device_name')))
+                                                order_by=[device_name]))
 
     __mapper_args__ = {'polymorphic_on': disk_type}
 

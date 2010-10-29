@@ -34,7 +34,6 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relation, backref
-from sqlalchemy.sql.expression import asc
 
 from aquilon.aqdb.model import Base, Switch
 from aquilon.aqdb.column_types.aqmac import AqMac
@@ -64,7 +63,6 @@ class ObservedMac(Base):
 
     switch = relation(Switch, backref=backref('observed_macs',
                                               cascade='delete',
-                                              order_by=[asc('slot'),
-                                                        asc('port_number')]))
+                                              order_by=[slot, port_number]))
 
 ObservedMac.__table__.primary_key.name = '%s_pk' % _TN
