@@ -84,9 +84,33 @@ def populate(sess, *args, **kw):  # pragma: no cover
     assert len(sess.query(ClusterLifecycle).all()) == len(statuslist)
 
 
-'''
-The following classes are the actual lifecycle states for a cluster
-'''
+"""
+The following classes are the actual lifecycle states for a cluster.
+
+WARNING: The classes Decommissioned, Ready, Rebuild and Build have the same name
+as 4 classes in hostlifecycle and have odd behaviors when imported into the same
+namespace. It would be ill advised to do use these clashing clasess in the
+same module.
+
+Perhaps it's best to illustrate by example:
+
+from aquilon.aqdb.model.clusterlifecycle import Ready
+
+session.query(Ready).first()
+    Out[31]: ready
+type(r)
+    Out[32]: <class 'aquilon.aqdb.model.clusterlifecycle.Ready'>
+
+from aquilon.aqdb.model.hostlifecycle import Ready
+r=s.query(Ready).first()
+type(r)
+    Out[35]: <class 'aquilon.aqdb.model.hostlifecycle.Ready'>
+
+from aquilon.aqdb.model.clusterlifecycle import Ready
+r=s.query(Ready).first()
+type(r)
+    Out[55]: <class 'aquilon.aqdb.model.clusterlifecycle.Ready'>
+"""
 
 class Decommissioned(ClusterLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'decommissioned'}
