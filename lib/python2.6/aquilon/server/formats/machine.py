@@ -53,7 +53,7 @@ class MachineInterfacePairFormatter(ObjectFormatter):
         details = [machine.label, rack, building, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
         if addr:
-            details.extend([addr.logical_name, addr.vlan.interface.mac, addr.ip])
+            details.extend([addr.logical_name, addr.interface.mac, addr.ip])
         else:
             details.extend([None, None, None])
         return details

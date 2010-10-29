@@ -35,7 +35,7 @@ from aquilon.server.dbwrappers.location import get_location
 from aquilon.server.dbwrappers.interface import check_ip_restrictions
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
-                                VlanInterface, ReservedName, FutureARecord)
+                                ReservedName, FutureARecord)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -92,7 +92,7 @@ class CommandUpdateSwitch(BrokerCommand):
 
             q = session.query(AddressAssignment)
             q = q.filter_by(ip=old_ip)
-            q = q.join(VlanInterface, Interface)
+            q = q.join(Interface)
             q = q.filter_by(hardware_entity=dbswitch)
             addr = q.first()
             if addr:
@@ -100,7 +100,7 @@ class CommandUpdateSwitch(BrokerCommand):
             else:
                 # This should only happen if the switch did not have an IP
                 # address before
-                dbswitch.interfaces[0].vlans[0].addresses.append(ip)
+                dbswitch.interfaces[0].addresses.append(ip)
 
         if comments is not None:
             dbswitch.comments = comments

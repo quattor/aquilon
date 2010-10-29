@@ -92,7 +92,7 @@ def parse_primary_name(session, fqdn, ip):
         addr = session.query(AddressAssignment).filter_by(ip=ip).first()
         if addr:
             raise ArgumentError("IP address {0} is already in use by "
-                                "{1:l}.".format(ip, addr.vlan.interface))
+                                "{1:l}.".format(ip, addr.interface))
 
     if dbdns_rec and isinstance(dbdns_rec, ReservedName) and ip:
         session.delete(dbdns_rec)

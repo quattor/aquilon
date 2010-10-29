@@ -38,7 +38,7 @@ from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import (Network, AddressAssignment, System,
                                 FutureARecord, DynamicStub,
                                 PrimaryNameAssociation, DnsDomain,
-                                VlanInterface, Interface, HardwareEntity)
+                                Interface, HardwareEntity)
 
 def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """
@@ -139,12 +139,11 @@ class NetworkHostListFormatter(ListFormatter):
                                          alias=addr_domain))
 
             q = q.reset_joinpoint()
-            q = q.join(VlanInterface, Interface, HardwareEntity)
+            q = q.join(Interface, HardwareEntity)
             q = q.outerjoin(PrimaryNameAssociation)
-            q = q.options(contains_eager('vlan'))
-            q = q.options(contains_eager('vlan.interface'))
-            q = q.options(contains_eager('vlan.interface.hardware_entity'))
-            q = q.options(contains_eager("vlan.interface.hardware_entity."
+            q = q.options(contains_eager('interface'))
+            q = q.options(contains_eager('interface.hardware_entity'))
+            q = q.options(contains_eager("interface.hardware_entity."
                                          "_primary_name_asc"))
 
             # Make sure we pick up the right System/DnsRecord instance
@@ -152,10 +151,10 @@ class NetworkHostListFormatter(ListFormatter):
                              pna_dnsrec.id))
             q = q.outerjoin((pna_domain, pna_dnsrec.dns_domain_id ==
                              pna_domain.id))
-            q = q.options(contains_eager("vlan.interface.hardware_entity."
+            q = q.options(contains_eager("interface.hardware_entity."
                                          "_primary_name_asc.dns_record",
                                          alias=pna_dnsrec))
-            q = q.options(contains_eager("vlan.interface.hardware_entity."
+            q = q.options(contains_eager("interface.hardware_entity."
                                          "_primary_name_asc.dns_record.dns_domain",
                                         alias=pna_domain))
 
@@ -169,7 +168,7 @@ class NetworkHostListFormatter(ListFormatter):
             addrs = q.params(ip=network.network.ip,
                              broadcast=network.broadcast).all()
             for addr in addrs:
-                iface = addr.vlan.interface
+                iface = addr.interface
                 hw_ent = iface.hardware_entity
                 if addr.fqdns:
                     names = ", ".join(addr.fqdns)
@@ -220,10 +219,9 @@ class SimpleNetworkListFormatter(ListFormatter):
             addrq = addrq.filter(AddressAssignment.ip > bindparam('ip'))
             addrq = addrq.filter(AddressAssignment.ip < bindparam('broadcast'))
             addrq = addrq.options(joinedload_all('dns_records.dns_domain'))
-            addrq = addrq.join(VlanInterface, Interface)
-            addrq = addrq.options(contains_eager('vlan'))
-            addrq = addrq.options(contains_eager('vlan.interface'))
-            addrq = addrq.options(subqueryload_all('vlan.interface.hardware_entity.'
+            addrq = addrq.join(Interface)
+            addrq = addrq.options(contains_eager('interface'))
+            addrq = addrq.options(subqueryload_all('interface.hardware_entity.'
                                                    'interfaces'))
 
             dynq = session.query(DynamicStub)
@@ -254,7 +252,7 @@ class SimpleNetworkListFormatter(ListFormatter):
         # Add interfaces that have addresses in this network
         addrs = addrq.params(ip=net.network.ip, broadcast=net.broadcast).all()
         for addr in addrs:
-            iface = addr.vlan.interface
+            iface = addr.interface
             hwent = iface.hardware_entity
 
             if not addr.dns_records:

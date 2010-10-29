@@ -37,8 +37,7 @@ from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
-                                System, DnsDomain, Interface, VlanInterface,
-                                AddressAssignment)
+                                System, DnsDomain, Interface, AddressAssignment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
@@ -77,7 +76,7 @@ class CommandSearchHost(BrokerCommand):
         if mac:
             addrq = addrq.filter(Interface.mac == mac)
             use_addrq = True
-        addrq = addrq.join(VlanInterface, AddressAssignment)
+        addrq = addrq.join(AddressAssignment)
         if ip:
             addrq = addrq.filter_by(ip=ip)
             use_addrq = True

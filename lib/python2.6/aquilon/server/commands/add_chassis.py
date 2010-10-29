@@ -72,7 +72,7 @@ class CommandAddChassis(BrokerCommand):
                                               interface_type="oa",
                                               comments=ifcomments)
         if ip:
-            dbinterface.vlans[0].addresses.append(ip)
+            dbinterface.addresses.append(ip)
 
         session.flush()
 

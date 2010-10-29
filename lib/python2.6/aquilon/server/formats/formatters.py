@@ -272,10 +272,7 @@ class ObjectFormatter(object):
                 if iface.mac:
                     int_msg.mac = str(iface.mac)
                 int_msg.ip = str(addr.ip)
-                if addr.vlan == 0:
-                    int_msg.bootable = iface.bootable
-                else:
-                    int_msg.bootable = False
+                int_msg.bootable = iface.bootable
             # Add entries for interfaces that do not have any addresses
             if not has_addrs:
                 int_msg = host_msg.machine.interfaces.add()

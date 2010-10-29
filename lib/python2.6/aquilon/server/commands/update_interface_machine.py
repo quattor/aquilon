@@ -70,8 +70,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             # Hack to set an intial interface for an aurora host...
             dbhost = dbhw_ent.host
             if dbhost.archetype.name == 'aurora' and \
-               dbhw_ent.primary_ip and not dbinterface.vlans[0].addresses:
-                dbinterface.vlans[0].addresses.append(dbhw_ent.primary_ip)
+               dbhw_ent.primary_ip and not dbinterface.addresses:
+                dbinterface.addresses.append(dbhw_ent.primary_ip)
 
         # We may need extra IP verification (or an autoip option)...
         # This may also throw spurious errors if attempting to set the
@@ -84,7 +84,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 dbinterface.hardware_entity)
 
         if ip:
-            if len(dbinterface.vlans[0].addresses) > 1:
+            if len(dbinterface.addresses) > 1:
                 raise ArgumentError("{0} has multiple addresses, "
                                     "update_interface can't handle "
                                     "that.".format(dbinterface))
@@ -92,8 +92,8 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbnetwork = get_net_id_from_ip(session, ip)
             check_ip_restrictions(dbnetwork, ip)
 
-            if dbinterface.vlans[0].assignments:
-                assignment = dbinterface.vlans[0].assignments[0]
+            if dbinterface.assignments:
+                assignment = dbinterface.assignments[0]
                 if assignment.dns_records:
                     assignment.dns_records[0].network = dbnetwork
                     assignment.dns_records[0].ip = ip
@@ -101,7 +101,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     session.expire(assignment, ['dns_records'])
                 assignment.ip = ip
             else:
-                dbinterface.vlans[0].addresses.append(ip)
+                dbinterface.addresses.append(ip)
 
             # Fix up the primary name if needed
             if dbinterface.bootable and \

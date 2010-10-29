@@ -200,10 +200,10 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            if dbinterface.vlans[0].assignments:
+            if dbinterface.assignments:
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                         "%s is already tied to %s." % \
-                        (host, mac, dbinterface.vlans[0].assignments[0].fqdns[0])
+                        (host, mac, dbinterface.assignments[0].fqdns[0])
                 failed.append(msg)
                 logger.info(msg)
                 continue

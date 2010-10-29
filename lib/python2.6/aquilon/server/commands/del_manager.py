@@ -54,7 +54,7 @@ class CommandDelManager(BrokerCommand):
             if not dbmanager.assignments or len(dbmanager.assignments) > 1:
                 is_mgr = False
             assignment = dbmanager.assignments[0]
-            if assignment.vlan.interface.interface_type != 'management':
+            if assignment.interface.interface_type != 'management':
                 is_mgr = False
             if not is_mgr:
                 raise ArgumentError("{0:a} is not a manager.".format(dbmanager))
@@ -62,7 +62,7 @@ class CommandDelManager(BrokerCommand):
             # FIXME: Look for dependencies...
 
             ip = dbmanager.ip
-            dbmachine = assignment.vlan.interface.hardware_entity
+            dbmachine = assignment.interface.hardware_entity
             session.delete(assignment)
             session.delete(dbmanager)
             session.expire(dbmachine)

@@ -71,7 +71,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
                                               comments=comments, preclude=True)
 
         if dbswitch.primary_name.ip and not dbswitch.primary_name.assignments:
-            dbinterface.vlans[0].addresses.append(dbswitch.primary_ip)
+            dbinterface.addresses.append(dbswitch.primary_ip)
         session.flush()
 
         # We could theoretically add the mac information to DSDB...

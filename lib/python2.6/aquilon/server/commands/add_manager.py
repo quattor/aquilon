@@ -86,7 +86,7 @@ class CommandAddManager(BrokerCommand):
                                   ip=ip, network=dbnetwork,
                                   comments=comments)
         session.add(dbdns_rec)
-        dbinterface.vlans[0].addresses.append(ip)
+        dbinterface.addresses.append(ip)
 
         session.flush()
 

@@ -360,12 +360,8 @@ class DSDBRunner(object):
         for addr in dbinterface.all_addresses():
             if not addr.fqdns:
                 continue
-            if addr.vlan.vlan_id == 0 and not addr.label:
-                mac = dbinterface.mac
-            else:
-                mac = None
             self.add_host_details(addr.fqdns[0], addr.ip, addr.logical_name,
-                                  mac, primary=primary)
+                                  dbinterface.mac, primary=primary)
 
     def add_host_details(self, fqdn, ip, name, mac, primary=None):
         # DSDB does not accept '/' as valid in an interface name.
@@ -436,15 +432,9 @@ class DSDBRunner(object):
                 else:
                     continue
 
-                # The MAC must be unique in DSDB, so only set it for the first
-                # address on the native VLAN
-                if addr.vlan.vlan_id == 0 and not addr.label:
-                    mac = iface.mac
-                else:
-                    mac = None
                 key = '%s:%s' % (primary, addr.logical_name)
                 status[key] = {'name': addr.logical_name,
-                               'mac': mac,
+                               'mac': iface.mac,
                                'ip': addr.ip,
                                'fqdn': fqdn,
                                'primary': primary}

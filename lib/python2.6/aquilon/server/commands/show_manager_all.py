@@ -31,8 +31,8 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import (AddressAssignment, VlanInterface, Interface,
-                                FutureARecord, DnsDomain)
+from aquilon.aqdb.model import (AddressAssignment, Interface, FutureARecord,
+                                DnsDomain)
 
 
 class CommandShowManagerAll(BrokerCommand):
@@ -41,7 +41,7 @@ class CommandShowManagerAll(BrokerCommand):
         q = session.query(FutureARecord)
         q = q.join((AddressAssignment, FutureARecord.ip ==
                     AddressAssignment.ip))
-        q = q.join(VlanInterface, Interface)
+        q = q.join(Interface)
         q = q.filter_by(interface_type='management')
         q = q.reset_joinpoint()
         q = q.join(DnsDomain)

@@ -35,7 +35,7 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
-from aquilon.aqdb.model import Host, AddressAssignment
+from aquilon.aqdb.model import Host, AddressAssignment, VlanInterface
 from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -121,57 +121,35 @@ class PlenaryToplevelHost(Plenary):
         for dbinterface in self.dbhost.machine.interfaces:
             if dbinterface.interface_type != 'public':
                 continue
-            for vlan in dbinterface.vlan_ids:
-                ifdesc = {}
-                if dbinterface.vlans[vlan].dhcp_enabled:
-                    ifdesc["bootproto"] = "dhcp"
+            ifdesc = {}
+            ifdesc["aliases"] = []
+            # XXX Move this to templates
+            ifdesc["bootproto"] = "static"
+            ifdesc["name"] = dbinterface.name
+            if isinstance(dbinterface, VlanInterface):
+                ifdesc["vlan"] = "true"
+
+            for addr in dbinterface.assignments:
+                net = addr.network
+
+                if addr.label == "":
+                    # Fudge the gateway as the first available ip
+                    gateway = net.network[1]
+                    if not default_gateway and dbinterface.bootable:
+                        default_gateway = gateway
+
+                    ifdesc["ip"] = addr.ip
+                    ifdesc["netmask"] = net.netmask
+                    ifdesc["broadcast"] = net.broadcast
+                    ifdesc["gateway"] = gateway
                 else:
-                    ifdesc["bootproto"] = "static"
+                    aliasdesc = {"label": addr.label,
+                                 "ip": addr.ip,
+                                 "netmask": net.netmask,
+                                 "broadcast": net.broadcast}
+                    ifdesc["aliases"].append(aliasdesc)
 
-                # XXX This is way too OS specific and should be in the
-                # templates instead
-                if vlan > 0:
-                    ifdesc["name"] = "%s.%d" % (dbinterface.name, vlan)
-                else:
-                    ifdesc["name"] = dbinterface.name
-
-                if vlan > 0:
-                    ifdesc["vlan"] = "true"
-
-                for addr in dbinterface.vlans[vlan].assignments:
-                    # Skip addresses that are assigned to more than one
-                    # interfaces, anticipating that they will be handled by
-                    # something else (like Zebra).
-                    q = session.query(AddressAssignment)
-                    q = q.filter(AddressAssignment.ip == addr.ip)
-                    if q.count() > 1:
-                        self.logger.info("Skipping IP %s as it belongs to "
-                                         "multiple interfaces." % addr.ip)
-                        continue
-
-                    net = addr.network
-
-                    if addr.label == "":
-                        # Fudge the gateway as the first available ip
-                        gateway = net.network[1]
-                        if not default_gateway and dbinterface.bootable:
-                            default_gateway = gateway
-
-                        ifdesc["ip"] = addr.ip
-                        ifdesc["netmask"] = net.netmask
-                        ifdesc["broadcast"] = net.broadcast
-                        ifdesc["gateway"] = gateway
-                    else:
-                        if not ifdesc["aliases"]:
-                            ifdesc["aliases"] = []
-
-                        aliasdesc = {"label": addr.label,
-                                     "ip": addr.ip,
-                                     "netmask": net.netmask,
-                                     "broadcast": net.broadcast}
-                        ifdesc["aliases"].append(aliasdesc)
-
-                interfaces.append(ifdesc)
+            interfaces.append(ifdesc)
 
         personality_template = "personality/%s/config" % \
                 self.dbhost.personality.name
@@ -224,7 +202,7 @@ class PlenaryToplevelHost(Plenary):
                              "\n\t\t'netmask', '%(netmask)s', "
                              "\n\t\t'broadcast', '%(broadcast)s', "
                              "\n\t\t'gateway', '%(gateway)s'," % ifdesc)
-            if "aliases" in ifdesc:
+            if len(ifdesc["aliases"]) > 0:
                 lines.append("\t\t'aliases', nlist(")
                 for aliasdesc in ifdesc["aliases"]:
                     lines.append("\t\t\t'%(label)s', nlist('ip', '%(ip)s', "

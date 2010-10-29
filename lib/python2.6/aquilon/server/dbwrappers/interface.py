@@ -236,12 +236,10 @@ def describe_interface(session, interface):
     for addr in interface.all_addresses():
         for dns_rec in addr.dns_records:
             if addr.label:
-                description.append("has address {0:a} label {1} on VLAN "
-                                   "{2}".format(dns_rec, addr.label,
-                                                addr.vlan.vlan_id))
+                description.append("has address {0:a} label "
+                                   "{1}".format(dns_rec, addr.label))
             else:
-                description.append("has address {0:a} on VLAN "
-                                   "{1}".format(dns_rec, addr.vlan.vlan_id))
+                description.append("has address {0:a}".format(dns_rec))
     ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
     if len(ifaces) == 1 and ifaces[0] != interface:
         description.append("but MAC address %s is in use by %s" %

@@ -58,7 +58,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         check_ip_restrictions(dbnetwork, ip)
 
         if ip:
-            dbinterface.vlans[0].addresses.append(ip)
+            dbinterface.addresses.append(ip)
 
             # Convert ReservedName to FutureARecord if needed
             if isinstance(dbchassis.primary_name, ReservedName):

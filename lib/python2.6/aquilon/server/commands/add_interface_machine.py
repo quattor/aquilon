@@ -95,8 +95,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
-                dummy_ip = prev.vlans[0].assignments[0].ip
-                old_network = prev.vlans[0].assignments[0].network
+                dummy_ip = prev.assignments[0].ip
+                old_network = prev.assignments[0].network
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
                 self.remove_dsdb(logger, dummy_ip)
@@ -134,7 +134,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.
         if dbmanager:
-            dbinterface.vlans[0].addresses.append(dbmanager.ip)
+            dbinterface.addresses.append(dbmanager.ip)
 
         session.add(dbinterface)
         session.flush()
@@ -147,7 +147,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 logger.client_info("Could not reserve IP address %s for %s "
                                    "in DSDB: %s" %
                                    (dbmanager.ip, dbmanager.fqdn, e))
-                dbinterface.vlans[0].addresses.remove(dbmanager.ip)
+                dbinterface.addresses.remove(dbmanager.ip)
                 session.add(dbinterface)
                 session.delete(dbmanager)
                 session.flush()

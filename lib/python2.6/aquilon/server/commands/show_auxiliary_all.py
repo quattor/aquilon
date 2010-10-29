@@ -32,9 +32,9 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import exists
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import (Interface, VlanInterface, AddressAssignment,
-                                HardwareEntity, PrimaryNameAssociation,
-                                FutureARecord, DnsDomain)
+from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
+                                PrimaryNameAssociation, FutureARecord,
+                                DnsDomain)
 
 
 class CommandShowAuxiliaryAll(BrokerCommand):
@@ -47,7 +47,7 @@ class CommandShowAuxiliaryAll(BrokerCommand):
                                      FutureARecord.system_id))
         # ... and is assigned to a public interface...
         q = q.join((AddressAssignment, FutureARecord.ip == AddressAssignment.ip))
-        q = q.join(VlanInterface, Interface)
+        q = q.join(Interface)
         q = q.filter_by(interface_type='public')
         # ... of a machine.
         q = q.join(HardwareEntity)

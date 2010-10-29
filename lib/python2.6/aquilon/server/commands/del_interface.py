@@ -81,8 +81,8 @@ class CommandDelInterface(BrokerCommand):
                         other = dbhw_ent.interfaces[0]
 
                     if len(list(other.all_addresses())) == 0:
-                        other.vlans[0].addresses.append(dbhw_ent.primary_ip)
-                        dbinterface.vlans[0].addresses.remove(dbhw_ent.primary_ip)
+                        other.addresses.append(dbhw_ent.primary_ip)
+                        dbinterface.addresses.remove(dbhw_ent.primary_ip)
                         raise _Goto
 
                 # If this is a machine, it is possible to delete the host to get rid

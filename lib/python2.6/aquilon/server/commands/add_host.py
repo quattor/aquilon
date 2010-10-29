@@ -126,13 +126,13 @@ class CommandAddHost(BrokerCommand):
         ip = generate_ip(session, dbinterface, **arguments)
         dbdns_rec = parse_primary_name(session, hostname, ip)
 
-        # Should not happen
-        if ip and not dbinterface:
-            raise InternalError("IP address requested but interface was not "
-                                "enforced")
-
-        if ip and ip not in dbinterface.vlans[0].addresses:
-            dbinterface.vlans[0].addresses.append(ip)
+        if ip:
+            # Should not happen
+            if not dbinterface:
+                raise InternalError("IP address requested but interface was not "
+                                    "enforced")
+            if ip not in dbinterface.addresses:
+                dbinterface.addresses.append(ip)
 
         dbhost = Host(machine=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
