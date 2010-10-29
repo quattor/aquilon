@@ -45,11 +45,10 @@ class CommandDelChassis(BrokerCommand):
         # Check and complain if the chassis has any other addresses than its
         # primary address
         addrs = []
-        for iface in dbchassis.interfaces:
-            for addr in iface.all_addresses():
-                if addr.ip == dbchassis.primary_ip:
-                    continue
-                addrs.append(str(addr.ip))
+        for addr in dbchassis.all_addresses():
+            if addr.ip == dbchassis.primary_ip:
+                continue
+            addrs.append(str(addr.ip))
         if addrs:
             raise ArgumentError("{0} still provides the following addresses, "
                                 "delete them first: {1}.".format

@@ -116,11 +116,6 @@ class Interface(Base):
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 
-    def all_addresses(self):
-        """ Iterator returning all addresses of the interface. """
-        for addr in self.assignments:
-            yield addr
-
     def __init__(self, **kw):  # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
             where the interface is bootable or is of type 'management'

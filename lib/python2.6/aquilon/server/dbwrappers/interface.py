@@ -233,7 +233,7 @@ def describe_interface(session, interface):
                     interface.bootable)]
     hw = interface.hardware_entity
     description.append("is attached to {0:l}".format(hw))
-    for addr in interface.all_addresses():
+    for addr in interface.assignments:
         for dns_rec in addr.dns_records:
             if addr.label:
                 description.append("has address {0:a} label "

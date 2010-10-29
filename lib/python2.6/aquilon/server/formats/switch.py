@@ -140,9 +140,8 @@ class TorSwitchFormatter(SwitchFormatter):
     """Wrapper to use the old CSV output."""
     def csv_tolist(self, switch):
         tuples = []
-        for iface in switch.interfaces:
-            for addr in iface.all_addresses():
-                tuples.append(TorSwitchInterfaceTuple((switch, iface, addr)))
+        for addr in switch.all_addresses():
+            tuples.append(TorSwitchInterfaceTuple((switch, addr.interface, addr)))
         if len(tuples):
             return tuples
         else:

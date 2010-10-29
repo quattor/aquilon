@@ -52,11 +52,10 @@ class CommandDelMachine(BrokerCommand):
                                 "deleted.".format(dbmachine, dbmachine.host))
 
         addrs = []
-        for iface in dbmachine.interfaces:
-            addrs.extend(list(iface.all_addresses()))
+        for addr in dbmachine.all_addresses():
+            addrs.append("%s: %s" % (addr.logical_name, addr.ip))
         if addrs:
-            addrmsg = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for
-                                 addr in addrs])
+            addrmsg = ", ".join(addrs)
             raise ArgumentError("{0} still provides the following addresses, "
                                 "delete them first: {1}.".format(dbmachine,
                                                                  addrmsg))

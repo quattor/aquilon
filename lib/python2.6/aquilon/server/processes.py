@@ -357,7 +357,7 @@ class DSDBRunner(object):
     def add_host(self, dbinterface):
         session = object_session(dbinterface)
         primary = dbinterface.hardware_entity.fqdn
-        for addr in dbinterface.all_addresses():
+        for addr in dbinterface.assignments:
             if not addr.fqdns:
                 continue
             self.add_host_details(addr.fqdns[0], addr.ip, addr.logical_name,
@@ -425,19 +425,18 @@ class DSDBRunner(object):
 
         primary = dbhw_ent.fqdn
 
-        for iface in dbhw_ent.interfaces:
-            for addr in iface.all_addresses():
-                if addr.fqdns:
-                    fqdn = addr.fqdns[0]
-                else:
-                    continue
+        for addr in dbhw_ent.all_addresses():
+            if addr.fqdns:
+                fqdn = addr.fqdns[0]
+            else:
+                continue
 
-                key = '%s:%s' % (primary, addr.logical_name)
-                status[key] = {'name': addr.logical_name,
-                               'mac': iface.mac,
-                               'ip': addr.ip,
-                               'fqdn': fqdn,
-                               'primary': primary}
+            key = '%s:%s' % (primary, addr.logical_name)
+            status[key] = {'name': addr.logical_name,
+                           'mac': addr.interface.mac,
+                           'ip': addr.ip,
+                           'fqdn': fqdn,
+                           'primary': primary}
         return status
 
     def update_host(self, dbhw_ent, oldinfo):

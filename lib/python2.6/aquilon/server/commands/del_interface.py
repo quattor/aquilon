@@ -65,7 +65,7 @@ class CommandDelInterface(BrokerCommand):
             dbhw_ent = dbinterface.hardware_entity
 
         try:
-            for addr in dbinterface.all_addresses():
+            for addr in dbinterface.assignments:
                 if addr.ip != dbhw_ent.primary_ip:
                     continue
 
@@ -80,7 +80,7 @@ class CommandDelInterface(BrokerCommand):
                     else:
                         other = dbhw_ent.interfaces[0]
 
-                    if len(list(other.all_addresses())) == 0:
+                    if len(other.assignments) == 0:
                         other.addresses.append(dbhw_ent.primary_ip)
                         dbinterface.addresses.remove(dbhw_ent.primary_ip)
                         raise _Goto
@@ -99,7 +99,7 @@ class CommandDelInterface(BrokerCommand):
             pass
 
         addrs = ", ".join(["%s: %s" % (addr.logical_name, addr.ip) for addr in
-                           dbinterface.all_addresses()])
+                           dbinterface.assignments])
         if addrs:
             raise ArgumentError("{0} still has the following addresses "
                                 "configured, delete them first: "

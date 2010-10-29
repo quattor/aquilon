@@ -182,7 +182,7 @@ class PlenaryMachineInfo(Plenary):
                                    "boot": interface.bootable})
             elif interface.interface_type == 'management':
                 has_addr = False
-                for addr in interface.all_addresses():
+                for addr in interface.assignments:
                     has_addr = True
                     manager = {"type": addr.logical_name, "mac": interface.mac,
                                "ip": addr.ip, "fqdn": None}

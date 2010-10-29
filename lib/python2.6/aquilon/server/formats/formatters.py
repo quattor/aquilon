@@ -265,7 +265,7 @@ class ObjectFormatter(object):
 
         for iface in hwent.interfaces:
             has_addrs = False
-            for addr in iface.all_addresses():
+            for addr in iface.assignments:
                 has_addrs = True
                 int_msg = host_msg.machine.interfaces.add()
                 int_msg.device = str(addr.logical_name)
