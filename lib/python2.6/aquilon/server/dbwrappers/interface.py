@@ -37,12 +37,12 @@ from ipaddr import IPv4Address
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.orm import object_session
-from sqlalchemy import sql
+from sqlalchemy.sql import select
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model import (Interface, HardwareEntity, ObservedMac, System,
-                                VlanInfo, ObservedVlan)
+                                VlanInfo, ObservedVlan, Network)
 from aquilon.server.dbwrappers.system import get_system
 from aquilon.utils import force_mac
 
@@ -169,6 +169,15 @@ def generate_ip(session, dbinterface, ip=None, ipfromip=None,
     if not dbnetwork:
         raise ArgumentError("Could not determine network to use for %s." %
                             dbsystem.fqdn)
+
+    # When there are e.g. multiple "add manager --autoip" operations going on in
+    # parallel, we must ensure that they won't try to use the same IP address.
+    # This query places a database lock on the network, which means IP address
+    # generation within a network will be serialized, while operations on
+    # different networks can still run in parallel. The lock will be released by
+    # COMMIT or ROLLBACK.
+    session.execute(select([Network.id], Network.id == dbnetwork.id,
+                           for_update=True)).fetchall()
 
     startip = dbnetwork.first_usable_host
 
