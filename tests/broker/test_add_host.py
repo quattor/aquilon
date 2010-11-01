@@ -144,7 +144,9 @@ class TestAddHost(TestBrokerCommand):
                    "--osname", "linux", "--osversion", "4.0.1-x86_64",
                    "--personality", "compileserver"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "'not-an-ip-address' is not a valid IPv4 address",
+        self.matchoutput(out,
+                         "Expected an IPv4 address for --ip: "
+                         "not-an-ip-address",
                          command)
 
     def testaddunittest16good(self):

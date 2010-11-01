@@ -116,6 +116,21 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testclearnetwork(self):
+        for ip in range(int(self.net.tor_net2[5].usable[0]),
+                        int(self.net.tor_net2[5].usable[-1]) + 1):
+            self.dsdb_expect_delete(IPv4Address(ip))
+        command = ["del_dynamic_range",
+                   "--clearnetwork", self.net.tor_net2[5].ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testclearnetworkagain(self):
+        command = ["del_dynamic_range",
+                   "--clearnetwork", self.net.tor_net2[5].ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "No dynamic stubs found on network.", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDynamicRange)

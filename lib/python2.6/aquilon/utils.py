@@ -36,7 +36,7 @@ import os
 import signal
 import re
 
-from ipaddr import IPv4Address, IPv4IpValidationError
+from ipaddr import IPv4Address, AddressValueError
 from aquilon.exceptions_ import ArgumentError
 
 ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
@@ -112,7 +112,7 @@ def force_ipv4(label, value):
         return value
     try:
         return IPv4Address(value)
-    except IPv4IpValidationError, e:
+    except AddressValueError, e:
         raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
 
 def force_int(label, value):

@@ -74,9 +74,11 @@ class CommandDelDynamicRange(BrokerCommand):
         if invalid:
             raise ArgumentError("The range contains non-dynamic systems:\n" +
                                 "\n".join([format(i, "a") for i in invalid]))
+        self.del_dynamic_stubs(session, logger, existing)
 
+    def del_dynamic_stubs(self, session, logger, dbstubs):
         stubs = {}
-        for stub in existing:
+        for stub in dbstubs:
             stubs[stub.fqdn] = stub.ip
             session.delete(stub)
         session.flush()

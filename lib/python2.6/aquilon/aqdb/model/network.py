@@ -163,6 +163,34 @@ class Network(Base):
     def available_ip_count(self):
         return int(self.broadcast) - int(self.first_usable_host)
 
+    @classmethod
+    def get_unique(cls, session, *args, **kwargs):
+        # Fall back to the generic implementation unless the caller used
+        # exactly one non-keyword argument, and possibly compel.  Any
+        # caller using preclude would be passing keywords anyway.
+        compel = kwargs.pop("compel", False)
+        if kwargs or len(args) > 1:
+            return super(Network, cls).get_unique(session, *args, compel=compel,
+                                                  **kwargs)
+
+        # Just a single positional argumentum - do magic
+        # The order matters here, we don't want to parse '1.2.3.4' as
+        # IPv4Network('1.2.3.4/32')
+        try:
+            ip = IPv4Address(args[0])
+            return super(Network, cls).get_unique(session, ip=ip, compel=compel)
+        except:
+            pass
+        try:
+            net = IPv4Network(args[0])
+            return super(Network, cls).get_unique(session, ip=net.network,
+                                                  cidr=net.prefixlen,
+                                                  compel=compel)
+        except:
+            pass
+        return super(Network, cls).get_unique(session, name=args[0],
+                                              compel=compel)
+
     def __repr__(self):
         msg = '<Network '
 
@@ -181,7 +209,7 @@ network.primary_key.name = 'network_pk'
 network.append_constraint(UniqueConstraint('ip', name='net_ip_uk'))
 
 network.info['unique_fields'] = ['ip']
-network.info['extra_search_fields'] = ['name']
+network.info['extra_search_fields'] = ['name', 'cidr']
 
 Index('net_loc_id_idx', network.c.location_id)
 

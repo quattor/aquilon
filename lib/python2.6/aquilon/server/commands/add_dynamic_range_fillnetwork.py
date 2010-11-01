@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,21 +26,20 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries.
 
-    These versions are the defaults for the binaries shipped.
 
-    Anything referencing aquilon.server.depends should also set up the
-    dependencies listed in aquilon.aqdb.depends.
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.add_dynamic_range import CommandAddDynamicRange
+from aquilon.aqdb.model import Network
 
-"""
 
-import ms.version
+class CommandAddDynamicRangeFillnetwork(CommandAddDynamicRange):
 
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.3.0')
-ms.version.addpkg('zope.interface', '3.5.2')
-ms.version.addpkg('twisted', '8.2.0-ms1')
-ms.version.addpkg('coverage', '3.3.1')
-ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('mako', '0.3.2')
+    required_parameters = ["fillnetwork", "dns_domain"]
+
+    def render(self, session, logger, fillnetwork, **arguments):
+        dbnetwork = Network.get_unique(session, fillnetwork)
+        arguments['startip'] = dbnetwork.first_usable_host
+        arguments['endip'] = dbnetwork.broadcast - 1
+        return CommandAddDynamicRange.render(self, session, logger,
+                                             **arguments)

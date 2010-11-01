@@ -1,6 +1,6 @@
 # ex: set expandtab softtabstop=4 shiftwidth=4: -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 #
-# Copyright (C) 2008,2009,2010  Contributor
+# Copyright (C) 2009,2010  Contributor
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the EU DataGrid Software License.  You should
@@ -26,21 +26,37 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" Suggested versions of external libraries.
 
-    These versions are the defaults for the binaries shipped.
 
-    Anything referencing aquilon.server.depends should also set up the
-    dependencies listed in aquilon.aqdb.depends.
+from sqlalchemy.sql.expression import asc
 
-"""
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.commands.del_dynamic_range import CommandDelDynamicRange
+from aquilon.aqdb.model import DynamicStub, Network
+from aquilon.exceptions_ import ArgumentError
+from aquilon.server.locks import lock_queue, DeleteKey
 
-import ms.version
 
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.3.0')
-ms.version.addpkg('zope.interface', '3.5.2')
-ms.version.addpkg('twisted', '8.2.0-ms1')
-ms.version.addpkg('coverage', '3.3.1')
-ms.version.addpkg('ipaddr', '2.1.4')
-ms.version.addpkg('mako', '0.3.2')
+class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
+
+    required_parameters = ["clearnetwork"]
+
+    def render(self, session, logger, clearnetwork, **arguments):
+        key = DeleteKey("system", logger=logger)
+        try:
+            lock_queue.acquire(key)
+            self.del_dynamic_network(session, logger, clearnetwork)
+            session.commit()
+        finally:
+            lock_queue.release(key)
+        return
+
+    def del_dynamic_network(self, session, logger, network):
+        dbnetwork = Network.get_unique(session, network)
+        q = session.query(DynamicStub)
+        q = q.filter_by(network=dbnetwork)
+        q = q.order_by(asc(DynamicStub.ip))
+        existing = q.all()
+        if not existing:
+            raise ArgumentError("No dynamic stubs found on network.")
+        self.del_dynamic_stubs(session, logger, existing)
