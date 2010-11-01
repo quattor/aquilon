@@ -46,6 +46,19 @@ class TestAddVirtualHardware(TestBrokerCommand):
             self.noouttest(["add", "machine", "--machine", "evm%s" % i,
                             "--cluster", "utecl1", "--model", "utmedium"])
 
+    def test_005_showmachinenorack(self):
+        # The only way to test show machine with a machine that's not in
+        # a rack is to use virtual hardware...
+        command = ["show_machine", "--machine=evm1", "--format=csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm1,,ut,utvendor,utmedium,", command)
+
+    def test_006_searchmachinenorack(self):
+        # Ditto.
+        command = ["search_machine", "--machine=evm1", "--format=csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm1,,ut,utvendor,utmedium,", command)
+
     def test_010_failwithoutcluster(self):
         command = ["add_machine", "--machine=evm999", "--rack=ut3",
                    "--model=utmedium"]

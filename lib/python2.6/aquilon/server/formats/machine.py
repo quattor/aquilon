@@ -44,8 +44,13 @@ class MachineInterfacePairFormatter(ObjectFormatter):
         machine = item[0]
         addr = item[1]
 
-        details = [machine.label, machine.location.rack.name,
-                   machine.location.building.name, machine.model.vendor.name,
+        rack = None
+        if machine.location.rack:
+            rack = machine.location.rack.name
+        building = None
+        if machine.location.building:
+            building = machine.location.building.name
+        details = [machine.label, rack, building, machine.model.vendor.name,
                    machine.model.name, machine.serial_no]
         if addr:
             details.extend([addr.logical_name, addr.vlan.interface.mac, addr.ip])

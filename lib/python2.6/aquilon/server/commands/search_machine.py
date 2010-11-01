@@ -33,7 +33,7 @@ from sqlalchemy.orm import aliased
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.formats.hardware_entity import SimpleHardwareEntityList
+from aquilon.server.formats.machine import SimpleMachineList
 from aquilon.aqdb.model import (Machine, Vendor, Cpu, Cluster, Service,
                                 ServiceInstance, NasDisk, Disk)
 from aquilon.server.dbwrappers.hardware_entity import (
@@ -75,4 +75,4 @@ class CommandSearchMachine(BrokerCommand):
             q = q.reset_joinpoint()
         if fullinfo:
             return q.all()
-        return SimpleHardwareEntityList(q.all())
+        return SimpleMachineList(q.all())
