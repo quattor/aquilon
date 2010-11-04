@@ -214,6 +214,10 @@ class TestAddMachine(TestBrokerCommand):
                          "'capacity', 466*GB),",
                          command)
 
+    def testaddut3c1n9(self):
+        self.noouttest(["add", "machine", "--machine", "ut3c1n9",
+                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+
     def testrejectqualifiedname(self):
         command = ["add", "machine", "--machine", "qualified.ms.com",
                    "--rack", "ut3", "--model", "hs21-8853l5u"]
