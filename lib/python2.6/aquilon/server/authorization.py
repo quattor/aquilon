@@ -91,6 +91,11 @@ class AuthorizationBroker(object):
                               'add_building', 'del_building',
                               'add_city', 'del_city']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'telco_operations':
+            if action not in ['add_rack', 'add_switch', 'add_tor_switch',
+                              'update_rack', 'update_switch',
+                              'del_rack', 'del_switch', 'del_tor_switch']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'maintech':
             if action not in ['pxeswitch', 'pxeswitch_list',
                               'compile', 'compile_hostname', 'change_status',
