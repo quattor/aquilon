@@ -53,6 +53,11 @@ class TestShowMachine(TestBrokerCommand):
                          "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,bmc,%s,%s" %
                          (net.usable[4].mac, net.usable[4]), command)
 
+    def testrejectfqdn(self):
+        command = "show machine --machine unittest00.one-nyp.ms.com"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Illegal hardware label", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachine)
