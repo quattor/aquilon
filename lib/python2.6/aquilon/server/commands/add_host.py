@@ -29,11 +29,13 @@
 """Contains the logic for `aq add host`."""
 
 
-from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
+from aquilon.exceptions_ import (ArgumentError, ProcessException, AquilonError,
+                                 InternalError)
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.hardware_entity import parse_primary_name
-from aquilon.server.dbwrappers.interface import generate_ip
+from aquilon.server.dbwrappers.interface import (generate_ip,
+                                                 get_or_create_interface)
 from aquilon.aqdb.model import (Domain, Host, OperatingSystem, Archetype,
                                 HostLifecycle, Machine, Personality)
 from aquilon.server.templates.base import PlenaryCollection
@@ -108,18 +110,13 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        dbinterface = None
-        if dbpersonality.archetype.name != 'aurora':
-            for interface in dbmachine.interfaces:
-                if interface.interface_type != 'public':
-                    continue
-                if interface.bootable:
-                    if dbinterface:
-                        # FIXME: Is this actually a problem?
-                        raise ArgumentError("Multiple public interfaces on "
-                                            "machine %s are marked bootable." %
-                                            machine)
-                    dbinterface = interface
+        # If the user wants an IP address, then we need an interface
+        if arguments.get("ip", None) or arguments.get("ipfromsystem", None) or \
+           arguments.get("ipfromip", None) or arguments.get("autoip", None):
+            dbinterface = get_or_create_interface(session, dbmachine,
+                                                  bootable=True)
+        else:
+            dbinterface = None
 
         # This method is allowed to return None, which will pass through
         # the next two.
@@ -129,13 +126,19 @@ class CommandAddHost(BrokerCommand):
         ip = generate_ip(session, dbinterface, **arguments)
         dbdns_rec = parse_primary_name(session, hostname, ip)
 
+        # Should not happen
+        if ip and not dbinterface:
+            raise InternalError("IP address requested but interface was not "
+                                "enforced")
+
+        if ip and ip not in dbinterface.vlans[0].addresses:
+            dbinterface.vlans[0].addresses.append(ip)
+
         dbhost = Host(machine=dbmachine, branch=dbbranch,
                       sandbox_author=dbauthor, personality=dbpersonality,
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
         dbmachine.primary_name = dbdns_rec
-        if ip and dbinterface and ip not in dbinterface.vlans[0].addresses:
-            dbinterface.vlans[0].addresses.append(ip)
         session.flush()
         session.refresh(dbhost)
 

@@ -198,6 +198,15 @@ class TestAddHost(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Personality: inventory", command)
 
+    def testaddnointerface(self):
+        ip = self.net.unknown[0].usable[-1]
+        command = ["add", "host", "--hostname", "unittest03.aqd-unittest.ms.com",
+                   "--ip", ip, "--machine", "ut3c1n9",
+                   "--domain", "unittest", "--archetype", "aquilon"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine ut3c1n9 has no public interfaces.",
+                         command)
+
     def testpopulatehprackhosts(self):
         # This gives us server1.aqd-unittest.ms.com through server10
         # and aquilon60.aqd-unittest.ms.com through aquilon100

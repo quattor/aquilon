@@ -85,10 +85,10 @@ class TestSearchNetwork(TestBrokerCommand):
 
     def testfailphysicalmachine(self):
         """This physical machine has no interface."""
-        command = ["search_network", "--machine=ut8s02p4"]
+        command = ["search_network", "--machine=ut3c1n9"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Machine ut8s02p4 has no interfaces assigned to a "
+                         "Machine ut3c1n9 has no interfaces assigned to a "
                          "network.",
                          command)
 
