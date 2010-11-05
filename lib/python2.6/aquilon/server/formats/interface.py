@@ -61,8 +61,6 @@ class InterfaceFormatter(ObjectFormatter):
                 vindent = indent + "  "
             else:
                 vindent = indent
-            details.append(vindent + "  DHCP enabled: %s" %
-                           (interface.vlans[vlan].dhcp_enabled))
             for assgn in interface.vlans[vlan].assignments:
                 if assgn.fqdns:
                     names = ", ".join(assgn.fqdns)
