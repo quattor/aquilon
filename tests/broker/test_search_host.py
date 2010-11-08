@@ -303,6 +303,14 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest17.aqd-unittest.ms.com", command)
 
+    def testmodellocation(self):
+        # Utilize two filters on the same table
+        command = "search host --model vb1205xm --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest15.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest17.aqd-unittest.ms.com", command)
+
     def testmodelunavailable(self):
         command = "search host --model model-does-not-exist"
         out = self.notfoundtest(command.split(" "))
