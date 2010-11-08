@@ -38,13 +38,12 @@ from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
-
-'''
-This stateful view describes where the host is within it's
-provisioning lifecycle.
-'''
 _TN = 'hostlifecycle'
+
+
 class HostLifecycle(StateEngine, Base):
+    """ Describes the state a host is within the provisioning lifecycle """
+
     transitions = {
                'blind'        : ['build', 'failed', 'decommissioned'],
                'build'        : ['almostready', 'ready', 'failed',

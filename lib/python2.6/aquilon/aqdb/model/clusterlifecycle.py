@@ -38,13 +38,12 @@ from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
-
-'''
-This stateful view describes where the cluster is within it's
-provisioning lifecycle.
-'''
 _TN = 'clusterlifecycle'
+
+
 class ClusterLifecycle(StateEngine, Base):
+    """ Describes the state a cluster is within the provisioning lifecycle """
+
     transitions = {
                'build'        : ['ready', 'decommissioned'],
                'ready'        : ['rebuild', 'decommissioned'],
