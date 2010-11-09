@@ -29,7 +29,7 @@
 """Contains the logic for `aq search host`."""
 
 
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, joinedload_all, contains_eager
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
@@ -37,10 +37,9 @@ from aquilon.server.formats.system import SimpleSystemList
 from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
-                                System, DnsDomain, Interface, HardwareEntity,
-                                VlanInterface, AddressAssignment)
+                                System, DnsDomain, Interface, VlanInterface,
+                                AddressAssignment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.server.dbwrappers.hardware_entity import search_hardware_entity_query
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.dbwrappers.branch import get_branch_and_author
 from aquilon.server.dbwrappers.location import get_location
@@ -92,37 +91,39 @@ class CommandSearchHost(BrokerCommand):
             use_addrq = True
 
         q = session.query(Host)
-        if use_addrq:
-            q = q.join(Machine, HardwareEntity, Interface)
-            q = q.filter(Interface.id.in_(addrq.subquery()))
-            q = q.reset_joinpoint()
-
-        dblocation = get_location(session, **arguments)
-        if dblocation:
-            q = q.join(Machine, HardwareEntity)
-            if exact_location:
-                q = q.filter_by(location=dblocation)
-            else:
-                childids = dblocation.offspring_ids()
-                q = q.filter(HardwareEntity.location_id.in_(childids))
-            q = q.reset_joinpoint()
-
-        if model or vendor or machine_type:
-            q = q.join(Machine, HardwareEntity)
-            subq = Model.get_matching_query(session, name=model, vendor=vendor,
-                                            machine_type=machine_type,
-                                            compel=True)
-            q = q.filter(HardwareEntity.model_id.in_(subq))
-            q = q.reset_joinpoint()
-
-        if serial:
-            q = q.join(Machine, HardwareEntity)
-            q = q.filter_by(serial_no=serial)
-            q = q.reset_joinpoint()
 
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(machine=dbmachine)
+
+        # Hardware-specific filters
+        q = q.join(Machine)
+        q = q.options(contains_eager('machine'))
+        q = q.options(joinedload_all('machine._primary_name_asc.dns_record.dns_domain'))
+
+        dblocation = get_location(session, **arguments)
+        if dblocation:
+            if exact_location:
+                q = q.filter_by(location=dblocation)
+            else:
+                childids = dblocation.offspring_ids()
+                q = q.filter(Machine.location_id.in_(childids))
+
+        if model or vendor or machine_type:
+            subq = Model.get_matching_query(session, name=model, vendor=vendor,
+                                            machine_type=machine_type,
+                                            compel=True)
+            q = q.filter(Machine.model_id.in_(subq))
+
+        if serial:
+            q = q.filter_by(serial_no=serial)
+
+        if use_addrq:
+            q = q.join(Interface)
+            q = q.filter(Interface.id.in_(addrq.subquery()))
+
+        # End of hardware-specific filters
+        q = q.reset_joinpoint()
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
