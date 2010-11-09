@@ -26,6 +26,11 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
+import warnings
+
+import aquilon.aqdb.depends
+from sqlalchemy.exc import SAWarning
+
 from aquilon.aqdb.model.base import Base
 from aquilon.aqdb.model.stateengine import StateEngine
 
@@ -95,7 +100,18 @@ from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 from aquilon.aqdb.model.disk import Disk, LocalDisk, NasDisk
 
 #CLUSTER
-from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
+#FIXME: this is a measure to dodge a warning raised by conflicting class names
+#in this and hostlifecycle. It's only used for one of the two classes using a
+#'with' clause to ensure as few warnings as possible are masked.
+#TODO: overhaul this using importlib. Before loading conflicting classes check
+# if they already exist in the current 'locals().keys()' and raise some kind of
+# error or warning.
+#(daqscott 29/10/10)
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", SAWarning)
+    from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
+
+
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         HostClusterMember,
                                         MachineClusterMember,

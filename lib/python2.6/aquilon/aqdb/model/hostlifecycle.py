@@ -38,13 +38,12 @@ from aquilon.utils import monkeypatch
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError
 
-
-'''
-This stateful view describes where the host is within it's
-provisioning lifecycle.
-'''
 _TN = 'hostlifecycle'
+
+
 class HostLifecycle(StateEngine, Base):
+    """ Describes the state a host is within the provisioning lifecycle """
+
     transitions = {
                'blind'        : ['build', 'failed', 'decommissioned'],
                'build'        : ['almostready', 'ready', 'failed',
@@ -94,9 +93,33 @@ def populate(sess, *args, **kw):  # pragma: no cover
     assert len(sess.query(HostLifecycle).all()) == len(statuslist)
 
 
-'''
-The following classes are the actual lifecycle states for a host
-'''
+"""
+The following classes are the actual lifecycle states for a host.
+
+WARNING: The classes Decommissioned, Ready, Rebuild and Build have the same name
+as 4 classes in clusterlifecycle and have odd behaviors when imported into the
+same namespace. It would be ill advised to do use these clashing clasess in the
+same module.
+
+Perhaps it's best to illustrate by example:
+
+from aquilon.aqdb.model.clusterlifecycle import Ready
+
+session.query(Ready).first()
+    Out[31]: ready
+type(r)
+    Out[32]: <class 'aquilon.aqdb.model.clusterlifecycle.Ready'>
+
+from aquilon.aqdb.model.hostlifecycle import Ready
+r=s.query(Ready).first()
+type(r)
+    Out[35]: <class 'aquilon.aqdb.model.hostlifecycle.Ready'>
+
+from aquilon.aqdb.model.clusterlifecycle import Ready
+r=s.query(Ready).first()
+type(r)
+    Out[55]: <class 'aquilon.aqdb.model.clusterlifecycle.Ready'>
+"""
 
 class Blind(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'blind'}
@@ -139,4 +162,3 @@ class Reinstall(HostLifecycle):
 
 class Failed(HostLifecycle):
     __mapper_args__ = {'polymorphic_identity': 'failed'}
-

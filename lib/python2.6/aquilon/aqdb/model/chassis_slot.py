@@ -58,8 +58,7 @@ class ChassisSlot(Base):  # pylint: disable-msg=W0232, R0903
     # TODO: remove delete-orphan?
     chassis = relation(Chassis, uselist=False,
                        backref=backref('slots', cascade='delete, delete-orphan',
-                                       order_by=[asc('slot_number')]),
-                       passive_deletes=True)
+                                       order_by=[asc('slot_number')]))
 
     machine = relation(Machine, uselist=False,
                        backref=backref('chassis_slot',
