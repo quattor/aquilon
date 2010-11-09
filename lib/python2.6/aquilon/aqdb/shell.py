@@ -46,10 +46,6 @@ import ms.modulecmd
 
 from aquilon.config import Config
 
-config = Config()
-if config.has_option("database", "module"):
-    ms.modulecmd.load(config.get("database", "module"))
-
 from aquilon.aqdb.model import *
 from aquilon.aqdb.dsdb import *
 from aquilon.aqdb.db_factory import DbFactory
@@ -61,7 +57,10 @@ Base.metadata.bind = db.engine
 if db.engine.url.drivername == 'sqlite':
     prompt = str(db.engine.url).split('///')[1]
 else:
-    prompt = '%s@%s' % (db.engine.url.username, db.engine.url.host)
+    # couldn't use the underlying dbapi connection.current_schema
+    # from the engine as it too is ''
+    user = db.engine.url.username or os.environ.get("USER")
+    prompt = '%s@%s' % (user, db.engine.url.host)
     if db.engine.url.database:
         prompt += '/%s'
 prompt += '>'

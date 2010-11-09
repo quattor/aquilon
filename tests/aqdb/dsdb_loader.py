@@ -41,13 +41,6 @@ utils.load_classpath()
 from ipaddr import IPv4Network
 
 import argparse
-import ms.modulecmd
-
-from aquilon.config import Config
-config = Config()
-
-if config.has_option("database", "module"):
-    ms.modulecmd.load(config.get("database", "module"))
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from sqlalchemy.exc import IntegrityError

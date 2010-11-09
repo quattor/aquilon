@@ -45,9 +45,24 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exceptions import SQLError, DatabaseError as SaDBError
 from sqlalchemy.interfaces import PoolListener
 
+import ms.modulecmd as modcmd
+
+try:
+    config = Config()
+except Exception, e:
+    print >> sys.stderr, 'failed to read configuration: %s' % e
+    sys.exit(os.EX_CONFIG)
+
+assert config, 'No configuration in db_factory'
+
+if config.has_option("database", "module"):
+    modcmd.load(config.get("database", "module"))
+
+
 class UnsafeSQLiteListener(PoolListener):
     def connect(self, dbapi_con, con_record):
         dbapi_con.execute('pragma synchronous=OFF')
+
 
 class DbFactory(object):
     __shared_state = {}
@@ -61,49 +76,47 @@ class DbFactory(object):
 
         self.__started = True
 
-        try:
-            self.config = Config()
-        except Exception, e:
-            print >> sys.stderr, "failed to read configuration: %s" % e
-            sys.exit(os.EX_CONFIG)
+        self.dsn = config.get('database', 'dsn')
+        assert self.dsn, 'No DSN in db_factory'
 
-        self.dsn = self.config.get('database', 'dsn')
-
-        self.buf = StringIO()  #for mock engine output
+        self.pool_options = {}
+        self.pool_options["pool_size"] = config.getint(
+            "database", "pool_size")
+        self.pool_options["max_overflow"] = config.getint("database",
+                                                          "pool_max_overflow")
+        if len(config.get("database", "pool_timeout").strip()) > 0:
+            self.pool_options["pool_timeout"] = config.getint("database",
+                                                              "pool_timeout")
+        else:
+            self.pool_options["pool_timeout"] = None
+        log = logging.getLogger('aqdb.db_factory')
+        log.info("Database engine using pool options %s" % self.pool_options)
 
         #ORACLE
         if self.dsn.startswith('oracle'):
             import cx_Oracle
             self.vendor = 'oracle'
-            self.schema = self.config.get('database','dbuser')
+            self.schema = config.get('database','dbuser')
 
-            passwds = self._get_password_list()
+            if self.schema != '':
+                passwds = self._get_password_list()
 
-            if len(passwds) < 1:
-                passwds.append(
-                    getpass(
-                        'Can not determine your password (%s).\nPassword:'% (
-                            self.dsn)))
-            self.login(passwds)
-
-        #DB2
-        #FIXME: DB2 support in an upcoming branch
-        #elif self.dsn.startswith('ibm_db_sa'):
-            #import ibm_db_sa
-            #import ibm_db_dbi
-
-            #self.vendor = 'db2'
-            #
-            #user = ''
-            #self.engine = create_engine(
-            #    'ibm_db_sa:///NYTD_AQUILON?UID=%s'% (user))
-            #self.connection = self.engine.connect()
-            #self.engine.execute('set current schema AQUILON')
+                if not passwds:
+                    msg = "No passwords found for %s." % self.dsn
+                    print >> sys.stderr, msg
+                    sys.exit(0)
+                self.login(passwds)
+            else:
+                #we're kerberized
+                self.kerberized = True
+                self.engine = create_engine(self.dsn, **self.pool_options)
+                connection = self.engine.connect()
+                connection.close()
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
-            if self.config.has_option("database", "disable_fsync") and \
-               self.config.getboolean("database", "disable_fsync"):
+            if config.has_option("database", "disable_fsync") and \
+               config.getboolean("database", "disable_fsync"):
                 self.engine = create_engine(self.dsn,
                                             listeners=[UnsafeSQLiteListener()])
                 log = logging.getLogger('aqdb.db_factory')
@@ -114,11 +127,10 @@ class DbFactory(object):
             connection.close()
             self.vendor = 'sqlite'
         else:
-            msg = "supported database datasources are db2, sqlite and oracle.\n"
+            msg = "supported database datasources are sqlite and oracle.\n"
             msg += "yours is '%s' "% (self.dsn)
             sys.stderr.write(msg)
             sys.exit(9)
-
 
         assert self.dsn, 'No dsn in DbFactory.__init__'
         assert self.engine, 'No engine in DbFactory.__init__'
@@ -143,27 +155,15 @@ class DbFactory(object):
         pswd_re = re.compile('PASSWORD')
         dsn_copy = self.dsn
 
-        log = logging.getLogger('aqdb.db_factory')
-        pool_options = {}
-        pool_options["pool_size"] = self.config.getint("database", "pool_size")
-        pool_options["max_overflow"] = self.config.getint("database",
-                                                          "pool_max_overflow")
-        if len(self.config.get("database", "pool_timeout").strip()) > 0:
-            pool_options["pool_timeout"] = self.config.getint("database",
-                                                              "pool_timeout")
-        else:
-            pool_options["pool_timeout"] = None
-        log.info("Database engine using pool options %s" % pool_options)
-
         for p in passwds:
             self.dsn = re.sub(pswd_re, p, dsn_copy)
-
-            self.engine = create_engine(self.dsn, **pool_options)
+            self.engine = create_engine(self.dsn, **self.pool_options)
 
             try:
                 connection = self.engine.connect()
                 connection.close()
-                self.no_lock_engine = create_engine(self.dsn, **pool_options)
+                self.no_lock_engine = create_engine(self.dsn,
+                                                    **self.pool_options)
                 return
             except SaDBError, e:
                 errs.append(e)
@@ -171,7 +171,6 @@ class DbFactory(object):
         if len(errs) >= 1:
             raise errs.pop()
         else:
-            #shouldn't get here
             msg = 'unknown issue connecting to %s'% (self.dsn)
             raise SaDBError(msg)
 
@@ -181,11 +180,11 @@ class DbFactory(object):
             (i.e. newest on top). It will try them sequentially, finally
             giving up and throwing an exception """
 
-        if self.config.has_option("database", "dbpassword"):
+        if config.has_option("database", "dbpassword"):
             #TODO: RAISE WARNING: we'd like to get out of that buisness I think
-            return [self.config.get("database", "dbpassword")]
+            return [config.get("database", "dbpassword")]
         else:
-            passwd_file = self.config.get("database", "password_file")
+            passwd_file = config.get("database", "password_file")
             passwds = []
 
             try:
@@ -203,7 +202,6 @@ class DbFactory(object):
 
     def safe_execute(self, stmt, **kw):
         """ convenience wrapper """
-
         try:
             return self.engine.execute(text(stmt), **kw)
         except SQLError, e:
@@ -219,20 +217,6 @@ class DbFactory(object):
                 return rows[0][0]
         return
 
-    def buffer_output(self, s, p=""):
-        return self.buf.write(s + p)
-
-    def ddl(self, outfile=None):
-        #TODO: reflect out the non-null constraints from oracle dbs (how???)
-        mock_engine = create_engine(self.dsn, strategy='mock',
-                                    executor=self.buffer_output)
-        self.meta.reflect()
-        self.meta.create_all(mock_engine)
-        if outfile:
-            with open(outfile, 'w') as f:
-                f.write(self.buf.getvalue())
-        else:
-            print >> sys.stderr, self.buf.getvalue()
     def get_tables(self):
         """ return a list of table names from the current databases public
         schema """
@@ -252,7 +236,7 @@ class DbFactory(object):
         """ MetaData.drop_all() doesn't play nice with db's that have sequences.
             you're alternative is to call this """
         if self.vendor is 'sqlite':
-            dbfile = self.config.get("database", "dbfile")
+            dbfile = config.get("database", "dbfile")
             if os.path.exists(dbfile):
                 os.unlink(dbfile)
 

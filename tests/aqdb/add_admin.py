@@ -37,13 +37,8 @@ log = logging.getLogger('aqdb.add_admin')
 import utils
 utils.load_classpath()
 
-import ms.modulecmd
-
 from aquilon.config import Config
-
 config = Config()
-if config.has_option("database", "module"):
-    ms.modulecmd.load(config.get("database", "module"))
 
 
 from subprocess import Popen, PIPE
