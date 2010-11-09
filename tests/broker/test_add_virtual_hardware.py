@@ -167,6 +167,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
                             "--capacity", "15", "--share", "test_share_%s" % i,
                             "--address", "0:0"])
 
+    def test_140_searchhostmemberclustershare(self):
+        command = ["search_host", "--member_cluster_share=test_share_1"]
+        out = self.commandtest(command)
+        for i in range(2, 5):
+            self.matchoutput(out, "evh%s.aqd-unittest.ms.com" % i, command)
+        self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
+
     def test_150_failaddillegaldisk(self):
         command = ["add", "disk", "--machine", "evm9", "--disk", "sda",
                    "--type", "sata", "--capacity", "15",
