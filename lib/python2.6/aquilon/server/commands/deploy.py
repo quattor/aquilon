@@ -83,9 +83,8 @@ class CommandDeploy(BrokerCommand):
                      kingdir, dbtarget.name],
                     path=tempdir, logger=logger)
             temprepo = os.path.join(tempdir, dbtarget.name)
-            # Should this use --no-ff?
             try:
-                run_git(["merge", "origin/%s" % dbsource.name],
+                run_git(["merge", "--no-ff", "origin/%s" % dbsource.name],
                         path=temprepo, logger=logger, loglevel=CLIENT_INFO)
             except ProcessException, e:
                 # No need to re-print e, output should have gone to client
