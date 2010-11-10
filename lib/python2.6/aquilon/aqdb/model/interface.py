@@ -33,13 +33,16 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint, Boolean)
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
+                        ForeignKey, UniqueConstraint, CheckConstraint)
 from sqlalchemy.orm import relation, backref, validates, object_session
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql.expression import desc, case
 
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
 from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
+
+from aquilon.aqdb.model.vlan import MAX_VLANS
 
 
 class Interface(Base):
@@ -88,12 +91,8 @@ class Interface(Base):
                                backref=backref('interfaces', cascade='all'))
 
     __mapper_args__ = {'polymorphic_on': interface_type}
-    # Interfaces also have the properties 'interfaces' and 'assignments'
-    # which are proxied in via association proxies in AddressAssignment
-
-    # There are a couple of other mappings defined in vlan.py and
-    # address_assignment.py. See the comment after VlanInterface in vlan.py for
-    # examples.
+    # Interfaces also have the property 'assignments' which is defined in
+    # address_assignment.py
 
     def __format__(self, format_spec):
         instance = "{0.name} of {1:l}".format(self, self.hardware_entity)
@@ -119,9 +118,8 @@ class Interface(Base):
 
     def all_addresses(self):
         """ Iterator returning all addresses of the interface. """
-        for vlan in self.vlan_ids:
-            for addr in self.vlans[vlan].assignments:
-                yield addr
+        for addr in self.assignments:
+            yield addr
 
     def __init__(self, **kw):  # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
@@ -129,10 +127,6 @@ class Interface(Base):
         """
         super(Interface, self).__init__(**kw)
         self.validate_mac("mac", self.mac)
-
-        # Always create the default VLAN, it makes life much simpler when
-        # converting VLAN-unaware code.
-        self.vlan_ids.append(0)
 
     def __repr__(self):
         msg = "<{0} {1} of {2}, MAC={3}>".format(self._get_class_label(),
@@ -171,6 +165,48 @@ class  OnboardInterface(Interface):
     __mapper_args__ = {'polymorphic_identity': 'oa'}
 
 
+class VlanInterface(Interface):
+    """ 802.1q VLAN interfaces """
+
+    _class_label = "VLAN Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'vlan'}
+
+    parent_id = Column(Integer, ForeignKey(Interface.id,
+                                           name='iface_vlan_parent_fk',
+                                           ondelete='CASCADE'))
+
+    vlan_id = Column(Integer)
+
+    parent = relation(Interface, uselist=False, lazy=True,
+                      remote_side=[Interface.id],
+                      backref=backref('vlans',
+                                      collection_class=attribute_mapped_collection('vlan_id')))
+
+    @validates('vlan_id')
+    def validate_vlan_id(self, key, value):
+        if not isinstance(value, int) or value <= 0 or value >= MAX_VLANS:
+            raise ValueError("Illegal VLAN ID %s: it must be greater than "
+                             "0 and smaller than %s." % (value, MAX_VLANS))
+        return value
+
+    @validates('mac')
+    def validate_mac(self, key, value):
+        if value is not None:
+            raise ValueError("VLAN interfaces can not have a distinct MAC address.")
+        return value
+
+    def __init__(self, parent=None, vlan_id=None, **kwargs):
+        if not parent:
+            raise InternalError("VLAN interfaces need a parent.")
+        if isinstance(parent, VlanInterface):
+            raise ValueError("Stacking of VLAN interfaces is not allowed.")
+        self.validate_vlan_id('vlan_id', vlan_id)
+
+        super(VlanInterface, self).__init__(parent=parent, vlan_id=vlan_id,
+                                            **kwargs)
+
+
 interface = Interface.__table__  # pylint: disable-msg=C0103, E1101
 interface.primary_key.name = 'interface_pk'
 interface.info['unique_fields'] = ['name', 'hardware_entity']
@@ -179,3 +215,11 @@ interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
 
 interface.append_constraint(
     UniqueConstraint('hardware_entity_id', 'name', name='iface_hw_name_uk'))
+
+# Order matters here, utils/constraints.py checks for endswith("NOT NULL")
+interface.append_constraint(
+    CheckConstraint("(parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < %s) "
+                    "OR interface_type <> 'vlan'" % MAX_VLANS,
+                    name="iface_vlan_ck"))
+interface.append_constraint(
+    UniqueConstraint('parent_id', 'vlan_id', name="iface_parent_vlan_uk"))

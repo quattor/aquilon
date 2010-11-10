@@ -53,6 +53,10 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.port_group:
             details.append(indent + "  Port Group: %s" % interface.port_group)
 
+        if hasattr(interface, "vlan_id"):
+            details.append(indent + "  Parent Interface: %s, VLAN ID: %s" %
+                           (interface.parent.name, interface.vlan_id))
+
         hw = interface.hardware_entity
         details.append(indent + "  Attached to: {0}".format(hw))
 

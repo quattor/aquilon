@@ -38,7 +38,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session
 
 from aquilon.aqdb.column_types import IPV4, AqStr
-from aquilon.aqdb.model import Base, Interface, VlanInterface, FutureARecord
+from aquilon.aqdb.model import Base, Interface, FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 _TN = 'address_assignment'
@@ -57,7 +57,7 @@ def _address_creator(addr):
 
 class AddressAssignment(Base):
     """
-        Assignment of IP addresses to network interfaces/VLANs.
+        Assignment of IP addresses to network interfaces.
 
         It's kept as an association map to model the linkage, since we need to
         have maximum ability to provide potentially complex configuration
@@ -74,10 +74,10 @@ class AddressAssignment(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
 
-    vlan_interface_id = Column(Integer, ForeignKey('vlan_interface.id',
-                                                   name='%s_vlan_id_fk' % _ABV,
-                                                   ondelete='CASCADE'),
-                               nullable=False)
+    interface_id = Column(Integer, ForeignKey('interface.id',
+                                              name='%s_interface_id_fk' % _ABV,
+                                              ondelete='CASCADE'),
+                          nullable=False)
 
     _label = Column("label", AqStr(16), nullable=False)
 
@@ -87,17 +87,17 @@ class AddressAssignment(Base):
 
     comments = Column(String(255), nullable=True)
 
-    #TODO: be sure about your cascade behaviors in all cases
-    vlan = relation(VlanInterface, lazy=False,
-                    backref=backref('assignments', cascade='all, delete-orphan'))
+    interface = relation(Interface, lazy=False, uselist=False,
+                         backref=backref('assignments', uselist=True,
+                                         order_by=[_label],
+                                         cascade='all, delete-orphan'))
 
-    # Setting passive_deletes is very important here as we do not want the
-    # removal of an AddressAssignment record to change the linked System
-    # record(s)
+    # Setting viewonly is very important here as we do not want the removal of
+    # an AddressAssignment record to change the linked System record(s)
     dns_records = relation(FutureARecord, lazy=True, uselist=True,
                            primaryjoin=ip == FutureARecord.ip,
                            foreign_keys=[FutureARecord.ip],
-                           passive_deletes=True,
+                           viewonly=True,
                            backref=backref('assignments', uselist=True))
 
     fqdns = association_proxy('dns_records', 'fqdn')
@@ -105,34 +105,19 @@ class AddressAssignment(Base):
     @property
     def logical_name(self):
         """
-        Compute an OS-agnostic name for this interface/VLAN/address combo.
+        Compute an OS-agnostic name for this interface/address combo.
 
         BIG FAT WARNING: do _NOT_ assume that this name really exist on the
         host!
 
-        There are external systems like DSDB that do not understand VLANs, or
-        can not handle having multiple addresses on the same interface. Because
-        of that this function generates an unique name for every
-        interface/vlan/address tuple.
-
-        Note that even if the generated name looks syntactically valid for a
-        given host, there is no guarantee that the host really uses this name
-        for this interface. The real name used by the OS is determined by the
-        templates, but we have no access to that information here.
-
-        For example, a Linux host may have a single "eth0" interface with two
-        addresses, instead of having an "eth0" and an "eth0:1" with a single
-        address each. A Solaris box (if we ever support that) will have an
-        interface called "hme7100000" instead of "hme0.710". So just to repeat,
-        the string returned here is purely for inventory reasons, used when
-        interfacing with other systems.
+        There are external systems like DSDB that can not handle having multiple
+        addresses on the same interface. Because of that this function generates
+        an unique name for every interface/address tuple.
         """
 
         # Use the Linux naming convention because people are familiar with that
         # and it is easy to parse if needed
-        name = self.vlan.interface.name
-        if self.vlan.vlan_id > 0:
-            name += ".%d" % self.vlan.vlan_id
+        name = self.interface.name
         if self.label:
             name += ":%d" % self.label
         return name
@@ -163,19 +148,17 @@ class AddressAssignment(Base):
 
     def __repr__(self):
         return "<Address %s on %s/%s>" % (self.ip,
-                                          self.vlan.interface.hardware_entity.label,
+                                          self.interface.hardware_entity.label,
                                           self.logical_name)
 
 
-address = AddressAssignment.__table__
+address = AddressAssignment.__table__  # pylint: disable-msg=C0103, E1101
 address.primary_key.name = '%s_pk' % _TN
 address.append_constraint(
-    UniqueConstraint("vlan_interface_id", "ip", name="%s_vlan_ip_uk" % _ABV))
+    UniqueConstraint("interface_id", "ip", name="%s_iface_ip_uk" % _ABV))
 address.append_constraint(
-    UniqueConstraint("vlan_interface_id", "label",
-                     name="%s_vlan_label_uk" % _ABV))
+    UniqueConstraint("interface_id", "label", name="%s_iface_label_uk" % _ABV))
 
-# Assigned to external classes here to avoid circular dependencies. See also the
-# comments after VlanInterface in vlan.py.
-VlanInterface.addresses = association_proxy('assignments', 'ip',
-                                            creator=_address_creator)
+# Assigned to external classes here to avoid circular dependencies.
+Interface.addresses = association_proxy('assignments', 'ip',
+                                        creator=_address_creator)
