@@ -367,9 +367,9 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
             raise ArgumentError("{0} has no {1} interfaces.".format(dbhw_ent,
                                                                     interface_type))
         try:
-            dbinterface = Interface(name=name, interface_type=interface_type,
-                                    mac=mac, bootable=bootable,
-                                    port_group=port_group, comments=comments)
+            cls = Interface.__mapper__.polymorphic_map[interface_type].class_
+            dbinterface = cls(name=name, mac=mac, bootable=bootable,
+                              port_group=port_group, comments=comments)
         except ValueError, err:
             raise ArgumentError(err)
 

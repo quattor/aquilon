@@ -31,7 +31,8 @@
 
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
-from aquilon.aqdb.model import Interface
+from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
+                                OnboardInterface)
 
 
 class InterfaceFormatter(ObjectFormatter):
@@ -79,6 +80,9 @@ class InterfaceFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
+ObjectFormatter.handlers[PublicInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[ManagementInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[OnboardInterface] = InterfaceFormatter()
 
 
 class MissingManagersList(list):

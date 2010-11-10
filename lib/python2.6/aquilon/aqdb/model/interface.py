@@ -41,19 +41,6 @@ from sqlalchemy.sql.expression import desc, case
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
 from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
 
-INTERFACE_TYPES = ('public', 'management', 'oa') #, 'transit')
-
-def _validate_mac(kw):  # pylint: disable-msg=C0103
-    """ Prevents null MAC addresses in certain cases.
-
-        If an interface is bootable or type 'management' we require it """
-
-    msg = 'Bootable and Management interfaces require a MAC address'
-    if kw.get('bootable') or kw.get('interface_type') == 'management':
-        if kw.get('mac') is None:
-            raise ValueError(msg)
-    return True
-
 
 class Interface(Base):
     """ Interface: Representation of network interfaces for our network
@@ -79,16 +66,17 @@ class Interface(Base):
     mac = Column(AqMac(17), nullable=True)
 
     # PXE boot control. Does not affect how the OS configures the interface.
+    # FIXME: move to PublicInterface
     bootable = Column(Boolean, nullable=False, default=False)
 
-    interface_type = Column(Enum(32, INTERFACE_TYPES),
-                            nullable=False) #TODO: index? Delete?
+    interface_type = Column(AqStr(32), nullable=False)
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
                                                     name='IFACE_HW_ENT_FK',
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
+    # FIXME: move to PublicInterface
     port_group = Column(AqStr(32), nullable=True)
 
     creation_date = Column('creation_date', DateTime, default=datetime.now,
@@ -99,6 +87,7 @@ class Interface(Base):
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
                                backref=backref('interfaces', cascade='all'))
 
+    __mapper_args__ = {'polymorphic_on': interface_type}
     # Interfaces also have the properties 'interfaces' and 'assignments'
     # which are proxied in via association proxies in AddressAssignment
 
@@ -112,10 +101,8 @@ class Interface(Base):
 
     @validates('mac')
     def validate_mac(self, key, value):
-        """ wraps _validate_mac for sqlalchemy @validates compatibility """
-        temp_dict = {'bootable': self.bootable, 'mac': value,
-                     'interface_type': self.interface_type}
-        _validate_mac(temp_dict)
+        if self.bootable and not value:
+            raise ValueError("Bootable interfaces require a MAC address.")
         return value
 
     @property
@@ -136,12 +123,12 @@ class Interface(Base):
             for addr in self.vlans[vlan].assignments:
                 yield addr
 
-    def __init__(self, **kw): # pylint: disable-msg=E1002
+    def __init__(self, **kw):  # pylint: disable-msg=E1002
         """ Overload the Base initializer to prevent null MAC addresses
             where the interface is bootable or is of type 'management'
         """
-        _validate_mac(kw)
         super(Interface, self).__init__(**kw)
+        self.validate_mac("mac", self.mac)
 
         # Always create the default VLAN, it makes life much simpler when
         # converting VLAN-unaware code.
@@ -152,6 +139,36 @@ class Interface(Base):
                                                  self.name,
                                                  self.hardware_entity, self.mac)
         return msg
+
+
+class PublicInterface(Interface):
+    """ Normal machine interfaces """
+
+    _class_label = "Public Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'public'}
+
+
+class ManagementInterface(Interface):
+    """ Management board interfaces """
+
+    _class_label = "Management Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'management'}
+
+    @validates('mac')
+    def validate_mac(self, key, value):
+        if not value:
+            raise ValueError("Management interfaces require a MAC address.")
+        return value
+
+
+class  OnboardInterface(Interface):
+    """ Switch/chassis interfaces """
+
+    _class_label = "On-board Admin Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'oa'}
 
 
 interface = Interface.__table__  # pylint: disable-msg=C0103, E1101

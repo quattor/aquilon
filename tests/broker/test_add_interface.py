@@ -396,7 +396,7 @@ class TestAddInterface(TestBrokerCommand):
                    "ut9s03p1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         'Bootable and Management interfaces require a MAC address',
+                         'Bootable interfaces require a MAC address',
                          command)
 
     def testadd_no_mac(self):
