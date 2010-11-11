@@ -60,11 +60,14 @@ class ServiceInstanceServer(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     service_instance = relation(ServiceInstance, uselist=False,
-                                backref=backref("servers",
+                                backref=backref("servers", lazy=True,
+                                                cascade="all, delete-orphan",
                                                 collection_class=ordering_list('position'),
                                                 order_by=[position]))
 
-    host = relation(Host, uselist=False, backref='services_provided')
+    host = relation(Host, uselist=False,
+                    backref=backref('services_provided', lazy=True,
+                                    cascade="all, delete-orphan"))
 
 
 service_instance_server = ServiceInstanceServer.__table__

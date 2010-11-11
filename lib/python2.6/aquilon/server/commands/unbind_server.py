@@ -57,7 +57,9 @@ class CommandUnbindServer(BrokerCommand):
         for dbinstance in dbinstances:
             for item in dbinstance.servers:
                 if item.host == dbhost:
-                    session.delete(item)
+                    dbinstance.servers.remove(item)
+                    session.expire(dbhost, ['services_provided'])
+                    break
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
