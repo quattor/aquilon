@@ -305,11 +305,11 @@ class Chooser(object):
             if len(instances) > 1:
                 # Ignore any services where an instance has not been chosen.
                 continue
-            for sis in instances[0].servers:
-                if self.servers.get(sis.host, None):
-                    self.servers[sis.host] += 1
+            for host in instances[0].server_hosts:
+                if self.servers.get(host, None):
+                    self.servers[host] += 1
                 else:
-                    self.servers[sis.host] = 1
+                    self.servers[host] = 1
 
     def reduce_service_instances(self, dbservice):
         if len(self.staging_services[dbservice]) == 1:
@@ -344,10 +344,10 @@ class Chooser(object):
             common_servers = []
             self.logger.debug("Checking service %s instance %s servers %s",
                               instance.service.name, instance.name,
-                              [sis.host.fqdn for sis in instance.servers])
-            for sis in instance.servers:
-                if self.servers.get(sis.host, None):
-                    common_servers.append(sis.host)
+                              [host.fqdn for host in instance.server_hosts])
+            for host in instance.server_hosts:
+                if self.servers.get(host, None):
+                    common_servers.append(host)
             if not common_servers:
                 continue
             if len(common_servers) > max_servers:

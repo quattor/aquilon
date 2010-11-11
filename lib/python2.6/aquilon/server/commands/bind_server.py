@@ -46,26 +46,20 @@ class CommandBindServer(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
-        for dbserver in dbinstance.servers:
-            if dbserver.host.machine_id == dbhost.machine_id:
-                # FIXME: This should just be a warning.  There is currently
-                # no way of returning output that would "do the right thing"
-                # on the client but still show status 200 (OK).
-                # The right thing would generally be writing to stderr for
-                # a CLI (either raw or csv), and some sort of generic error
-                # page for a web client.
-                raise ArgumentError("Server %s is already bound to service %s "
-                                    "instance %s." %
-                                    (hostname, service, instance))
-        positions = []
-        for dbserver in dbinstance.servers:
-            positions.append(dbserver.position)
-        position = 0
-        while position in positions:
-            position += 1
-        sis = ServiceInstanceServer(service_instance=dbinstance,
-                                    host=dbhost, position=position)
-        session.add(sis)
+        if dbhost in dbinstance.server_hosts:
+            # FIXME: This should just be a warning.  There is currently
+            # no way of returning output that would "do the right thing"
+            # on the client but still show status 200 (OK).
+            # The right thing would generally be writing to stderr for
+            # a CLI (either raw or csv), and some sort of generic error
+            # page for a web client.
+            raise ArgumentError("Server %s is already bound to service %s "
+                                "instance %s." %
+                                (hostname, service, instance))
+
+        # The ordering_list will manage the position for us
+        dbinstance.server_hosts.append(dbhost)
+
         session.flush()
         session.refresh(dbinstance)
 

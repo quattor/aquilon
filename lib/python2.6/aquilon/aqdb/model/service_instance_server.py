@@ -30,10 +30,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Table, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, Index)
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Host, ServiceInstance
 
@@ -70,5 +70,11 @@ class ServiceInstanceServer(Base):
                                     cascade="all, delete-orphan"))
 
 
-service_instance_server = ServiceInstanceServer.__table__
-service_instance_server.primary_key.name='service_instance_server_pk'
+def _sis_creator(host):
+    return ServiceInstanceServer(host=host)
+
+ServiceInstance.server_hosts = association_proxy('servers', 'host',
+                                                 creator=_sis_creator)
+
+sis = ServiceInstanceServer.__table__  # pylint: disable-msg=C0103, E1101
+sis.primary_key.name = 'service_instance_server_pk'
