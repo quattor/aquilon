@@ -46,12 +46,12 @@ class CommandAddMetaCluster(BrokerCommand):
         MetaCluster.get_unique(session, metacluster, preclude=True)
 
         if max_members is None:
-            max_members = self.config.get("broker",
-                                          "metacluster_max_members_default")
+            max_members = self.config.getint("broker",
+                                             "metacluster_max_members_default")
 
         if max_shares is None:
-            max_shares = self.config.get("broker",
-                                         "metacluster_max_shares_default")
+            max_shares = self.config.getint("broker",
+                                            "metacluster_max_shares_default")
 
         dbmetacluster = MetaCluster(name=metacluster, max_clusters=max_members,
                                     max_shares=max_shares, comments=comments)

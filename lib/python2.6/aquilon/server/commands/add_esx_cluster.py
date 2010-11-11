@@ -74,8 +74,8 @@ class CommandAddESXCluster(BrokerCommand):
                                                archetype=archetype, compel=True)
 
         if max_members is None:
-            max_members = self.config.get("broker",
-                                          "esx_cluster_max_members_default")
+            max_members = self.config.getint("broker",
+                                             "esx_cluster_max_members_default")
 
         if vm_to_host_ratio is None:
             vm_to_host_ratio = self.config.get("broker",
