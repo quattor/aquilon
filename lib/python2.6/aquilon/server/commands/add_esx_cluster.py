@@ -106,7 +106,6 @@ class CommandAddESXCluster(BrokerCommand):
         dbmetacluster.members.append(dbcluster)
 
         session.flush()
-        session.refresh(dbcluster)
 
         plenary = PlenaryCluster(dbcluster, logger=logger)
         plenary.write()

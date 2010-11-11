@@ -102,7 +102,6 @@ class CommandAddMachine(BrokerCommand):
         if cluster:
             dbcluster.machines.append(dbmachine)
             session.flush()
-            session.refresh(dbcluster)
 
         session.flush()
 

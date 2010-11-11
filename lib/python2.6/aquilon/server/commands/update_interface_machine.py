@@ -168,7 +168,6 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         session.add(dbinterface)
         session.flush()
-        session.refresh(dbinterface)
         session.refresh(dbhw_ent)
 
         plenary_info = PlenaryMachineInfo(dbhw_ent, logger=logger)

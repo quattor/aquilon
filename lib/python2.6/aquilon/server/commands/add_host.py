@@ -105,7 +105,6 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("Machines of type aurora_node can only be "
                                 "added with archetype aurora.")
 
-        session.refresh(dbmachine)
         if dbmachine.host:
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
@@ -122,7 +121,6 @@ class CommandAddHost(BrokerCommand):
                       status=dbstatus, operating_system=dbos, comments=comments)
         session.add(dbhost)
         session.flush()
-        session.refresh(dbhost)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryMachineInfo(dbmachine, logger=logger))

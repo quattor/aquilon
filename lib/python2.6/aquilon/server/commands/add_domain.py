@@ -75,7 +75,6 @@ class CommandAddDomain(BrokerCommand):
                           tracked_branch=dbtracked, comments=comments)
         session.add(dbdomain)
         session.flush()
-        session.refresh(dbdomain)
 
         domainsdir = self.config.get("broker", "domainsdir")
         clonedir = os.path.join(domainsdir, dbdomain.name)

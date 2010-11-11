@@ -83,7 +83,6 @@ class CommandUpdatePersonality(BrokerCommand):
             dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
         session.flush()
-        session.refresh(dbpersona)
 
         q = session.query(Cluster)
         q = q.with_polymorphic("*")

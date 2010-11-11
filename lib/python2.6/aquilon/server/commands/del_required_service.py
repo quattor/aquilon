@@ -51,5 +51,4 @@ class CommandDelRequiredService(BrokerCommand):
                                     "not found." % (service, archetype))
         session.delete(dbsli)
         session.flush()
-        session.refresh(dbarchetype)
         return

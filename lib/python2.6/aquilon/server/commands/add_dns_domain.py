@@ -49,7 +49,6 @@ class CommandAddDnsDomain(BrokerCommand):
             raise ArgumentError(err)
         session.add(dbdns_domain)
         session.flush()
-        session.refresh(dbdns_domain)
 
         dsdb_runner = DSDBRunner(logger=logger)
         try:
