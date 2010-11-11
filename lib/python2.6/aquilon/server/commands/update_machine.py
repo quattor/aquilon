@@ -160,9 +160,7 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.location = dbcluster.location_constraint
             dbcluster.machines.append(dbmachine)
             session.flush()
-            session.refresh(dbmachine)
-            session.refresh(dbcluster)
-            session.refresh(old_cluster)
+            session.expire(dbmachine, ['_cluster'])
             plenaries.append(PlenaryCluster(old_cluster, logger=logger))
             plenaries.append(PlenaryCluster(dbcluster, logger=logger))
 

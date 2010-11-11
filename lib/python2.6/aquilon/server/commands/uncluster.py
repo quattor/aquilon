@@ -51,7 +51,7 @@ class CommandUncluster(BrokerCommand):
                                 dbhost, dbhost.cluster, dbcluster))
         dbcluster.hosts.remove(dbhost)
         session.flush()
-        session.refresh(dbcluster)
+        session.expire(dbhost, ['_cluster'])
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenaryHost(dbhost, logger=logger))

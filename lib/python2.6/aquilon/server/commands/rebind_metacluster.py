@@ -49,7 +49,7 @@ class CommandRebindMetaCluster(BrokerCommand):
                                     "while virtual machines are attached.")
             old_metacluster = dbcluster.metacluster
             old_metacluster.members.remove(dbcluster)
-            session.refresh(dbcluster)
+            session.expire(dbcluster, ['_metacluster'])
         if not dbcluster.metacluster:
             dbmetacluster.members.append(dbcluster)
 

@@ -61,7 +61,6 @@ class CommandBindServer(BrokerCommand):
         dbinstance.server_hosts.append(dbhost)
 
         session.flush()
-        session.refresh(dbinstance)
 
         plenary_info = PlenaryServiceInstance(dbservice, dbinstance,
                                               logger=logger)

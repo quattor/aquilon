@@ -73,7 +73,7 @@ class CommandDelDisk(BrokerCommand):
             raise ArgumentError("More than one matching disks found.  "
                                 "Use --all to delete them all.")
         session.flush()
-        session.refresh(dbmachine)
+        session.expire(dbmachine, ['disks'])
 
         plenary_info = PlenaryMachineInfo(dbmachine, logger=logger)
         plenary_info.write()
