@@ -70,7 +70,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
                 short = dbchassis.primary_name.name
                 session.delete(dbchassis.primary_name)
                 session.flush()
-                session.expire(dbchassis)
+                session.expire(dbchassis, ['_primary_name_asc'])
                 dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
                                           ip=ip)
                 dbdns_rec.network = dbnetwork
