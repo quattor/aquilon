@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.service_instance import get_service_instance
-from aquilon.aqdb.model import Service, ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import Service
 from aquilon.server.templates.service import PlenaryServiceInstance
 
 
@@ -53,10 +53,7 @@ class CommandDelServiceInstance(BrokerCommand):
                                 "provided by servers: %s." %
                                 (dbservice.name, dbsi.name, msg))
 
-        # Check the service map and remove any mappings
-        session.query(ServiceMap).filter_by(service_instance=dbsi).delete()
-        session.query(PersonalityServiceMap).filter_by(service_instance=dbsi).delete()
-
+        # Depend on cascading to remove any mappings
         session.delete(dbsi)
         session.flush()
 
