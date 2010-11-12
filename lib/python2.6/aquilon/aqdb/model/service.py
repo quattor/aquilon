@@ -45,7 +45,7 @@ import re
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, Index)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Host, Archetype, Personality
@@ -118,8 +118,9 @@ class ServiceListItem(Base):
                                               ondelete='CASCADE'),
                           nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255), nullable=True)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     archetype = relation(Archetype, uselist=False, lazy=False,
                          backref=backref('_services', cascade='all'))
@@ -155,8 +156,9 @@ class PersonalityServiceListItem(Base):
                                                  ondelete='CASCADE'),
                              primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255), nullable=True)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     personality = relation(Personality, uselist=False, lazy=False,
                            backref=backref('_services', cascade='all'))

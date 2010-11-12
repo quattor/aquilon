@@ -36,7 +36,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
                         ForeignKey, UniqueConstraint, Boolean)
 
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.orm.session import object_session
@@ -192,7 +192,8 @@ class MetaClusterMember(Base):
                         #if a cluster is deleted, so is the association
                         primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     """
         Association Proxy and relation cascading:

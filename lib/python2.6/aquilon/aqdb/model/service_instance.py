@@ -33,7 +33,8 @@ import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, contains_eager, column_property, backref
+from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
+                            deferred)
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
@@ -339,8 +340,9 @@ class BuildItem(Base):
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255), nullable=True)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     service_instance = relation(ServiceInstance, uselist=False,
                                 backref=backref('clients'))

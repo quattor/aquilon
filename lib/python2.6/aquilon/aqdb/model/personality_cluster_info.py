@@ -32,7 +32,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         Float, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, reconstructor
+from sqlalchemy.orm import relation, backref, reconstructor, deferred
 from sqlalchemy.orm.collections import column_mapped_collection
 
 from aquilon.aqdb.model import Base, Personality
@@ -62,7 +62,8 @@ class PersonalityClusterInfo(Base):
                                            collection_class=column_mapped_collection(cluster_type),
                                            cascade="all"))
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
 
     __mapper_args__ = {'polymorphic_on': cluster_type}
 

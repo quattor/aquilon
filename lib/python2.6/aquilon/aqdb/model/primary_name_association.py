@@ -30,7 +30,7 @@
 
 from datetime import datetime
 
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         UniqueConstraint)
@@ -78,8 +78,9 @@ class PrimaryNameAssociation(Base):
                                                name='%s_dns_rec_fk' % _ABV),
                            primary_key=True)
 
-    creation_date = Column(DateTime, default=datetime.now, nullable=False)
-    comments = Column(String(255), nullable=True)
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = deferred(Column(String(255), nullable=True))
 
     # Cascading:
     # - do not delete the HW if the association is removed
