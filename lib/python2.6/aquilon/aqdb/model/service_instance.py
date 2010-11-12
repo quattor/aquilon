@@ -37,6 +37,7 @@ from sqlalchemy.orm import relation, contains_eager, column_property, backref
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import (Base, Service, Host, System, DnsDomain, Machine,
                                 PrimaryNameAssociation)
@@ -86,8 +87,7 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import (ClusterServiceBinding, BuildItem,
-                                        Cluster)
+        from aquilon.aqdb.model import (ClusterServiceBinding, Cluster)
         session = object_session(self)
 
         cluster_types = self.service.aligned_cluster_types
@@ -346,13 +346,15 @@ class BuildItem(Base):
                                 backref=backref('clients'))
 
     host = relation(Host, uselist=False,
-                    backref=backref('services_used',
+                    backref=backref('_services_used',
                                     cascade="all, delete-orphan"))
 
-    @property
-    def cfg_path(self):
-        return self.service_instance.cfg_path
 
+def _build_item_si_creator(service_instance):
+    return BuildItem(service_instance=service_instance)
+
+Host.services_used = association_proxy('_services_used', 'service_instance',
+                                       creator=_build_item_si_creator)
 
 build_item = BuildItem.__table__  # pylint: disable-msg=C0103, E1101
 

@@ -33,7 +33,8 @@ from socket import gethostbyname
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.server.dbwrappers.host import (hostname_to_host, get_host_build_item)
+from aquilon.server.dbwrappers.host import (hostname_to_host,
+                                            get_host_bound_service)
 from aquilon.server.processes import run_command
 from aquilon.server.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
@@ -50,11 +51,11 @@ class CommandPxeswitch(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         # Find what "bootserver" instance we're bound to
         dbservice = Service.get_unique(session, "bootserver", compel=True)
-        bootbi = get_host_build_item(session, dbhost, dbservice)
-        if not bootbi:
+        si = get_host_bound_service(dbhost, dbservice)
+        if not si:
             raise ArgumentError("{0} has no bootserver.".format(dbhost))
         # for that instance, find what servers are bound to it.
-        servers = [host.fqdn for host in bootbi.service_instance.server_hosts]
+        servers = [host.fqdn for host in si.server_hosts]
 
         command = self.config.get("broker", "installfe")
         args = [command]

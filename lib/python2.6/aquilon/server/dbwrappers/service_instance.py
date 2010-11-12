@@ -45,7 +45,3 @@ def get_service_instance(session, dbservice, instance):
                                 "add it." % (dbservice.name, instance,
                                              dbservice.name, instance))
     return dbsi
-
-def get_client_service_instances(session, dbclient):
-    service_instances = [bi.service_instance for bi in dbclient.services_used]
-    return service_instances

@@ -197,16 +197,16 @@ class PlenaryToplevelHost(Plenary):
         required_services = set(self.dbhost.archetype.services +
                                 self.dbhost.personality.services)
 
-        for t in self.dbhost.services_used:
-            required_services.discard(t.service_instance.service)
-            services.append(t.cfg_path + '/client/config')
+        for si in self.dbhost.services_used:
+            required_services.discard(si.service)
+            services.append(si.cfg_path + '/client/config')
         if required_services:
             raise IncompleteError("Host %s is missing required services %s." %
                                   (self.name, required_services))
 
         provides = []
-        for sis in self.dbhost.services_provided:
-            provides.append('%s/server/config' % sis.service_instance.cfg_path)
+        for si in self.dbhost.services_provided:
+            provides.append('%s/server/config' % si.cfg_path)
 
         templates = []
         templates.append("archetype/base")

@@ -66,15 +66,22 @@ class ServiceInstanceServer(Base):
                                                 order_by=[position]))
 
     host = relation(Host, uselist=False,
-                    backref=backref('services_provided', lazy=True,
+                    backref=backref('_services_provided', lazy=True,
                                     cascade="all, delete-orphan"))
 
 
-def _sis_creator(host):
+def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)
 
+def _sis_si_creator(service_instance):
+    return ServiceInstanceServer(service_instance=service_instance)
+
 ServiceInstance.server_hosts = association_proxy('servers', 'host',
-                                                 creator=_sis_creator)
+                                                 creator=_sis_host_creator)
+
+Host.services_provided = association_proxy('_services_provided',
+                                           'service_instance',
+                                           creator=_sis_si_creator)
 
 sis = ServiceInstanceServer.__table__  # pylint: disable-msg=C0103, E1101
 sis.primary_key.name = 'service_instance_server_pk'

@@ -31,7 +31,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, ServiceInstance, ServiceInstanceServer
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import get_service_instance
 from aquilon.server.templates.base import PlenaryCollection
@@ -57,7 +57,7 @@ class CommandUnbindServer(BrokerCommand):
         for dbinstance in dbinstances:
             if dbhost in dbinstance.server_hosts:
                 dbinstance.server_hosts.remove(dbhost)
-                session.expire(dbhost, ['services_provided'])
+                session.expire(dbhost, ['_services_provided'])
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
