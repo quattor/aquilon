@@ -47,7 +47,7 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, user, **arguments):
+    def render(self, session, logger, hostname, **arguments):
         # removing the plenary host requires a compile lock, however
         # we want to avoid deadlock by the fact that we're messing
         # with two locks here, so we want to be careful. We grab the

@@ -29,7 +29,6 @@
 
 from __future__ import with_statement
 
-from socket import gethostbyname
 from tempfile import NamedTemporaryFile
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
@@ -109,7 +108,8 @@ class CommandPxeswitchList(BrokerCommand):
                     raise ArgumentError("Missing required target parameter.")
 
                 groupargs.append("--servers")
-                groupargs.append(" ".join(["%s@%s" % (user,s) for s in servers[group]]))
+                groupargs.append(" ".join(["%s@%s" % (user, s) for s in
+                                           servers[group]]))
 
                 # it would be nice to parallelize this....
                 run_command(groupargs, logger=logger, loglevel=CLIENT_INFO)

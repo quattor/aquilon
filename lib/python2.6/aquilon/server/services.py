@@ -34,8 +34,8 @@ from random import choice
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import (Host, Cluster, BuildItem, ClusterServiceBinding,
-                                ClusterAlignedService, ServiceInstance)
+from aquilon.aqdb.model import (Host, Cluster, ClusterAlignedService,
+                                ServiceInstance)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.host import PlenaryHost

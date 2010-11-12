@@ -31,7 +31,7 @@
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import ServiceInstance
 
 

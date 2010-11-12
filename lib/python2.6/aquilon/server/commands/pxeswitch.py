@@ -29,8 +29,6 @@
 """Contains the logic for `aq pxeswitch`."""
 
 
-from socket import gethostbyname
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import (hostname_to_host,
@@ -71,7 +69,7 @@ class CommandPxeswitch(BrokerCommand):
         args.append("/dev/null")
         args.append("--servers")
         user = self.config.get("broker", "installfe_user")
-        args.append(" ".join(["%s@%s"%(user,s) for s in servers]))
+        args.append(" ".join(["%s@%s"%(user, s) for s in servers]))
         args.append("--sshdir")
         args.append(self.config.get("broker", "installfe_sshdir"))
         args.append("--logfile")

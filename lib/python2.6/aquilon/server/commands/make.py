@@ -32,8 +32,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
-from aquilon.aqdb.model import (BuildItem, HostLifecycle,
-                                OperatingSystem, Personality)
+from aquilon.aqdb.model import HostLifecycle, OperatingSystem, Personality
 from aquilon.server.templates.domain import TemplateDomain
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.server.services import Chooser

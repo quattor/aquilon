@@ -30,7 +30,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Service, ServiceInstanceServer
+from aquilon.aqdb.model import Service
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.service_instance import get_service_instance
@@ -41,8 +41,7 @@ class CommandBindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service", "instance"]
 
-    def render(self, session, logger, hostname, service, instance, user,
-               force=False, **arguments):
+    def render(self, session, logger, hostname, service, instance, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)

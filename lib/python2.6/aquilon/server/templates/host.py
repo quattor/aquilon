@@ -101,7 +101,7 @@ class PlenaryToplevelHost(Plenary):
         if not self.new_content:
             try:
                 self.new_content = self._generate_content()
-            except IncompleteError, e:
+            except IncompleteError:
                 # Attempting to have IncompleteError thrown later by
                 # not caching the return
                 return self.old_content is None
@@ -245,7 +245,7 @@ class PlenaryToplevelHost(Plenary):
         # We put in a default function: this will be overridden by the
         # personality with a more suitable value, we just leave this here
         # for paranoia's sake.
-        lines.append("'/system/function' = 'grid';");
+        lines.append("'/system/function' = 'grid';")
         lines.append("'/system/build' = %s;" % pan(self.dbhost.status.name))
         if self.dbhost.cluster:
             lines.append("'/system/cluster/name' = %s;" % pan(self.dbhost.cluster.name))

@@ -31,10 +31,9 @@
 
 from sqlalchemy.orm import aliased, joinedload_all, contains_eager
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.formats.system import SimpleSystemList
-from aquilon.aqdb.model import (Host, Cluster, Domain, Archetype, Personality,
+from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 HostLifecycle, OperatingSystem, Service,
                                 ServiceInstance, NasDisk, Disk, Machine, Model,
                                 System, DnsDomain, Interface, AddressAssignment)

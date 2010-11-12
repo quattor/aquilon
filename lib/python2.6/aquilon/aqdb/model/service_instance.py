@@ -243,7 +243,7 @@ class ServiceInstance(Base):
         return cache
 
 
-service_instance = ServiceInstance.__table__
+service_instance = ServiceInstance.__table__  # pylint: disable-msg=C0103, E1101
 
 service_instance.primary_key.name = 'svc_inst_pk'
 service_instance.append_constraint(
