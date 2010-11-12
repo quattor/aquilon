@@ -33,7 +33,7 @@ import socket
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, contains_eager, column_property
+from sqlalchemy.orm import relation, contains_eager, column_property, backref
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import or_
 from sqlalchemy.sql import select, func
@@ -342,9 +342,12 @@ class BuildItem(Base):
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
 
-    service_instance = relation(ServiceInstance, backref='clients')
+    service_instance = relation(ServiceInstance, uselist=False,
+                                backref=backref('clients'))
 
-    host = relation(Host, uselist=False, backref='services_used')
+    host = relation(Host, uselist=False,
+                    backref=backref('services_used',
+                                    cascade="all, delete-orphan"))
 
     @property
     def cfg_path(self):

@@ -29,14 +29,12 @@
 """Provides various utilities around services."""
 
 
-import logging
 from random import choice
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import ArgumentError, InternalError, IncompleteError
-from aquilon.aqdb.model import (Host, Cluster, BuildItem, ServiceMap,
-                                PersonalityServiceMap, ClusterServiceBinding,
+from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.aqdb.model import (Host, Cluster, BuildItem, ClusterServiceBinding,
                                 ClusterAlignedService, ServiceInstance)
 from aquilon.server.templates.service import PlenaryServiceInstanceServer
 from aquilon.server.templates.cluster import PlenaryCluster
@@ -462,8 +460,7 @@ class HostChooser(Chooser):
             self.required_services.add(service)
         for service in self.personality.services:
             self.required_services.add(service)
-        q = self.session.query(BuildItem).filter_by(host=self.dbhost)
-        self.original_service_build_items = q.all()
+        self.original_service_build_items = self.dbhost.services_used[:]
         """Cache of the build_items related to services."""
         self.original_service_instances = {}
         """Cache of any already bound services (keys) and the instance
@@ -545,7 +542,8 @@ class HostChooser(Chooser):
                                "previous binding for %s %s" %
                                (instance.service.name, instance.name))
                 continue
-            bi = BuildItem(host=self.dbhost, service_instance=instance)
+
+            bi = BuildItem(service_instance=instance)
             self.dbhost.services_used.append(bi)
         for instance in self.instances_unbound:
             self.logger.client_info("%s removing binding for "
@@ -558,7 +556,7 @@ class HostChooser(Chooser):
             found_instance = False
             for bi in self.original_service_build_items:
                 if bi.service_instance == instance:
-                    self.session.delete(bi)
+                    self.dbhost.services_used.remove(bi)
                     found_instance = True
                     break
             if not found_instance:
@@ -625,11 +623,8 @@ class ClusterChooser(Chooser):
                                     "service %s instance %s",
                                     self.description,
                                     instance.service.name, instance.name)
-            dbcs = ClusterServiceBinding.get_unique(self.session,
-                                                    cluster=self.dbcluster,
-                                                    service_instance=instance)
-            if dbcs:
-                self.session.delete(dbcs)
+            if instance in self.dbcluster.service_bindings:
+                self.dbcluster.service_bindings.remove(instance)
             else:
                 self.error("Internal Error: Could not unbind "
                            "service %s instance %s" %
@@ -639,9 +634,7 @@ class ClusterChooser(Chooser):
                                     "service %s instance %s",
                                     self.description,
                                     instance.service.name, instance.name)
-            dbcs = ClusterServiceBinding(cluster=self.dbcluster,
-                                         service_instance=instance)
-            self.session.add(dbcs)
+            self.dbcluster.service_bindings.append(instance)
             self.flush_changes()
             for h in self.dbcluster.hosts:
                 host_plenary = PlenaryHost(h, logger=self.logger)

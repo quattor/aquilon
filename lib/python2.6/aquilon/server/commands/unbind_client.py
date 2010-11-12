@@ -55,7 +55,7 @@ class CommandUnbindClient(BrokerCommand):
         if dbtemplate:
             logger.info("Removing client binding")
             si = dbtemplate.service_instance
-            session.delete(dbtemplate)
+            dbhost.services_used.remove(dbtemplate)
             session.flush()
 
             plenaries = PlenaryCollection(logger=logger)

@@ -91,7 +91,8 @@ class CommandDelHost(BrokerCommand):
                     bindings.append(plenary)
                 logger.info("Before deleting host '%s', removing binding '%s'"
                             % (fqdn, binding.cfg_path))
-                session.delete(binding)
+
+            del dbhost.services_used[:]
 
             # In case of Zebra, the IP may be configured on multiple interfaces
             for iface in dbmachine.interfaces:

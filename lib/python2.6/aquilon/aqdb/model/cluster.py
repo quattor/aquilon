@@ -82,6 +82,15 @@ _CASABV = 'clstr_alnd_svc'
 _CSB = 'cluster_service_binding'
 _CSBABV = 'clstr_svc_bndg'
 
+def _hcm_host_creator(host):
+    return HostClusterMember(host=host)
+
+def _mcm_machine_creator(machine):
+    return MachineClusterMember(machine=machine)
+
+def _csb_svcinst_creator(service_instance):
+    return ClusterServiceBinding(service_instance=service_instance)
+
 
 class Cluster(Base):
     """
@@ -128,13 +137,12 @@ class Cluster(Base):
     branch = relation(Branch, uselist=False, lazy=False, backref='clusters')
     sandbox_author = relation(UserPrincipal, uselist=False)
 
-    hosts = association_proxy('_hosts', 'host',
-                              creator=lambda host: HostClusterMember(host=host))
+    hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
     machines = association_proxy('_machines', 'machine',
-                         creator=lambda mach: MachineClusterMember(machine=mach))
-
+                                 creator=_mcm_machine_creator)
     service_bindings = association_proxy('_cluster_svc_binding',
-                                         'service_instance')
+                                         'service_instance',
+                                         creator=_csb_svcinst_creator)
 
     _metacluster = None
     metacluster = association_proxy('_metacluster', 'metacluster')
@@ -537,7 +545,7 @@ class ClusterServiceBinding(Base):
 
     cluster = relation(Cluster, uselist=False, lazy=False,
                        backref=backref('_cluster_svc_binding',
-                                       cascade='all'))
+                                       cascade='all, delete-orphan'))
 
     """
         backref name != forward reference name intentional as it seems more
@@ -548,7 +556,8 @@ class ClusterServiceBinding(Base):
                 cluster.service_bindings.append(svc_inst)
     """
     service_instance = relation(ServiceInstance, lazy=False,
-                                backref='service_instances')
+                                backref=backref('service_instances',
+                                                cascade="all, delete-orphan"))
 
     """
         cfg_path will die soon. using service instance here to
