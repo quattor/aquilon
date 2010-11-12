@@ -96,6 +96,7 @@ def parse_primary_name(session, fqdn, ip):
 
     if dbdns_rec and isinstance(dbdns_rec, ReservedName) and ip:
         session.delete(dbdns_rec)
+        session.flush()
         dbdns_rec = None
 
     if dbdns_rec:

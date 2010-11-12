@@ -52,4 +52,5 @@ class CommandDelRequiredServicePersonality(BrokerCommand):
                                     "%s, archetype %s not found." %
                                     (service, archetype, personality))
         session.delete(dbpsli)
+        session.flush()
         return
