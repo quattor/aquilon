@@ -129,6 +129,7 @@ from test_constraints_service import TestServiceConstraints
 from test_constraints_domain import TestDomainConstraints
 from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
+from test_constraints_interface import TestInterfaceConstraints
 from test_constraints_switch import TestSwitchConstraints
 from test_constraints_make import TestMakeConstraints
 from test_constraints_cluster import TestClusterConstraints
@@ -257,6 +258,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestArchetypeConstraints, TestPersonalityConstraints,
                 TestDomainConstraints, TestVendorConstraints,
                 TestMachineConstraints, TestSwitchConstraints,
+                TestInterfaceConstraints,
                 TestMakeConstraints,
                 TestUpdatePersonality,
                 TestClusterConstraints, TestMetaClusterConstraints,

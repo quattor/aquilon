@@ -50,6 +50,35 @@ class TestAddInterface(TestBrokerCommand):
                         "--machine", "ut3c5n10",
                         "--mac", self.net.unknown[0].usable[1].mac.lower()])
 
+    def testaddut3c5n10eth1_2(self):
+        self.noouttest(["add", "interface", "--interface", "eth1.2",
+                        "--machine", "ut3c5n10"])
+
+    def testfailvlanstacking(self):
+        command = ["add", "interface", "--interface", "eth1.2.2",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Stacking of VLAN interfaces is not allowed.",
+                         command)
+
+    def testfailvlanmac(self):
+        mac = self.net.unknown[0].usable[-1].mac
+        command = ["add", "interface", "--interface", "eth1.3",
+                   "--machine", "ut3c5n10", "--mac", mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "VLAN interfaces can not have a distinct MAC address.",
+                         command)
+
+    def testfailbadvlan(self):
+        command = ["add", "interface", "--interface", "eth1.4096",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Illegal VLAN ID 4096: it must be greater than 0 and "
+                         "smaller than 4096.",
+                         command)
+
     def testaddut3c5n10eth1again(self):
         command = ["add", "interface", "--interface", "eth1",
                    "--machine", "ut3c5n10",
@@ -66,6 +95,13 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "MAC address %s is already in use" %
                          self.net.tor_net[6].usable[0].mac, command)
 
+    def testaddut3c5n10eth2_2(self):
+        command = ["add", "interface", "--interface", "eth2.2",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Parent interface eth2 for VLAN interface "
+                         "eth2.2 does not exist", command)
+
     def testaddut3c5n10eth2automac(self):
         command = ["add", "interface", "--interface", "eth2",
                    "--machine", "ut3c5n10", "--automac"]
@@ -76,14 +112,21 @@ class TestAddInterface(TestBrokerCommand):
     def testverifyaddut3c5n10interfaces(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Interface: eth0 %s boot=True" %
-                         self.net.unknown[0].usable[0].mac.lower(),
-                         command)
-        self.matchoutput(out,
-                         "Interface: eth1 %s boot=False" %
-                         self.net.unknown[0].usable[1].mac.lower(),
-                         command)
+        self.searchoutput(out,
+                          r"Interface: eth0 %s boot=True"
+                          r"\s+Type: public" %
+                          self.net.unknown[0].usable[0].mac.lower(),
+                          command)
+        self.searchoutput(out,
+                          r"Interface: eth1 %s boot=False"
+                          r"\s+Type: public" %
+                          self.net.unknown[0].usable[1].mac.lower(),
+                          command)
+        self.searchoutput(out,
+                          r"Interface: eth1\.2 boot=False \(no MAC addr\)"
+                          r"\s+Type: vlan"
+                          r"\s+Parent Interface: eth1, VLAN ID: 2",
+                          command)
         self.matchclean(out, "Port Group", command)
 
     def testverifycatut3c5n10interfaces(self):

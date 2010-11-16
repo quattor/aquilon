@@ -119,8 +119,10 @@ class PlenaryToplevelHost(Plenary):
         default_gateway = None
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
-            if dbinterface.interface_type != 'public':
+            # Management interfaces are not configured at the host level
+            if dbinterface.interface_type == 'management':
                 continue
+
             ifdesc = {}
             ifdesc["aliases"] = []
             # XXX Move this to templates

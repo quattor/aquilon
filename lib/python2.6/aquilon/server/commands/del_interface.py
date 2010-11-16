@@ -64,6 +64,13 @@ class CommandDelInterface(BrokerCommand):
         if not dbhw_ent:
             dbhw_ent = dbinterface.hardware_entity
 
+        if dbinterface.vlans:
+            vlans = ", ".join([iface.name for iface in
+                               dbinterface.vlans.values()])
+            raise ArgumentError("{0} is the parent of the following VLAN "
+                                "interfaces, delete them first: "
+                                "{1}.".format(dbinterface, vlans))
+
         try:
             for addr in dbinterface.assignments:
                 if addr.ip != dbhw_ent.primary_ip:

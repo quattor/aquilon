@@ -57,11 +57,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        if interface == 'eth0':
-            bootable = True
-        else:
-            bootable = False
-
         prev = session.query(Interface).filter_by(
                 name=interface,hardware_entity=dbmachine).first()
         if prev:
@@ -74,6 +69,16 @@ class CommandAddInterfaceMachine(BrokerCommand):
             if interface.startswith(mtype):
                 itype = 'management'
                 break
+
+        if '.' in interface:
+            itype = 'vlan'
+
+        bootable = None
+        if itype == 'public':
+            if interface == 'eth0':
+                bootable = True
+            else:
+                bootable = False
 
         dbmanager = None
         pending_removals = PlenaryCollection()

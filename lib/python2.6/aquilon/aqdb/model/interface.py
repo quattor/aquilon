@@ -39,6 +39,7 @@ from sqlalchemy.orm import relation, backref, validates, object_session
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql.expression import desc, case
 
+from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
 from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
 
@@ -53,6 +54,9 @@ class Interface(Base):
     """
 
     __tablename__ = 'interface'
+
+    # Any extra fields the subclass needs over the generic interface parameters
+    extra_fields = []
 
     # The Natural (and composite) pk is HW_ENT_ID/NAME.
     # But is it the "correct" pk in this case???. The surrogate key is here
@@ -137,6 +141,8 @@ class PublicInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'public'}
 
+    extra_fields = ['bootable', 'port_group']
+
 
 class ManagementInterface(Interface):
     """ Management board interfaces """
@@ -166,6 +172,8 @@ class VlanInterface(Interface):
     _class_label = "VLAN Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'vlan'}
+
+    extra_fields = ['vlan_id', 'parent']
 
     parent_id = Column(Integer, ForeignKey(Interface.id,
                                            name='iface_vlan_parent_fk',

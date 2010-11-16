@@ -27,7 +27,7 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-"""Module for testing constraints in commands involving machine."""
+"""Module for testing constraints in commands involving interfaces."""
 
 import unittest
 
@@ -38,24 +38,23 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 
 
-class TestMachineConstraints(TestBrokerCommand):
+class TestInterfaceConstraints(TestBrokerCommand):
+    
+    def testdelinterfaceprimary(self):
+        command = ["del", "interface", "--interface", "eth0",
+                   "--machine", "ut3c1n3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "holds the primary address", command)
 
-    def testdelmachinewithhost(self):
-        command = "del machine --machine ut3c5n10"
-        self.badrequesttest(command.split(" "))
+    def testdelinterfacewithvlans(self):
+        command = ["del", "interface", "--interface", "eth1",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "is the parent of the following VLAN interfaces",
+                         command)
 
-    def testverifydelmachinewithhostfailed(self):
-        command = "show machine --machine ut3c5n10"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
-
-    # Expected to fail without the --all flag...
-    def testdelalldisks(self):
-        command = "del disk --machine ut3c5n10"
-        self.badrequesttest(command.split(" "))
 
 
 if __name__=='__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMachineConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestInterfaceConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
