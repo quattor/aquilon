@@ -59,8 +59,14 @@ class ClusterFormatter(ObjectFormatter):
                 details.append(indent + "  {0:c}: {0!s}".format(cluster.switch))
             caps = cluster.get_total_capacity()
             if caps:
-                capstr = ", ".join(["%s: %s" % (name, value) for name, value in
-                                    caps.items()])
+                overrides = cluster.get_capacity_overrides()
+                values = []
+                for name, value in caps.items():
+                    flags = ""
+                    if overrides.get(name) is not None:
+                        flags = " [override]"
+                    values.append("%s: %s%s" % (name, value, flags))
+                capstr = ", ".join(values)
             else:
                 capstr = None
             details.append(indent + "  Capacity limits: %s" % capstr)

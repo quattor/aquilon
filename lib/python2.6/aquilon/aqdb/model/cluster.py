@@ -293,6 +293,10 @@ class EsxCluster(Cluster):
 
         return resmap
 
+    def get_capacity_overrides(self):
+        """Used by the raw formatter to flag a capacity as overridden."""
+        return {'memory': self.memory_capacity}
+
     def get_total_usage(self):
         """ Return the amount of resources used by the virtual machines """
         func = self.virtmachine_capacity_function

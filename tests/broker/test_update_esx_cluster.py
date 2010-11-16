@@ -80,7 +80,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: 97", command)
         self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
         self.matchoutput(out, "Down Hosts Threshold: 0",command)
-        self.matchoutput(out, "Capacity limits: memory: 16384", command)
+        self.matchoutput(out, "Capacity limits: memory: 16384 [override]",
+                         command)
         self.matchoutput(out, "Personality: esx_desktop Archetype: vmhost",
                          command)
         self.matchoutput(out, "Comments: ESX Cluster with a new comment",
@@ -94,6 +95,11 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl3", command)
         self.matchclean(out, "utecl4", command)
         self.matchclean(out, "utecl5", command)
+
+    def test_225_verifynooverrideflag(self):
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchclean(out, "override", command)
 
     def test_230_failupdateutecl2(self):
         command = ["update_esx_cluster", "--cluster", "utecl2",
