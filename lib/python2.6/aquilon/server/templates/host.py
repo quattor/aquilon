@@ -128,7 +128,7 @@ class PlenaryToplevelHost(Plenary):
             # XXX Move this to templates
             ifdesc["bootproto"] = "static"
             if isinstance(dbinterface, VlanInterface):
-                ifdesc["vlan"] = "true"
+                ifdesc["vlan"] = True
                 ifdesc["physdev"] = dbinterface.parent.name
 
             for addr in dbinterface.assignments:
