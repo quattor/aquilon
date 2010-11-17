@@ -32,6 +32,7 @@
 #should always be reviewed by DHCP Eng.
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint, CheckConstraint)
@@ -39,7 +40,7 @@ from sqlalchemy.orm import relation, backref, validates, object_session
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql.expression import desc, case
 
-from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr, Enum
 from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
 
@@ -57,6 +58,9 @@ class Interface(Base):
 
     # Any extra fields the subclass needs over the generic interface parameters
     extra_fields = []
+
+    # Name syntax restrictions
+    name_check = None
 
     # The Natural (and composite) pk is HW_ENT_ID/NAME.
     # But is it the "correct" pk in this case???. The surrogate key is here
@@ -108,6 +112,14 @@ class Interface(Base):
             raise ValueError("Bootable interfaces require a MAC address.")
         return value
 
+    @validates('name')
+    def validate_name(self, key, value):
+        if self.__class__.name_check and \
+           not self.__class__.name_check.match(value):
+            raise ValueError("Illegal %s interface name '%s'." %
+                             (self.interface_type, value))
+        return value
+
     @property
     def last_observation(self):
         session = object_session(self)
@@ -143,6 +155,8 @@ class PublicInterface(Interface):
 
     extra_fields = ['bootable', 'port_group']
 
+    name_check = re.compile(r"^[a-z]+\d*$")
+
 
 class ManagementInterface(Interface):
     """ Management board interfaces """
@@ -150,6 +164,8 @@ class ManagementInterface(Interface):
     _class_label = "Management Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'management'}
+
+    name_check = re.compile(r"^[a-z]+\d*$")
 
     @validates('mac')
     def validate_mac(self, key, value):
@@ -165,6 +181,8 @@ class  OnboardInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'oa'}
 
+    # There are interface names like "gigabitethernet0/1", so no name checks for
+    # now.
 
 class VlanInterface(Interface):
     """ 802.1q VLAN interfaces """
@@ -174,6 +192,8 @@ class VlanInterface(Interface):
     __mapper_args__ = {'polymorphic_identity': 'vlan'}
 
     extra_fields = ['vlan_id', 'parent']
+
+    name_check = re.compile(r"^[a-z]+\d*\.[1-9]\d*$")
 
     parent_id = Column(Integer, ForeignKey(Interface.id,
                                            name='iface_vlan_parent_fk',
