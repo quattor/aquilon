@@ -29,7 +29,7 @@
 """ Contains the logic for `aq add interface --switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Switch
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import get_or_create_interface
@@ -59,6 +59,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
 
         """
         dbswitch = Switch.get_unique(session, switch, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
@@ -72,7 +73,13 @@ class CommandAddInterfaceSwitch(BrokerCommand):
 
         if dbswitch.primary_name.ip and not dbswitch.primary_name.assignments:
             dbinterface.addresses.append(dbswitch.primary_ip)
+
         session.flush()
 
-        # We could theoretically add the mac information to DSDB...
-        # doesn't seem worth the trouble.
+        dsdb_runner = DSDBRunner(logger=logger)
+        try:
+            dsdb_runner.update_host(dbswitch, oldinfo)
+        except AquilonError, err:
+            raise ArgumentError("Could not update switch in DSDB: %s" % err)
+
+        return
