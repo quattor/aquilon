@@ -1088,6 +1088,7 @@
          <option name="switch" type="string" conflicts="machine hostname chassis">Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
+         <option name="type" type="string">Interface type: public, management, oa, vlan</option>
          <option name="comments" type="string">Comments</option>
          <option name="ip" type="ipv4" conflicts="hostname ipfromip ipfromsystem autoip">IP address</option>
          <option name="ipfromip" type="ipv4" conflicts="hostname ip ipfromsystem autoip">choose IP address in subnet</option>

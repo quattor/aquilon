@@ -42,7 +42,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
     invalid_parameters = ['automac', 'ip', 'ipfromip', 'ipfromsystem',
                           'autoip', 'ipalgorithm', 'pg', 'autopg']
 
-    def render(self, session, logger, interface, switch, mac, comments,
+    def render(self, session, logger, interface, switch, mac, type, comments,
                **arguments):
         """This command can handle three cases:
 
@@ -58,6 +58,10 @@ class CommandAddInterfaceSwitch(BrokerCommand):
         In this case, just record the new interface.
 
         """
+        if type and type != "oa":
+            raise ArgumentError("Only 'oa' is allowed as the interface type "
+                                "for switches.")
+
         dbswitch = Switch.get_unique(session, switch, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
 

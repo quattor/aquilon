@@ -44,8 +44,12 @@ class CommandAddInterfaceChassis(BrokerCommand):
 
     required_parameters = ["interface", "chassis", "mac"]
 
-    def render(self, session, logger, interface, chassis, mac, comments, user,
+    def render(self, session, logger, interface, chassis, mac, type, comments,
                **arguments):
+        if type and type != "oa":
+            raise ArgumentError("Only 'oa' is allowed as the interface type "
+                                "for chassis.")
+
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         dbinterface = get_or_create_interface(session, dbchassis,

@@ -53,7 +53,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, automac,
-               pg, autopg, comments, **arguments):
+               pg, autopg, type, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
@@ -63,18 +63,23 @@ class CommandAddInterfaceMachine(BrokerCommand):
             raise ArgumentError("Machine %s already has an interface named %s."
                     % (machine, interface))
 
-        itype = 'public'
-        management_types = ['bmc', 'ilo', 'ipmi']
-        for mtype in management_types:
-            if interface.startswith(mtype):
-                itype = 'management'
-                break
+        if not type:
+            type = 'public'
+            management_types = ['bmc', 'ilo', 'ipmi']
+            for mtype in management_types:
+                if interface.startswith(mtype):
+                    type = 'management'
+                    break
 
-        if '.' in interface:
-            itype = 'vlan'
+            if '.' in interface:
+                type = 'vlan'
+
+        if type == "oa":
+            raise ArgumentError("Interface type 'oa' is not valid for "
+                                "machines.")
 
         bootable = None
-        if itype == 'public':
+        if type == 'public':
             if interface == 'eth0':
                 bootable = True
             else:
@@ -93,7 +98,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # - the old interface belongs to a machine
             # - the old interface is associated with a host
             # - that host was blindly created, and thus can be removed safely
-            if prev and itype == 'management' and \
+            if prev and type == 'management' and \
                prev.hardware_entity.hardware_type == 'machine' and \
                prev.hardware_entity.host and \
                prev.hardware_entity.host.status.name == 'blind':
@@ -131,7 +136,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
-                                              interface_type=itype, mac=mac,
+                                              interface_type=type, mac=mac,
                                               bootable=bootable,
                                               port_group=port_group,
                                               comments=comments, preclude=True)
