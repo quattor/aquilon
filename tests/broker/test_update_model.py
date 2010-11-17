@@ -44,14 +44,17 @@ class TestUpdateModel(TestBrokerCommand):
     def test_000_sanitycheck(self):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         '"ram" = list(create("hardware/ram/generic", '
-                         '"size", 8192*MB));',
-                         command)
-        self.matchoutput(out, 'create("hardware/cpu/intel/xeon_2500")',
-                         command)
-        self.matchoutput(out, "'capacity', 15*GB,", command)
-        self.matchoutput(out, "'interface', 'sata',", command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2500"\)\s*\);',
+                          command)
+        self.matchoutput(out, '"capacity", 15*GB,', command)
+        self.matchoutput(out, '"interface", "sata",', command)
 
     def test_100_updateexisting(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
@@ -72,14 +75,17 @@ class TestUpdateModel(TestBrokerCommand):
     def test_120_verifymachine(self):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         '"ram" = list(create("hardware/ram/generic", '
-                         '"size", 4096*MB));',
-                         command)
-        self.matchoutput(out, 'create("hardware/cpu/intel/utcpu")',
-                         command)
-        self.matchoutput(out, "'capacity', 45*GB,", command)
-        self.matchoutput(out, "'interface', 'scsi',", command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 4096\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/utcpu"\)\s*\);',
+                          command)
+        self.matchoutput(out, '"capacity", 45*GB,', command)
+        self.matchoutput(out, '"interface", "scsi",', command)
 
     def test_200_faildisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
@@ -108,14 +114,17 @@ class TestUpdateModel(TestBrokerCommand):
     def test_230_verifymachine(self):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         '"ram" = list(create("hardware/ram/generic", '
-                         '"size", 4096*MB));',
-                         command)
-        self.matchoutput(out, 'create("hardware/cpu/intel/utcpu")',
-                         command)
-        self.matchoutput(out, "'capacity', 45*GB,", command)
-        self.matchoutput(out, "'interface', 'scsi',", command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 4096\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/utcpu"\)\s*\);',
+                          command)
+        self.matchoutput(out, '"capacity", 45*GB,', command)
+        self.matchoutput(out, '"interface", "scsi",', command)
 
     def test_300_updatetype(self):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",

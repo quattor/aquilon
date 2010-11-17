@@ -77,7 +77,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
+            """'/hardware' = create("machine/americas/ut/ut3/ut3c5n10");""",
             command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -179,7 +179,7 @@ class TestMakeAquilon(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
+            """'/hardware' = create("machine/americas/ut/ut3/ut3c1n3");""",
             command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'

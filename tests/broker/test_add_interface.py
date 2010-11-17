@@ -133,14 +133,15 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.unknown[0].usable[0].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*\);'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[1].mac,
                           command)
 
@@ -196,14 +197,15 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.unknown[0].usable[2].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*\);'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[3].mac,
                           command)
         self.searchoutput(out,
@@ -255,9 +257,10 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[5].mac,
                           command)
 
@@ -506,15 +509,16 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut11s01p1"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.tor_net2[2].usable[2].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
+                          r'"eth1", nlist\(\s*'
                           r'"hwaddr", "%s",\s*'
-                          r'"port_group", "storage-v701",\s*\);'
+                          r'"port_group", "storage-v701"\s*\)\s*\);'
                           % self.net.vm_storage_net[0].usable[0].mac,
                           command)
 

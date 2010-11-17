@@ -40,7 +40,7 @@ from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.cluster import PlenaryClusterClient
-from aquilon.server.templates.panutils import pan
+from aquilon.server.templates.panutils import pan, StructureTemplate
 
 LOGGER = logging.getLogger('aquilon.server.templates.host')
 
@@ -196,7 +196,8 @@ class PlenaryToplevelHost(Plenary):
         lines.append("")
         lines.append("include { 'pan/units' };")
         pmachine = PlenaryMachineInfo(self.dbhost.machine)
-        lines.append("'/hardware' = create('%(plenary_template)s');" % pmachine.__dict__)
+        lines.append("'/hardware' = %s;" %
+                     pan(StructureTemplate(pmachine.plenary_template)))
         lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
         if default_gateway:
             lines.append("'/system/network/default_gateway' = %s;" %

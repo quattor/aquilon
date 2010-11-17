@@ -64,7 +64,7 @@ class TestDelDisk(TestBrokerCommand):
     def testverifycatut3c1n3disk(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, '"harddisks"', command)
+        self.matchclean(out, "harddisks", command)
 
     def testfaildelunknowntype(self):
         command = ["del", "disk", "--machine", "ut3c1n3",

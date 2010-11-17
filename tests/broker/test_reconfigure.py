@@ -73,7 +73,7 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/ut/ut3/ut3c5n10');""",
+            """'/hardware' = create("machine/americas/ut/ut3/ut3c5n10");""",
             command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -124,7 +124,7 @@ class TestReconfigure(TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/ut/ut3/ut3c1n3');""",
+            """'/hardware' = create("machine/americas/ut/ut3/ut3c1n3");""",
             command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'
@@ -318,7 +318,7 @@ class TestReconfigure(TestBrokerCommand):
         self.matchclean(out, "chooser2", command)
         self.matchclean(out, "chooser3", command)
         self.matchoutput(out,
-            """'/hardware' = create('machine/americas/ut/ut9/ut9s03p37');""",
+            """'/hardware' = create("machine/americas/ut/ut9/ut9s03p37");""",
             command)
         self.matchoutput(out,
             """include { "archetype/base" };""",

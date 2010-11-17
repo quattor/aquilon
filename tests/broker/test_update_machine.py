@@ -67,17 +67,16 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        # 1st cpu
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
-            command)
-        # 2nd cpu
-        self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_2660"));""",
-            command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          command)
 
     def testupdateut3c5n10(self):
         self.noouttest(["update", "machine",
@@ -117,17 +116,16 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        # 1st cpu
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_2660"),""",
-            command)
-        # 2nd cpu
-        self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_2660"));""",
-            command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          command)
 
     def testupdateut3c1n4(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
@@ -167,17 +165,16 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out,
             """include { 'hardware/machine/ibm/hs21-8853l5u' };""",
             command)
-        self.matchoutput(out,
-            """"ram" = list(create("hardware/ram/generic", "size", 8192*MB));""",
-            command)
-        # 1st cpu
-        self.matchoutput(out,
-            """"cpu" = list(create("hardware/cpu/intel/xeon_3000"),""",
-            command)
-        # 2nd cpu
-        self.matchoutput(out,
-            """create("hardware/cpu/intel/xeon_3000"));""",
-            command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 8192\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_3000"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_3000"\s*\)\s*\);',
+                          command)
 
     def testclearchassis(self):
         command = ["update", "machine", "--machine", "ut9s03p1",

@@ -105,14 +105,15 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic/eth0" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*\);'
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\),'
                           % self.net.unknown[0].usable[11].mac,
                           command)
         self.searchoutput(out,
-                          r'"cards/nic/eth1" = nlist\(\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"boot", true,\s*\);'
+                          r'"eth1", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net.unknown[0].usable[12].mac,
                           command)
 

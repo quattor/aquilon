@@ -77,16 +77,8 @@ class TestDelInterface(TestBrokerCommand):
     def testverifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out,
-                        """"cards/nic/eth0/hwdelr" = "%s";""" %
-                        self.net.unknown[0].usable[2].mac,
-                        command)
-        self.matchclean(out, """"cards/nic/eth0/boot" = true;""", command)
-        self.matchclean(out,
-                        """"cards/nic/eth1/hwdelr" = "%s";""" %
-                        self.net.unknown[0].usable[3].mac,
-                        command)
-        self.matchclean(out, """"cards/nic/eth1/boot" = true;""", command)
+        self.matchclean(out, "eth0", command)
+        self.matchclean(out, "eth1", command)
 
 
 if __name__=='__main__':
