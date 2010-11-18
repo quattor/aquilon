@@ -1232,6 +1232,60 @@
       <transport method="post" path="interface/command/del" />
    </command>
 
+   <command name="add_interface_address">
+      Assign a new IP address to an interface.
+      <p/>
+      If you specify only --fqdn, and none of the IP generation options, then
+      the appropriate DNS record must already exist. If you specify both --fqdn
+      and an IP generation option, then a new DNS record will be created.
+      <p/>
+      Valid values for the --usage option are: "system" and "zebra". To
+      configure Zebra, the same IP address with the same label and with
+      "--usage zebra" must be added to multiple physical interfaces.
+      <optgroup name="add_interface_address_req" mandatory="True" fields="all">
+         <optgroup name="add_interface_address_hw_opts" mandatory="True" fields="any">
+            <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
+            <option name="chassis" type="string" conflicts="machine switch">Chassis name</option>
+            <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
+         </optgroup>
+         <option name="interface" type="string">Name of the interface.</option>
+         <option name="fqdn" type="string">FQDN of the new address</option>
+      </optgroup>
+      <optgroup name="add_interface_address_opt" mandatory="False" fields="any">
+	 <option name="label" type="string">Interface alias of the new address</option>
+	 <option name="usage" type="string">Use of the new address (default: system)</option>
+         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+      </optgroup>
+      <optgroup name="add_interface_address_ip_opts" mandatory="False" fields="any">
+         <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
+         <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
+         <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
+         <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on MAC/switch</option>
+      </optgroup>
+      <transport method="put" path="interface_address"/>
+   </command>
+
+   <command name="del_interface_address">
+      Delete an IP address from an interface.
+      <optgroup name="del_interface_address_hw_opts" mandatory="True" fields="any">
+         <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
+         <option name="chassis" type="string" conflicts="machine switch">Chassis name</option>
+         <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
+      </optgroup>
+      <optgroup name="del_interface_address_req" mandatory="True" fields="all">
+         <option name="interface" type="string">Name of the interface</option>
+      </optgroup>
+      <optgroup name="del_interface_address_opt" mandatory="False" fields="any">
+         <option name="keep_dns" type="flag">Keep the DNS record</option>
+      </optgroup>
+      <optgroup name="del_interface_address_ip_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>
+         <option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
+         <option name="label" type="string" conflicts="fqdn">Interface alias</option>
+      </optgroup>
+      <transport method="delete" path="interface_address"/>
+   </command>
+
    <command name="add_service">
       Add a new service. If --instance is also specified, then also
       create a named instance for this service at the same time. Default templates

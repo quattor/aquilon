@@ -431,12 +431,30 @@ class DSDBRunner(object):
             else:
                 continue
 
-            key = '%s:%s' % (primary, addr.logical_name)
-            status[key] = {'name': addr.logical_name,
-                           'mac': addr.interface.mac,
+            # Zebra: in AQDB the address is assigned to multiple existing
+            # interfaces. In DSDB however, we need just a single virtual
+            # interface
+            # FIXME: support for multiple Zebra-managed addresses
+            if addr.usage == "zebra":
+                ifname = "vip"
+            else:
+                ifname = addr.logical_name
+
+            key = '%s:%s' % (primary, ifname)
+
+            if key in status:
+                continue
+
+            status[key] = {'name': ifname,
                            'ip': addr.ip,
                            'fqdn': fqdn,
                            'primary': primary}
+
+            # Exclude the MAC address for aliases
+            if addr.label:
+                status[key]["mac"] = None
+            else:
+                status[key]["mac"] = addr.interface.mac
         return status
 
     def update_host(self, dbhw_ent, oldinfo):

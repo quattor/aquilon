@@ -145,6 +145,28 @@ class TestAddInterface(TestBrokerCommand):
                           % self.net.unknown[0].usable[1].mac,
                           command)
 
+    def testaddut3c5n2(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n2",
+                        "--mac", self.net.unknown[11].usable[0].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n2",
+                        "--mac", self.net.unknown[12].usable[0].mac])
+
+    def testverifyut3c5n2(self):
+        command = "cat --machine ut3c5n2"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),\s*'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          % (self.net.unknown[11].usable[0].mac,
+                             self.net.unknown[12].usable[0].mac),
+                          command)
+
     def testaddut3c1n3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3",

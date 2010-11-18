@@ -37,17 +37,22 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, object_session
 
-from aquilon.aqdb.column_types import IPV4, AqStr
+from aquilon.aqdb.column_types import IPV4, AqStr, Enum
 from aquilon.aqdb.model import Base, Interface, FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 _TN = 'address_assignment'
 _ABV = 'addr_assign'
 
+# Valid values:
+# - system: used/configured by the operating system
+# - zebra: used/configured by Zebra
+ADDR_USAGES = ['system', 'zebra']
+
 
 def _address_creator(addr):
     if isinstance(addr, IPv4Address):
-        return AddressAssignment(ip=addr, label=None)
+        return AddressAssignment(ip=addr, label=None, usage="system")
     elif isinstance(addr, dict):
         return AddressAssignment(**addr)
     else:  # pragma: no cover
@@ -82,6 +87,8 @@ class AddressAssignment(Base):
     _label = Column("label", AqStr(16), nullable=False)
 
     ip = Column(IPV4, nullable=False)
+
+    usage = Column(Enum(16, ADDR_USAGES), nullable=False)
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
 

@@ -117,6 +117,7 @@ class PlenaryToplevelHost(Plenary):
         session = object_session(self.dbhost)
 
         interfaces = dict()
+        vips = dict()
         default_gateway = None
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbhost.machine.interfaces:
@@ -132,6 +133,26 @@ class PlenaryToplevelHost(Plenary):
                 ifdesc["physdev"] = dbinterface.parent.name
 
             for addr in dbinterface.assignments:
+                if addr.usage == "zebra":
+                    if addr.label not in vips:
+                        vips[addr.label] = {"ip": addr.ip,
+                                            "interfaces": [dbinterface.name]}
+                    else:
+                        # Sanity check
+                        if vips[addr.label]["ip"] != addr.ip:
+                            raise ArgumentError("Zebra configuration mismatch: "
+                                                "label %s has IP %s on "
+                                                "interface %s, but IP %s on "
+                                                "interface %s." %
+                                                (addr.label, addr.ip,
+                                                 dbinterface.name,
+                                                 vips[addr.label]["ip"],
+                                                 vips[addr.label]["interfaces"][0].name))
+                        vips[addr.label]["interfaces"].append(dbinterface.name)
+                    continue
+                elif addr.usage != "system":
+                    continue
+
                 net = addr.network
 
                 if addr.label == "":
@@ -202,6 +223,8 @@ class PlenaryToplevelHost(Plenary):
         if default_gateway:
             lines.append("'/system/network/default_gateway' = %s;" %
                          pan(default_gateway))
+        if vips:
+            lines.append('"/system/network/vips" = %s;' % pan(vips))
         lines.append("")
         # XXX: remove!
         # We put in a default function: this will be overridden by the

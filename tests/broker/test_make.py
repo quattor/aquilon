@@ -80,6 +80,43 @@ class TestMake(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 compiled", command)
 
+    def testmakezebra(self):
+        command = ["make", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "1/1 compiled", command)
+
+    def testverifyunittest20(self):
+        eth1_ip = self.net.unknown[12].usable[0]
+        eth1_1_ip = self.net.unknown[12].usable[3]
+        zebra_ip = self.net.unknown[13].usable[0]
+        broadcast = self.net.unknown[12].broadcast
+        netmask = self.net.unknown[12].netmask
+        gateway = self.net.unknown[12].gateway
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/network/vips" = nlist\(\s*'
+                          r'"hostname", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\)\s*\);' % zebra_ip,
+                          command)
+        self.searchoutput(out,
+                          r'"eth1", nlist\(\s*'
+                          r'"aliases", nlist\(\s*'
+                          r'escape\("1"\), nlist\(\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)\s*\),\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (broadcast, eth1_1_ip, netmask,
+                           broadcast, gateway, eth1_ip, netmask),
+                          command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)

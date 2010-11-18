@@ -87,6 +87,14 @@ class TestDelAddress(TestBrokerCommand):
                          "supported." % default,
                          command)
 
+    def testdelunittest20_e1(self):
+        ip = self.net.unknown[12].usable[0]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "address", "--ip", ip,
+                   "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAddress)
