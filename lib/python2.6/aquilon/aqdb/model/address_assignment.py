@@ -119,7 +119,7 @@ class AddressAssignment(Base):
         # and it is easy to parse if needed
         name = self.interface.name
         if self.label:
-            name += ":%d" % self.label
+            name += ":%s" % self.label
         return name
 
     @property
