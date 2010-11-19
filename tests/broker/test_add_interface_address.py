@@ -146,6 +146,15 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--fqdn", "zebra.aqd-unittest.ms.com", "--ip", ip]
         self.noouttest(command)
 
+    def test_failslaveaddress(self):
+        # eth1 is enslaved to bond0
+        command = ["add", "interface", "address", "--machine", "ut3c5n3",
+                   "--interface", "eth1", "--fqdn",
+                   "arecord14.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Slave interfaces cannot hold addresses.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)

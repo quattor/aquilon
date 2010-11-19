@@ -32,7 +32,8 @@
 from aquilon.server.formats.formatters import ObjectFormatter
 from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
-                                OnboardInterface, VlanInterface)
+                                OnboardInterface, VlanInterface,
+                                BondingInterface, BridgeInterface)
 
 
 class InterfaceFormatter(ObjectFormatter):
@@ -56,6 +57,10 @@ class InterfaceFormatter(ObjectFormatter):
         if hasattr(interface, "vlan_id"):
             details.append(indent + "  Parent Interface: %s, VLAN ID: %s" %
                            (interface.parent.name, interface.vlan_id))
+
+        if interface.master:
+            details.append(indent + "  Master Interface: %s" %
+                           interface.master.name)
 
         hw = interface.hardware_entity
         details.append(indent + "  Attached to: {0}".format(hw))
@@ -82,6 +87,8 @@ ObjectFormatter.handlers[PublicInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[ManagementInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[OnboardInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[VlanInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[BondingInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[BridgeInterface] = InterfaceFormatter()
 
 
 class MissingManagersList(list):

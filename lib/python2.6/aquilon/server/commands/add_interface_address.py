@@ -64,6 +64,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         dbinterface = get_interface(session, interface, dbhw_ent, None)
 
+        if dbinterface.master:
+            raise ArgumentError("Slave interfaces cannot hold addresses.")
+
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
         ip = generate_ip(session, dbinterface, **kwargs)

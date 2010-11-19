@@ -71,6 +71,12 @@ class CommandDelInterface(BrokerCommand):
                                 "interfaces, delete them first: "
                                 "{1}.".format(dbinterface, vlans))
 
+        if dbinterface.slaves:
+            slaves = ", ".join([iface.name for iface in dbinterface.slaves])
+            raise ArgumentError("{0} is the master of the following slave "
+                                "interfaces, delete them first: "
+                                "{1}.".format(dbinterface, slaves))
+
         try:
             for addr in dbinterface.assignments:
                 if addr.ip != dbhw_ent.primary_ip:

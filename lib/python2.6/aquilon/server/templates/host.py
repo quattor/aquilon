@@ -35,7 +35,8 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
-from aquilon.aqdb.model import Host, AddressAssignment, VlanInterface
+from aquilon.aqdb.model import (Host, AddressAssignment, VlanInterface,
+                                BondingInterface, BridgeInterface)
 from aquilon.server.locks import CompileKey
 from aquilon.server.templates.base import Plenary, PlenaryCollection
 from aquilon.server.templates.machine import PlenaryMachineInfo
@@ -126,8 +127,20 @@ class PlenaryToplevelHost(Plenary):
                 continue
 
             ifdesc = {}
-            # XXX Move this to templates
-            ifdesc["bootproto"] = "static"
+
+            if dbinterface.master:
+                ifdesc["bootproto"] = "none"
+                if isinstance(dbinterface.master, BondingInterface):
+                    ifdesc["master"] = dbinterface.master.name
+                elif isinstance(dbinterface.master, BridgeInterface):
+                    ifdesc["bridge"] = dbinterface.master.name
+                else:
+                    raise InternalError("Unexpected master interface type: "
+                                        "{0}".format(dbinterface.master))
+            else:
+                # XXX Move this to templates and allow it to be set to DHCP
+                ifdesc["bootproto"] = "static"
+
             if isinstance(dbinterface, VlanInterface):
                 ifdesc["vlan"] = True
                 ifdesc["physdev"] = dbinterface.parent.name

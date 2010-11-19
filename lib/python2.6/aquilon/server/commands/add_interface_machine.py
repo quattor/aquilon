@@ -71,6 +71,12 @@ class CommandAddInterfaceMachine(BrokerCommand):
                     type = 'management'
                     break
 
+            if interface.startswith("bond"):
+                type = 'bonding'
+            elif interface.startswith("br"):
+                type = 'bridge'
+
+            # Test it last, VLANs can be added on top of almost anything
             if '.' in interface:
                 type = 'vlan'
 

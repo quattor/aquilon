@@ -47,7 +47,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, ip, boot,
-               pg, autopg, comments, **arguments):
+               pg, autopg, comments, master, clear_master, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -83,6 +83,26 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             dbinterface.port_group = choose_port_group(
                 dbinterface.hardware_entity)
 
+        if master:
+            if dbinterface.addresses:
+                # FIXME: as a special case, if the only address is the
+                # primary IP, then we could just move it to the master
+                # interface. However this can be worked around by bonding
+                # the interface before calling "add host", so don't bother
+                # for now.
+                raise ArgumentError("Can not enslave {0:l} because it has "
+                                    "addresses.".format(dbinterface))
+            dbmaster = get_interface(session, master, dbhw_ent, None)
+            if dbmaster in dbinterface.all_slaves():
+                raise ArgumentError("Enslaving {0:l} would create a circle, "
+                                    "which is not allowed.".format(dbinterface))
+            dbinterface.master = dbmaster
+
+        if clear_master:
+            if not dbinterface.master:
+                raise ArgumentError("{0} is not a slave.".format(dbinterface))
+            dbinterface.master = None
+
         if ip:
             if len(dbinterface.addresses) > 1:
                 raise ArgumentError("{0} has multiple addresses, "
@@ -91,6 +111,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
             dbnetwork = get_net_id_from_ip(session, ip)
             check_ip_restrictions(dbnetwork, ip)
+
+            if dbinterface.master:
+                raise ArgumentError("Slave interfaces cannot hold addresses.")
 
             if dbinterface.assignments:
                 assignment = dbinterface.assignments[0]

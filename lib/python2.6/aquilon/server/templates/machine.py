@@ -157,6 +157,11 @@ class PlenaryMachineInfo(Plenary):
                     managers[addr.logical_name] = manager
                 if not has_addr:
                     managers[interface.name] = {"hwaddr": interface.mac}
+            elif interface.interface_type == 'bonding':
+                # Bonding interfaces need an entry under /hardware/cards/nic
+                # only if the MAC address has been explicitely set
+                if interface.mac:
+                    interfaces[interface.name] = {"hwaddr": interface.mac}
 
         # Firstly, location
         lines.append('"location" = %s;' % pan(self.sysloc))

@@ -167,6 +167,94 @@ class TestAddInterface(TestBrokerCommand):
                              self.net.unknown[12].usable[0].mac),
                           command)
 
+    def testaddut3c5n3(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n3",
+                        "--mac", self.net.unknown[11].usable[1].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n3",
+                        "--mac", self.net.unknown[12].usable[1].mac])
+
+    def testaddut3c5n3bond0(self):
+        # Let the broker guess the type
+        self.noouttest(["add", "interface", "--interface", "bond0",
+                        "--machine", "ut3c5n3"])
+
+    def testenslaveut3c5n3eth0(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n3",
+                        "--interface", "eth0", "--master", "bond0"])
+
+    def testenslaveut3c5n3eth1(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n3",
+                        "--interface", "eth1", "--master", "bond0"])
+
+    def testforbidcircle(self):
+        command = ["update", "interface", "--machine", "ut3c5n3",
+                   "--interface", "bond0", "--master", "eth0"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Enslaving bonding interface bond0 of machine ut3c5n3 "
+                         "would create a circle, which is not allowed.",
+                         command)
+
+    def testverifyut3c5n3(self):
+        command = "cat --machine ut3c5n3"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),\s*'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          % (self.net.unknown[11].usable[1].mac,
+                             self.net.unknown[12].usable[1].mac),
+                          command)
+
+    def testaddut3c5n4(self):
+        self.noouttest(["add", "interface", "--interface", "eth0",
+                        "--machine", "ut3c5n4",
+                        "--mac", self.net.unknown[11].usable[2].mac])
+        self.noouttest(["add", "interface", "--interface", "eth1",
+                        "--machine", "ut3c5n4",
+                        "--mac", self.net.unknown[12].usable[2].mac])
+
+    def testaddut3c5n4br0(self):
+        # Specify the interface type explicitely this time
+        self.noouttest(["add", "interface", "--interface", "br0",
+                        "--type", "bridge", "--machine", "ut3c5n4"])
+
+    def testenslaveut3c5n4eth0(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n4",
+                        "--interface", "eth0", "--master", "br0"])
+
+    def testenslaveut3c5n4eth1(self):
+        self.noouttest(["update", "interface", "--machine", "ut3c5n4",
+                        "--interface", "eth1", "--master", "br0"])
+
+    def testfailbridgemac(self):
+        mac = self.net.unknown[0].usable[-1].mac
+        command = ["add", "interface", "--interface", "br1",
+                   "--machine", "ut3c5n4", "--mac", mac]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Bridge interfaces can not have a distinct MAC address.",
+                         command)
+
+    def testverifyut3c5n4(self):
+        command = "cat --machine ut3c5n4"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", nlist\(\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\),\s*'
+                          r'"eth1", nlist\(\s*'
+                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          % (self.net.unknown[11].usable[2].mac,
+                             self.net.unknown[12].usable[2].mac),
+                          command)
+
     def testaddut3c1n3eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3",

@@ -53,6 +53,12 @@ class TestInterfaceConstraints(TestBrokerCommand):
         self.matchoutput(out, "is the parent of the following VLAN interfaces",
                          command)
 
+    def testdelmasterwithslaves(self):
+        command = ["del", "interface", "--interface", "bond0",
+                   "--machine", "ut3c5n3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "is the master of the following slave interfaces",
+                         command)
 
 
 if __name__=='__main__':

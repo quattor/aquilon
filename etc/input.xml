@@ -1201,11 +1201,13 @@
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
-         <option name="ip" type="ipv4">IP address</option>
+         <option name="ip" type="ipv4" conflicts="master">IP address</option>
          <option name="boot" type="boolean">Mark the interface as bootable</option>
          <option name="pg" type="string" conflicts="autopg">portgroup, or an empty string to clear</option>
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="comments" type="string">Comments</option>
+         <option name="master" type="string" conflicts="ip clear_master">Enslave interface to the given master</option>
+         <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />

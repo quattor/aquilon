@@ -32,6 +32,7 @@
 #should always be reviewed by DHCP Eng.
 
 from datetime import datetime
+from collections import deque
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
@@ -87,6 +88,11 @@ class Interface(Base):
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
+    master_id = Column(Integer, ForeignKey('interface.id',
+                                           name='iface_master_fk',
+                                           ondelete='CASCADE'),
+                       nullable=True)
+
     # FIXME: move to PublicInterface
     port_group = Column(AqStr(32), nullable=True)
 
@@ -97,6 +103,11 @@ class Interface(Base):
 
     hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
                                backref=backref('interfaces', cascade='all'))
+
+    master = relation('Interface', uselist=False, lazy=True,
+                      remote_side=id,
+                      primaryjoin=master_id == id,
+                      backref=backref('slaves', lazy=True))
 
     __mapper_args__ = {'polymorphic_on': interface_type}
     # Interfaces also have the property 'assignments' which is defined in
@@ -118,6 +129,19 @@ class Interface(Base):
            not self.__class__.name_check.match(value):
             raise ValueError("Illegal %s interface name '%s'." %
                              (self.interface_type, value))
+        return value
+
+    @validates('master')
+    def validate_master(self, key, value):
+        if value is not None and not isinstance(value, BondingInterface) and \
+           not isinstance(value, BridgeInterface):
+            raise ValueError("The master must be a bonding or bridge interface.")
+        if self.vlans:
+            raise ValueError("{0} can not be bound as long as it has "
+                             "VLANs.".format(self))
+        if self.assignments:
+            raise ValueError("{0} cannot be enslaved as long as it holds "
+                             "addresses.".format(self))
         return value
 
     @property
@@ -144,6 +168,15 @@ class Interface(Base):
                                                  self.name,
                                                  self.hardware_entity, self.mac)
         return msg
+
+    def all_slaves(self):
+        queue = deque(self.slaves)
+        slaves = []
+        while queue:
+            iface = queue.popleft()
+            slaves.append(iface)
+            queue.extend(iface.slaves)
+        return slaves
 
 
 class PublicInterface(Interface):
@@ -202,8 +235,9 @@ class VlanInterface(Interface):
     vlan_id = Column(Integer)
 
     parent = relation(Interface, uselist=False, lazy=True,
-                      remote_side=[Interface.id],
-                      backref=backref('vlans',
+                      remote_side=Interface.id,
+                      primaryjoin=parent_id == Interface.id,
+                      backref=backref('vlans', lazy=True,
                                       collection_class=attribute_mapped_collection('vlan_id')))
 
     @validates('vlan_id')
@@ -228,6 +262,35 @@ class VlanInterface(Interface):
 
         super(VlanInterface, self).__init__(parent=parent, vlan_id=vlan_id,
                                             **kwargs)
+
+
+class BondingInterface(Interface):
+    """ Channel bonding interfaces """
+
+    _class_label = "Bonding Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'bonding'}
+
+    # The templates also enforce this naming
+    name_check = re.compile(r'^bond\d+$')
+
+
+class BridgeInterface(Interface):
+    """ Level 2 bridge interfaces """
+
+    _class_label = "Bridge Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'bridge'}
+
+    # Bridges on Linux could have any random name, but the templates also
+    # enforce this naming
+    name_check = re.compile(r'^br\d+$')
+
+    @validates('mac')
+    def validate_mac(self, key, value):
+        if value is not None:
+            raise ValueError("Bridge interfaces can not have a distinct MAC address.")
+        return value
 
 
 interface = Interface.__table__  # pylint: disable-msg=C0103, E1101

@@ -115,6 +115,10 @@ class CommandAddHost(BrokerCommand):
            arguments.get("ipfromip", None) or arguments.get("autoip", None):
             dbinterface = get_or_create_interface(session, dbmachine,
                                                   bootable=True)
+            # In case of bonding/bridging, we need to assign the address to the
+            # master, not the slave
+            while dbinterface.master:
+                dbinterface = dbinterface.master
         else:
             dbinterface = None
 
