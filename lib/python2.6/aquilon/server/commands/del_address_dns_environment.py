@@ -58,6 +58,22 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                                     "{1:l}, therefore it cannot be "
                                     "deleted.".format(dbaddress,
                                                       dbaddress.hardware_entity))
+
+            # Do not allow deleting the DNS record if the IP address is still in
+            # use - except if there are other DNS records having the same
+            # address
+            if dbaddress.assignments:
+                last_use = []
+                # FIXME: race condition here, we should use
+                # SELECT ... FOR UPDATE
+                for addr in dbaddress.assignments:
+                    if len(addr.dns_records) == 1:
+                        last_use.append(addr)
+                if last_use:
+                    users = " ,".join([format(addr.interface, "l") for addr in
+                                       last_use])
+                    raise ArgumentError("IP address %s is still in use by %s." %
+                                        (ip, users))
             session.delete(dbaddress)
             session.flush()
 

@@ -87,6 +87,27 @@ class TestDelAddress(TestBrokerCommand):
                          "supported." % default,
                          command)
 
+    def testfailprimary(self):
+        ip = self.net.unknown[0].usable[2]
+        command = ["del", "address", "--ip", ip, "--fqdn",
+                   "unittest00.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS record unittest00.one-nyp.ms.com [%s] is the "
+                         "primary name of machine unittest00.one-nyp.ms.com, "
+                         "therefore it cannot be deleted." % ip,
+                         command)
+
+    def testfailipinuse(self):
+        ip = self.net.unknown[0].usable[3]
+        command = ["del", "address", "--ip", ip, "--fqdn",
+                   "unittest00-e1.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is still in use by public interface "
+                         "eth1 of machine unittest00.one-nyp.ms.com" % ip,
+                         command)
+
     def testdelunittest20_e1(self):
         ip = self.net.unknown[12].usable[0]
         self.dsdb_expect_delete(ip)
