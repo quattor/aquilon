@@ -82,6 +82,11 @@ class CommandPollSwitch(BrokerCommand):
                 self.clear(session, logger, switch)
             self.poll_mac(session, logger, switch, now)
             if vlan:
+                if switch.switch_type != "tor":
+                    logger.client_info("Skipping VLAN probing on {0:l}, it's "
+                                       "not a ToR switch.".format(switch))
+                    continue
+
                 try:
                     self.poll_vlan(session, logger, switch, now)
                 except ProcessException, e:
