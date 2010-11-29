@@ -69,6 +69,7 @@ from test_update_service import TestUpdateService
 from test_add_required_service import TestAddRequiredService
 from test_organization import TestOrganization
 from test_add_building import TestAddBuilding
+from test_add_city import TestAddCity
 from test_add_room import TestAddRoom
 from test_add_location import TestAddLocation
 from test_add_rack import TestAddRack
@@ -225,6 +226,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddArchetype, TestAddOS, TestAddPersonality,
                 TestAddService, TestUpdateService, TestAddRequiredService,
                 TestAddBuilding, TestAddRoom, TestAddLocation,
+                TestAddCity,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
                 TestAddNetwork,
                 TestAddMetaCluster, TestAddESXCluster,

@@ -30,13 +30,15 @@
 
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.aqdb.model import Service, Machine, Branch, Personality, Cluster
+from aquilon.aqdb.model import (Service, Machine, Branch, Personality,
+                                Cluster, City)
 from aquilon.server.templates.personality import PlenaryPersonality
 from aquilon.server.templates.cluster import PlenaryCluster
 from aquilon.server.templates.service import (PlenaryService,
                                               PlenaryServiceInstance)
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.templates.host import PlenaryHost
+from aquilon.server.templates.city import PlenaryCity
 from aquilon.server.locks import lock_queue, CompileKey
 from aquilon.exceptions_ import PartialError, IncompleteError
 
@@ -44,7 +46,8 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 class CommandFlush(BrokerCommand):
 
     def render(self, session, logger, user, 
-               services, personalities, machines, clusters, hosts, all,
+               services, personalities, machines, clusters, hosts,
+               locations, all,
                **arguments):
         success = []
         failed = []
@@ -53,6 +56,17 @@ class CommandFlush(BrokerCommand):
         key = CompileKey(logger=logger)
         try:
             lock_queue.acquire(key)
+
+            if locations or all:
+                logger.client_info("Flushing locations.")
+                for dbloc in session.query(City).all():
+                    try:
+                        plenary = PlenaryCity(dbloc)
+                        written += plenary.write(locked=True)
+                    except Exception, e:
+                        failed.append("City %s failed: %s" %
+                                      dbloc, e)
+                        continue
 
             if services or all:
                 logger.client_info("Flushing services.")

@@ -31,21 +31,32 @@
 
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
-from aquilon.server.commands.del_location import CommandDelLocation
+from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.templates.city import PlenaryCity
+from aquilon.server.locks import lock_queue
 
-
-class CommandDelCity(CommandDelLocation):
+class CommandDelCity(BrokerCommand):
 
     required_parameters = ["city"]
 
     def render(self, session, logger, city, **arguments):
-        # This should probably be refactored into a method that would
-        # return the database label that was removed.  (For now, added
-        # calls to strip() and lower() below.)
-        result = CommandDelLocation.render(self, session=session, name=city,
-                                           type='city', **arguments)
+        dbcity = get_location(session, city=city)
+        label = dbcity.name
+        plenary = PlenaryCity(dbcity, logger=logger)
+        session.delete(dbcity)
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.del_city(city.strip().lower())
-        return result
+        key = plenary.get_remove_key()
+        try:
+            lock_queue.acquire(key)
+            plenary.remove(locked=True)
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.del_city(label)
+        except:
+            plenary.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
+
+
+        return

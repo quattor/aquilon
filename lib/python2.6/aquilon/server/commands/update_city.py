@@ -26,23 +26,27 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" City is a subclass of Location """
-from sqlalchemy import Column, Integer, String, ForeignKey
+"""Contains the logic for `aq update city`."""
 
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, Country
-from aquilon.aqdb.column_types.aqstr import AqStr
 
-class City(Location):
-    """ City is a subtype of location """
-    __tablename__ = 'city'
-    __mapper_args__ = {'polymorphic_identity' : 'city'}
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='city_loc_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
-    timezone = Column(String(64), nullable=True, default = 'UTC')
+from aquilon.server.broker import BrokerCommand
+from aquilon.server.dbwrappers.location import get_location
+from aquilon.server.templates.city import PlenaryCity
+from aquilon.server.locks import lock_queue
 
-city = City.__table__
-city.primary_key.name='city_pk'
-city.info['unique_fields'] = ['name']
+
+class CommandUpdateCity(BrokerCommand):
+
+    required_parameters = ["city", "timezone"]
+
+    def render(self, session, logger, city, timezone, **arguments):
+        dbcity = get_location(session, city=city)
+        if timezone is not None:
+            dbcity.timezone = timezone
+
+        session.flush()
+
+        plenary = PlenaryCity(dbcity, logger=logger)
+        plenary.write()
+
+        return

@@ -63,7 +63,7 @@ class TestBrokerCommand(unittest.TestCase):
         if protodir not in sys.path:
             sys.path.append(protodir)
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
-                  'aqddnsdomains_pb2']:
+                  'aqddnsdomains_pb2', "aqdlocations_pb2"]:
             globals()[m] = __import__(m)
 
         self.sandboxdir = os.path.join(self.config.get("broker",
@@ -386,6 +386,19 @@ class TestBrokerCommand(unittest.TestCase):
                                  "%d host(s) expected, got %d\n" %
                                  (expect, received))
         return hostlist
+
+    def parse_location_msg(self, msg, expect=None):
+        loclist = aqdlocations_pb2.LocationList()
+        loclist.ParseFromString(msg)
+        received = len(loclist.locations)
+        if expect is None:
+            self.failUnless(received > 0,
+                            "No locations in LocationList protobuf\n")
+        else:
+            self.failUnlessEqual(received, expect,
+                                 "%d location(s) expected, got %d\n" %
+                                 (expect, received))
+        return loclist
 
     def parse_dns_domainlist_msg(self, msg, expect=None):
         dns_domainlist = aqddnsdomains_pb2.DNSDomainList()

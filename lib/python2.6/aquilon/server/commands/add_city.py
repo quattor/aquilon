@@ -29,8 +29,11 @@
 """Contains the logic for `aq add city`."""
 
 
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.processes import DSDBRunner
+from aquilon.server.locks import lock_queue
+from aquilon.server.templates.city import PlenaryCity
 from aquilon.server.commands.add_location import (CommandAddLocation,
                                                   add_location)
 
@@ -40,14 +43,32 @@ class CommandAddCity(CommandAddLocation):
     required_parameters = ["city", "country"]
 
     def render(self, session, logger, city, country, fullname, comments,
+               timezone,
                **arguments):
 
         new_loc = add_location(session, city, fullname, 'city', country,
                                'country', comments)
+        if timezone is not None:
+            new_loc.timezone = timezone
         session.add(new_loc)
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_city(city, country, fullname)
+        plenary = PlenaryCity(new_loc, logger=logger)
+        key = plenary.get_write_key()
+        try:
+            lock_queue.acquire(key)
+            plenary.write(locked=True)
+
+            dsdb_runner = DSDBRunner(logger=logger)
+            try:
+                dsdb_runner.add_city(city, country, fullname)
+            except AquilonError, err:
+                raise ArgumentError("Could not add city to DSDB: %s" % err)
+
+        except:
+            plenary.restore_stash()
+            raise
+        finally:
+            lock_queue.release(key)
 
         return
