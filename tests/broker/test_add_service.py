@@ -367,6 +367,7 @@ class TestAddService(TestBrokerCommand):
                          "structure template service/nas_disk_share/"
                          "test_share_1/client/nasinfo",
                          command)
+        self.matchoutput(out, "'sharename' = 'test_share_1';", command)
         self.matchoutput(out, "'server' = 'lnn30f1';", command)
         self.matchoutput(out, "'mountpoint' = '/vol/lnn30f1v1/test_share_1';",
                          command)
