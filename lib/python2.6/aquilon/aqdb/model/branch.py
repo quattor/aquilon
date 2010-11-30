@@ -30,15 +30,16 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Table, Integer, Boolean, DateTime, Sequence, String,
-                        Column, ForeignKey, UniqueConstraint,
-                        ForeignKeyConstraint)
-from sqlalchemy.orm import relation, backref
+from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
+                        Column, ForeignKey, UniqueConstraint)
+from sqlalchemy.orm import relation
 
-from aquilon.config import Config
-from aquilon.utils import monkeypatch
 from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
+
+_TN = "branch"
+_DMN = "domain"
+_SBX = "sandbox"
 
 
 class Branch(Base):
@@ -47,32 +48,38 @@ class Branch(Base):
         templates in use broker-side (domains) or client-side (sandboxes)
         for testing and managing systems.
     """
-    __tablename__ = 'branch'
-    id = Column(Integer, Sequence('branch_id_seq'), primary_key=True)
+    __tablename__ = _TN
+
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
+
     branch_type = Column(AqStr(16), nullable=False)
+
     name = Column(AqStr(32), nullable=False)
 
     compiler = Column(String(255), nullable=False)
-    is_sync_valid = Column(Boolean, nullable=False, default=True)
-    autosync = Column(Boolean, nullable=False, default=True)
+
+    is_sync_valid = Column(Boolean(name="%s_is_sync_valid_ck" % _TN),
+                           nullable=False, default=True)
+
+    autosync = Column(Boolean(name="%s_autosync_ck" % _TN), nullable=False,
+                      default=True)
 
     owner_id = Column(Integer, ForeignKey('user_principal.id',
-                                          name='branch_user_princ_fk'),
+                                          name='%s_user_princ_fk' % _TN),
                       nullable=False)
 
-    creation_date = Column( DateTime, default=datetime.now, nullable=False)
-    comments = Column('comments', String(255), nullable=True)
+    creation_date = Column(DateTime, default=datetime.now, nullable=False)
+
+    comments = Column(String(255), nullable=True)
 
     owner = relation(UserPrincipal, uselist=False, backref='domain')
 
     __mapper_args__ = {'polymorphic_on': branch_type}
 
-branch = Branch.__table__
-branch.primary_key.name = 'branch_pk'
-branch.append_constraint(UniqueConstraint('name', name='branch_uk'))
+branch = Branch.__table__  # pylint: disable-msg=C0103, E1101
+branch.primary_key.name = '%s_pk' % _TN
+branch.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
 branch.info['unique_fields'] = ['name']
-
-table = branch
 
 
 class Domain(Branch):
@@ -80,22 +87,22 @@ class Domain(Branch):
         Template branch where the checked out contents are managed
         solely by the broker.
     """
-    __tablename__ = 'domain'
+    __tablename__ = _DMN
 
-    domain_id = Column(Integer, ForeignKey('branch.id', name='domain_fk',
+    domain_id = Column(Integer, ForeignKey('branch.id', name='%s_fk' % _DMN,
                                            ondelete='CASCADE'),
                        primary_key=True)
 
     tracked_branch_id = Column(Integer, ForeignKey('branch.id',
-                                                   name='domain_branch_fk'),
+                                                   name='%s_branch_fk' % _DMN),
                                nullable=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
-    __mapper_args__ = {'polymorphic_identity': 'domain',
+    __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 
-domain = Domain.__table__
-domain.primary_key.name = 'domain_pk'
+domain = Domain.__table__  # pylint: disable-msg=C0103, E1101
+domain.primary_key.name = '%s_pk' % _DMN
 domain.info['unique_fields'] = ['name']
 Domain.tracked_branch = relation(Branch, uselist=False, backref='trackers',
         primaryjoin=Domain.tracked_branch_id == Branch.id)
@@ -106,13 +113,13 @@ class Sandbox(Branch):
         Template branch where the checked out contents are managed
         by a user.  Multiple users can have a sandbox checked out.
     """
-    __tablename__ = 'sandbox'
-    __mapper_args__ = {'polymorphic_identity': 'sandbox'}
+    __tablename__ = _SBX
+    __mapper_args__ = {'polymorphic_identity': _SBX}
 
-    sandbox_id = Column(Integer, ForeignKey('branch.id', name='sandbox_fk',
+    sandbox_id = Column(Integer, ForeignKey('branch.id', name='%s_fk' % _SBX,
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-sandbox = Sandbox.__table__
-sandbox.primary_key.name = 'sandbox_pk'
+sandbox = Sandbox.__table__  # pylint: disable-msg=C0103, E1101
+sandbox.primary_key.name = '%s_pk' % _SBX
 sandbox.info['unique_fields'] = ['name']

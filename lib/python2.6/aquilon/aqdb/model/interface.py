@@ -42,10 +42,13 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql.expression import desc, case
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import AqMac, AqStr, Enum
+from aquilon.aqdb.column_types import AqMac, AqStr
 from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac
 
 from aquilon.aqdb.model.vlan import MAX_VLANS
+
+_TN = "interface"
+_ABV = "iface"
 
 
 class Interface(Base):
@@ -55,7 +58,7 @@ class Interface(Base):
         types, and a bootable flag to aid our DHCP and machine configuration.
     """
 
-    __tablename__ = 'interface'
+    __tablename__ = _TN
 
     # Any extra fields the subclass needs over the generic interface parameters
     extra_fields = []
@@ -71,25 +74,26 @@ class Interface(Base):
     # It's also extra work we may not enjoy, it means rewriting the table
     # since we'd blow away its PK.
 
-    id = Column(Integer, Sequence('interface_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
 
-    name = Column(AqStr(32), nullable=False) #like e0, hme1, etc.
+    name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
     mac = Column(AqMac(17), nullable=True)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
-    bootable = Column(Boolean, nullable=False, default=False)
+    bootable = Column(Boolean(name="%s_bootable_ck" % _ABV), nullable=False,
+                      default=False)
 
     interface_type = Column(AqStr(32), nullable=False)
 
     hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
-                                                    name='IFACE_HW_ENT_FK',
+                                                    name='%s_hw_ent_fk' % _ABV,
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
     master_id = Column(Integer, ForeignKey('interface.id',
-                                           name='iface_master_fk',
+                                           name='%s_master_fk' % _ABV,
                                            ondelete='CASCADE'),
                        nullable=True)
 
@@ -217,6 +221,7 @@ class  OnboardInterface(Interface):
     # There are interface names like "gigabitethernet0/1", so no name checks for
     # now.
 
+
 class VlanInterface(Interface):
     """ 802.1q VLAN interfaces """
 
@@ -294,18 +299,18 @@ class BridgeInterface(Interface):
 
 
 interface = Interface.__table__  # pylint: disable-msg=C0103, E1101
-interface.primary_key.name = 'interface_pk'
+interface.primary_key.name = '%s_pk' % _TN
 interface.info['unique_fields'] = ['name', 'hardware_entity']
 
-interface.append_constraint(UniqueConstraint('mac', name='iface_mac_addr_uk'))
+interface.append_constraint(UniqueConstraint('mac', name='%s_mac_addr_uk' % _ABV))
 
 interface.append_constraint(
-    UniqueConstraint('hardware_entity_id', 'name', name='iface_hw_name_uk'))
+    UniqueConstraint('hardware_entity_id', 'name', name='%s_hw_name_uk' % _ABV))
 
 # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
 interface.append_constraint(
     CheckConstraint("(parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < %s) "
                     "OR interface_type <> 'vlan'" % MAX_VLANS,
-                    name="iface_vlan_ck"))
+                    name="%s_vlan_ck" % _ABV))
 interface.append_constraint(
-    UniqueConstraint('parent_id', 'vlan_id', name="iface_parent_vlan_uk"))
+    UniqueConstraint('parent_id', 'vlan_id', name="%s_parent_vlan_uk" % _ABV))

@@ -62,11 +62,18 @@ class MetaCluster(Base):
     _class_label = "Metacluster"
 
     id = Column(Integer, Sequence('%s_seq' % _MCT), primary_key=True)
+
     name = Column(AqStr(64), nullable=False)
+
     max_clusters = Column(Integer, default=2, nullable=False)
+
     max_shares = Column(Integer, nullable=False)
-    high_availability = Column(Boolean, default=False, nullable=False)
+
+    high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
+                               nullable=False)
+
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
+
     comments = Column(String(255))
 
     members = association_proxy('_clusters', 'cluster',

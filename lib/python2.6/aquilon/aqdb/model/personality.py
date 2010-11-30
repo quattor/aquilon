@@ -30,9 +30,8 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, Index)
 from sqlalchemy.orm import relation
-from sqlalchemy.orm.session import object_session
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Archetype
@@ -63,9 +62,11 @@ class Personality(Base):
         return self.format_helper(format_spec, instance)
 
 
-personality = Personality.__table__
+personality = Personality.__table__   # pylint: disable-msg=C0103, E1101
 
 personality.primary_key.name = '%s_pk' % (_ABV)
 personality.append_constraint(UniqueConstraint('name', 'archetype_id',
                                                name='%s_uk' % (_TN)))
 personality.info['unique_fields'] = ['name', 'archetype']
+
+Index('%s_arch_idx' % _ABV, personality.c.archetype_id)
