@@ -77,6 +77,7 @@ from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
 from test_add_network import TestAddNetwork
+from test_add_ns_record import TestAddNSRecord
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_esx_cluster_aligned_service import (
@@ -120,7 +121,7 @@ from test_refresh_windows_hosts import TestRefreshWindowsHosts
 from test_constraints_chooser import TestChooserConstraints
 from test_flush import TestFlush
 from test_compile import TestCompile
-from test_profile import TestProfile 
+from test_profile import TestProfile
 from test_bind_server import TestBindServer
 from test_constraints_bind_client import TestBindClientConstraints
 from test_constraints_bind_server import TestBindServerConstraints
@@ -201,6 +202,7 @@ from test_del_os import TestDelOS
 from test_del_archetype import TestDelArchetype
 from test_del_domain import TestDelDomain
 from test_del_sandbox import TestDelSandbox
+from test_del_ns_record import TestDelNSRecord
 from test_del_dns_domain import TestDelDnsDomain
 from test_client_failure import TestClientFailure
 from test_client_bypass import TestClientBypass
@@ -232,7 +234,7 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestAddBuilding, TestAddRoom, TestAddLocation,
                 TestAddCity,
                 TestAddRack, TestAddVendor, TestAddCpu, TestAddModel,
-                TestAddNetwork,
+                TestAddNetwork, TestAddNSRecord,
                 TestAddMetaCluster, TestAddESXCluster,
                 TestAddESXClusterAlignedService,
                 TestClusterEarlyConstraints,
@@ -295,7 +297,8 @@ class BrokerTestSuite(unittest.TestSuite):
                 TestDelRack, TestDelRoom,
                 TestDelBuilding, TestDelRequiredService, TestDelService,
                 TestDelPersonality, TestDelOS, TestDelArchetype,
-                TestDelDomain, TestDelSandbox, TestDelDnsDomain,
+                TestDelDomain, TestDelSandbox,
+                TestDelNSRecord, TestDelDnsDomain,
                 TestClientFailure,
                 TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
