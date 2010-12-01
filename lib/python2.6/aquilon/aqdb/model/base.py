@@ -293,7 +293,15 @@ class Base(object):
         return query.subquery()
 
     @classmethod
-    def ddl(self):
+    def ddl(self):  # pragma: no cover
+        """ Returns the DDL SqlAlchemy will use to generate the table.
+
+            This method is used to aid rapid upgrade sql scripts for new
+            tables, but make careful note that it won't properly rename any
+            constraints made on a per column basis. The utils.contstraints
+            module contains utilities for this and should also be part of the
+            creation of any new tables during upgrade procedures """
+
         return str(CreateTable(self.__table__))
 
 #Base = declarative_base(metaclass=VersionedMeta, cls=Base)
