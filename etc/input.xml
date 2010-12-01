@@ -3249,4 +3249,29 @@
       <transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s/%(ip)s" />
    </command>
 
+   <command name="show_ns_record">
+      Display NS Records
+      <optgroup name="show_ns_record_opts" mandatory="True" fields="all">
+         <option name="dns_domain" type="string">The dns domain name</option>
+      </optgroup>
+      <optgroup name="show_ns_optional" mandatory="False" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name of the server</option>
+      </optgroup>
+      <transport method="get" path="find/ns_record" />
+   </command>
+
+   <command name="add_ns_record">
+      Add an NS Record (Name Server) to a Dns Domain/Environment
+      <optgroup name="add_ns_record_opts" mandatory="True" fields="all">
+         <option name="fqdn" type="string">The fully qualified domain name of the name server</option>
+         <option name="dns_domain" type="string">The dns domain to add the record to</option>
+      </optgroup>
+      <optgroup name="add_ns_record_optional" mandatory="False">
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="ns_record/%(dns_domain)s/%(fqdn)s" />
+   </command>
+
+
+
 </commandline>
