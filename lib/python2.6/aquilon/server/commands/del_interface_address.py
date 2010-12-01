@@ -29,7 +29,7 @@
 """Contains the logic for `aq del interface address`."""
 
 from aquilon.server.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError, ProcessException, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, AddressAssignment,
                                 FutureARecord)
 from aquilon.server.dbwrappers.interface import get_interface
@@ -110,7 +110,14 @@ class CommandDelInterfaceAddress(BrokerCommand):
             key = plenary_info.get_write_key()
             try:
                 lock_queue.acquire(key)
-                plenary_info.write(locked=True)
+                try:
+                    plenary_info.write(locked=True)
+                except IncompleteError:
+                    # FIXME: if this command is used after "add host" but before
+                    # "make", then writing out the template will fail due to
+                    # required services not being assigned. Ignore this error
+                    # for now.
+                    plenary_info.restore_stash()
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 try:
