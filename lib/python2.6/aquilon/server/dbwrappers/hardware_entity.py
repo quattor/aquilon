@@ -86,8 +86,8 @@ def parse_primary_name(session, fqdn, ip):
     dbdns_rec = System.get_unique(session, name=short, dns_domain=dbdns_domain)
 
     if dbdns_rec and dbdns_rec.hardware_entity:
-        raise ArgumentError("{0} already exists as the primary name of "
-                            "{1:l}.".format(fqdn, dbdns_rec.hardware_entity))
+        raise ArgumentError("{0} already exists as the primary name of {1:cl} "
+                            "{1.label}.".format(fqdn, dbdns_rec.hardware_entity))
     if ip:
         addr = session.query(AddressAssignment).filter_by(ip=ip).first()
         if addr:
