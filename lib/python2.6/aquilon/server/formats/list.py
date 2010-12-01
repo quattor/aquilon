@@ -78,4 +78,7 @@ class ListFormatter(ObjectFormatter):
                 [self.redirect_html(item) for item in result]
                 ) + "</li>\n</ul>\n"
 
+    def format_djb(self, result):
+        return "\n".join([self.redirect_djb(item) for item in result])
+
 ObjectFormatter.handlers[list] = ListFormatter()

@@ -37,8 +37,10 @@ from aquilon.server.formats.formatters import ObjectFormatter
 class NsRecordFormatter(ObjectFormatter):
     template_raw = 'ns_record.mako'
 
-    def format_csv(self, ns):
-        return "%s,%s" % (ns.dns_domain.name, ns.a_record.fqdn)
+    def csv_fields(self, dns_domain):
+        return (ns.dns_domain.name, ns.a_record.fqdn)
 
+    def format_djb(self, ns):
+        return ".%s::%s" % (ns.dns_domain.name, ns.a_record.fqdn)
 
 ObjectFormatter.handlers[NsRecord] = NsRecordFormatter()

@@ -77,6 +77,11 @@ class TestAddNSRecord(TestBrokerCommand):
         self.matchoutput(out, 'DNS Domain: %s' % DOMAIN, cmd)
         self.matchoutput(out, NAME, cmd)
 
+    def test_410_verify_ns_record_djb(self):
+        cmd = "show ns record --dns_domain %s %s" % (DOMAIN, DJB)
+        out = self.commandtest(cmd.split(" "))
+        self.matchoutput(out, '.%s::%s' % (DOMAIN, NAME), cmd)
+
 
 if __name__ == '__main__':
     import nose
