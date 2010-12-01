@@ -37,8 +37,15 @@ from aquilon.aqdb.model import DnsDomain
 class DnsDomainFormatter(ObjectFormatter):
     def format_raw(self, dns_domain, indent=""):
         details = [indent + "DNS Domain: %s" % dns_domain.name]
+
+        if len(dns_domain.servers) > 0:
+            server_list = map(str, dns_domain.servers)
+            server_list = ','.join(server_list)
+            details.append(indent + "Servers: %s" % server_list)
+
         if dns_domain.comments:
             details.append(indent + "  Comments: %s" % dns_domain.comments)
+
         return "\n".join(details)
 
     def csv_fields(self, dns_domain):

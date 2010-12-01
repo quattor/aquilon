@@ -33,6 +33,7 @@ import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
                         UniqueConstraint)
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base
@@ -76,6 +77,8 @@ class DnsDomain(Base):
 
     creation_date = Column(DateTime, default=datetime.now, nullable=False)
     comments = Column(String(255), nullable=True)
+
+    servers = association_proxy('_ns_records', 'a_record')
 
     @classmethod
     def check_label(cls, label):  # TODO: database check constraint for length
