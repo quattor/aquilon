@@ -233,6 +233,8 @@ class PlenaryToplevelHost(Plenary):
         lines.append("'/hardware' = %s;" %
                      pan(StructureTemplate(pmachine.plenary_template)))
         lines.append("'/system/network/interfaces' = %s;" % pan(interfaces))
+        lines.append("'/system/network/primary_ip' = %s;" %
+                     pan(self.dbhost.machine.primary_ip))
         if default_gateway:
             lines.append("'/system/network/default_gateway' = %s;" %
                          pan(default_gateway))
