@@ -95,23 +95,39 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          "does not have an address with label 1.",
                          command)
 
+    def testdelunittest20e0(self):
+        ip = self.net.unknown[11].usable[0]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testdelzebraeth0(self):
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth0", "--label", "hostname"]
+                   "--interface", "eth0", "--label", "zebra2"]
         self.noouttest(command)
 
     def testdelzebraeth1(self):
-        ip = self.net.unknown[13].usable[0]
+        ip = self.net.unknown[13].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "hostname"]
+                   "--interface", "eth1", "--label", "zebra2"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyunittest20(self):
+        ip = self.net.unknown[13].usable[0]
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchclean(out, "vips", command)
+        self.searchoutput(out,
+                          r'"/system/network/vips" = nlist\(\s*'
+                          r'"hostname", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\)\s*'
+                          r'\);' % ip,
+                          command)
         self.matchclean(out, "aliases", command)
 
 

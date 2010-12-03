@@ -86,12 +86,20 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "1/1 compiled", command)
 
     def testverifyunittest20(self):
+        eth0_ip = self.net.unknown[11].usable[0]
+        eth0_broadcast = self.net.unknown[11].broadcast
+        eth0_netmask = self.net.unknown[11].netmask
+        eth0_gateway = self.net.unknown[11].gateway
+
         eth1_ip = self.net.unknown[12].usable[0]
+        eth1_broadcast = self.net.unknown[12].broadcast
+        eth1_netmask = self.net.unknown[12].netmask
+        eth1_gateway = self.net.unknown[12].gateway
         eth1_1_ip = self.net.unknown[12].usable[3]
-        zebra_ip = self.net.unknown[13].usable[0]
-        broadcast = self.net.unknown[12].broadcast
-        netmask = self.net.unknown[12].netmask
-        gateway = self.net.unknown[12].gateway
+
+        hostname_ip = self.net.unknown[13].usable[0]
+        zebra2_ip = self.net.unknown[13].usable[1]
+
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -99,7 +107,21 @@ class TestMake(TestBrokerCommand):
                           r'"hostname", nlist\(\s*'
                           r'"interfaces", list\(\s*'
                           r'"eth0",\s*"eth1"\s*\),\s*'
-                          r'"ip", "%s"\s*\)\s*\);' % zebra_ip,
+                          r'"ip", "%s"\s*\),\s*'
+                          r'"zebra2", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\)\s*'
+                          r'\);' % (hostname_ip, zebra2_ip),
+                          command)
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (eth0_broadcast, eth0_gateway, eth0_ip, eth0_netmask),
                           command)
         self.searchoutput(out,
                           r'"eth1", nlist\(\s*'
@@ -113,8 +135,8 @@ class TestMake(TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s"\s*\)' %
-                          (broadcast, eth1_1_ip, netmask,
-                           broadcast, gateway, eth1_ip, netmask),
+                          (eth1_broadcast, eth1_1_ip, eth1_netmask,
+                           eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
 
 

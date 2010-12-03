@@ -172,5 +172,6 @@ class CommandAddAuroraHost(CommandAddHost):
         kwargs['machine'] = dbmachine.label
         kwargs['buildstatus'] = buildstatus
         kwargs['ip'] = None
+        kwargs['zebra_interfaces'] = None
         # The superclass already contains the rest of the logic to handle this.
         return CommandAddHost.render(self, **kwargs)

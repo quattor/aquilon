@@ -84,6 +84,13 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("{0} already has an alias named "
                                     "{1}.".format(dbinterface, label))
 
+        # When add_host sets up Zebra, it always uses the label 'hostname'. Due
+        # to the primary IP being special, add_interface_address cannot really
+        # emulate what add_host does, so tell the user where to look.
+        if label == "hostname":
+            raise ArgumentError("The 'hostname' label can only be managed "
+                                "by add_host/del_host.")
+
         if not usage:
             usage = "system"
         if usage not in ADDR_USAGES:

@@ -43,7 +43,17 @@ def dynname(ip, domain="aqd-unittest.ms.com"):
 
 class TestAddInterfaceAddress(TestBrokerCommand):
 
-    def testaddbyfqdn(self):
+    def testaddunittest20e0(self):
+        ip = self.net.unknown[11].usable[0]
+        fqdn = "unittest20-e0.aqd-unittest.ms.com"
+        self.dsdb_expect_add(fqdn, ip, "eth0", ip.mac,
+                             primary="unittest20.aqd-unittest.ms.com")
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testaddunittest20e1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
         # XXX The old DNS record should be deleted from DSDB
@@ -128,20 +138,20 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testaddzebraeth0(self):
-        ip = self.net.unknown[13].usable[0]
+        ip = self.net.unknown[13].usable[1]
         self.dsdb_expect_add("zebra.aqd-unittest.ms.com", ip, "vip",
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth0", "--label", "zebra",
+                   "--interface", "eth0", "--label", "zebra2",
                    "--usage", "zebra",
                    "--fqdn", "zebra.aqd-unittest.ms.com", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testaddzebraeth1(self):
-        ip = self.net.unknown[13].usable[0]
+        ip = self.net.unknown[13].usable[1]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--label", "zebra",
+                   "--interface", "eth1", "--label", "zebra2",
                    "--usage", "zebra",
                    "--fqdn", "zebra.aqd-unittest.ms.com", "--ip", ip]
         self.noouttest(command)

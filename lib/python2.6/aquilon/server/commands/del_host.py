@@ -91,6 +91,7 @@ class CommandDelHost(BrokerCommand):
                             % (fqdn, binding.cfg_path))
                 session.delete(binding)
 
+            # In case of Zebra, the IP may be configured on multiple interfaces
             for iface in dbmachine.interfaces:
                 if ip in iface.addresses:
                     iface.addresses.remove(ip)
