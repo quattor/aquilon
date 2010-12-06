@@ -1937,6 +1937,8 @@
       <optgroup name="optional_opts">
          <option name="row" type="string">Row of the tile location</option>
          <option name="column" type="string">Column of the tile location</option>
+         <option name="room" type="string" conflicts="clearroom">Name of the room that houses the rack</option>
+         <option name="clearroom" type="boolean" conflicts="room">Clear room information for the rack</option>
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>

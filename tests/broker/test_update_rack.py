@@ -123,6 +123,54 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, '"rack/row" = "h";', command)
         self.matchoutput(out, '"rack/column" = "9";', command)
 
+    def test_100_updateroom(self):
+        command = ['update_rack', '--rack=ut8', '--room=utroom1']
+        self.noouttest(command)
+
+    def test_200_verifyroom(self):
+        command = ['show_rack', '--rack=ut8']
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Location Parents: '
+                          '\[.*Building ut, Room utroom1, Rack ut8\]',
+                          command)
+
+    def test_300_swaproom(self):
+        command = ['update_rack', '--rack=ut8', '--room=utroom2']
+        self.noouttest(command)
+
+    def test_400_verifyroom(self):
+        command = ['show_rack', '--rack=ut8']
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Location Parents: '
+                          '\[.*Building ut, Room utroom2, Rack ut8\]',
+                          command)
+
+    def test_500_clearroom(self):
+        command = ['update_rack', '--rack=ut8', '--clearroom']
+        self.noouttest(command)
+
+    def test_600_verifyclear(self):
+        command = ['show_rack', '--rack=ut8']
+        out = self.commandtest(command)
+        self.searchclean(out, r'Location Parents: \[.*Room utroom1\]', command)
+
+    def test_700_failcleartwice(self):
+        command = ['update_rack', '--rack=ut8', '--clearroom']
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         'Rack ut8 does not have room information to clear.',
+                         command)
+
+    def test_800_failchangebuilding(self):
+        command = ['update_rack', '--rack=ut8', '--room=np-lab1']
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot change buildings.  Room np-lab1 is in "
+                         "Building np while Rack ut8 is in Building ut.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateRack)
