@@ -53,6 +53,10 @@ class PlenaryMachineInfo(Plenary):
             self.rackcol = loc.rack.rack_column
         else:
             self.rack = None
+        if loc.room:
+            self.room = loc.room.fullname
+        else:
+            self.room = None
         if loc.campus:
             self.campus = loc.campus.name
             # TODO: We will need more complex mapping here
@@ -110,6 +114,8 @@ class PlenaryMachineInfo(Plenary):
                 lines.append('"rack/row" = "%(rackrow)s";' % self.__dict__)
             if self.rackcol:
                 lines.append('"rack/column" = "%(rackcol)s";' % self.__dict__)
+        if self.room:
+            lines.append('"rack/room" = "%(room)s";' % self.__dict__)
 
         # And a chassis location?
         if self.dbmachine.chassis_slot:

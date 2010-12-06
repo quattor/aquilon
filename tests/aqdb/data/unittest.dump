@@ -111,7 +111,6 @@ Building(name="ut", fullname="Unittest-building", address="unittest address", pa
 @pi Building(name="pi")
 @ut Building(name="ut")
 
-Room(name="utroom2", fullname="UT pod1", parent=@ut)
 Room(name="np-lab1", fullname="NP lab1", parent=@np)
 
 Archetype(name="aegis")
