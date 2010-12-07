@@ -175,7 +175,8 @@ class TestDelHost(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdeltest_windows_default_os(self):
-        self.dsdb_expect_delete("4.2.3.127")
+        ip = self.net.tor_net[10].usable[-2]
+        self.dsdb_expect_delete(ip)
         command = "del host --hostname test_windows_default_os.msad.ms.com --quiet"
         self.noouttest(command.split(" "))
         self.dsdb_verify()

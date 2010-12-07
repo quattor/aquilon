@@ -348,10 +348,11 @@ class TestAddHost(TestBrokerCommand):
 
     #test aurora and windows defaults now
     def testaddauroradefaultos(self):
+        ip = self.net.tor_net[10].usable[-1]
         self.dsdb_expect("show host -host_name test_aurora_default_os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test_aurora_default_os.ms.com",
-                        "--ip", "4.2.3.126", "--domain", "ny-prod", "--machine",
+                        "--ip", ip, "--domain", "ny-prod", "--machine",
                         "ut8s02p4"])
         self.dsdb_verify()
 
@@ -366,11 +367,12 @@ class TestAddHost(TestBrokerCommand):
                          command)
 
     def testaddwindowsefaultos(self):
-        self.dsdb_expect_add("test_windows_default_os.msad.ms.com", "4.2.3.127",
+        ip = self.net.tor_net[10].usable[-2]
+        self.dsdb_expect_add("test_windows_default_os.msad.ms.com", ip,
                              "eth0", self.net.tor_net[0].usable[5].mac)
         self.noouttest(["add", "host", "--archetype", "windows",
                         "--hostname", "test_windows_default_os.msad.ms.com",
-                        "--ip", "4.2.3.127", "--domain", "ny-prod",
+                        "--ip", ip, "--domain", "ny-prod",
                         "--machine", "ut8s02p5"])
         self.dsdb_verify()
 
