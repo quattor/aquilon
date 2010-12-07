@@ -92,6 +92,16 @@ class TestMakeAquilon(TestBrokerCommand):
                            self.net.unknown[0].usable[0],
                            self.net.unknown[0].netmask),
                           command)
+        self.searchoutput(out,
+                          r'"eth1", nlist\(\s*'
+                          r'"bootproto", "none"\s*\)',
+                          command)
+        self.searchoutput(out,
+                          r'escape\("eth1\.2"\), nlist\(\s*'
+                          r'"bootproto", "none",\s*'
+                          r'"physdev", "eth1",\s*'
+                          r'"vlan", true\s*\)',
+                          command)
         self.matchoutput(out,
             """include { "archetype/base" };""",
             command)

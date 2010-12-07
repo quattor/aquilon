@@ -118,6 +118,42 @@ class TestUpdateInterface(TestBrokerCommand):
                           % self.net.unknown[0].usable[12].mac,
                           command)
 
+    def testverifycatunittest02interfaces(self):
+        net = self.net.unknown[0]
+        eth0ip = net.usable[11]
+        eth1ip = net.usable[12]
+        # Use --generate as update_interface does not update the on-disk
+        # templates
+        command = "cat --hostname unittest02.one-nyp.ms.com --generate"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (net.broadcast, net.gateway,
+                           eth0ip, net.netmask),
+                          command)
+        self.searchoutput(out,
+                          r'"eth1", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s"\s*\)' %
+                          (net.broadcast, net.gateway,
+                           eth1ip, net.netmask),
+                          command)
+        self.searchoutput(out,
+                          r'escape\("eth1\.2"\), nlist\(\s*'
+                          r'"bootproto", "none",\s*'
+                          r'"physdev", "eth1",\s*'
+                          r'"vlan", true\s*\)',
+                          command)
+
     def testfailswitchboot(self):
         command = ["update_interface", "--boot", "--interface=xge49",
                    "--switch=ut3gd1r01.aqd-unittest.ms.com"]
