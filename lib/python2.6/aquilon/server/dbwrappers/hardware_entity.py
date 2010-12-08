@@ -35,7 +35,7 @@ from aquilon.aqdb.model import (HardwareEntity, Model, System, FutureARecord,
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.interface import restrict_switch_offsets
+from aquilon.server.dbwrappers.interface import check_ip_restrictions
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
@@ -123,7 +123,7 @@ def parse_primary_name(session, fqdn, ip):
 
     if dbdns_rec.ip:
         dbnetwork = get_net_id_from_ip(session, dbdns_rec.ip)
-        restrict_switch_offsets(dbnetwork, dbdns_rec.ip)
+        check_ip_restrictions(dbnetwork, dbdns_rec.ip)
 
         # TODO: get rid of this
         dbdns_rec.network = dbnetwork

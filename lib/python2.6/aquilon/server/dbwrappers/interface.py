@@ -73,7 +73,7 @@ def get_interface(session, interface, dbhw_ent, mac):
                             " ".join(errmsg))
     return dbinterface
 
-def restrict_switch_offsets(dbnetwork, ip):
+def check_ip_restrictions(dbnetwork, ip):
     """ given a network and ip addr, raise an exception if the ip is reserved
 
         Used during ip assignment as a check against grabbing an ip address

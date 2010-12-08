@@ -34,7 +34,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.host import hostname_to_host
 from aquilon.server.dbwrappers.system import parse_system_and_verify_free
 from aquilon.server.dbwrappers.interface import (generate_ip,
-                                                 restrict_switch_offsets,
+                                                 check_ip_restrictions,
                                                  get_or_create_interface)
 from aquilon.aqdb.model import FutureARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -73,7 +73,7 @@ class CommandAddManager(BrokerCommand):
 
         ip = generate_ip(session, dbinterface, compel=True, **arguments)
         dbnetwork = get_net_id_from_ip(session, ip)
-        restrict_switch_offsets(dbnetwork, ip)
+        check_ip_restrictions(dbnetwork, ip)
 
         dbdns_rec = FutureARecord(name=short, dns_domain=dbdns_domain,
                                   ip=ip, network=dbnetwork,
