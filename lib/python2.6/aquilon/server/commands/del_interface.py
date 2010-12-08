@@ -85,7 +85,7 @@ class CommandDelInterface(BrokerCommand):
                 # Special handling: if this interface was created automatically,
                 # and there is exactly one other interface with no IP address,
                 # then re-assign the primary address to that interface
-                if not dbinterface.mac and \
+                if not dbinterface.mac and dbinterface.comments is not None and \
                    dbinterface.comments.startswith("Created automatically") and \
                    len(dbhw_ent.interfaces) == 2:
                     if dbinterface == dbhw_ent.interfaces[0]:
