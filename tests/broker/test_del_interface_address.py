@@ -103,12 +103,12 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelzebraeth0(self):
+    def testdelzebra2eth0(self):
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--label", "zebra2"]
         self.noouttest(command)
 
-    def testdelzebraeth1(self):
+    def testdelzebra2eth1(self):
         ip = self.net.unknown[13].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
@@ -116,8 +116,22 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyunittest20(self):
+    def testdelzebra3eth0(self):
         ip = self.net.unknown[13].usable[0]
+        command = ["del", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--ip", ip]
+        self.noouttest(command)
+
+    def testdelzebra3eth1(self):
+        ip = self.net.unknown[13].usable[0]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testverifyunittest20(self):
+        ip = self.net.unknown[13].usable[2]
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.searchoutput(out,

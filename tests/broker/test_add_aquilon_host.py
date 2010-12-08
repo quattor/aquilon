@@ -125,8 +125,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Build Status: blind", command)
 
     def testaddunittest20(self):
-        ip = self.net.unknown[13].usable[0]
-        self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "vip")
+        ip = self.net.unknown[13].usable[2]
+        self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "le0")
         self.noouttest(["add", "aquilon", "host",
                         "--hostname", "unittest20.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "build",
@@ -137,7 +137,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyunittest20(self):
-        ip = self.net.unknown[13].usable[0]
+        ip = self.net.unknown[13].usable[2]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)

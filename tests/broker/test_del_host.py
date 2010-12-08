@@ -100,7 +100,7 @@ class TestDelHost(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelunittest20(self):
-        self.dsdb_expect_delete(self.net.unknown[13].usable[0])
+        self.dsdb_expect_delete(self.net.unknown[13].usable[2])
         command = "del host --hostname unittest20.aqd-unittest.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)

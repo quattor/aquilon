@@ -97,8 +97,9 @@ class TestMake(TestBrokerCommand):
         eth1_gateway = self.net.unknown[12].gateway
         eth1_1_ip = self.net.unknown[12].usable[3]
 
-        hostname_ip = self.net.unknown[13].usable[0]
+        hostname_ip = self.net.unknown[13].usable[2]
         zebra2_ip = self.net.unknown[13].usable[1]
+        zebra3_ip = self.net.unknown[13].usable[0]
 
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -111,8 +112,12 @@ class TestMake(TestBrokerCommand):
                           r'"zebra2", nlist\(\s*'
                           r'"interfaces", list\(\s*'
                           r'"eth0",\s*"eth1"\s*\),\s*'
+                          r'"ip", "%s"\s*\),\s*'
+                          r'"zebra3", nlist\(\s*'
+                          r'"interfaces", list\(\s*'
+                          r'"eth0",\s*"eth1"\s*\),\s*'
                           r'"ip", "%s"\s*\)\s*'
-                          r'\);' % (hostname_ip, zebra2_ip),
+                          r'\);' % (hostname_ip, zebra2_ip, zebra3_ip),
                           command)
         self.searchoutput(out,
                           r'"eth0", nlist\(\s*'

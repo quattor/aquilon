@@ -137,23 +137,49 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "not configured for Zebra." % ip,
                          command)
 
-    def testaddzebraeth0(self):
+    def testaddzebra2eth0(self):
+        # Use an address that is smaller than the primary IP to verify that the
+        # primary IP is not removed
         ip = self.net.unknown[13].usable[1]
-        self.dsdb_expect_add("zebra.aqd-unittest.ms.com", ip, "vip",
+        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "le1",
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--label", "zebra2",
                    "--usage", "zebra",
-                   "--fqdn", "zebra.aqd-unittest.ms.com", "--ip", ip]
+                   "--fqdn", "zebra2.aqd-unittest.ms.com", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testaddzebraeth1(self):
+    def testaddzebra2eth1(self):
         ip = self.net.unknown[13].usable[1]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "zebra2",
                    "--usage", "zebra",
-                   "--fqdn", "zebra.aqd-unittest.ms.com", "--ip", ip]
+                   "--fqdn", "zebra2.aqd-unittest.ms.com", "--ip", ip]
+        self.noouttest(command)
+
+    def testaddzebra3eth0(self):
+        # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
+        zebra2_ip = self.net.unknown[13].usable[1]
+        zebra3_ip = self.net.unknown[13].usable[0]
+        self.dsdb_expect_delete(zebra2_ip)
+        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "le1",
+                             primary="unittest20.aqd-unittest.ms.com")
+        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", zebra2_ip, "le2",
+                             primary="unittest20.aqd-unittest.ms.com")
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth0", "--label", "zebra3",
+                   "--usage", "zebra",
+                   "--fqdn", "zebra3.aqd-unittest.ms.com", "--ip", zebra3_ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testaddzebra3eth1(self):
+        ip = self.net.unknown[13].usable[0]
+        command = ["add", "interface", "address", "--machine", "ut3c5n2",
+                   "--interface", "eth1", "--label", "zebra3",
+                   "--usage", "zebra",
+                   "--fqdn", "zebra3.aqd-unittest.ms.com", "--ip", ip]
         self.noouttest(command)
 
     def test_failslaveaddress(self):
@@ -166,15 +192,21 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def testverifyunittest20(self):
-        ip = self.net.unknown[13].usable[1]
+        zebra2_ip = self.net.unknown[13].usable[1]
+        zebra3_ip = self.net.unknown[13].usable[0]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Provides: zebra.aqd-unittest.ms.com [%s] "
-                         "(label: zebra2, usage: zebra)" % ip,
+                         "Provides: zebra2.aqd-unittest.ms.com [%s] "
+                         "(label: zebra2, usage: zebra)" % zebra2_ip,
                          command)
-        self.matchclean(out, "Auxiliary: zebra.aqd-unittest.ms.com", command)
+        self.matchoutput(out,
+                         "Provides: zebra3.aqd-unittest.ms.com [%s] "
+                         "(label: zebra3, usage: zebra)" % zebra3_ip,
+                         command)
+        self.matchclean(out, "Auxiliary: zebra2.aqd-unittest.ms.com", command)
+        self.matchclean(out, "Auxiliary: zebra3.aqd-unittest.ms.com", command)
 
 
 if __name__=='__main__':
