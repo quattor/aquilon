@@ -128,17 +128,17 @@ class Network(Base):
     def reserved_addresses(self):
         """returns address offsets from the base which are the reserved range"""
 
+        # Always reserve the network and the broadcast address
+        reserved = [0, self.network.numhosts - 1]
+
         if self.network_type == 'tor_net':
-            return [6, 7]
+            reserved.extend([6, 7])
         elif self.network_type == 'tor_net2':
-            return [7, 8]
-        else:
-            return []
+            reserved.extend([7, 8])
         #TODO: this will be uncommented in a future release (daqscott 7/24/10)
         #elif self.network_type == 'zebra':
-        #    return [1, 2]
-        #else:
-        #    return [1] #restrict first IP for the gateway by default
+        #    reserved.extend([1, 2])
+        return reserved
 
     @property
     def network(self):
