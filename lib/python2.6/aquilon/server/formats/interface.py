@@ -71,12 +71,17 @@ class InterfaceFormatter(ObjectFormatter):
             else:
                 names = "unknown"
 
+            tags = []
             if addr.label:
-                details.append(indent + "  Provides: %s [%s] (label: %s)" %
-                               (names, addr.ip, addr.label))
+                tags.append("label: %s" % addr.label)
+            if addr.usage != "system":
+                tags.append("usage: %s" % addr.usage)
+            if tags:
+                tagstr = " (%s)" % ", ".join(tags)
             else:
-                details.append(indent + "  Provides: %s [%s]" %
-                               (names, addr.ip))
+                tagstr = ""
+            details.append(indent + "  Provides: %s [%s]%s" %
+                           (names, addr.ip, tagstr))
 
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)

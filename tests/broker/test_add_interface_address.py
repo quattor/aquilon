@@ -165,6 +165,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out, "Slave interfaces cannot hold addresses.",
                          command)
 
+    def testverifyunittest20(self):
+        ip = self.net.unknown[13].usable[1]
+        command = ["show", "host", "--hostname",
+                   "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Provides: zebra.aqd-unittest.ms.com [%s] "
+                         "(label: zebra2, usage: zebra)" % ip,
+                         command)
+        self.matchclean(out, "Auxiliary: zebra.aqd-unittest.ms.com", command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)

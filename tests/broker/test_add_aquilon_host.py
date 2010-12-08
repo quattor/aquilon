@@ -136,6 +136,16 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
+    def testverifyunittest20(self):
+        ip = self.net.unknown[13].usable[0]
+        command = ["show", "host", "--hostname",
+                   "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Provides: unittest20.aqd-unittest.ms.com [%s] "
+                         "(label: hostname, usage: zebra)" % ip,
+                         command)
+
     def testaddunittest21(self):
         ip = self.net.unknown[11].usable[1]
         self.dsdb_expect_add("unittest21.aqd-unittest.ms.com", ip, "bond0")

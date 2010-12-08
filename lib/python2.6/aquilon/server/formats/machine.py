@@ -81,7 +81,7 @@ class MachineFormatter(ObjectFormatter):
                 continue
             if addr.interface.interface_type == 'management':
                 managers.append((addr.fqdns, addr.ip))
-            else:
+            elif addr.usage == 'system':
                 auxiliaries.append((addr.fqdns, addr.ip))
 
         for mgr in managers:
