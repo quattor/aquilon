@@ -56,8 +56,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testaddunittest20e1(self):
         ip = self.net.unknown[12].usable[0]
         fqdn = "unittest20-e1.aqd-unittest.ms.com"
-        # XXX The old DNS record should be deleted from DSDB
-        # self.dsdb_expect_delete(ip)
+        self.dsdb_expect_delete(ip)
         self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",

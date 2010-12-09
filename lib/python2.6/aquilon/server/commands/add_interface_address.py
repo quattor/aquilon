@@ -96,6 +96,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
         if usage not in ADDR_USAGES:
             raise ArgumentError("Illegal address usage '%s'." % usage)
 
+        delete_old_dsdb_entry = False
         if ip:
             q = session.query(DynamicStub)
             q = q.filter_by(ip=ip)
@@ -104,8 +105,14 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
 
-            dbdns_rec = FutureARecord.get_or_create(session, fqdn=fqdn,
-                                                    ip=ip)
+            dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn, ip=ip)
+            if dbdns_rec:
+                # If it was just a pure DNS placeholder, then delete & re-add it
+                if not dbdns_rec.assignments:
+                    delete_old_dsdb_entry = True
+            else:
+                dbdns_rec = FutureARecord(session=session, fqdn=fqdn, ip=ip)
+                session.add(dbdns_rec)
         else:
             dbdns_rec = FutureARecord.get_unique(session, fqdn=fqdn,
                                                  compel=True)
@@ -113,6 +120,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
                 raise ArgumentError("Address {0:a} is reserved for dynamic "
                                     "DHCP.".format(dbdns_rec))
             ip = dbdns_rec.ip
+
+            # If it was just a pure DNS placeholder, then delete & re-add it
+            if not dbdns_rec.assignments:
+                delete_old_dsdb_entry = True
 
         # Sanity checks
         if dbdns_rec.hardware_entity:
@@ -157,6 +168,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 try:
+                    # FIXME: this is not rolled back if update_host() fails
+                    if delete_old_dsdb_entry:
+                        dsdb_runner.delete_host_details(ip)
+
                     dsdb_runner.update_host(dbhw_ent, oldinfo)
                 except ProcessException, e:
                     raise ArgumentError("Could not add host to DSDB: %s" % e)

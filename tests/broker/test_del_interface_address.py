@@ -43,9 +43,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
     def testdelkeepdns(self):
         ip = self.net.unknown[12].usable[0]
         self.dsdb_expect_delete(ip)
-        # XXX The DNS record is retained, so the address should be added back
-        # without the interface info
-        # self.dsdb_expect_add("arecord13.aqd-unittest.ms.com", ip)
+        self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--ip", ip, "--keep_dns"]
         self.noouttest(command)

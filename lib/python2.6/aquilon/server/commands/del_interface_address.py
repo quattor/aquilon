@@ -122,6 +122,12 @@ class CommandDelInterfaceAddress(BrokerCommand):
                 dsdb_runner = DSDBRunner(logger=logger)
                 try:
                     dsdb_runner.update_host(dbhw_ent, oldinfo)
+
+                    # FIXME: update_host() is not rolled back if this fails
+                    if not other_uses and keep_dns:
+                        dbdns_rec = session.query(FutureARecord).filter_by(ip=ip).first()
+                        dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, None,
+                                                     None)
                 except ProcessException, e:
                     raise ArgumentError("Could not add host to DSDB: %s" % e)
             except:
