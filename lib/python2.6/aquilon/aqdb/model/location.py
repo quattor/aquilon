@@ -74,6 +74,7 @@ class Location(Base):
         session = object_session(self)
         if session.connection().dialect.name == 'oracle':
             s = text("""SELECT * FROM location
+                        WHERE id != :loc_id
                         CONNECT BY id = PRIOR parent_id
                         START WITH id = :loc_id""")
             pl = session.query(Location).from_statement(s)
