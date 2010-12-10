@@ -131,8 +131,7 @@ class TestUpdateRack(TestBrokerCommand):
         command = ['show_rack', '--rack=ut8']
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'Location Parents: '
-                          '\[.*Building ut, Room utroom1, Rack ut8\]',
+                          r'Location Parents: \[.*Building ut, Room utroom1\]',
                           command)
 
     def test_300_swaproom(self):
@@ -143,8 +142,7 @@ class TestUpdateRack(TestBrokerCommand):
         command = ['show_rack', '--rack=ut8']
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'Location Parents: '
-                          '\[.*Building ut, Room utroom2, Rack ut8\]',
+                          r'Location Parents: \[.*Building ut, Room utroom2\]',
                           command)
 
     def test_500_clearroom(self):
@@ -154,7 +152,7 @@ class TestUpdateRack(TestBrokerCommand):
     def test_600_verifyclear(self):
         command = ['show_rack', '--rack=ut8']
         out = self.commandtest(command)
-        self.searchclean(out, r'Location Parents: \[.*Room utroom1\]', command)
+        self.searchclean(out, r'Location Parents: \[.* Room .*\]', command)
 
     def test_700_failcleartwice(self):
         command = ['update_rack', '--rack=ut8', '--clearroom']
