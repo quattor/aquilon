@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
-from aquilon.server.dbwrappers.interface import restrict_switch_offsets
+from aquilon.server.dbwrappers.interface import check_ip_restrictions
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model import (Interface, Model, Switch, AddressAssignment,
                                 VlanInterface, ReservedName, FutureARecord)
@@ -72,7 +72,7 @@ class CommandUpdateSwitch(BrokerCommand):
             old_ip = dbswitch.primary_ip
             dbnetwork = get_net_id_from_ip(session, ip)
             # Hmm... should this check apply to the switch's own network?
-            restrict_switch_offsets(dbnetwork, ip)
+            check_ip_restrictions(dbnetwork, ip)
 
             # Convert ReservedName to FutureARecord if needed
             if isinstance(dbswitch.primary_name, ReservedName):

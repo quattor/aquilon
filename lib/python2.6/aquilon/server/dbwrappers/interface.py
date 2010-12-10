@@ -73,7 +73,7 @@ def get_interface(session, interface, dbhw_ent, mac):
                             " ".join(errmsg))
     return dbinterface
 
-def restrict_switch_offsets(dbnetwork, ip):
+def check_ip_restrictions(dbnetwork, ip):
     """ given a network and ip addr, raise an exception if the ip is reserved
 
         Used during ip assignment as a check against grabbing an ip address
@@ -87,6 +87,17 @@ def restrict_switch_offsets(dbnetwork, ip):
     if ip is None:
         # Simple passthrough to make calling logic easier.
         return
+
+    if ip < dbnetwork.ip or ip > dbnetwork.broadcast:  # pragma: no cover
+        raise InternalError("IP address {0!s} is outside "
+                            "{1:l}.".format(ip, dbnetwork))
+    if ip == dbnetwork.ip:
+        raise ArgumentError("IP address %s is the address of network %s." %
+                            (ip, dbnetwork.name))
+    if ip == dbnetwork.broadcast:
+        raise ArgumentError("IP address %s is the broadcast address of "
+                            "network %s." % (ip, dbnetwork.name))
+
     if dbnetwork.network.numhosts < 8:
         # This network doesn't have enough addresses, the test is irrelevant.
         return

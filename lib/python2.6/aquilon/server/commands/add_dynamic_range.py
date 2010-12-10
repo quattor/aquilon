@@ -35,7 +35,7 @@ from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import DynamicStub, System, DnsDomain
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.server.dbwrappers.interface import restrict_switch_offsets
+from aquilon.server.dbwrappers.interface import check_ip_restrictions
 from aquilon.server.processes import DSDBRunner
 
 
@@ -70,7 +70,7 @@ class CommandAddDynamicRange(BrokerCommand):
         stubs = []
         for ipint in range(int(start), int(end) + 1):
             ip = IPv4Address(ipint)
-            restrict_switch_offsets(startnet, ip)
+            check_ip_restrictions(startnet, ip)
             name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
             dbdynamic_stub = DynamicStub(name=name, dns_domain=dbdns_domain,
                                          ip=ip, network=startnet)

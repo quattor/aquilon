@@ -109,6 +109,22 @@ class TestAddAddress(TestBrokerCommand):
         command = ["show", "fqdn", "--fqdn", "arecord16.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_420_failnetaddress(self):
+        ip = self.net.unknown[0].ip
+        command = ["add", "address", "--fqdn", "netaddress.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is the address of network " % ip,
+                         command)
+
+    def test_430_failbroadcast(self):
+        ip = self.net.unknown[0].broadcast
+        command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is the broadcast address of "
+                         "network " % ip, command)
+
     def test_900_failbadenv(self):
         default = self.config.get("broker", "default_dns_environment")
         command = ["add_address", "--ip=%s" % self.net.unknown[0].usable[16],

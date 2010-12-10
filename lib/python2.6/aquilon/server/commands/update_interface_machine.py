@@ -32,7 +32,7 @@
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.interface import (get_interface,
-                                                 restrict_switch_offsets,
+                                                 check_ip_restrictions,
                                                  verify_port_group,
                                                  choose_port_group)
 from aquilon.server.locks import lock_queue
@@ -90,7 +90,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                                     "that.".format(dbinterface))
 
             dbnetwork = get_net_id_from_ip(session, ip)
-            restrict_switch_offsets(dbnetwork, ip)
+            check_ip_restrictions(dbnetwork, ip)
 
             if dbinterface.vlans[0].assignments:
                 assignment = dbinterface.vlans[0].assignments[0]
