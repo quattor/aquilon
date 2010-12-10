@@ -59,6 +59,10 @@ if config.has_option("database", "module"):
     modcmd.load(config.get("database", "module"))
 
 
+class ForeignKeySQLiteListener(PoolListener):
+    def connect(self, dbapi_con, con_record):
+        dbapi_con.execute('pragma foreign_keys=ON')
+
 class UnsafeSQLiteListener(PoolListener):
     def connect(self, dbapi_con, con_record):
         dbapi_con.execute('pragma synchronous=OFF')
@@ -115,14 +119,14 @@ class DbFactory(object):
 
         #SQLITE
         elif self.dsn.startswith('sqlite'):
+            listeners = [ForeignKeySQLiteListener()]
             if config.has_option("database", "disable_fsync") and \
                config.getboolean("database", "disable_fsync"):
-                self.engine = create_engine(self.dsn,
-                                            listeners=[UnsafeSQLiteListener()])
+                listeners.append(UnsafeSQLiteListener())
                 log = logging.getLogger('aqdb.db_factory')
                 log.info("SQLite is operating in unsafe mode!")
-            else:
-                self.engine = create_engine(self.dsn)
+
+            self.engine = create_engine(self.dsn, listeners=listeners)
             connection = self.engine.connect()
             connection.close()
             self.vendor = 'sqlite'
