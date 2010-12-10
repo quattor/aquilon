@@ -266,6 +266,7 @@ class PlenaryInstanceNasDiskShare(Plenary):
             # beyond me). We need a CSV parser...
             raise NotFoundException("Share %s cannot be found in NAS maps." %
                                     self.name)
+        lines.append("'sharename' = '%(name)s';" % self.__dict__)
         lines.append("'server' = '%(server)s';" % self.__dict__)
         lines.append("'mountpoint' = '%(mount)s';" % self.__dict__)
 
