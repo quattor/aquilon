@@ -121,7 +121,7 @@ def create_uml_graph(mappers,
 
 def create_schema_graph(tables=None,
                         metadata=None,
-                        show_datatypes=True,
+                        show_datatypes=False,
                         font="Sans-Serif",
                         concentrate="True",
                         relation_options=None,
@@ -140,12 +140,14 @@ def create_schema_graph(tables=None,
         raise Exception("You need to specify at least tables or metadata")
 
     graph = pydot.Dot(prog="dot", mode="ipsep", overlap="ipsep", sep="0.01",
-                      concentrate=concentrate, rankdir=rankdir)
+                      concentrate=concentrate, rankdir=rankdir, font=font,
+                      fontsize="7.0")
+
+    #Grossly inefficient. We can do this once for the whole graph
     for table in tables:
         graph.add_node(pydot.Node(str(table.name),
             shape = "record",
-            label = _render_table_record(table, show_datatypes),
-            fontname=font, fontsize="7.0"))
+            label = _render_table_record(table, show_datatypes)))
 
     for table in tables:
         for fk in table.foreign_keys:
@@ -156,10 +158,10 @@ def create_schema_graph(tables=None,
             graph_edge = pydot.Edge(
                 headlabel = " %s" % fk.column.name,
                 taillabel = " %s" % fk.parent.name,
-                arrowhead = is_inheritance and 'none' or 'odot' ,
+                arrowhead = is_inheritance and 'inv' or 'normal' ,
                 arrowtail = (fk.parent.primary_key or
                            fk.parent.unique) and 'empty' or 'crow' ,
-                fontname=font, *edge, **relation_kwargs)
+                *edge, **relation_kwargs)
 
             graph_edge.set_parent_graph(graph.get_parent_graph)
             graph.add_edge(graph_edge)
@@ -179,20 +181,24 @@ def write_schema_png(meta, file_name = "/tmp/aqdb_schema.png"):
 def _render_table_record(table, show_datatypes=False):
     def format_col_type(col):
         try:
-            return '%s' % col.type.__class__.__name__.capitalize()
+            return '%s' % col.type.__class__.__name__.title()
         except NotImplementedError:
-            return str(col.type).capitalize()
+            return str(col.type).title()
 
     cols = list()
     for col in table.columns:
+        if col.name in ['id', 'creation_date', 'comments']:  #skip these columns
+            continue
         desc = "%s" % (col.name)
         if show_datatypes:
             label = "%s : %s"% (desc, format_col_type(col))
             cols.append(label)
         else:
             cols.append(desc)
-
-    return "\"{%s|%s}\"" % (table.name.capitalize(), "\\l".join(cols))
+    if len(cols) == 0:
+        return "\"{%s}\"" % table.name.title()
+    else:
+        return "\"{%s|%s\l}\"" % (table.name.title(), "\\l".join(cols))
 
 def _mk_label(mapper, show_attributes=True, show_datatypes=True):
 
