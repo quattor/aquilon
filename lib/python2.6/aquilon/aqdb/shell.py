@@ -54,6 +54,14 @@ from ipaddr import IPv4Address, IPv4Network
 db = DbFactory()
 Base.metadata.bind = db.engine
 
+temp_dir_name = None
+if not(os.access(os.environ['HOME'], os.W_OK)):
+    #we can't write to our home directory, ipython can't handle this
+    msg = "%s is not writable, ipython would crash. Set $IPYTHONDIR" % (
+        os.environ['HOME'])
+    raise EnvironmentError(msg)
+
+
 if db.engine.url.drivername == 'sqlite':
     prompt = str(db.engine.url).split('///')[1]
 else:
@@ -67,7 +75,7 @@ prompt += '>'
 
 from IPython.Shell import IPShellEmbed
 _banner = '<<<Welcome to the Aquilon shell (courtesy of IPython). Ctrl-D to quit>>>\n'
-_args = ['-pi1', prompt, '-nosep']
+_args = ['-pi1', prompt, '-nosep', '-nomessages', '-pprint']
 ipshell = IPShellEmbed(_args, banner=_banner)
 
 
@@ -83,7 +91,9 @@ def main(*args, **kw):
         db.engine.echo = True
 
     s = db.Session()
+
     ipshell()
+
 
 
 def graph_schema(db=db, file_name="/tmp/aqdb_schema"):

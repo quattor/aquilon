@@ -27,12 +27,9 @@
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
 """ Translates dotted quad strings into long integers """
-
-from struct import pack, unpack
-from socket import inet_aton, inet_ntoa
+import sqlalchemy
 from ipaddr import IPv4Address
 
-import sqlalchemy
 
 class IPV4(sqlalchemy.types.TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
