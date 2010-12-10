@@ -29,6 +29,7 @@
 """Contains the logic for `aq show machine`."""
 
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
 from aquilon.aqdb.model import Machine, Model, Chassis
@@ -46,6 +47,8 @@ class CommandShowMachine(BrokerCommand):
             # the requested attributes (via the standard query filters).
             # In the future, this should be clearly separated as 'show machine'
             # and 'search machine'.
+            if not Machine.valid_label(machine):
+                raise ArgumentError("Illegal hardware label '%s'." % machine)
             Machine.get_unique(session, machine, compel=True)
             q = q.filter_by(label=machine)
         dblocation = get_location(session, **arguments)
