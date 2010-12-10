@@ -29,7 +29,7 @@
 """Contains the logic for `aq update rack`."""
 
 
-#from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.server.broker import BrokerCommand
 from aquilon.server.dbwrappers.location import get_location
@@ -41,8 +41,8 @@ class CommandUpdateRack(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, rack, row, column, fullname, comments,
-               **arguments):
+    def render(self, session, logger, rack, row, column, room, clearroom,
+               fullname, comments, **arguments):
         dbrack = get_location(session, rack=rack)
         if row is not None:
             dbrack.rack_row = row
@@ -52,6 +52,21 @@ class CommandUpdateRack(BrokerCommand):
             dbrack.fullname = fullname
         if comments is not None:
             dbrack.comments = comments
+        if room:
+            dbroom = get_location(session, room=room)
+            if dbroom.building != dbrack.building:
+                # Doing this both to reduce user error and to limit
+                # testing required.
+                raise ArgumentError("Cannot change buildings.  {0} is in {1} "
+                                    "while {2} is in {3}.".format(
+                                        dbroom, dbroom.building,
+                                        dbrack, dbrack.building))
+            dbrack.parent = dbroom
+        if clearroom:
+            if not dbrack.room:
+                raise ArgumentError("{0} does not have room information "
+                                    "to clear.".format(dbrack))
+            dbrack.parent = dbrack.room.parent
 
         session.flush()
 
