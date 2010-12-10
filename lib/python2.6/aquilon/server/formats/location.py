@@ -32,15 +32,20 @@
 from inspect import isclass
 
 from aquilon.server.formats.formatters import ObjectFormatter
+from aquilon.server.formats.list import ListFormatter
 from aquilon.aqdb.model import (Location, Company, Hub, Continent, Country,
                                 Campus, City, Building, Room, Rack, Desk)
 
 
 class LocationFormatter(ObjectFormatter):
+    protocol = "aqdlocations_pb2"
+
     def format_raw(self, location, indent=""):
         details = [indent + "{0:c}: {0.name}".format(location)]
         if location.fullname:
             details.append(indent + "  Fullname: %s" % location.fullname)
+        if hasattr(location, 'timezone'):
+            details.append(indent + "  Timezone: %s" % location.timezone)
         # Rack could have been a separate formatter, but since this is
         # the only difference...
         if isinstance(location, Rack):
@@ -53,22 +58,62 @@ class LocationFormatter(ObjectFormatter):
                     ", ".join(format(p) for p in location.parents))
         return "\n".join(details)
 
+    def format_proto(self, loc, skeleton=None):
+        loclistf = LocationListFormatter()
+        return(loclistf.format_proto([loc], skeleton))
+
     def csv_fields(self, location):
-        # TODO: We have no policy around quoting CSV yet... leaving off fullname
-        # for now.
         details = [location.location_type, location.name]
         if location.parent:
             details.append(location.parent.location_type)
             details.append(location.parent.name)
         else:
             details.extend([None, None])
+
         if isinstance(location, Rack):
             details.append(location.rack_row)
             details.append(location.rack_column)
         else:
             details.extend([None, None])
+
+        if hasattr(location, 'timezone'):
+            details.append(location.timezone)
+        else:
+            details.extend([None])
+
+        details.append(location.fullname)
+
         return details
 
+
+class LocationList(list):
+    """Holds a list of locations for which a location list will be formatted
+    """
+    pass
+
+
+class LocationListFormatter(ListFormatter):
+    protocol = "aqdlocations_pb2"
+
+    def format_proto(self, result, skeleton=None):
+        loclist_msg = self.loaded_protocols[self.protocol].LocationList()
+        for loc in result:
+            msg = loclist_msg.locations.add()
+            msg.name = str(loc.name)
+            msg.location_type = str(loc.location_type)
+            msg.fullname = str(loc.fullname)
+            if isinstance(loc, Rack):
+                msg.row = loc.rack_row
+                msg.col = loc.rack_column
+            if hasattr(loc, "timezone"):
+                msg.timezone = loc.timezone
+
+            for p in loc.parents:
+                parent = msg.parents.add()
+                parent.name = p.name
+                parent.location_type = p.location_type
+
+        return loclist_msg.SerializeToString()
 
 # Laziness... grab any imported Location classes and handle them above.
 for location_type in globals().values():
@@ -76,3 +121,5 @@ for location_type in globals().values():
         continue
     if issubclass(location_type, Location):
         ObjectFormatter.handlers[location_type] = LocationFormatter()
+
+ObjectFormatter.handlers[LocationList] = LocationListFormatter()

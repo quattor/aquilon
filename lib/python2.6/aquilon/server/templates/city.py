@@ -26,23 +26,24 @@
 # SOFTWARE MAY BE REDISTRIBUTED TO OTHERS ONLY BY EFFECTIVELY USING
 # THIS OR ANOTHER EQUIVALENT DISCLAIMER AS WELL AS ANY OTHER LICENSE
 # TERMS THAT MAY APPLY.
-""" City is a subclass of Location """
-from sqlalchemy import Column, Integer, String, ForeignKey
 
-from aquilon.utils import monkeypatch
-from aquilon.aqdb.model import Location, Country
-from aquilon.aqdb.column_types.aqstr import AqStr
 
-class City(Location):
-    """ City is a subtype of location """
-    __tablename__ = 'city'
-    __mapper_args__ = {'polymorphic_identity' : 'city'}
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='city_loc_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
-    timezone = Column(String(64), nullable=True, default = 'UTC')
+import os
+import logging
 
-city = City.__table__
-city.primary_key.name='city_pk'
-city.info['unique_fields'] = ['name']
+from aquilon.server.templates.base import Plenary
+
+LOGGER = logging.getLogger('aquilon.server.templates.city')
+
+class PlenaryCity(Plenary):
+    def __init__(self, dbcity, logger=LOGGER):
+        Plenary.__init__(self, dbcity, logger=logger)
+        self.name = dbcity.name
+        self.hub = dbcity.hub.fullname.lower()
+        self.timezone = dbcity.timezone
+        self.plenary_core = "site/%(hub)s/%(name)s" % self.__dict__
+        self.plenary_template = self.plenary_core + "/config"
+        self.dir = self.config.get("broker", "plenarydir")
+
+    def body(self, lines):
+        lines.append("variable TIMEZONE = '%(timezone)s';" % self.__dict__)

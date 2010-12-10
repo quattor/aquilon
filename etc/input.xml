@@ -88,6 +88,7 @@
          <option name="personalities" type="boolean">flush the personality templates</option>
          <option name="clusters" type="boolean">flush the cluster templates</option>
          <option name="services" type="boolean">flush the service templates</option>
+         <option name="locations" type="boolean">flush templates related to locations. This is only cities for now.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
@@ -1838,6 +1839,8 @@
    <command name="show_location">
       Shows all locations of a given type
       or information about a specific location type and name.
+      <p/>
+      Supported options for --format: raw, csv, proto.
       <optgroup name="show_location_opts" mandatory="True" fields="all">
          <option name="type" type="string">Location type</option>
       </optgroup>
@@ -1945,6 +1948,9 @@
 
    <command name="show_rack">
       Show the rack list, or details about a particular rack.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_rack_opts" mandatory="True" fields="any">
          <option name="rack" type="string" conflicts="all">rack name</option>
          <option name="all" type="flag" conflicts="rack">all</option>
@@ -1977,6 +1983,9 @@
 
    <command name="show_building">
       Show the building list, or details about a particular building.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_building_opts" mandatory="True" fields="any">
          <option name="building" type="string" conflicts="all">building name</option>
          <option name="all" type="flag" conflicts="building">Select all</option>
@@ -2008,6 +2017,9 @@
 
    <command name="show_room">
       Show the room list, or details about a particular room.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_room_opts" mandatory="True" fields="any">
          <option name="room" type="string">room name</option>
          <option name="all" type="flag">show all</option>
@@ -2026,6 +2038,9 @@
 
    <command name="show_campus">
       Show the list of campuses, or details about a particular campus.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_campus_opts" mandatory="True" fields="any">
          <option name="campus" type="string" conflicts="all">campus name</option>
          <option name="all" type="flag" conflicts="campus">show all campuses</option>
@@ -2036,6 +2051,8 @@
 
    <command name="add_city">
       Add a new city to the database. See also add_location.
+      <p/>
+      Cities have a plenary template named site/$region/$city/config. The timezone of the city will be available in this template as the global variable TIMEZONE.
       <optgroup name="add_city_options" mandatory="True" fields="all">
          <option name="city" type="string">Name of the new city</option>
          <option name="country" type="string">Name of the country that contains the city</option>
@@ -2043,12 +2060,25 @@
       <optgroup name="optional_opts">
          <option name="fullname" type="string">Full, descriptive name</option>
          <option name="comments" type="string">Comments</option>
+         <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
       </optgroup>
       <transport method="put" path="location/city/%(city)s" />
    </command>
 
+   <command name="update_city">
+      Update the timezone of an existing city. See also add_city.
+      <optgroup name="update_city_options" mandatory="True" fields="all">
+         <option name="city" type="string">Name of the new city</option>
+         <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
+      </optgroup>
+      <transport method="post" path="location/city/%(city)s" />
+   </command>
+
    <command name="show_city">
       Show the list of cities, or details about a particular city.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_city_opts" mandatory="True" fields="any">
          <option name="city" type="string" conflicts="all">city name</option>
          <option name="all" type="flag" conflicts="city">show all cities</option>
@@ -2080,6 +2110,9 @@
 
    <command name="show_country">
       Show the list of countries, or details about a particular country.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_country_opts" mandatory="True" fields="any">
          <option name="country" type="string" conflicts="all">country name</option>
          <option name="all" type="flag" conflicts="country">show all countries</option>
@@ -2111,6 +2144,9 @@
 
    <command name="show_continent">
       Show the list of continents, or details about a particular continent.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_continent_opts" mandatory="True" fields="any">
          <option name="continent" type="string" conflicts="all">continent name</option>
          <option name="all" type="flag" conflicts="continent">show all continents</option>
@@ -2150,6 +2186,9 @@
 
    <command name="show_organization">
       Show an organization.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_org_options" mandatory="True" fields="any">
          <option name="organization" type="string" conflicts="all">Name of the organization</option>
          <option name="all" type="flag" conflicts="organization">Show all organizations</option>
@@ -2173,6 +2212,9 @@
 
    <command name="show_hub">
       Show the list of hubs, or details about a particular hub.
+      <p/>
+      Supported options for --format: raw, csv, proto.
+      <p/>
       <optgroup name="show_hub_opts" mandatory="True" fields="any">
          <option name="hub" type="string" conflicts="all">hub name</option>
          <option name="all" type="flag" conflicts="hub">Show all hubs</option>

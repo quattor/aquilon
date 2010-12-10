@@ -34,7 +34,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from aquilon.exceptions_ import NotFoundException
 from aquilon.server.broker import BrokerCommand
 from aquilon.aqdb.model import Location
-
+from aquilon.server.formats.location import LocationList
 
 class CommandShowLocationType(BrokerCommand):
 
@@ -53,4 +53,5 @@ class CommandShowLocationType(BrokerCommand):
             except NoResultFound:
                 raise NotFoundException("%s %s not found." %
                                         (type.capitalize(), name))
-        return query.order_by([Location.location_type, Location.name]).all()
+        return LocationList(query.order_by([Location.location_type,
+                                            Location.name]).all())
