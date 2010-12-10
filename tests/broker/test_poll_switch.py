@@ -185,6 +185,15 @@ class TestPollSwitch(TestBrokerCommand):
         self.successtest(["poll", "tor_switch",
                           "--tor_switch", "np01ga2s03.one-nyp.ms.com"])
 
+    def testpollbor(self):
+        command = ["poll", "switch", "--vlan",
+                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         "Skipping VLAN probing on switch "
+                         "ut3gd1r01.aqd-unittest.ms.com, it's not a ToR switch.",
+                         command)
+
 
 if __name__=='__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPollSwitch)
