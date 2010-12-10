@@ -39,7 +39,7 @@ from aquilon.server.locks import lock_queue
 from aquilon.server.templates.machine import PlenaryMachineInfo
 from aquilon.server.processes import DSDBRunner
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model import FutureARecord, ReservedName, Machine
+from aquilon.aqdb.model import FutureARecord, ReservedName, Machine, Interface
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -133,6 +133,11 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         #that takes place in the interface class doesn't have to be worried
         #about the order of update to bootable=True and mac address
         if mac:
+            q = session.query(Interface).filter_by(mac=mac)
+            other = q.first()
+            if other and other != dbinterface:
+                raise ArgumentError("MAC address {0} is already in use by "
+                                    "{1:l}.".format(mac, other))
             dbinterface.mac = mac
 
         session.add(dbinterface)
