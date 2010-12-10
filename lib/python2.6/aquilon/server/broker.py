@@ -288,6 +288,9 @@ class BrokerCommand(object):
         if self.action == 'put':
             kwargs.pop('bundle')
         for (key, value) in kwargs.items():
+            if value is None:
+                kwargs.pop(key)
+                continue
             if len(str(value)) > 100:
                 kwargs[key] = value[0:96] + '...'
         kwargs_str = str(kwargs)
