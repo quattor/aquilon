@@ -257,6 +257,10 @@ class SimpleNetworkListFormatter(ListFormatter):
             iface = addr.vlan.interface
             hwent = iface.hardware_entity
 
+            if not addr.dns_records:
+                # hostname is a required field in the protobuf description
+                continue
+
             host_msg = net_msg.hosts.add()
 
             if iface.interface_type == 'management':
@@ -274,10 +278,10 @@ class SimpleNetworkListFormatter(ListFormatter):
             else:
                 host_msg.type = 'auxiliary'
 
-            if addr.dns_records:
-                host_msg.hostname = str(addr.dns_records[0].name)
-                host_msg.fqdn = str(addr.dns_records[0].fqdn)
-                host_msg.dns_domain = str(addr.dns_records[0].dns_domain)
+            host_msg.hostname = str(addr.dns_records[0].name)
+            host_msg.fqdn = str(addr.dns_records[0].fqdn)
+            host_msg.dns_domain = str(addr.dns_records[0].dns_domain)
+
             host_msg.ip = str(addr.ip)
 
             # This ensures that we do not generate multiple DHCP entries if the
