@@ -117,6 +117,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
             if dbinterface.assignments:
                 assignment = dbinterface.assignments[0]
+                if assignment.ip != dbhw_ent.primary_ip:
+                    raise ArgumentError("update_interface can not update "
+                                        "auxiliary addresses.")
                 if assignment.dns_records:
                     assignment.dns_records[0].network = dbnetwork
                     assignment.dns_records[0].ip = ip
