@@ -160,6 +160,15 @@ class TestDelMachine(TestBrokerCommand):
 
     # FIXME: Add a test for deleting a machine with only auxiliaries.
 
+    def testdelut3c5n2(self):
+        self.noouttest(["del", "machine", "--machine", "ut3c5n2"])
+
+    def testdelut3c5n3(self):
+        self.noouttest(["del", "machine", "--machine", "ut3c5n3"])
+
+    def testdelut3c5n4(self):
+        self.noouttest(["del", "machine", "--machine", "ut3c5n4"])
+
 
 if __name__=='__main__':
     import aquilon.aqdb.depends
